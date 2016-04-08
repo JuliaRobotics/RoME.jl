@@ -19,6 +19,7 @@ export
   projNewLandm!,
   malahanobisBR,
   initFactorGraph!,
+  Feature,
 
   # Some vizualization tools
   plotLsrScanFeats,
