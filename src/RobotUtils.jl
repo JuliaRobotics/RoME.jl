@@ -100,6 +100,10 @@ function addOdoFG!(fg::FactorGraph, n::ASCIIString, DX::Array{Float64,1}, cov::A
     return v, f
 end
 
+function initfg()
+  return emptyFactorGraph()
+end
+
 # cov should not be required here
 function newLandm!(fg::FactorGraph, lm::ASCIIString, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100)

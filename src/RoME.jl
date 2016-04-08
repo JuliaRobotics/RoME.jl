@@ -1,6 +1,11 @@
 module RoME
 
-export 
+using
+  IncrementalInference,
+  KernelDensityEstimate
+
+export
+  initfg,
   measureMeanDist,
   predictBodyBR,
   getLastPose2D,
@@ -12,20 +17,18 @@ export
   projNewLandm!,
   malahanobisBR,
   initFactorGraph!,
-  
+
   # Some vizualization tools
   plotLsrScanFeats,
   drawFeatTrackers,
   saveImgSeq,
-  lsrBR,
-  
-  
+  lsrBR
 
-include("robots/BayesTracker.jl")
-include("robots/RobotViz.jl")
-include("robots/RobotUtils.jl")
-include("robots/SimulationUtils.jl")
-  
+
+
+include("BayesTracker.jl")
+include("RobotViz.jl")
+include("RobotUtils.jl")
+include("SimulationUtils.jl")
+
 end
-
-
