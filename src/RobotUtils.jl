@@ -1,5 +1,5 @@
 
-include("ISAMRemoteSolve.jl")
+include("dev/ISAMRemoteSolve.jl")
 
 function measureMeanDist(fg::FactorGraph, a::ASCIIString, b::ASCIIString)
     #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})

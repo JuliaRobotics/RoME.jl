@@ -2,7 +2,9 @@ module RoME
 
 using
   IncrementalInference,
-  KernelDensityEstimate
+  KernelDensityEstimate,
+  Colors,
+  Gadfly
 
 export
   initfg,
