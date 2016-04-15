@@ -194,12 +194,19 @@ function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity)
     # all landmarks of interest
     xx,ll = ls(fgl)
     # output result
+    rr = Dict{ASCIIString, RemoteRef}()
+    for l in ll
+      p = getVertKDE(fgl, l)
+      rr[l] = remotecall(uppA(), intersIntgAppxIS, p,predLm)
+    end
     iv = Dict{ASCIIString, Float64}()
     max = 0
     maxl = ASCIIString("")
     for l in ll
-      p = getVertKDE(fgl, l)
-      tv = intersIntgAppxIS(p,predLm)
+      # p = getVertKDE(fgl, l)
+      # tv = intersIntgAppxIS(p,predLm)
+      # iv[l] = tv
+      tv = fetch(rr[l])
       iv[l] = tv
       if max < tv  max = tv; maxl = l; end
     end
@@ -241,7 +248,7 @@ function malahanobisBR(measA, preA, cov::Array{Float64,2})
     return mala
 end
 
-function initFactorGraph!(fg::FactorGraph; P0=diagm([0.01;0.01;0.001]),
+function initFactorGraph!(fg::FactorGraph; P0=diagm([0.03;0.03;0.001]),
                       init=[0.0;0.0;0.0], N::Int=100, lbl="x1")
     init = (init')'
     v1 = addNode!(fg, lbl, init, P0, N=N)
