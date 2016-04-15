@@ -51,11 +51,11 @@ end
 #   return v, X, string('x',max+1)
 # end
 
-function getLastPose2D(fg::FactorGraph)
+function getNextLbl(fgl::FactorGraph, sym)
   max = 0
-  maxid = 0
-  for v in fg.v
-      if v[2].attributes["label"][1] == 'x'
+  maxid = -1
+  for v in fgl.v
+      if v[2].attributes["label"][1] == sym
         val = parse(Int,v[2].attributes["label"][2:end])
         if max < val
           max = val
@@ -63,9 +63,35 @@ function getLastPose2D(fg::FactorGraph)
         end
       end
   end
-  v = fg.v[maxid]
-  X = getVal(v)
-  return v, X, string('x',max+1)
+  if maxid != -1
+    v = fgl.v[maxid]
+    X = getVal(v)
+    return v, X, string(sym,max+1)
+  else
+    return Union{}, Union{}, string(sym,max+1)
+  end
+end
+
+function getLastPose2D(fgl::FactorGraph)
+  return getNextLbl(fgl, 'x')
+  # max = 0
+  # maxid = 0
+  # for v in fg.v
+  #     if v[2].attributes["label"][1] == 'x'
+  #       val = parse(Int,v[2].attributes["label"][2:end])
+  #       if max < val
+  #         max = val
+  #         maxid = v[1]
+  #       end
+  #     end
+  # end
+  # v = fg.v[maxid]
+  # X = getVal(v)
+  # return v, X, string('x',max+1)
+end
+
+function getLastLandm2D(fgl::FactorGraph)
+  return getNextLbl(fgl, 'l')
 end
 
 function odomKDE(p1,dx,cov)
@@ -134,9 +160,7 @@ function addMMBRFG!(fg::FactorGraph, pose::ASCIIString,
     return f
 end
 
-function projNewLandm!(fg::FactorGraph, pose::ASCIIString, lm::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2};
-                        addfactor=true, N::Int=100)
-    vps = fg.v[fg.IDs[pose]]
+function projNewLandmPoints(vps::Graphs.ExVertex, br::Array{Float64,1}, cov::Array{Float64,2})
     Xps = getVal(vps)
     lmPts = zeros(2,size(Xps,2))
     for i in 1:size(Xps,2)
@@ -144,21 +168,75 @@ function projNewLandm!(fg::FactorGraph, pose::ASCIIString, lm::ASCIIString, br::
         init = vec(Xps[1:2,i])+randn(2)
         lmPts[:,i] = solveLandm(br + ent, vec(Xps[:,i]), init)
     end
+    return lmPts
+end
+
+function projNewLandm!(fg::FactorGraph, pose::ASCIIString, lm::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2};
+                        addfactor=true, N::Int=100)
+    vps = fg.v[fg.IDs[pose]]
+    # Xps = getVal(vps)
+    # lmPts = zeros(2,size(Xps,2))
+    # for i in 1:size(Xps,2)
+    #     ent = [cov[1,1]*randn(); cov[2,2]*randn()]
+    #     init = vec(Xps[1:2,i])+randn(2)
+    #     lmPts[:,i] = solveLandm(br + ent, vec(Xps[:,i]), init)
+    # end
+    lmPts = projNewLandmPoints(vps, br, cov)
     vlm = newLandm!(fg, lm, lmPts, cov, N=N) # cov should not be required here
     if addfactor
       fbr = addBRFG!(fg, pose, lm, br, cov)
       return vlm, fbr
+    end
+    return vlm
+end
+
+function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity)
+    # all landmarks of interest
+    xx,ll = ls(fgl)
+    # output result
+    iv = Dict{ASCIIString, Float64}()
+    max = 0
+    maxl = ASCIIString("")
+    for l in ll
+      p = getVertKDE(fgl, l)
+      tv = intersIntgAppxIS(p,predLm)
+      iv[l] = tv
+      if max < tv  max = tv; maxl = l; end
+    end
+    return iv, maxl
+end
+
+function addAutoLandmBR!(fgl::FactorGraph, pose::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2};
+                      N::Int=100)
+    vps = fgl.v[fgl.IDs[pose]]
+    lmPts = projNewLandmPoints(vps, br, cov)
+    lmkde = kde!(lmPts)
+    ivs, maxl = calcIntersectVols(fgl, lmkde)
+    maxval = maxl != ASCIIString("") ? ivs[maxl] : 0.0
+    println("addAutoLandm! -- max intg val $(maxval)")
+    if maxval > 0.03
+      fbr = addBRFG!(fgl, pose, maxl, br, cov)
+      return fgl.v[fgl.IDs[maxl]], fbr
     else
-      return vlm
+      v,L,lm = getLastLandm2D(fgl)
+      vlm = newLandm!(fgl, lm, lmPts, cov, N=N)
+      fbr = addBRFG!(fgl, pose, lm, br, cov)
+      return vlm, fbr
     end
 end
 
 function malahanobisBR(measA, preA, cov::Array{Float64,2})
     # measure landmark with noise
     res = measA - preA
-    lambda = cov \ eye(2)
+    mala2 = Union{}
     #Malahanobis distance
-    mala2 = res' * lambda * res
+    if false
+      lambda = cov \ eye(2)
+      mala2 = res' * lambda * res
+    else
+      mala2 = res' * (cov \ res)
+    end
+
     mala = sqrt(mala2)
     return mala
 end
