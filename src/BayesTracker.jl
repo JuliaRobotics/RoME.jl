@@ -178,7 +178,7 @@ function addNewFeats!(trckr::Dict{Int64,Feature}, lkhds::Array{Float64,2}, lkpid
       newmeas = allmeas
     end
   else
-    newmeas = allmeas
+    newmeas = allmeas[:,nidx]
   end
   for i in 1:size(newmeas,2)
       id = addNewFeatTrk!(trckr, vec(newmeas[:,i]), [0.5;0.03])
@@ -256,6 +256,7 @@ function assocMeasWFeats!(trkrs::Dict{Int64, Feature}, fez::Array{Float64,2})
   hardassoc = findMatches(lk, lkpidx, fez)
   # Also add new features into the mix here
   nidx = findNewFeats(lk)
+  @show "assocMeasWFeats!", nidx
   addNewFeats!(trkrs, lk, lkpidx, fez, nidx)
   return hardassoc
 end
