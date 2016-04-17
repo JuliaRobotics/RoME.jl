@@ -4,6 +4,7 @@ using
   IncrementalInference,
   Graphs,
   KernelDensityEstimate,
+  Distributions,
   Colors,
   Gadfly
 
@@ -21,12 +22,22 @@ export
   addAutoLandmBR!,
   projNewLandm!,
   malahanobisBR,
-  Feature,
 
   # helper functions
   getLastLandm2D,
   getLastPose2D,
   getNextLbl,
+
+  # some transform functions
+  cart2pol,
+  pol2cart,
+
+  # Feature tracking code
+  Feature,
+  initTrackersFrom,
+  propAllTrackers!,
+  measUpdateTrackers!,
+  assocMeasWFeats!,
 
   # Some vizualization tools
   plotLsrScanFeats,

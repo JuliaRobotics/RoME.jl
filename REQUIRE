@@ -1,5 +1,7 @@
 julia 0.4
 IncrementalInference
+Graphs
 KernelDensityEstimate
+Distributions
 Colors
 Gadfly
