@@ -237,7 +237,7 @@ function addAutoLandmBR!(fgl::FactorGraph, pose::ASCIIString, br::Array{Float64,
     lmPts = projNewLandmPoints(vps, br, cov)
     lmkde = kde!(lmPts)
     currage = parse(Int, pose[2:end])
-    ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=5)
+    ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=7)
     maxval = maxl != ASCIIString("") ? ivs[maxl] : 0.0
     println("addAutoLandm! -- max intg val $(maxval)")
     lm = Union{}; vlm = Union{};
