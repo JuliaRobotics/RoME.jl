@@ -134,6 +134,9 @@ end
 function newLandm!(fg::FactorGraph, lm::ASCIIString, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100)
     v=addNode!(fg, lm, wPos, sig, N=N)
+    v.attributes["age"] = 0
+    v.attributes["maxage"] = 0
+    v.attributes["numposes"] = 0
     return v
 end
 
@@ -141,10 +144,16 @@ function addBRFG!(fg::FactorGraph, pose::ASCIIString,
                   lm::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2})
     vps = fg.v[fg.IDs[pose]]
     vlm = fg.v[fg.IDs[lm]]
+    np = vlm.attributes["numposes"]
+    la = vlm.attributes["age"]
+    nage = parse(Int,pose[2:end])
+    vlm.attributes["numposes"] = np+1
+    vlm.attributes["age"] = ((la*np)+nage)/(np+1)
+    vlm.attributes["maxage"] = nage
     f = addFactor!(fg, Pose2DPoint2DBearingRange([vps;vlm],(br')',  cov,  [1.0]) )
     u, P = pol2cart(br[[2;1]], diag(cov))
     infor = inv(P^2)
-    addLandmMeasRemote(vps.index,vlm.index,u,infor)
+    addLandmMeasRemote(vps.index,vlm.index,u,infor) # for iSAM1 remote solution as reference
     return f
 end
 
@@ -190,19 +199,28 @@ function projNewLandm!(fg::FactorGraph, pose::ASCIIString, lm::ASCIIString, br::
     return vlm
 end
 
-function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity)
+function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
+                          currage=0, maxdeltaage=Inf)
     # all landmarks of interest
     xx,ll = ls(fgl)
     # output result
     rr = Dict{ASCIIString, RemoteRef}()
-    for l in ll
-      p = getVertKDE(fgl, l)
-      rr[l] = remotecall(uppA(), intersIntgAppxIS, p,predLm)
-    end
+    fetchlist = ASCIIString[]
     iv = Dict{ASCIIString, Float64}()
+    for l in ll
+      pvlm = fgl.v[fgl.IDs[l]]
+      if currage - pvlm.attributes["maxage"] < maxdeltaage
+        p = getVertKDE(fgl, l)
+        rr[l] = remotecall(uppA(), intersIntgAppxIS, p,predLm)
+        push!(fetchlist, l)
+      else
+        println("calcIntersectVols -- ignoring $(l) because maxdeltaage exceeded")
+        iv[l] = 0
+      end
+    end
     max = 0
     maxl = ASCIIString("")
-    for l in ll
+    for l in fetchlist #ll
       # p = getVertKDE(fgl, l)
       # tv = intersIntgAppxIS(p,predLm)
       # iv[l] = tv
@@ -218,18 +236,23 @@ function addAutoLandmBR!(fgl::FactorGraph, pose::ASCIIString, br::Array{Float64,
     vps = fgl.v[fgl.IDs[pose]]
     lmPts = projNewLandmPoints(vps, br, cov)
     lmkde = kde!(lmPts)
-    ivs, maxl = calcIntersectVols(fgl, lmkde)
+    currage = parse(Int, pose[2:end])
+    ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=5)
     maxval = maxl != ASCIIString("") ? ivs[maxl] : 0.0
     println("addAutoLandm! -- max intg val $(maxval)")
+    lm = Union{}; vlm = Union{};
     if maxval > 0.03
-      fbr = addBRFG!(fgl, pose, maxl, br, cov)
-      return fgl.v[fgl.IDs[maxl]], fbr
+      vlm = fgl.v[fgl.IDs[maxl]]
+      lm = maxl
+      println("prev lm age=$(vlm.attributes["maxage"])")
+      # fbr = addBRFG!(fgl, pose, maxl, br, cov)
+      # return vlm, fbr
     else
       v,L,lm = getLastLandm2D(fgl)
       vlm = newLandm!(fgl, lm, lmPts, cov, N=N)
-      fbr = addBRFG!(fgl, pose, lm, br, cov)
-      return vlm, fbr
     end
+    fbr = addBRFG!(fgl, pose, lm, br, cov)
+    return vlm, fbr
 end
 
 function malahanobisBR(measA, preA, cov::Array{Float64,2})
