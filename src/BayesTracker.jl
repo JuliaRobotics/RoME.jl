@@ -141,6 +141,7 @@ function insertLkhdEvals!(lkhds::Array{Float64,2}, currFeats::Dict{Int64,Feature
   lkpidx = Array{Int,1}(length(currFeats))
   idx = 0
   for f in currFeats
+      # @show "insertLkhdEvals", idx, size(sightCart)
       yV = evaluateDualTree(f[2].bel, sightCart[1:2,:])
       idx+=1
       lkpidx[idx]=f[1]
@@ -235,7 +236,6 @@ function findMatches(lk::Array{Float64,2}, lkpidx::Array{Int,1}, allmeas::Array{
   dmdm = dmac+dmal
   hardassoc = Dict{Int64,Array{Float64,1}}()
   hardMatches!(hardassoc, deepcopy(dmdm), lkpidx, allmeas)
-  @show length(hardassoc)
   return hardassoc
 end
 
@@ -245,23 +245,25 @@ function findNewFeats(lkhds::Array{Float64,2}; thr=0.00001)
   if size(lkhds, 2) == 0
     return [-1]
   end
-  @show low = vec(maximum(lkhds,2) .< thr)
+  low = vec(maximum(lkhds,2) .< thr)
   return (1:numz)[low]
 end
 
 # will also add new features at the end of the tracking pool
 # currently only does hard associations, soft multihypothesis tracking work to follow
 function assocMeasWFeats!(trkrs::Dict{Int64, Feature}, fez::Array{Float64,2})
+  if size(fez,2) == 0
+    return Dict{Int64,Array{Float64,1}}() # no matches possible
+  end
   lk, lkpidx = evalAllLikelihoods(trkrs, fez)
   hardassoc = findMatches(lk, lkpidx, fez)
   # Also add new features into the mix here
   nidx = findNewFeats(lk)
-  @show "assocMeasWFeats!", nidx
   addNewFeats!(trkrs, lk, lkpidx, fez, nidx)
   return hardassoc
 end
 
-function update(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1}; N::Int=50)
+function update(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1}; N::Int=75)
 
   bXl = p2cPtsKDE(z,s, N=N)
   # take the product between predicted and measured position
@@ -272,7 +274,7 @@ function update(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1
   return kde!(pGM, "lcv")
 end
 
-function updatelin(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1}; N::Int=50)
+function updatelin(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1}; N::Int=75)
 
   bXl = resample(kde!((z')',s),N)
   # take the product between predicted and measured position
@@ -283,7 +285,7 @@ function updatelin(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float6
   return kde!(pGM, "lcv")
 end
 
-function updatelin(bhatXl::BallTreeDensity, bXl::BallTreeDensity; N=50)
+function updatelin(bhatXl::BallTreeDensity, bXl::BallTreeDensity; N=75)
   dummy = kde!(rand(bhatXl.bt.dims,N),[1.0])
   pGM, = prodAppxMSGibbsS(dummy, [bhatXl, bXl], Union{}, Union{}, 5)
   # error("update -- Not ready")
