@@ -130,13 +130,14 @@ function initfg()
   return emptyFactorGraph()
 end
 
-# cov should not be required here
+
 function newLandm!(fg::FactorGraph, lm::ASCIIString, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100)
     v=addNode!(fg, lm, wPos, sig, N=N)
-    v.attributes["age"] = 0
-    v.attributes["maxage"] = 0
-    v.attributes["numposes"] = 0
+    fg.v[v.index].attributes["age"] = 0
+    fg.v[v.index].attributes["maxage"] = 0
+    fg.v[v.index].attributes["numposes"] = 0
+    println("newLandm! -- added $(lm)")
     return v
 end
 

@@ -182,7 +182,7 @@ function addNewFeats!(trckr::Dict{Int64,Feature}, lkhds::Array{Float64,2}, lkpid
     newmeas = allmeas[:,nidx]
   end
   for i in 1:size(newmeas,2)
-      id = addNewFeatTrk!(trckr, vec(newmeas[:,i]), [0.5;0.03])
+      id = addNewFeatTrk!(trckr, vec(newmeas[:,i]), [0.4;0.02])
       # newfeats[id] = trckr[id]
       push!(newfeIds, id)
   end
