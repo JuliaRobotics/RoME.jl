@@ -41,7 +41,7 @@ end
 
 function discardOldFeatures!(trkrs::Dict{Int64,Feature})
   for ft in trkrs
-    if ft[2].lastzage > 25 # TODO, still hand tuned for odo update rate
+    if ft[2].lastzage > 30 # TODO, still hand tuned for odo update rate
       println("deleting $(ft[1])")
       delete!(trkrs, ft[1])
     end

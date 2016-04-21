@@ -141,10 +141,15 @@ function newLandm!(fg::FactorGraph, lm::ASCIIString, wPos::Array{Float64,2}, sig
     return v
 end
 
+function updateLandmAge(vlm::Graphs.ExVertex, pose::AbstractString)
+
+end
+
 function addBRFG!(fg::FactorGraph, pose::ASCIIString,
                   lm::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2})
     vps = fg.v[fg.IDs[pose]]
     vlm = fg.v[fg.IDs[lm]]
+    # println("addBRFG! -- looking at $(lm)")
     np = vlm.attributes["numposes"]
     la = vlm.attributes["age"]
     nage = parse(Int,pose[2:end])
@@ -152,6 +157,8 @@ function addBRFG!(fg::FactorGraph, pose::ASCIIString,
     vlm.attributes["age"] = ((la*np)+nage)/(np+1)
     vlm.attributes["maxage"] = nage
     f = addFactor!(fg, Pose2DPoint2DBearingRange([vps;vlm],(br')',  cov,  [1.0]) )
+
+    # only used for max likelihood unimodal tests.
     u, P = pol2cart(br[[2;1]], diag(cov))
     infor = inv(P^2)
     addLandmMeasRemote(vps.index,vlm.index,u,infor) # for iSAM1 remote solution as reference
@@ -232,28 +239,118 @@ function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
     return iv, maxl
 end
 
-function addAutoLandmBR!(fgl::FactorGraph, pose::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2};
+function maxIvWithoutID(ivs::Dict{ASCIIString, Float64}, l::AbstractString)
+  max = 0
+  maxl = ASCIIString("")
+  for i in ivs
+    if max < i[2] && i[1] != l;  max = i[2]; maxl = i[1]; end
+  end
+  return maxl
+end
+
+# binary tests to distinguish how to automatically add a landmark to the existing factor graph
+function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{ASCIIString, Float64}, maxl::ASCIIString, lmid::Int, lmindx::Int)
+  maxAnyval = maxl != ASCIIString("") ? ivs[maxl] : 0.0
+  # maxid = fgl.IDs[maxl]
+  lmidSugg = lmid != -1 # a landmark ID has been suggested
+  maxAnyExists = maxAnyval > 0.03 # there is notable intersection with previous landm
+  lmIDExists = haskey(fgl.v, lmid) # suggested lmid already in fgl
+  newlmindx = lmindx
+  if lmIDExists
+    lmSuggLbl = ASCIIString(fgl.v[lmid].label)
+  else
+    newlmindx = lmindx + 1
+    lmSuggLbl = ASCIIString(string('l',newlmindx))
+  end
+  maxl2 = lmIDExists ? maxIvWithoutID(ivs, lmSuggLbl) : ASCIIString("")
+  maxl2Exists = lmIDExists ? (maxl2 != "" ? ivs[maxl2] > 0.03 : false) : false # there is notable intersection with previous landm
+  intgLmIDExists = lmIDExists ? ivs[lmSuggLbl] > 0.03 : false
+
+  return lmidSugg, maxAnyExists, maxl2Exists, maxl2, lmIDExists, intgLmIDExists, lmSuggLbl, newlmindx
+end
+
+# TODO, busy here
+function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{ASCIIString, Float64}, maxl::ASCIIString,
+                        pose::ASCIIString, lmPts::Array{Float64,2}, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
+                        N::Int=100)
+  lmidSugg, maxAnyExists, maxl2Exists, maxl2, lmIDExists, intgLmIDExists, lmSuggLbl, newlmindx = doAutoEvalTests(fgl,ivs,maxl,lmid, lmindx)
+
+  println("evalAutoCases -- found=$(lmidSugg), $(maxAnyExists), $(maxl2Exists), $(lmIDExists), $(intgLmIDExists)")
+
+  vlm = Union{}; fbr = Union{};
+  if (!lmidSugg && !maxAnyExists)
+    #new landmark and UniBR constraint
+    v,L,lm = getLastLandm2D(fgl)
+    vlm = newLandm!(fgl, lm, lmPts, cov, N=N)
+    fbr = addBRFG!(fgl, pose, lm, br, cov)
+  elseif !lmidSugg && maxAnyExists
+    # add UniBR to best match maxl
+    vlm = fgl.v[fgl.IDs[maxl]]
+    fbr = addBRFG!(fgl, pose, maxl, br, cov)
+  elseif lmidSugg && !maxl2Exists && !lmIDExists
+    #add new landmark and add UniBR to suggested lmid
+    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N)
+    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov)
+  elseif lmidSugg && !maxl2Exists && lmIDExists && intgLmIDExists
+    # doesn't self intesect with existing lmid, add UniBR to lmid
+    vlm = fgl.v[lmid]
+    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov)
+  elseif lmidSugg && maxl2Exists && !lmIDExists
+    # add new landmark and add MMBR to both maxl and lmid
+    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N)
+    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov)
+  elseif lmidSugg && maxl2Exists && lmIDExists && intgLmIDExists
+    # obvious case, add MMBR to both maxl and lmid. Double intersect might be the same thing
+    println("evalAutoCases! -- obvious case is happening")
+    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov)
+    vlm = fgl.v[fgl.IDs[lmSuggLbl]]
+  elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
+    # odd case, does not intersect with suggestion, but does with some previous landm
+    # add MMBR
+    warn("evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected")
+    addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov)
+    vlm = fgl.v[fgl.IDs[lmSuggLbl]]
+  elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
+  #   # landm exists but no intersection with existing or suggested lmid
+  #   # may suggest some error
+    warn("evalAutoCases! -- no intersect with suggested $(lmSuggLbl) or map detected, adding  new landmark MM constraint incase")
+    v,L,lm = getLastLandm2D(fgl)
+    vlm = newLandm!(fgl, lm, lmPts, cov, N=N)
+    addMMBRFG!(fgl, pose, [lm; lmSuggLbl], br, cov)
+  else
+    error("evalAutoCases! -- unknown case encountered, can reduce to this error to a warning and ignore user request")
+  end
+
+  return vlm, fbr, newlmindx
+end
+
+function addAutoLandmBR!(fgl::FactorGraph, pose::ASCIIString, lmid::Int, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
                       N::Int=100)
     vps = fgl.v[fgl.IDs[pose]]
     lmPts = projNewLandmPoints(vps, br, cov)
     lmkde = kde!(lmPts)
     currage = parse(Int, pose[2:end])
     ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=6)
-    maxval = maxl != ASCIIString("") ? ivs[maxl] : 0.0
-    println("addAutoLandm! -- max intg val $(maxval)")
-    lm = Union{}; vlm = Union{};
-    if maxval > 0.03
-      vlm = fgl.v[fgl.IDs[maxl]]
-      lm = maxl
-      println("prev lm age=$(vlm.attributes["maxage"])")
-      # fbr = addBRFG!(fgl, pose, maxl, br, cov)
-      # return vlm, fbr
-    else
-      v,L,lm = getLastLandm2D(fgl)
-      vlm = newLandm!(fgl, lm, lmPts, cov, N=N)
-    end
-    fbr = addBRFG!(fgl, pose, lm, br, cov)
-    return vlm, fbr
+
+    # There are 8 cases of interest
+    vlm, fbr, newlmindx = evalAutoCases!(fgl, lmid, ivs, maxl,pose,lmPts, br,cov,lmindx,N=N)
+
+    # OLD TESTS
+    # maxval = maxl != ASCIIString("") ? ivs[maxl] : 0.0
+    # println("addAutoLandm! -- max intg val $(maxval)")
+    # lm = Union{}; vlm = Union{};
+    # if maxval > 0.03 # TODO : needs to be properly normalized.
+    #   vlm = fgl.v[fgl.IDs[maxl]]
+    #   lm = maxl
+    #   println("prev lm age=$(vlm.attributes["maxage"])")
+    #   # fbr = addBRFG!(fgl, pose, maxl, br, cov)
+    #   # return vlm, fbr
+    # else
+    #   v,L,lm = getLastLandm2D(fgl)
+    #   vlm = newLandm!(fgl, lm, lmPts, cov, N=N)
+    # end
+    # fbr = addBRFG!(fgl, pose, lm, br, cov)
+    return vlm, fbr, newlmindx
 end
 
 function malahanobisBR(measA, preA, cov::Array{Float64,2})
