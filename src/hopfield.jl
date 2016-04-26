@@ -10,10 +10,9 @@ function train(X)
   return W
 end
 
-iterHopfield(W,x) = sign(W*x)
+iterHopfield(W::Array{Float64,2}, x::Vector{Float64}) = sign(W*x)
 
 hamming(a,b) = sum(abs(a-b)/2)
-
 
 function findmatch(Ps::Array{Float64,2}, v::Vector{Float64})
   l = size(Ps,2)
@@ -34,10 +33,15 @@ function findmatch(Ps::Array{Float64,2}, v::Vector{Float64})
 end
 
 function searchHopfield(Ps::Array{Float64,2}, v0::Vector{Float64}; W::Array{Float64,2}=zeros(1,0), maxiter::Int=4)
-  W = size(W,2) == 0 ? train(Ps) : W
+  W2 = Union{}
+  if size(W,2) == 0
+    W2 = train(Ps)
+  else
+    W2 = W
+  end
   v = deepcopy(v0)
   for i in 1:maxiter
-    v1 = iterHopfield(W,v)
+    v1 = iterHopfield(W2,v)
     hamming(v,v1) > 0 ? v = v1 : return findmatch(Ps, v1)
   end
   return -1

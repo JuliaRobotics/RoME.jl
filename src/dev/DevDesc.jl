@@ -1,4 +1,4 @@
-
+include("../hopfield.jl")
 using Gadfly, Colors
 
 function circLayer(x::Vector{Float64};r::Float64=1.0,c="red")
@@ -12,7 +12,7 @@ function circLayer(x::Vector{Float64};r::Float64=1.0,c="red")
   return Gadfly.layer(x=X,y=Y, Geom.path(), Gadfly.Theme(default_color=parse(Colorant,c)))
 end
 
-function drawLandmPtsLayer(pts::Dict{ASCIIString, Vector{Float64}})
+function drawLandmPtsLayer(pts::Dict{ASCIIString, Vector{Float64}}; c::ASCIIString="blue")
   N = length(pts)
   xy = zeros(2,N)
   lbls = ASCIIString[]
@@ -24,7 +24,7 @@ function drawLandmPtsLayer(pts::Dict{ASCIIString, Vector{Float64}})
     [xy[j,i] = p[2][j] for j in 1:2]
     push!(lbl, p[1])
   end
-  return layer(x=xy[1,:],y=xy[2,:], label=lbl, Geom.point, Geom.label)
+  return layer(x=xy[1,:],y=xy[2,:], label=lbl, Geom.point, Geom.label, Gadfly.Theme(default_color=parse(Colorant,c)))
 end
 
 incirc(dx,dy,r) = dx^2 + dy^2 <= r^2
@@ -116,7 +116,8 @@ function calcShapeContext(pts::Dict{ASCIIString, Vector{Float64}}, refpt::ASCIIS
 end
 
 function shapeContMatToVec(mat::Array{Float64,2}; duplicity::Int=2)
-  v = [map(Int,mat[:].==1)'; map(Int,mat[:].>=2)']
+  v = [map(Int,mat[:].==1)'; map(Int,mat[:].>=2)']#; map(Int,mat[:].>2)']
+  # v = map(Int,mat[:].>=1)'
   r,c = size(v)
   V = reshape(v,floor(Int,r*c),1)
   return sign(V[:]-0.5)
@@ -134,13 +135,13 @@ end
 # we want a way to select the top 3 descriptors from current list of landmarks
 # parameter
 function bestDescriptors(d::Dict{ASCIIString, Vector{Float64}};
-                          r=0.4,Mf=4,angBins = 6,k=3)
+                          r::Float64=1.0,Mf::Int=4,angBins::Int=4,rangeBins::Int=3,k::Int=3)
 
   allDescr = Dict{ASCIIString, Vector{Int}}()
   skey = collect(keys(d))
   for lm in skey
     if length(findInRadius(d,lm,r=r)) > Mf
-      allDescr[lm] = shapeContPattern(d, lm, r=r, angBins=angBins)
+      allDescr[lm] = shapeContPattern(d, lm, r=r, angBins=angBins, rangeBins=rangeBins)
     end
   end
   @show ks = collect(keys(allDescr))
@@ -181,34 +182,60 @@ function bestDescriptors(d::Dict{ASCIIString, Vector{Float64}};
 end
 
 
-function findMatches(dd::Dict{ASCIIString, Vector{Float64}}, P::Array{Float64,2}, bLbls::Vector{ASCIIString};
-  R=1.0, angBins=4, Mf=4)
+function findMatches(dd::Dict{ASCIIString, Vector{Float64}}, Patt::Array{Float64,2}, bLbls::Vector{ASCIIString};
+  R::Float64=1.0,angBins::Int=4,rangeBins::Int=3, Mf::Int=4)
   SV = Dict{ASCIIString, Vector{Int}}()
   Psv = Dict{ASCIIString, Int}()
   for i in 1:length(dd)
     l = length(findInRadius(dd,"l$(i)",r=R))
     if l > Mf
-      val = shapeContPattern(dd, "l$(i)", r=R, angBins=angBins)
+      val = shapeContPattern(dd, "l$(i)", r=R, angBins=angBins, rangeBins=rangeBins)
       SV[ASCIIString("l$(i)")] = val
-      Psv[ASCIIString("l$(i)")] = searchHopfield(P, val, maxiter=4)
+      Psv[ASCIIString("l$(i)")] = searchHopfield(Patt, val, maxiter=4)
     end
   end
 
   # display matching results
-  @show bLbls
+  mtchs = Dict{Int, Any}()
+  fm = Dict{Int, Any}()
+  # @show bLbls
+  i = 0
+  ord = Int[]
   for psv in Psv
     if psv[2] != -1
-      hd = hamming(SV[psv[1]], P[:,psv[2]])
-      @show psv[1], bLbls[psv[2]], hd
+      i+=1
+      hd = hamming(SV[psv[1]], Patt[:,psv[2]])
+      mtchs[i] = (psv[1], bLbls[psv[2]], hd)
+      push!(ord, hd)
     end
   end
-  nothing
+  p = sortperm(ord)
+  i = 0
+  for j in p
+    i+=1
+    fm[i] = mtchs[j]
+  end
+  return fm
 end
 
 
+function convertToMMLst(fm::Dict{Int,Any}, distLim::Int)
+  mmlst = Dict{ASCIIString, Array{Tuple{ASCIIString, Int},1}}()
+  for i in 1:length(fm)
+    if fm[i][3] <= distLim
+      if haskey(mmlst,fm[i][2])
+          push!(mmlst[fm[i][2]], (fm[i][1],fm[i][3]) )
+      else
+          mmlst[fm[i][2]] =  [ (fm[i][1],fm[i][3])  ]
+      end
+    end
+  end
+  return mmlst
+end
+
 
 # start some practicatical tests
-
+if false
 d = Dict{ASCIIString, Vector{Float64}}()
 for i in 1:9
   d[ASCIIString("l$(i)")] = rand(2)
@@ -263,9 +290,15 @@ for i in length(d):floor(Int,length(d)*1.0)
   dd[ASCIIString("l$(i)")] = (3.0.*rand(2))-1
 end
 
-plot(drawLandmPtsLayer(dd))
-
 findMatches(dd, P, bLbls, R=R, angBins=angBins, Mf=Mf)
+
+l2 = drawLandmPtsLayer(dd,c="green")
+push!(pl.layers, l2[1])
+pl
+
+# plot(drawLandmPtsLayer(dd))
+
+
 
 # random drawing
 refpt = "l8"
@@ -281,66 +314,48 @@ val1 = shapeContPattern(d, "l3", r=R, angBins=angBins)
 val2 = shapeContPattern(dd, "l3", r=R, angBins=angBins)
 @show hamming(val1,val2)
 
-
-
-# some training and recognition tests
-ks = collect(keys(rd))
-doone = ks[1] != "l1" ? ks[1] : ks[2]
-doone="l6"
-push!(pl,circLayer(rd[doone],r=0.4)[1])
-
-mat = zeros(3, 4)
-for doone in ["l6";"l8";"l10"]
-  @show doone
-  @show mat = mat + myShapeContext(d, doone, "l1", r=0.4)
 end
 
-v1 = shapeContPattern(d, "l2", r=0.4)
-v2 = shapeContPattern(d, "l4", r=0.4)
-v3 = shapeContPattern(d, "l7", r=0.4)
-v4 = shapeContPattern(d, "l10", r=0.4)
-
-P = [v1';v2';v3']'
-
-a1 = deepcopy(v10)
-a1[1] = -1*v10[1]
-a1[10] = -1*v10[10]
-@show searchHopfield(P, a1)
+# some training and recognition tests
+# ks = collect(keys(rd))
+# doone = ks[1] != "l1" ? ks[1] : ks[2]
+# doone="l6"
+# push!(pl,circLayer(rd[doone],r=0.4)[1])
+#
+# mat = zeros(3, 4)
+# for doone in ["l6";"l8";"l10"]
+#   @show doone
+#   @show mat = mat + myShapeContext(d, doone, "l1", r=0.4)
+# end
+#
+# v1 = shapeContPattern(d, "l2", r=0.4)
+# v2 = shapeContPattern(d, "l4", r=0.4)
+# v3 = shapeContPattern(d, "l7", r=0.4)
+# v4 = shapeContPattern(d, "l10", r=0.4)
+#
+# P = [v1';v2';v3']'
+#
+# a1 = deepcopy(v10)
+# a1[1] = -1*v10[1]
+# a1[10] = -1*v10[10]
+# @show searchHopfield(P, a1)
 
 
 
 
 # trying sorting
 
-@show A = rand(4,4)
-
-A = 16*eye(4,4)
-for i in 1:3, j in (i+1):4
-A[i,j] = i*j
-end
-A = A + A'
-@show A
-
-[A[i,i]=24.0 for i in 1:4]
-@show Amin = vec(minimum(A,2))
-@show p = sortperm(Amin,rev=true)
-A1 = A[:,p]
-@show A2 = A1[p,:]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-df
+# @show A = rand(4,4)
+#
+# A = 16*eye(4,4)
+# for i in 1:3, j in (i+1):4
+# A[i,j] = i*j
+# end
+# A = A + A'
+# @show A
+#
+# [A[i,i]=24.0 for i in 1:4]
+# @show Amin = vec(minimum(A,2))
+# @show p = sortperm(Amin,rev=true)
+# A1 = A[:,p]
+# @show A2 = A1[p,:]
