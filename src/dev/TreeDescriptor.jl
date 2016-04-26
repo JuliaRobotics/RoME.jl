@@ -1,4 +1,6 @@
-# i want a tree detector....!!!
+# 2D descriptor based on relative constraints in a marginalized map
+# can beexpanded to 3D later.
+
 
 
 type TreeDescriptor
@@ -66,7 +68,7 @@ end
 
 function calcFeatDesc(fgl::FactorGraph, flbl::ASCIIString, midx::Float64)
   lm = fgl.v[fgl.IDs[flbl]]
-  
+
 end
 
 function calcLandmDescriptions!(fgl::FactorGraph, lmd::Dict{Int64,TreeDescriptor})

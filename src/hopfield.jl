@@ -21,11 +21,11 @@ function findmatch(Ps::Array{Float64,2}, v::Vector{Float64})
   minidx = -1
   for i in 1:l
     d = hamming(Ps[:,i], v)
-    if min == 0 && d == 0 
+    if min == 0 && d == 0
       warn("find match -- double match")
       return -1
     end
-    if d < min 
+    if d < min
       min = d
       minidx = i
     end
@@ -46,12 +46,13 @@ end
 
 function basicTestNet()
   N = 20
-  a = sign(randn(N))
-  b = sign(randn(N))
+  a = sign(randn(N)-1)
+  b = sign(randn(N)-1)
   c = sign(randn(N))
   Ps = [a';b';c']'
   a1 = deepcopy(a)
   a1[1] = -1*a[1]
+  a1[6] = -1*a[6]
   @show searchHopfield(Ps, a1)
   b1 = deepcopy(b)
   b1[6] = -1*b[6]
@@ -60,4 +61,3 @@ function basicTestNet()
 end
 
 basicTestNet()
-
