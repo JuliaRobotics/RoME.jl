@@ -62,3 +62,201 @@ function saveImgSeq(d::Dict{Int64,Array{Float64,2}}; from::Int=1,to::Int=10,step
   end
   nothing
 end
+
+
+
+# --------------------------------------------------------------
+# transfered in from IncrementalInference
+
+## TODO -- you were here with port starboard lines
+function stbPrtLineLayers!(pl, Xpp, Ypp, Thpp)
+
+    l = 5.0
+    lnstpr = [0.0;l;0.0]
+    lnstpg = [0.0;-l;0.0]
+
+    Rd  =SE2(lnstpr)
+    Gr = SE2(lnstpg)
+
+    for i in 1:length(Xpp)
+      lnstt = [Xpp[i];Ypp[i];Thpp[i]]
+      Ps = SE2(lnstt)
+      lnr = se2vee(Ps*Rd)
+      lng = se2vee(Ps*Gr)
+      xsr = [Xpp[i];lnr[1]]
+      ysr = [Ypp[i];lnr[2]]
+      xsg = [Xpp[i];lng[1]]
+      ysg = [Ypp[i];lng[2]]
+
+      push!(pl.layers, layer(x=xsr, y=ysr, Geom.path(), Gadfly.Theme(default_color=colorant"red", line_width=1.5pt))[1] )
+      push!(pl.layers, layer(x=xsg, y=ysg, Geom.path(), Gadfly.Theme(default_color=colorant"green", line_width=1.5pt))[1] )
+    end
+    nothing
+end
+
+# function lblsFromTo(from,to)
+#   lbls=ASCIIString[]
+#   [push!(lbls, "$(i)") for i in from:to]
+#   return lbls
+# end
+
+function drawPoses(fg::FactorGraph; from::Int64=0,to::Int64=99999999,
+                    meanmax=:max, lbls=true, drawhist=true)
+    #Gadfly.set_default_plot_size(20cm, 30cm)
+    Xp,Yp = get2DPoseSamples(fg, from=from, to=to)
+    Xpp = Float64[]; Ypp=Float64[]; Thpp=Float64[]; LBLS=ASCIIString[];
+    if meanmax == :mean
+      Xpp,Ypp, Thpp, LBLS = get2DPoseMeans(fg, from=from, to=to)
+    elseif meanmax == :max
+      Xpp,Ypp, Thpp, LBLS = get2DPoseMax(fg, from=from, to=to)
+    end
+
+    # lbls = lblsFromTo(1,length(Xpp))
+    psplt = Union{}
+    if lbls
+      psplt = Gadfly.plot(
+      Gadfly.layer(x=Xpp,y=Ypp,label=LBLS,Geom.path(), Theme(line_width=2pt), Geom.label)
+      )
+    else
+      psplt = Gadfly.plot(
+      Gadfly.layer(x=Xpp,y=Ypp,Geom.path(), Theme(line_width=2pt))
+      )
+    end
+    stbPrtLineLayers!(psplt, Xpp, Ypp, Thpp)
+    if drawhist
+      push!(psplt.layers,  Gadfly.layer(x=Xp, y=Yp, Geom.histogram2d)[1] )#(xbincount=100, ybincount=100))
+    end
+    psplt
+end
+
+function drawLandms(fg::FactorGraph;
+              from::Int64=0, to::Int64=99999999, minnei::Int64=0,
+              meanmax=:max,lbls=true,showmm=false,drawhist=true,c="red",MM=Union{})
+    #Gadfly.set_default_plot_size(20cm, 30cm)
+    Xp,Yp = get2DLandmSamples(fg, from=from, to=to)
+    Xpp = Float64[]; Ypp=Float64[]; Thpp=Float64[]; lblstags=ASCIIString[];
+    if meanmax==:mean
+      Xpp,Ypp, t, lbltags = get2DLandmMeans(fg, from=from, to=to)
+    elseif meanmax==:max
+      Xpp,Ypp, t, lbltags = get2DLandmMax(fg, from=from, to=to,showmm=showmm,MM=MM)
+    end
+
+    if lbls
+      psplt = Gadfly.plot(
+      Gadfly.layer(x=Xpp,y=Ypp, label=lbltags, Geom.point, Theme(line_width=2pt, default_color=parse(Colorant,c)), Geom.label)
+      # ,Gadfly.layer(x=Xp, y=Yp, Geom.histogram2d)#(xbincount=100, ybincount=100)
+      )
+    else
+      psplt = Gadfly.plot(
+      Gadfly.layer(x=Xpp,y=Ypp, Geom.point, Theme(line_width=2pt, default_color=parse(Colorant,c)))
+      )
+    end
+
+    if drawhist
+      push!(psplt.layers, Gadfly.layer(x=Xp, y=Yp, Geom.histogram2d)[1])#(xbincount=100, ybincount=100)
+    end
+
+    psplt
+end
+
+function drawPosesLandms(fg::FactorGraph;
+                    from::Int64=0, to::Int64=99999999, minnei::Int64=0,
+                    meanmax=:max,lbls=true,drawhist=true, MM=Union{})
+  p = drawPoses(fg, from=from,to=to,meanmax=meanmax,lbls=lbls,drawhist=drawhist)
+  pl = drawLandms(fg, from=from, to=to, minnei=minnei,lbls=lbls,drawhist=drawhist, MM=MM)
+  for l in pl.layers
+    push!(p.layers, l)
+  end
+  return p
+end
+
+function drawSubmaps(fgl::FactorGraph, fromto::Array{Int,2};
+                    m1hist=false,m2hist=false,m3hist=false, showmm=false)
+  p = drawLandms(fgl, from=fromto[1,1], to=fromto[1,2], drawhist=m1hist, showmm=showmm)
+  if size(fromto,1) >1
+    p2 = drawLandms(fgl, from=fromto[2,1], to=fromto[2,2], drawhist=m2hist,c="blue", showmm=showmm)
+    for l in p2.layers
+      push!(p.layers, l)
+    end
+  end
+  if size(fromto,1) >2
+    p3 = drawLandms(fgl, from=fromto[3,1], to=fromto[3,2], drawhist=m3hist,c="magenta", showmm=showmm)
+    for l in p3.layers
+      push!(p.layers, l)
+    end
+  end
+  return p
+end
+
+function drawSubmaps(fgl::FactorGraph, fromto::Array{Int,1}; spread::Int=25,
+                    m1hist=false,m2hist=false,m3hist=false, showmm=false)
+  ft = zeros(Int,length(fromto),2)
+  for i in 1:length(fromto)
+    ft[i,1] = fromto[i]-spread; ft[i,2] = fromto[i]+spread;
+  end
+  drawSubmaps(fgl, ft, m1hist=m1hist, m2hist=m2hist, m3hist=m3hist, showmm=showmm)
+end
+
+# function getKDEMax(p::BallTreeDensity;N=200)
+#   m = zeros(p.bt.dims)
+#   for i in 1:p.bt.dims
+#     mm = marginal(p,[i])
+#     rangeV = getKDERange(mm)
+#     X = linspace(rangeV[1],rangeV[2],N)
+#     yV = evaluateDualTree(mm,X)
+#     m[i] = X[findfirst(yV,maximum(yV))]
+#   end
+#   return m
+# end
+
+function investigatePoseKDE(p::BallTreeDensity, p0::BallTreeDensity)
+    # co = ["black"; "blue"]
+    # h = Union{}
+    # x = plotKDE([marginal(p,[1]); marginal(p0,[1])], c=co )
+    # y = plotKDE([marginal(p,[2]); marginal(p0,[2])], c=co )
+    # if p.bt.dims >= 3
+    #   th = plotKDE([marginal(p,[3]); marginal(p0,[3])], c=co )
+    #   h = hstack(x,y,th)
+    # else
+    #   h = hstack(x,y)
+    # end
+    #
+    # return h
+    return investigateMultidimKDE(p, p0)
+end
+
+
+function investigatePoseKDE(p::Array{BallTreeDensity,1})
+    # co = ["black"; "blue"; "green"; "red"; "magenta"; "cyan"; "cyan1"; "cyan2";
+    # "magenta"; "cyan"; "cyan1"; "cyan2"; "magenta"; "cyan"; "cyan1"; "cyan2"; "magenta";
+    # "cyan"; "cyan1"; "cyan2"; "magenta"; "cyan"; "cyan1"; "cyan2"]
+    # # compute all the marginals
+    # Pm = Array{Array{BallTreeDensity,1},1}()
+    # push!(Pm,stackMarginals(p,1)) #[marginal(p[1],[1]); marginal(p[2],[1])]
+    # push!(Pm,stackMarginals(p,2)) #[marginal(p[1],[2]); marginal(p[2],[2])]
+    #
+    # h = Union{}
+    # x = plotKDE(Pm[1], c=co )
+    # y = plotKDE(Pm[2], c=co )
+    # if p[1].bt.dims >= 3
+    #   #Pm3 = [marginal(p[1],[3]); marginal(p[2],[3])]
+    #   push!(Pm,stackMarginals(p,3)) # [marginal(p[1],[3]); marginal(p[2],[3])]
+    #   th = plotKDE(Pm[3], c=co )
+    #   h = hstack(x,y,th)
+    # else
+    #   h = hstack(x,y)
+    # end
+    # return h
+    return investigateMultidimKDE(p)
+end
+
+function investigatePoseKDE(p::BallTreeDensity)
+    # x = plotKDE(marginal(p,[1]) )
+    # y = plotKDE(marginal(p,[2]) )
+    # if p.bt.dims >= 3
+    #   th = plotKDE(marginal(p,[3]) )
+    #   return hstack(x,y,th)
+    # end
+    # return hstack(x,y)
+    return investigateMultidimKDE(p)
+end
