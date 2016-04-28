@@ -161,9 +161,9 @@ end
 
 function drawPosesLandms(fg::FactorGraph;
                     from::Int64=0, to::Int64=99999999, minnei::Int64=0,
-                    meanmax=:max,lbls=true,drawhist=true, MM=Union{})
+                    meanmax=:max,lbls=true,drawhist=true, MM=Union{}, showmm=true)
   p = drawPoses(fg, from=from,to=to,meanmax=meanmax,lbls=lbls,drawhist=drawhist)
-  pl = drawLandms(fg, from=from, to=to, minnei=minnei,lbls=lbls,drawhist=drawhist, MM=MM)
+  pl = drawLandms(fg, from=from, to=to, minnei=minnei,lbls=lbls,drawhist=drawhist, MM=MM, showmm=showmm)
   for l in pl.layers
     push!(p.layers, l)
   end

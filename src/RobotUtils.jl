@@ -142,7 +142,7 @@ function newLandm!(fg::FactorGraph, lm::ASCIIString, wPos::Array{Float64,2}, sig
 end
 
 function updateLandmAge(vlm::Graphs.ExVertex, pose::AbstractString)
-
+  error("still working here")
 end
 
 function addBRFG!(fg::FactorGraph, pose::ASCIIString,
@@ -330,7 +330,7 @@ function addAutoLandmBR!(fgl::FactorGraph, pose::ASCIIString, lmid::Int, br::Arr
     lmPts = projNewLandmPoints(vps, br, cov)
     lmkde = kde!(lmPts)
     currage = parse(Int, pose[2:end])
-    ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=6)
+    ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=10)
 
     # There are 8 cases of interest
     vlm, fbr, newlmindx = evalAutoCases!(fgl, lmid, ivs, maxl,pose,lmPts, br,cov,lmindx,N=N)
