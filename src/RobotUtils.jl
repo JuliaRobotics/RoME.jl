@@ -119,8 +119,8 @@ function addOdoFG!(fg::FactorGraph, n::ASCIIString, DX::Array{Float64,1}, cov::A
     end
 
     v = addNode!(fg, n, RES, cov, N=N)
-    pp = Pose2Pose2([prev;v], (DX')', cov, [1.0])
-    f = addFactor!(fg, pp)
+    pp = Pose2Pose2((DX')', cov, [1.0]) #[prev;v],
+    f = addFactor!(fg, [prev;v], pp)
     infor = inv(cov^2)
     addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
     return v, f
@@ -156,7 +156,7 @@ function addBRFG!(fg::FactorGraph, pose::ASCIIString,
     vlm.attributes["numposes"] = np+1
     vlm.attributes["age"] = ((la*np)+nage)/(np+1)
     vlm.attributes["maxage"] = nage
-    f = addFactor!(fg, Pose2DPoint2DBearingRange([vps;vlm],(br')',  cov,  [1.0]) )
+    f = addFactor!(fg, [vps;vlm], Pose2DPoint2DBearingRange((br')',  cov,  [1.0]) ) #[vps;vlm],
 
     # only used for max likelihood unimodal tests.
     u, P = pol2cart(br[[2;1]], diag(cov))
@@ -172,8 +172,8 @@ function addMMBRFG!(fg::FactorGraph, pose::ASCIIString,
     vlm1 = fg.v[fg.IDs[lm[1]]]
     vlm2 = fg.v[fg.IDs[lm[2]]]
 
-    pbr = Pose2DPoint2DBearingRange([vps;vlm1;vlm2],(br')',  cov,  w)
-    f = addFactor!(fg, pbr )
+    pbr = Pose2DPoint2DBearingRange((br')',  cov,  w) #[vps;vlm1;vlm2],
+    f = addFactor!(fg, [vps;vlm1;vlm2], pbr )
     return f
 end
 
@@ -373,7 +373,7 @@ function initFactorGraph!(fg::FactorGraph; P0=diagm([0.03;0.03;0.001]),
                       init=[0.0;0.0;0.0], N::Int=100, lbl="x1")
     init = (init')'
     v1 = addNode!(fg, lbl, init, P0, N=N)
-    addFactor!(fg, PriorPose2([v1], init, P0,  [1.0]) )
+    addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]) ) #[v1], 
     return lbl
 end
 
