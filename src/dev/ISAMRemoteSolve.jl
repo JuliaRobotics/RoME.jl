@@ -33,7 +33,13 @@ function requestAllPosesLandmsRemote(fg::FactorGraph)
     @show line
     line == "\n" ? continue : nothing
     spl = split(line)
-    spl[1] == "POSE" || spl[1] == "LNDM" ? nothing : continue
+    if spl[1] == "POSE" || spl[1] == "LNDM"
+      #
+    else
+      println("skipping $(spl)")
+      continue
+    end
+
     idx = parse(Int, spl[2])
     arr = Float64[]
     for i in 3:length(spl)
@@ -42,6 +48,7 @@ function requestAllPosesLandmsRemote(fg::FactorGraph)
     dict[idx] = arr
   end
   println("finished requestAllPosesLandmsRemote")
+  @show length(dict)
   return dict
 end
 
