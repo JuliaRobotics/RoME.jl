@@ -28,8 +28,12 @@ function requestAllPosesLandmsRemote(fg::FactorGraph)
   end
   println(cl,"quit")
   close(cl)
+  @show clr
   for line in readlines(clr)
+    @show line
+    line == "\n" ? continue : nothing
     spl = split(line)
+    spl[1] == "POSE" || spl[1] == "LNDM" ? nothing : continue
     idx = parse(Int, spl[2])
     arr = Float64[]
     for i in 3:length(spl)
@@ -37,10 +41,11 @@ function requestAllPosesLandmsRemote(fg::FactorGraph)
     end
     dict[idx] = arr
   end
+  println("finished requestAllPosesLandmsRemote")
   return dict
 end
 
-function doISAMSolve(d,f;toT=Inf, savejld=false, retfg=false)
+function doISAMSolve(d,f;toT=Inf, savejld=false, retfg=false, MM=Union{})
   #nc -l 2389 | python tcpisam.py | grep "POSE\|LNDM" | nc -l 2390
   global ENABLISAMREF, cl, clr
   ENABLISAMREF = true
@@ -48,7 +53,7 @@ function doISAMSolve(d,f;toT=Inf, savejld=false, retfg=false)
   clr = connect("mrg-liljon.csail.mit.edu", 2390)
 
   fgu = emptyFactorGraph()
-  appendFactorGraph!(fgu, d, f, toT=toT,lcmode=:unimodal);
+  appendFactorGraph!(fgu, d, f, toT=toT,lcmode=:unimodal, MM=MM);
   println(cl, "BATCHSOLVE")
   gtvals = requestAllPosesLandmsRemote(fgu)
   close(clr)

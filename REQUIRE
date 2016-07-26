@@ -5,3 +5,5 @@ KernelDensityEstimate
 Distributions
 Colors
 Gadfly
+JLD
+HDF5

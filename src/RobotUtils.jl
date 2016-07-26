@@ -373,7 +373,7 @@ function initFactorGraph!(fg::FactorGraph; P0=diagm([0.03;0.03;0.001]),
                       init=[0.0;0.0;0.0], N::Int=100, lbl="x1")
     init = (init')'
     v1 = addNode!(fg, lbl, init, P0, N=N)
-    addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]) ) #[v1], 
+    addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]) ) #[v1],
     return lbl
 end
 
@@ -396,8 +396,10 @@ function get2DSamples(fg::FactorGraph, sym; from::Int64=0, to::Int64=999999999, 
         val = parse(Int,id[1][2:end])
         if from <= val && val <= to
           if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
-              X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
-              Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
+              X=[X;vec(getVal(fg.v[id[2]])[1,:])]
+              Y=[Y;vec(getVal(fg.v[id[2]])[2,:])]
+              # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
+              # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
           end
         end
       end

@@ -6,7 +6,9 @@ using
   KernelDensityEstimate,
   Distributions,
   Colors,
-  Gadfly
+  Gadfly,
+  JLD,
+  HDF5
 
 export
   initfg,
@@ -66,7 +68,17 @@ export
   drawLandms,
   drawPosesLandms,
   drawSubmaps,
-  investigatePoseKDE
+  investigatePoseKDE,
+
+  # solve with isam in pytslam
+  doISAMSolve,
+  drawCompPosesLandm,
+
+  # Victoria Park data specific
+  LaserFeatures,
+  addLandmarksFactoGraph!,
+  appendFactorGraph!,
+  doBatchRun
 
 
 
@@ -75,5 +87,8 @@ include("BayesTracker.jl")
 include("RobotViz.jl")
 include("RobotUtils.jl")
 include("SimulationUtils.jl")
+include("VictoriaParkTypes.jl")
+include("VicPrkEstimator.jl")
+include("dev/ISAMRemoteSolve.jl")
 
 end

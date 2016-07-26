@@ -1,11 +1,4 @@
 
-# TODO -- make NBP a module
-# include("../NBP/BallTree01.jl")
-# include("../NBP/BallTreeDensity01.jl")
-# include("../NBP/KDE01.jl")
-# include("../NBP/DualTree01.jl")
-# include("../NBP/MSGibbs01.jl")
-# include("../NBP/KDEPlotting01.jl")
 
 type Feature
   id::Int64
@@ -263,6 +256,8 @@ function assocMeasWFeats!(trkrs::Dict{Int64, Feature}, fez::Array{Float64,2})
   return hardassoc
 end
 
+
+## Moved to RecursiveFiltering
 function update(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1}; N::Int=75)
 
   bXl = p2cPtsKDE(z,s, N=N)
@@ -273,7 +268,6 @@ function update(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1
   # error("update -- Not ready")
   return kde!(pGM, "lcv")
 end
-
 function updatelin(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1}; N::Int=75)
 
   bXl = resample(kde!((z')',s),N)
@@ -284,13 +278,13 @@ function updatelin(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float6
   # error("update -- Not ready")
   return kde!(pGM, "lcv")
 end
-
 function updatelin(bhatXl::BallTreeDensity, bXl::BallTreeDensity; N=75)
   dummy = kde!(rand(bhatXl.bt.dims,N),[1.0])
   pGM, = prodAppxMSGibbsS(dummy, [bhatXl, bXl], Union{}, Union{}, 5)
   # error("update -- Not ready")
   return kde!(pGM, "lcv")
 end
+## Moved to RecursiveFiltering
 
 function doAsyncUpdate(oldFeat::Feature, meas::Array{Float64,1}, s::Array{Float64,1})
   bel = update(oldFeat.bel, meas, s)
