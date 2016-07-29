@@ -78,7 +78,8 @@ export
   LaserFeatures,
   addLandmarksFactoGraph!,
   appendFactorGraph!,
-  doBatchRun
+  doBatchRun,
+  rotateFeatsToWorld
 
 
 

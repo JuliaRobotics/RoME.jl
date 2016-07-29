@@ -52,12 +52,12 @@ function requestAllPosesLandmsRemote(fg::FactorGraph)
   return dict
 end
 
-function doISAMSolve(d,f;toT=Inf, savejld=false, retfg=false, MM=Union{})
+function doISAMSolve(d,f;toT=Inf, savejld=false, retfg=false, MM=Union{}, port1::Int=2389, port2::Int=2390)
   #nc -l 2389 | python tcpisam.py | grep "POSE\|LNDM" | nc -l 2390
   global ENABLISAMREF, cl, clr
   ENABLISAMREF = true
-  cl = connect("mrg-liljon.csail.mit.edu", 2389)
-  clr = connect("mrg-liljon.csail.mit.edu", 2390)
+  cl = connect("mrg-liljon.csail.mit.edu", port1)
+  clr = connect("mrg-liljon.csail.mit.edu", port2)
 
   fgu = emptyFactorGraph()
   appendFactorGraph!(fgu, d, f, toT=toT,lcmode=:unimodal, MM=MM);

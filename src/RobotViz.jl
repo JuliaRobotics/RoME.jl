@@ -171,16 +171,16 @@ function drawPosesLandms(fg::FactorGraph;
 end
 
 function drawSubmaps(fgl::FactorGraph, fromto::Array{Int,2};
-                    m1hist=false,m2hist=false,m3hist=false, showmm=false)
-  p = drawLandms(fgl, from=fromto[1,1], to=fromto[1,2], drawhist=m1hist, showmm=showmm)
+                    m1hist=false,m2hist=false,m3hist=false, showmm=false, MM=Union{})
+  p = drawLandms(fgl, from=fromto[1,1], to=fromto[1,2], drawhist=m1hist, showmm=showmm, MM=MM)
   if size(fromto,1) >1
-    p2 = drawLandms(fgl, from=fromto[2,1], to=fromto[2,2], drawhist=m2hist,c="blue", showmm=showmm)
+    p2 = drawLandms(fgl, from=fromto[2,1], to=fromto[2,2], drawhist=m2hist,c="blue", showmm=showmm, MM=MM)
     for l in p2.layers
       push!(p.layers, l)
     end
   end
   if size(fromto,1) >2
-    p3 = drawLandms(fgl, from=fromto[3,1], to=fromto[3,2], drawhist=m3hist,c="magenta", showmm=showmm)
+    p3 = drawLandms(fgl, from=fromto[3,1], to=fromto[3,2], drawhist=m3hist,c="magenta", showmm=showmm, MM=MM)
     for l in p3.layers
       push!(p.layers, l)
     end
@@ -189,12 +189,12 @@ function drawSubmaps(fgl::FactorGraph, fromto::Array{Int,2};
 end
 
 function drawSubmaps(fgl::FactorGraph, fromto::Array{Int,1}; spread::Int=25,
-                    m1hist=false,m2hist=false,m3hist=false, showmm=false)
+                    m1hist=false,m2hist=false,m3hist=false, showmm=false, MM=Union{})
   ft = zeros(Int,length(fromto),2)
   for i in 1:length(fromto)
     ft[i,1] = fromto[i]-spread; ft[i,2] = fromto[i]+spread;
   end
-  drawSubmaps(fgl, ft, m1hist=m1hist, m2hist=m2hist, m3hist=m3hist, showmm=showmm)
+  drawSubmaps(fgl, ft, m1hist=m1hist, m2hist=m2hist, m3hist=m3hist, showmm=showmm, MM=MM)
 end
 
 # function getKDEMax(p::BallTreeDensity;N=200)
