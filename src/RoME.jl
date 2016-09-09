@@ -79,7 +79,9 @@ export
   addLandmarksFactoGraph!,
   appendFactorGraph!,
   doBatchRun,
-  rotateFeatsToWorld
+  rotateFeatsToWorld,
+
+  togglePrtStbLines
 
 
 

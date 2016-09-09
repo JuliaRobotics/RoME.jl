@@ -1,4 +1,9 @@
+global DISABLESTBPRTLINES = false
 
+function togglePrtStbLines()
+  global DISABLESTBPRTLINES
+  DISABLESTBPRTLINES = !DISABLESTBPRTLINES
+end
 
 function plotLsrScanFeats(br::Array{Float64,2})
   Cart = zeros(size(br))
@@ -70,6 +75,9 @@ end
 
 ## TODO -- you were here with port starboard lines
 function stbPrtLineLayers!(pl, Xpp, Ypp, Thpp)
+    if DISABLESTBPRTLINES
+      return nothing
+    end
 
     l = 5.0
     lnstpr = [0.0;l;0.0]
@@ -115,11 +123,11 @@ function drawPoses(fg::FactorGraph; from::Int64=0,to::Int64=99999999,
     psplt = Union{}
     if lbls
       psplt = Gadfly.plot(
-      Gadfly.layer(x=Xpp,y=Ypp,label=LBLS,Geom.path(), Theme(line_width=2pt), Geom.label)
+      Gadfly.layer(x=Xpp,y=Ypp,label=LBLS,Geom.path(), Theme(line_width=1pt), Geom.label)
       )
     else
       psplt = Gadfly.plot(
-      Gadfly.layer(x=Xpp,y=Ypp,Geom.path(), Theme(line_width=2pt))
+      Gadfly.layer(x=Xpp,y=Ypp,Geom.path(), Theme(line_width=1pt))
       )
     end
     stbPrtLineLayers!(psplt, Xpp, Ypp, Thpp)
@@ -143,12 +151,12 @@ function drawLandms(fg::FactorGraph;
 
     if lbls
       psplt = Gadfly.plot(
-      Gadfly.layer(x=Xpp,y=Ypp, label=lbltags, Geom.point, Theme(line_width=2pt, default_color=parse(Colorant,c)), Geom.label)
+      Gadfly.layer(x=Xpp,y=Ypp, label=lbltags, Geom.point, Theme(line_width=1pt, default_color=parse(Colorant,c), default_point_size=1pt), Geom.label)
       # ,Gadfly.layer(x=Xp, y=Yp, Geom.histogram2d)#(xbincount=100, ybincount=100)
       )
     else
       psplt = Gadfly.plot(
-      Gadfly.layer(x=Xpp,y=Ypp, Geom.point, Theme(line_width=2pt, default_color=parse(Colorant,c)))
+      Gadfly.layer(x=Xpp,y=Ypp, Geom.point, Theme(line_width=1pt, default_color=parse(Colorant,c), default_point_size=1pt))
       )
     end
 

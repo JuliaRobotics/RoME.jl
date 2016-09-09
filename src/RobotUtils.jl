@@ -4,8 +4,10 @@ include("dev/ISAMRemoteSolve.jl")
 function measureMeanDist(fg::FactorGraph, a::ASCIIString, b::ASCIIString)
     #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
     res = zeros(2)
-    A = getVal(fg.v[fg.IDs[a]])
-    B = getVal(fg.v[fg.IDs[b]])
+    A = getVal(fg,a)
+    B = getVal(fg,b)
+    # A = getVal(fg.v[fg.IDs[a]])
+    # B = getVal(fg.v[fg.IDs[b]])
     Ax = Base.mean(vec(A[1,:]))
     Ay = Base.mean(vec(A[2,:]))
     Bx = Base.mean(vec(B[1,:]))
@@ -19,8 +21,10 @@ end
 
 function predictBodyBR(fg::FactorGraph, a::ASCIIString, b::ASCIIString)
   res = zeros(2)
-  A = getVal(fg.v[fg.IDs[a]])
-  B = getVal(fg.v[fg.IDs[b]])
+  A = getVal(fg,a)
+  B = getVal(fg,b)
+  # A = getVal(fg.v[fg.IDs[a]])
+  # B = getVal(fg.v[fg.IDs[b]])
   Ax = Base.mean(vec(A[1,:]))
   Ay = Base.mean(vec(A[2,:]))
   Ath = Base.mean(vec(A[3,:]))
@@ -64,7 +68,8 @@ function getNextLbl(fgl::FactorGraph, sym)
       end
   end
   if maxid != -1
-    v = fgl.v[maxid]
+    v = getVert(fgl,maxid)
+    # v = fgl.v[maxid]
     X = getVal(v)
     return v, X, string(sym,max+1)
   else
@@ -74,20 +79,6 @@ end
 
 function getLastPose2D(fgl::FactorGraph)
   return getNextLbl(fgl, 'x')
-  # max = 0
-  # maxid = 0
-  # for v in fg.v
-  #     if v[2].attributes["label"][1] == 'x'
-  #       val = parse(Int,v[2].attributes["label"][2:end])
-  #       if max < val
-  #         max = val
-  #         maxid = v[1]
-  #       end
-  #     end
-  # end
-  # v = fg.v[maxid]
-  # X = getVal(v)
-  # return v, X, string('x',max+1)
 end
 
 function getLastLandm2D(fgl::FactorGraph)
@@ -108,7 +99,7 @@ end
 
 
 function addOdoFG!(fg::FactorGraph, n::ASCIIString, DX::Array{Float64,1}, cov::Array{Float64,2};
-                  N::Int=100)
+                  N::Int=100, ready::Int=1)
     prev, X, nextn = getLastPose2D(fg)
     sig = diag(cov)
     RES = zeros(size(X))
@@ -118,9 +109,9 @@ function addOdoFG!(fg::FactorGraph, n::ASCIIString, DX::Array{Float64,1}, cov::A
         RES[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addNode!(fg, n, RES, cov, N=N)
+    v = addNode!(fg, n, RES, cov, N=N, ready=ready)
     pp = Pose2Pose2((DX')', cov, [1.0]) #[prev;v],
-    f = addFactor!(fg, [prev;v], pp)
+    f = addFactor!(fg, [prev;v], pp, ready=ready)
     infor = inv(cov^2)
     addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
     return v, f
@@ -132,13 +123,21 @@ end
 
 
 function newLandm!(fg::FactorGraph, lm::ASCIIString, wPos::Array{Float64,2}, sig::Array{Float64,2};
-                  N::Int=100)
-    v=addNode!(fg, lm, wPos, sig, N=N)
-    fg.v[v.index].attributes["age"] = 0
-    fg.v[v.index].attributes["maxage"] = 0
-    fg.v[v.index].attributes["numposes"] = 0
+                  N::Int=100, ready::Int=1)
+
+    # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
+    vert=addNode!(fg, lm, wPos, sig, N=N, ready=ready)
+
+    vert.attributes["age"] = 0
+    vert.attributes["maxage"] = 0
+    vert.attributes["numposes"] = 0
+    updateFullVert!(fg, vert)
+    # fg.v[v.index].attributes["age"] = 0
+    # fg.v[v.index].attributes["maxage"] = 0
+    # fg.v[v.index].attributes["numposes"] = 0
+
     println("newLandm! -- added $(lm)")
-    return v
+    return vert
 end
 
 function updateLandmAge(vlm::Graphs.ExVertex, pose::AbstractString)
@@ -146,17 +145,25 @@ function updateLandmAge(vlm::Graphs.ExVertex, pose::AbstractString)
 end
 
 function addBRFG!(fg::FactorGraph, pose::ASCIIString,
-                  lm::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2})
-    vps = fg.v[fg.IDs[pose]]
-    vlm = fg.v[fg.IDs[lm]]
-    # println("addBRFG! -- looking at $(lm)")
+                  lm::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2};
+                   ready::Int=1)
+
+
+    vps = getVert(fg,pose)
+    vlm = getVert(fg,lm)
+    # vps = fg.v[fg.IDs[pose]]
+    # vlm = fg.v[fg.IDs[lm]]
+    @show keys(vlm.attributes)
     np = vlm.attributes["numposes"]
     la = vlm.attributes["age"]
     nage = parse(Int,pose[2:end])
     vlm.attributes["numposes"] = np+1
     vlm.attributes["age"] = ((la*np)+nage)/(np+1)
     vlm.attributes["maxage"] = nage
-    f = addFactor!(fg, [vps;vlm], Pose2DPoint2DBearingRange((br')',  cov,  [1.0]) ) #[vps;vlm],
+    updateFullVert!(fg, vlm)
+
+    pbr = Pose2DPoint2DBearingRange((br')',  cov,  [1.0])
+    f = addFactor!(fg, [vps;vlm], pbr, ready=ready ) #[vps;vlm],
 
     # only used for max likelihood unimodal tests.
     u, P = pol2cart(br[[2;1]], diag(cov))
@@ -167,17 +174,23 @@ end
 
 function addMMBRFG!(fg::FactorGraph, pose::ASCIIString,
                   lm::Array{ASCIIString,1}, br::Array{Float64,1},
-                  cov::Array{Float64,2}; w=[0.5;0.5])
-    vps = fg.v[fg.IDs[pose]]
-    vlm1 = fg.v[fg.IDs[lm[1]]]
-    vlm2 = fg.v[fg.IDs[lm[2]]]
+                  cov::Array{Float64,2}; w=[0.5;0.5], ready::Int=1)
+
+    vps = getVert(fg,pose)
+    vlm1 = getVert(fg,lm[1])
+    vlm2 = getVert(fg,lm[2])
+    # vps = fg.v[fg.IDs[pose]]
+    # vlm1 = fg.v[fg.IDs[lm[1]]]
+    # vlm2 = fg.v[fg.IDs[lm[2]]]
 
     pbr = Pose2DPoint2DBearingRange((br')',  cov,  w) #[vps;vlm1;vlm2],
-    f = addFactor!(fg, [vps;vlm1;vlm2], pbr )
+    f = addFactor!(fg, [vps;vlm1;vlm2], pbr, ready=ready )
     return f
 end
 
+
 function projNewLandmPoints(vps::Graphs.ExVertex, br::Array{Float64,1}, cov::Array{Float64,2})
+    # TODO -- convert to use Distributions and common projection function
     Xps = getVal(vps)
     lmPts = zeros(2,size(Xps,2))
     for i in 1:size(Xps,2)
@@ -189,19 +202,15 @@ function projNewLandmPoints(vps::Graphs.ExVertex, br::Array{Float64,1}, cov::Arr
 end
 
 function projNewLandm!(fg::FactorGraph, pose::ASCIIString, lm::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2};
-                        addfactor=true, N::Int=100)
-    vps = fg.v[fg.IDs[pose]]
-    # Xps = getVal(vps)
-    # lmPts = zeros(2,size(Xps,2))
-    # for i in 1:size(Xps,2)
-    #     ent = [cov[1,1]*randn(); cov[2,2]*randn()]
-    #     init = vec(Xps[1:2,i])+randn(2)
-    #     lmPts[:,i] = solveLandm(br + ent, vec(Xps[:,i]), init)
-    # end
+                        addfactor=true, N::Int=100, ready::Int=1)
+
+    vps = getVert(fg,pose)
+    # vps = fg.v[fg.IDs[pose]]
+
     lmPts = projNewLandmPoints(vps, br, cov)
-    vlm = newLandm!(fg, lm, lmPts, cov, N=N) # cov should not be required here
+    vlm = newLandm!(fg, lm, lmPts, cov, N=N, ready=ready) # cov should not be required here
     if addfactor
-      fbr = addBRFG!(fg, pose, lm, br, cov)
+      fbr = addBRFG!(fg, pose, lm, br, cov, ready=ready)
       return vlm, fbr
     end
     return vlm
@@ -216,7 +225,9 @@ function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
     fetchlist = ASCIIString[]
     iv = Dict{ASCIIString, Float64}()
     for l in ll
-      pvlm = fgl.v[fgl.IDs[l]]
+      pvlm = getVert(fgl,l)
+      # pvlm = fgl.v[fgl.IDs[l]]
+      # TODO -- can be improved via query in DB case
       if currage - pvlm.attributes["maxage"] < maxdeltaage
         p = getVertKDE(fgl, l)
         rr[l] = remotecall(uppA(), intersIntgAppxIS, p,predLm)
@@ -257,7 +268,8 @@ function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{ASCIIString, Float64}, maxl
   lmIDExists = haskey(fgl.v, lmid) # suggested lmid already in fgl
   newlmindx = lmindx
   if lmIDExists
-    lmSuggLbl = ASCIIString(fgl.v[lmid].label)
+    lmSuggLbl = ASCIIString(getVert(fgl,lmid).label) # TODO -- wasteful
+    # lmSuggLbl = ASCIIString(fgl.v[lmid].label)
   else
     newlmindx = lmindx + 1
     lmSuggLbl = ASCIIString(string('l',newlmindx))
@@ -269,10 +281,10 @@ function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{ASCIIString, Float64}, maxl
   return lmidSugg, maxAnyExists, maxl2Exists, maxl2, lmIDExists, intgLmIDExists, lmSuggLbl, newlmindx
 end
 
-# TODO, busy here
+
 function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{ASCIIString, Float64}, maxl::ASCIIString,
                         pose::ASCIIString, lmPts::Array{Float64,2}, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
-                        N::Int=100)
+                        N::Int=100, ready::Int=1)
   lmidSugg, maxAnyExists, maxl2Exists, maxl2, lmIDExists, intgLmIDExists, lmSuggLbl, newlmindx = doAutoEvalTests(fgl,ivs,maxl,lmid, lmindx)
 
   println("evalAutoCases -- found=$(lmidSugg), $(maxAnyExists), $(maxl2Exists), $(lmIDExists), $(intgLmIDExists)")
@@ -281,42 +293,46 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{ASCIIString, Floa
   if (!lmidSugg && !maxAnyExists)
     #new landmark and UniBR constraint
     v,L,lm = getLastLandm2D(fgl)
-    vlm = newLandm!(fgl, lm, lmPts, cov, N=N)
-    fbr = addBRFG!(fgl, pose, lm, br, cov)
+    vlm = newLandm!(fgl, lm, lmPts, cov, N=N,ready=ready)
+    fbr = addBRFG!(fgl, pose, lm, br, cov, ready=ready)
   elseif !lmidSugg && maxAnyExists
     # add UniBR to best match maxl
-    vlm = fgl.v[fgl.IDs[maxl]]
-    fbr = addBRFG!(fgl, pose, maxl, br, cov)
+    # vlm = fgl.v[fgl.IDs[maxl]]
+    vlm = getVert(fgl,maxl)
+    fbr = addBRFG!(fgl, pose, maxl, br, cov, ready=ready)
   elseif lmidSugg && !maxl2Exists && !lmIDExists
     #add new landmark and add UniBR to suggested lmid
-    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N)
-    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov)
+    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N, ready=ready)
+    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, ready=ready)
   elseif lmidSugg && !maxl2Exists && lmIDExists && intgLmIDExists
     # doesn't self intesect with existing lmid, add UniBR to lmid
-    vlm = fgl.v[lmid]
-    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov)
+    # vlm = fgl.v[lmid]
+    vlm = getVert(fgl, lmid)
+    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, ready=ready)
   elseif lmidSugg && maxl2Exists && !lmIDExists
     # add new landmark and add MMBR to both maxl and lmid
-    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N)
-    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov)
+    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N, ready=ready)
+    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, ready=ready)
   elseif lmidSugg && maxl2Exists && lmIDExists && intgLmIDExists
     # obvious case, add MMBR to both maxl and lmid. Double intersect might be the same thing
     println("evalAutoCases! -- obvious case is happening")
-    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov)
-    vlm = fgl.v[fgl.IDs[lmSuggLbl]]
-  elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
+    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, ready=ready)
+    # vlm = fgl.v[fgl.IDs[lmSuggLbl]]
+    vlm = getVert(fgl,lmSuggLbl)
+elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
     # odd case, does not intersect with suggestion, but does with some previous landm
     # add MMBR
     warn("evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected")
-    addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov)
-    vlm = fgl.v[fgl.IDs[lmSuggLbl]]
-  elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
+    addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov, ready=ready)
+    # vlm = fgl.v[fgl.IDs[lmSuggLbl]]
+    vlm = getVert(fgl,lmSuggLbl)
+elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
   #   # landm exists but no intersection with existing or suggested lmid
   #   # may suggest some error
     warn("evalAutoCases! -- no intersect with suggested $(lmSuggLbl) or map detected, adding  new landmark MM constraint incase")
     v,L,lm = getLastLandm2D(fgl)
-    vlm = newLandm!(fgl, lm, lmPts, cov, N=N)
-    addMMBRFG!(fgl, pose, [lm; lmSuggLbl], br, cov)
+    vlm = newLandm!(fgl, lm, lmPts, cov, N=N, ready=ready)
+    addMMBRFG!(fgl, pose, [lm; lmSuggLbl], br, cov, ready=ready)
   else
     error("evalAutoCases! -- unknown case encountered, can reduce to this error to a warning and ignore user request")
   end
@@ -325,31 +341,17 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{ASCIIString, Floa
 end
 
 function addAutoLandmBR!(fgl::FactorGraph, pose::ASCIIString, lmid::Int, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
-                      N::Int=100)
-    vps = fgl.v[fgl.IDs[pose]]
+                      N::Int=100, ready::Int=1)
+    vps = getVert(fgl, pose)
+    # vps = fgl.v[fgl.IDs[pose]]
     lmPts = projNewLandmPoints(vps, br, cov)
     lmkde = kde!(lmPts)
     currage = parse(Int, pose[2:end])
     ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=10)
 
     # There are 8 cases of interest
-    vlm, fbr, newlmindx = evalAutoCases!(fgl, lmid, ivs, maxl,pose,lmPts, br,cov,lmindx,N=N)
+    vlm, fbr, newlmindx = evalAutoCases!(fgl, lmid, ivs, maxl,pose,lmPts, br,cov,lmindx,N=N,ready=ready)
 
-    # OLD TESTS
-    # maxval = maxl != ASCIIString("") ? ivs[maxl] : 0.0
-    # println("addAutoLandm! -- max intg val $(maxval)")
-    # lm = Union{}; vlm = Union{};
-    # if maxval > 0.03 # TODO : needs to be properly normalized.
-    #   vlm = fgl.v[fgl.IDs[maxl]]
-    #   lm = maxl
-    #   println("prev lm age=$(vlm.attributes["maxage"])")
-    #   # fbr = addBRFG!(fgl, pose, maxl, br, cov)
-    #   # return vlm, fbr
-    # else
-    #   v,L,lm = getLastLandm2D(fgl)
-    #   vlm = newLandm!(fgl, lm, lmPts, cov, N=N)
-    # end
-    # fbr = addBRFG!(fgl, pose, lm, br, cov)
     return vlm, fbr, newlmindx
 end
 
@@ -370,10 +372,10 @@ function malahanobisBR(measA, preA, cov::Array{Float64,2})
 end
 
 function initFactorGraph!(fg::FactorGraph; P0=diagm([0.03;0.03;0.001]),
-                      init=[0.0;0.0;0.0], N::Int=100, lbl="x1")
+                      init=[0.0;0.0;0.0], N::Int=100, lbl="x1", ready::Int=1)
     init = (init')'
-    v1 = addNode!(fg, lbl, init, P0, N=N)
-    addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]) ) #[v1],
+    v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready)
+    addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]), ready=ready ) #[v1],
     return lbl
 end
 
@@ -395,9 +397,10 @@ function get2DSamples(fg::FactorGraph, sym; from::Int64=0, to::Int64=999999999, 
       if id[1][1] == sym
         val = parse(Int,id[1][2:end])
         if from <= val && val <= to
-          if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
-              X=[X;vec(getVal(fg.v[id[2]])[1,:])]
-              Y=[Y;vec(getVal(fg.v[id[2]])[2,:])]
+          if length( getOutNeighbors(fg, id[2] ) ) >= minnei
+          # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
+              X=[X; vec(getVal(fg,id[2])[1,:]) ]
+              Y=[Y; vec(getVal(fg,id[2])[2,:]) ]
               # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
               # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
           end
@@ -423,7 +426,8 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
       if id[1][1] == sym
           val = parse(Int,id[1][2:end])
           if from <= val && val <= to
-            if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
+            if length( getOutNeighbors(fg, id[2]) ) >= minnei
+            # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
               push!(allIDs, val)
             end
           end
@@ -432,12 +436,15 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
   allIDs = sort(allIDs)
 
   for id in allIDs
-      X=[X;Base.mean(vec(fg.v[fg.IDs[string(sym,id)]].attributes["val"][1,:]))]
-      Y=[Y;Base.mean(vec(fg.v[fg.IDs[string(sym,id)]].attributes["val"][2,:]))]
-      if sym == 'x'
-        Th=[Th;Base.mean(vec(fg.v[fg.IDs[string(sym,id)]].attributes["val"][3,:]))]
-      end
-      push!(LB, string(sym,id))
+    X=[X;Base.mean( vec( getVal(fg,string(sym,id))[1,:] ) )]
+    Y=[Y;Base.mean( vec( getVal(fg, string(sym,id))[2,:] ) )]
+    # X=[X;Base.mean(vec(fg.v[fg.IDs[string(sym,id)]].attributes["val"][1,:]))]
+    # Y=[Y;Base.mean(vec(fg.v[fg.IDs[string(sym,id)]].attributes["val"][2,:]))]
+    if sym == 'x'
+      Th=[Th;Base.mean( vec( getVal(fg, string(sym,id))[3,:] ) )]
+      # Th=[Th;Base.mean(vec(fg.v[fg.IDs[string(sym,id)]].attributes["val"][3,:]))]
+    end
+    push!(LB, string(sym,id))
   end
   return X,Y,Th,LB
 end
@@ -522,3 +529,47 @@ function get2DLandmMax(fgl::FactorGraph;
   end
   return X, Y, Th, LB
 end
+
+
+
+#
+# function +(p1::Rigid6DOF, p2::Rigid6DOF)
+#     t = rotate(p1.rot, p2.trl) + p1.trl
+#     return Rigid6DOF(p1.rot*p2.rot,t)
+# end
+#
+# function +(p1::PoseSE3, p2::PoseSE3)
+#     return PoseSE3(p1.utime+p2.utime,
+#                    "+",
+#                    p1.mu+p2.mu,
+#                    p1.cov + p2.cov,
+#                    Dict())
+# end
+#
+# function makePose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*eye(6))
+#     return PoseSE3(ut,
+#                    name,
+#                    Rigid6DOF( q, t ),
+#                    cov,
+#                    Dict())
+# end
+
+# function makeDynPose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*eye(18))
+#     return DynPose3(ut,
+#                     name,
+#                     Dynamic6DOF( q, t, [0.,0,0], [0.,0,0] ),
+#                     IMUComp([0.,0,0],[0.,0,0]),
+#                     cov,
+#                     Dict())
+# end
+#
+# function wTo(p::PoseSE3)
+#     T = eye(4)
+#     T[1:3,1:3] =  convert(SO3, p.mu.rot).R
+#     T[1:3,4] = p.mu.trl
+#     return T
+# end
+#
+# function oTw(p::PoseSE3)
+#     return wTo(p) \ eye(4)
+# end
