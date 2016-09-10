@@ -151,6 +151,15 @@ function addBRFG!(fg::FactorGraph, pose::ASCIIString,
 
     vps = getVert(fg,pose)
     vlm = getVert(fg,lm)
+    testlbl = vps.label*vlm.label
+    for nei in getOutNeighbors(fg, vlm)
+      if nei.label == testlbl
+        @show nei
+        # TODO -- makes function call brittle
+        warn("We already have $(testlbl), skipping this constraint")
+        return nothing
+      end
+    end
     # vps = fg.v[fg.IDs[pose]]
     # vlm = fg.v[fg.IDs[lm]]
     @show keys(vlm.attributes)
@@ -319,14 +328,14 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{ASCIIString, Floa
     addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, ready=ready)
     # vlm = fgl.v[fgl.IDs[lmSuggLbl]]
     vlm = getVert(fgl,lmSuggLbl)
-elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
+  elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
     # odd case, does not intersect with suggestion, but does with some previous landm
     # add MMBR
     warn("evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected")
     addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov, ready=ready)
     # vlm = fgl.v[fgl.IDs[lmSuggLbl]]
     vlm = getVert(fgl,lmSuggLbl)
-elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
+  elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
   #   # landm exists but no intersection with existing or suggested lmid
   #   # may suggest some error
     warn("evalAutoCases! -- no intersect with suggested $(lmSuggLbl) or map detected, adding  new landmark MM constraint incase")
