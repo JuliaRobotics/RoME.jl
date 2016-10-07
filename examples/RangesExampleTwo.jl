@@ -1,4 +1,4 @@
-using RoME, IncrementalInference
+using RoME, IncrementalInference, Gadfly
 
 # using CloudGraphs, Neo4j
 # include("BlandAuthDB.jl")
@@ -101,7 +101,15 @@ function batchsolve(fgl::FactorGraph)
 	nothing
 end
 
-
+function drawMarginalContour(fgl::FactorGraph, lbl::ASCIIString;xmin=-150,xmax=150,ymin=-150,ymax=150,n=200)
+	p = getKDE(getVert(fgl,lbl))
+	plot(z=(x,y)->evaluateDualTree(p,([x;y]')')[1],
+		x=linspace(xmin,xmax,n),
+		y=linspace(ymin,ymax,n),
+		Geom.contour,
+		Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
+	)
+end
 
 N = 300
 fg = initfg()
