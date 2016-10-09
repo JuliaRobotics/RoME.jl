@@ -1,4 +1,5 @@
-using RoME, IncrementalInference, Gadfly
+using RoME, IncrementalInference
+# , Gadfly
 
 # using CloudGraphs, Neo4j
 # include("BlandAuthDB.jl")
@@ -101,15 +102,15 @@ function batchsolve(fgl::FactorGraph)
 	nothing
 end
 
-function drawMarginalContour(fgl::FactorGraph, lbl::ASCIIString;xmin=-150,xmax=150,ymin=-150,ymax=150,n=200)
-	p = getKDE(getVert(fgl,lbl))
-	plot(z=(x,y)->evaluateDualTree(p,([x;y]')')[1],
-		x=linspace(xmin,xmax,n),
-		y=linspace(ymin,ymax,n),
-		Geom.contour,
-		Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
-	)
-end
+# function drawMarginalContour(fgl::FactorGraph, lbl::ASCIIString;xmin=-150,xmax=150,ymin=-150,ymax=150,n=200)
+# 	p = getKDE(getVert(fgl,lbl))
+# 	plot(z=(x,y)->evaluateDualTree(p,([x;y]')')[1],
+# 		x=linspace(xmin,xmax,n),
+# 		y=linspace(ymin,ymax,n),
+# 		Geom.contour,
+# 		Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
+# 	)
+# end
 
 N = 300
 fg = initfg()
@@ -136,14 +137,20 @@ writeGraphPdf(fg)
 
 batchsolve(fg)
 drawLandms(fg,showmm=true)
+drawLandms(fg,showmm=true,from=100,to=100)
+drawLandms(fg,showmm=true,from=3,to=3)
 
+RoME.drawMarginalContour(fg,"l3")
 
 addNewPose!(fg, "l100", "l101", GTp, N=N)
 writeGraphPdf(fg)
 
 batchsolve(fg)
 drawLandms(fg,showmm=true)
+drawLandms(fg,showmm=true,from=101,to=101)
 
+RoME.drawMarginalContour(fg,"l3")
+RoME.drawMarginalContour(fg,"l101")
 
 
 
@@ -155,7 +162,8 @@ writeGraphPdf(fg)
 batchsolve(fg)
 drawLandms(fg,showmm=true)
 
-
+RoME.drawMarginalContour(fg,"l3")
+RoME.drawMarginalContour(fg,"l100")
 
 
 drive(fg, GTp, GTl, "l101", "l102", N=N)

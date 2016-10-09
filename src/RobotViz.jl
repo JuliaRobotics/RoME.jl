@@ -268,3 +268,14 @@ function investigatePoseKDE(p::BallTreeDensity)
     # return hstack(x,y)
     return investigateMultidimKDE(p)
 end
+
+
+function drawMarginalContour(fgl::FactorGraph, lbl::ASCIIString;xmin=-150,xmax=150,ymin=-150,ymax=150,n=200)
+  p = getKDE(getVert(fgl,lbl))
+  Gadfly.plot(z=(x,y)->evaluateDualTree(p,([x;y]')')[1],
+    x=linspace(xmin,xmax,n),
+    y=linspace(ymin,ymax,n),
+    Geom.contour,
+    Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
+  )
+end
