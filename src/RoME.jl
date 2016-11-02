@@ -41,6 +41,7 @@ export
   get2DLandmMeans,
   get2DLandmMax,
   drawMarginalContour,
+  accumulateMarginalContours,
 
   # helper functions
   getLastLandm2D,

@@ -276,6 +276,36 @@ function drawMarginalContour(fgl::FactorGraph, lbl::ASCIIString;xmin=-150,xmax=1
     x=linspace(xmin,xmax,n),
     y=linspace(ymin,ymax,n),
     Geom.contour,
-    Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
+    Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax),
+    Guide.title(lbl)
   )
 end
+
+function accumulateMarginalContours(fgl, order;xmin=-150,xmax=150,ymin=-150,ymax=150,n=200)
+  pl = drawMarginalContour(fgl, order[1],xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,n=n)
+  pl2 = nothing
+  PL = []
+  for or in order[1:end]
+    pl2 = drawMarginalContour(fgl, or, xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,n=n)
+    push!(PL, pl2)
+    push!(pl.layers, pl2.layers[1])
+  end
+  return pl, PL
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
