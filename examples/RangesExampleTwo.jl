@@ -1,3 +1,6 @@
+# video at: https://vimeo.com/190052649
+
+
 addprocs(7)
 # using RoME, IncrementalInference, Gadfly, Colors
 for p in procs()
@@ -179,8 +182,8 @@ function drawGroundTruth(GTp, orderp, GTl=nothing, orderl=[]; drawranges=true, i
 		end
 	end
 	if length(orderl) > 0
-		push!(LAYERS, Gadfly.layer(x=Xlr, y=Ylr, Geom.point, Theme(default_color=colorant"red")  )[1]) # label=Lblr, Geom.label
-		push!(LAYERS, Gadfly.layer(x=Xla, y=Yla, Geom.point, Theme(default_color=colorant"cyan", default_point_size=2pt) )[1]) # label=Lbla, Geom.label
+		push!(LAYERS, Gadfly.layer(x=Xlr, y=Ylr, Geom.point, Theme(default_color=colorant"red", default_point_size=4pt)  )[1]) # label=Lblr, Geom.label
+		push!(LAYERS, Gadfly.layer(x=Xla, y=Yla, Geom.point, Theme(default_color=colorant"cyan", default_point_size=4pt) )[1]) # label=Lbla, Geom.label
 		if drawranges
 			idx = !interp ? length(X) : length(X)-1
 			gtlcur = landmsInRange(GTl, [X[idx];Y[idx]])
@@ -285,28 +288,92 @@ function plotCircle(;cent=[0.0;0.0], radius=1.0, c="deepskyblue", N=200, drawcen
 	plot(PL...)
 end
 
+
 function drawFirstPoseIllustration(GTl, GTp)
 	l1, l2 = GTl["l1"], GTl["l2"]
-	p1 = GTp["l100"]
+	p1, p2 = GTp["l100"], GTp["l101"]
 	rho1, rho2 = norm(p1-l1), norm(p1-l2)
 
 	PL = Gadfly.Layer[]
 
-	push!(PL, layerCircle(cent=l1,radius=rho1)[1])
-	push!(PL, layerCircle(cent=l2,radius=rho2)[1])
+	PL = union(PL, plotCircle(cent=[0.0;0],radius=3.0, c="blue", drawcent=false).layers)
+	PL = union(PL, plotCircle(cent=[36.0;12],radius=3.0, c="blue", drawcent=false).layers)
 
+	PL = union(PL, plotCircle(cent=l1,radius=rho1, c="red", drawcent=true).layers)
+	PL = union(PL, plotCircle(cent=l2,radius=rho2, c="red", drawcent=true).layers)
 
 	plot(PL,
 		Guide.title("Parametric illustration"),
-		Coord.Cartesian(xmin=-150,xmax=150,ymin=-150, ymax=150))
+		Coord.Cartesian(xmin=-150,xmax=150,ymin=-150, ymax=150) )
 end
 
 
-function drawIllustrations(GTl, GTp)
+function drawSecondPoseIllustration(GTl, GTp)
+	l1, l2 = GTl["l1"], GTl["l2"]
+	p1, p2 = GTp["l100"], GTp["l101"]
+	rho1, rho2 = norm(p1-l1), norm(p1-l2)
+
+	PL = Gadfly.Layer[]
+
+	PL = union(PL, plotCircle(cent=[0.0;0],radius=norm(p1-p2), c="blue", drawcent=true).layers)
+	PL = union(PL, plotCircle(cent=[36.0;12],radius=norm(p1-p2), c="blue", drawcent=true).layers)
+
+
+	PL = union(PL, plotCircle(cent=l1,radius=rho1, c="gray").layers)
+	PL = union(PL, plotCircle(cent=l2,radius=rho2, c="gray").layers)
+
+	plot(PL,
+		Guide.title("Parametric illustration"),
+		Coord.Cartesian(xmin=-150,xmax=150,ymin=-150, ymax=150) )
+end
+
+function drawFirstL3Illustration(GTl, GTp)
+	l1, l2, l3 = GTl["l1"], GTl["l2"], GTl["l3"]
+	p1, p2 = GTp["l100"], GTp["l101"]
+	rho1, rho2 = norm(p1-l1), norm(p1-l2)
+
+	PL = Gadfly.Layer[]
+
+	PL = union(PL, plotCircle(cent=[0.0;0],radius=norm(p1-l3), c="cyan", drawcent=true).layers)
+	PL = union(PL, plotCircle(cent=[36.0;12],radius=norm(p1-l3), c="cyan", drawcent=true).layers)
+
+
+	PL = union(PL, plotCircle(cent=l1,radius=rho1, c="gray").layers)
+	PL = union(PL, plotCircle(cent=l2,radius=rho2, c="gray").layers)
+
+	push!(PL, layer(x=[l3[1]], y=[l3[2]], Geom.point, Theme(default_color=colorant"cyan", default_point_size=4pt)  )[1] )
+
+	plot(PL,
+		Guide.title("Parametric illustration"),
+		Coord.Cartesian(xmin=-150,xmax=150,ymin=-150, ymax=150) )
+end
+
+
+function drawIllustrations(GTl, GTp, folderloc)
+	pl = drawGroundTruth(GTp, ASCIIString[], GTl, ["l$(i)" for i in 1:4], drawranges=false, interp=false, t=0)
+	filename = "$(folderloc)/gtPos0.png"
+	draw(PNG(filename,30cm,20cm),pl)
+
 	# first pose location
+	pl2 = drawFirstPoseIllustration(GTl, GTp)
+	filename2 = "$(folderloc)/gtArc0.png"
+	draw(PNG(filename2,30cm,20cm),pl2)
 
+	pl3 = drawSecondPoseIllustration(GTl, GTp)
+	filename3 = "$(folderloc)/gtPose2Pred.png"
+	draw(PNG(filename3,30cm,20cm),pl3)
+
+	pl4 = drawFirstL3Illustration(GTl, GTp)
+	filename4 = "$(folderloc)/gtLm3Pred.png"
+	draw(PNG(filename4,30cm,20cm),pl4)
+
+
+	nothing
 end
 
+
+folderloc2 = "/home/dehann/irosVid"
+drawIllustrations(GTl, GTp, folderloc2)
 
 
 N = 300
