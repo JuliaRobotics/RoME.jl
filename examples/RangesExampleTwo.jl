@@ -272,6 +272,40 @@ function draw30AllFast(GTp, GTl, fgl, th, offset, start, ending;
 end
 
 
+function layerCircle(;cent=[0.0;0.0], radius=1.0, c="deepskyblue", N=200)
+	TH = linspace(0,2pi,200)
+	X = real(radius*exp(TH*im))+cent[1]
+	Y = imag(radius*exp(TH*im))+cent[2]
+	layer(x=X,y=Y, Geom.path(), Theme(default_color=parse(Colorant,c)))
+end
+function plotCircle(;cent=[0.0;0.0], radius=1.0, c="deepskyblue", N=200, drawcent=false)
+	PL = []
+	push!(PL, layerCircle(cent=cent, radius=radius, c=c, N=N) )
+	!drawcent ? nothing : push!(PL, layer(x=[cent[1]],y=[cent[2]], Geom.point, Theme(default_color=parse(Colorant,c))))
+	plot(PL...)
+end
+
+function drawFirstPoseIllustration(GTl, GTp)
+	l1, l2 = GTl["l1"], GTl["l2"]
+	p1 = GTp["l100"]
+	rho1, rho2 = norm(p1-l1), norm(p1-l2)
+
+	PL = Gadfly.Layer[]
+
+	push!(PL, layerCircle(cent=l1,radius=rho1)[1])
+	push!(PL, layerCircle(cent=l2,radius=rho2)[1])
+
+
+	plot(PL,
+		Guide.title("Parametric illustration"),
+		Coord.Cartesian(xmin=-150,xmax=150,ymin=-150, ymax=150))
+end
+
+
+function drawIllustrations(GTl, GTp)
+	# first pose location
+
+end
 
 
 
