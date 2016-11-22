@@ -1,0 +1,58 @@
+Prior sqrtinf:
+     10       0       0       0       0       0
+      0      10       0       0       0       0
+      0       0      10       0       0       0
+      0       0       0 57.2958       0       0
+      0       0       0       0 57.2958       0
+      0       0       0       0       0 57.2958
+Odometry sqrtinf:
+     10       0       0       0       0       0
+      0      10       0       0       0       0
+      0       0      10       0       0       0
+      0       0       0 57.2958       0       0
+      0       0       0       0 57.2958       0
+      0       0       0       0       0 57.2958
+Bearing Range sqrtinf:
+286.479       0
+      0     200
+Prior pose 0: (0, 0, 0; 0, -0.0992321, -0.00772052)
+Odometry pose 0 pose 1: (-0.380711, -1.02585, 1.77348; -2.19796, -0.151721, -0.0929671)
+Odometry pose 1 pose 2: (-0.00138117, -0.0600476, 0.0204065; -0.038278, 0.0186151, 0.00606331)
+Odometry pose 2 pose 3: (-0.298704, -0.113974, 0.0244868; -0.00805163, -0.00425057, -0.0275746)
+Odometry pose 3 pose 4: (0.670492, 0.0251882, -0.0705555; 0.109113, 0.0228966, 0.039246)
+Odometry pose 4 pose 5: (-0.0615969, 0.00849829, -0.0170747; 0.0315662, -0.0115416, -0.00605423)
+Bearing Range pose 1 landmark 0: (0.0103329, 2.99139)
+Bearing Range pose 2 landmark 0: (0.0456434, 3.02145)
+Bearing Range pose 3 landmark 0: (-0.0277112, 3.12405)
+Bearing Range pose 4 landmark 0: (0.0778371, 3.20003)
+Bearing Range pose 5 landmark 0: (0.03676, 3.17675)
+Bearing Range pose 1 landmark 1: (-0.0971847, 3.49785)
+Bearing Range pose 2 landmark 1: (-0.0522769, 3.5344)
+Bearing Range pose 3 landmark 1: (-0.115672, 3.69064)
+Bearing Range pose 4 landmark 1: (-0.0471636, 3.66387)
+Bearing Range pose 5 landmark 1: (-0.0887547, 3.66507)
+Bearing Range pose 1 landmark 2: (-0.149587, 3.06005)
+Bearing Range pose 2 landmark 2: (-0.0960879, 3.07682)
+Bearing Range pose 3 landmark 2: (-0.176641, 3.23283)
+Bearing Range pose 4 landmark 2: (-0.065336, 3.21081)
+Bearing Range pose 5 landmark 2: (-0.115751, 3.20317)
+Bearing Range pose 1 landmark 3: (-0.151731, 3.18027)
+Bearing Range pose 2 landmark 3: (-0.099368, 3.20953)
+Bearing Range pose 3 landmark 3: (-0.174175, 3.33787)
+Bearing Range pose 4 landmark 3: (-0.0662606, 3.32899)
+Bearing Range pose 5 landmark 3: (-0.114886, 3.32137)
+Bearing Range pose 1 landmark 4: (0.00322788, 3.10878)
+Bearing Range pose 2 landmark 4: (0.0370399, 3.15066)
+Bearing Range pose 3 landmark 4: (-0.030071, 3.22893)
+Bearing Range pose 4 landmark 4: (0.0683279, 3.31492)
+Bearing Range pose 5 landmark 4: (0.0323075, 3.29366)
+Bearing Range pose 1 landmark 5: (-0.146491, 2.95272)
+Bearing Range pose 2 landmark 5: (-0.090717, 2.99605)
+Bearing Range pose 3 landmark 5: (-0.178344, 3.14063)
+Bearing Range pose 4 landmark 5: (-0.0603386, 3.10463)
+Bearing Range pose 5 landmark 5: (-0.111392, 3.10912)
+Bearing Range pose 1 landmark 6: (0.0179481, 2.8873)
+Bearing Range pose 2 landmark 6: (0.0543992, 2.9317)
+Bearing Range pose 3 landmark 6: (-0.0250711, 3.03224)
+Bearing Range pose 4 landmark 6: (0.0878667, 3.09855)
+Bearing Range pose 5 landmark 6: (0.041406, 3.07297)

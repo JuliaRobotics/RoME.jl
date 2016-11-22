@@ -3,6 +3,7 @@ module RoME
 using
   IncrementalInference,
   Graphs,
+  TransformUtils,
   KernelDensityEstimate,
   Distributions,
   Colors,
@@ -24,6 +25,16 @@ export
   addAutoLandmBR!,
   projNewLandm!,
   malahanobisBR,
+
+  # DIDSON sonar model
+  LinearRangeBearingElevation,
+  project!,
+  project,
+  backprojectRandomized!,
+  residual!,
+  ominus,
+  evalPotential,
+  getSample,
 
   # helper functions
   get2DSamples,
@@ -91,6 +102,7 @@ export
 include("BayesTracker.jl")
 include("RobotViz.jl")
 include("RobotUtils.jl")
+include("SensorModels.jl")
 include("SimulationUtils.jl")
 include("VictoriaParkTypes.jl")
 include("VicPrkEstimator.jl")
