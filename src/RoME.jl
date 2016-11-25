@@ -26,16 +26,6 @@ export
   projNewLandm!,
   malahanobisBR,
 
-  # DIDSON sonar model
-  LinearRangeBearingElevation,
-  project!,
-  project,
-  backprojectRandomized!,
-  residual!,
-  ominus,
-  evalPotential,
-  getSample,
-
   # helper functions
   get2DSamples,
   getAll2D,
@@ -102,7 +92,7 @@ export
 include("BayesTracker.jl")
 include("RobotViz.jl")
 include("RobotUtils.jl")
-include("SensorModels.jl")
+# include("SensorModels.jl")
 include("SimulationUtils.jl")
 include("VictoriaParkTypes.jl")
 include("VicPrkEstimator.jl")
