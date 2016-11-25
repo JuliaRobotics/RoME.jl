@@ -3,7 +3,7 @@ Robot Motion Estimate: A set of functions for developing front-ends for SLAM in 
 
 ## Video example
 
-[mmisamvid01.gif](https://vimeo.com/190052649)
+[Video example](https://vimeo.com/190052649)
 
 ## Work in progress
 
