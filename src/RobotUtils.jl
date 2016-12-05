@@ -117,8 +117,11 @@ function addOdoFG!(fg::FactorGraph, n::ASCIIString, DX::Array{Float64,1}, cov::A
     return v, f
 end
 
-function initfg()
-  return emptyFactorGraph()
+function initfg(;sessionname="NA")
+  fgl = emptyFactorGraph()
+  fgl.sessionname="NA"
+  registerCallback!(fgl, RoME.evalPotential)
+  return fgl
 end
 
 

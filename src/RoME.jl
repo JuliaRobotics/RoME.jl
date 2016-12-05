@@ -1,5 +1,7 @@
 module RoME
 
+# importall IncrementalInference
+
 using
   IncrementalInference,
   Graphs,
@@ -84,7 +86,26 @@ export
   doBatchRun,
   rotateFeatsToWorld,
 
-  togglePrtStbLines
+  togglePrtStbLines,
+
+  # Didson model
+  evalPotential,
+  LinearRangeBearingElevation,
+  project!,
+  project,
+  backprojectRandomized!,
+  residual!,
+  ominus,
+  evalPotential,
+  getSample,
+
+  # camera model
+  CameraIntrinsic,
+  CameraExtrinsic,
+  CameraModelFull,
+  project!,
+  project,
+  cameraResidual!
 
 
 
@@ -92,10 +113,15 @@ export
 include("BayesTracker.jl")
 include("RobotViz.jl")
 include("RobotUtils.jl")
-# include("SensorModels.jl")
+
+include("SensorModels.jl")
+include("CameraModel.jl")
+
 include("SimulationUtils.jl")
 include("VictoriaParkTypes.jl")
 include("VicPrkEstimator.jl")
 include("dev/ISAMRemoteSolve.jl")
+
+
 
 end
