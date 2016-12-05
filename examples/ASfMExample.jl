@@ -28,7 +28,7 @@ initPosePrior = PriorPose3(SE3([0.0;0.0;0.0], Euler(-0.00772052, 0.0, -0.0992321
 f1  = addFactor!(fg,[v1], initPosePrior)
 
 
-function addPose3Pose3(fgl::FactorGraph, n::ASCIIString, DX::SE3, cov::Array{Float64,2};
+function addPose3Pose3(fgl::FactorGraph, n::String, DX::SE3, cov::Array{Float64,2};
                   N::Int=100, ready::Int=1)
 
 	prev, X, nextn = getLastPose2D(fgl)
@@ -64,7 +64,7 @@ v, f = addPose3Pose3(fg, "x6", deepcopy(odo), odoCov, N=N)
 
 
 # convenience function to add DIDSON sonar constraints to graph
-function addDidsonConstraint(fgl::FactorGraph, rangebearing::Tuple, pose::ASCIIString, landm::ASCIIString)
+function addDidsonConstraint(fgl::FactorGraph, rangebearing::Tuple, pose::String, landm::String)
   cl = LinearRangeBearingElevation((rangebearing[1],3e-4),(rangebearing[2],3e-4))
   addFactor!(fgl, [getVert(fg, pose); getVert(fgl, landm)], cl)
   nothing
@@ -170,8 +170,8 @@ draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
 draw(PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),
  plotKDE( getVertKDE(fg,"x6"), dimLbls=["x";"y";"z";"phi";"the";"psi"]) )
 
-XX = ASCIIString["x$i" for i in 1:6];
-LL = ASCIIString["l$i" for i in 1:7];
+XX = String["x$i" for i in 1:6];
+LL = String["l$i" for i in 1:7];
 [draw(PDF("/home/dehann/Desktop/imgs/$(i).pdf",30cm,20cm),
   plotKDE( getVertKDE(fg,i), dimLbls=["x";"y";"z";"phi";"the";"psi"]) ) for i in union(XX,LL)];
 

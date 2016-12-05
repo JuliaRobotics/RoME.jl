@@ -1,11 +1,11 @@
 
 
-function sendCmd(cl::TCPSocket, cmd::ASCIIString)
+function sendCmd(cl::TCPSocket, cmd::String)
   println(cl, cmd)
   cmd == "QUIT" ?  close(cl) : readline(cl)
 end
 
-function getParticles(cl::TCPSocket, lbl::ASCIIString)
+function getParticles(cl::TCPSocket, lbl::String)
   res = sendCmd(cl, "GETPARTICLES $(lbl)")
   rows = split(res[1:(end-1)],';')
   V = readdlm(IOBuffer(rows[1]),',')

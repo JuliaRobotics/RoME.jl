@@ -1,7 +1,7 @@
 
 include("dev/ISAMRemoteSolve.jl")
 
-function measureMeanDist(fg::FactorGraph, a::ASCIIString, b::ASCIIString)
+function measureMeanDist(fg::FactorGraph, a::String, b::String)
     #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
     res = zeros(2)
     A = getVal(fg,a)
@@ -19,7 +19,7 @@ function measureMeanDist(fg::FactorGraph, a::ASCIIString, b::ASCIIString)
     return r, b
 end
 
-function predictBodyBR(fg::FactorGraph, a::ASCIIString, b::ASCIIString)
+function predictBodyBR(fg::FactorGraph, a::String, b::String)
   res = zeros(2)
   A = getVal(fg,a)
   B = getVal(fg,b)
@@ -98,7 +98,7 @@ function odomKDE(p1,dx,cov)
 end
 
 
-function addOdoFG!(fg::FactorGraph, n::ASCIIString, DX::Array{Float64,1}, cov::Array{Float64,2};
+function addOdoFG!(fg::FactorGraph, n::String, DX::Array{Float64,1}, cov::Array{Float64,2};
                   N::Int=100, ready::Int=1)
     prev, X, nextn = getLastPose2D(fg)
     sig = diag(cov)
@@ -125,7 +125,7 @@ function initfg(;sessionname="NA")
 end
 
 
-function newLandm!(fg::FactorGraph, lm::ASCIIString, wPos::Array{Float64,2}, sig::Array{Float64,2};
+function newLandm!(fg::FactorGraph, lm::String, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100, ready::Int=1)
 
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
@@ -147,8 +147,8 @@ function updateLandmAge(vlm::Graphs.ExVertex, pose::AbstractString)
   error("still working here")
 end
 
-function addBRFG!(fg::FactorGraph, pose::ASCIIString,
-                  lm::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2};
+function addBRFG!(fg::FactorGraph, pose::String,
+                  lm::String, br::Array{Float64,1}, cov::Array{Float64,2};
                    ready::Int=1)
 
 
@@ -184,8 +184,8 @@ function addBRFG!(fg::FactorGraph, pose::ASCIIString,
     return f
 end
 
-function addMMBRFG!(fg::FactorGraph, pose::ASCIIString,
-                  lm::Array{ASCIIString,1}, br::Array{Float64,1},
+function addMMBRFG!(fg::FactorGraph, pose::String,
+                  lm::Array{String,1}, br::Array{Float64,1},
                   cov::Array{Float64,2}; w=[0.5;0.5], ready::Int=1)
 
     vps = getVert(fg,pose)
@@ -213,7 +213,7 @@ function projNewLandmPoints(vps::Graphs.ExVertex, br::Array{Float64,1}, cov::Arr
     return lmPts
 end
 
-function projNewLandm!(fg::FactorGraph, pose::ASCIIString, lm::ASCIIString, br::Array{Float64,1}, cov::Array{Float64,2};
+function projNewLandm!(fg::FactorGraph, pose::String, lm::String, br::Array{Float64,1}, cov::Array{Float64,2};
                         addfactor=true, N::Int=100, ready::Int=1)
 
     vps = getVert(fg,pose)
@@ -233,9 +233,9 @@ function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
     # all landmarks of interest
     xx,ll = ls(fgl)
     # output result
-    rr = Dict{ASCIIString, RemoteRef}()
-    fetchlist = ASCIIString[]
-    iv = Dict{ASCIIString, Float64}()
+    rr = Dict{String, RemoteRef}()
+    fetchlist = String[]
+    iv = Dict{String, Float64}()
     for l in ll
       pvlm = getVert(fgl,l)
       # pvlm = fgl.v[fgl.IDs[l]]
@@ -250,7 +250,7 @@ function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
       end
     end
     max = 0
-    maxl = ASCIIString("")
+    maxl = String("")
     for l in fetchlist #ll
       # p = getVertKDE(fgl, l)
       # tv = intersIntgAppxIS(p,predLm)
@@ -262,9 +262,9 @@ function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
     return iv, maxl
 end
 
-function maxIvWithoutID(ivs::Dict{ASCIIString, Float64}, l::AbstractString)
+function maxIvWithoutID(ivs::Dict{String, Float64}, l::AbstractString)
   max = 0
-  maxl = ASCIIString("")
+  maxl = String("")
   for i in ivs
     if max < i[2] && i[1] != l;  max = i[2]; maxl = i[1]; end
   end
@@ -272,21 +272,21 @@ function maxIvWithoutID(ivs::Dict{ASCIIString, Float64}, l::AbstractString)
 end
 
 # binary tests to distinguish how to automatically add a landmark to the existing factor graph
-function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{ASCIIString, Float64}, maxl::ASCIIString, lmid::Int, lmindx::Int)
-  maxAnyval = maxl != ASCIIString("") ? ivs[maxl] : 0.0
+function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{String, Float64}, maxl::String, lmid::Int, lmindx::Int)
+  maxAnyval = maxl != String("") ? ivs[maxl] : 0.0
   # maxid = fgl.IDs[maxl]
   lmidSugg = lmid != -1 # a landmark ID has been suggested
   maxAnyExists = maxAnyval > 0.03 # there is notable intersection with previous landm
   lmIDExists = haskey(fgl.v, lmid) # suggested lmid already in fgl
   newlmindx = lmindx
   if lmIDExists
-    lmSuggLbl = ASCIIString(getVert(fgl,lmid).label) # TODO -- wasteful
-    # lmSuggLbl = ASCIIString(fgl.v[lmid].label)
+    lmSuggLbl = String(getVert(fgl,lmid).label) # TODO -- wasteful
+    # lmSuggLbl = String(fgl.v[lmid].label)
   else
     newlmindx = lmindx + 1
-    lmSuggLbl = ASCIIString(string('l',newlmindx))
+    lmSuggLbl = String(string('l',newlmindx))
   end
-  maxl2 = lmIDExists ? maxIvWithoutID(ivs, lmSuggLbl) : ASCIIString("")
+  maxl2 = lmIDExists ? maxIvWithoutID(ivs, lmSuggLbl) : String("")
   maxl2Exists = lmIDExists ? (maxl2 != "" ? ivs[maxl2] > 0.03 : false) : false # there is notable intersection with previous landm
   intgLmIDExists = lmIDExists ? ivs[lmSuggLbl] > 0.03 : false
 
@@ -294,8 +294,8 @@ function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{ASCIIString, Float64}, maxl
 end
 
 
-function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{ASCIIString, Float64}, maxl::ASCIIString,
-                        pose::ASCIIString, lmPts::Array{Float64,2}, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
+function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{String, Float64}, maxl::String,
+                        pose::String, lmPts::Array{Float64,2}, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
                         N::Int=100, ready::Int=1)
   lmidSugg, maxAnyExists, maxl2Exists, maxl2, lmIDExists, intgLmIDExists, lmSuggLbl, newlmindx = doAutoEvalTests(fgl,ivs,maxl,lmid, lmindx)
 
@@ -352,7 +352,7 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{ASCIIString, Floa
   return vlm, fbr, newlmindx
 end
 
-function addAutoLandmBR!(fgl::FactorGraph, pose::ASCIIString, lmid::Int, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
+function addAutoLandmBR!(fgl::FactorGraph, pose::String, lmid::Int, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
                       N::Int=100, ready::Int=1)
     vps = getVert(fgl, pose)
     # vps = fgl.v[fgl.IDs[pose]]
@@ -430,7 +430,7 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
-  LB = ASCIIString[]
+  LB = String[]
 
   # if sym = 'l', ignore single measurement landmarks
   allIDs = Array{Int,1}()
@@ -485,7 +485,7 @@ function get2DPoseMax(fgl::FactorGraph;
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
-  LB = ASCIIString[]
+  LB = String[]
   for lbl in xLB
     if from <= parse(Int,lbl[2:end]) <=to
       mv = getKDEMax(getVertKDE(fgl,lbl))
@@ -510,8 +510,8 @@ function get2DLandmMeans(fg::FactorGraph; from::Int64=0, to::Int64=999999999, mi
   return get2DSampleMeans(fg, 'l', from=from, to=to, minnei=minnei)
 end
 
-function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{ASCIIString,1})
-  retlbs = ASCIIString[]
+function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{String,1})
+  retlbs = String[]
   for i in 1:length(lbl)
     id = parse(Int,lbl[i][2:end])
     if findfirst(torm,id) == 0
@@ -530,7 +530,7 @@ function get2DLandmMax(fgl::FactorGraph;
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
-  LB = ASCIIString[]
+  LB = String[]
   for lbl in lLB
     if from <= parse(Int,lbl[2:end]) <=to
       mv = getKDEMax(getVertKDE(fgl,lbl))

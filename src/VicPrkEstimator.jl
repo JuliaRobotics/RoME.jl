@@ -57,7 +57,7 @@ function appendFactorGraph!(fg::FactorGraph, d, f;
     prevn = initFactorGraph!(fg, init=d[idx][1:3])
   else
     v,X,nextn = getLastPose2D(fg)
-    @show prevn = ASCIIString(v.label)
+    @show prevn = String(v.label)
   end
 
   while T < toT && idx <= len

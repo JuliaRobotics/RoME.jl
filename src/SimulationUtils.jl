@@ -25,7 +25,7 @@ function simOdo!(fgGT::FactorGraph, fg::FactorGraph, DX::Array{Float64,1};
 end
 
 
-function truePredBR(fgGT::FactorGraph, fg::FactorGraph, ps::ASCIIString, lm::ASCIIString)
+function truePredBR(fgGT::FactorGraph, fg::FactorGraph, ps::String, lm::String)
     trubr = predictBodyBR(fgGT, ps, lm)
     truA = [trubr[1]; trubr[2]]
     # Prediction of BR measurement
@@ -34,7 +34,7 @@ function truePredBR(fgGT::FactorGraph, fg::FactorGraph, ps::ASCIIString, lm::ASC
     return truA, preA
 end
 
-function showTruePredBR(fgGT::FactorGraph, fg::FactorGraph, ps::ASCIIString, lm::ASCIIString, cov::Array{Float64,2})
+function showTruePredBR(fgGT::FactorGraph, fg::FactorGraph, ps::String, lm::String, cov::Array{Float64,2})
     truA, preA = truePredBR(fgGT, fg, ps, lm)
     measA = truA + [cov[1,1]*randn();cov[2,2]*randn()]
     mala = malahanobisBR(measA, preA, cov)
@@ -42,7 +42,7 @@ function showTruePredBR(fgGT::FactorGraph, fg::FactorGraph, ps::ASCIIString, lm:
 end
 
 function crossMalaBR(fgGT::FactorGraph, fg::FactorGraph,
-                      ps::ASCIIString, lmT::ASCIIString, lmE, cov::Array{Float64,2})
+                      ps::String, lmT::String, lmE, cov::Array{Float64,2})
     truT, preT = truePredBR(fgGT, fg, ps, lmT)
     measT = truT + [cov[1,1]*randn();cov[2,2]*randn()]
 

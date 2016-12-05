@@ -25,8 +25,8 @@ end
 # togglePrtStbLines()
 
 
-GTp = Dict{ASCIIString, Vector{Float64}}()
-GTl = Dict{ASCIIString, Vector{Float64}}()
+GTp = Dict{String, Vector{Float64}}()
+GTl = Dict{String, Vector{Float64}}()
 
 
 GTp["l100"] = [0.0;0]
@@ -50,9 +50,9 @@ GTl["l4"] = [120.0;-50]
 
 cursor = [0.0;0]
 
-function landmsInRange(GTl::Dict{ASCIIString, Vector{Float64}}, cur::Vector{Float64};
+function landmsInRange(GTl::Dict{String, Vector{Float64}}, cur::Vector{Float64};
 			lim::Float64=100.0)
-	inrange = Dict{ASCIIString, Float64}()
+	inrange = Dict{String, Float64}()
 	for gtl in GTl
 		rho = norm(gtl[2]-cur)
 		if rho < lim
@@ -62,7 +62,7 @@ function landmsInRange(GTl::Dict{ASCIIString, Vector{Float64}}, cur::Vector{Floa
 	return inrange
 end
 
-function isInFG!(fgl::FactorGraph, lbl::ASCIIString; N=100, ready=0)
+function isInFG!(fgl::FactorGraph, lbl::String; N=100, ready=0)
 	v = nothing
 	if !haskey(fgl.IDs, lbl)
 		init = 300*randn(2,N)
@@ -73,7 +73,7 @@ function isInFG!(fgl::FactorGraph, lbl::ASCIIString; N=100, ready=0)
 	v
 end
 
-function addLandmsOnPose!(fgl::FactorGraph, pose::Graphs.ExVertex, GTl::Dict{ASCIIString, Float64};
+function addLandmsOnPose!(fgl::FactorGraph, pose::Graphs.ExVertex, GTl::Dict{String, Float64};
 			ready=0,N=100)
 	for gtl in GTl
 		println("addLandmsOnPose! -- adding $(gtl[1])")
@@ -85,7 +85,7 @@ function addLandmsOnPose!(fgl::FactorGraph, pose::Graphs.ExVertex, GTl::Dict{ASC
 	nothing
 end
 
-function addNewPose!(fgl::FactorGraph, from::ASCIIString, lbl::ASCIIString, GTp;
+function addNewPose!(fgl::FactorGraph, from::String, lbl::String, GTp;
 			ready=0, N=N)
 
 	init = 300*randn(2,N)
@@ -128,7 +128,7 @@ function drawQuadLandms(fgl; file="", w=30cm, h=20cm,
 end
 
 
-function drawLandmMargOver(fgl::FactorGraph, lbl::ASCIIString,
+function drawLandmMargOver(fgl::FactorGraph, lbl::String,
 		file,
 		gtlayers;
 		w=30cm, h=20cm)
@@ -166,10 +166,10 @@ function drawGroundTruth(GTp, orderp, GTl=nothing, orderl=[]; drawranges=true, i
 	end
 	Xlr = Float64[]
 	Ylr = Float64[]
-	Lblr = ASCIIString[]
+	Lblr = String[]
 	Xla = Float64[]
 	Yla = Float64[]
-	Lbla = ASCIIString[]
+	Lbla = String[]
 	for o in orderl
 		if o == "l1" || o == "l2"
 			push!(Lblr, o)
@@ -350,7 +350,7 @@ end
 
 
 function drawIllustrations(GTl, GTp, folderloc)
-	pl = drawGroundTruth(GTp, ASCIIString[], GTl, ["l$(i)" for i in 1:4], drawranges=false, interp=false, t=0)
+	pl = drawGroundTruth(GTp, String[], GTl, ["l$(i)" for i in 1:4], drawranges=false, interp=false, t=0)
 	filename = "$(folderloc)/gtPos0.png"
 	draw(PNG(filename,30cm,20cm),pl)
 

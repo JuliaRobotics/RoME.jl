@@ -12,12 +12,12 @@ function circLayer(x::Vector{Float64};r::Float64=1.0,c="red")
   return Gadfly.layer(x=X,y=Y, Geom.path(), Gadfly.Theme(default_color=parse(Colorant,c)))
 end
 
-function drawLandmPtsLayer(pts::Dict{ASCIIString, Vector{Float64}}; c::ASCIIString="blue")
+function drawLandmPtsLayer(pts::Dict{String, Vector{Float64}}; c::String="blue")
   N = length(pts)
   xy = zeros(2,N)
-  lbls = ASCIIString[]
+  lbls = String[]
   i = 0
-  lbl = ASCIIString[]
+  lbl = String[]
   for p in pts
     i += 1
     push!(lbls, p[1])
@@ -29,8 +29,8 @@ end
 
 incirc(dx,dy,r) = dx^2 + dy^2 <= r^2
 
-function findInRadius(pts::Dict{ASCIIString, Vector{Float64}}, from::ASCIIString; r::Float64=1.0)
-  rd = Dict{ASCIIString, Vector{Float64}}()
+function findInRadius(pts::Dict{String, Vector{Float64}}, from::String; r::Float64=1.0)
+  rd = Dict{String, Vector{Float64}}()
   xy = pts[from]
   rd[from] = pts[from]
   for p in pts
@@ -45,7 +45,7 @@ function drawLineLayer(from::Vector{Float64}, to::Vector{Float64}; c="magenta")
   return Gadfly.layer(x=[from[1];to[1]],y=[from[2];to[2]], Geom.path(), Gadfly.Theme(default_color=parse(Colorant,c)))
 end
 
-function drawDictLinesLayers(pl, pts::Dict{ASCIIString, Vector{Float64}}, from::ASCIIString)
+function drawDictLinesLayers(pl, pts::Dict{String, Vector{Float64}}, from::String)
   x0 = pts[from][1:2]
   for p in pts
     p[1] == from ? continue : nothing
@@ -71,11 +71,11 @@ function orderedBinIndex(x::Float64; start::Float64=0.0, stop::Float64=1.0,N::In
   return N
 end
 
-function constructShapeContexctMat(range::Dict{ASCIIString, Float64}, ang::Dict{ASCIIString, Float64}, me::ASCIIString;
+function constructShapeContexctMat(range::Dict{String, Float64}, ang::Dict{String, Float64}, me::String;
                                    angBins::Int=4, rangeBins::Int=3, r::Float64=1.0)
   sc = zeros(rangeBins, angBins)
   for a in ang
-    if ASCIIString(a[1]) == me  continue; end
+    if String(a[1]) == me  continue; end
     # @show a[1], a[2], range[a[1]]
     aIdx = orderedBinIndex(a[2], start=Float64(-pi), stop=Float64(pi), N=angBins)
     rIdx = orderedBinIndex(range[a[1]], start=0.0, stop=r, N=rangeBins)
@@ -85,12 +85,12 @@ function constructShapeContexctMat(range::Dict{ASCIIString, Float64}, ang::Dict{
   return sc
 end
 
-function myShapeContext(pts::Dict{ASCIIString, Vector{Float64}}, me::ASCIIString, refpt::ASCIIString;
+function myShapeContext(pts::Dict{String, Vector{Float64}}, me::String, refpt::String;
                         r::Float64=1.0, angBins::Int=4, rangeBins::Int=3)
   rd = findInRadius(pts, me, r=r)
-  ang = Dict{ASCIIString, Float64}()
-  rang = Dict{ASCIIString, Float64}()
-  # scVec = Dict{ASCIIString}
+  ang = Dict{String, Float64}()
+  rang = Dict{String, Float64}()
+  # scVec = Dict{String}
   refang = calcang(rd[me], pts[refpt])
   for p in rd
     ang[p[1]] = calcang(rd[me], p[2]) - refang
@@ -103,12 +103,12 @@ function myShapeContext(pts::Dict{ASCIIString, Vector{Float64}}, me::ASCIIString
 end
 
 
-function calcShapeContext(pts::Dict{ASCIIString, Vector{Float64}}, refpt::ASCIIString;
+function calcShapeContext(pts::Dict{String, Vector{Float64}}, refpt::String;
                           r::Float64=1.0, angBins::Int=4, rangeBins::Int=3)
   rd = findInRadius(pts,refpt,r=r)
   mat = zeros(rangeBins, angBins)
   for doone in keys(rd)
-    if ASCIIString(doone) == refpt  continue; end
+    if String(doone) == refpt  continue; end
     # @show doone
     mat = mat + myShapeContext(pts, doone, refpt, r=r, angBins=angBins, rangeBins=rangeBins)
   end
@@ -123,7 +123,7 @@ function shapeContMatToVec(mat::Array{Float64,2}; duplicity::Int=2)
   return sign(V[:]-0.5)
 end
 
-function shapeContPattern(pts::Dict{ASCIIString, Vector{Float64}}, refpt::ASCIIString;
+function shapeContPattern(pts::Dict{String, Vector{Float64}}, refpt::String;
                           r::Float64=1.0, angBins::Int=4, rangeBins::Int=3)
     mat = calcShapeContext(pts, refpt, r=r, angBins=angBins, rangeBins=rangeBins)
     return shapeContMatToVec(mat)
@@ -134,10 +134,10 @@ end
 
 # we want a way to select the top 3 descriptors from current list of landmarks
 # parameter
-function bestDescriptors(d::Dict{ASCIIString, Vector{Float64}};
+function bestDescriptors(d::Dict{String, Vector{Float64}};
                           r::Float64=1.0,Mf::Int=4,angBins::Int=4,rangeBins::Int=3,k::Int=3)
 
-  allDescr = Dict{ASCIIString, Vector{Int}}()
+  allDescr = Dict{String, Vector{Int}}()
   skey = collect(keys(d))
   for lm in skey
     if length(findInRadius(d,lm,r=r)) > Mf
@@ -174,7 +174,7 @@ function bestDescriptors(d::Dict{ASCIIString, Vector{Float64}};
   # @show H1min[p1]
   # @show kss[p1]
   bestlbls = kss[p1]#[1:k]]
-  bestDescr = Dict{ASCIIString, Vector{Int}}()
+  bestDescr = Dict{String, Vector{Int}}()
   for lb in bestlbls
     bestDescr[lb] = allDescr[lb]
   end
@@ -182,16 +182,16 @@ function bestDescriptors(d::Dict{ASCIIString, Vector{Float64}};
 end
 
 
-function findMatches(dd::Dict{ASCIIString, Vector{Float64}}, Patt::Array{Float64,2}, bLbls::Vector{ASCIIString};
+function findMatches(dd::Dict{String, Vector{Float64}}, Patt::Array{Float64,2}, bLbls::Vector{String};
   R::Float64=1.0,angBins::Int=4,rangeBins::Int=3, Mf::Int=4)
-  SV = Dict{ASCIIString, Vector{Int}}()
-  Psv = Dict{ASCIIString, Int}()
+  SV = Dict{String, Vector{Int}}()
+  Psv = Dict{String, Int}()
   for i in 1:length(dd)
     l = length(findInRadius(dd,"l$(i)",r=R))
     if l > Mf
       val = shapeContPattern(dd, "l$(i)", r=R, angBins=angBins, rangeBins=rangeBins)
-      SV[ASCIIString("l$(i)")] = val
-      Psv[ASCIIString("l$(i)")] = searchHopfield(Patt, val, maxiter=4)
+      SV[String("l$(i)")] = val
+      Psv[String("l$(i)")] = searchHopfield(Patt, val, maxiter=4)
     end
   end
 
@@ -220,7 +220,7 @@ end
 
 
 function convertToMMLst(fm::Dict{Int,Any}, distLim::Int)
-  mmlst = Dict{ASCIIString, Array{Tuple{ASCIIString, Int},1}}()
+  mmlst = Dict{String, Array{Tuple{String, Int},1}}()
   for i in 1:length(fm)
     if fm[i][3] <= distLim
       if haskey(mmlst,fm[i][2])
@@ -236,12 +236,12 @@ end
 
 # start some practicatical tests
 if false
-d = Dict{ASCIIString, Vector{Float64}}()
+d = Dict{String, Vector{Float64}}()
 for i in 1:9
-  d[ASCIIString("l$(i)")] = rand(2)
+  d[String("l$(i)")] = rand(2)
 end
 for i in 10:20
-  d[ASCIIString("l$(i)")] = (3.0.*rand(2))-1
+  d[String("l$(i)")] = (3.0.*rand(2))-1
 end
 
 # draw points
@@ -284,10 +284,10 @@ hamming(v3,v4)
 dd = deepcopy(d)
 @show length(d)
 for i in 1:length(d)
-  dd[ASCIIString("l$(i)")] = dd[ASCIIString("l$(i)")] + 0.0*randn(2)
+  dd[String("l$(i)")] = dd[String("l$(i)")] + 0.0*randn(2)
 end
 for i in length(d):floor(Int,length(d)*1.0)
-  dd[ASCIIString("l$(i)")] = (3.0.*rand(2))-1
+  dd[String("l$(i)")] = (3.0.*rand(2))-1
 end
 
 findMatches(dd, P, bLbls, R=R, angBins=angBins, Mf=Mf)

@@ -103,7 +103,7 @@ function stbPrtLineLayers!(pl, Xpp, Ypp, Thpp)
 end
 
 # function lblsFromTo(from,to)
-#   lbls=ASCIIString[]
+#   lbls=String[]
 #   [push!(lbls, "$(i)") for i in from:to]
 #   return lbls
 # end
@@ -112,7 +112,7 @@ function drawPoses(fg::FactorGraph; from::Int64=0,to::Int64=99999999,
                     meanmax=:max, lbls=true, drawhist=true)
     #Gadfly.set_default_plot_size(20cm, 30cm)
     Xp,Yp = get2DPoseSamples(fg, from=from, to=to)
-    Xpp = Float64[]; Ypp=Float64[]; Thpp=Float64[]; LBLS=ASCIIString[];
+    Xpp = Float64[]; Ypp=Float64[]; Thpp=Float64[]; LBLS=String[];
     if meanmax == :mean
       Xpp,Ypp, Thpp, LBLS = get2DPoseMeans(fg, from=from, to=to)
     elseif meanmax == :max
@@ -142,7 +142,7 @@ function drawLandms(fg::FactorGraph;
               meanmax=:max,lbls=true,showmm=false,drawhist=true,c="red",MM=Union{})
     #Gadfly.set_default_plot_size(20cm, 30cm)
     Xp,Yp = get2DLandmSamples(fg, from=from, to=to)
-    Xpp = Float64[]; Ypp=Float64[]; Thpp=Float64[]; lblstags=ASCIIString[];
+    Xpp = Float64[]; Ypp=Float64[]; Thpp=Float64[]; lblstags=String[];
     if meanmax==:mean
       Xpp,Ypp, t, lbltags = get2DLandmMeans(fg, from=from, to=to)
     elseif meanmax==:max
@@ -270,7 +270,7 @@ function investigatePoseKDE(p::BallTreeDensity)
 end
 
 
-function drawMarginalContour(fgl::FactorGraph, lbl::ASCIIString;xmin=-150,xmax=150,ymin=-150,ymax=150,n=200)
+function drawMarginalContour(fgl::FactorGraph, lbl::String;xmin=-150,xmax=150,ymin=-150,ymax=150,n=200)
   p = getKDE(getVert(fgl,lbl))
   Gadfly.plot(z=(x,y)->evaluateDualTree(p,([x;y]')')[1],
     x=linspace(xmin,xmax,n),
