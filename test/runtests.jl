@@ -9,3 +9,7 @@ println("[SUCCESS]")
 println("[TEST] Linear array functions evaluations...")
 include("testDidsonFunctions.jl")
 println("[SUCCESS]")
+
+println("[TEST] Pose3 evaluations...")
+include("threeDimLinearProductTest.jl")
+println("[SUCCESS]")

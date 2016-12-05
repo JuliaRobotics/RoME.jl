@@ -105,7 +105,13 @@ export
   CameraModelFull,
   project!,
   project,
-  cameraResidual!
+  cameraResidual!,
+
+  # Pose3Pose3
+  PriorPose3,
+  Pose3Pose3,
+  projectParticles
+
 
 
 
@@ -116,6 +122,7 @@ include("RobotUtils.jl")
 
 include("SensorModels.jl")
 include("CameraModel.jl")
+include("Pose3Pose3.jl")
 
 include("SimulationUtils.jl")
 include("VictoriaParkTypes.jl")
