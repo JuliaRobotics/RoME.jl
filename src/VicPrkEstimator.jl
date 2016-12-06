@@ -81,7 +81,7 @@ end
 
 
 function doBatchRun(d, f; toT=30)
-  fg = emptyFactorGraph()
+  fg = initfg()
   appendFactorGraph!(fg, d, f; toT=toT);
   p = drawPosesLandms(fg)
   tree = prepBatchTree!(fg);

@@ -4,7 +4,7 @@ using RoME, TransformUtils, IncrementalInference, Gadfly
 using KernelDensityEstimate
 
 N = 200
-fg = emptyFactorGraph()
+fg = initfg()
 
 
 sqrtinv = [[10;0;0;0;0;0]';

@@ -4,7 +4,6 @@ using Base.Test
 using KernelDensityEstimate
 
 N = 200
-# fg = emptyFactorGraph()
 fg = initfg()
 
 initCov = eye(6)

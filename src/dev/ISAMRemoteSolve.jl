@@ -60,7 +60,7 @@ function doISAMSolve(d,f;toT=Inf, savejld=false, retfg=false, MM=Union{},
   cl = connect(host, port1)
   clr = connect(host, port2)
 
-  fgu = emptyFactorGraph()
+  fgu = initfg()
   appendFactorGraph!(fgu, d, f, toT=toT,lcmode=:unimodal, MM=MM);
   println(cl, "BATCHSOLVE")
   gtvals = requestAllPosesLandmsRemote(fgu)
