@@ -107,7 +107,25 @@ export
   project,
   cameraResidual!,
 
-  # Pose3Pose3
+  # Point2D
+  Pose2DPoint2DBearingRange,
+  Pose2DPoint2DRange,
+  Point2DPoint2DRange,
+  PriorPoint2D,
+  PackedPose2DPoint2DBearingRange,
+  solveLandm,
+  solvePose2,
+  solveSetSeps,
+  addPose2Pose2!,
+
+  # Pose2D
+  PriorPose2,
+  PackedPriorPose2,
+  Pose2Pose2,
+  PackedPose2Pose2,
+  addPose2Pose2,
+
+  # Pose3D
   PriorPose3,
   Pose3Pose3,
   projectParticles
@@ -122,6 +140,9 @@ include("RobotUtils.jl")
 
 include("SensorModels.jl")
 include("CameraModel.jl")
+include("Point2D.jl")
+include("Pose2D.jl")
+include("BearingRange2D.jl")
 include("Pose3Pose3.jl")
 
 include("SimulationUtils.jl")

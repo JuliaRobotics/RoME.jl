@@ -126,8 +126,8 @@ function projectParticles(Xval::Array{Float64,2}, Z::SE3, Cov::Array{Float64,2})
   j=1
   # for j in 1:cz
     for i in 1:c
-      x.R, x.t = convert(SO3,Euler(Xval[4:6,i])), Xval[1:3,i]
-      ent.R, ent.t = convert(SO3,so3(ENT[4:6,i])), ENT[1:3,i]
+      x.R, x.t = TransformUtils.convert(SO3,Euler((Xval[4:6,i][:])...)), Xval[1:3,i][:]
+      ent.R, ent.t = TransformUtils.convert(SO3, so3(ENT[4:6,i][:])), ENT[1:3,i][:]
       newval = x*Z*ent
       RES[1:r,i*j] = veeEuler(newval)
     end
