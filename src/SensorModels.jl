@@ -28,9 +28,9 @@ end
 # measurement z is measurement vector with [range; bearing; elevation]
 # variables are tuple (pose X [dim6], landmark L [dim3])
 # function handle follows required parameter list
-function residualLRBE!(residual::Vector{Float64}, z::Vector{Float64}, variables::Tuple)
+function residualLRBE!(residual::Vector{Float64}, z::LinearRangeBearingElevation, variables::Tuple)
   # TODO upgrade so the - sign here is used on a manifold too, ominus(z,  ominus(tt, variables...)  )
-  residual[:] = z - ominus(LinearRangeBearingElevation, variables...)
+  residual[:] = getSample(z) - ominus(LinearRangeBearingElevation, variables...)
   # @show residual
   nothing
 end
@@ -62,7 +62,8 @@ function evalPotential(meas::LinearRangeBearingElevation, Xi::Array{Graphs.ExVer
   if Xi[1].index == Xid
     fromX = getVal( Xi[2] )
     ret = deepcopy(getVal( Xi[1] ))
-    ff = backprojectRandomized!
+    # ff = backprojectRandomized!
+    ff = (x, res) -> residualLRBE!(res, meas, (X, L))
   elseif Xi[2].index == Xid
     fromX = getVal( Xi[1] )
     ret = deepcopy(getVal( Xi[2] ))
