@@ -28,10 +28,9 @@ end
 # measurement z is measurement vector with [range; bearing; elevation]
 # variables are tuple (pose X [dim6], landmark L [dim3])
 # function handle follows required parameter list
-function residualLRBE!(residual::Vector{Float64}, z::LinearRangeBearingElevation, variables::Tuple)
+function residualLRBE!(resid::Vector{Float64}, z::Vector{Float64}, X::Vector{Float64}, L::Vector{Float64})
   # TODO upgrade so the - sign here is used on a manifold too, ominus(z,  ominus(tt, variables...)  )
-  residual[:] = getSample(z) - ominus(LinearRangeBearingElevation, variables...)
-  # @show residual
+  resid[:] = z - ominus(LinearRangeBearingElevation, X, L)
   nothing
 end
 
@@ -39,13 +38,20 @@ end
 # Convolution of conditional to project landmark location from position X (dim6)
 # Y (dim3) are projected points
 function project!(meas::LinearRangeBearingElevation, pose::Array{Float64,2}, landmark::Array{Float64,2}, idx::Int)
-  landmark[1:3,idx] = numericRootGenericRandomized(residualLRBE!, 3, getSample(meas), pose[1:6,idx][:], landmark[1:3,idx][:]) # ( bearrange3!,
+  z = getSample(meas)
+  gg = (x, res) -> residualLRBE!(res, z, pose[1:6,idx][:], x)
+  landmark[1:3,idx] = numericRootGenericRandomizedFnc(gg, 3, 3, landmark[1:3,idx][:])
+  # landmark[1:3,idx] = numericRootGenericRandomized(residualLRBE!, 3, getSample(meas), pose[1:6,idx][:], landmark[1:3,idx][:]) # ( bearrange3!,
 	# x0[1:3,idx] = numericRoot(bearrange3!, getSample(meas), fixed[1:6,idx], x0[1:3,idx]+0.01*randn(3))
 	nothing
 end
 
+# zsolving for pose given landmark [P | L]
 function backprojectRandomized!(meas::LinearRangeBearingElevation, landmark::Array{Float64,2}, pose::Array{Float64,2}, idx::Int)
-	pose[1:6,idx] = numericRootGenericRandomized(residualLRBE!, 3, getSample(meas), landmark[1:3,idx][:], pose[1:6,idx][:]) # ( bearrange3!,
+  z = getSample(meas)
+  gg = (x, res) -> residualLRBE!(res, z, x, landmark[1:3,idx][:])
+  pose[1:6,idx] = numericRootGenericRandomizedFnc(gg, 3, 6, pose[1:6,idx][:])
+	# pose[1:6,idx] = numericRootGenericRandomized(residualLRBE!, 3, getSample(meas), landmark[1:3,idx][:], pose[1:6,idx][:]) # ( bearrange3!,
 	nothing
 end
 
@@ -62,8 +68,7 @@ function evalPotential(meas::LinearRangeBearingElevation, Xi::Array{Graphs.ExVer
   if Xi[1].index == Xid
     fromX = getVal( Xi[2] )
     ret = deepcopy(getVal( Xi[1] ))
-    # ff = backprojectRandomized!
-    ff = (x, res) -> residualLRBE!(res, meas, (X, L))
+    ff = backprojectRandomized!
   elseif Xi[2].index == Xid
     fromX = getVal( Xi[1] )
     ret = deepcopy(getVal( Xi[2] ))
