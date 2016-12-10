@@ -117,6 +117,7 @@ export
   solvePose2,
   solveSetSeps,
   addPose2Pose2!,
+  PackedPriorPoint2D,
 
   # Pose2D
   PriorPose2,
@@ -125,10 +126,19 @@ export
   PackedPose2Pose2,
   addPose2Pose2,
 
+  # packedTypes
+  passTypeThrough,
+
   # Pose3D
   PriorPose3,
   Pose3Pose3,
   projectParticles
+
+  # Datalayer converters
+  # VNDencoder,
+  # VNDdecoder,
+  # FNDencode,
+  # FNDdecode
 
 
 
