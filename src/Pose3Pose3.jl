@@ -11,7 +11,7 @@ type PriorPose3 <: IncrementalInference.Singleton
     PriorPose3(st::FloatInt, sr::Float64) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]])
     PriorPose3(s::SE3, c::Array{Float64,2}) = new(s,c)
 end
-# type PackedPriorPose3
+# type PackedPriorPose3  <: IncrementalInference.PackedInferenceType
 #     vecZij::Array{Float64,1} # 0rotations, 1translation in each column
 #     dimz::Int64
 #     vecCov::Array{Float64,1}
@@ -32,18 +32,18 @@ end
 #                           v2,size(d.Cov,1),
 #                           d.W)
 # end
-# function convert(::Type{FunctionNodeData{PackedPriorPose3}}, d::FunctionNodeData{PriorPose3})
-#   return FunctionNodeData{PackedPriorPose3}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
+# function convert(::Type{PackedFunctionNodeData{PackedPriorPose3}}, d::FunctionNodeData{PriorPose3})
+#   return PackedFunctionNodeData{PackedPriorPose3}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
 #           convert(PackedPriorPose3, d.fnc))
 # end
-# function convert(::Type{FunctionNodeData{PriorPose3}}, d::FunctionNodeData{PackedPriorPose3})
+# function convert(::Type{FunctionNodeData{PriorPose3}}, d::PackedFunctionNodeData{PackedPriorPose3})
 #   return FunctionNodeData{PriorPose3}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
 #           convert(PriorPose3, d.fnc))
 # end
 # function FNDencode(d::FunctionNodeData{PriorPose3})
-#   return convert(FunctionNodeData{PackedPriorPose3}, d)
+#   return convert(PackedFunctionNodeData{PackedPriorPose3}, d)
 # end
-# function FNDdecode(d::FunctionNodeData{PackedPriorPose3})
+# function FNDdecode(d::PackedFunctionNodeData{PackedPriorPose3})
 #   return convert(FunctionNodeData{PriorPose3}, d)
 # end
 
@@ -59,7 +59,7 @@ type Pose3Pose3 <: IncrementalInference.Pairwise
     Pose3Pose3(st::FloatInt, sr::Float64) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]])
     Pose3Pose3(s::SE3, c::Array{Float64,2}) = new(s,c)
 end
-# type PackedPose3Pose3
+# type PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
 #   vecZij::Array{Float64,1} # 2translations, 1rotation
 #   dimz::Int64
 #   vecCov::Array{Float64,1}
@@ -79,18 +79,18 @@ end
 #                           v2,size(d.Cov,1),
 #                           d.W)
 # end
-# function convert(::Type{FunctionNodeData{PackedPose3Pose3}}, d::FunctionNodeData{Pose3Pose3})
-#   return FunctionNodeData{PackedPose3Pose3}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
+# function convert(::Type{PackedFunctionNodeData{PackedPose3Pose3}}, d::FunctionNodeData{Pose3Pose3})
+#   return PackedFunctionNodeData{PackedPose3Pose3}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
 #           convert(PackedPose3Pose3, d.fnc))
 # end
-# function convert(::Type{FunctionNodeData{Pose3Pose3}}, d::FunctionNodeData{PackedPose3Pose3})
+# function convert(::Type{FunctionNodeData{Pose3Pose3}}, d::PackedFunctionNodeData{PackedPose3Pose3})
 #   return FunctionNodeData{Pose3Pose3}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
 #           convert(Pose3Pose3, d.fnc))
 # end
 # function FNDencode(d::FunctionNodeData{Pose3Pose3})
-#   return convert(FunctionNodeData{PackedPose3Pose3}, d)
+#   return convert(PackedFunctionNodeData{PackedPose3Pose3}, d)
 # end
-# function FNDdecode(d::FunctionNodeData{PackedPose3Pose3})
+# function FNDdecode(d::PackedFunctionNodeData{PackedPose3Pose3})
 #   return convert(FunctionNodeData{Pose3Pose3}, d)
 # end
 

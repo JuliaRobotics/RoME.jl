@@ -221,7 +221,7 @@ end
 
 passTypeThrough(d::FunctionNodeData{Pose2DPoint2DRange}) = d
 
-type PackedPose2DPoint2DBearingRange
+type PackedPose2DPoint2DBearingRange <: IncrementalInference.PackedInferenceType
     vecZij::Array{Float64,1} # 0rotations, 1translation in each column
     dimz::Int64
     vecCov::Array{Float64,1}
@@ -242,18 +242,18 @@ function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearin
                                          v2,size(d.Cov,1),
                                          d.W)
 end
-function convert(::Type{FunctionNodeData{PackedPose2DPoint2DBearingRange}}, d::FunctionNodeData{Pose2DPoint2DBearingRange})
-  return FunctionNodeData{PackedPose2DPoint2DBearingRange}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
+function convert(::Type{PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}}, d::FunctionNodeData{Pose2DPoint2DBearingRange})
+  return PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
           string(d.frommodule), convert(PackedPose2DPoint2DBearingRange, d.fnc))
 end
-function convert(::Type{FunctionNodeData{Pose2DPoint2DBearingRange}}, d::FunctionNodeData{PackedPose2DPoint2DBearingRange})
+function convert(::Type{FunctionNodeData{Pose2DPoint2DBearingRange}}, d::PackedFunctionNodeData{PackedPose2DPoint2DBearingRange})
   return FunctionNodeData{Pose2DPoint2DBearingRange}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
           Symbol(d.frommodule), convert(Pose2DPoint2DBearingRange, d.fnc))
 end
 function FNDencode(d::FunctionNodeData{Pose2DPoint2DBearingRange})
-  return convert(FunctionNodeData{PackedPose2DPoint2DBearingRange}, d)
+  return convert(PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, d)
 end
-function FNDdecode(d::FunctionNodeData{PackedPose2DPoint2DBearingRange})
+function FNDdecode(d::PackedFunctionNodeData{PackedPose2DPoint2DBearingRange})
   return convert(FunctionNodeData{Pose2DPoint2DBearingRange}, d)
 end
 
