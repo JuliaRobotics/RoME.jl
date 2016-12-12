@@ -17,3 +17,7 @@ println("[SUCCESS]")
 println("[TEST] Pose3 evaluations...")
 include("threeDimLinearProductTest.jl")
 println("[SUCCESS]")
+
+println("[TEST] ensure Pose3Pose3NH evaluations...")
+include("testPose3Pose3NH.jl")
+println("[SUCCESS]")
