@@ -67,7 +67,7 @@ type PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
   PackedPose3Pose3(x...) = new(x[1], x[2], x[3], x[4])
 end
 function convert(::Type{Pose3Pose3}, d::PackedPose3Pose3)
-  Eu = Euler(d.vecZij[4:6]..)
+  Eu = Euler(d.vecZij[4:6]...)
   return Pose3Pose3(SE3(d.vecZij[1:3], Eu),
                     reshapeVec2Mat(d.vecCov, d.dimc))
 end
@@ -118,7 +118,7 @@ type PackedPose3Pose3NH <: IncrementalInference.PackedInferenceType
   PackedPose3Pose3NH(x...) = new(x[1], x[2], x[3], x[4], x[5])
 end
 function convert(::Type{Pose3Pose3NH}, d::PackedPose3Pose3NH)
-  Eu = Euler(d.vecZij[4:6]..)
+  Eu = Euler(d.vecZij[4:6]...)
   return Pose3Pose3NH(SE3(d.vecZij[1:3], Eu),
                     reshapeVec2Mat(d.vecCov, d.dimc), d.ValidHypot)
 end
@@ -223,7 +223,7 @@ function evalPotential(odom::Pose3Pose3NH, Xi::Array{Graphs.ExVertex,1}, Xid::In
     projted[:,dos] = projectParticles(Xval[:,dos], Z, odom.Cov)
 
     projted[:,donts] = oldval[:,donts]
-    
+
     return projted
 end
 

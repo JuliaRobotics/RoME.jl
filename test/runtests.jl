@@ -2,7 +2,7 @@ using RoME
 using Base.Test
 
 
-println("[TEST] Camera functions evaluations...")
+println("[TEST] Camera function evaluations...")
 include("testCameraFunctions.jl")
 println("[SUCCESS]")
 
