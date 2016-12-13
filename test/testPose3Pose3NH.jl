@@ -19,7 +19,7 @@ begin
   B[:,dos] = ff(A[:,dos])
 
   @test sum(sum(B[:,dos],2) .== sum(dos),1)[1,1] == 3
-  println("Null Hypothesis matrix substitutions syntax works.")
+  println("Syntax for null hypothesis matrix substitutions work.")
 end
 
 
