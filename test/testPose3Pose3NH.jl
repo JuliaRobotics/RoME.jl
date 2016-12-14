@@ -91,8 +91,24 @@ X2pts = evalFactor2(fg, fg.g.vertices[7], 5)
 p1 = kde!(X1pts)
 p2 = kde!(X2pts)
 
-plotKDE(marginal(p1,[1]))
+# X1ptst, = KernelDensityEstimate.sample(p1,200)
+# X1ptst[1,:] -= 5.0
 
-plotKDE(marginal(p2,[1]))
+
+# plotKDE([marginal(p1,[1]),marginal(p1t,[1])], c=["black";"red"])
+
+using JLD, HDF5
+
+println("loading validation data for testing.")
+@load "testvalidation.jld"
+
+p1t = kde!(X1ptst)
+@test abs(kld(p1t, p1)[1]) < 30.0
+
+p2t = kde!(X2ptst)
+@test abs(kld(p2t, p2)[1]) < 30.0
+
+
+# plotKDE(marginal(p2,[1]))
 
 # warn("incomplete Pose3Pose3NH tests.")

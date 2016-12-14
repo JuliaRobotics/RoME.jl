@@ -1,6 +1,9 @@
 using RoME
 using Base.Test
 
+using JLD, HDF5
+
+
 
 println("[TEST] Camera function evaluations...")
 include("testCameraFunctions.jl")
@@ -17,6 +20,8 @@ println("[SUCCESS]")
 println("[TEST] Pose3 evaluations...")
 include("threeDimLinearProductTest.jl")
 println("[SUCCESS]")
+
+
 
 println("[TEST] ensure Pose3Pose3NH evaluations...")
 include("testPose3Pose3NH.jl")
