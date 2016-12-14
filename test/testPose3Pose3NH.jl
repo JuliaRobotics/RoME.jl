@@ -55,24 +55,44 @@ means = Base.mean(priorpts,2)
 
 
 
-println("Adding Pose3Pose3NH to graph...")
-odo = SE3([10;0;0], Quaternion(0))
-pts0X2 = projectParticles(getVal(fg,"x1"), odo, odoCov)
-odoconstr = Pose3Pose3NH(odo, odoCov, [0.5;0.5]) # define 50/50% hypothesis
-v2 = addNode!(fg,"x2",  pts0X2, N=N)
+odo = SE3([25;0;0], Quaternion(0))
+odoconstr = Pose3Pose3(odo, odoCov) # define 50/50% hypothesis
+# pts0X2 = projectParticles(getVal(fg,"x1"), odo, odoCov)
+v2 = addNode!(fg,"x2", getVal(fg,"x1")⊕odoconstr , N=N)
 addFactor!(fg,[v1;v2],odoconstr)
 
 
-
-println("Testing Pose3Pose3NH evaluation...")
-X1pts = evalFactor2(fg, fg.g.vertices[4], 1)
-X2pts = evalFactor2(fg, fg.g.vertices[4], 3)
-# X2ptsMean = Base.mean(X2pts,2)
-# X1ptsMean = Base.mean(X1pts,2)
-# @test  sum(map(Int, abs(X1ptsMean) .< 0.5 )) == 6
-# @test  sum(map(Int, abs(X2ptsMean - [10.0;0;0;0;0;0]) .< 0.5 )) == 6
+odo2 = SE3([25;0;0], Quaternion(0))
+odoc2 = Pose3Pose3(odo2, odoCov) # define 50/50% hypothesis
+v3 = addNode!(fg,"x3", getVal(fg,"x2")⊕odoc2 , N=N)
+addFactor!(fg,[v2;v3],odoc2)
 
 
+println("Testing Pose3Pose3 evaluation...")
+X1pts = evalFactor2(fg, fg.g.vertices[6], 3)
+X2pts = evalFactor2(fg, fg.g.vertices[6], 5)
+X2ptsMean = Base.mean(X2pts,2)
+X1ptsMean = Base.mean(X1pts,2)
+@test  sum(map(Int, abs(X1ptsMean) - [25.0;0;0;0;0;0] .< 5.0 )) == 6
+@test  sum(map(Int, abs(X2ptsMean - [50.0;0;0;0;0;0]) .< 5.0 )) == 6
 
+
+
+println("Adding Pose3Pose3NH to graph...")
+
+odo3 = SE3([-35;0;0], Quaternion(0))
+odoc3 = Pose3Pose3NH(odo3, odoCov, [0.5;0.5]) # define 50/50% hypothesis
+addFactor!(fg,[v3;v1],odoc3)
+
+
+X1pts = evalFactor2(fg, fg.g.vertices[7], 1)
+X2pts = evalFactor2(fg, fg.g.vertices[7], 5)
+
+p1 = kde!(X1pts)
+p2 = kde!(X2pts)
+
+plotKDE(marginal(p1,[1]))
+
+plotKDE(marginal(p2,[1]))
 
 # warn("incomplete Pose3Pose3NH tests.")

@@ -136,6 +136,7 @@ export
   PriorPose3,
   Pose3Pose3,
   projectParticles,
+  ⊕,
   Pose3Pose3NH,
   PackedPose3Pose3NH
 
