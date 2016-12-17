@@ -1,13 +1,13 @@
 # RoME.jl
 
 [![Coverage Status](http://img.shields.io/coveralls/dehann/RoME.jl.svg)](http://coveralls.io/github/dehann/RoME.jl?branch=master)
-[![codecov.io](http://codecov.io/github/dehann/RoME.jl/coverage.svg?branch=master)](http://codecov.io/github/dehann/RoME.jl?branch=master)
+[![codecov.io](https://codecov.io/github/dehann/RoME.jl/coverage.svg?branch=master)](https://codecov.io/github/dehann/RoME.jl?branch=master)
 
 [![RoME](http://pkg.julialang.org/badges/RoME_0.5.svg)](http://pkg.julialang.org/?pkg=RoME&ver=0.5)
 [![RoME](http://pkg.julialang.org/badges/RoME_0.6.svg)](http://pkg.julialang.org/?pkg=RoME&ver=0.6)
 
 
-Robot Motion Estimate: A set of functions for developing front-ends for SLAM in [Julia](www.julialang.org) which adds transform, visualization and convenience functions to the Multi-modal iSAM backend solver. The back-end solver is implemented in [IncrementalInference.jl](https://github.com/dehann/IncrementalInference.jl).
+Robot Motion Estimate: A set of functions for developing front-ends for SLAM in [Julia](www.julialang.org) which adds transform, visualization and convenience functions to the [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf) backend solver. The back-end solver is implemented in [IncrementalInference.jl](https://github.com/dehann/IncrementalInference.jl).
 
 ## Introduction
 
