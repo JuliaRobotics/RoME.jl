@@ -17,6 +17,7 @@ export
   initfg,
   measureMeanDist,
   predictBodyBR,
+  getLastPose,
   getLastPose2D,
   odomKDE,
   initFactorGraph!,
@@ -99,25 +100,28 @@ export
   evalPotential,
   getSample,
 
-  # camera model
+  # camera model -- TODO --separate out
   CameraIntrinsic,
   CameraExtrinsic,
   CameraModelFull,
   project!,
   project,
+  backprojectRandomized!,
+  # keep
   cameraResidual!,
 
   # Point2D
   Pose2DPoint2DBearingRange,
+  PackedPose2DPoint2DBearingRange,
   Pose2DPoint2DRange,
   Point2DPoint2DRange,
+  PackedPoint2DPoint2DRange,
   PriorPoint2D,
-  PackedPose2DPoint2DBearingRange,
+  PackedPriorPoint2D,
   solveLandm,
   solvePose2,
   solveSetSeps,
   addPose2Pose2!,
-  PackedPriorPoint2D,
 
   # Pose2D
   PriorPose2,
@@ -132,7 +136,14 @@ export
   # Pose3D
   PriorPose3,
   Pose3Pose3,
-  projectParticles
+  projectParticles,
+  ⊕,
+  Pose3Pose3NH,
+  PackedPose3Pose3NH,
+
+  # SLAM specific functions
+  SLAMWrapper
+
 
   # Datalayer converters
   # VNDencoder,
@@ -145,8 +156,6 @@ export
 
 
 include("BayesTracker.jl")
-include("RobotViz.jl")
-include("RobotUtils.jl")
 
 include("SensorModels.jl")
 include("CameraModel.jl")
@@ -155,9 +164,17 @@ include("Pose2D.jl")
 include("BearingRange2D.jl")
 include("Pose3Pose3.jl")
 
+include("Slam.jl")
+
+include("RobotViz.jl")
+include("RobotUtils.jl")
+
 include("SimulationUtils.jl")
+
+
 include("VictoriaParkTypes.jl")
 include("VicPrkEstimator.jl")
+
 include("dev/ISAMRemoteSolve.jl")
 
 

@@ -242,20 +242,22 @@ function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearin
                                          v2,size(d.Cov,1),
                                          d.W)
 end
-function convert(::Type{PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}}, d::FunctionNodeData{Pose2DPoint2DBearingRange})
-  return PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
-          string(d.frommodule), convert(PackedPose2DPoint2DBearingRange, d.fnc))
-end
-function convert(::Type{FunctionNodeData{Pose2DPoint2DBearingRange}}, d::PackedFunctionNodeData{PackedPose2DPoint2DBearingRange})
-  return FunctionNodeData{Pose2DPoint2DBearingRange}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
-          Symbol(d.frommodule), convert(Pose2DPoint2DBearingRange, d.fnc))
-end
-function FNDencode(d::FunctionNodeData{Pose2DPoint2DBearingRange})
-  return convert(PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, d)
-end
-function FNDdecode(d::PackedFunctionNodeData{PackedPose2DPoint2DBearingRange})
-  return convert(FunctionNodeData{Pose2DPoint2DBearingRange}, d)
-end
+
+# no longer needed
+# function convert(::Type{PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}}, d::FunctionNodeData{Pose2DPoint2DBearingRange})
+#   return PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
+#           string(d.frommodule), convert(PackedPose2DPoint2DBearingRange, d.fnc))
+# end
+# function convert(::Type{FunctionNodeData{Pose2DPoint2DBearingRange}}, d::PackedFunctionNodeData{PackedPose2DPoint2DBearingRange})
+#   return FunctionNodeData{Pose2DPoint2DBearingRange}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
+#           Symbol(d.frommodule), convert(Pose2DPoint2DBearingRange, d.fnc))
+# end
+# function FNDencode(d::FunctionNodeData{Pose2DPoint2DBearingRange})
+#   return convert(PackedFunctionNodeData{PackedPose2DPoint2DBearingRange}, d)
+# end
+# function FNDdecode(d::PackedFunctionNodeData{PackedPose2DPoint2DBearingRange})
+#   return convert(FunctionNodeData{Pose2DPoint2DBearingRange}, d)
+# end
 
 
 # ------------------------------------------------------

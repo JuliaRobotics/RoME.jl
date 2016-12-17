@@ -6,8 +6,6 @@ function measureMeanDist(fg::FactorGraph, a::String, b::String)
     res = zeros(2)
     A = getVal(fg,a)
     B = getVal(fg,b)
-    # A = getVal(fg.v[fg.IDs[a]])
-    # B = getVal(fg.v[fg.IDs[b]])
     Ax = Base.mean(vec(A[1,:]))
     Ay = Base.mean(vec(A[2,:]))
     Bx = Base.mean(vec(B[1,:]))
@@ -23,8 +21,6 @@ function predictBodyBR(fg::FactorGraph, a::String, b::String)
   res = zeros(2)
   A = getVal(fg,a)
   B = getVal(fg,b)
-  # A = getVal(fg.v[fg.IDs[a]])
-  # B = getVal(fg.v[fg.IDs[b]])
   Ax = Base.mean(vec(A[1,:]))
   Ay = Base.mean(vec(A[2,:]))
   Ath = Base.mean(vec(A[3,:]))
@@ -40,26 +36,15 @@ function predictBodyBR(fg::FactorGraph, a::String, b::String)
   return b, r
 end
 
-# function getLastPose2D(fg::FactorGraph)
-#   max = 0
-#   for id in fg.IDs
-#       if id[1][1] == 'x'
-#         val = parse(Int,id[1][2:end])
-#         if max < val
-#           max = val
-#         end
-#       end
-#   end
-#   v = fg.v[fg.IDs[string('x',max)]]
-#   X = getVal(v)
-#   return v, X, string('x',max+1)
-# end
-
-function getNextLbl(fgl::FactorGraph, sym)
+function getNextLbl(fgl::FactorGraph, chr)
+  # TODO convert this to use a double lookup
+  warn("getNextLbl(::FactorGraph..) to be depricated, use getlastpose/landm(::SLAMWrapper..) instead.")
   max = 0
   maxid = -1
-  for v in fgl.v
-      if v[2].attributes["label"][1] == sym
+  for vid in fgl.IDs
+  # for v in fgl.v #fgl.g.vertices # fgl.v
+      v = (vid[2], fgl.g.vertices[vid[2]])
+      if v[2].attributes["label"][1] == chr
         val = parse(Int,v[2].attributes["label"][2:end])
         if max < val
           max = val
@@ -69,17 +54,22 @@ function getNextLbl(fgl::FactorGraph, sym)
   end
   if maxid != -1
     v = getVert(fgl,maxid)
-    # v = fgl.v[maxid]
     X = getVal(v)
-    return v, X, string(sym,max+1)
+    return v, X, Symbol(string(chr,max+1))
   else
-    return Union{}, Union{}, string(sym,max+1)
+    return nothing, nothing, Symbol(string(chr,max+1)) # Union{}
   end
 end
 
-function getLastPose2D(fgl::FactorGraph)
+function getLastPose(fgl::FactorGraph)
   return getNextLbl(fgl, 'x')
 end
+getLastPose2D(fgl::FactorGraph) = getLastPose(fgl)
+
+function getlastpose(slam::SLAMWrapper)
+  error("getlastpose -- Not implemented yet")
+end
+
 
 function getLastLandm2D(fgl::FactorGraph)
   return getNextLbl(fgl, 'l')
@@ -117,6 +107,17 @@ function addOdoFG!(fg::FactorGraph, n::String, DX::Array{Float64,1}, cov::Array{
     return v, f
 end
 
+# create a new variable node and insert odometry constraint factor between.
+# will automatically increment latest pose symbol x<k+1> for new node
+# new node and constraint factor are returned as a tuple
+function addOdoFG!(fgl::FactorGraph, odo::Pose3Pose3;
+                  N::Int=100, ready::Int=1)
+    @show vprev, X, nextn = getLastPose(fgl)
+    vnext = addNode!(fgl, nextn, X⊕odo, [1.0]', N=N, ready=ready)
+    fact = addFactor!(fgl, [vprev;vnext], odo)
+    return vnext, fact
+end
+
 function initfg(;sessionname="NA")
   fgl = emptyFactorGraph()
   fgl.sessionname="NA"
@@ -135,9 +136,6 @@ function newLandm!(fg::FactorGraph, lm::String, wPos::Array{Float64,2}, sig::Arr
     vert.attributes["maxage"] = 0
     vert.attributes["numposes"] = 0
     updateFullVert!(fg, vert)
-    # fg.v[v.index].attributes["age"] = 0
-    # fg.v[v.index].attributes["maxage"] = 0
-    # fg.v[v.index].attributes["numposes"] = 0
 
     println("newLandm! -- added $(lm)")
     return vert
@@ -150,38 +148,35 @@ end
 function addBRFG!(fg::FactorGraph, pose::String,
                   lm::String, br::Array{Float64,1}, cov::Array{Float64,2};
                    ready::Int=1)
-
-
-    vps = getVert(fg,pose)
-    vlm = getVert(fg,lm)
-    testlbl = vps.label*vlm.label
-    for nei in getOutNeighbors(fg, vlm)
-      if nei.label == testlbl
-        @show nei
-        # TODO -- makes function call brittle
-        warn("We already have $(testlbl), skipping this constraint")
-        return nothing
-      end
+  #
+  vps = getVert(fg,pose)
+  vlm = getVert(fg,lm)
+  testlbl = vps.label*vlm.label
+  for nei in getOutNeighbors(fg, vlm)
+    if nei.label == testlbl
+      @show nei
+      # TODO -- makes function call brittle
+      warn("We already have $(testlbl), skipping this constraint")
+      return nothing
     end
-    # vps = fg.v[fg.IDs[pose]]
-    # vlm = fg.v[fg.IDs[lm]]
-    @show keys(vlm.attributes)
-    np = vlm.attributes["numposes"]
-    la = vlm.attributes["age"]
-    nage = parse(Int,pose[2:end])
-    vlm.attributes["numposes"] = np+1
-    vlm.attributes["age"] = ((la*np)+nage)/(np+1)
-    vlm.attributes["maxage"] = nage
-    updateFullVert!(fg, vlm)
+  end
+  @show keys(vlm.attributes)
+  np = vlm.attributes["numposes"]
+  la = vlm.attributes["age"]
+  nage = parse(Int,pose[2:end])
+  vlm.attributes["numposes"] = np+1
+  vlm.attributes["age"] = ((la*np)+nage)/(np+1)
+  vlm.attributes["maxage"] = nage
+  updateFullVert!(fg, vlm)
 
-    pbr = Pose2DPoint2DBearingRange((br')',  cov,  [1.0])
-    f = addFactor!(fg, [vps;vlm], pbr, ready=ready ) #[vps;vlm],
+  pbr = Pose2DPoint2DBearingRange((br')',  cov,  [1.0])
+  f = addFactor!(fg, [vps;vlm], pbr, ready=ready ) #[vps;vlm],
 
-    # only used for max likelihood unimodal tests.
-    u, P = pol2cart(br[[2;1]], diag(cov))
-    infor = inv(P^2)
-    addLandmMeasRemote(vps.index,vlm.index,u,infor) # for iSAM1 remote solution as reference
-    return f
+  # only used for max likelihood unimodal tests.
+  u, P = pol2cart(br[[2;1]], diag(cov))
+  infor = inv(P^2)
+  addLandmMeasRemote(vps.index,vlm.index,u,infor) # for iSAM1 remote solution as reference
+  return f
 end
 
 function addMMBRFG!(fg::FactorGraph, pose::String,
@@ -191,9 +186,6 @@ function addMMBRFG!(fg::FactorGraph, pose::String,
     vps = getVert(fg,pose)
     vlm1 = getVert(fg,lm[1])
     vlm2 = getVert(fg,lm[2])
-    # vps = fg.v[fg.IDs[pose]]
-    # vlm1 = fg.v[fg.IDs[lm[1]]]
-    # vlm2 = fg.v[fg.IDs[lm[2]]]
 
     pbr = Pose2DPoint2DBearingRange((br')',  cov,  w) #[vps;vlm1;vlm2],
     f = addFactor!(fg, [vps;vlm1;vlm2], pbr, ready=ready )
@@ -217,7 +209,6 @@ function projNewLandm!(fg::FactorGraph, pose::String, lm::String, br::Array{Floa
                         addfactor=true, N::Int=100, ready::Int=1)
 
     vps = getVert(fg,pose)
-    # vps = fg.v[fg.IDs[pose]]
 
     lmPts = projNewLandmPoints(vps, br, cov)
     vlm = newLandm!(fg, lm, lmPts, cov, N=N, ready=ready) # cov should not be required here
@@ -238,7 +229,6 @@ function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
     iv = Dict{String, Float64}()
     for l in ll
       pvlm = getVert(fgl,l)
-      # pvlm = fgl.v[fgl.IDs[l]]
       # TODO -- can be improved via query in DB case
       if currage - pvlm.attributes["maxage"] < maxdeltaage
         p = getVertKDE(fgl, l)
@@ -281,7 +271,6 @@ function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{String, Float64}, maxl::Str
   newlmindx = lmindx
   if lmIDExists
     lmSuggLbl = String(getVert(fgl,lmid).label) # TODO -- wasteful
-    # lmSuggLbl = String(fgl.v[lmid].label)
   else
     newlmindx = lmindx + 1
     lmSuggLbl = String(string('l',newlmindx))
@@ -309,7 +298,6 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{String, Float64},
     fbr = addBRFG!(fgl, pose, lm, br, cov, ready=ready)
   elseif !lmidSugg && maxAnyExists
     # add UniBR to best match maxl
-    # vlm = fgl.v[fgl.IDs[maxl]]
     vlm = getVert(fgl,maxl)
     fbr = addBRFG!(fgl, pose, maxl, br, cov, ready=ready)
   elseif lmidSugg && !maxl2Exists && !lmIDExists
@@ -318,7 +306,6 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{String, Float64},
     fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, ready=ready)
   elseif lmidSugg && !maxl2Exists && lmIDExists && intgLmIDExists
     # doesn't self intesect with existing lmid, add UniBR to lmid
-    # vlm = fgl.v[lmid]
     vlm = getVert(fgl, lmid)
     fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, ready=ready)
   elseif lmidSugg && maxl2Exists && !lmIDExists
@@ -329,14 +316,12 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{String, Float64},
     # obvious case, add MMBR to both maxl and lmid. Double intersect might be the same thing
     println("evalAutoCases! -- obvious case is happening")
     addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, ready=ready)
-    # vlm = fgl.v[fgl.IDs[lmSuggLbl]]
     vlm = getVert(fgl,lmSuggLbl)
   elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
     # odd case, does not intersect with suggestion, but does with some previous landm
     # add MMBR
     warn("evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected")
     addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov, ready=ready)
-    # vlm = fgl.v[fgl.IDs[lmSuggLbl]]
     vlm = getVert(fgl,lmSuggLbl)
   elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
   #   # landm exists but no intersection with existing or suggested lmid
@@ -355,7 +340,6 @@ end
 function addAutoLandmBR!(fgl::FactorGraph, pose::String, lmid::Int, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
                       N::Int=100, ready::Int=1)
     vps = getVert(fgl, pose)
-    # vps = fgl.v[fgl.IDs[pose]]
     lmPts = projNewLandmPoints(vps, br, cov)
     lmkde = kde!(lmPts)
     currage = parse(Int, pose[2:end])
@@ -439,7 +423,6 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
           val = parse(Int,id[1][2:end])
           if from <= val && val <= to
             if length( getOutNeighbors(fg, id[2]) ) >= minnei
-            # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
               push!(allIDs, val)
             end
           end
@@ -450,11 +433,8 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
   for id in allIDs
     X=[X;Base.mean( vec( getVal(fg,string(sym,id))[1,:] ) )]
     Y=[Y;Base.mean( vec( getVal(fg, string(sym,id))[2,:] ) )]
-    # X=[X;Base.mean(vec(fg.v[fg.IDs[string(sym,id)]].attributes["val"][1,:]))]
-    # Y=[Y;Base.mean(vec(fg.v[fg.IDs[string(sym,id)]].attributes["val"][2,:]))]
     if sym == 'x'
       Th=[Th;Base.mean( vec( getVal(fg, string(sym,id))[3,:] ) )]
-      # Th=[Th;Base.mean(vec(fg.v[fg.IDs[string(sym,id)]].attributes["val"][3,:]))]
     end
     push!(LB, string(sym,id))
   end

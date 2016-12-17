@@ -92,17 +92,35 @@ function convert(::Type{PackedPriorPoint2D}, d::PriorPoint2D)
   return PackedPriorPoint2D(d.mv.μ, v2, size(d.mv.Σ.mat,1), d.W)
 end
 
-function convert(::Type{PackedFunctionNodeData{PackedPriorPoint2D}}, d::FunctionNodeData{PriorPoint2D})
-  return PackedFunctionNodeData{PackedPriorPoint2D}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
-          string(d.frommodule), convert(PackedPriorPoint2D, d.fnc))
+# no longer needed -- using multiple dispatch
+# function convert(::Type{PackedFunctionNodeData{PackedPriorPoint2D}}, d::FunctionNodeData{PriorPoint2D})
+#   return PackedFunctionNodeData{PackedPriorPoint2D}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
+#           string(d.frommodule), convert(PackedPriorPoint2D, d.fnc))
+# end
+# function convert(::Type{FunctionNodeData{PriorPoint2D}}, d::PackedFunctionNodeData{PackedPriorPoint2D})
+#   return FunctionNodeData{PriorPoint2D}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
+#           Symbol(d.frommodule), convert(PriorPoint2D, d.fnc))
+# end
+# function FNDencode(d::FunctionNodeData{PriorPoint2D})
+#   return convert(PackedFunctionNodeData{PackedPriorPoint2D}, d)
+# end
+# function FNDdecode(d::PackedFunctionNodeData{PackedPriorPoint2D})
+#   return convert(FunctionNodeData{PriorPoint2D}, d)
+# end
+
+
+
+type PackedPoint2DPoint2DRange  <: IncrementalInference.PackedInferenceType
+    Zij::Vector{Float64} # bearing and range hypotheses as columns
+    Cov::Float64
+    W::Vector{Float64}
+    PackedPoint2DPoint2DRange() = new()
+    PackedPoint2DPoint2DRange(x...) = new(x[1],x[2],x[3])
+    PackedPoint2DPoint2DRange(x::Point2DPoint2DRange) = new(x.Zij,x.Cov,x.W)
 end
-function convert(::Type{FunctionNodeData{PriorPoint2D}}, d::PackedFunctionNodeData{PackedPriorPoint2D})
-  return FunctionNodeData{PriorPoint2D}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
-          Symbol(d.frommodule), convert(PriorPoint2D, d.fnc))
+function convert(::Type{PackedPoint2DPoint2DRange}, d::Point2DPoint2DRange)
+  return PackedPoint2DPoint2DRange(d)
 end
-function FNDencode(d::FunctionNodeData{PriorPoint2D})
-  return convert(PackedFunctionNodeData{PackedPriorPoint2D}, d)
-end
-function FNDdecode(d::PackedFunctionNodeData{PackedPriorPoint2D})
-  return convert(FunctionNodeData{PriorPoint2D}, d)
+function convert(::Type{Point2DPoint2DRange}, d::PackedPoint2DPoint2DRange)
+  return Point2DPoint2DRange(d.Zij, d.Cov, d.W)
 end
