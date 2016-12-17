@@ -38,7 +38,7 @@ end
 
 function getNextLbl(fgl::FactorGraph, chr)
   # TODO convert this to use a double lookup
-  warn("getNextLbl(::FactorGraph..) to be depricated, use getlastpose/landm(::SLAMWrapper..) instead.")
+  warn("getNextLbl(::FactorGraph..) to be deprecated, use getlastpose/landm(::SLAMWrapper..) instead.")
   max = 0
   maxid = -1
   for vid in fgl.IDs
@@ -112,7 +112,7 @@ end
 # new node and constraint factor are returned as a tuple
 function addOdoFG!(fgl::FactorGraph, odo::Pose3Pose3;
                   N::Int=100, ready::Int=1)
-    @show vprev, X, nextn = getLastPose(fgl)
+    vprev, X, nextn = getLastPose(fgl)
     vnext = addNode!(fgl, nextn, X⊕odo, [1.0]', N=N, ready=ready)
     fact = addFactor!(fgl, [vprev;vnext], odo)
     return vnext, fact

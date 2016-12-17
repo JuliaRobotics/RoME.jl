@@ -20,9 +20,9 @@ end
 
 
 
-# to be depricated
+# to be deprecated
 function pack3(xL1, xL2, p1, p2, p3, xF3)
-    warn("IncrementalInference.TreePotentials02:pack3 to be depricated")
+    warn("RoME.BearingRange2D:pack3 to be deprecated")
     X = zeros(3)
     X[p1] = xL1
     X[p2] = xL2
