@@ -12,10 +12,10 @@ initCov = diagm([0.03;0.03;0.001])
 odoCov = diagm([3.0;3.0;0.01])
 
 # Some starting position
-v1 = addNode!(fg, "x1", zeros(3,1), diagm([1.0;1.0;0.1]), N=N)
+v1 = addNode!(fg, :x1, zeros(3,1), diagm([1.0;1.0;0.1]), N=N)
 
 # Two landmarks
-l1 = addNode!(fg, "l1", ([10.0;0.0]')', diagm([1.0;1.0]), N=N)
+l1 = addNode!(fg, :l1, ([10.0;0.0]')', diagm([1.0;1.0]), N=N)
 
 # and constraints to pose x1
 rhoZ1 = norm([10.0;0.0])
@@ -28,7 +28,7 @@ pts = evalFactor2(fg, f1, l1.index)
 # @show sum(sqrt(sum(pts.^2, 1 )) .< 10.0)
 # @test sum(sqrt(sum(pts.^2, 1 )) .< 10.0) == 0
 
-v2 = addNode!(fg, "x2", ([50.0;0.0;0.0]')', diagm([1.0;1.0;0.05]), N=N)
+v2 = addNode!(fg, :x2, ([50.0;0.0;0.0]')', diagm([1.0;1.0;0.05]), N=N)
 ppc = Pose2Pose2(([50.0;0.0;0.0]')', 0.1*eye(3), [1.0])
 f2 = addFactor!(fg, [v1;v2], ppr)
 pts = evalFactor2(fg, f2, v1.index)

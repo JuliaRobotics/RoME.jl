@@ -14,7 +14,6 @@ treelms = Dict{Int64,TreeDescriptor}()
 # get the mean trajector index from sighing to this landmark
 function getLandmTrajIndxs(fgl::FactorGraph, lmlbl::String)
   vlm = getVert(fgl,lmlbl)
-  # vlm = fgl.v[fgl.IDs[lmlbl]]
   psoi = String[]
 
   for f in out_neighbors(fgl.g, vlm)
@@ -68,7 +67,6 @@ function getAllLandmNearByIndx(LB, X, Y, MIDX, nearidx;
 end
 
 function calcFeatDesc(fgl::FactorGraph, flbl::String, midx::Float64)
-  # lm = fgl.v[fgl.IDs[flbl]]
   lm = getVert(fgl,flbl)
 end
 

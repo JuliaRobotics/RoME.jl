@@ -35,14 +35,14 @@ odoCov = deepcopy(initCov)
 
 
 println("Adding PriorPose3 to graph...")
-v1 = addNode!(fg,"x1",  0.1*randn(6,N),  N=N)
+v1 = addNode!(fg,:x1,  0.1*randn(6,N),  N=N)
 initPosePrior = PriorPose3(SE3(0), initCov)
 f1  = addFactor!(fg,[v1], initPosePrior)
 
 println("Ensure vertex initialized properly")
 # start with to tight an initialization
-muX1 = Base.mean(getVal(fg,"x1"),2)
-stdX1 = Base.std(getVal(fg,"x1"),2)
+muX1 = Base.mean(getVal(fg,:x1),2)
+stdX1 = Base.std(getVal(fg,:x1),2)
 @test sum(map(Int,abs(muX1) .< 0.1)) == 6
 @test sum(map(Int, 0.05 .< stdX1 .< 0.15)) == 6
 
@@ -55,17 +55,8 @@ means = Base.mean(priorpts,2)
 
 
 
-odo = SE3([25;0;0], Quaternion(0))
-odoconstr = Pose3Pose3(odo, odoCov) # define 50/50% hypothesis
-# pts0X2 = projectParticles(getVal(fg,"x1"), odo, odoCov)
-v2 = addNode!(fg,"x2", getVal(fg,"x1")⊕odoconstr , N=N)
-addFactor!(fg,[v1;v2],odoconstr)
-
-
-odo2 = SE3([25;0;0], Quaternion(0))
-odoc2 = Pose3Pose3(odo2, odoCov) # define 50/50% hypothesis
-v3 = addNode!(fg,"x3", getVal(fg,"x2")⊕odoc2 , N=N)
-addFactor!(fg,[v2;v3],odoc2)
+v2, f2 = addOdoFG!(fg, Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov) )
+v3, f3 = addOdoFG!(fg, Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov) )
 
 
 println("Testing Pose3Pose3 evaluation...")
@@ -109,6 +100,6 @@ p2t = kde!(X2ptst)
 @test abs(kld(p2t, p2)[1]) < 30.0
 
 
-# plotKDE(marginal(p2,[1]))
+# plotKDE(margisal(p1,[1]))
 
 # warn("incomplete Pose3Pose3NH tests.")

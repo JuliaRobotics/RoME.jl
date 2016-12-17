@@ -17,6 +17,7 @@ export
   initfg,
   measureMeanDist,
   predictBodyBR,
+  getLastPose,
   getLastPose2D,
   odomKDE,
   initFactorGraph!,
@@ -138,7 +139,10 @@ export
   projectParticles,
   ⊕,
   Pose3Pose3NH,
-  PackedPose3Pose3NH
+  PackedPose3Pose3NH,
+
+  # SLAM specific functions
+  SLAMWrapper
 
 
   # Datalayer converters
@@ -152,8 +156,6 @@ export
 
 
 include("BayesTracker.jl")
-include("RobotViz.jl")
-include("RobotUtils.jl")
 
 include("SensorModels.jl")
 include("CameraModel.jl")
@@ -162,9 +164,17 @@ include("Pose2D.jl")
 include("BearingRange2D.jl")
 include("Pose3Pose3.jl")
 
+include("Slam.jl")
+
+include("RobotViz.jl")
+include("RobotUtils.jl")
+
 include("SimulationUtils.jl")
+
+
 include("VictoriaParkTypes.jl")
 include("VicPrkEstimator.jl")
+
 include("dev/ISAMRemoteSolve.jl")
 
 

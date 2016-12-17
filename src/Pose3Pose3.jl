@@ -173,6 +173,12 @@ function projectParticles(Xval::Array{Float64,2}, Z::SE3, Cov::Array{Float64,2})
   return RES
 end
 
+⊕(Xpts::Array{Float64,2}, z::Pose3Pose3) = projectParticles(Xpts, z.Zij, z.Cov)
+⊕(Xvert::Graphs.ExVertex, z::Pose3Pose3) = ⊕(getVal(Xvert), z)
+
+
+
+
 # Still limited to linear sampler, then reprojected onto ball -- TODO upgrade manifold sampler
 function evalPotential(odom::Pose3Pose3, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int64=200)
     # rz,cz = size(odom.Zij)
@@ -227,8 +233,6 @@ function evalPotential(odom::Pose3Pose3NH, Xi::Array{Graphs.ExVertex,1}, Xid::In
     return projted
 end
 
-⊕(Xpts::Array{Float64,2}, z::Pose3Pose3) = projectParticles(Xpts, z.Zij, z.Cov)
-⊕(Xvert::Graphs.ExVertex, z::Pose3Pose3) = ⊕(getVal(Xvert), z)
 
 
 

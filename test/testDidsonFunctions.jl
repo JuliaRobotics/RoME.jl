@@ -58,7 +58,7 @@ odoCov = deepcopy(initCov)
 println("Adding PriorPose3 to graph...")
 X, pts = 0.01*randn(6,N), zeros(3,N);
 
-v1 = addNode!(fg,"x1",  X,  N=N)
+v1 = addNode!(fg,:x1,  X,  N=N)
 initPosePrior = PriorPose3(SE3(0), initCov)
 f1  = addFactor!(fg,[v1], initPosePrior)
 
@@ -68,7 +68,7 @@ meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 for i in 1:N
 	project!(meas, X, pts, i)
 end
-v2 = addNode!(fg,"l2",  pts, N=N)
+v2 = addNode!(fg,:l2,  pts, N=N)
 addFactor!(fg,[v1;v2],meas)
 
 
