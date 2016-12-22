@@ -1,17 +1,20 @@
 # test sonar functions directly
 using RoME, TransformUtils, IncrementalInference
-
-
-
 using KernelDensityEstimate
 
+# Functor for efficient functional programming, avoids type_inference at each call
+fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
+function (p::WrapParam{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64})
+  residualLRBE!(res, p.z, x, p.landmark, p.reuse)
+  nothing
+end
 
 meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 # LinearRangeBearingElevation(Distributions.Normal{Float64}(μ=0.2, σ=0.001),Distributions.Normal{Float64}(μ=3.0, σ=0.001),Distributions.Uniform{Float64}(a=-0.25133, b=0.25133))
 X, pts = 0.01*randn(6,200), zeros(3,200);
 # X[1:3,:] = 0.1*randn(3,200)
-for i in 1:200
-	project!(meas, X, pts, i)
+@time for i in 1:200
+	project!(meas, X, pts, i, fp!)
 end
 p1 = kde!(pts);
 
@@ -19,14 +22,23 @@ pts, L = 0.01*randn(6,200), zeros(3,200);
 L[1,:] += 3.0
 L[2,:] += 0.65
 
+
 # X = rand(6,200)
-for i in 1:200
-	backprojectRandomized!(meas, L, pts, i)
+
+
+# using ProfileView
+# Profile.clear()
+
+@time for i in 1:10
+	backprojectRandomized!(meas, L, pts, i, fp!)
 end
+
+
+# ProfileView.view()
+
+
+
 p2 = kde!(pts);
-
-
-
 
 
 
@@ -66,7 +78,7 @@ f1  = addFactor!(fg,[v1], initPosePrior)
 println("Adding LinearRangeBearingElevation to graph...")
 meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 for i in 1:N
-	project!(meas, X, pts, i)
+	project!(meas, X, pts, i, fp!)
 end
 v2 = addNode!(fg,:l2,  pts, N=N)
 addFactor!(fg,[v1;v2],meas)

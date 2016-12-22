@@ -14,6 +14,34 @@ function getSample( las::LinearRangeBearingElevation )
 end
 
 
+type reuseLBRA
+  wTb::SE3
+  M::Array{Float64,2}
+  inp::Vector{Float64}
+  outp::Vector{Float64}
+  rbe::Vector{Float64}
+  reuseLBRA()=new()
+  reuseLBRA(::Int)=new(SE3(0),eye(4),ones(4),ones(4), zeros(3))
+  reuseLBRA(a,b,c,d,e)=new(a,b,c,d,e)
+end
+
+type WrapParam{T} <: Function
+  # params::Tuple
+  landmark::Vector{Float64}
+  pose::Vector{Float64}
+  z::Vector{Float64}
+  reuse::T
+end
+
+# TODO -- ugrade to more genericparams
+# type WrapParam{T} <: Function
+#   variables::Tuple
+#   varidx::Int
+#   reuse::T
+# end
+
+
+
 # returns [Range Bearing Elevation] manifold difference between pose X ominus landmark L
 function ominus(::Type{LinearRangeBearingElevation}, X::Vector{Float64}, L::Vector{Float64})
   # rangeBearing3(X, L)
@@ -24,22 +52,47 @@ function ominus(::Type{LinearRangeBearingElevation}, X::Vector{Float64}, L::Vect
   return [norm(bTl[1:3]); b; el]
 end
 
+function ominus!(reuse::reuseLBRA, X::Vector{Float64}, L::Vector{Float64})
+  # rangeBearing3(X, L)
+  reuse.wTb.t[1:3] = X[1:3]
+  # TODO -- refactor to complete inplace operations
+  reuse.wTb.R = TransformUtils.convert(SO3, Euler(X[4:6]...))
+  matrix!(reuse.M, reuse.wTb)
+  reuse.inp[1:3] = L[1:3]
+  reuse.outp[1:4] = reuse.M\reuse.inp  # bTl
+  reuse.rbe[1] = norm(reuse.outp[1:3])
+  reuse.rbe[2] = atan2(reuse.outp[2],	reuse.outp[1])
+  reuse.rbe[3] = -atan2(reuse.outp[3], reuse.outp[1])
+  # return [norm(reuse.outp[1:3]); b; el]
+  nothing
+end
+
 # residual should equal zero when system is in balance
 # measurement z is measurement vector with [range; bearing; elevation]
 # variables are tuple (pose X [dim6], landmark L [dim3])
 # function handle follows required parameter list
-function residualLRBE!(resid::Vector{Float64}, z::Vector{Float64}, X::Vector{Float64}, L::Vector{Float64})
+function residualLRBE!(resid::Vector{Float64}, z::Vector{Float64}, X::Vector{Float64}, L::Vector{Float64}, reuse::reuseLBRA)
   # TODO upgrade so the - sign here is used on a manifold too, ominus(z,  ominus(tt, variables...)  )
-  resid[:] = z - ominus(LinearRangeBearingElevation, X, L)
+  # TODO just switch directly to parameterized function
+  ominus!(reuse, X, L)
+  resid[:] = z - reuse.rbe
+  # resid[:] = z - ominus!(LinearRangeBearingElevation, X, L)
   nothing
 end
+(p::WrapParam{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) = residualLRBE!(res, p.z, x, p.landmark, p.reuse)
+# function (p::WrapParam)(x::Vector{Float64}, res::Vector{Float64})
+  # p.
+  # residualLRBE!(p)
+  # res[1:3] = p.reuse.resid[1:3]
+# end
 
 
 # Convolution of conditional to project landmark location from position X (dim6)
 # Y (dim3) are projected points
-function project!(meas::LinearRangeBearingElevation, pose::Array{Float64,2}, landmark::Array{Float64,2}, idx::Int)
+function project!(meas::LinearRangeBearingElevation, pose::Array{Float64,2}, landmark::Array{Float64,2}, idx::Int, ggtemp::Function)
   z = getSample(meas)
-  gg = (x, res) -> residualLRBE!(res, z, pose[1:6,idx][:], x)
+  # warn("didson project! to be upgraded") # TODO
+  gg = (x, res) -> residualLRBE!(res, z, pose[1:6,idx][:], x, ggtemp.reuse)
   landmark[1:3,idx] = numericRootGenericRandomizedFnc(gg, 3, 3, landmark[1:3,idx][:])
   # landmark[1:3,idx] = numericRootGenericRandomized(residualLRBE!, 3, getSample(meas), pose[1:6,idx][:], landmark[1:3,idx][:]) # ( bearrange3!,
 	# x0[1:3,idx] = numericRoot(bearrange3!, getSample(meas), fixed[1:6,idx], x0[1:3,idx]+0.01*randn(3))
@@ -47,11 +100,31 @@ function project!(meas::LinearRangeBearingElevation, pose::Array{Float64,2}, lan
 end
 
 # zsolving for pose given landmark [P | L]
-function backprojectRandomized!(meas::LinearRangeBearingElevation, landmark::Array{Float64,2}, pose::Array{Float64,2}, idx::Int)
+function backprojectRandomized!(meas::LinearRangeBearingElevation,
+        landmark::Array{Float64,2},
+        pose::Array{Float64,2},
+        idx::Int  )
+  #
+  # error("outdated")
   z = getSample(meas)
   gg = (x, res) -> residualLRBE!(res, z, x, landmark[1:3,idx][:])
   pose[1:6,idx] = numericRootGenericRandomizedFnc(gg, 3, 6, pose[1:6,idx][:])
 	# pose[1:6,idx] = numericRootGenericRandomized(residualLRBE!, 3, getSample(meas), landmark[1:3,idx][:], pose[1:6,idx][:]) # ( bearrange3!,
+	nothing
+end
+
+function backprojectRandomized!(meas::LinearRangeBearingElevation,
+        landmark::Array{Float64,2},
+        pose::Array{Float64,2},
+        idx::Int,
+        gg::Function  )
+  #
+  gg.landmark[1:3] = landmark[1:3,idx][:]
+  gg.pose[1:6] = pose[1:6,idx][:]
+  gg.z[1:3] = getSample(meas)
+
+  # gg = (x, res) -> residualLRBE!(res, z, x, landmark[1:3,idx][:])
+  pose[1:6,idx] = numericRootGenericRandomizedFnc(gg, 3, 6, pose[1:6,idx][:])
 	nothing
 end
 
@@ -62,8 +135,12 @@ function project(meas::LinearRangeBearingElevation, X::Vector{Float64}, Y::Vecto
   return yy[1:3]
 end
 
+
+
 function evalPotential(meas::LinearRangeBearingElevation, Xi::Array{Graphs.ExVertex,1}, Xid::Int64)
   fromX, ret, ff = zeros(0,0), zeros(0,0), +
+
+  fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
 
   if Xi[1].index == Xid
     fromX = getVal( Xi[2] )
@@ -77,7 +154,7 @@ function evalPotential(meas::LinearRangeBearingElevation, Xi::Array{Graphs.ExVer
   r,c = size(fromX)
 
 	for i in 1:200
-		ff(meas, fromX, ret, i)
+		ff(meas, fromX, ret, i, fp!)
 	end
 
   return ret

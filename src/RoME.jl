@@ -96,9 +96,16 @@ export
   project,
   backprojectRandomized!,
   residual!,
+  residualLRBE!,
+  reuseLBRA,
   ominus,
+  ominus!,
   evalPotential,
   getSample,
+  WrapParam,
+
+  # Didson convenience function
+  addLinearArrayConstraint,
 
   # camera model -- TODO --separate out
   CameraIntrinsic,

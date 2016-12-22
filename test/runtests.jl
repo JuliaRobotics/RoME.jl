@@ -1,3 +1,5 @@
+addprocs(3)
+
 using RoME
 using Base.Test
 

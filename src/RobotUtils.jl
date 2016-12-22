@@ -524,6 +524,22 @@ end
 
 
 
+# convenience function to add DIDSON sonar constraints to graph
+function addLinearArrayConstraint(fgl::FactorGraph,
+      rangebearing::Tuple,
+      pose::Symbol,
+      landm::Symbol ;
+      rangecov::Float64=3e-4,
+      bearingcov::Float64=3e-4 )
+
+  #
+  cl = LinearRangeBearingElevation((rangebearing[1],rangecov),(rangebearing[2],bearingcov))
+  addFactor!(fgl, [getVert(fgl, pose); getVert(fgl, landm)], cl)
+  nothing
+end
+
+
+
 #
 # function +(p1::Rigid6DOF, p2::Rigid6DOF)
 #     t = rotate(p1.rot, p2.trl) + p1.trl
