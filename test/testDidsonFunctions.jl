@@ -25,16 +25,16 @@ L[2,:] += 0.65
 
 # X = rand(6,200)
 
+#
+# using ProfileView
+# Profile.clear()
 
-using ProfileView
-Profile.clear()
-
-@profile for i in 1:200
+@time for i in 1:200
 	backprojectRandomized!(meas, L, pts, i, fp!)
 end
 
 
-ProfileView.view()
+# ProfileView.view()
 
 
 
