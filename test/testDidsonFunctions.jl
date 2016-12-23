@@ -26,15 +26,15 @@ L[2,:] += 0.65
 # X = rand(6,200)
 
 
-# using ProfileView
-# Profile.clear()
+using ProfileView
+Profile.clear()
 
-@time for i in 1:10
+@profile for i in 1:200
 	backprojectRandomized!(meas, L, pts, i, fp!)
 end
 
 
-# ProfileView.view()
+ProfileView.view()
 
 
 
@@ -81,7 +81,12 @@ for i in 1:N
 	project!(meas, X, pts, i, fp!)
 end
 v2 = addNode!(fg,:l2,  pts, N=N)
-addFactor!(fg,[v1;v2],meas)
+f2 = addFactor!(fg,[v1;v2],meas)
+
+
+L1pts = evalFactor2(fg, f2, fg.IDs[:l1])
+X1pts = evalFactor2(fg, f2, fg.IDs[:x1])
+
 
 
 tree = wipeBuildNewTree!(fg)

@@ -17,12 +17,13 @@ end
 type reuseLBRA
   wTb::SE3
   M::Array{Float64,2}
+  E::Euler
   inp::Vector{Float64}
   outp::Vector{Float64}
   rbe::Vector{Float64}
   reuseLBRA()=new()
-  reuseLBRA(::Int)=new(SE3(0),eye(4),ones(4),ones(4), zeros(3))
-  reuseLBRA(a,b,c,d,e)=new(a,b,c,d,e)
+  reuseLBRA(::Int)=new(SE3(0),eye(4),Euler(0),ones(4),ones(4), zeros(3))
+  reuseLBRA(a,b,c,d,e,f)=new(a,b,c,d,e,f)
 end
 
 type WrapParam{T} <: Function
@@ -56,7 +57,8 @@ function ominus!(reuse::reuseLBRA, X::Vector{Float64}, L::Vector{Float64})
   # rangeBearing3(X, L)
   reuse.wTb.t[1:3] = X[1:3]
   # TODO -- refactor to complete inplace operations
-  reuse.wTb.R = TransformUtils.convert(SO3, Euler(X[4:6]...))
+  reuse.E.P, reuse.E.R, reuse.E.Y = X[4], X[5], X[6]
+  convert!(reuse.wTb.R, reuse.E)
   matrix!(reuse.M, reuse.wTb)
   reuse.inp[1:3] = L[1:3]
   reuse.outp[1:4] = reuse.M\reuse.inp  # bTl
