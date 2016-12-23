@@ -80,7 +80,7 @@ meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 for i in 1:N
 	project!(meas, X, pts, i, fp!)
 end
-v2 = addNode!(fg,:l2,  pts, N=N)
+v2 = addNode!(fg,:l1,  pts, N=N)
 f2 = addFactor!(fg,[v1;v2],meas)
 
 
