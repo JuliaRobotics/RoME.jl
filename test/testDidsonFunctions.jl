@@ -1,41 +1,94 @@
 # test sonar functions directly
-using RoME, TransformUtils, IncrementalInference
+
+# addprocs(2)
+
 using KernelDensityEstimate
+using TransformUtils
+using IncrementalInference
+using RoME
+
 
 # Functor for efficient functional programming, avoids type_inference at each call
 fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
-function (p::WrapParam{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64})
-  residualLRBE!(res, p.z, x, p.landmark, p.reuse)
-  nothing
-end
+
+# @everywhere begin
+# (p::WrapParam{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
+#     residualLRBE!(res, p.z, x, p.landmark, p.reuse)
+# end
 
 meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
+
+
+@time fp!(zeros(6), zeros(3))
+fgr = FastGenericRoot{WrapParam}(6, 3, fp!)
+
 # LinearRangeBearingElevation(Distributions.Normal{Float64}(μ=0.2, σ=0.001),Distributions.Normal{Float64}(μ=3.0, σ=0.001),Distributions.Uniform{Float64}(a=-0.25133, b=0.25133))
 X, pts = 0.01*randn(6,200), zeros(3,200);
 # X[1:3,:] = 0.1*randn(3,200)
 @time for i in 1:200
 	project!(meas, X, pts, i, fp!)
 end
+
 p1 = kde!(pts);
+
 
 pts, L = 0.01*randn(6,200), zeros(3,200);
 L[1,:] += 3.0
 L[2,:] += 0.65
 
 
-# X = rand(6,200)
-
-#
 # using ProfileView
 # Profile.clear()
 
 @time for i in 1:200
-	backprojectRandomized!(meas, L, pts, i, fp!)
+  backprojectRandomized!(meas, L, pts, i, fp!)
+end
+
+# ProfileView.view()
+
+
+# work on speeding up and refactoring the numericroot operation
+# did not yet have the desired affect, lots of memory still being claimed
+println("Compute with FastGenericRoot memory structure")
+fgr = FastGenericRoot{WrapParam}(6, 3, fp!)
+@time for idx in 1:200
+  fp!.landmark[1:3] = L[1:3,idx]
+  fp!.pose[1:6] = pts[1:6,idx]
+  fp!.z[1:3] = getSample(meas)
+  copy!(fgr.X, pts[1:6,idx]) #initial guess x0
+  backprojectRandomized!(fgr)
+	pts[1:6,idx] = fgr.Y[1:6]
+end
+
+
+pts, L = 0.01*randn(6,200), zeros(3,200);
+L[1,:] += 3.0
+L[2,:] += 0.65
+
+
+# going faster
+fpA! = WrapParamArray(L, pts, zeros(3), 1, reuseLBRA(0))
+
+# @everywhere begin
+# (p::WrapParamArray{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
+#     residualLRBE!(res, p.z, x, p.landmark[:,p.idx], p.reuse)
+# end
+# Profile.clear()
+
+println("Compute with FastGenericRoot memory structure")
+fgr = FastGenericRoot{WrapParamArray}(6, 3, fpA!)
+
+@time for idx in 1:200
+  fpA!.idx = idx
+  getSample!(fpA!.z,  meas)
+  # fpA!.z[1:3] = getSample(meas)
+  copy!(fgr.X, pts[1:6,idx]) #initial guess x0
+  backprojectRandomized!( fgr )
+	pts[1:6,idx] = fgr.Y[1:6]
 end
 
 
 # ProfileView.view()
-
 
 
 p2 = kde!(pts);

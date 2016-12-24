@@ -101,8 +101,10 @@ export
   ominus,
   ominus!,
   evalPotential,
+  getSample!,
   getSample,
   WrapParam,
+  WrapParamArray,
 
   # Didson convenience function
   addLinearArrayConstraint,
