@@ -46,7 +46,7 @@ function addPose2Pose2!(retval::Array{Float64,1}, x::Array{Float64,1}, dx::Array
   nothing
 end
 
-function evalPotential(odom::Pose2Pose2, Xi::Array{Graphs.ExVertex,1}, Xid::Int64)
+function evalPotential(odom::Pose2Pose2, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
     rz,cz = size(odom.Zij)
     Xval = Array{Float64,2}()
     XvalNull = Array{Float64,2}()

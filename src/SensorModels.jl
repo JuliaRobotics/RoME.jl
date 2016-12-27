@@ -38,7 +38,6 @@ type WrapParamArray{T} <: Function
   reuse::T
 end
 
-
 function getSample!(y::Vector{Float64}, las::LinearRangeBearingElevation )
   y[1] = rand(las.range)
   y[2] = rand(las.bearing)
@@ -147,18 +146,18 @@ function backprojectRandomizedOld!(meas::LinearRangeBearingElevation,
 	nothing
 end
 
-function backprojectRandomized!(meas::LinearRangeBearingElevation,
+function backprojectRandomized!{T}(meas::LinearRangeBearingElevation,
         landmark::Array{Float64,2},
         pose::Array{Float64,2},
         idx::Int,
-        gg::Function  )
+        gg::T  )
   #
   gg.landmark[1:3] = landmark[1:3,idx]
   gg.pose[1:6] = pose[1:6,idx]
   gg.z[1:3] = getSample(meas)
 
   # println("doing this")
-  fgr = FastGenericRoot{typeof(gg)}(6, 3, gg)
+  fgr = FastGenericRoot{T}(6, 3, gg)
   #initial guess x0
   copy!(fgr.X, pose[1:6,idx])
 
@@ -192,8 +191,8 @@ end
 
 
 
-
-function evalPotential(meas::LinearRangeBearingElevation, Xi::Array{Graphs.ExVertex,1}, Xid::Int64)
+function evalPotential(meas::LinearRangeBearingElevation, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+  # Function soon to be replaced with improved functor version
   fromX, ret, ff = zeros(0,0), zeros(0,0), +
 
   fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
