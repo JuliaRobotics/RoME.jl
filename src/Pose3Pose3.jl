@@ -204,33 +204,37 @@ end
 
 
 # Still limited to linear sampler, then reprojected onto ball -- TODO upgrade manifold sampler
-function evalPotential(odom::Pose3Pose3NH, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int64=200)
-    # rz,cz = size(odom.Zij)
-    Xval = Array{Float64,2}()
-    # implicit equation portion -- bi-directional pairwise function made explicit here
-    if Xid == Xi[1].index #odom.
-        # reverse direction
-        Z = inverse(odom.Zij)
-        Xval = getVal(Xi[2])
-        oldval = getVal(Xi[1])
-    elseif Xid == Xi[2].index
-        # forward direction
-        Z = odom.Zij
-        Xval = getVal(Xi[1])
-        oldval = getVal(Xi[2])
-    else
-        error("Bad evalPairwise Pose3Pose3")
-    end
+function evalPotential(odom::Pose3Pose3NH,
+      Xi::Array{Graphs.ExVertex,1},
+      Xid::Int64;
+      N::Int64=200)
+   #
+  # rz,cz = size(odom.Zij)
+  Xval = Array{Float64,2}()
+  # implicit equation portion -- bi-directional pairwise function made explicit here
+  if Xid == Xi[1].index #odom.
+      # reverse direction
+      Z = inverse(odom.Zij)
+      Xval = getVal(Xi[2])
+      oldval = getVal(Xi[1])
+  elseif Xid == Xi[2].index
+      # forward direction
+      Z = odom.Zij
+      Xval = getVal(Xi[1])
+      oldval = getVal(Xi[2])
+  else
+      error("Bad evalPairwise Pose3Pose3")
+  end
 
-    skipdos = rand(odom.ValidHypot, N)
-    dos, donts = skipdos .== 2, skipdos .== 1
+  skipdos = rand(odom.ValidHypot, N)
+  dos, donts = skipdos .== 2, skipdos .== 1
 
-    projted = Array{Float64}(6, N)
-    projted[:,dos] = projectParticles(Xval[:,dos], Z, odom.Cov)
+  projted = Array{Float64}(6, N)
+  projted[:,dos] = projectParticles(Xval[:,dos], Z, odom.Cov)
 
-    projted[:,donts] = oldval[:,donts]
+  projted[:,donts] = oldval[:,donts]
 
-    return projted
+  return projted
 end
 
 

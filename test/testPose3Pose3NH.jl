@@ -76,8 +76,8 @@ odoc3 = Pose3Pose3NH(odo3, odoCov, [0.5;0.5]) # define 50/50% hypothesis
 addFactor!(fg,[v3;v1],odoc3)
 
 
-X1pts = evalFactor2(fg, fg.g.vertices[7], 1)
-X2pts = evalFactor2(fg, fg.g.vertices[7], 5)
+X1pts = evalFactor2(fg, fg.g.vertices[7], 1, N=N)
+X2pts = evalFactor2(fg, fg.g.vertices[7], 5, N=N)
 
 p1 = kde!(X1pts)
 p2 = kde!(X2pts)
