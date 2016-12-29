@@ -17,6 +17,20 @@ This package forms part of the [Caesar.jl](https://github.com/dehann/Caesar.jl) 
 
 <a href="https://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="480" border="10" /></a>
 
+## Installation
+
+You can directly install all the RoME and Multi-modal iSAM functionality in Julia 0.5+ with:
+
+    julia> Pkg.add("RoME")
+
+If you are interested in a broader toolkit, which includes a visualizer and database interaction, please see [Caesar.jl](https://github.com/dehann/Caesar.jl).
+
+## Examples
+
+There are a few use cases in the examples folder, including the Victoria Park dataset. The code was recently refactored and several examples are due to appear.
+
+Feel free to create and issue to resolve problems or if something is unclear.
+
 ## Work in progress
 
 This is a work in progress package.
