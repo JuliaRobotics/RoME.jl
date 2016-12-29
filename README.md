@@ -1,6 +1,6 @@
 # RoME.jl
 
-[![Coverage Status](http://img.shields.io/coveralls/dehann/RoME.jl.svg)](http://coveralls.io/github/dehann/RoME.jl?branch=master)
+[![Build Status](https://travis-ci.org/dehann/RoME.jl.svg?branch=master)](https://travis-ci.org/dehann/RoME.jl)
 [![codecov.io](https://codecov.io/github/dehann/RoME.jl/coverage.svg?branch=master)](https://codecov.io/github/dehann/RoME.jl?branch=master)
 
 [![RoME](http://pkg.julialang.org/badges/RoME_0.5.svg)](http://pkg.julialang.org/?pkg=RoME&ver=0.5)
