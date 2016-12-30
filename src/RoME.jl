@@ -1,6 +1,5 @@
 module RoME
 
-# importall IncrementalInference
 
 using
   IncrementalInference,
@@ -12,6 +11,8 @@ using
   Gadfly,
   JLD,
   HDF5
+
+import IncrementalInference: getSample
 
 export
   initfg,

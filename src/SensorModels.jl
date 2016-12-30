@@ -3,13 +3,6 @@
 # typealias FloatInt Union{Float64, Int64}
 
 # These types should be consolidated in some form -- still exploring for good factorization
-type LinearRangeBearingElevation <: Pairwise
-  range::Normal
-  bearing::Normal
-  elev::Uniform
-  LinearRangeBearingElevation() = new()
-  LinearRangeBearingElevation( r::Tuple{Float64,Float64}, b::Tuple{Float64,Float64}; elev=Uniform(-0.25133,0.25133)) = new(Normal(r...),Normal(b...),elev)
-end
 type reuseLBRA
   wTb::SE3
   M::Array{Float64,2}
@@ -21,6 +14,40 @@ type reuseLBRA
   reuseLBRA(::Int)=new(SE3(0),eye(4),Euler(0),ones(4),ones(4), zeros(3))
   reuseLBRA(a,b,c,d,e,f)=new(a,b,c,d,e,f)
 end
+type LinearRangeBearingElevation <: FunctorPairwise
+  range::Normal
+  bearing::Normal
+  elev::Uniform
+  reuse::reuseLBRA
+  LinearRangeBearingElevation() = new()
+  LinearRangeBearingElevation( r::Tuple{Float64,Float64}, b::Tuple{Float64,Float64}; elev=Uniform(-0.25133,0.25133)) = new(Normal(r...),Normal(b...),elev, reuseLBRA(0))
+end
+function (p::LinearRangeBearingElevation)(
+      res::Vector{Float64},
+      idx::Int,
+      meas::Array{Float64,2},
+      pose::Array{Float64,2},
+      landm::Array{Float64,2}  )
+  #
+  residualLRBE!(res, meas[:,idx], pose[:,idx], landm[:,idx], p.reuse)
+  nothing
+end
+
+function getSample!(y::Array{Float64,2}, las::LinearRangeBearingElevation, idx::Int )
+  y[1,idx] = rand(las.range)
+  y[2,idx] = rand(las.bearing)
+  y[3,idx] = rand(las.elev)
+  nothing
+end
+function getSample( las::LinearRangeBearingElevation, N::Int=1 )
+  y = zeros(3,N)
+  for i in 1:N
+    getSample!(y, las, i)
+  end
+  return y
+end
+
+warn("Obsolete definitions of WrapParam and WrapParamArray")
 type WrapParam{T} <: Function
   # params::Tuple
   landmark::Vector{Float64}
@@ -38,26 +65,7 @@ type WrapParamArray{T} <: Function
   reuse::T
 end
 
-function getSample!(y::Vector{Float64}, las::LinearRangeBearingElevation )
-  y[1] = rand(las.range)
-  y[2] = rand(las.bearing)
-  y[3] = rand(las.elev)
-  nothing
-end
-function getSample( las::LinearRangeBearingElevation )
-  y = zeros(3)
-  getSample!(y, las)
-  return y
-end
 
-
-
-# TODO -- ugrade to more genericparams
-# type WrapParam{T} <: Function
-#   variables::Tuple
-#   varidx::Int
-#   reuse::T
-# end
 
 
 
@@ -98,11 +106,14 @@ function residualLRBE!(resid::Vector{Float64}, z::Vector{Float64}, X::Vector{Flo
   nothing
 end
 # (p::WrapParam{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) = residualLRBE!(res, p.z, x, p.landmark, p.reuse)
-# function (p::WrapParam)(x::Vector{Float64}, res::Vector{Float64})
-  # p.
-  # residualLRBE!(p)
-  # res[1:3] = p.reuse.resid[1:3]
-# end
+function (p::LinearRangeBearingElevation)(
+      res::Vector{Float64},
+      )
+  #
+  residualLRBE!(resid, )
+  res[1:3] = p.reuse.resid[1:3]
+  nothing
+end
 
 
 # Convolution of conditional to project landmark location from position X (dim6)
