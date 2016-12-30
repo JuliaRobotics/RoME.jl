@@ -4,12 +4,16 @@
 
 
 
-type PriorPose3 <: IncrementalInference.Singleton
+type PriorPose3 <: IncrementalInference.FunctorSingleton
     Zi::SE3
     Cov::Array{Float64,2}
     PriorPose3() = new()
     PriorPose3(st::FloatInt, sr::Float64) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]])
     PriorPose3(s::SE3, c::Array{Float64,2}) = new(s,c)
+end
+function getSample(p3::PriorPose3, N::Int=1)
+  mv = Distributions.MvNormal(veeEuler(p3.Zi), p3.Cov)
+  return rand(mv, N)
 end
 type PackedPriorPose3  <: IncrementalInference.PackedInferenceType
     vecZij::Array{Float64,1} # 0rotations, 1translation in each column

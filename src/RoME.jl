@@ -13,6 +13,7 @@ using
   HDF5
 
 import IncrementalInference: getSample
+import Base: +
 
 export
   initfg,
@@ -101,9 +102,11 @@ export
   reuseLBRA,
   ominus,
   ominus!,
+  +,
   evalPotential,
   getSample!,
   getSample,
+  # obsolete
   WrapParam,
   WrapParamArray,
 
