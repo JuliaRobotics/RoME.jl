@@ -25,11 +25,11 @@ end
 function (p::LinearRangeBearingElevation)(
       res::Vector{Float64},
       idx::Int,
-      meas::Array{Float64,2},
+      meas::Tuple{Array{Float64,2}},
       pose::Array{Float64,2},
       landm::Array{Float64,2}  )
   #
-  residualLRBE!(res, meas[:,idx], pose[:,idx], landm[:,idx], p.reuse)
+  residualLRBE!(res, meas[1][:,idx], pose[:,idx], landm[:,idx], p.reuse)
   nothing
 end
 
@@ -44,7 +44,7 @@ function getSample( las::LinearRangeBearingElevation, N::Int=1 )
   for i in 1:N
     getSample!(y, las, i)
   end
-  return y
+  return (y,)
 end
 
 warn("Obsolete definitions of WrapParam and WrapParamArray")
@@ -106,14 +106,14 @@ function residualLRBE!(resid::Vector{Float64}, z::Vector{Float64}, X::Vector{Flo
   nothing
 end
 # (p::WrapParam{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) = residualLRBE!(res, p.z, x, p.landmark, p.reuse)
-function (p::LinearRangeBearingElevation)(
-      res::Vector{Float64},
-      )
-  #
-  residualLRBE!(resid, )
-  res[1:3] = p.reuse.resid[1:3]
-  nothing
-end
+# function (p::LinearRangeBearingElevation)(
+#       res::Vector{Float64},
+#       )
+#   #
+#   residualLRBE!(resid, )
+#   res[1:3] = p.reuse.resid[1:3]
+#   nothing
+# end
 
 
 # Convolution of conditional to project landmark location from position X (dim6)
@@ -234,7 +234,7 @@ function +(arr::Array{Float64,2}, meas::LinearRangeBearingElevation)
   push!(t,arr)
   push!(t,L)
 
-  fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 2, 1, zeros(0,1), getSample)
+  fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 2, 1, (zeros(0,1),) , getSample)
   # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
   fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
   # fp!(x, res)

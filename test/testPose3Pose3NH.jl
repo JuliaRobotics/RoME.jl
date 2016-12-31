@@ -26,7 +26,7 @@ end
 println("Test if null hypothesis occurs as expected...")
 
 
-N = 200
+N = 101
 fg = initfg()
 
 initCov = eye(6)
@@ -53,20 +53,20 @@ means = Base.mean(priorpts,2)
 @test sum(map(Int,abs(means[1:3]) .> 0.5)) == 0
 @test sum(map(Int,abs(means[4:6]) .> 0.05)) == 0
 
-
-
 v2, f2 = addOdoFG!(fg, Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov) )
 v3, f3 = addOdoFG!(fg, Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov) )
-
 
 println("Testing Pose3Pose3 evaluation...")
 X1pts = evalFactor2(fg, fg.g.vertices[6], 3)
 X2pts = evalFactor2(fg, fg.g.vertices[6], 5)
-X2ptsMean = Base.mean(X2pts,2)
 X1ptsMean = Base.mean(X1pts,2)
+X2ptsMean = Base.mean(X2pts,2)
 @test  sum(map(Int, abs(X1ptsMean) - [25.0;0;0;0;0;0] .< 5.0 )) == 6
 @test  sum(map(Int, abs(X2ptsMean - [50.0;0;0;0;0;0]) .< 5.0 )) == 6
 
+tree = wipeBuildNewTree!(fg)
+inferOverTreeR!(fg,tree)
+inferOverTree!(fg,tree)
 
 
 println("Adding Pose3Pose3NH to graph...")
@@ -81,9 +81,6 @@ X2pts = evalFactor2(fg, fg.g.vertices[7], 5, N=N)
 
 p1 = kde!(X1pts)
 p2 = kde!(X2pts)
-
-# X1ptst, = KernelDensityEstimate.sample(p1,200)
-# X1ptst[1,:] -= 5.0
 
 
 # plotKDE([marginal(p1,[1]),marginal(p1t,[1])], c=["black";"red"])

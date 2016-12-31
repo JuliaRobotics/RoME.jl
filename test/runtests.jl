@@ -1,4 +1,5 @@
 addprocs(3)
+@show nprocs()
 
 using RoME
 using Base.Test

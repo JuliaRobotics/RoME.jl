@@ -32,14 +32,14 @@ t = Array{Array{Float64,2},1}()
 push!(t,X)
 push!(t,pts)
 
-fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 2, 1, zeros(0,1), RoME.getSample)
+fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 2, 1, (zeros(0,1),) , RoME.getSample)
 
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
 fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
 # fp!(x, res)
 @time fp!(zeros(3), zeros(3))
 
-@show zDim = size(fp!.measurement,1)
+@show zDim = size(fp!.measurement[1],1)
 fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], zDim, fp!)
 
 @time for fp!.particleidx in 1:N
@@ -68,14 +68,14 @@ t = Array{Array{Float64,2},1}()
 push!(t,pts)
 push!(t,L)
 
-fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 1, 1, zeros(0,1), RoME.getSample)
+fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 1, 1, (zeros(0,1),) , RoME.getSample)
 
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
 fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
 # fp!(x, res)
 @time fp!(zeros(6), zeros(3))
 
-@show zDim = size(fp!.measurement,1)
+@show zDim = size(fp!.measurement[1],1)
 fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], zDim, fp!)
 
 @time for fp!.particleidx in 1:N
