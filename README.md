@@ -11,7 +11,7 @@ Robot Motion Estimate: A set of functions for developing front-ends for SLAM in 
 
 ## Introduction
 
-This package forms part of the [Caesar.jl](https://github.com/dehann/Caesar.jl) robot state estimate toolkit -- towards robust solutions in robot navigation and mapping. Robot style wrapper function and front-end factor graph generation functions are provided. Plot based visualization of robot belief based navigation variables is provided.
+This package forms part of the [Caesar.jl](https://github.com/dehann/Caesar.jl) robot state estimate toolkit, towards robust solutions in robot navigation and mapping, which includes visualization and database interaction features. Robot style wrapper function and front-end factor graph generation functions are provided. Plot based visualization of robot belief based navigation variables is provided.
 
 ## Example
 
