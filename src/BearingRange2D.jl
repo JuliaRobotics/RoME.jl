@@ -1,6 +1,7 @@
 # Bearing and Range constraints for 2D
 
 
+# better to use bearingrange with [uniform bearing], numerical solving issue on 1D
 type Pose2DPoint2DRange <: IncrementalInference.FunctorPairwise
     Zij::Vector{Float64} # bearing and range hypotheses as columns
     Cov::Float64
@@ -32,12 +33,31 @@ end
 #-------------------------------------------------------------------------------
 # bearing and range available
 
-type Pose2DPoint2DBearingRange <: IncrementalInference.Pairwise
-    Zij::Array{Float64,2} # bearing and range hypotheses as columns
-    Cov::Array{Float64,2}
-    W::Array{Float64,1}
+type Pose2DPoint2DBearingRange{B,R} <: IncrementalInference.FunctorPairwise
+    # Zij::Array{Float64,2} # bearing and range hypotheses as columns
+    # Cov::Array{Float64,2}
+    # W::Array{Float64,1}
+    bearing::B
+    range::R
     Pose2DPoint2DBearingRange() = new()
-    Pose2DPoint2DBearingRange(x...) = new(x[1],x[2],x[3])
+    Pose2DPoint2DBearingRange{B,R}(x1::B,x2::R) = new(x1,x2)
+end
+function getSample(pp2br::Pose2DPoint2DBearingRange, N::Int=1)
+  b = rand(pp2br.bearing, N)
+  r = rand(pp2br.range, N)
+  return ([b';r'], )
+end
+# define the conditional probability constraint
+function (pp2br::Pose2DPoint2DBearingRange)(res::Array{Float64},
+        idx::Int,
+        meas::Tuple{Array{Float64,2}},
+        xi::Array{Float64,2},
+        lm::Array{Float64,2} )
+  #
+  # @show size(lm), size(xi), size(meas), size(meas[1]), size(meas[2])
+  res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]) + xi[1,idx])
+  res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]) + xi[2,idx])
+  nothing
 end
 
 
