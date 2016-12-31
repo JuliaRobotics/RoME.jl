@@ -1,27 +1,50 @@
 # Point2D type
 
 
-type PriorPoint2D <: IncrementalInference.Singleton
+type PriorPoint2D <: IncrementalInference.FunctorSingleton
   mv::MvNormal
   W::Array{Float64,1}
   PriorPoint2D() = new()
   PriorPoint2D(mu, cov, W) = new(MvNormal(mu, cov), W)
 end
+function getSample(p2::PriorPoint2D, N::Int=1)
+  return (rand(p2.mv, N),)
+end
 
-type Point2DPoint2DRange <: IncrementalInference.Pairwise
+type Point2DPoint2DRange <: IncrementalInference.FunctorPairwise
     Zij::Vector{Float64} # bearing and range hypotheses as columns
     Cov::Float64
     W::Vector{Float64}
     Point2DPoint2DRange() = new()
     Point2DPoint2DRange(x...) = new(x[1],x[2],x[3])
 end
+function (pp2r::Point2DPoint2DRange)(
+      res::Array{Float64},
+      idx::Int,
+      meas::Tuple, # Array{Float64,2},
+      xi::Array{Float64,2},
+      lm::Array{Float64,2} )
+  #
+  # TODO -- still need to add multi-hypotheses support here
+  # this is the noisy range
+  z = pp2r.Zij[1]+meas[1][1,idx]
+  # theta = meas[2]
+  XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
+  YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
+  res[1] = XX^2 + YY^2
+  nothing
+end
+function getSample(pp2::Point2DPoint2DRange, N::Int=1)
+  return (pp2.Cov*randn(1,N),  2*pi*rand(N))
+end
 
 
 
+
+# Old evalPotential functions
 function evalPotential(prior::PriorPoint2D, Xi::Array{Graphs.ExVertex,1}; N::Int64=100)#, from::Int64)
     return rand(prior.mv, N)
 end
-
 
 # Solve for Xid, given values from vertices [Xi] and measurement rho
 function evalPotential(rho::Point2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int64)

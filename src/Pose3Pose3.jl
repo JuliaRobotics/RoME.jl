@@ -4,12 +4,16 @@
 
 
 
-type PriorPose3 <: IncrementalInference.Singleton
+type PriorPose3 <: IncrementalInference.FunctorSingleton
     Zi::SE3
     Cov::Array{Float64,2}
     PriorPose3() = new()
     PriorPose3(st::FloatInt, sr::Float64) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]])
     PriorPose3(s::SE3, c::Array{Float64,2}) = new(s,c)
+end
+function getSample(p3::PriorPose3, N::Int=1)
+  mv = Distributions.MvNormal(veeEuler(p3.Zi), p3.Cov)
+  return (rand(mv, N),)
 end
 type PackedPriorPose3  <: IncrementalInference.PackedInferenceType
     vecZij::Array{Float64,1} # 0rotations, 1translation in each column
@@ -52,13 +56,38 @@ end
 # ------------------------------------
 
 
-type Pose3Pose3 <: IncrementalInference.Pairwise
-    Zij::SE3 # 3translations, 3exponential param rotation
+type Pose3Pose3 <: IncrementalInference.FunctorPairwise
+    Zij::SE3 # 3translations, 3exponential param rotation, iZj
     Cov::Array{Float64,2}
+    reuseTent::SE3
+    reusewTi::SE3
+    reusewTj::SE3
+    reuseiTi::SE3
     Pose3Pose3() = new()
-    Pose3Pose3(s::SE3, c::Array{Float64,2}) = new(s,c)
-    Pose3Pose3(st::FloatInt, sr::Float64) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]])
+    Pose3Pose3(s::SE3, c::Array{Float64,2}) = new(s,c,SE3(0),SE3(0),SE3(0),SE3(0))
+    Pose3Pose3(st::FloatInt, sr::Float64) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]], SE3(0),SE3(0),SE3(0),SE3(0))
 end
+function (pp3::Pose3Pose3)(res::Array{Float64}, idx::Int, meas::Tuple{Array{Float64,2}}, wXi::Array{Float64,2}, wXj::Array{Float64,2})
+  pp3.reusewTi.t = wXi[1:3,idx]
+  TransformUtils.convert!(pp3.reusewTi.R, Euler(wXi[4,idx],wXi[5,idx],wXi[6,idx]))
+  pp3.reusewTj.t = wXj[1:3,idx]
+  TransformUtils.convert!(pp3.reusewTj.R, Euler(wXj[4,idx],wXj[5,idx],wXj[6,idx]))
+
+  # TODO -- convert to in place convert! functions, many speed-ups possible here
+  pp3.reuseTent.R, pp3.reuseTent.t = TransformUtils.convert(SO3, so3(meas[1][4:6,idx])), meas[1][1:3,idx]
+  # jTi = A_invB(SE3(0), pp3.reusewTj)*pp3.reusewTi
+  # jTi = inverse(pp3.reusewTj)*pp3.reusewTi
+  jTi = SE3( matrix(pp3.reusewTj)\matrix(pp3.reusewTi) )
+  pp3.reuseiTi = (pp3.Zij*pp3.reuseTent) * jTi
+  res[:] = veeEuler(pp3.reuseiTi)
+  nothing
+end
+function getSample(pp3::Pose3Pose3, N::Int=1)
+  # this could be much better if we can operate with array of manifolds instead
+  mv = Distributions.MvNormal(zeros(6), pp3.Cov)
+  return (rand(mv, N),)
+end
+
 type PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
   vecCov::Array{Float64,1}
@@ -99,16 +128,55 @@ end
 
 
 
-
-type Pose3Pose3NH <: IncrementalInference.Pairwise
+type Pose3Pose3NH <: IncrementalInference.FunctorPairwise
     Zij::SE3 # 3translations, 3exponential param rotation
     Cov::Array{Float64,2}
     ValidHypot::Distributions.Categorical
+    reusewTi::SE3
+    reusewTj::SE3
+    reuseiTi::SE3
     Pose3Pose3NH() = new()
-    Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Vector{Float64}) = new(s,c, Distributions.Categorical(vh)  )
-    Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Float64) = new(s,c, [(1.0-vh);vh])
-    Pose3Pose3NH(st::FloatInt, sr::Float64;vh::Float64=1.0) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]], vh)
+    Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Vector{Float64}) = new(s,c, Distributions.Categorical(vh),SE3(0),SE3(0),SE3(0)  )
+    Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Float64) = new(s,c, [(1.0-vh);vh],SE3(0),SE3(0),SE3(0))
+    Pose3Pose3NH(st::FloatInt, sr::Float64;vh::Float64=1.0) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]], vh,SE3(0),SE3(0),SE3(0))
 end
+function getSample(pp3::Pose3Pose3NH, N::Int=1)
+  # this could be much better if we can operate with array of manifolds instead
+  mv = Distributions.MvNormal(veeEuler(pp3.Zij), pp3.Cov)
+  return (rand(mv, N), rand(pp3.ValidHypot, N)-1)
+end
+function (pp3::Pose3Pose3NH)(res::Array{Float64},
+      idx::Int,
+      meas::Tuple,
+      wXi::Array{Float64,2},
+      wXj::Array{Float64,2}  )
+  #
+  if meas[2][idx] == 0
+    # null hypothesis
+    res[1:6] = 1e-10*randn(6)
+  else
+    pp3.reusewTi.t = wXi[1:3,idx]
+    TransformUtils.convert!(pp3.reusewTi.R, Euler(wXi[4,idx],wXi[5,idx],wXi[6,idx]))
+    pp3.reusewTj.t = wXj[1:3,idx]
+    TransformUtils.convert!(pp3.reusewTj.R, Euler(wXj[4,idx],wXj[5,idx],wXj[6,idx]))
+
+    # TODO -- convert to in place convert! functions, many speed-ups possible here
+    jTi = SE3( matrix(pp3.reusewTj)\matrix(pp3.reusewTi) )
+    pp3.reuseiTi = (SE3(meas[1][1:3,idx],Euler(meas[1][4:6,idx]...)) * jTi)
+    res[:] = veeEuler(pp3.reuseiTi)
+  end
+  nothing
+end
+
+# using NLsolve
+# function f(x, res)
+#   res[1] = 1e-10*randn()
+#   nothing
+# end
+# r = nlsolve(f, [1.0])
+# @show r
+
+
 type PackedPose3Pose3NH <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
   vecCov::Array{Float64,1}
@@ -127,15 +195,6 @@ function convert(::Type{PackedPose3Pose3NH}, d::Pose3Pose3NH)
   v2 = d.Cov[:];
   return PackedPose3Pose3NH(v1,v2,size(d.Cov,1), d.ValidHypot.p )
 end
-
-
-
-
-
-
-
-
-
 
 
 
