@@ -53,11 +53,11 @@ tree = wipeBuildNewTree!(fg)
 
 # test post evaluation values are correct
 pts = getVal(fg, :x1)
-@test norm(Base.mean(pts,2)[1:2]-[0.0;0.0]) < 10.0
+@test norm(Base.mean(pts,2)[1:2]-[0.0;0.0]) < 20.0
 @test abs(Base.mean(pts,2)[3]) < 0.5
 
 pts = getVal(fg, :x2)
-@test norm(Base.mean(pts,2)[1:2]-[50.0;0.0]) < 10.0
+@test norm(Base.mean(pts,2)[1:2]-[50.0;0.0]) < 20.0
 @test abs(Base.mean(pts,2)[3] - pi/2) < 0.5
 
 pts = getVal(fg, :x3)
@@ -84,7 +84,7 @@ pp2 = PriorPoint2D([10.0;0.0], diagm([1.0;1.0]), [1.0])
 f5 = addFactor!(fg,[l1], pp2)
 pts = evalFactor2(fg, f5, l1.index)
 
-@test norm(Base.mean(pts,2)[:]-[10.0;0.0]) < 3.0
+@test norm(Base.mean(pts,2)[:]-[10.0;0.0]) < 5.0
 
 
 # using KernelDensityEstimate
