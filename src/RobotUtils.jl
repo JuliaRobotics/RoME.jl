@@ -533,7 +533,14 @@ function addLinearArrayConstraint(fgl::FactorGraph,
       bearingcov::Float64=3e-4 )
 
   #
+
   cl = LinearRangeBearingElevation((rangebearing[1],rangecov),(rangebearing[2],bearingcov))
+  if !haskey(fgl.IDs, landm)
+    pts = getVal(fgl, pose) + cl
+    N = size(pts,2)
+    vl1 = addNode!(fgl, landm,  pts,  N=N)
+    println("Automatically added $(landm) to the factor graph")
+  end
   addFactor!(fgl, [getVert(fgl, pose); getVert(fgl, landm)], cl)
   nothing
 end

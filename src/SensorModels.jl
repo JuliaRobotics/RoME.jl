@@ -81,14 +81,14 @@ end
 
 function ominus!(reuse::reuseLBRA, X::Vector{Float64}, L::Array{Float64})
   copy!(reuse.wTb.t, X[1:3])
-  reuse.E.P, reuse.E.R, reuse.E.Y = X[4], X[5], X[6]
+  reuse.E.R, reuse.E.P, reuse.E.Y = X[4], X[5], X[6]
   convert!(reuse.wTb.R, reuse.E)  # costly
   matrix!(reuse.M, reuse.wTb)
   reuse.inp[1:3] = L[1:3]
   reuse.outp[1:4] = reuse.M\reuse.inp  # bTl  # costly
   reuse.rbe[1] = norm(reuse.outp[1:3])
   reuse.rbe[2] = atan2(reuse.outp[2],	reuse.outp[1])
-  reuse.rbe[3] = -atan2(reuse.outp[3], reuse.outp[1])
+  reuse.rbe[3] = -atan2(reuse.outp[3], reuse.outp[1]) #-
   # return [norm(reuse.outp[1:3]); b; el]
   nothing
 end
