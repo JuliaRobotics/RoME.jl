@@ -218,14 +218,16 @@ function projectParticles(Xval::Array{Float64,2}, Z::SE3, Cov::Array{Float64,2})
 
   ent, x = SE3(0), SE3(0)
   ENT = rand( MvNormal(zeros(6), Cov), c )
-
   j=1
   # for j in 1:cz
     for i in 1:c
-      x.R, x.t = TransformUtils.convert(SO3,Euler((Xval[4:6,i][:])...)), Xval[1:3,i][:]
-      ent.R, ent.t = TransformUtils.convert(SO3, so3(ENT[4:6,i][:])), ENT[1:3,i][:]
-      newval = x*Z*ent
-      RES[1:r,i*j] = veeEuler(newval)
+      x.R = TransformUtils.convert(SO3,Euler(Xval[4,i],Xval[5,i],Xval[6,i]))
+      x.t = Xval[1:3,i]
+      ent.R =  TransformUtils.convert(SO3, so3(ENT[4:6,i]))
+      ent.t = ENT[1:3,i]
+      newval = Z*ent
+      res = x*newval
+      RES[1:r,i*j] = veeEuler(res)
     end
   # end
   #
@@ -234,6 +236,23 @@ end
 
 ⊕(Xpts::Array{Float64,2}, z::Pose3Pose3) = projectParticles(Xpts, z.Zij, z.Cov)
 ⊕(Xvert::Graphs.ExVertex, z::Pose3Pose3) = ⊕(getVal(Xvert), z)
+
+
+using TransformUtils, RoME
+
+tf = SE3([0.0;0.0;0.0], AngleAxis(pi/4,[1.0;0;0]))# Euler(pi/4,0.0,0.0) )
+
+N = 1
+initCov = 0.01*eye(6)
+[initCov[i,i] = 0.001 for i in 4:6];
+odoCov = deepcopy(initCov)
+odo = Pose3Pose3(tf, odoCov)
+
+X = [0.01*randn(5,N);pi/4+0.01*randn(1,N)]
+
+Y = X ⊕ odo
+
+@show
 
 
 
