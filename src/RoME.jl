@@ -191,6 +191,7 @@ include("SimulationUtils.jl")
 
 include("FactorGraphAnalysisTools.jl")
 
+include("NavigationSystem.jl")
 # include("VictoriaParkTypes.jl")
 # include("VicPrkEstimator.jl")
 #
