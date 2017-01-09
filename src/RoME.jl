@@ -191,10 +191,9 @@ include("SimulationUtils.jl")
 
 include("FactorGraphAnalysisTools.jl")
 
+include("WheeledRobotUtils.jl")
 include("NavigationSystem.jl")
-# include("VictoriaParkTypes.jl")
-# include("VicPrkEstimator.jl")
-#
+
 # include("dev/ISAMRemoteSolve.jl")
 
 
