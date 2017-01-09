@@ -258,13 +258,13 @@ function plotTrckStep(DBG, i, fid, m)
   plotKDE(arr, c=["red";"green";"black"])
 end
 
-function loadVicPrkDataset(filename::AbstractString="datasets/VicPrk.jld")
-  DRS,GPS,LsrFeats,d,f = jldopen(filename, "r") do file
-    read(file, "DRS")
-    read(file, "GPS")
-    read(file, "LsrFeats")
-    read(file, "d")
-    read(file, "f")
-  end
-  return DRS,GPS,LsrFeats,d,f
-end
+# function loadVicPrkDataset(filename::AbstractString="datasets/VicPrk.jld")
+#   DRS,GPS,LsrFeats,d,f = jldopen(filename, "r") do file
+#     read(file, "DRS")
+#     read(file, "GPS")
+#     read(file, "LsrFeats")
+#     read(file, "d")
+#     read(file, "f")
+#   end
+#   return DRS,GPS,LsrFeats,d,f
+# end

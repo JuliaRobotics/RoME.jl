@@ -160,7 +160,7 @@ export
   # FG Analysis tools
   rangeErrMaxPoint2,
   rangeCompAllPoses,
-  rangeCompAllPoses
+  rangeCompAllPoses,
 
 
   # Datalayer converters
@@ -169,7 +169,18 @@ export
   # FNDencode,
   # FNDdecode
 
-
+  # new robot navigation functionality
+  triggerPose,
+  GenericInSituSystem,
+  InSituSystem,
+  makeInSituSys,
+  makeGenericInSituSys,
+  advOdoByRules,
+  progressExamplePlot,
+  plotTrckStep,
+  poseTrigAndAdd!,
+  poseTrigAndAdd!,
+  processTreeTrackersUpdates!
 
 
 
