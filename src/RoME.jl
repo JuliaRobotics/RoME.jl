@@ -155,7 +155,12 @@ export
   PackedPose3Pose3NH,
 
   # SLAM specific functions
-  SLAMWrapper
+  SLAMWrapper,
+
+  # FG Analysis tools
+  rangeErrMaxPoint2,
+  rangeCompAllPoses,
+  rangeCompAllPoses
 
 
   # Datalayer converters
@@ -184,11 +189,12 @@ include("RobotUtils.jl")
 
 include("SimulationUtils.jl")
 
+include("FactorGraphAnalysisTools.jl")
 
-include("VictoriaParkTypes.jl")
-include("VicPrkEstimator.jl")
-
-include("dev/ISAMRemoteSolve.jl")
+# include("VictoriaParkTypes.jl")
+# include("VicPrkEstimator.jl")
+#
+# include("dev/ISAMRemoteSolve.jl")
 
 
 
