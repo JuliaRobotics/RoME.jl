@@ -47,23 +47,23 @@ function getSample( las::LinearRangeBearingElevation, N::Int=1 )
   return (y,)
 end
 
-warn("Obsolete definitions of WrapParam and WrapParamArray")
-type WrapParam{T} <: Function
-  # params::Tuple
-  landmark::Vector{Float64}
-  pose::Vector{Float64}
-  z::Vector{Float64}
-  reuse::T
-end
-# towards Tuple of pointers for speed and flexibility
-type WrapParamArray{T} <: Function
-  # params::Tuple
-  landmark::Array{Float64}
-  pose::Array{Float64}
-  z::Vector{Float64}
-  idx::Int
-  reuse::T
-end
+# warn("Obsolete definitions of WrapParam and WrapParamArray")
+# type WrapParam{T} <: Function
+#   # params::Tuple
+#   landmark::Vector{Float64}
+#   pose::Vector{Float64}
+#   z::Vector{Float64}
+#   reuse::T
+# end
+# # towards Tuple of pointers for speed and flexibility
+# type WrapParamArray{T} <: Function
+#   # params::Tuple
+#   landmark::Array{Float64}
+#   pose::Array{Float64}
+#   z::Vector{Float64}
+#   idx::Int
+#   reuse::T
+# end
 
 
 
@@ -194,37 +194,37 @@ function project(meas::LinearRangeBearingElevation, X::Vector{Float64}, Y::Vecto
 end
 
 
-(p::WrapParam{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
-    residualLRBE!(res, p.z, x, p.landmark, p.reuse)
-(p::WrapParamArray{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
-    residualLRBE!(res, p.z, x, p.landmark[:,p.idx], p.reuse)
+# (p::WrapParam{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
+#     residualLRBE!(res, p.z, x, p.landmark, p.reuse)
+# (p::WrapParamArray{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
+#     residualLRBE!(res, p.z, x, p.landmark[:,p.idx], p.reuse)
 
 
 
 
-function evalPotential(meas::LinearRangeBearingElevation, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
-  # Function soon to be replaced with improved functor version
-  fromX, ret, ff = zeros(0,0), zeros(0,0), +
-
-  fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
-
-  if Xi[1].index == Xid
-    fromX = getVal( Xi[2] )
-    ret = deepcopy(getVal( Xi[1] ))
-    ff = backprojectRandomized!
-  elseif Xi[2].index == Xid
-    fromX = getVal( Xi[1] )
-    ret = deepcopy(getVal( Xi[2] ))
-    ff = project!
-  end
-  r,c = size(fromX)
-
-	for i in 1:200
-		ff(meas, fromX, ret, i, fp!)
-	end
-
-  return ret
-end
+# function evalPotential(meas::LinearRangeBearingElevation, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+#   # Function soon to be replaced with improved functor version
+#   fromX, ret, ff = zeros(0,0), zeros(0,0), +
+#
+#   fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
+#
+#   if Xi[1].index == Xid
+#     fromX = getVal( Xi[2] )
+#     ret = deepcopy(getVal( Xi[1] ))
+#     ff = backprojectRandomized!
+#   elseif Xi[2].index == Xid
+#     fromX = getVal( Xi[1] )
+#     ret = deepcopy(getVal( Xi[2] ))
+#     ff = project!
+#   end
+#   r,c = size(fromX)
+#
+# 	for i in 1:200
+# 		ff(meas, fromX, ret, i, fp!)
+# 	end
+#
+#   return ret
+# end
 
 
 function +(arr::Array{Float64,2}, meas::LinearRangeBearingElevation)

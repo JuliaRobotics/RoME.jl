@@ -12,10 +12,19 @@ using
   JLD,
   HDF5
 
-import IncrementalInference: getSample
+import IncrementalInference: getSample, ls, addFactor!, addNode!, getVert, getVertKDE, getVal
 import Base: +
 
 export
+  # pass throughs from IncrementalInference
+  ls,
+  addFactor!,
+  addNode!,
+  getVert,
+  getVertKDE,
+  getVal,
+
+  # RoME specific functions
   initfg,
   measureMeanDist,
   predictBodyBR,

@@ -40,7 +40,7 @@ end
  # 1.0199
 
 
-
+warn("Moved SE2 functions to TransformUtils")
  function wrapRad(th::Float64)
    if th >= pi
      th -= 2.0*pi
