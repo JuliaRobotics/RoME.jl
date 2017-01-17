@@ -12,6 +12,7 @@ using
   JLD,
   HDF5
 
+import TransformUtils: ⊕
 import IncrementalInference: getSample, ls, addFactor!, addNode!, getVert, getVertKDE, getVal
 import Base: +
 
