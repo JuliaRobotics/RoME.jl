@@ -35,6 +35,10 @@ export
   getVertKDE,
   getVal,
   getData,
+  FNDencode,
+  FNDdecode,
+  VNDencoder,
+  VNDdecoder,
 
   # RoME specific functions
   initfg,

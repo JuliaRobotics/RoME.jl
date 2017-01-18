@@ -2,9 +2,64 @@
 
 
 using RoME
-using IncrementalInference
+# using IncrementalInference
 
 using Base.Test
+
+
+N = 100
+fg = initfg()
+
+
+initCov = diagm([0.03;0.03;0.001])
+odoCov = diagm([3.0;3.0;0.01])
+
+# Some starting position
+v1 = addNode!(fg, :x1, zeros(3,1), diagm([1.0;1.0;0.1]), N=N)
+ipp = PriorPose2(zeros(3,1), initCov, [1.0])
+f1  = addFactor!(fg,[v1], ipp)
+
+# and a second pose
+v2 = addNode!(fg, :x2, ([50.0;0.0;pi/2]')', diagm([1.0;1.0;0.05]), N=N)
+ppc = Pose2Pose2(([50.0;0.0;pi/2]')', odoCov, [1.0])
+f2 = addFactor!(fg, [v1;v2], ppc)
+
+
+println("test conversions of PriorPose2")
+dd = convert(PackedPriorPose2, ipp)
+upd = convert(RoME.PriorPose2, dd)
+
+@test compare(ipp, upd)
+
+packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
+unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{RoME.PriorPose2}, packeddata)
+
+@test IncrementalInference.compare(getData(f1), unpackeddata)
+
+packedv1data = VNDencoder(IncrementalInference.PackedVariableNodeData, getData(v1))
+upv1data = VNDdecoder(IncrementalInference.VariableNodeData, packedv1data)
+
+@test IncrementalInference.compare(getData(v1), upv1data)
+
+
+
+println("test conversions of Pose2Pose2")
+
+dd = convert(PackedPose2Pose2, ppc)
+upd = convert(RoME.Pose2Pose2, dd)
+
+# TODO -- fix ambiguity in compare function
+@test compare(ppc, upd)
+
+packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Pose2}, getData(f2))
+unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{RoME.Pose2Pose2}, packeddata)
+
+# TODO -- fix ambibuity in compare function
+@test IncrementalInference.compare(getData(f2), unpackeddata)
+
+
+
+
 
 # parameters
 N = 300

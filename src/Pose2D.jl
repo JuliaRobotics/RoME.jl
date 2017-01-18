@@ -38,13 +38,25 @@ function (pp2::Pose2Pose2)(res::Array{Float64},
 end
 
 
+function compare(a::PriorPose2,b::PriorPose2; tol::Float64=1e-10)
+  TP = true
+  TP = TP && norm(a.Zi-b.Zi) < tol
+  TP = TP && norm(a.Cov-b.Cov) < tol
+  TP = TP && norm(a.W-b.W) < tol
+  return TP
+end
+function compare(a::Pose2Pose2,b::Pose2Pose2; tol::Float64=1e-10)
+  TP = true
+  TP = TP && norm(a.Zij-b.Zij) < tol
+  TP = TP && norm(a.Cov-b.Cov) < tol
+  TP = TP && norm(a.W-b.W) < tol
+  return TP
+end
 
 
 
 
-
-
-# Temporary functions for database support -- will be reduced to macro in future
+# NOTE, for database support -- will be reduced to macro in future
 # ------------------------------------
 
 
@@ -69,20 +81,7 @@ function convert(::Type{PackedPriorPose2}, d::PriorPose2)
                           v2,size(d.Cov,1),
                           d.W)
 end
-# function convert(::Type{PackedFunctionNodeData{PackedPriorPose2}}, d::FunctionNodeData{PriorPose2})
-#   return PackedFunctionNodeData{PackedPriorPose2}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
-#           string(d.frommodule), convert(PackedPriorPose2, d.fnc))
-# end
-# function convert(::Type{FunctionNodeData{PriorPose2}}, d::PackedFunctionNodeData{PackedPriorPose2})
-#   return FunctionNodeData{PriorPose2}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
-#           Symbol(d.frommodule), convert(PriorPose2, d.fnc))
-# end
-# function FNDencode(d::FunctionNodeData{PriorPose2})
-#   return convert(PackedFunctionNodeData{PackedPriorPose2}, d)
-# end
-# function FNDdecode(d::PackedFunctionNodeData{PackedPriorPose2})
-#   return convert(FunctionNodeData{PriorPose2}, d)
-# end
+
 
 
 # --------------------------------------------
@@ -108,20 +107,9 @@ function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
                           v2,size(d.Cov,1),
                           d.W)
 end
-# function convert(::Type{PackedFunctionNodeData{PackedPose2Pose2}}, d::FunctionNodeData{Pose2Pose2})
-#   return PackedFunctionNodeData{PackedPose2Pose2}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
-#           string(d.frommodule), convert(PackedPose2Pose2, d.fnc))
-# end
-# function convert(::Type{FunctionNodeData{Pose2Pose2}}, d::PackedFunctionNodeData{PackedPose2Pose2})
-#   return FunctionNodeData{Pose2Pose2}(d.fncargvID, d.eliminated, d.potentialused, d.edgeIDs,
-#           Symbol(d.frommodule), convert(Pose2Pose2, d.fnc))
-# end
-# function FNDencode(d::FunctionNodeData{Pose2Pose2})
-#   return convert(PackedFunctionNodeData{PackedPose2Pose2}, d)
-# end
-# function FNDdecode(d::PackedFunctionNodeData{PackedPose2Pose2})
-#   return convert(FunctionNodeData{Pose2Pose2}, d)
-# end
+
+
+
 
 
 # --------------------------------------------
