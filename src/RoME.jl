@@ -12,11 +12,21 @@ using
   JLD,
   HDF5
 
-import TransformUtils: ⊕
-import IncrementalInference: getSample, ls, addFactor!, addNode!, getVert, getVertKDE, getVal
 import Base: +
+import TransformUtils: ⊖, ⊕, convert, compare
+import IncrementalInference: convert, getSample, compare
 
 export
+  # pass throughs from TransformUtils
+  SE3,
+  Euler,
+  Quaternion,
+  AngleAxis,
+  SO3,
+  so3,
+  compare,
+  convert,
+
   # pass throughs from IncrementalInference
   ls,
   addFactor!,
@@ -24,6 +34,7 @@ export
   getVert,
   getVertKDE,
   getVal,
+  getData,
 
   # RoME specific functions
   initfg,
@@ -158,7 +169,9 @@ export
 
   # Pose3D
   PriorPose3,
+  PackedPriorPose3,
   Pose3Pose3,
+  PackedPose3Pose3,
   projectParticles,
   ⊕,
   Pose3Pose3NH,

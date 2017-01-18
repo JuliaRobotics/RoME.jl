@@ -16,23 +16,22 @@ function getSample(p3::PriorPose3, N::Int=1)
   return (rand(mv, N),)
 end
 type PackedPriorPose3  <: IncrementalInference.PackedInferenceType
-    vecZij::Array{Float64,1} # 0rotations, 1translation in each column
-    dimz::Int64
+    vecZi::Array{Float64,1} # 0rotations, 1translation in each column
     vecCov::Array{Float64,1}
     dimc::Int64
     PackedPriorPose3() = new()
-    PackedPriorPose3(x...) = new(x[1], x[2], x[3], x[4])
+    PackedPriorPose3(x...) = new(x[1], x[2], x[3])
 end
 function convert(::Type{PriorPose3}, d::PackedPriorPose3)
-  Zij = reshapeVec2Mat(d.vecZij, d.dimz)
+  Zi = SE3(d.vecZi[1:3], Quaternion(d.vecZi[4],d.vecZi[5:7]))
   Cov = reshapeVec2Mat(d.vecCov, d.dimc)
-  return PriorPose3(Zij, Cov)
+  return PriorPose3(Zi, Cov)
 end
 function convert(::Type{PackedPriorPose3}, d::PriorPose3)
-  v1 = d.Zij[:];
+  # TODO -- change to
+  v1 = veeQuaternion(d.Zi)
   v2 = d.Cov[:];
-  return PackedPriorPose3(v1,size(d.Zij,1),
-                          v2,size(d.Cov,1))
+  return PackedPriorPose3(v1, v2, size(d.Cov,1))
 end
 
 # no longer needed -- processed by multiple dispatch
@@ -93,15 +92,15 @@ type PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
   vecCov::Array{Float64,1}
   dimc::Int64
   PackedPose3Pose3() = new()
-  PackedPose3Pose3(x...) = new(x[1], x[2], x[3], x[4])
+  PackedPose3Pose3(x...) = new(x[1], x[2], x[3])
 end
 function convert(::Type{Pose3Pose3}, d::PackedPose3Pose3)
-  Eu = Euler(d.vecZij[4:6]...)
-  return Pose3Pose3(SE3(d.vecZij[1:3], Eu),
+  qu = Quaternion(d.vecZij[4], d.vecZij[5:7])
+  return Pose3Pose3(SE3(d.vecZij[1:3], qu),
                     reshapeVec2Mat(d.vecCov, d.dimc))
 end
 function convert(::Type{PackedPose3Pose3}, d::Pose3Pose3)
-  v1 = veeEuler(d.Zij)
+  v1 = veeQuaternion(d.Zij)
   v2 = d.Cov[:];
   return PackedPose3Pose3(v1,v2,size(d.Cov,1) )
 end
@@ -137,8 +136,8 @@ type Pose3Pose3NH <: IncrementalInference.FunctorPairwise
     reuseiTi::SE3
     Pose3Pose3NH() = new()
     Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Vector{Float64}) = new(s,c, Distributions.Categorical(vh),SE3(0),SE3(0),SE3(0)  )
-    Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Float64) = new(s,c, [(1.0-vh);vh],SE3(0),SE3(0),SE3(0))
-    Pose3Pose3NH(st::FloatInt, sr::Float64;vh::Float64=1.0) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]], vh,SE3(0),SE3(0),SE3(0))
+    Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Float64) = new(s,c, Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
+    Pose3Pose3NH(st::FloatInt, sr::Float64;vh::Float64=1.0) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]], Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
 end
 function getSample(pp3::Pose3Pose3NH, N::Int=1)
   # this could be much better if we can operate with array of manifolds instead
@@ -183,32 +182,30 @@ type PackedPose3Pose3NH <: IncrementalInference.PackedInferenceType
   dimc::Int64
   ValidHypot::Vector{Float64}
   PackedPose3Pose3NH() = new()
-  PackedPose3Pose3NH(x...) = new(x[1], x[2], x[3], x[4], x[5])
+  PackedPose3Pose3NH(x...) = new(x[1], x[2], x[3], x[4])
 end
+# function convert(::Type{Pose3Pose3NH}, d::PackedPose3Pose3NH)
+#   Eu = Euler(d.vecZij[4:6]...)
+#   return Pose3Pose3NH(SE3(d.vecZij[1:3], Eu),
+#                     reshapeVec2Mat(d.vecCov, d.dimc), d.ValidHypot)
+# end
+# function convert(::Type{PackedPose3Pose3NH}, d::Pose3Pose3NH)
+#   v1 = veeEuler(d.Zij)
+#   v2 = d.Cov[:];
+#   return PackedPose3Pose3NH(v1,v2,size(d.Cov,1), d.ValidHypot.p )
+# end
 function convert(::Type{Pose3Pose3NH}, d::PackedPose3Pose3NH)
-  Eu = Euler(d.vecZij[4:6]...)
-  return Pose3Pose3NH(SE3(d.vecZij[1:3], Eu),
-                    reshapeVec2Mat(d.vecCov, d.dimc), d.ValidHypot)
+  qu = Quaternion(d.vecZij[4], d.vecZij[5:7])
+  return Pose3Pose3NH(SE3(d.vecZij[1:3], qu),
+                    reshapeVec2Mat(d.vecCov, d.dimc),
+                    d.ValidHypot )
 end
 function convert(::Type{PackedPose3Pose3NH}, d::Pose3Pose3NH)
-  v1 = veeEuler(d.Zij)
-  v2 = d.Cov[:];
+  v1 = veeQuaternion(d.Zij)
+  v2 = d.Cov[:]
   return PackedPose3Pose3NH(v1,v2,size(d.Cov,1), d.ValidHypot.p )
 end
 
-
-
-
-# 3 dimensionsal evaluation functions.
-# Transforms code is scattered, and will be moved to better location with stable 3D Examples
-# also worth it to consolidate if other affine transforms package is available
-
-# using Euler angles for linear sampling in product of potentials
-# Gaussian model for prior
-function evalPotential(obs::PriorPose3, Xi::Array{Graphs.ExVertex,1}; N::Int64=200)
-  mu = veeEuler(obs.Zi)
-  return rand( MvNormal(mu, obs.Cov), N)
-end
 
 # Project all particles (columns) Xval with Z, that is for all  SE3(Xval[:,i])*Z
 function projectParticles(Xval::Array{Float64,2}, Z::SE3, Cov::Array{Float64,2})
@@ -238,23 +235,19 @@ end
 ⊕(Xvert::Graphs.ExVertex, z::Pose3Pose3) = ⊕(getVal(Xvert), z)
 
 
-using TransformUtils, RoME
-
-tf = SE3([0.0;0.0;0.0], AngleAxis(pi/4,[1.0;0;0]))# Euler(pi/4,0.0,0.0) )
-
-N = 1
-initCov = 0.01*eye(6)
-[initCov[i,i] = 0.001 for i in 4:6];
-odoCov = deepcopy(initCov)
-odo = Pose3Pose3(tf, odoCov)
-
-X = [0.01*randn(5,N);pi/4+0.01*randn(1,N)]
-
-Y = X ⊕ odo
-
-@show
 
 
+
+# 3 dimensionsal evaluation functions.
+# Transforms code is scattered, and will be moved to better location with stable 3D Examples
+# also worth it to consolidate if other affine transforms package is available
+
+# using Euler angles for linear sampling in product of potentials
+# Gaussian model for prior
+function evalPotential(obs::PriorPose3, Xi::Array{Graphs.ExVertex,1}; N::Int64=200)
+  mu = veeEuler(obs.Zi)
+  return rand( MvNormal(mu, obs.Cov), N)
+end
 
 
 # Still limited to linear sampler, then reprojected onto ball -- TODO upgrade manifold sampler
@@ -276,10 +269,6 @@ function evalPotential(odom::Pose3Pose3, Xi::Array{Graphs.ExVertex,1}, Xid::Int6
 
     return projectParticles(Xval, Z, odom.Cov)
 end
-
-
-
-
 
 # Still limited to linear sampler, then reprojected onto ball -- TODO upgrade manifold sampler
 function evalPotential(odom::Pose3Pose3NH,
