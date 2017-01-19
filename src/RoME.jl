@@ -41,6 +41,7 @@ export
   FNDdecode,
   VNDencoder,
   VNDdecoder,
+  GenericWrapParam,
 
   # RoME specific functions
   initfg,
