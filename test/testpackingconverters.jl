@@ -29,10 +29,10 @@ println("test conversions of PriorPose2")
 dd = convert(PackedPriorPose2, ipp)
 upd = convert(RoME.PriorPose2, dd)
 
-@test compare(ipp, upd)
+@test RoME.compare(ipp, upd)
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{RoME.PriorPose2}, packeddata)
+unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose2}}, packeddata)
 
 @test IncrementalInference.compare(getData(f1), unpackeddata)
 
@@ -49,10 +49,10 @@ dd = convert(PackedPose2Pose2, ppc)
 upd = convert(RoME.Pose2Pose2, dd)
 
 # TODO -- fix ambiguity in compare function
-@test compare(ppc, upd)
+@test RoME.compare(ppc, upd)
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Pose2}, getData(f2))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{RoME.Pose2Pose2}, packeddata)
+unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2Pose2}}, packeddata)
 
 # TODO -- fix ambibuity in compare function
 @test IncrementalInference.compare(getData(f2), unpackeddata)
@@ -84,7 +84,7 @@ upd = convert(RoME.PriorPose3, dd)
 @test norm(ipp.Cov - upd.Cov) < 1e-8
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, getData(f1))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{RoME.PriorPose3}, packeddata)
+unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose3}}, packeddata)
 
 # TODO -- fix ambibuity in compare function
 @test IncrementalInference.compare(getData(f1), unpackeddata)
@@ -111,7 +111,7 @@ upd = convert(RoME.Pose3Pose3, dd)
 @test norm(pp3.Cov - upd.Cov) < 1e-8
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3}, getData(f2))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{RoME.Pose3Pose3}, packeddata)
+unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose3Pose3}}, packeddata)
 
 # TODO -- fix ambibuity in compare function
 @test IncrementalInference.compare(getData(f2), unpackeddata)
@@ -136,7 +136,7 @@ upd = convert(RoME.Pose3Pose3NH, dd)
 
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3NH}, getData(f3))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{RoME.Pose3Pose3NH}, packeddata)
+unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose3Pose3NH}}, packeddata)
 
 # TODO -- fix ambibuity in compare function
 @test IncrementalInference.compare(getData(f3), unpackeddata)

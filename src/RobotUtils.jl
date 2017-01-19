@@ -121,7 +121,7 @@ end
 function initfg(;sessionname="NA")
   fgl = emptyFactorGraph()
   fgl.sessionname="NA"
-  registerCallback!(fgl, RoME.getSample) # RoME.evalPotention
+  # registerCallback!(fgl, RoME.getSample) # RoME.evalPotention
   return fgl
 end
 
