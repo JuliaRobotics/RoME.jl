@@ -20,6 +20,9 @@ import IncrementalInference: convert, getSample, compare, reshapeVec2Mat
 
 export
   # pass throughs from TransformUtils
+  SE2,
+  se2vee,
+  se2vee!,
   SE3,
   Euler,
   Quaternion,
@@ -184,6 +187,9 @@ export
   Pose3Pose3NH,
   PackedPose3Pose3NH,
 
+  # MickeyMouse2D constraint functions
+  MickeyMouse2D,
+
   # SLAM specific functions
   SLAMWrapper,
 
@@ -222,6 +228,7 @@ include("Point2D.jl")
 include("Pose2D.jl")
 include("BearingRange2D.jl")
 include("Pose3Pose3.jl")
+include("MickeyMouseConstraint.jl")
 
 include("Slam.jl")
 
