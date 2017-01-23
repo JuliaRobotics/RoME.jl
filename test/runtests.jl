@@ -6,12 +6,14 @@ using Base.Test
 
 using JLD, HDF5
 
-println("[TEST] MickeyMouse constraints")
-include("testmickeymouse.jl")
-println("[SUCCESS]")
+
 
 println("[TEST] Camera function evaluations...")
 include("testCameraFunctions.jl")
+println("[SUCCESS]")
+
+println("[TEST] MickeyMouse constraints")
+include("testmickeymouse.jl")
 println("[SUCCESS]")
 
 println("[TEST] Linear array functions evaluations...")
