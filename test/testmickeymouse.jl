@@ -1,5 +1,6 @@
 #  test MickeyMouse2D
 using RoME, Distributions
+using IncrementalInference   # for evalFactor2
 using Base.Test
 
 # using Gadfly
@@ -68,20 +69,31 @@ mm2(res, idx, meas,
   wAo3  )
 
 
-@test norm(res) < 1e-6
+@test norm(res) < 1e-3
 
 
 
+# now build in factor graph form for further testing
+
+N=100
+fg = initfg()
 
 
+v1 = addNode!(fg, :x1, 0.001*randn(3,N), diagm([1.0;1.0;0.1]), N=N)
+
+pts2 = [0.1*randn(1,N)+1;  0.1*randn(1,N)-1; 0.01*randn(1,N)+pi/2]
+v2 = addNode!(fg, :x2, pts2, diagm([1.0;1.0;0.1]), N=N)
 
 
+vl1 = addNode!(fg, :l1, randn(2,N), diagm([1.0;1.0]), N=N)
+vl2 = addNode!(fg, :l2, randn(2,N), diagm([1.0;1.0]), N=N)
+vl3 = addNode!(fg, :l3, randn(2,N), diagm([1.0;1.0]), N=N)
 
 
+f1  = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2)
 
 
-
-
+priorpts = evalFactor2(fg, f1, fg.IDs[:l1])
 
 
 

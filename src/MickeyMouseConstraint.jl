@@ -30,7 +30,7 @@ function residruvec()
 end
 
 # two sets of three feature sightings and a body to camera lever arm transform
-type MickeyMouse2D
+type MickeyMouse2D <: IncrementalInference.FunctorPairwise
   # treat these as angles
   xir1::Normal
   xir2::Normal
@@ -39,7 +39,11 @@ type MickeyMouse2D
   xjr2::Normal
   xjr3::Normal
   bTc
+  zDim::Dict{Int, Int}
+  # Takes five
+  MickeyMouse2D(a,b,c,d,e,f,g) = new(a,b,c,d,e,f,g, Dict{Int,Int}(1=>3,2=>3,3=>2,4=>2,5=>2) )
 end
+
 
 function getSample(mm2d::MickeyMouse2D, N::Int=1)
   meas = Array{Float64,3}(3,N,2)
