@@ -1,4 +1,4 @@
-using RoME, TransformUtils
+using RoME, IncrementalInference, TransformUtils
 using Base.Test
 
 
