@@ -56,9 +56,9 @@ meas = getSample(mm2)
 
 wAbi = (x1')'
 wAbj = (x2')'
-wAo1 = ([l1;0.0]')'
-wAo2 = ([l2;0.0]')'
-wAo3 = ([l3;0.0]')'
+wAo1 = (l1')'
+wAo2 = (l2')'
+wAo3 = (l3')'
 
 
 mm2(res, idx, meas,
@@ -93,9 +93,17 @@ vl3 = addNode!(fg, :l3, randn(2,N), diagm([1.0;1.0]), N=N)
 f1  = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2)
 
 
-priorpts = evalFactor2(fg, f1, fg.IDs[:l1])
+ef2pts = evalFactor2(fg, f1, fg.IDs[:l2])
 
 
+
+
+using KernelDensityEstimate
+
+plotKDE(marginal(kde!(ef2pts),[2]))
+
+
+# @show ef2pts
 
 
 

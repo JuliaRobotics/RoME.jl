@@ -39,9 +39,9 @@ type MickeyMouse2D <: IncrementalInference.FunctorPairwise
   xjr2::Normal
   xjr3::Normal
   bTc
-  zDim::Dict{Int, Int}
+  zDim::Tuple{Int,Int,Int,Int,Int}
   # Takes five
-  MickeyMouse2D(a,b,c,d,e,f,g) = new(a,b,c,d,e,f,g, Dict{Int,Int}(1=>3,2=>3,3=>2,4=>2,5=>2) )
+  MickeyMouse2D(a,b,c,d,e,f,g) = new(a,b,c,d,e,f,g, (3,3,2,2,2) )
 end
 
 
@@ -64,11 +64,11 @@ function (mm2d::MickeyMouse2D)(res::Array{Float64}, idx::Int, meas::Tuple,
           wAo3::Array{Float64,2}  )
   #
   wTbi, wTbj = SE2(wAbi[:,idx]), SE2(wAbj[:,idx])
-  wTo = ( SE2(wAo1[:,idx]),SE2(wAo2[:,idx]),SE2(wAo3[:,idx]) )
+  wTo = ( SE2([wAo1[:,idx];0.0]),SE2([wAo2[:,idx];0.0]),SE2([wAo3[:,idx];0.0]) )
 
   rhat, resid = zeros(2), zeros(2)
-  res[:] = 0.0
-  for i in 1:3
+  res[:] = -1e-5
+  for i in [2]
     # sightings from first pose
     r1, rhathat1, α1 = getUvecScaleFeature2D(wTbi, mm2d.bTc, wTo[i])
     rhat[1] = cos(meas[1][i,idx,1])
