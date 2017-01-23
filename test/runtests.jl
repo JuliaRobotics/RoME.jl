@@ -6,7 +6,9 @@ using Base.Test
 
 using JLD, HDF5
 
-
+println("[TEST] numeric root...")
+include("testhigherdimroots.jl")
+println("[SUCCESS]")
 
 println("[TEST] Camera function evaluations...")
 include("testCameraFunctions.jl")
