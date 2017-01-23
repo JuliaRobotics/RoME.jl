@@ -1,7 +1,7 @@
 using RoME, IncrementalInference, TransformUtils
+using KernelDensityEstimate
 using Base.Test
 
-using KernelDensityEstimate
 
 N = 200
 fg = initfg()
