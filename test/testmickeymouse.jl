@@ -78,30 +78,39 @@ mm2(res, idx, meas,
 N=100
 fg = initfg()
 
+initCov = eye(6)
+[initCov[i,i] = 0.01 for i in 4:6];
+odoCov = deepcopy(initCov)
+
+ipp = PriorPose3(SE3(0), initCov)
 
 v1 = addNode!(fg, :x1, 0.001*randn(3,N), diagm([1.0;1.0;0.1]), N=N)
+
+f1  = addFactor!(fg,[:x1], ipp)
+
 
 pts2 = [0.1*randn(1,N)+1;  0.1*randn(1,N)-1; 0.01*randn(1,N)+pi/2]
 v2 = addNode!(fg, :x2, pts2, diagm([1.0;1.0;0.1]), N=N)
 
-vl1 = addNode!(fg, :l1, rand(MvNormal(l1,0.01*eye(2)),N), diagm([1.0;1.0]), N=N)
-vl2 = addNode!(fg, :l1, rand(MvNormal(l2,0.01*eye(2)),N), diagm([1.0;1.0]), N=N)
-vl3 = addNode!(fg, :l1, rand(MvNormal(l3,0.01*eye(2)),N), diagm([1.0;1.0]), N=N)
+vl1 = addNode!(fg, :l1, rand(MvNormal(l1,0.001*eye(2)),N), diagm([1.0;1.0]), N=N)
+vl2 = addNode!(fg, :l2, rand(MvNormal(l2,0.001*eye(2)),N), diagm([1.0;1.0]), N=N)
+vl3 = addNode!(fg, :l3, rand(MvNormal(l3,0.001*eye(2)),N), diagm([1.0;1.0]), N=N)
 
 
-f1  = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2)
+f2 = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2)
 
+ef2pts = evalFactor2(fg, f2, fg.IDs[:x1])
 
-ef2pts = evalFactor2(fg, f1, fg.IDs[:x1])
-
-
-
-
-using KernelDensityEstimate
-
-plotKDE(marginal(kde!(ef2pts),[2]))
-
-
+tree = wipeBuildNewTree!(fg)
+# spyCliqMat(tree.cliques[1])
+#
+# using KernelDensityEstimate
+#
+# plotKDE(marginal(kde!(ef2pts),[1;2]))
+#
+# plotKDE([getVertKDE(fg, :l1);getVertKDE(fg, :l2);getVertKDE(fg, :l3)])
+#
+#
 # @show ef2pts
 
 
