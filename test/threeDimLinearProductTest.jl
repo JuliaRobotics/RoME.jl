@@ -1,6 +1,6 @@
 using RoME, IncrementalInference, TransformUtils
-using Base.Test
 using KernelDensityEstimate
+using Base.Test
 
 
 tf = SE3([0.0;0.0;0.0], AngleAxis(pi/4,[0;0;1.0]))# Euler(pi/4,0.0,0.0) )
