@@ -49,7 +49,7 @@ mm2 = MickeyMouse2D(
   xjr3,
   SE2(zeros(3))  )
 
-res = randn(2)
+res = randn(3)
 idx = 1
 meas = getSample(mm2)
 
@@ -84,16 +84,15 @@ v1 = addNode!(fg, :x1, 0.001*randn(3,N), diagm([1.0;1.0;0.1]), N=N)
 pts2 = [0.1*randn(1,N)+1;  0.1*randn(1,N)-1; 0.01*randn(1,N)+pi/2]
 v2 = addNode!(fg, :x2, pts2, diagm([1.0;1.0;0.1]), N=N)
 
-
-vl1 = addNode!(fg, :l1, randn(2,N), diagm([1.0;1.0]), N=N)
-vl2 = addNode!(fg, :l2, randn(2,N), diagm([1.0;1.0]), N=N)
-vl3 = addNode!(fg, :l3, randn(2,N), diagm([1.0;1.0]), N=N)
+vl1 = addNode!(fg, :l1, rand(MvNormal(l1,0.01*eye(2)),N), diagm([1.0;1.0]), N=N)
+vl2 = addNode!(fg, :l1, rand(MvNormal(l2,0.01*eye(2)),N), diagm([1.0;1.0]), N=N)
+vl3 = addNode!(fg, :l1, rand(MvNormal(l3,0.01*eye(2)),N), diagm([1.0;1.0]), N=N)
 
 
 f1  = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2)
 
 
-ef2pts = evalFactor2(fg, f1, fg.IDs[:l2])
+ef2pts = evalFactor2(fg, f1, fg.IDs[:x1])
 
 
 

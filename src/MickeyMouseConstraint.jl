@@ -66,9 +66,13 @@ function (mm2d::MickeyMouse2D)(res::Array{Float64}, idx::Int, meas::Tuple,
   wTbi, wTbj = SE2(wAbi[:,idx]), SE2(wAbj[:,idx])
   wTo = ( SE2([wAo1[:,idx];0.0]),SE2([wAo2[:,idx];0.0]),SE2([wAo3[:,idx];0.0]) )
 
+  b, bhat, β = getUvecScaleBaseline2D(wTbi, wTbj, mm2d.bTc)
+
   rhat, resid = zeros(2), zeros(2)
-  res[:] = -1e-5
-  for i in [2]
+  # res[:] = -1e-5
+  res[3] = -3*β
+
+  for i in 1:3
     # sightings from first pose
     r1, rhathat1, α1 = getUvecScaleFeature2D(wTbi, mm2d.bTc, wTo[i])
     rhat[1] = cos(meas[1][i,idx,1])
@@ -83,9 +87,11 @@ function (mm2d::MickeyMouse2D)(res::Array{Float64}, idx::Int, meas::Tuple,
     resid[1:2] = rhat-rhathat2
     res[2] += dot(resid, resid)
 
+    # baseline constraint
+    res[3] += dot(r1, bhat)
+    res[3] += dot(r2, -bhat)
   end
   nothing
-
 end
 
 
