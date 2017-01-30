@@ -13,7 +13,7 @@ include("testCameraFunctions.jl")
 println("[SUCCESS]")
 
 println("[TEST] MultipleFeatures constraints")
-include("testMultipleFeatures.jl")
+include("testmultiplefeatures.jl")
 println("[SUCCESS]")
 
 println("[TEST] Linear array functions evaluations...")
