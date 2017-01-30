@@ -30,8 +30,8 @@ function residruvec()
 end
 
 # two sets of three feature sightings and a body to camera lever arm transform
-type MickeyMouse2D <: IncrementalInference.FunctorPairwise
-  # treat these as angles
+type MickeyMouse2D <: IncrementalInference.FunctorPairwiseMinimize
+  # treat these as angles positive X->Y, X forward, Y left and Z up
   xir1::Normal
   xir2::Normal
   xir3::Normal
@@ -44,7 +44,6 @@ type MickeyMouse2D <: IncrementalInference.FunctorPairwise
   MickeyMouse2D(a,b,c,d,e,f,g) = new(a,b,c,d,e,f,g, (3,3,2,2,2) )
 end
 
-
 function getSample(mm2d::MickeyMouse2D, N::Int=1)
   meas = Array{Float64,3}(3,N,2)
   meas[1,:,1] = rand(mm2d.xir1,N)
@@ -56,6 +55,48 @@ function getSample(mm2d::MickeyMouse2D, N::Int=1)
   return (meas,)
 end
 
+# function (mm2d::MickeyMouse2D)(res::Array{Float64}, idx::Int, meas::Tuple,
+#           wAbi::Array{Float64,2},
+#           wAbj::Array{Float64,2},
+#           wAo1::Array{Float64,2},
+#           wAo2::Array{Float64,2},
+#           wAo3::Array{Float64,2}  )
+#   #
+#   wTbi, wTbj = SE2(wAbi[:,idx]), SE2(wAbj[:,idx])
+#   wTo = ( SE2([wAo1[:,idx];0.0]),SE2([wAo2[:,idx];0.0]),SE2([wAo3[:,idx];0.0]) )
+#
+#   # b, bhat, β = getUvecScaleBaseline2D(wTbi, wTbj, mm2d.bTc)
+#
+#   rhat, resid = zeros(2), zeros(2)
+#   # res[:] = -1e-5
+#   # res[3] = -3*β
+#
+#   for i in 1:3
+#     # sightings from first pose
+#     r1, rhathat1, α1 = getUvecScaleFeature2D(wTbi, mm2d.bTc, wTo[i])
+#     rhat[1] = cos(meas[1][i,idx,1])
+#     rhat[2] = sin(meas[1][i,idx,1])
+#     resid[1:2] = rhat-rhathat1
+#     res[1] += dot(resid, resid)
+#
+#     # sightingings from second pose
+#     r2, rhathat2, α2 = getUvecScaleFeature2D(wTbj, mm2d.bTc, wTo[i])
+#     rhat[1] = cos(meas[1][i,idx,2])
+#     rhat[2] = sin(meas[1][i,idx,2])
+#     resid[1:2] = rhat-rhathat2
+#     res[2] += dot(resid, resid)
+#
+#     # baseline constraint
+#     # res[3] += dot(r1, bhat)
+#     # res[3] += dot(r2, -bhat)
+#   end
+#
+#   nothing
+# end
+
+
+# redo with angles on sightings for minimization
+# NOTE -- currently an inefficient implementation
 function (mm2d::MickeyMouse2D)(res::Array{Float64}, idx::Int, meas::Tuple,
           wAbi::Array{Float64,2},
           wAbj::Array{Float64,2},
@@ -63,36 +104,42 @@ function (mm2d::MickeyMouse2D)(res::Array{Float64}, idx::Int, meas::Tuple,
           wAo2::Array{Float64,2},
           wAo3::Array{Float64,2}  )
   #
-  wTbi, wTbj = SE2(wAbi[:,idx]), SE2(wAbj[:,idx])
-  wTo = ( SE2([wAo1[:,idx];0.0]),SE2([wAo2[:,idx];0.0]),SE2([wAo3[:,idx];0.0]) )
+  wTbi = SE2(wAbi[:,idx])
+  wTbj = SE2(wAbj[:,idx])
+  wTo1 = SE2([wAo1[:,idx];0.0])
+  wTo2 = SE2([wAo2[:,idx];0.0])
+  wTo3 = SE2([wAo3[:,idx];0.0])
 
-  b, bhat, β = getUvecScaleBaseline2D(wTbi, wTbj, mm2d.bTc)
+  ciTo1 = (wTbi * mm2d.bTc) \ wTo1
+  ciTo2 = (wTbi * mm2d.bTc) \ wTo2
+  ciTo3 = (wTbi * mm2d.bTc) \ wTo3
 
-  rhat, resid = zeros(2), zeros(2)
-  # res[:] = -1e-5
-  res[3] = -3*β
+  cjTo1 = (wTbj * mm2d.bTc) \ wTo1
+  cjTo2 = (wTbj * mm2d.bTc) \ wTo2
+  cjTo3 = (wTbj * mm2d.bTc) \ wTo3
 
-  for i in 1:3
-    # sightings from first pose
-    r1, rhathat1, α1 = getUvecScaleFeature2D(wTbi, mm2d.bTc, wTo[i])
-    rhat[1] = cos(meas[1][i,idx,1])
-    rhat[2] = sin(meas[1][i,idx,1])
-    resid[1:2] = rhat-rhathat1
-    res[1] += dot(resid, resid)
+  the1 = atan2(se2vee(ciTo1)[2], se2vee(ciTo1)[1])
+  the2 = atan2(se2vee(ciTo2)[2], se2vee(ciTo2)[1])
+  the3 = atan2(se2vee(ciTo3)[2], se2vee(ciTo3)[1])
 
-    # sightingings from second pose
-    r2, rhathat2, α2 = getUvecScaleFeature2D(wTbj, mm2d.bTc, wTo[i])
-    rhat[1] = cos(meas[1][i,idx,2])
-    rhat[2] = sin(meas[1][i,idx,2])
-    resid[1:2] = rhat-rhathat2
-    res[2] += dot(resid, resid)
+  res[1] = 0.0
+  res[1] += ( meas[1][1,idx,1] - the1 )^2
+  res[1] += ( meas[1][2,idx,1] - the2 )^2
+  res[1] += ( meas[1][3,idx,1] - the3 )^2
 
-    # baseline constraint
-    res[3] += dot(r1, bhat)
-    res[3] += dot(r2, -bhat)
-  end
-  nothing
+  the1 = atan2(se2vee(cjTo1)[2], se2vee(cjTo1)[1])
+  the2 = atan2(se2vee(cjTo2)[2], se2vee(cjTo2)[1])
+  the3 = atan2(se2vee(cjTo3)[2], se2vee(cjTo3)[1])
+
+  res[2] = 0.0
+  res[2] += ( meas[1][1,idx,2] - the1 )^2
+  res[2] += ( meas[1][2,idx,2] - the2 )^2
+  res[2] += ( meas[1][3,idx,2] - the3 )^2
+
+  sum(res)
 end
+
+
 
 
 

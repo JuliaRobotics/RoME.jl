@@ -189,6 +189,8 @@ export
 
   # MickeyMouse2D constraint functions
   MickeyMouse2D,
+  getUvecScaleFeature2D,
+  getUvecScaleBaseline2D,
 
   # SLAM specific functions
   SLAMWrapper,
