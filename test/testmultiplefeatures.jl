@@ -1,4 +1,4 @@
-#  test MickeyMouse2D
+#  test MultipleFeatures2D
 using RoME, Distributions
 using IncrementalInference   # for evalFactor2
 using Base.Test
@@ -42,7 +42,7 @@ xjr1 = Normal(the21,1e-4)
 xjr2 = Normal(the22,1e-4)
 xjr3 = Normal(the23,1e-4)
 
-mm2 = MickeyMouse2D(
+mm2 = MultipleFeatures2D(
   xir1,
   xir2,
   xir3,
@@ -63,7 +63,7 @@ wAo2 = (l2')'
 wAo3 = (l3')'
 
 
-println("test MickeyMouse unit vector functions")
+println("test MultipleFeatures unit vector functions")
 res, rhat, resid = zeros(3),zeros(2), zeros(2)
 
 for i in 1:3

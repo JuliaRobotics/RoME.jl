@@ -30,7 +30,7 @@ function residruvec()
 end
 
 # two sets of three feature sightings and a body to camera lever arm transform
-type MickeyMouse2D <: IncrementalInference.FunctorPairwiseMinimize
+type MultipleFeatures2D <: IncrementalInference.FunctorPairwiseMinimize
   # treat these as angles positive X->Y, X forward, Y left and Z up
   xir1::Normal
   xir2::Normal
@@ -41,10 +41,10 @@ type MickeyMouse2D <: IncrementalInference.FunctorPairwiseMinimize
   bTc
   zDim::Tuple{Int,Int,Int,Int,Int}
   # Takes five
-  MickeyMouse2D(a,b,c,d,e,f,g) = new(a,b,c,d,e,f,g, (3,3,2,2,2) )
+  MultipleFeatures2D(a,b,c,d,e,f,g) = new(a,b,c,d,e,f,g, (3,3,2,2,2) )
 end
 
-function getSample(mm2d::MickeyMouse2D, N::Int=1)
+function getSample(mm2d::MultipleFeatures2D, N::Int=1)
   meas = Array{Float64,3}(3,N,2)
   meas[1,:,1] = rand(mm2d.xir1,N)
   meas[2,:,1] = rand(mm2d.xir2,N)
@@ -55,7 +55,7 @@ function getSample(mm2d::MickeyMouse2D, N::Int=1)
   return (meas,)
 end
 
-# function (mm2d::MickeyMouse2D)(res::Array{Float64}, idx::Int, meas::Tuple,
+# function (mm2d::MultipleFeatures2D)(res::Array{Float64}, idx::Int, meas::Tuple,
 #           wAbi::Array{Float64,2},
 #           wAbj::Array{Float64,2},
 #           wAo1::Array{Float64,2},
@@ -97,7 +97,7 @@ end
 
 # redo with angles on sightings for minimization
 # NOTE -- currently an inefficient implementation
-function (mm2d::MickeyMouse2D)(res::Array{Float64}, idx::Int, meas::Tuple,
+function (mm2d::MultipleFeatures2D)(res::Array{Float64}, idx::Int, meas::Tuple,
           wAbi::Array{Float64,2},
           wAbj::Array{Float64,2},
           wAo1::Array{Float64,2},

@@ -187,8 +187,8 @@ export
   Pose3Pose3NH,
   PackedPose3Pose3NH,
 
-  # MickeyMouse2D constraint functions
-  MickeyMouse2D,
+  # MultipleFeatures2D constraint functions
+  MultipleFeatures2D,
   getUvecScaleFeature2D,
   getUvecScaleBaseline2D,
 
@@ -230,7 +230,7 @@ include("Point2D.jl")
 include("Pose2D.jl")
 include("BearingRange2D.jl")
 include("Pose3Pose3.jl")
-include("MickeyMouseConstraint.jl")
+include("MultipleFeaturesConstraint.jl")
 
 include("Slam.jl")
 
