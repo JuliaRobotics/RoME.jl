@@ -3,6 +3,41 @@ using KernelDensityEstimate
 using Base.Test
 
 
+tf = SE3([0.0;0.0;0.0], AngleAxis(pi/4,[0;0;1.0]))# Euler(pi/4,0.0,0.0) )
+
+N = 1
+initCov = 0.01*eye(6)
+[initCov[i,i] = 0.001 for i in 4:6];
+odoCov = deepcopy(initCov)
+odo = Pose3Pose3(tf, odoCov)
+
+X = [0.01*randn(5,N);0*pi/4+0.01*randn(1,N)]
+
+Y = X ⊕ odo
+
+@test norm(Y[1:3]-zeros(3)) < 1.0
+@test norm(Y[4:6]-[zeros(2);pi/4]) < 0.1
+
+
+
+tf = SE3([0.0;0.0;0.0], AngleAxis(pi/4,[0;0;1.0]))# Euler(pi/4,0.0,0.0) )
+
+N = 1
+initCov = 0.01*eye(6)
+[initCov[i,i] = 0.001 for i in 4:6];
+odoCov = deepcopy(initCov)
+odo = Pose3Pose3(tf, odoCov)
+
+X = [0.01*randn(5,N);0*pi/4+0.01*randn(1,N)]
+
+Y = X ⊕ odo
+
+@test norm(Y[1:3]-zeros(3)) < 1.0
+@test norm(Y[4:6]-[zeros(2);pi/4]) < 0.2
+
+
+
+
 N = 200
 fg = initfg()
 

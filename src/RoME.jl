@@ -12,10 +12,38 @@ using
   JLD,
   HDF5
 
-import IncrementalInference: getSample
 import Base: +
+import TransformUtils: ⊖, ⊕, convert, compare
+import IncrementalInference: convert, getSample, compare, reshapeVec2Mat
+
+
 
 export
+  # pass throughs from TransformUtils
+  SE3,
+  Euler,
+  Quaternion,
+  AngleAxis,
+  SO3,
+  so3,
+  compare,
+  convert,
+
+  # pass throughs from IncrementalInference
+  ls,
+  addFactor!,
+  addNode!,
+  getVert,
+  getVertKDE,
+  getVal,
+  getData,
+  FNDencode,
+  FNDdecode,
+  VNDencoder,
+  VNDdecoder,
+  GenericWrapParam,
+
+  # RoME specific functions
   initfg,
   measureMeanDist,
   predictBodyBR,
@@ -148,7 +176,9 @@ export
 
   # Pose3D
   PriorPose3,
+  PackedPriorPose3,
   Pose3Pose3,
+  PackedPose3Pose3,
   projectParticles,
   ⊕,
   Pose3Pose3NH,
