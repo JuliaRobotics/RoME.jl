@@ -201,59 +201,39 @@ f2 = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2)
 
 ef2pts = evalFactor2(fg, f2, fg.IDs[:l2])
 
-using KernelDensityEstimate
-# plotKDE(kde!(ef2pts[1,:]))
 
 tree = wipeBuildNewTree!(fg)
 # spyCliqMat(tree.cliques[1])
 
-[inferOverTree!(fg,tree, N=N) for i in 1:1]
-#
-#
-#
-arrp = [getVertKDE(fg, :l1);getVertKDE(fg, :l2);getVertKDE(fg, :l3)]
+[inferOverTree!(fg,tree, N=N, dbg=true) for i in 1:1]
+
+# lets see what is happening during MCMC runs
+plotMCMC(tree, :l1, show=false ) # make true to see pictures, false for testing
+
+
+
+
+
+
+# using KernelDensityEstimate
+# plotKDE(kde!(ef2pts[1,:]))
+
+# pl = plotKDE([kde!(randn(2,100));kde!(2+randn(2,100))],levels=1,c=["red";"green"],legend=["1";"2"])
+
+# arrp = [getVertKDE(fg, :l1);getVertKDE(fg, :l2);getVertKDE(fg, :l3)]
 # arrp1 = deepcopy(arrp)
 # plotKDE([arrp;arrp1],levels=1,c=["red";"red";"red";"blue";"blue";"blue"])
-#
 
-arrp=[marginal(getVertKDE(fg, :x1),[1;2]);marginal(getVertKDE(fg, :x2),[1;2]) ]
-plotKDE(arrp,levels=1)
-#
+# arrp=[marginal(getVertKDE(fg, :x1),[1;2]);marginal(getVertKDE(fg, :x2),[1;2]) ]
+# plotKDE(arrp,levels=1)
+
 # plotKDE(marginal(getVertKDE(fg,:x1),[3]))
-#
-
 
 # pp,arr = localProduct(fg,:x2)
 # cc = plotKDE([pp;arr],c=["red";"black";"blue"],levels=1);
 
-cc = drawLbl(fg,:l1);
-Gadfly.draw(PDF("/home/dehann/Desktop/test.pdf",20cm,15cm),cc)
-
-
-lbl = :x2
-
-cliq = whichCliq(tree, string(lbl))
-cliqdbg = cliq.attributes["debug"]
-tmpfilepath = joinpath(dirname(@__FILE__),"tmpimgs")
-ARR = BallTreeDensity[]
-for i in 1:length(cliqdbg.mcmc)
-  ppr = kde!(cliqdbg.mcmc[i].prods[1].prev)
-  ppp = kde!(cliqdbg.mcmc[i].prods[1].product)
-  ARR = [ARR;ppr;ppr;cliqdbg.mcmc[i].prods[1].potentials]
-end
-rangeV = getKDERange(ARR)
-for i in 1:length(cliqdbg.mcmc)
-  ppr = kde!(cliqdbg.mcmc[i].prods[1].prev)
-  ppp = kde!(cliqdbg.mcmc[i].prods[1].product)
-  arr = [ppr;ppr;cliqdbg.mcmc[i].prods[1].potentials]
-  cc = plotKDE(arr,c=["black";"red";"green";"blue";"cyan";"deepskyblue"],levels=1,fill=true,axis=rangeV);
-  Gadfly.draw(PNG(joinpath(tmpfilepath,"$(string(lbl))mcmc$(i).png"),20cm,15cm),cc)
-end
-run(`convert -delay 100 $(tmpfilepath)/$(string(lbl))mcmc*.png $(tmpfilepath)/$(string(lbl))mcmc.gif`)
-
-@async run(`eog $(tmpfilepath)/$(string(lbl))mcmc.gif`)
-
-# mcp = mcmcPose2D!(plots, cliqdbg)
+# cc = drawLbl(fg,:l1);
+# Gadfly.draw(PDF("/home/dehann/Desktop/test.pdf",20cm,15cm),cc)
 
 
 println("test ambiguous bi-modal multifeature constraint operation")
