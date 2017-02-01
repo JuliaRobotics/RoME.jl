@@ -235,17 +235,25 @@ lbl = :x2
 cliq = whichCliq(tree, string(lbl))
 cliqdbg = cliq.attributes["debug"]
 tmpfilepath = joinpath(dirname(@__FILE__),"tmpimgs")
+ARR = BallTreeDensity[]
 for i in 1:length(cliqdbg.mcmc)
   ppr = kde!(cliqdbg.mcmc[i].prods[1].prev)
   ppp = kde!(cliqdbg.mcmc[i].prods[1].product)
-  cc = plotKDE([ppr;ppr;cliqdbg.mcmc[i].prods[1].potentials],c=["black";"red";"green";"blue";"cyan";"deepskyblue"],levels=1);
+  ARR = [ARR;ppr;ppr;cliqdbg.mcmc[i].prods[1].potentials]
+end
+rangeV = getKDERange(ARR)
+for i in 1:length(cliqdbg.mcmc)
+  ppr = kde!(cliqdbg.mcmc[i].prods[1].prev)
+  ppp = kde!(cliqdbg.mcmc[i].prods[1].product)
+  arr = [ppr;ppr;cliqdbg.mcmc[i].prods[1].potentials]
+  cc = plotKDE(arr,c=["black";"red";"green";"blue";"cyan";"deepskyblue"],levels=1,fill=true,axis=rangeV);
   Gadfly.draw(PNG(joinpath(tmpfilepath,"$(string(lbl))mcmc$(i).png"),20cm,15cm),cc)
 end
 run(`convert -delay 100 $(tmpfilepath)/$(string(lbl))mcmc*.png $(tmpfilepath)/$(string(lbl))mcmc.gif`)
 
-run(`eog $(tmpfilepath)/$(string(lbl))mcmc.gif`)
+@async run(`eog $(tmpfilepath)/$(string(lbl))mcmc.gif`)
 
-mcp = mcmcPose2D!(plots, cliqdbg)
+# mcp = mcmcPose2D!(plots, cliqdbg)
 
 
 println("test ambiguous bi-modal multifeature constraint operation")
