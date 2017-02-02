@@ -77,9 +77,9 @@ for i in 1:3
   r1, rhathat1, α1 = getUvecScaleFeature2D(Xi, SE2(zeros(3)), SE2([L[i,:];0.0]))
   rhat[1] = cos(meas[1][i,idx,1])
   rhat[2] = sin(meas[1][i,idx,1])
-  @show rhat, rhathat1
+  # @show rhat, rhathat1
   resid[1:2] = rhat-rhathat1
-  @show res[1] += dot(resid, resid)
+  res[1] += dot(resid, resid)
 end
 
 @test 0.0 <= res[1] < 1e-5
@@ -169,16 +169,16 @@ gg = (x,y) -> minmickey([x;y])
 
 # now build in factor graph form for further testing
 
-N=100
+N=200
 fg = initfg()
 
 initCov = 0.01*eye(3)
 initCov[3,3] = 0.001
 odoCov = deepcopy(initCov)
 
-ipp = PriorPose2(zeros(3,1), initCov,[1.0])
+ipp = PriorPose2(zeros(3,1), initCov^2,[1.0])
 
-v1 = addNode!(fg, :x1, 0.001*randn(3,N), diagm([1.0;1.0;0.1]), N=N)
+v1 = addNode!(fg, :x1, 0.01*randn(3,N), diagm([1.0;1.0;0.1]), N=N)
 
 f1  = addFactor!(fg,[:x1], ipp)
 
@@ -188,8 +188,8 @@ v2 = addNode!(fg, :x2, pts2, diagm([1.0;1.0;0.1]), N=N)
 
 px2 = zeros(3,1)
 px2[1:3,1] = [1.0;-1.0;pi/2]
-ipp2 = PriorPose2(px2, initCov,[1.0])
-f1  = addFactor!(fg,[:x2], ipp2)
+ipp2 = PriorPose2(px2, initCov^2,[1.0])
+# f1  = addFactor!(fg,[:x2], ipp2)
 
 
 vl1 = addNode!(fg, :l1, rand(MvNormal(l1,0.001*eye(2)),N), diagm([1.0;1.0]), N=N)
@@ -205,15 +205,20 @@ ef2pts = evalFactor2(fg, f2, fg.IDs[:l2])
 tree = wipeBuildNewTree!(fg)
 # spyCliqMat(tree.cliques[1])
 
-[inferOverTree!(fg,tree, N=N, dbg=true) for i in 1:1]
+[inferOverTreeR!(fg,tree, N=N, dbg=true) for i in 1:1]
 
 # lets see what is happening during MCMC runs
-plotMCMC(tree, :l1, show=false ) # make true to see pictures, false for testing
+# plotMCMC(tree, :x2, show=true ) # make true to see pictures, false for testing
 
+# spyCliqMat(tree, :x2)
 
-
-
-
+#
+# pts, = getSample(ipp2, 100);
+#
+# plotKDE( kde!(pts[1:2,:]) )
+#
+# @show ipp2.Cov
+# pts = rand(MvNormal(ipp2.Zi[:,1],ipp2.Cov),N);
 
 # using KernelDensityEstimate
 # plotKDE(kde!(ef2pts[1,:]))
