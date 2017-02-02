@@ -45,6 +45,9 @@ export
   VNDencoder,
   VNDdecoder,
   GenericWrapParam,
+  wipeBuildNewTree!,
+  inferOverTree!,
+  inferOverTreeR!,
 
   # RoME specific functions
   initfg,
@@ -61,6 +64,9 @@ export
   addAutoLandmBR!,
   projNewLandm!,
   malahanobisBR,
+
+  # types
+  BetweenPoses,
 
   # helper functions
   get2DSamples,
@@ -220,6 +226,8 @@ export
   poseTrigAndAdd!,
   processTreeTrackersUpdates!
 
+
+abstract BetweenPoses <: IncrementalInference.FunctorPairwise
 
 
 include("BayesTracker.jl")

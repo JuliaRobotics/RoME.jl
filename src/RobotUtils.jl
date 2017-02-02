@@ -107,10 +107,15 @@ function addOdoFG!(fg::FactorGraph, n::String, DX::Array{Float64,1}, cov::Array{
     return v, f
 end
 
-# create a new variable node and insert odometry constraint factor between.
-# will automatically increment latest pose symbol x<k+1> for new node
-# new node and constraint factor are returned as a tuple
-function addOdoFG!(fgl::FactorGraph, odo::Pose3Pose3;
+"""
+    addOdoFG!(fg, tft, N=100, ready=1)
+
+Create a new variable node and insert odometry constraint factor between
+which will automatically increment latest pose symbol x<k+1> for new node new node and
+constraint factor are returned as a tuple.
+
+"""
+function addOdoFG!{PP <: RoME.BetweenPoses}(fgl::FactorGraph, odo::PP;
                   N::Int=100, ready::Int=1)
     vprev, X, nextn = getLastPose(fgl)
     vnext = addNode!(fgl, nextn, X⊕odo, [1.0]', N=N, ready=ready)
@@ -118,9 +123,10 @@ function addOdoFG!(fgl::FactorGraph, odo::Pose3Pose3;
     return vnext, fact
 end
 
+
 function initfg(;sessionname="NA")
   fgl = emptyFactorGraph()
-  fgl.sessionname="NA"
+  fgl.sessionname=sessionname
   # registerCallback!(fgl, RoME.getSample) # RoME.evalPotention
   return fgl
 end
@@ -390,18 +396,20 @@ function get2DSamples(fg::FactorGraph, sym; from::Int64=0, to::Int64=999999999, 
   # if sym = 'l', ignore single measurement landmarks
 
   for id in fg.IDs
-      if id[1][1] == sym
-        val = parse(Int,id[1][2:end])
-        if from <= val && val <= to
-          if length( getOutNeighbors(fg, id[2] ) ) >= minnei
+    vertlbl = string(id[1])
+    if vertlbl[1] == sym
+      val = parse(Int,vertlbl[2:end])
+      if from <= val && val <= to
+        if length( getOutNeighbors(fg, id[2] ) ) >= minnei
           # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
-              X=[X; vec(getVal(fg,id[2])[1,:]) ]
-              Y=[Y; vec(getVal(fg,id[2])[2,:]) ]
-              # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
-              # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
-          end
+          @show id
+            X=[X; vec(getVal(fg,id[2])[1,:]) ]
+            Y=[Y; vec(getVal(fg,id[2])[2,:]) ]
+            # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
+            # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
         end
       end
+    end
   end
   return X,Y
 end
@@ -419,14 +427,15 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
   # if sym = 'l', ignore single measurement landmarks
   allIDs = Array{Int,1}()
   for id in fg.IDs
-      if id[1][1] == sym
-          val = parse(Int,id[1][2:end])
-          if from <= val && val <= to
-            if length( getOutNeighbors(fg, id[2]) ) >= minnei
-              push!(allIDs, val)
-            end
-          end
+    vertlbl = string(id[1])
+    if vertlbl[1] == sym
+      val = parse(Int,vertlbl[2:end])
+      if from <= val && val <= to
+        if length( getOutNeighbors(fg, id[2]) ) >= minnei
+          push!(allIDs, val)
+        end
       end
+    end
   end
   allIDs = sort(allIDs)
 
@@ -466,9 +475,10 @@ function get2DPoseMax(fgl::FactorGraph;
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
   LB = String[]
-  for lbl in xLB
+  for slbl in xLB
+    lbl = string(slbl)
     if from <= parse(Int,lbl[2:end]) <=to
-      mv = getKDEMax(getVertKDE(fgl,lbl))
+      mv = getKDEMax(getVertKDE(fgl,slbl))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(Th,mv[3])
