@@ -431,11 +431,10 @@ function get2DSamples(fg::FactorGraph, sym; from::Int64=0, to::Int64=999999999, 
       if from <= val && val <= to
         if length( getOutNeighbors(fg, id[2] ) ) >= minnei
           # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
-          @show id
-            X=[X; vec(getVal(fg,id[2])[1,:]) ]
-            Y=[Y; vec(getVal(fg,id[2])[2,:]) ]
-            # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
-            # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
+          X=[X; vec(getVal(fg,id[2])[1,:]) ]
+          Y=[Y; vec(getVal(fg,id[2])[2,:]) ]
+          # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
+          # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
         end
       end
     end
@@ -543,16 +542,21 @@ function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{Stri
 end
 
 function get2DLandmMax(fgl::FactorGraph;
-                from::Int=-99999999999, to::Int=9999999999, showmm=false,MM=Union{} )
+                from::Int=-99999999999,
+                to::Int=9999999999,
+                showmm=false, MM=Union{}  )
+  #
   xLB,lLB = ls(fgl) # TODO add: from, to, special option 'x'
   if !showmm lLB = removeKeysFromArr(fgl, collect(keys(MM)), lLB); end
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
   LB = String[]
-  for lbl in lLB
+  for lb in lLB
+    @show lb
+    @show lbl = string(lb)
     if from <= parse(Int,lbl[2:end]) <=to
-      mv = getKDEMax(getVertKDE(fgl,lbl))
+      mv = getKDEMax(getVertKDE(fgl,lb))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(LB, lbl)
