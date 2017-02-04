@@ -26,7 +26,7 @@ end
 println("Test if null hypothesis occurs as expected...")
 
 
-N = 101
+N = 50
 fg = initfg()
 
 initCov = eye(6)
@@ -65,8 +65,8 @@ X2ptsMean = Base.mean(X2pts,2)
 @test  sum(map(Int, abs(X2ptsMean - [50.0;0;0;0;0;0]) .< 5.0 )) == 6
 
 tree = wipeBuildNewTree!(fg)
-inferOverTreeR!(fg,tree)
-inferOverTree!(fg,tree)
+inferOverTreeR!(fg,tree,N=N)
+# inferOverTree!(fg,tree)
 
 
 println("Adding Pose3Pose3NH to graph...")
