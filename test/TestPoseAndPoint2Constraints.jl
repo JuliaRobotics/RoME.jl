@@ -30,8 +30,8 @@ pts = evalFactor2(fg, f2, v2.index)
 # @show ls(fg)
 
 tree = wipeBuildNewTree!(fg)
-inferOverTreeR!(fg, tree)
-inferOverTree!(fg, tree)
+inferOverTreeR!(fg, tree,N=N)
+inferOverTree!(fg, tree, N=N)
 
 # test post evaluation values are correct
 pts = getVal(fg, :x1)
