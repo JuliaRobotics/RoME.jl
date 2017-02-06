@@ -169,10 +169,10 @@ gg = (x,y) -> minmickey([x;y])
 
 # now build in factor graph form for further testing
 
-N=200
+N=100
 fg = initfg()
 
-initCov = 0.01*eye(3)
+initCov = 0.05*eye(3)
 initCov[3,3] = 0.001
 odoCov = deepcopy(initCov)
 
@@ -187,9 +187,9 @@ pts2 = [0.014*randn(1,N)+1;  0.014*randn(1,N)-1; 0.002*randn(1,N)+pi/2]
 v2 = addNode!(fg, :x2, pts2, diagm([1.0;1.0;0.1]), N=N)
 
 px2 = zeros(3,1)
-px2[1:3,1] = [1.0;-1.0;pi/2]
+px2[1:3,1] = [1.1;-1.0;pi/2]
 ipp2 = PriorPose2(px2, initCov^2,[1.0])
-# f1  = addFactor!(fg,[:x2], ipp2)
+f1  = addFactor!(fg,[:x2], ipp2)
 
 
 vl1 = addNode!(fg, :l1, rand(MvNormal(l1,0.001*eye(2)),N), diagm([1.0;1.0]), N=N)
@@ -208,7 +208,7 @@ tree = wipeBuildNewTree!(fg)
 [inferOverTreeR!(fg,tree, N=N, dbg=true) for i in 1:1]
 
 # lets see what is happening during MCMC runs
-# plotMCMC(tree, :x2, show=true ) # make true to see pictures, false for testing
+# plotMCMC(tree, :l2, show=true, levels=3) # make true to see pictures, false for testing
 
 # spyCliqMat(tree, :x2)
 

@@ -101,15 +101,19 @@ function addOdoFG!{T <: AbstractString}(
         n::T,
         DX::Array{Float64,1},
         cov::Array{Float64,2};
-        N::Int=100,
+        N::Int=0,
         ready::Int=1,
         labels::Vector{T}=String[]  )
     #
     prev, X, nextn = getLastPose2D(fg)
+    r,c = size(X)
+    if N==0
+      N = c
+    end
     sig = diag(cov)
-    RES = zeros(size(X))
+    RES = zeros(r,c)
     # increases the number of particles based on the number of modes in the measurement Z
-    for i in 1:size(X,2)
+    for i in 1:c
         ent = [randn()*sig[1]; randn()*sig[2]; randn()*sig[3]]
         RES[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
@@ -133,11 +137,14 @@ constraint factor are returned as a tuple.
 function addOdoFG!{PP <: RoME.BetweenPoses, T <: AbstractString}(
         fgl::FactorGraph,
         odo::PP;
-        N::Int=100,
+        N::Int=0,
         ready::Int=1,
         labels::Vector{T}=String[] )
     #
     vprev, X, nextn = getLastPose(fgl)
+    if N==0
+      N = size(X,2)
+    end
     vnext = addNode!(fgl, nextn, X⊕odo, [1.0]', N=N, ready=ready, labels=labels)
     fact = addFactor!(fgl, [vprev;vnext], odo)
     return vnext, fact

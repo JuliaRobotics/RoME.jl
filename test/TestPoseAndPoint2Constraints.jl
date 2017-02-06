@@ -50,7 +50,7 @@ f3 = addFactor!(fg, [v2;v3], ppc)
 
 
 tree = wipeBuildNewTree!(fg)
-[inferOverTree!(fg, tree) for i in 1:3]
+[inferOverTree!(fg, tree, N=N) for i in 1:3]
 
 # test post evaluation values are correct
 pts = getVal(fg, :x1)
