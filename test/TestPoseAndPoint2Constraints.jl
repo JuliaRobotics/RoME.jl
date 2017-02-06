@@ -4,6 +4,7 @@ using RoME, IncrementalInference, Distributions
 using Base.Test
 
 begin
+
 N = 100
 fg = initfg()
 
@@ -29,8 +30,8 @@ pts = evalFactor2(fg, f2, v2.index)
 # @show ls(fg)
 
 tree = wipeBuildNewTree!(fg)
-inferOverTreeR!(fg, tree)
-inferOverTree!(fg, tree)
+inferOverTreeR!(fg, tree,N=N)
+inferOverTree!(fg, tree, N=N)
 
 # test post evaluation values are correct
 pts = getVal(fg, :x1)
@@ -49,7 +50,7 @@ f3 = addFactor!(fg, [v2;v3], ppc)
 
 
 tree = wipeBuildNewTree!(fg)
-[inferOverTree!(fg, tree) for i in 1:3]
+[inferOverTree!(fg, tree, N=N) for i in 1:3]
 
 # test post evaluation values are correct
 pts = getVal(fg, :x1)
@@ -86,6 +87,10 @@ pts = evalFactor2(fg, f5, l1.index)
 
 @test norm(Base.mean(pts,2)[:]-[10.0;0.0]) < 5.0
 
+println("test Pose2D plotting")
+
+drawPoses(fg);
+drawPosesLandms(fg);
 
 # using KernelDensityEstimate
 # using Gadfly

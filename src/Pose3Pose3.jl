@@ -55,7 +55,7 @@ end
 # ------------------------------------
 
 
-type Pose3Pose3 <: IncrementalInference.FunctorPairwise
+type Pose3Pose3 <: RoME.BetweenPoses # IncrementalInference.FunctorPairwise
     Zij::SE3 # 3translations, 3exponential param rotation, iZj
     Cov::Array{Float64,2}
     reuseTent::SE3

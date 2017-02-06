@@ -26,7 +26,7 @@ meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 # Functor for efficient functional programming, avoids type_inference at each call
 # fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
 
-N = 200
+N = 100
 X, pts = 0.01*randn(6,N), zeros(3,N);
 t = Array{Array{Float64,2},1}()
 push!(t,X)
@@ -137,8 +137,8 @@ X1pts = evalFactor2(fg, f2, fg.IDs[:x1])
 
 
 tree = wipeBuildNewTree!(fg)
-inferOverTreeR!(fg, tree)
-inferOverTree!(fg, tree)
+inferOverTreeR!(fg, tree, N=N)
+inferOverTree!(fg, tree, N=N)
 
 
 

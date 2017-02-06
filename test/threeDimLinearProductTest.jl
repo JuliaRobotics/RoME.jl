@@ -38,7 +38,7 @@ Y = X ⊕ odo
 
 
 
-N = 200
+N = 100
 fg = initfg()
 
 initCov = eye(6)
@@ -85,7 +85,7 @@ X1ptsMean = Base.mean(X1pts,2)
 
 println("Construct Bayes tree and perform inference...")
 tree = prepBatchTree!(fg);
-inferOverTree!(fg, tree)
+inferOverTree!(fg, tree, N=N)
 
 println("Ensure basic parameters on x1,x2 after inference...")
 # check mean and covariances after one up and down pass over the tree
@@ -127,7 +127,7 @@ addFactor!(fg,[v3;v4],odoconstr3)
 
 println("Reconstruct Bayes tree and perform inference...")
 tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+inferOverTree!(fg, tree, N=N)
 
 
 

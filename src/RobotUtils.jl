@@ -1,7 +1,8 @@
 
+warn("Must remove optional dev/ISAMRemoteSolve.jl dependency here.")
 include("dev/ISAMRemoteSolve.jl")
 
-function measureMeanDist(fg::FactorGraph, a::String, b::String)
+function measureMeanDist{T <: AbstractString}(fg::FactorGraph, a::T, b::T)
     #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
     res = zeros(2)
     A = getVal(fg,a)
@@ -17,7 +18,7 @@ function measureMeanDist(fg::FactorGraph, a::String, b::String)
     return r, b
 end
 
-function predictBodyBR(fg::FactorGraph, a::String, b::String)
+function predictBodyBR{T <: AbstractString}(fg::FactorGraph, a::T, b::T)
   res = zeros(2)
   A = getVal(fg,a)
   B = getVal(fg,b)
@@ -87,19 +88,37 @@ function odomKDE(p1,dx,cov)
   return kde!(RES, "lcv")
 end
 
+"""
+    addOdoFG!(fg, name, DX, cov, , N=100, ready=1)
 
-function addOdoFG!(fg::FactorGraph, n::String, DX::Array{Float64,1}, cov::Array{Float64,2};
-                  N::Int=100, ready::Int=1)
+Create a new variable node and insert odometry constraint factor between
+which will automatically increment latest pose symbol x<k+1> for new node new node and
+constraint factor are returned as a tuple.
+
+"""
+function addOdoFG!{T <: AbstractString}(
+        fg::FactorGraph,
+        n::T,
+        DX::Array{Float64,1},
+        cov::Array{Float64,2};
+        N::Int=0,
+        ready::Int=1,
+        labels::Vector{T}=String[]  )
+    #
     prev, X, nextn = getLastPose2D(fg)
+    r,c = size(X)
+    if N==0
+      N = c
+    end
     sig = diag(cov)
-    RES = zeros(size(X))
+    RES = zeros(r,c)
     # increases the number of particles based on the number of modes in the measurement Z
-    for i in 1:size(X,2)
+    for i in 1:c
         ent = [randn()*sig[1]; randn()*sig[2]; randn()*sig[3]]
         RES[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addNode!(fg, n, RES, cov, N=N, ready=ready)
+    v = addNode!(fg, n, RES, cov, N=N, ready=ready, labels=labels)
     pp = Pose2Pose2((DX')', cov, [1.0]) #[prev;v],
     f = addFactor!(fg, [prev;v], pp, ready=ready)
     infor = inv(cov^2)
@@ -107,26 +126,54 @@ function addOdoFG!(fg::FactorGraph, n::String, DX::Array{Float64,1}, cov::Array{
     return v, f
 end
 
-# create a new variable node and insert odometry constraint factor between.
-# will automatically increment latest pose symbol x<k+1> for new node
-# new node and constraint factor are returned as a tuple
-function addOdoFG!(fgl::FactorGraph, odo::Pose3Pose3;
-                  N::Int=100, ready::Int=1)
+"""
+    addOdoFG!(fg, odo, N=100, ready=1)
+
+Create a new variable node and insert odometry constraint factor between
+which will automatically increment latest pose symbol x<k+1> for new node new node and
+constraint factor are returned as a tuple.
+
+"""
+function addOdoFG!{PP <: RoME.BetweenPoses, T <: AbstractString}(
+        fgl::FactorGraph,
+        odo::PP;
+        N::Int=0,
+        ready::Int=1,
+        labels::Vector{T}=String[] )
+    #
     vprev, X, nextn = getLastPose(fgl)
-    vnext = addNode!(fgl, nextn, X⊕odo, [1.0]', N=N, ready=ready)
+    if N==0
+      N = size(X,2)
+    end
+    vnext = addNode!(fgl, nextn, X⊕odo, [1.0]', N=N, ready=ready, labels=labels)
     fact = addFactor!(fgl, [vprev;vnext], odo)
     return vnext, fact
 end
 
+
 function initfg(;sessionname="NA")
   fgl = emptyFactorGraph()
-  fgl.sessionname="NA"
+  fgl.sessionname=sessionname
   # registerCallback!(fgl, RoME.getSample) # RoME.evalPotention
   return fgl
 end
 
+function initFactorGraph!{T <: AbstractString}(fg::FactorGraph;
+      P0::Array{Float64,2}=diagm([0.03;0.03;0.001]),
+      init::Vector{Float64}=[0.0;0.0;0.0],
+      N::Int=100,
+      lbl::Symbol=:x1,
+      ready::Int=1,
+      labels::Vector{T}=String[]  )
+  #
+  init = (init')'
+  v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
+  #
+  addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]), ready=ready ) #[v1],
+  return lbl
+end
 
-function newLandm!(fg::FactorGraph, lm::String, wPos::Array{Float64,2}, sig::Array{Float64,2};
+function newLandm!{T <: AbstractString}(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100, ready::Int=1)
 
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
@@ -141,20 +188,22 @@ function newLandm!(fg::FactorGraph, lm::String, wPos::Array{Float64,2}, sig::Arr
     return vert
 end
 
-function updateLandmAge(vlm::Graphs.ExVertex, pose::AbstractString)
+function updateLandmAge{T <: AbstractString}(vlm::Graphs.ExVertex, pose::T)
   error("still working here")
 end
 
-function addBRFG!(fg::FactorGraph, pose::String,
-                  lm::String, br::Array{Float64,1}, cov::Array{Float64,2};
-                   ready::Int=1)
+function addBRFG!{T <: AbstractString}(fg::FactorGraph,
+      pose::T,
+      lm::T,
+      br::Array{Float64,1},
+      cov::Array{Float64,2};
+      ready::Int=1  )
   #
   vps = getVert(fg,pose)
   vlm = getVert(fg,lm)
   testlbl = vps.label*vlm.label
   for nei in getOutNeighbors(fg, vlm)
     if nei.label == testlbl
-      @show nei
       # TODO -- makes function call brittle
       warn("We already have $(testlbl), skipping this constraint")
       return nothing
@@ -179,10 +228,10 @@ function addBRFG!(fg::FactorGraph, pose::String,
   return f
 end
 
-function addMMBRFG!(fg::FactorGraph, pose::String,
-                  lm::Array{String,1}, br::Array{Float64,1},
+function addMMBRFG!{T <: AbstractString}(fg::FactorGraph, pose::T,
+                  lm::Array{T,1}, br::Array{Float64,1},
                   cov::Array{Float64,2}; w=[0.5;0.5], ready::Int=1)
-
+    #
     vps = getVert(fg,pose)
     vlm1 = getVert(fg,lm[1])
     vlm2 = getVert(fg,lm[2])
@@ -205,9 +254,9 @@ function projNewLandmPoints(vps::Graphs.ExVertex, br::Array{Float64,1}, cov::Arr
     return lmPts
 end
 
-function projNewLandm!(fg::FactorGraph, pose::String, lm::String, br::Array{Float64,1}, cov::Array{Float64,2};
+function projNewLandm!{T <: AbstractString}(fg::FactorGraph, pose::T, lm::T, br::Array{Float64,1}, cov::Array{Float64,2};
                         addfactor=true, N::Int=100, ready::Int=1)
-
+    #
     vps = getVert(fg,pose)
 
     lmPts = projNewLandmPoints(vps, br, cov)
@@ -252,7 +301,7 @@ function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
     return iv, maxl
 end
 
-function maxIvWithoutID(ivs::Dict{String, Float64}, l::AbstractString)
+function maxIvWithoutID{T <: AbstractString}(ivs::Dict{String, Float64}, l::T)
   max = 0
   maxl = String("")
   for i in ivs
@@ -262,7 +311,7 @@ function maxIvWithoutID(ivs::Dict{String, Float64}, l::AbstractString)
 end
 
 # binary tests to distinguish how to automatically add a landmark to the existing factor graph
-function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{String, Float64}, maxl::String, lmid::Int, lmindx::Int)
+function doAutoEvalTests{T <: AbstractString}(fgl::FactorGraph, ivs::Dict{T, Float64}, maxl::T, lmid::Int, lmindx::Int)
   maxAnyval = maxl != String("") ? ivs[maxl] : 0.0
   # maxid = fgl.IDs[maxl]
   lmidSugg = lmid != -1 # a landmark ID has been suggested
@@ -283,8 +332,8 @@ function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{String, Float64}, maxl::Str
 end
 
 
-function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{String, Float64}, maxl::String,
-                        pose::String, lmPts::Array{Float64,2}, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
+function evalAutoCases!{T <: AbstractString}(fgl::FactorGraph, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
+                        pose::T, lmPts::Array{Float64,2}, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
                         N::Int=100, ready::Int=1)
   lmidSugg, maxAnyExists, maxl2Exists, maxl2, lmIDExists, intgLmIDExists, lmSuggLbl, newlmindx = doAutoEvalTests(fgl,ivs,maxl,lmid, lmindx)
 
@@ -337,7 +386,7 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{String, Float64},
   return vlm, fbr, newlmindx
 end
 
-function addAutoLandmBR!(fgl::FactorGraph, pose::String, lmid::Int, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
+function addAutoLandmBR!{T <: AbstractString}(fgl::FactorGraph, pose::T, lmid::Int, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
                       N::Int=100, ready::Int=1)
     vps = getVert(fgl, pose)
     lmPts = projNewLandmPoints(vps, br, cov)
@@ -367,13 +416,6 @@ function malahanobisBR(measA, preA, cov::Array{Float64,2})
     return mala
 end
 
-function initFactorGraph!(fg::FactorGraph; P0=diagm([0.03;0.03;0.001]),
-                      init=[0.0;0.0;0.0], N::Int=100, lbl="x1", ready::Int=1)
-    init = (init')'
-    v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready)
-    addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]), ready=ready ) #[v1],
-    return lbl
-end
 
 
 
@@ -390,18 +432,19 @@ function get2DSamples(fg::FactorGraph, sym; from::Int64=0, to::Int64=999999999, 
   # if sym = 'l', ignore single measurement landmarks
 
   for id in fg.IDs
-      if id[1][1] == sym
-        val = parse(Int,id[1][2:end])
-        if from <= val && val <= to
-          if length( getOutNeighbors(fg, id[2] ) ) >= minnei
+    vertlbl = string(id[1])
+    if vertlbl[1] == sym
+      val = parse(Int,vertlbl[2:end])
+      if from <= val && val <= to
+        if length( getOutNeighbors(fg, id[2] ) ) >= minnei
           # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
-              X=[X; vec(getVal(fg,id[2])[1,:]) ]
-              Y=[Y; vec(getVal(fg,id[2])[2,:]) ]
-              # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
-              # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
-          end
+          X=[X; vec(getVal(fg,id[2])[1,:]) ]
+          Y=[Y; vec(getVal(fg,id[2])[2,:]) ]
+          # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
+          # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
         end
       end
+    end
   end
   return X,Y
 end
@@ -419,14 +462,15 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
   # if sym = 'l', ignore single measurement landmarks
   allIDs = Array{Int,1}()
   for id in fg.IDs
-      if id[1][1] == sym
-          val = parse(Int,id[1][2:end])
-          if from <= val && val <= to
-            if length( getOutNeighbors(fg, id[2]) ) >= minnei
-              push!(allIDs, val)
-            end
-          end
+    vertlbl = string(id[1])
+    if vertlbl[1] == sym
+      val = parse(Int,vertlbl[2:end])
+      if from <= val && val <= to
+        if length( getOutNeighbors(fg, id[2]) ) >= minnei
+          push!(allIDs, val)
+        end
       end
+    end
   end
   allIDs = sort(allIDs)
 
@@ -466,9 +510,10 @@ function get2DPoseMax(fgl::FactorGraph;
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
   LB = String[]
-  for lbl in xLB
+  for slbl in xLB
+    lbl = string(slbl)
     if from <= parse(Int,lbl[2:end]) <=to
-      mv = getKDEMax(getVertKDE(fgl,lbl))
+      mv = getKDEMax(getVertKDE(fgl,slbl))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(Th,mv[3])
@@ -504,16 +549,21 @@ function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{Stri
 end
 
 function get2DLandmMax(fgl::FactorGraph;
-                from::Int=-99999999999, to::Int=9999999999, showmm=false,MM=Union{} )
+                from::Int=-99999999999,
+                to::Int=9999999999,
+                showmm=false, MM=Union{}  )
+  #
   xLB,lLB = ls(fgl) # TODO add: from, to, special option 'x'
   if !showmm lLB = removeKeysFromArr(fgl, collect(keys(MM)), lLB); end
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
   LB = String[]
-  for lbl in lLB
+  for lb in lLB
+    @show lb
+    @show lbl = string(lb)
     if from <= parse(Int,lbl[2:end]) <=to
-      mv = getKDEMax(getVertKDE(fgl,lbl))
+      mv = getKDEMax(getVertKDE(fgl,lb))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(LB, lbl)

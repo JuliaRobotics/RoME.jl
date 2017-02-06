@@ -13,7 +13,7 @@ function getSample(p2::PriorPose2, N::Int=1)
 end
 
 
-type Pose2Pose2 <: IncrementalInference.FunctorPairwise
+type Pose2Pose2 <: RoME.BetweenPoses # IncrementalInference.FunctorPairwise
     Zij::Array{Float64,2} # 2translations, 1rotation
     Cov::Array{Float64,2}
     W::Array{Float64,1}
@@ -52,6 +52,37 @@ function compare(a::Pose2Pose2,b::Pose2Pose2; tol::Float64=1e-10)
   TP = TP && norm(a.W-b.W) < tol
   return TP
 end
+
+
+
+
+
+
+# Project all particles (columns) Xval with Z, that is for all  SE3(Xval[:,i])*Z
+function projectParticles(Xval::Array{Float64,2}, Z::Array{Float64,2}, Cov::Array{Float64,2})
+  # TODO optimize convert SE2 to a type
+
+  r,c = size(Xval)
+  RES = zeros(r,c) #*cz
+
+  # ent, x = SE3(0), SE3(0)
+  j=1
+  # for j in 1:cz
+  ENT = rand( MvNormal(Z[:,1], Cov), c )
+    for i in 1:c
+      x = SE2(Xval[1:3,i])
+      dx = SE2(ENT[1:3,i])
+      RES[1:r,i*j] = se2vee(x*dx)
+    end
+  # end
+  #
+  return RES
+end
+
+⊕(Xpts::Array{Float64,2}, z::Pose2Pose2) = projectParticles(Xpts, z.Zij, z.Cov)
+⊕(Xvert::Graphs.ExVertex, z::Pose2Pose2) = ⊕(getVal(Xvert), z)
+
+
 
 
 

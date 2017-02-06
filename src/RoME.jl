@@ -14,12 +14,15 @@ using
 
 import Base: +
 import TransformUtils: ⊖, ⊕, convert, compare
-import IncrementalInference: convert, getSample, compare, reshapeVec2Mat
+import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
 
 
 
 export
   # pass throughs from TransformUtils
+  SE2,
+  se2vee,
+  se2vee!,
   SE3,
   Euler,
   Quaternion,
@@ -42,6 +45,9 @@ export
   VNDencoder,
   VNDdecoder,
   GenericWrapParam,
+  wipeBuildNewTree!,
+  inferOverTree!,
+  inferOverTreeR!,
 
   # RoME specific functions
   initfg,
@@ -58,6 +64,9 @@ export
   addAutoLandmBR!,
   projNewLandm!,
   malahanobisBR,
+
+  # types
+  BetweenPoses,
 
   # helper functions
   get2DSamples,
@@ -184,6 +193,11 @@ export
   Pose3Pose3NH,
   PackedPose3Pose3NH,
 
+  # MultipleFeatures2D constraint functions
+  MultipleFeatures2D,
+  getUvecScaleFeature2D,
+  getUvecScaleBaseline2D,
+
   # SLAM specific functions
   SLAMWrapper,
 
@@ -213,6 +227,8 @@ export
   processTreeTrackersUpdates!
 
 
+abstract BetweenPoses <: IncrementalInference.FunctorPairwise
+
 
 include("BayesTracker.jl")
 
@@ -222,6 +238,7 @@ include("Point2D.jl")
 include("Pose2D.jl")
 include("BearingRange2D.jl")
 include("Pose3Pose3.jl")
+include("MultipleFeaturesConstraint.jl")
 
 include("Slam.jl")
 

@@ -26,11 +26,11 @@ end
 println("Test if null hypothesis occurs as expected...")
 
 
-N = 101
+N = 100
 fg = initfg()
 
 initCov = eye(6)
-[initCov[i,i] = 0.01 for i in 4:6];
+[initCov[i,i] = 0.01^2 for i in 4:6];
 odoCov = deepcopy(initCov)
 
 
@@ -53,21 +53,22 @@ means = Base.mean(priorpts,2)
 @test sum(map(Int,abs(means[1:3]) .> 0.5)) == 0
 @test sum(map(Int,abs(means[4:6]) .> 0.05)) == 0
 
-v2, f2 = addOdoFG!(fg, Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov) )
-v3, f3 = addOdoFG!(fg, Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov) )
+v2, f2 = addOdoFG!(fg, Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov))
+v3, f3 = addOdoFG!(fg, Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov))
 
 println("Testing Pose3Pose3 evaluation...")
-X1pts = evalFactor2(fg, fg.g.vertices[6], 3)
-X2pts = evalFactor2(fg, fg.g.vertices[6], 5)
-X1ptsMean = Base.mean(X1pts,2)
+X1pts = getVal(fg, :x1)
+X2pts = evalFactor2(fg, fg.g.vertices[6], 3, N=N)
+X3pts = evalFactor2(fg, fg.g.vertices[6], 5)
 X2ptsMean = Base.mean(X2pts,2)
-@test  sum(map(Int, abs(X1ptsMean) - [25.0;0;0;0;0;0] .< 5.0 )) == 6
-@test  sum(map(Int, abs(X2ptsMean - [50.0;0;0;0;0;0]) .< 5.0 )) == 6
+X3ptsMean = Base.mean(X3pts,2)
+
+@test  sum(map(Int, abs(X2ptsMean) - [25.0;0;0;0;0;0] .< 5.0 )) == 6
+@test  sum(map(Int, abs(X3ptsMean - [50.0;0;0;0;0;0]) .< 5.0 )) == 6
 
 tree = wipeBuildNewTree!(fg)
-inferOverTreeR!(fg,tree)
-inferOverTree!(fg,tree)
-
+inferOverTreeR!(fg,tree,N=N)
+# inferOverTree!(fg,tree)
 
 println("Adding Pose3Pose3NH to graph...")
 
@@ -88,13 +89,19 @@ p2 = kde!(X2pts)
 using JLD, HDF5
 
 println("loading validation data for testing.")
-@load "testvalidation.jld"
+@load joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
 
 p1t = kde!(X1ptst)
-@test abs(kld(p1t, p1)[1]) < 30.0
-
 p2t = kde!(X2ptst)
-@test abs(kld(p2t, p2)[1]) < 30.0
+
+# plotKDE([marginal(p1,[2]);marginal(p1t,[2])],c=["black";"red"],levels=15)
+# kld(marginal(p1,[2]), marginal(p1t,[2]), method=:unscented)
+
+t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
+t2 = minimum([abs(kld(p2, p2t)[1]) ; abs(kld(p2t, p2)[1])])
+
+@test t1 < 30.0
+@test t2 < 30.0
 
 
 # plotKDE(margisal(p1,[1]))
