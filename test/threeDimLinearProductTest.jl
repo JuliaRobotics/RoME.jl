@@ -79,8 +79,9 @@ X1pts = evalFactor2(fg, fg.g.vertices[4], 1)
 X2pts = evalFactor2(fg, fg.g.vertices[4], 3)
 X2ptsMean = Base.mean(X2pts,2)
 X1ptsMean = Base.mean(X1pts,2)
-@test  sum(map(Int, abs(X1ptsMean) .< 0.5 )) == 6
-@test  sum(map(Int, abs(X2ptsMean - [10.0;0;0;0;0;0]) .< 0.5 )) == 6
+@show X1ptsMean
+@test  sum(map(Int, abs(X1ptsMean) .< 1.0 )) == 6
+@test  sum(map(Int, abs(X2ptsMean - [10.0;0;0;0;0;0]) .< 1.0 )) == 6
 
 
 println("Construct Bayes tree and perform inference...")
