@@ -62,7 +62,6 @@ unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{
 println("test conversions of Pose2DPoint2DBearingRange")
 
 
-
 # and a second pose
 v3 = addNode!(fg, :l1, ([50.0;50.0]')', diagm([1.0;1.0]), N=N)
 # ppc = Pose2DPoint2DBearingRange([50.0;0.0;pi/2], 0.01*eye(2), [1.0])
@@ -78,12 +77,12 @@ upd = convert(RoME.Pose2DPoint2DBearingRange{Normal,Normal}, dd)
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2DPoint2DBearingRange}, getData(f3))
 unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2DPoint2DBearingRange{Normal,Normal}}}, packeddata)
 
-@test
-@show ppbr.bearing.μ == unpackeddata.fnc.usrfnc!.bearing.μ
-@show ppbr.bearing.σ == unpackeddata.fnc.usrfnc!.bearing.σ
+@test ppbr.bearing.μ == unpackeddata.fnc.usrfnc!.bearing.μ
+@test ppbr.bearing.σ == unpackeddata.fnc.usrfnc!.bearing.σ
 
-@show ppbr.range.μ == unpackeddata.fnc.usrfnc!.range.μ
-@show ppbr.range.σ == unpackeddata.fnc.usrfnc!.range.σ
+@test ppbr.range.μ == unpackeddata.fnc.usrfnc!.range.μ
+@test ppbr.range.σ == unpackeddata.fnc.usrfnc!.range.σ
+
 
 println("test conversions of PriorPose3")
 
