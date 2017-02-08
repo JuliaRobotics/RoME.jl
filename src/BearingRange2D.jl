@@ -33,7 +33,7 @@ end
 #-------------------------------------------------------------------------------
 # bearing and range available
 
-type Pose2DPoint2DBearingRange{B,R} <: IncrementalInference.FunctorPairwise
+type Pose2DPoint2DBearingRange{B <: Distributions.Distribution, R <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
     # Zij::Array{Float64,2} # bearing and range hypotheses as columns
     # Cov::Array{Float64,2}
     # W::Array{Float64,1}
