@@ -33,7 +33,7 @@ end
 #-------------------------------------------------------------------------------
 # bearing and range available
 
-type Pose2DPoint2DBearingRange{B,R} <: IncrementalInference.FunctorPairwise
+type Pose2DPoint2DBearingRange{B <: Distributions.Distribution, R <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
     # Zij::Array{Float64,2} # bearing and range hypotheses as columns
     # Cov::Array{Float64,2}
     # W::Array{Float64,1}
@@ -68,25 +68,19 @@ end
 passTypeThrough(d::FunctionNodeData{Pose2DPoint2DRange}) = d
 
 type PackedPose2DPoint2DBearingRange <: IncrementalInference.PackedInferenceType
-    vecZij::Array{Float64,1} # 0rotations, 1translation in each column
-    dimz::Int64
-    vecCov::Array{Float64,1}
-    dimc::Int64
-    W::Array{Float64,1}
+    bmu::Float64 # 0rotations, 1translation in each column
+    bsig::Float64
+    rmu::Float64
+    rsig::Float64
     PackedPose2DPoint2DBearingRange() = new()
-    PackedPose2DPoint2DBearingRange(x...) = new(x[1], x[2], x[3], x[4], x[5])
+    PackedPose2DPoint2DBearingRange(x...) = new(x[1], x[2], x[3], x[4])
 end
-function convert(::Type{Pose2DPoint2DBearingRange}, d::PackedPose2DPoint2DBearingRange)
-  Zij = reshapeVec2Mat(d.vecZij,d.dimz)
-  Cov = reshapeVec2Mat(d.vecCov, d.dimc)
-  return Pose2DPoint2DBearingRange(Zij, Cov, d.W)
+function convert(::Type{Pose2DPoint2DBearingRange{Normal, Normal}}, d::PackedPose2DPoint2DBearingRange)
+  return Pose2DPoint2DBearingRange{Distributions.Normal, Distributions.Normal}(Distributions.Normal(d.bmu,d.bsig), Distributions.Normal(d.rmu, d.rsig))
 end
-function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange)
-  v1 = d.Zij[:];
-  v2 = d.Cov[:];
-  return PackedPose2DPoint2DBearingRange(v1,size(d.Zij,1),
-                                         v2,size(d.Cov,1),
-                                         d.W)
+function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal, Normal})
+  return PackedPose2DPoint2DBearingRange(d.bearing.μ, d.bearing.σ,
+                                         d.range.μ,   d.range.σ )
 end
 
 
