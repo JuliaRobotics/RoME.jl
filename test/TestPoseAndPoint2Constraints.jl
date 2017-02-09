@@ -65,6 +65,7 @@ pts = getVal(fg, :x3)
 @test norm(Base.mean(pts,2)[1:2]-[50.0;50.0]) < 20.0
 @test abs(Base.mean(pts,2)[3]-pi/2) < 0.5
 
+println("test bearing range evaluations")
 
 # new landmark
 l1 = addNode!(fg, :l1, ([0.0;0.0]')', diagm([1.0;1.0]), N=N)
@@ -77,9 +78,15 @@ pts = evalFactor2(fg, f4, l1.index)
 # @show sum(sqrt(sum(pts.^2, 1 )) .< 5.0)
 @test sum(sqrt(sum(pts.^2, 1 )) .< 5.0) == 0
 
+pts = evalFactor2(fg, f4, v1.index)
+# @show sum(sqrt(sum(pts.^2, 1 )) .< 5.0)
+# @test sum(sqrt(sum(pts.^2, 1 )) .< 5.0) == 0
 
 
-# add a prior somewhere
+
+
+
+# add a prior to landmark
 pp2 = PriorPoint2D([10.0;0.0], diagm([1.0;1.0]), [1.0])
 
 f5 = addFactor!(fg,[l1], pp2)

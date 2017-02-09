@@ -54,9 +54,13 @@ function (pp2br::Pose2DPoint2DBearingRange)(res::Array{Float64},
         xi::Array{Float64,2},
         lm::Array{Float64,2} )
   #
-  # @show size(lm), size(xi), size(meas), size(meas[1]), size(meas[2])
-  res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]) + xi[1,idx])
-  res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]) + xi[2,idx])
+  # @show size(lm), size(xi), size(meas[1])
+  # @show idx
+  # @show meas[1][:,idx]
+  # @show xi[:, idx]
+  # @show lm[:,idx]
+  res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
+  res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
   nothing
 end
 
