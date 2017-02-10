@@ -16,7 +16,7 @@ X = [0.01*randn(5,N);0*pi/4+0.01*randn(1,N)]
 Y = X ⊕ odo
 
 @test norm(Y[1:3]-zeros(3)) < 1.0
-@test norm(Y[4:6]-[zeros(2);pi/4]) < 0.1
+@test norm(Y[4:6]-[zeros(2);pi/4]) < 0.15
 
 
 
