@@ -74,12 +74,12 @@ end
 # transfered in from IncrementalInference
 
 ## TODO -- you were here with port starboard lines
-function stbPrtLineLayers!(pl, Xpp, Ypp, Thpp)
+function stbPrtLineLayers!(pl, Xpp, Ypp, Thpp; l::Float64=5.0)
     if DISABLESTBPRTLINES
       return nothing
     end
 
-    l = 5.0
+
     lnstpr = [0.0;l;0.0]
     lnstpg = [0.0;-l;0.0]
 
@@ -109,7 +109,8 @@ end
 # end
 
 function drawPoses(fg::FactorGraph; from::Int64=0,to::Int64=99999999,
-                    meanmax=:max, lbls=true, drawhist=true)
+                    meanmax=:max, lbls=true, drawhist=true,
+                    spscale::Float64=5.0)
     #Gadfly.set_default_plot_size(20cm, 30cm)
     Xp,Yp = get2DPoseSamples(fg, from=from, to=to)
     Xpp = Float64[]; Ypp=Float64[]; Thpp=Float64[]; LBLS=String[];
@@ -130,7 +131,7 @@ function drawPoses(fg::FactorGraph; from::Int64=0,to::Int64=99999999,
       Gadfly.layer(x=Xpp,y=Ypp,Geom.path(), Theme(line_width=1pt))
       )
     end
-    stbPrtLineLayers!(psplt, Xpp, Ypp, Thpp)
+    stbPrtLineLayers!(psplt, Xpp, Ypp, Thpp, l=spscale)
     if drawhist
       push!(psplt.layers,  Gadfly.layer(x=Xp, y=Yp, Geom.histogram2d)[1] )#(xbincount=100, ybincount=100))
     end
@@ -169,8 +170,9 @@ end
 
 function drawPosesLandms(fg::FactorGraph;
                     from::Int64=0, to::Int64=99999999, minnei::Int64=0,
-                    meanmax=:max,lbls=true,drawhist=true, MM=Union{}, showmm=true)
-  p = drawPoses(fg, from=from,to=to,meanmax=meanmax,lbls=lbls,drawhist=drawhist)
+                    meanmax=:max,lbls=true,drawhist=true, MM=Union{}, showmm=true,
+                    spscale::Float64=5.0)
+  p = drawPoses(fg, from=from,to=to,meanmax=meanmax,lbls=lbls,drawhist=drawhist, spscale=spscale)
   pl = drawLandms(fg, from=from, to=to, minnei=minnei,lbls=lbls,drawhist=drawhist, MM=MM, showmm=showmm)
   for l in pl.layers
     push!(p.layers, l)
