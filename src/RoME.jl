@@ -173,6 +173,12 @@ export
   solveSetSeps,
   addPose2Pose2!,
 
+  # acoustics
+  Pose2DPoint2DBearingRangeDensity,
+  PackedPose2DPoint2DBearingRangeDensity,
+  Pose2DPoint2DRangeDensity,
+  PackedPose2DPoint2DRangeDensity,
+
   # Pose2D
   PriorPose2,
   PackedPriorPose2,
@@ -237,6 +243,9 @@ include("CameraModel.jl")
 include("Point2D.jl")
 include("Pose2D.jl")
 include("BearingRange2D.jl")
+
+include("BearingRangeDensity2D.jl")
+
 include("Pose3Pose3.jl")
 include("MultipleFeaturesConstraint.jl")
 
