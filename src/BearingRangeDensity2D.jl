@@ -36,7 +36,7 @@ end
 
 
 # better to use bearingrange with [uniform bearing], numerical solving issue on 1D
-type Pose2DPoint2DRangeDensity <: IncrementalInference.FunctorPairwise
+type Pose2DPoint2DRangeDensity <: IncrementalInference.FunctorPairwiseMinimize
     range::BallTreeDensity
     Pose2DPoint2DRangeDensity() = new()
     Pose2DPoint2DRangeDensity(x...) = new(x[1])
@@ -53,7 +53,7 @@ function (pp2r::Pose2DPoint2DRangeDensity)(res::Array{Float64},
   XX = lm[1,idx] - (meas[1][1,idx]*cos(meas[2][idx]+xi[3,idx]) + xi[1,idx])
   YY = lm[2,idx] - (meas[1][1,idx]*sin(meas[2][idx]+xi[3,idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
-  nothing
+  res[1]
 end
 function getSample(pp2r::Pose2DPoint2DRangeDensity, N::Int=1)
   return (KernelDensityEstimate.sample(pp2r.range, N)[1],  2*pi*rand(N))
