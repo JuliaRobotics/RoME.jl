@@ -438,8 +438,8 @@ function get2DSamples(fg::FactorGraph, sym; from::Int64=0, to::Int64=999999999, 
       if from <= val && val <= to
         if length( getOutNeighbors(fg, id[2] ) ) >= minnei
           # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
-          X=[X; vec(getVal(fg,id[2])[1,:]) ]
-          Y=[Y; vec(getVal(fg,id[2])[2,:]) ]
+          X=[X; vec(getVal(fg,id[2], api=localapi)[1,:]) ]
+          Y=[Y; vec(getVal(fg,id[2], api=localapi)[2,:]) ]
           # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
           # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
         end
@@ -475,10 +475,10 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
   allIDs = sort(allIDs)
 
   for id in allIDs
-    X=[X;Base.mean( vec( getVal(fg,string(sym,id))[1,:] ) )]
-    Y=[Y;Base.mean( vec( getVal(fg, string(sym,id))[2,:] ) )]
+    X=[X;Base.mean( vec( getVal(fg,string(sym,id), api=localapi)[1,:] ) )]
+    Y=[Y;Base.mean( vec( getVal(fg, string(sym,id), api=localapi)[2,:] ) )]
     if sym == 'x'
-      Th=[Th;Base.mean( vec( getVal(fg, string(sym,id))[3,:] ) )]
+      Th=[Th;Base.mean( vec( getVal(fg, string(sym,id), api=localapi)[3,:] ) )]
     end
     push!(LB, string(sym,id))
   end
