@@ -187,16 +187,17 @@ function drawPosesLandms(fg::FactorGraph;
 end
 
 function drawSubmaps(fgl::FactorGraph, fromto::Array{Int,2};
-                    m1hist=false,m2hist=false,m3hist=false, showmm=false, MM=Union{})
-  p = drawLandms(fgl, from=fromto[1,1], to=fromto[1,2], drawhist=m1hist, showmm=showmm, MM=MM)
+                    m1hist=false,m2hist=false,m3hist=false, showmm=false, MM=Union{},
+                    api::DataLayerAPI=IncrementalInference.localapi )
+  p = drawLandms(fgl, from=fromto[1,1], to=fromto[1,2], drawhist=m1hist, showmm=showmm, MM=MM, api=api)
   if size(fromto,1) >1
-    p2 = drawLandms(fgl, from=fromto[2,1], to=fromto[2,2], drawhist=m2hist,c="blue", showmm=showmm, MM=MM)
+    p2 = drawLandms(fgl, from=fromto[2,1], to=fromto[2,2], drawhist=m2hist,c="blue", showmm=showmm, MM=MM, api=api)
     for l in p2.layers
       push!(p.layers, l)
     end
   end
   if size(fromto,1) >2
-    p3 = drawLandms(fgl, from=fromto[3,1], to=fromto[3,2], drawhist=m3hist,c="magenta", showmm=showmm, MM=MM)
+    p3 = drawLandms(fgl, from=fromto[3,1], to=fromto[3,2], drawhist=m3hist,c="magenta", showmm=showmm, MM=MM, api=api)
     for l in p3.layers
       push!(p.layers, l)
     end
