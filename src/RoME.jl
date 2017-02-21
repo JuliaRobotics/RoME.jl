@@ -16,6 +16,8 @@ import Base: +
 import TransformUtils: ⊖, ⊕, convert, compare
 import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
 
+warn("Deprecated import < v0.2.5, IncrementalInference: localapi")
+import IncrementalInference: localapi
 
 
 export
