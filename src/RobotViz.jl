@@ -110,14 +110,15 @@ end
 
 function drawPoses(fg::FactorGraph; from::Int64=0,to::Int64=99999999,
                     meanmax=:max, lbls=true, drawhist=true,
-                    spscale::Float64=5.0)
+                    spscale::Float64=5.0,
+                    api::DataLayerAPI=IncrementalInference.localapi  )
     #Gadfly.set_default_plot_size(20cm, 30cm)
     Xp,Yp = get2DPoseSamples(fg, from=from, to=to)
     Xpp = Float64[]; Ypp=Float64[]; Thpp=Float64[]; LBLS=String[];
     if meanmax == :mean
-      Xpp,Ypp, Thpp, LBLS = get2DPoseMeans(fg, from=from, to=to)
+      Xpp,Ypp, Thpp, LBLS = get2DPoseMeans(fg, from=from, to=to, api=api)
     elseif meanmax == :max
-      Xpp,Ypp, Thpp, LBLS = get2DPoseMax(fg, from=from, to=to)
+      Xpp,Ypp, Thpp, LBLS = get2DPoseMax(fg, from=from, to=to, api=api)
     end
 
     # lbls = lblsFromTo(1,length(Xpp))
@@ -140,14 +141,18 @@ end
 
 function drawLandms(fg::FactorGraph;
               from::Int64=0, to::Int64=99999999, minnei::Int64=0,
-              meanmax=:max,lbls=true,showmm=false,drawhist=true,c="red",MM=Union{})
+              meanmax=:max,
+              lbls=true,showmm=false,drawhist=true,
+              c="red",
+              MM=Union{},
+              api::DataLayerAPI=IncrementalInference.localapi  )
     #Gadfly.set_default_plot_size(20cm, 30cm)
     Xp,Yp = get2DLandmSamples(fg, from=from, to=to)
     Xpp = Float64[]; Ypp=Float64[]; Thpp=Float64[]; lblstags=String[];
     if meanmax==:mean
-      Xpp,Ypp, t, lbltags = get2DLandmMeans(fg, from=from, to=to)
+      Xpp,Ypp, t, lbltags = get2DLandmMeans(fg, from=from, to=to, api=api)
     elseif meanmax==:max
-      Xpp,Ypp, t, lbltags = get2DLandmMax(fg, from=from, to=to,showmm=showmm,MM=MM)
+      Xpp,Ypp, t, lbltags = get2DLandmMax(fg, from=from, to=to,showmm=showmm,MM=MM, api=api)
     end
 
     if lbls
@@ -171,9 +176,10 @@ end
 function drawPosesLandms(fg::FactorGraph;
                     from::Int64=0, to::Int64=99999999, minnei::Int64=0,
                     meanmax=:max,lbls=true,drawhist=true, MM=Union{}, showmm=true,
-                    spscale::Float64=5.0)
-  p = drawPoses(fg, from=from,to=to,meanmax=meanmax,lbls=lbls,drawhist=drawhist, spscale=spscale)
-  pl = drawLandms(fg, from=from, to=to, minnei=minnei,lbls=lbls,drawhist=drawhist, MM=MM, showmm=showmm)
+                    spscale::Float64=5.0,
+                    api::DataLayerAPI=IncrementalInference.localapi  )
+  p = drawPoses(fg, from=from,to=to,meanmax=meanmax,lbls=lbls,drawhist=drawhist, spscale=spscale, api=api)
+  pl = drawLandms(fg, from=from, to=to, minnei=minnei,lbls=lbls,drawhist=drawhist, MM=MM, showmm=showmm, api=api)
   for l in pl.layers
     push!(p.layers, l)
   end
@@ -272,8 +278,11 @@ function investigatePoseKDE(p::BallTreeDensity)
 end
 
 
-function drawMarginalContour(fgl::FactorGraph, lbl::String;xmin=-150,xmax=150,ymin=-150,ymax=150,n=200)
-  p = getKDE(getVert(fgl,lbl))
+function drawMarginalContour(fgl::FactorGraph, lbl::String;
+    xmin=-150,xmax=150,ymin=-150,ymax=150,n=200,
+    api::DataLayerAPI=IncrementalInference.localapi )
+  #
+  p = getVertKDE(fgl,lbl, api=api)  # p = getKDE(getVert(fgl,lbl))
   Gadfly.plot(z=(x,y)->evaluateDualTree(p,([x;y]')')[1],
     x=linspace(xmin,xmax,n),
     y=linspace(ymin,ymax,n),
@@ -283,12 +292,15 @@ function drawMarginalContour(fgl::FactorGraph, lbl::String;xmin=-150,xmax=150,ym
   )
 end
 
-function accumulateMarginalContours(fgl, order;xmin=-150,xmax=150,ymin=-150,ymax=150,n=200)
-  pl = drawMarginalContour(fgl, order[1],xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,n=n)
+function accumulateMarginalContours(fgl, order;
+    xmin=-150,xmax=150,ymin=-150,ymax=150,n=200,
+    api::DataLayerAPI=IncrementalInference.localapi )
+  #
+  pl = drawMarginalContour(fgl, order[1],xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,n=n, api=api)
   pl2 = nothing
   PL = []
   for or in order[1:end]
-    pl2 = drawMarginalContour(fgl, or, xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,n=n)
+    pl2 = drawMarginalContour(fgl, or, xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,n=n, api=api)
     push!(PL, pl2)
     push!(pl.layers, pl2.layers[1])
   end
