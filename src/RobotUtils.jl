@@ -425,7 +425,12 @@ end
 
 
 
-function get2DSamples(fg::FactorGraph, sym; from::Int64=0, to::Int64=999999999, minnei::Int64=0)
+function get2DSamples(fg::FactorGraph,
+      sym;
+      from::Int64=0, to::Int64=999999999,
+      minnei::Int64=0,
+      api::DataLayerAPI=IncrementalInference.localapi  )
+  #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
 
@@ -436,10 +441,10 @@ function get2DSamples(fg::FactorGraph, sym; from::Int64=0, to::Int64=999999999, 
     if vertlbl[1] == sym
       val = parse(Int,vertlbl[2:end])
       if from <= val && val <= to
-        if length( getOutNeighbors(fg, id[2] ) ) >= minnei
+        if length( getOutNeighbors(fg, id[2], api=api, needdata=true ) ) >= minnei
           # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
-          X=[X; vec(getVal(fg,id[2])[1,:]) ]
-          Y=[Y; vec(getVal(fg,id[2])[2,:]) ]
+          X=[X; vec(getVal(fg,id[2], api=api)[1,:]) ]
+          Y=[Y; vec(getVal(fg,id[2], api=api)[2,:]) ]
           # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
           # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
         end
@@ -449,11 +454,17 @@ function get2DSamples(fg::FactorGraph, sym; from::Int64=0, to::Int64=999999999, 
   return X,Y
 end
 
-function getAll2D(fg, sym; minnei::Int64=0)
-  return get2DSamples(fg, sym, minnei=minnei)
+function getAll2D(fg, sym; minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+  warn("getAll2D deprecated, use get2DSamples instead")
+  return get2DSamples(fg, sym, minnei=minnei, api=api)
 end
 
-function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999999, minnei::Int64=0)
+function get2DSampleMeans(fg::FactorGraph,
+      sym;
+      from::Int64=0, to::Int64=9999999999,
+      minnei::Int64=0,
+      api::DataLayerAPI=IncrementalInference.localapi  )
+  #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
@@ -466,7 +477,7 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
     if vertlbl[1] == sym
       val = parse(Int,vertlbl[2:end])
       if from <= val && val <= to
-        if length( getOutNeighbors(fg, id[2]) ) >= minnei
+        if length( getOutNeighbors(fg, id[2], api=api, needdata=true) ) >= minnei
           push!(allIDs, val)
         end
       end
@@ -475,10 +486,10 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
   allIDs = sort(allIDs)
 
   for id in allIDs
-    X=[X;Base.mean( vec( getVal(fg,string(sym,id))[1,:] ) )]
-    Y=[Y;Base.mean( vec( getVal(fg, string(sym,id))[2,:] ) )]
+    X=[X;Base.mean( vec( getVal(fg,string(sym,id), api=api)[1,:] ) )]
+    Y=[Y;Base.mean( vec( getVal(fg, string(sym,id), api=api)[2,:] ) )]
     if sym == 'x'
-      Th=[Th;Base.mean( vec( getVal(fg, string(sym,id))[3,:] ) )]
+      Th=[Th;Base.mean( vec( getVal(fg, string(sym,id), api=api)[3,:] ) )]
     end
     push!(LB, string(sym,id))
   end
@@ -486,25 +497,25 @@ function get2DSampleMeans(fg::FactorGraph, sym; from::Int64=0, to::Int64=9999999
 end
 
 #draw landmark positions
-function getAll2DMeans(fg, sym)
-  return get2DSampleMeans(fg, sym)
+function getAll2DMeans(fg, sym, api::DataLayerAPI=IncrementalInference.localapi)
+  return get2DSampleMeans(fg, sym, api=api)
 end
 
-function getAll2DPoses(fg::FactorGraph)
-    return getAll2D(fg, 'x')
+function getAll2DPoses(fg::FactorGraph, api::DataLayerAPI=IncrementalInference.localapi)
+    return getAll2DSamples(fg, 'x', api=api)
 end
 
-function get2DPoseSamples(fg::FactorGraph; from::Int64=0, to::Int64=999999999)
-  return get2DSamples(fg, 'x'; from=from, to=to)
+function get2DPoseSamples(fg::FactorGraph; from::Int64=0, to::Int64=999999999, api::DataLayerAPI=IncrementalInference.localapi)
+  return get2DSamples(fg, 'x'; from=from, to=to, api=api)
 end
 
-function get2DPoseMeans(fg::FactorGraph; from::Int64=0, to::Int64=999999999)
-  return get2DSampleMeans(fg, 'x', from=from, to=to)
+function get2DPoseMeans(fg::FactorGraph; from::Int64=0, to::Int64=999999999, api::DataLayerAPI=IncrementalInference.localapi)
+  return get2DSampleMeans(fg, 'x', from=from, to=to, api=api)
 end
 
 
 function get2DPoseMax(fgl::FactorGraph;
-            from::Int=-99999999999, to::Int=9999999999 )
+            from::Int=-99999999999, to::Int=9999999999, api::DataLayerAPI=IncrementalInference.localapi )
   xLB,ll = ls(fgl) # TODO add: from, to, special option 'x'
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
@@ -523,16 +534,16 @@ function get2DPoseMax(fgl::FactorGraph;
   return X, Y, Th, LB
 end
 
-function getAll2DLandmarks(fg::FactorGraph, minnei::Int64=0)
-    return getAll2D(fg, 'l', minnei=minnei)
+function getAll2DLandmarks(fg::FactorGraph, minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+    return getAll2DSamples(fg, 'l', minnei=minnei, api=api)
 end
 
-function get2DLandmSamples(fg::FactorGraph; from::Int64=0, to::Int64=999999999, minnei::Int64=0)
-  return get2DSamples(fg, 'l', from=from, to=to, minnei=minnei)
+function get2DLandmSamples(fg::FactorGraph; from::Int64=0, to::Int64=999999999, minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+  return get2DSamples(fg, 'l', from=from, to=to, minnei=minnei, api=api)
 end
 
-function get2DLandmMeans(fg::FactorGraph; from::Int64=0, to::Int64=999999999, minnei::Int64=0)
-  return get2DSampleMeans(fg, 'l', from=from, to=to, minnei=minnei)
+function get2DLandmMeans(fg::FactorGraph; from::Int64=0, to::Int64=999999999, minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+  return get2DSampleMeans(fg, 'l', from=from, to=to, minnei=minnei, api=api)
 end
 
 function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{String,1})
@@ -551,7 +562,8 @@ end
 function get2DLandmMax(fgl::FactorGraph;
                 from::Int=-99999999999,
                 to::Int=9999999999,
-                showmm=false, MM=Union{}  )
+                showmm=false, MM=Union{},
+                api::DataLayerAPI=IncrementalInference.localapi  )
   #
   xLB,lLB = ls(fgl) # TODO add: from, to, special option 'x'
   if !showmm lLB = removeKeysFromArr(fgl, collect(keys(MM)), lLB); end
@@ -563,7 +575,7 @@ function get2DLandmMax(fgl::FactorGraph;
     @show lb
     @show lbl = string(lb)
     if from <= parse(Int,lbl[2:end]) <=to
-      mv = getKDEMax(getVertKDE(fgl,lb))
+      mv = getKDEMax(getVertKDE(fgl,lb, api=api))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(LB, lbl)
