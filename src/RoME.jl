@@ -60,6 +60,7 @@ export
   odomKDE,
   initFactorGraph!,
   addOdoFG!,
+  addposeFG!,
   newLandm!,
   addBRFG!,
   addMMBRFG!,
@@ -201,6 +202,12 @@ export
   Pose3Pose3NH,
   PackedPose3Pose3NH,
 
+  # partial Pose3
+  PartialPriorRollPitchZ,
+  PackedPartialPriorRollPitchZ,
+  PartialPose3XYYaw,
+  PackedPartialPose3XYYaw,
+
   # MultipleFeatures2D constraint functions
   MultipleFeatures2D,
   getUvecScaleFeature2D,
@@ -249,6 +256,7 @@ include("BearingRange2D.jl")
 include("BearingRangeDensity2D.jl")
 
 include("Pose3Pose3.jl")
+include("PartialPose3.jl")
 include("MultipleFeaturesConstraint.jl")
 
 include("Slam.jl")
