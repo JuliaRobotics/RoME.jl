@@ -38,7 +38,7 @@ Y = X ⊕ odo
 
 
 
-N = 100
+N = 75
 fg = initfg()
 
 initCov = eye(6)
