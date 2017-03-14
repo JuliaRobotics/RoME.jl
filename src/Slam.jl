@@ -50,19 +50,13 @@ function addposeFG!(slaml::SLAMWrapper,
   vnext = addNode!(slaml.fg, nextn, getVal(vprev), N=N, ready=ready)
   slaml.lastposesym = nextn
 
+  addsubtype(fgl::FactorGraph, vprev, vnext, cc::FunctorPairwise) = addFactor!(fgl, [vprev;vnext], cc)
+  addsubtype(fgl::FactorGraph, vprev, vnext, cc::FunctorSingleton) = addFactor!(fgl, [vnext], cc)
+
   facts = Graphs.ExVertex[]
   PP = BallTreeDensity[]
-  for cns = constrs
-    fa = nothing
-    if typeof(cns) == FunctorPairwise
-      fa = addFactor!(slaml.fg, [vprev;vnext], cns)
-    elseif typeof(cns) == FunctorSingleton
-      fa = addFactor!(slaml.fg, [vnext], cns)
-    else
-      error("Unrecognized type $typeof(cns)")
-    end
-    # ppts = evalFactor2(slaml.fg, fa, vnext)
-    # push!(PP, kde!(ppts))
+  for cns in constrs
+    fa = addsubtype(slaml.fg, vprev, vnext, cns)
     push!(facts, fa)
   end
 

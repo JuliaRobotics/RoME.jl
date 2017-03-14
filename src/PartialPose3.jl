@@ -12,7 +12,7 @@ type PartialPriorRollPitchZ <: IncrementalInference.FunctorSingleton
                                                     # Normal(rpz.zmu, rpz.zsig) )
 end
 function getSample(pprz::PartialPriorRollPitchZ, N::Int=1)
-  return ([rand(pprz.roll,N)';rand(pprz.pitch,N)';rand(pprz.z,N)'], )
+  return ([rand(pprz.rp,N);rand(pprz.z,N)'], )
 end
 
 type PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInferenceType
