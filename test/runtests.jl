@@ -1,4 +1,4 @@
-addprocs(3)
+addprocs(2)
 @show nprocs()
 
 using RoME
