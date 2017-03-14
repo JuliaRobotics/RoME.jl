@@ -59,7 +59,7 @@ end
 function getSample(pxyy::PartialPose3XYYaw, N::Int=1)
   return (rand(pxyy.xyy,N), )
 end
-function (pxyy::Pose3Pose3)(res::Array{Float64},
+function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
                             idx::Int,
                             meas::Tuple{Array{Float64,2}},
                             wXi::Array{Float64,2},
