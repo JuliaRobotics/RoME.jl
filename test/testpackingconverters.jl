@@ -188,7 +188,7 @@ xyy = PartialPose3XYYaw(MvNormal([1.0;2.0;0.5],0.1*eye(3)))
 pxyy = convert(PackedPartialPose3XYYaw, xyy)
 unp = convert(PartialPose3XYYaw, pxyy)
 
-@test Main.compare(xyy, unp)
+@test RoME.compare(xyy, unp)
 
 
 
