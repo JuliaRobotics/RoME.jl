@@ -169,7 +169,7 @@ gg = (x,y) -> minmickey([x;y])
 
 # now build in factor graph form for further testing
 
-N=100
+N=50
 fg = initfg()
 
 initCov = 0.05*eye(3)

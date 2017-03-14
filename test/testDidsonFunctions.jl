@@ -138,7 +138,7 @@ X1pts = evalFactor2(fg, f2, fg.IDs[:x1])
 
 tree = wipeBuildNewTree!(fg)
 inferOverTreeR!(fg, tree, N=N)
-inferOverTree!(fg, tree, N=N)
+# inferOverTree!(fg, tree, N=N)
 
 
 

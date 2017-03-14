@@ -167,7 +167,28 @@ unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{
 
 
 
+println("test conversions of PartialPriorRollPitchZ")
 
+prpz = PartialPriorRollPitchZ(MvNormal([0.0;0.5],0.1*eye(2)),Normal(3.0,0.5))
+
+pprpz = convert(PackedPartialPriorRollPitchZ, prpz)
+unp = convert(PartialPriorRollPitchZ, pprpz)
+
+@test RoME.compare(prpz, unp)
+
+
+
+
+
+println("test conversions of PartialPose3XYYaw")
+
+
+xyy = PartialPose3XYYaw(MvNormal([1.0;2.0;0.5],0.1*eye(3)))
+
+pxyy = convert(PackedPartialPose3XYYaw, xyy)
+unp = convert(PartialPose3XYYaw, pxyy)
+
+@test RoME.compare(xyy, unp)
 
 
 

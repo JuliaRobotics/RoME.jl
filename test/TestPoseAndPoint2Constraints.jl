@@ -5,7 +5,7 @@ using Base.Test
 
 begin
 
-N = 100
+N = 75
 fg = initfg()
 
 
@@ -31,7 +31,7 @@ pts = evalFactor2(fg, f2, v2.index)
 
 tree = wipeBuildNewTree!(fg)
 inferOverTreeR!(fg, tree,N=N)
-inferOverTree!(fg, tree, N=N)
+# inferOverTree!(fg, tree, N=N)
 
 # test post evaluation values are correct
 pts = getVal(fg, :x1)
@@ -50,7 +50,7 @@ f3 = addFactor!(fg, [v2;v3], ppc)
 
 
 tree = wipeBuildNewTree!(fg)
-[inferOverTree!(fg, tree, N=N) for i in 1:3]
+[inferOverTree!(fg, tree, N=N) for i in 1:2]
 
 # test post evaluation values are correct
 pts = getVal(fg, :x1)
@@ -96,7 +96,7 @@ pts = evalFactor2(fg, f5, l1.index)
 
 println("test Pose2D plotting")
 
-drawPoses(fg);
+# drawPoses(fg);
 drawPosesLandms(fg);
 
 # using KernelDensityEstimate
