@@ -50,8 +50,8 @@ function addposeFG!(slaml::SLAMWrapper,
   vnext = addNode!(slaml.fg, nextn, getVal(vprev), N=N, ready=ready)
   slaml.lastposesym = nextn
 
-  addsubtype(fgl::FactorGraph, vprev, vnext, cc::FunctorPairwise) = addFactor!(fgl, [vprev;vnext], cc)
-  addsubtype(fgl::FactorGraph, vprev, vnext, cc::FunctorSingleton) = addFactor!(fgl, [vnext], cc)
+  addsubtype(fgl::FactorGraph, vprev, vnext, cc::IncrementalInference.FunctorPairwise) = addFactor!(fgl, [vprev;vnext], cc)
+  addsubtype(fgl::FactorGraph, vprev, vnext, cc::IncrementalInference.FunctorSingleton) = addFactor!(fgl, [vnext], cc)
 
   facts = Graphs.ExVertex[]
   PP = BallTreeDensity[]

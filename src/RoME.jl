@@ -50,6 +50,7 @@ export
   wipeBuildNewTree!,
   inferOverTree!,
   inferOverTreeR!,
+  writeGraphPdf,
 
   # RoME specific functions
   initfg,
