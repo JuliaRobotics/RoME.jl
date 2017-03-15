@@ -9,7 +9,7 @@ fg = initfg()
 
 v1 = addNode!(fg,:x1,0.001*randn(6,N),N=N)
 
-mu1 = [2.0;0.0; -10.0]
+mu1 = [0.0;0.0; -10.0]
 prpz = PartialPriorRollPitchZ(
   MvNormal( mu1[1:2], [[1e-4;0.0]'; [0.0;1e-4]'] ),
   Normal( mu1[3], 0.0281 )
@@ -42,7 +42,7 @@ olddims = setdiff(collect(1:6), newdims)
 @test size(pts, 2) == N
 @test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10
 # @show Base.mean(pts,2)[newdims]
-@test norm(Base.mean(pts,2)[newdims]-mu1) < 0.3
+@test norm(Base.mean(pts,2)[newdims]-mu1[[3;1;2]]) < 0.3
 # ensure the correct response from
 @test norm(X2pts[newdims,:] - pts[newdims,:]) > 2.0
 # memcheck
