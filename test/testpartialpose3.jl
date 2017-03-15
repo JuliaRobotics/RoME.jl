@@ -9,7 +9,7 @@ fg = initfg()
 
 v1 = addNode!(fg,:x1,0.001*randn(6,N),N=N)
 
-mu1 = [0.0;0.0; -10.0]
+mu1 = [2.0;0.0; -10.0]
 prpz = PartialPriorRollPitchZ(
   MvNormal( mu1[1:2], [[1e-4;0.0]'; [0.0;1e-4]'] ),
   Normal( mu1[3], 0.0281 )
