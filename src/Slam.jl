@@ -62,6 +62,7 @@ function addposeFG!(slaml::SLAMWrapper,
 
   # set node val from new constraints as init
   val = predictbelief(slaml.fg, vnext, facts, N=N)
+  setVal!(vnext, val)
 
   if saveusrid > -1
     slaml.lbl2usrid[nextn] = saveusrid
