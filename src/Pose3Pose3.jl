@@ -73,17 +73,20 @@ function (pp3::Pose3Pose3)(res::Array{Float64}, idx::Int, meas::Tuple{Array{Floa
   TransformUtils.convert!(pp3.reusewTj.R, Euler(wXj[4,idx],wXj[5,idx],wXj[6,idx]))
 
   # TODO -- convert to in place convert! functions, many speed-ups possible here
-  pp3.reuseTent.R, pp3.reuseTent.t = TransformUtils.convert(SO3, so3(meas[1][4:6,idx])), meas[1][1:3,idx]
   # jTi = A_invB(SE3(0), pp3.reusewTj)*pp3.reusewTi
   # jTi = inverse(pp3.reusewTj)*pp3.reusewTi
+
+  pp3.reuseTent.R, pp3.reuseTent.t = TransformUtils.convert(SO3, Euler(meas[1][4:6,idx]...)), meas[1][1:3,idx]
   jTi = SE3( matrix(pp3.reusewTj)\matrix(pp3.reusewTi) )
-  pp3.reuseiTi = (pp3.Zij*pp3.reuseTent) * jTi
+  # pp3.reuseTent.R, pp3.reuseTent.t = TransformUtils.convert(SO3, so3(meas[1][4:6,idx])), meas[1][1:3,idx]
+  # pp3.reuseiTi = (pp3.Zij*pp3.reuseTent) * jTi
+  pp3.reuseiTi = (pp3.reuseTent) * jTi
   res[:] = veeEuler(pp3.reuseiTi)
   nothing
 end
 function getSample(pp3::Pose3Pose3, N::Int=1)
   # this could be much better if we can operate with array of manifolds instead
-  mv = Distributions.MvNormal(zeros(6), pp3.Cov)
+  mv = Distributions.MvNormal(veeEuler(pp3.Zij), pp3.Cov)
   return (rand(mv, N),)
 end
 
