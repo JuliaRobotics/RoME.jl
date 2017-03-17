@@ -113,8 +113,7 @@ end
 @test size(val, 1) == 6
 @test size(val, 2) == N
 
-
-@test norm(Base.mean(val[collect(getData(f1).fnc.usrfnc!.partial),:],2)-mu1) < 0.3
+@test norm(Base.mean(val[collect(getData(f1).fnc.usrfnc!.partial),:],2)-mu1[[3;1;2]]) < 0.3
 @test norm(Base.mean(val[collect(getData(f2).fnc.usrfnc!.partial),:],2)-mu2) < 0.3
 
 memcheck = getVal(v2)
