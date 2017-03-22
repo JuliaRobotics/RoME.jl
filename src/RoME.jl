@@ -12,12 +12,12 @@ using
   JLD,
   HDF5,
   ProgressMeter
-  
+
 
 import Base: +
 import TransformUtils: ⊖, ⊕, convert, compare
 import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
-import IncrementalInference: loadjld, decodefg, convertfrompackedfunctionnode
+import IncrementalInference: loadjld, decodefg, convertfrompackedfunctionnode, encodefg, savejld, convert2packedfunctionnode
 
 # warn("Deprecated import < v0.2.5, IncrementalInference: localapi, DataLayerAPI")
 # import IncrementalInference: localapi, DataLayerAPI
@@ -55,6 +55,7 @@ export
   inferOverTree!,
   inferOverTreeR!,
   writeGraphPdf,
+  savejld,
   # overloaded functions from IIF
   loadjld,
   decodefg,
@@ -184,6 +185,10 @@ export
   solvePose2,
   solveSetSeps,
   addPose2Pose2!,
+
+  # Point2D with null hypotheses
+  PriorPoint2DensityNH,
+  PackedPriorPoint2DensityNH,
 
   # acoustics
   Pose2DPoint2DBearingRangeDensity,

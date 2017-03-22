@@ -24,7 +24,7 @@ function addOdoFG!(slaml::SLAMWrapper, odo::Pose3Pose3;
   # vprev, X, nextn = getLastPose(fgl)
   npnum = parse(Int,string(slaml.lastposesym)[2:end]) + 1
   nextn = Symbol("x$(npnum)")
-  vnext = addNode!(slaml.fg, nextn, getVal(vprev) ⊕ odo, N=N, ready=ready)
+  vnext = addNode!(slaml.fg, nextn, getVal(vprev) ⊕ odo, N=N, ready=ready, labels=["POSE"])
   slaml.lastposesym = nextn
   fact = addFactor!(slaml.fg, [vprev;vnext], odo)
 
@@ -47,7 +47,7 @@ function addposeFG!(slaml::SLAMWrapper,
   npnum = parse(Int,string(slaml.lastposesym)[2:end]) + 1
   nextn = Symbol("x$(npnum)")
   # preinit
-  vnext = addNode!(slaml.fg, nextn, getVal(vprev), N=N, ready=ready)
+  vnext = addNode!(slaml.fg, nextn, getVal(vprev), N=N, ready=ready, labels=["POSE"])
   slaml.lastposesym = nextn
 
   addsubtype(fgl::FactorGraph, vprev, vnext, cc::IncrementalInference.FunctorPairwise) = addFactor!(fgl, [vprev;vnext], cc)
@@ -63,6 +63,7 @@ function addposeFG!(slaml::SLAMWrapper,
   # set node val from new constraints as init
   val = predictbelief(slaml.fg, vnext, facts, N=N)
   setVal!(vnext, val)
+  IncrementalInference.dlapi.updatevertex!(slaml.fg, vnext)
 
   if saveusrid > -1
     slaml.lbl2usrid[nextn] = saveusrid

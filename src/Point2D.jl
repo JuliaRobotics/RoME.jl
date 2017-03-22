@@ -39,6 +39,29 @@ function getSample(pp2::Point2DPoint2DRange, N::Int=1)
 end
 
 
+type PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
+  mv::BallTreeDensity
+  nullhypothesis::Distributions.Categorical
+  PriorPoint2D() = new()
+  PriorPoint2D(mucov, p) = new(mv, Distributions.Categorical(p))
+end
+function getSample(p2::PriorPoint2DensityNH, N::Int=1)
+  return (rand(p2.mv, N), )
+end
+type PackedPriorPoint2DensityNH <: IncrementalInference.PackedInferenceType
+    rpts::Vector{Float64} # 0rotations, 1translation in each column
+    rbw::Vector{Float64}
+    nh::Vector{Float64}
+    PackedPriorPoint2DensityNH() = new()
+    PackedPriorPoint2DensityNH(x1,x2,x3) = new(x1, x2, x3)
+end
+function convert(::Type{PriorPoint2DensityNH}, d::PackedPriorPoint2DensityNH)
+  return PriorPoint2DensityNH( kde!(EasyMessage(d.rpts', d.rbw)), Distributions.Categorical(d.nh) )
+end
+function convert(::Type{PackedPriorPoint2DensityNH}, d::PriorPoint2DensityNH)
+  return PackedPriorPoint2DensityNH( getPoints(d.range)[1,:], getBW(d.range)[:,1], d.nullhypothesis.p )
+end
+
 
 
 # Old evalPotential functions
