@@ -10,11 +10,14 @@ using
   Colors,
   Gadfly,
   JLD,
-  HDF5
+  HDF5,
+  ProgressMeter
+
 
 import Base: +
 import TransformUtils: ⊖, ⊕, convert, compare
 import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
+import IncrementalInference: loadjld, decodefg, convertfrompackedfunctionnode, encodefg, savejld, convert2packedfunctionnode
 
 # warn("Deprecated import < v0.2.5, IncrementalInference: localapi, DataLayerAPI")
 # import IncrementalInference: localapi, DataLayerAPI
@@ -34,6 +37,7 @@ export
   compare,
   convert,
 
+
   # pass throughs from IncrementalInference
   ls,
   addFactor!,
@@ -50,6 +54,12 @@ export
   wipeBuildNewTree!,
   inferOverTree!,
   inferOverTreeR!,
+  writeGraphPdf,
+  savejld,
+  # overloaded functions from IIF
+  loadjld,
+  decodefg,
+  convertfrompackedfunctionnode,
 
   # RoME specific functions
   initfg,
@@ -176,6 +186,10 @@ export
   solveSetSeps,
   addPose2Pose2!,
 
+  # Point2D with null hypotheses
+  PriorPoint2DensityNH,
+  PackedPriorPoint2DensityNH,
+
   # acoustics
   Pose2DPoint2DBearingRangeDensity,
   PackedPose2DPoint2DBearingRangeDensity,
@@ -270,6 +284,8 @@ include("FactorGraphAnalysisTools.jl")
 
 include("WheeledRobotUtils.jl")
 include("NavigationSystem.jl")
+
+include("fgos.jl")
 
 # include("dev/ISAMRemoteSolve.jl")
 

@@ -3,6 +3,7 @@
 
 using RoME
 using Distributions
+using TransformUtils
 # using IncrementalInference
 
 using Base.Test
@@ -145,7 +146,7 @@ unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{
 println("test conversions of Pose3Pose3NH")
 
 odo = SE3(randn(3), convert(Quaternion, so3(0.1*randn(3)) ))
-odoc = Pose3Pose3NH(odo, odoCov, [0.5;0.5])
+odoc = Pose3Pose3NH( MvNormal(veeEuler(odo),odoCov), [0.5;0.5])
 
 f3 = addFactor!(fg,[:x1;:x2],odoc)
 
@@ -153,9 +154,9 @@ f3 = addFactor!(fg,[:x1;:x2],odoc)
 dd = convert(PackedPose3Pose3NH, odoc)
 upd = convert(RoME.Pose3Pose3NH, dd)
 
-@test TransformUtils.compare(odoc.Zij, upd.Zij)
-@test norm(odoc.Cov - upd.Cov) < 1e-8
-@test norm(odoc.ValidHypot.p - upd.ValidHypot.p) < 1e-8
+@test norm(odoc.Zij.μ - upd.Zij.μ) < 1e-8
+@test norm(odoc.Zij.Σ.mat - upd.Zij.Σ.mat) < 1e-8
+@test norm(odoc.nullhypothesis.p - upd.nullhypothesis.p) < 1e-8
 
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3NH}, getData(f3))

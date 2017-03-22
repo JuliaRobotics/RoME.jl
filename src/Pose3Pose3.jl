@@ -73,17 +73,20 @@ function (pp3::Pose3Pose3)(res::Array{Float64}, idx::Int, meas::Tuple{Array{Floa
   TransformUtils.convert!(pp3.reusewTj.R, Euler(wXj[4,idx],wXj[5,idx],wXj[6,idx]))
 
   # TODO -- convert to in place convert! functions, many speed-ups possible here
-  pp3.reuseTent.R, pp3.reuseTent.t = TransformUtils.convert(SO3, so3(meas[1][4:6,idx])), meas[1][1:3,idx]
   # jTi = A_invB(SE3(0), pp3.reusewTj)*pp3.reusewTi
   # jTi = inverse(pp3.reusewTj)*pp3.reusewTi
+
+  pp3.reuseTent.R, pp3.reuseTent.t = TransformUtils.convert(SO3, Euler(meas[1][4:6,idx]...)), meas[1][1:3,idx]
   jTi = SE3( matrix(pp3.reusewTj)\matrix(pp3.reusewTi) )
-  pp3.reuseiTi = (pp3.Zij*pp3.reuseTent) * jTi
+  # pp3.reuseTent.R, pp3.reuseTent.t = TransformUtils.convert(SO3, so3(meas[1][4:6,idx])), meas[1][1:3,idx]
+  # pp3.reuseiTi = (pp3.Zij*pp3.reuseTent) * jTi
+  pp3.reuseiTi = (pp3.reuseTent) * jTi
   res[:] = veeEuler(pp3.reuseiTi)
   nothing
 end
 function getSample(pp3::Pose3Pose3, N::Int=1)
   # this could be much better if we can operate with array of manifolds instead
-  mv = Distributions.MvNormal(zeros(6), pp3.Cov)
+  mv = Distributions.MvNormal(veeEuler(pp3.Zij), pp3.Cov)
   return (rand(mv, N),)
 end
 
@@ -125,24 +128,24 @@ end
 
 # -----------------------
 
+type PP3REUSE
+  wTi::SE3
+  wTj::SE3
+  iTi::SE3
+  PP3REUSE() = new(SE3(0),SE3(0),SE3(0))
+end
 
-
-type Pose3Pose3NH <: IncrementalInference.FunctorPairwise
-    Zij::SE3 # 3translations, 3exponential param rotation
-    Cov::Array{Float64,2}
-    ValidHypot::Distributions.Categorical
-    reusewTi::SE3
-    reusewTj::SE3
-    reuseiTi::SE3
+type Pose3Pose3NH <: IncrementalInference.FunctorPairwiseNH
+    Zij::Distribution
+    nullhypothesis::Distributions.Categorical
+    reuse::Vector{PP3REUSE}
     Pose3Pose3NH() = new()
-    Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Vector{Float64}) = new(s,c, Distributions.Categorical(vh),SE3(0),SE3(0),SE3(0)  )
-    Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Float64) = new(s,c, Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
-    Pose3Pose3NH(st::FloatInt, sr::Float64;vh::Float64=1.0) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]], Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
+    Pose3Pose3NH(s::Distribution, vh::Vector{Float64}) = new(s, Distributions.Categorical(vh), fill(PP3REUSE(), Threads.nthreads() )  )
+    # Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Float64) = new(s,c, Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
+    # Pose3Pose3NH(st::FloatInt, sr::Float64;vh::Float64=1.0) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]], Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
 end
 function getSample(pp3::Pose3Pose3NH, N::Int=1)
-  # this could be much better if we can operate with array of manifolds instead
-  mv = Distributions.MvNormal(veeEuler(pp3.Zij), pp3.Cov)
-  return (rand(mv, N), rand(pp3.ValidHypot, N)-1)
+  return (rand(pp3.Zij, N), )
 end
 function (pp3::Pose3Pose3NH)(res::Array{Float64},
       idx::Int,
@@ -150,61 +153,47 @@ function (pp3::Pose3Pose3NH)(res::Array{Float64},
       wXi::Array{Float64,2},
       wXj::Array{Float64,2}  )
   #
-  if meas[2][idx] == 0
-    # null hypothesis
-    res[1:6] = 1e-10*randn(6)
-  else
-    pp3.reusewTi.t = wXi[1:3,idx]
-    TransformUtils.convert!(pp3.reusewTi.R, Euler(wXi[4,idx],wXi[5,idx],wXi[6,idx]))
-    pp3.reusewTj.t = wXj[1:3,idx]
-    TransformUtils.convert!(pp3.reusewTj.R, Euler(wXj[4,idx],wXj[5,idx],wXj[6,idx]))
+  reusethrid = pp3.reuse[Threads.threadid()]
 
-    # TODO -- convert to in place convert! functions, many speed-ups possible here
-    jTi = SE3( matrix(pp3.reusewTj)\matrix(pp3.reusewTi) )
-    pp3.reuseiTi = (SE3(meas[1][1:3,idx],Euler(meas[1][4:6,idx]...)) * jTi)
-    res[:] = veeEuler(pp3.reuseiTi)
-  end
+  reusethrid.wTi.t[1:3] = wXi[1:3,idx]
+  TransformUtils.convert!(reusethrid.wTi.R, Euler(wXi[4,idx],wXi[5,idx],wXi[6,idx]))
+  reusethrid.wTj.t[1:3] = wXj[1:3,idx]
+  TransformUtils.convert!(reusethrid.wTj.R, Euler(wXj[4,idx],wXj[5,idx],wXj[6,idx]))
+
+  # TODO -- convert to in place convert! functions, many speed-ups possible here
+  jTi = SE3( matrix(reusethrid.wTj)\matrix(reusethrid.wTi) )
+  # also wasted memory here, should operate directly on iTi and not be assigning new memory
+  reusethrid.iTi = (SE3(meas[1][1:3,idx],Euler(meas[1][4:6,idx]...)) * jTi)
+  res[:] = veeEuler(reusethrid.iTi)
+
   nothing
 end
 
-# using NLsolve
-# function f(x, res)
-#   res[1] = 1e-10*randn()
-#   nothing
-# end
-# r = nlsolve(f, [1.0])
-# @show r
 
 
 type PackedPose3Pose3NH <: IncrementalInference.PackedInferenceType
-  vecZij::Array{Float64,1} # 3translations, 3rotation
-  vecCov::Array{Float64,1}
+  vecZij::Vector{Float64} # 3translations, 3rotation
+  vecCov::Vector{Float64}
   dimc::Int64
-  ValidHypot::Vector{Float64}
+  nullhypothesis::Vector{Float64}
   PackedPose3Pose3NH() = new()
-  PackedPose3Pose3NH(x...) = new(x[1], x[2], x[3], x[4])
+  PackedPose3Pose3NH(x1::Vector{Float64},x2::Vector{Float64},x3::Int64,x4::Vector{Float64}) = new(x1, x2, x3, x4)
 end
-# function convert(::Type{Pose3Pose3NH}, d::PackedPose3Pose3NH)
-#   Eu = Euler(d.vecZij[4:6]...)
-#   return Pose3Pose3NH(SE3(d.vecZij[1:3], Eu),
-#                     reshapeVec2Mat(d.vecCov, d.dimc), d.ValidHypot)
-# end
-# function convert(::Type{PackedPose3Pose3NH}, d::Pose3Pose3NH)
-#   v1 = veeEuler(d.Zij)
-#   v2 = d.Cov[:];
-#   return PackedPose3Pose3NH(v1,v2,size(d.Cov,1), d.ValidHypot.p )
-# end
+
 function convert(::Type{Pose3Pose3NH}, d::PackedPose3Pose3NH)
   qu = Quaternion(d.vecZij[4], d.vecZij[5:7])
-  return Pose3Pose3NH(SE3(d.vecZij[1:3], qu),
-                    reshapeVec2Mat(d.vecCov, d.dimc),
-                    d.ValidHypot )
+  se3val = SE3(d.vecZij[1:3], qu)
+  cov = reshapeVec2Mat(d.vecCov, d.dimc)
+  return Pose3Pose3NH( MvNormal(veeEuler(se3val), cov), d.nullhypothesis )
 end
 function convert(::Type{PackedPose3Pose3NH}, d::Pose3Pose3NH)
-  v1 = veeQuaternion(d.Zij)
-  v2 = d.Cov[:]
-  return PackedPose3Pose3NH(v1,v2,size(d.Cov,1), d.ValidHypot.p )
+  val = d.Zij.μ
+  se3val = SE3(val[1:3], Euler(val[4:6]...))
+  v1 = veeQuaternion(se3val)
+  v2 = d.Zij.Σ.mat
+  return PackedPose3Pose3NH(v1[:], v2[:], size(v2,1), d.nullhypothesis.p )
 end
+
 
 
 # Project all particles (columns) Xval with Z, that is for all  SE3(Xval[:,i])*Z

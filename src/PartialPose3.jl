@@ -12,7 +12,7 @@ type PartialPriorRollPitchZ <: IncrementalInference.FunctorSingleton
                                                     # Normal(rpz.zmu, rpz.zsig) )
 end
 function getSample(pprz::PartialPriorRollPitchZ, N::Int=1)
-  return ([rand(pprz.roll,N)';rand(pprz.pitch,N)';rand(pprz.z,N)'], )
+  return ([rand(pprz.z,N)';rand(pprz.rp,N)], )
 end
 
 type PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInferenceType
@@ -67,7 +67,7 @@ function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
   #
   wXjhat = SE2(wXi[[1;2;6],idx])*SE2(meas[1][:,idx]) #*SE2(pp2.Zij[:,1])*SE2(meas[1][:,idx])
   jXjhat = SE2(wXj[[1;2;6],idx]) \ wXjhat
-  se2vee!(res[1:3], jXjhat)
+  se2vee!(res, jXjhat)
   nothing
 end
 

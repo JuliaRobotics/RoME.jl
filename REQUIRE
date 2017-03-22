@@ -1,5 +1,5 @@
 julia 0.5
-IncrementalInference 0.2.5
+IncrementalInference 0.2.6
 Graphs 0.7.1
 TransformUtils 0.0.5
 KernelDensityEstimate 0.2.3
@@ -9,3 +9,4 @@ Gadfly
 JLD
 HDF5
 Optim
+ProgressMeter

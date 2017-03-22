@@ -73,7 +73,7 @@ inferOverTreeR!(fg,tree,N=N)
 println("Adding Pose3Pose3NH to graph...")
 
 odo3 = SE3([-35;0;0], Quaternion(0))
-odoc3 = Pose3Pose3NH(odo3, odoCov, [0.5;0.5]) # define 50/50% hypothesis
+odoc3 = Pose3Pose3NH( MvNormal(veeEuler(odo3), odoCov), [0.5;0.5]) # define 50/50% hypothesis
 addFactor!(fg,[v3;v1],odoc3)
 
 
@@ -86,15 +86,17 @@ p2 = kde!(X2pts)
 
 # plotKDE([marginal(p1,[1]),marginal(p1t,[1])], c=["black";"red"])
 
+
 using JLD, HDF5
 
 println("loading validation data for testing.")
 @load joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
+# @save joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
 
 p1t = kde!(X1ptst)
 p2t = kde!(X2ptst)
 
-# plotKDE([marginal(p1,[2]);marginal(p1t,[2])],c=["black";"red"],levels=15)
+# plotKDE([p2t;p2],c=["red";"blue"],dims=[1;2],levels=3)
 # kld(marginal(p1,[2]), marginal(p1t,[2]), method=:unscented)
 
 t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
