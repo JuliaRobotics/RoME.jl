@@ -17,10 +17,6 @@ using
 import Base: +
 import TransformUtils: ⊖, ⊕, convert, compare
 import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
-import IncrementalInference: loadjld, decodefg, convertfrompackedfunctionnode, encodefg, savejld, convert2packedfunctionnode
-
-# warn("Deprecated import < v0.2.5, IncrementalInference: localapi, DataLayerAPI")
-# import IncrementalInference: localapi, DataLayerAPI
 
 
 export
@@ -56,10 +52,10 @@ export
   inferOverTreeR!,
   writeGraphPdf,
   savejld,
-  # overloaded functions from IIF
   loadjld,
-  decodefg,
-  convertfrompackedfunctionnode,
+  # overloaded functions from IIF
+  # decodefg,
+  # convertfrompackedfunctionnode,
 
   # RoME specific functions
   initfg,
@@ -235,12 +231,6 @@ export
   rangeCompAllPoses,
   rangeCompAllPoses,
 
-
-  # Datalayer converters
-  # VNDencoder,
-  # VNDdecoder,
-  # FNDencode,
-  # FNDdecode
 
   # new robot navigation functionality
   triggerPose,
