@@ -34,6 +34,12 @@ println("[TEST] ensure Pose3Pose3NH evaluations...")
 include("testPose3Pose3NH.jl")
 println("[SUCCESS]")
 
+println("[TEST] saving to and loading from .jld file")
+savejld(fg, file="tempfg.jld" )
+fgu = loadjld( file="tempfg.jld" )
+Base.rm("tempfg.jld")
+println("Success")
+
 println("[TEST] partial pose3 evaluations...")
 include("testpartialpose3.jl")
 println("[SUCCESS]")

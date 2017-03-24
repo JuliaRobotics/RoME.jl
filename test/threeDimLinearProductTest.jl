@@ -1,4 +1,5 @@
 using RoME, IncrementalInference, TransformUtils
+using Distributions
 using KernelDensityEstimate
 using Base.Test
 
@@ -6,10 +7,10 @@ using Base.Test
 tf = SE3([0.0;0.0;0.0], AngleAxis(pi/4,[0;0;1.0]))# Euler(pi/4,0.0,0.0) )
 
 N = 1
-initCov = 0.01*eye(6)
-[initCov[i,i] = 0.001 for i in 4:6];
+initCov = 0.0001*eye(6)
+[initCov[i,i] = 0.000001 for i in 4:6];
 odoCov = deepcopy(initCov)
-odo = Pose3Pose3(tf, odoCov)
+odo = Pose3Pose3( MvNormal(veeEuler(tf), odoCov) )
 
 X = [0.01*randn(5,N);0*pi/4+0.01*randn(1,N)]
 
@@ -26,7 +27,7 @@ N = 1
 initCov = 0.01*eye(6)
 [initCov[i,i] = 0.001 for i in 4:6];
 odoCov = deepcopy(initCov)
-odo = Pose3Pose3(tf, odoCov)
+odo = Pose3Pose3(  MvNormal(veeEuler(tf), odoCov) )
 
 X = [0.01*randn(5,N);0*pi/4+0.01*randn(1,N)]
 
@@ -68,8 +69,8 @@ means = Base.mean(priorpts,2)
 
 println("Adding Pose3Pose3 to graph...")
 odo = SE3([10;0;0], Quaternion(0))
-pts0X2 = projectParticles(getVal(fg,:x1), odo, odoCov)
-odoconstr = Pose3Pose3(odo, odoCov)
+pts0X2 = projectParticles(getVal(fg,:x1), MvNormal(veeEuler(odo), odoCov) )
+odoconstr = Pose3Pose3( MvNormal(veeEuler(odo), odoCov) )
 v2 = addNode!(fg,:x2,  pts0X2, N=N)
 addFactor!(fg,[v1;v2],odoconstr)
 
@@ -103,32 +104,9 @@ stdX2 = Base.std(getVal(fg,:x2),2)
 @test sum(map(Int, 1.0 .< stdX2[1:3] .< 2.0)) == 3
 @test sum(map(Int, 0.05 .< stdX2[4:6] .< 0.25)) == 3
 
-# # println("Plot marginals to see what is happening")
-# # plotKDE(marginal(getVertKDE(fg,:x1),[1]))
-# # plotKDE(marginal(getVertKDE(fg,:x2),[1]))
-#
-# println("Modify factor graph, adding Pose3Pose3's X3,X4 to graph...")
-# #X3, yaw 90 degrees
-# odo2 = SE3([0;0;0], AngleAxis(pi/2,[0;0;1]))
-# odoconstr2 = Pose3Pose3(odo2, odoCov)
-# pts0x3 = projectParticles(getVal(fg,:x2), odo2, odoCov) # init new pose location
-# v3 = addNode!(fg,:x3, pts0x3, N=N)
-# addFactor!(fg,[v2;v3],odoconstr2)
-#
-# # X4, drive forward 10m
-# odo3 = SE3([10;0;0], SO3(0))
-# odoconstr3 = Pose3Pose3(odo3, odoCov)
-# pts0X4 = projectParticles(getVal(fg,:x3),odo3, odoCov)
-# v4 = addNode!(fg,:x4, pts0X4, N=N)
-# addFactor!(fg,[v3;v4],odoconstr3)
-#
-# # println("Plot marginals to see what is happening")
-# # plotKDE(marginal(getVertKDE(fg,:x3),[1]))
-# # plotKDE(marginal(getVertKDE(fg,:x4),[1]))
-#
-# println("Reconstruct Bayes tree and perform inference...")
-# tree = wipeBuildNewTree!(fg)
-# inferOverTree!(fg, tree, N=N)
+# println("Plot marginals to see what is happening")
+# plotKDE(marginal(getVertKDE(fg,:x1),[1]))
+# plotKDE(marginal(getVertKDE(fg,:x2),[1]))
 
 
 
