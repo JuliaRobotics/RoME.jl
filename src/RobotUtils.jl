@@ -126,6 +126,20 @@ function addOdoFG!{T <: AbstractString}(
     return v, f
 end
 
+function addOdoFG!{T <: AbstractString}(
+        fg::FactorGraph,
+        n::T,
+        Z::Pose3Pose3;
+        N::Int=0,
+        ready::Int=1,
+        labels::Vector{T}=String[]  )
+  #
+  DX=Z.μ
+  cov=Z.Σ.mat
+
+  addOdoFG(fg, n, DX, cov, N=N, ready=ready, labels=labels)
+end
+
 """
     addOdoFG!(fg, odo, N=100, ready=1)
 

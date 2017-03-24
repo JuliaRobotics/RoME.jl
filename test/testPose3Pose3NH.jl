@@ -53,8 +53,8 @@ means = Base.mean(priorpts,2)
 @test sum(map(Int,abs(means[1:3]) .> 0.5)) == 0
 @test sum(map(Int,abs(means[4:6]) .> 0.05)) == 0
 
-v2, f2 = addOdoFG!(fg, Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov))
-v3, f3 = addOdoFG!(fg, Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov))
+v2, f2 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
+v3, f3 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
 
 println("Testing Pose3Pose3 evaluation...")
 X1pts = getVal(fg, :x1)

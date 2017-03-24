@@ -124,15 +124,15 @@ upv1data = VNDdecoder(IncrementalInference.VariableNodeData, packedv1data)
 
 println("test conversions of Pose3Pose3")
 
-pp3 = Pose3Pose3( SE3([25;0;0], Quaternion(0)), odoCov)
+pp3 = Pose3Pose3( MvNormal([25.0;0;0;0;0;0], odoCov) )
 v2, f2 = addOdoFG!(fg, pp3 )
 
 dd = convert(PackedPose3Pose3, pp3)
 upd = convert(RoME.Pose3Pose3, dd)
 
-# TODO -- fix ambiguity in compare function
-@test TransformUtils.compare(pp3.Zij, upd.Zij)
-@test norm(pp3.Cov - upd.Cov) < 1e-8
+
+@test norm(pp3.Zij.μ - upd.Zij.μ) < 1e-10
+@test norm(pp3.Zij.Σ.mat - upd.Zij.Σ.mat) < 1e-8
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3}, getData(f2))
 unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose3Pose3}}, packeddata)

@@ -34,7 +34,7 @@ function addPose3Pose3(fgl::FactorGraph, n::String, DX::SE3, cov::Array{Float64,
 	prev, X, nextn = getLastPose2D(fgl)
 
 	pts0 = projectParticles(getVal(fgl,"x1"), DX, cov)
-	DXconstr = Pose3Pose3(DX, cov)
+	DXconstr = Pose3Pose3( MvNormal(veeEuler(DX), cov) )
 	v = addNode!(fgl, n,  pts0, N=N)
 	f = addFactor!(fgl,[prev;v], DXconstr)
 
