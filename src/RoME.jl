@@ -275,8 +275,6 @@ include("FactorGraphAnalysisTools.jl")
 include("WheeledRobotUtils.jl")
 include("NavigationSystem.jl")
 
-include("fgos.jl")
-
 # include("dev/ISAMRemoteSolve.jl")
 
 
