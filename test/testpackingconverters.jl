@@ -104,9 +104,8 @@ dd = convert(PackedPriorPose3, ipp)
 upd = convert(RoME.PriorPose3, dd)
 
 # @test TransformUtils.compare(ipp.Zi, upd.Zi)
-@test norm(pp3.Zi.μ - upd.Zi.μ) < 1e-10
-@test norm(pp3.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
-@test norm(ipp.Cov - upd.Cov) < 1e-8
+@test norm(ipp.Zi.μ - upd.Zi.μ) < 1e-10
+@test norm(ipp.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, getData(f1))
 unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose3}}, packeddata)
