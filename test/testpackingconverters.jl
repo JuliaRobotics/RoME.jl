@@ -97,7 +97,7 @@ odoCov = deepcopy(initCov)
 fg = initfg()
 
 v1 = addNode!(fg,:x1,  0.1*randn(6,N))
-ipp = PriorPose3(SE3(0), initCov)
+ipp = PriorPose3(MvNormal(zeros(6), initCov) )
 f1  = addFactor!(fg,[v1], ipp)
 
 dd = convert(PackedPriorPose3, ipp)

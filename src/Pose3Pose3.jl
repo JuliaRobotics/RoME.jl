@@ -5,15 +5,14 @@
 
 
 type PriorPose3 <: IncrementalInference.FunctorSingleton
-    Zi::SE3
-    Cov::Array{Float64,2}
+    Zij::Distribution
     PriorPose3() = new()
-    PriorPose3(st::FloatInt, sr::Float64) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]])
-    PriorPose3(s::SE3, c::Array{Float64,2}) = new(s,c)
+    PriorPose3(st::FloatInt, sr::Float64) = new( MvNormal(zeros(6), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]] )  )
+    PriorPose3(s::Distribution) = new(s)
 end
 function getSample(p3::PriorPose3, N::Int=1)
-  mv = Distributions.MvNormal(veeEuler(p3.Zi), p3.Cov)
-  return (rand(mv, N),)
+  # mv = Distributions.MvNormal(veeEuler(p3.Zi), p3.Cov)
+  return (rand(p3.Zi, N),)
 end
 type PackedPriorPose3  <: IncrementalInference.PackedInferenceType
     vecZi::Array{Float64,1} # 0rotations, 1translation in each column
@@ -25,13 +24,13 @@ end
 function convert(::Type{PriorPose3}, d::PackedPriorPose3)
   Zi = SE3(d.vecZi[1:3], Quaternion(d.vecZi[4],d.vecZi[5:7]))
   Cov = reshapeVec2Mat(d.vecCov, d.dimc)
-  return PriorPose3(Zi, Cov)
+  return PriorPose3( MvNormal( veeEuler(Zi), Cov) )
 end
 function convert(::Type{PackedPriorPose3}, d::PriorPose3)
-  # TODO -- change to
-  v1 = veeQuaternion(d.Zi)
-  v2 = d.Cov[:];
-  return PackedPriorPose3(v1, v2, size(d.Cov,1))
+  tf = SE3(d.Zi.μ[1:3], Euler(d.Zi.μ[4:6]...) )
+  v1 = veeQuaternion(tf)
+  v2 = d.Zi.Σ.mat[:];
+  return PackedPriorPose3(v1, v2, size(d.Zi.Σ.mat,1))
 end
 
 
