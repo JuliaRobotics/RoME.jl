@@ -103,8 +103,9 @@ f1  = addFactor!(fg,[v1], ipp)
 dd = convert(PackedPriorPose3, ipp)
 upd = convert(RoME.PriorPose3, dd)
 
-# TODO -- fix ambibuity in compare function
-@test TransformUtils.compare(ipp.Zi, upd.Zi)
+# @test TransformUtils.compare(ipp.Zi, upd.Zi)
+@test norm(pp3.Zi.μ - upd.Zi.μ) < 1e-10
+@test norm(pp3.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
 @test norm(ipp.Cov - upd.Cov) < 1e-8
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, getData(f1))
@@ -112,7 +113,6 @@ unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{
 
 # TODO -- fix ambibuity in compare function
 @test IncrementalInference.compare(getData(f1), unpackeddata)
-
 
 packedv1data = VNDencoder(IncrementalInference.PackedVariableNodeData, getData(v1))
 upv1data = VNDdecoder(IncrementalInference.VariableNodeData, packedv1data)
