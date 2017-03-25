@@ -5,7 +5,7 @@
 
 
 type PriorPose3 <: IncrementalInference.FunctorSingleton
-    Zij::Distribution
+    Zi::Distribution
     PriorPose3() = new()
     PriorPose3(st::FloatInt, sr::Float64) = new( MvNormal(zeros(6), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]] )  )
     PriorPose3(s::Distribution) = new(s)
