@@ -6,6 +6,7 @@ using KernelDensityEstimate
 using TransformUtils
 using IncrementalInference
 using RoME
+using Distributions
 
 
 # @everywhere begin
@@ -114,7 +115,7 @@ println("Adding PriorPose3 to graph...")
 X, pts = 0.01*randn(6,N), zeros(3,N);
 
 v1 = addNode!(fg,:x1,  X,  N=N)
-initPosePrior = PriorPose3(SE3(0), initCov)
+initPosePrior = PriorPose3( MvNormal(zeros(6), initCov) )
 f1  = addFactor!(fg,[v1], initPosePrior)
 
 

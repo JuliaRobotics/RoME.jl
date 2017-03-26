@@ -97,22 +97,21 @@ odoCov = deepcopy(initCov)
 fg = initfg()
 
 v1 = addNode!(fg,:x1,  0.1*randn(6,N))
-ipp = PriorPose3(SE3(0), initCov)
+ipp = PriorPose3(MvNormal(zeros(6), initCov) )
 f1  = addFactor!(fg,[v1], ipp)
 
 dd = convert(PackedPriorPose3, ipp)
 upd = convert(RoME.PriorPose3, dd)
 
-# TODO -- fix ambibuity in compare function
-@test TransformUtils.compare(ipp.Zi, upd.Zi)
-@test norm(ipp.Cov - upd.Cov) < 1e-8
+# @test TransformUtils.compare(ipp.Zi, upd.Zi)
+@test norm(ipp.Zi.μ - upd.Zi.μ) < 1e-10
+@test norm(ipp.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, getData(f1))
 unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose3}}, packeddata)
 
 # TODO -- fix ambibuity in compare function
 @test IncrementalInference.compare(getData(f1), unpackeddata)
-
 
 packedv1data = VNDencoder(IncrementalInference.PackedVariableNodeData, getData(v1))
 upv1data = VNDdecoder(IncrementalInference.VariableNodeData, packedv1data)
