@@ -4,7 +4,7 @@
 using RoME
 using Distributions
 using TransformUtils
-# using IncrementalInference
+using KernelDensityEstimate
 
 using Base.Test
 
@@ -195,9 +195,16 @@ unp = convert(PartialPose3XYYaw, pxyy)
 
 
 
+println("test PriorPoint2DensityNH")
 
+prpt2 = PriorPoint2DensityNH(kde!(randn(2,100)),[0.25;0.75]  )
 
+pprpt2 = convert(PackedPriorPoint2DensityNH, prpt2)
+uprpt2 = convert(PriorPoint2DensityNH, pprpt2)
 
+@test norm(getPoints(prpt2.belief)-getPoints(uprpt2.belief)) < 1e-8
+
+@test norm(prpt2.nullhypothesis.p-uprpt2.nullhypothesis.p) < 1e-8
 
 
 
