@@ -39,6 +39,7 @@ function getSample(pp2::Point2DPoint2DRange, N::Int=1)
 end
 
 
+
 type PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
   belief::BallTreeDensity
   nullhypothesis::Distributions.Categorical
