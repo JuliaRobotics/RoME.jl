@@ -40,13 +40,13 @@ end
 
 
 type PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
-  mu::BallTreeDensity
+  belief::BallTreeDensity
   nullhypothesis::Distributions.Categorical
   PriorPoint2DensityNH() = new()
-  PriorPoint2DensityNH(mu, p) = new(mu, Distributions.Categorical(p))
+  PriorPoint2DensityNH(belief, p) = new(belief, Distributions.Categorical(p))
 end
 function getSample(p2::PriorPoint2DensityNH, N::Int=1)
-  return (rand(p2.mu, N), )
+  return (rand(p2.belief, N), )
 end
 type PackedPriorPoint2DensityNH <: IncrementalInference.PackedInferenceType
     rpts::Vector{Float64} # 0rotations, 1translation in each column
