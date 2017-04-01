@@ -53,6 +53,7 @@ export
   writeGraphPdf,
   savejld,
   loadjld,
+  FactorGraph,
   # overloaded functions from IIF
   # decodefg,
   # convertfrompackedfunctionnode,
