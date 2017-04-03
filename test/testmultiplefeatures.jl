@@ -234,7 +234,7 @@ tree = wipeBuildNewTree!(fg)
 
 # plotKDE(marginal(getVertKDE(fg,:x1),[3]))
 
-# pp,arr = localProduct(fg,:x2)
+# pp,arr,parts = localProduct(fg,:x2)
 # cc = plotKDE([pp;arr],c=["red";"black";"blue"],levels=1);
 
 # cc = drawLbl(fg,:l1);
