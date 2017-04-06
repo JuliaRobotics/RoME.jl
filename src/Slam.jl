@@ -47,7 +47,12 @@ function addposeFG!(slaml::SLAMWrapper,
   npnum = parse(Int,string(slaml.lastposesym)[2:end]) + 1
   nextn = Symbol("x$(npnum)")
   # preinit
-  vnext = addNode!(slaml.fg, nextn, getVal(vprev), N=N, ready=ready, labels=["POSE"])
+  vnext = nothing
+  if !haskey(slaml.fg.IDs, nextn)
+    vnext = addNode!(slaml.fg, nextn, getVal(vprev), N=N, ready=ready, labels=["POSE"])
+  else
+    vnext = getVert(slaml.fg, nextn) #, api=localapi # as optimization, assuming we already have latest vnest in slaml.fg
+  end
   slaml.lastposesym = nextn
 
   addsubtype(fgl::FactorGraph, vprev, vnext, cc::IncrementalInference.FunctorPairwise) = addFactor!(fgl, [vprev;vnext], cc)
