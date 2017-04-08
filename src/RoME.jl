@@ -15,7 +15,7 @@ using
 
 
 import Base: +
-import TransformUtils: ⊖, ⊕, convert, compare
+import TransformUtils: ⊖, ⊕, convert, compare, ominus
 import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
 
 
