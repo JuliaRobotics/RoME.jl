@@ -1,6 +1,17 @@
 
-warn("Must remove optional dev/ISAMRemoteSolve.jl dependency here.")
-include("dev/ISAMRemoteSolve.jl")
+# warn("Must remove optional dev/ISAMRemoteSolve.jl dependency here.")
+# include("dev/ISAMRemoteSolve.jl")
+
+"""
+    getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)
+
+Calculate the cartesian distange between two vertices in the graph using their symbol name, and by maximum belief point.
+"""
+function getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)
+  x1 = getKDEMax(getVertKDE(fgl, vsym1))
+  x2 = getKDEMax(getVertKDE(fgl, vsym2))
+  norm(x1[1:2]-x2[1:2])
+end
 
 function measureMeanDist{T <: AbstractString}(fg::FactorGraph, a::T, b::T)
     #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
