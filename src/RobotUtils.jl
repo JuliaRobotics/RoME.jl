@@ -5,7 +5,7 @@
 """
     getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)
 
-Calculate the cartesian distange between two vertices in the graph using their symbol name, and by maximum belief point.
+Calculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.
 """
 function getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)
   x1 = getKDEMax(getVertKDE(fgl, vsym1))
