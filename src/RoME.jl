@@ -104,6 +104,9 @@ export
   getLastPose2D,
   getNextLbl,
 
+  # RobotUtils
+  getRangeKDEMax2D,
+
   # some transform functions
   cart2pol,
   pol2cart,
