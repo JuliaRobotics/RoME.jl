@@ -57,6 +57,7 @@ export
   savejld,
   loadjld,
   FactorGraph,
+  initializeNode!,
   # overloaded functions from IIF
   # decodefg,
   # convertfrompackedfunctionnode,
