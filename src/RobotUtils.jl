@@ -2,6 +2,15 @@
 # warn("Must remove optional dev/ISAMRemoteSolve.jl dependency here.")
 # include("dev/ISAMRemoteSolve.jl")
 
+
+function convert{T <: CoordinateTransformations.AffineMap}(::Type{T}, x::SE3)
+  q = convert(TransformUtils.Quaternion, x.R)
+  Translation(x.t...) ∘ LinearMap( Rotations.Quat(q.s, q.v...) )
+end
+function convert{T <: CoordinateTransformations.AffineMap{Rotations.Quat{Float64}}}(::Type{SE3}, x::T)
+  SE3(x.v[1:3], TransformUtils.Quaternion(x.m.w, [x.m.x,x.m.y,x.m.z]) )
+end
+
 """
     getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)
 

@@ -44,6 +44,10 @@ println("[TEST] partial pose3 evaluations...")
 include("testpartialpose3.jl")
 println("[SUCCESS]")
 
+println("[TEST] PartialPose3XYYaw evaluations...")
+include("testPartialXYH.jl")
+println("[SUCCESS]")
+
 println("[TEST] packing converters...")
 include("testpackingconverters.jl")
 println("[SUCCESS]")

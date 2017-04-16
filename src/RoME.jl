@@ -5,6 +5,8 @@ using
   IncrementalInference,
   Graphs,
   TransformUtils,
+  CoordinateTransformations,
+  Rotations,
   KernelDensityEstimate,
   Distributions,
   Colors,
@@ -14,7 +16,7 @@ using
   ProgressMeter
 
 
-import Base: +
+import Base: +, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus
 import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
 
