@@ -273,6 +273,8 @@ include("Pose3Pose3.jl")
 include("PartialPose3.jl")
 include("MultipleFeaturesConstraint.jl")
 
+include("InertialPose3.jl")
+
 include("Slam.jl")
 
 include("RobotViz.jl")

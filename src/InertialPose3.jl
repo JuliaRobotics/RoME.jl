@@ -5,10 +5,14 @@ export
   InertialPose3Container,
   oplus,
   ⊕,
-  InertialPose3,
   getSample,
+  InertialPose3,
   PackedInertialPose3,
+  PriorInertialPose3,
+  PackedPriorInertialPose3,
   compare
+
+abstract PreintContainer
 
 type PreintegralCompensationGradients <: PreintContainer
   # First order terms
@@ -211,6 +215,36 @@ end
 
 
 
+
+
+
+
+
+# we also need a prior for InertialPose3
+
+
+
+type PriorInertialPose3 <: IncrementalInference.FunctorSingleton
+  Zi::Distribution
+end
+function getSample(prip3::PriorInertialPose3, N::Int=1)
+  return (rand( prip3.Zi, N )', )
+end
+
+
+type PackedPriorInertialPose3 <: IncrementalInference.PackedInferenceType
+  vecZi::Array{Float64,1} # 3translations, 3rotation, 3 velocities
+  vecCov::Array{Float64,1}
+  dimc::Int64
+  PackedPriorInertialPose3() = new()
+  PackedPriorInertialPose3(prip3::PriorInertialPose3) = new( prip3.Zi.μ, prip3.Zi.Σ.mat[:], size(prip3.Zi.Σ.mat,1)  )
+end
+
+convert(::Type{PackedPriorInertialPose3}, prip3::PriorInertialPose3) = PackedPriorInertialPose3(prip3)
+
+function convert(::Type{PriorInertialPose3}, pprip3::PackedPriorInertialPose3)
+  PriorInertialPose3(Distributions.MvNormal(pprip3.vecZi, reshapeVec2Mat(pprip3.vecCov, pprip3.dimc))
+end
 
 
 
