@@ -60,6 +60,7 @@ export
   loadjld,
   FactorGraph,
   initializeNode!,
+  plotKDE,
   # overloaded functions from IIF
   # decodefg,
   # convertfrompackedfunctionnode,
