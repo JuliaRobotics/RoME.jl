@@ -243,7 +243,7 @@ end
 convert(::Type{PackedPriorInertialPose3}, prip3::PriorInertialPose3) = PackedPriorInertialPose3(prip3)
 
 function convert(::Type{PriorInertialPose3}, pprip3::PackedPriorInertialPose3)
-  PriorInertialPose3(Distributions.MvNormal(pprip3.vecZi, reshapeVec2Mat(pprip3.vecCov, pprip3.dimc))
+  PriorInertialPose3(Distributions.MvNormal(pprip3.vecZi, reshapeVec2Mat(pprip3.vecCov, pprip3.dimc)) )
 end
 
 
