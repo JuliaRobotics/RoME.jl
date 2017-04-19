@@ -46,27 +46,26 @@ type InertialPose3Container <: PreintContainer
         rnTime::Int64=0  ) = new( rRp,rPosp,rVelp,pBw,pBa,rnTime )
 end
 
-function vee(ip3::InertialPose3Container)
-  ret = zeros(15)
-  ret[1:6] = veeEuler(  SE3(ip3.rPosp, SO3(rRp))  )
+function veeQuaternion(ip3::InertialPose3Container)
+  ret = zeros(16)
+  ret[1:7] = veeQuaternion(  SE3(ip3.rPosp, SO3(rRp))  )
 
 end
 
 function oplus(xi::InertialPose3Container, Dx::InertialPose3Container)
   return InertialPose3Container(
-        xi.rRp*Dx.rRp,
-        xi.rPosp + xi.rRp*Dx.rPosp,
-        xi.rVelp + xi.rRp*Dx.rVelp*(Dx.rnTime*1e-9),
-        xi.pBw + Dx.pBw,
-        xi.pBa + Dx.pBa,
-        xi.rnTime+Dx.rnTime  )
+        rRp = xi.rRp*Dx.rRp,
+        rPosp = xi.rPosp + xi.rRp*Dx.rPosp,
+        rVelp = xi.rVelp + xi.rRp*Dx.rVelp*(Dx.rnTime*1e-9),
+        pBw = xi.pBw + Dx.pBw,
+        pBa = xi.pBa + Dx.pBa,
+        rnTime = xi.rnTime+Dx.rnTime  )
 end
 ⊕(xi::InertialPose3Container, Dx::InertialPose3Container) = oplus(xi,Dx)
 
 function zetaEmbedding(posei::InertialPose3Container, posej::InertialPose3Container; rGrav=[0.0;0.0;9.81])
   z = zeros(30)
-  # z[1:3] = logmap(SO3(posei.rRp'*posej.rRp))
-
+  z[1:3] = logmap(SO3(posei.rRp'*posej.rRp))
   z[4:6] = posej.pBw
   z[7:9] = posej.rVelp
   z[10:12] = posej.rPosp
@@ -113,7 +112,8 @@ function constructC1{T <: PreintContainer}(posei::InertialPose3Container, pido::
 end
 
 function preintMeas{T <: PreintContainer}(pido::T)
-  return [logmap(SO3(pido.iRj));zeros(3);pido.iDvj;pido.iDppj;zeros(3)] # temporarily suppressing bias updates
+  return [logmap(SO3(pido.rRp)); pido.pBw; pido.rVelp; pido.rPosp; pido.pBa]
+  # return [logmap(SO3(pido.iRj));zeros(3);pido.iDvj;pido.iDppj;zeros(3)] # temporarily suppressing bias updates
 end
 
 function predictDeltaXij{T <: PreintContainer}(pido::T, posei::InertialPose3Container, posej::InertialPose3Container; rGrav=[0.0;0.0;9.81])
@@ -159,8 +159,9 @@ type InertialPose3 <: RoME.BetweenPoses
 end
 
 function getSample(ip3::InertialPose3, N::Int=1)
-  return (rand( ip3.Zij, N )', )
+  return (rand( ip3.Zij, N ), )
 end
+
 
 function (ip3::InertialPose3)(
         res::Vector{Float64},
@@ -190,17 +191,24 @@ function (ip3::InertialPose3)(
   posei.pBa = wIPj[13:15, idx]
 
   # repoint to existing load values for second pose
-  ENT.rRp[1:3,1:3] = convert(SO3, so3(meas[1][4:6, idx])).R,
-  ENT.rPosp = meas[1][1:3, idx],
-  ENT.rVelp = meas[1][7:9, idx],
-  ENT.pBw = meas[1][10:12, idx],
-  ENT.pBa = meas[1][13:15, idx],
+  ENT.rRp[1:3,1:3] = convert(SO3, so3(meas[1][4:6, idx])).R
+  ENT.rPosp = meas[1][1:3, idx]
+  ENT.rVelp = meas[1][7:9, idx]
+  ENT.pBw = meas[1][10:12, idx]
+  ENT.pBa = meas[1][13:15, idx]
   ENT.rnTime = ip3.pioc.rnTime # need time to enact velocity noise
 
   keeprntime = deepcopy(posej.rnTime)
   noisyposej = posej⊕ENT
-  poisyposej.rnTime =keeprntime  # rest timestamp to correct value
-  residual!(res, ip3.picg, posei,  noisyposej)
+  noisyposej.rnTime = keeprntime  # rest timestamp to correct value
+
+  # function residual!(res::Vector{Float64},
+  #         pioc::InertialPose3Container,
+  #         picg::PreintegralCompensationGradients,
+  #         posei::InertialPose3Container,
+  #         posej::InertialPose3Container, rGrav=[0.0;0.0;9.81]  )
+  residual!(res, ip3.pioc, ip3.picg, posei,  noisyposej)
+  # (res'*(ip3.Zij.Σ.mat\res))[1]
   nothing
 end
 
