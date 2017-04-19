@@ -30,7 +30,7 @@ type PreintegralCompensationGradients <: PreintContainer
         dVdDw::Array{Float64,2}=zeros(3,3),
         dRdDw::Array{Float64,2}=zeros(3,3)  ) = new(dPdDa,dVdDa,dPdDw,dVdDw,dRdDw)
 end
-type InertialPose3Container
+type InertialPose3Container <: PreintContainer
   rRp::Array{Float64,2}
   rPosp::Vector{Float64}
   rVelp::Vector{Float64}
@@ -46,6 +46,11 @@ type InertialPose3Container
         rnTime::Int64=0  ) = new( rRp,rPosp,rVelp,pBw,pBa,rnTime )
 end
 
+function vee(ip3::InertialPose3Container)
+  ret = zeros(15)
+  ret[1:6] = veeEuler(  SE3(ip3.rPosp, SO3(rRp))  )
+
+end
 
 function oplus(xi::InertialPose3Container, Dx::InertialPose3Container)
   return InertialPose3Container(
@@ -119,22 +124,44 @@ function predictDeltaXij{T <: PreintContainer}(pido::T, posei::InertialPose3Cont
   return (L-C1)*zet #-0.5*C2*zet.^2
 end
 
-function residual!{T <: PreintContainer}(res::Vector{Float64}, pido::T, posei::InertialPose3Container, posej::InertialPose3Container; rGrav=[0.0;0.0;9.81])
-  res[1:15] = preintMeas(pido) - predictDeltaXij(pido, posei, posej, rGrav=rGrav)
+function residual!(res::Vector{Float64},
+        pioc::InertialPose3Container,
+        picg::PreintegralCompensationGradients,
+        posei::InertialPose3Container,
+        posej::InertialPose3Container, rGrav=[0.0;0.0;9.81]  )
+  #
+  res[1:15] = preintMeas(pioc) - predictDeltaXij(picg, posei, posej, rGrav=rGrav)
   nothing
 end
 
 
+"""
+    InertialPose3(zij::Distributions.MvNormal, pioc::InertialPose3Container, pido::PreintegralCompensationGradients)
 
-type InertialPose3{P <: PreintContainer} <: RoME.BetweenPoses
+Zij is entropy of veeLie15, pioc is preintegral measurements, pido is compensation gradients.
+"""
+type InertialPose3 <: RoME.BetweenPoses
   Zij::Distribution
-  pido::P
-  reuse::Vector{Tuple{InertialPose3Container,InertialPose3Container}} # number of threads
-  InertialPose3(zij::Distributions.MvNormal, pido::PreintegralCompensationGradients) = new(zij, pido, fill((InertialPose3Container(),InertialPose3Container()), Threads.nthreads() )  )
+  pioc::InertialPose3Container
+  picg::PreintegralCompensationGradients
+  reuse::Vector{Tuple{InertialPose3Container,InertialPose3Container, InertialPose3Container}} # number of threads
+
+  InertialPose3(
+    zij::Distributions.MvNormal,
+    pioc::InertialPose3Container,
+    picg::PreintegralCompensationGradients  ) =
+      new( zij, pioc, picg,
+        fill( (InertialPose3Container(),
+               InertialPose3Container(),
+               InertialPose3Container()),
+        Threads.nthreads() )
+      )
 end
+
 function getSample(ip3::InertialPose3, N::Int=1)
   return (rand( ip3.Zij, N )', )
 end
+
 function (ip3::InertialPose3)(
         res::Vector{Float64},
         idx::Int,
@@ -142,8 +169,9 @@ function (ip3::InertialPose3)(
         wIPi::Array{Float64,2},
         wIPj::Array{Float64,2}  )
   #
+  # Function can be massively improved. Just getting it all wired at first.
   # get pointer to memory, local to this thread
-  posei, posej = ip3.reuse[Threads.threadid()]
+  posei, posej, ENT = ip3.reuse[Threads.threadid()]
 
   ## this part must be moved in the general ApproxConv.jl code, since this reassignment
   ## does not have to happen every time
@@ -161,7 +189,18 @@ function (ip3::InertialPose3)(
   posei.pBw = wIPj[10:12, idx]
   posei.pBa = wIPj[13:15, idx]
 
-  residual!(res, ip3.pido, posei, posej)
+  # repoint to existing load values for second pose
+  ENT.rRp[1:3,1:3] = convert(SO3, so3(meas[1][4:6, idx])).R,
+  ENT.rPosp = meas[1][1:3, idx],
+  ENT.rVelp = meas[1][7:9, idx],
+  ENT.pBw = meas[1][10:12, idx],
+  ENT.pBa = meas[1][13:15, idx],
+  ENT.rnTime = ip3.pioc.rnTime # need time to enact velocity noise
+
+  keeprntime = deepcopy(posej.rnTime)
+  noisyposej = posej⊕ENT
+  poisyposej.rnTime =keeprntime  # rest timestamp to correct value
+  residual!(res, ip3.picg, posei,  noisyposej)
   nothing
 end
 
@@ -169,27 +208,38 @@ type PackedInertialPose3 <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation, 3 velocities
   vecCov::Array{Float64,1}
   dimc::Int64
-  pidovecdPdDa::Vector{Float64}
-  pidovecdVdDa::Vector{Float64}
-  pidovecdPdDw::Vector{Float64}
-  pidovecdVdDw::Vector{Float64}
-  pidovecdRdDw::Vector{Float64}
-  InertialPose3() = new()
-  InertialPose3(ip3::InertialPose3) = new( ip3.Zij.μ, ip3.Zij.Σ.mat[:], size(ip3.Zij.Σ.mat,1),
+  vecpioc::Vector{Float64}
+  rnTime::Int64
+  picgvecdPdDa::Vector{Float64}
+  picgvecdVdDa::Vector{Float64}
+  picgvecdPdDw::Vector{Float64}
+  picgvecdVdDw::Vector{Float64}
+  picgvecdRdDw::Vector{Float64}
+  PackedInertialPose3() = new()
+  PackedInertialPose3(ip3::InertialPose3) = new( ip3.Zij.μ, ip3.Zij.Σ.mat[:], size(ip3.Zij.Σ.mat,1),
+            veeQuaternion(ip3.pioc), ip3.pioc.rnTime,
             ip3.dPdDa[:] ,ip3.dVdDa[:] ,ip3.dPdDw[:] ,ip3.dVdDw[:] ,ip3.dRdDw[:] )
 end
 
 convert(::Type{PackedInertialPose3}, ip3::InertialPose3) = PackedInertialPose3(ip3)
 
 function convert(::Type{InertialPose3}, pip3::PackedInertialPose3)
-  pido = PreintegralCompensationGradients(
-      reshapeVec2Mat(pip3.pidovecdPdDa, 3),
-      reshapeVec2Mat(pip3.pidovecdVdDa, 3),
-      reshapeVec2Mat(pip3.pidovecdPdDw, 3),
-      reshapeVec2Mat(pip3.pidovecdVdDw, 3),
-      reshapeVec2Mat(pip3.pidovecdRdDw, 3)
+  pioc = InertialPose3Container(
+      rPosp=pip3.vecpioc[1:3],
+      rRp=Quaternion(vecpioc[4],vecpioc[5:7]),
+      rVelp=vecpioc[8:10],
+      pBw=vecpioc[11:13],
+      pBa=vecpioc[14:16],
+      rnTime=pip3.rnTime
   )
-  InertialPose3(Distributions.MvNormal(pip3.vecZij, reshapeVec2Mat(pip3.vecCov, pip3.dimc)), pido)
+  picg = PreintegralCompensationGradients(
+      reshapeVec2Mat(pip3.picgvecdPdDa, 3),
+      reshapeVec2Mat(pip3.picgvecdVdDa, 3),
+      reshapeVec2Mat(pip3.picgvecdPdDw, 3),
+      reshapeVec2Mat(pip3.picgvecdVdDw, 3),
+      reshapeVec2Mat(pip3.picgvecdRdDw, 3)
+  )
+  InertialPose3(Distributions.MvNormal(pip3.vecZij, reshapeVec2Mat(pip3.vecCov, pip3.dimc)), pioc, picg)
 end
 
 
