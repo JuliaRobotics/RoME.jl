@@ -11,6 +11,18 @@ function convert{T <: CoordinateTransformations.AffineMap{Rotations.Quat{Float64
   SE3(x.v[1:3], TransformUtils.Quaternion(x.m.w, [x.m.x,x.m.y,x.m.z]) )
 end
 
+function convert(::Type{SE3}, t::Tuple{Symbol, Vector{Float64}})
+  if t[1]==:XYZqWXYZ
+    return SE3(t[2][1:3],TransformUtils.Quaternion(t[2][4],t[2][5:7]))
+  else
+    error("Unknown conversion type $(t[1])")
+  end
+end
+
+function veePose3(s::SE3)
+  TransformUtils.veeEuler(s)
+end
+
 """
     getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)
 
