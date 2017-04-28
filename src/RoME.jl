@@ -17,9 +17,8 @@ using
 
 
 import Base: +, convert
-import TransformUtils: ⊖, ⊕, convert, compare, ominus
+import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
 import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
-
 
 export
   # pass throughs from TransformUtils
@@ -37,6 +36,10 @@ export
 
 
   # pass throughs from IncrementalInference
+  FunctorSingleton,
+  FunctorPairwise,
+  FunctorPairwiseNH,
+  FunctorSingletonNH,
   ls,
   addFactor!,
   addNode!,
@@ -60,6 +63,8 @@ export
   loadjld,
   FactorGraph,
   initializeNode!,
+  plotKDE,
+  plot, # for Graphs.plot
   # overloaded functions from IIF
   # decodefg,
   # convertfrompackedfunctionnode,
@@ -80,6 +85,7 @@ export
   addAutoLandmBR!,
   projNewLandm!,
   malahanobisBR,
+  veePose3,
 
   # types
   BetweenPoses,
@@ -133,6 +139,7 @@ export
   drawPosesLandms,
   drawSubmaps,
   investigatePoseKDE,
+  plotPose3Pairs,
 
   # solve with isam in pytslam
   doISAMSolve,
