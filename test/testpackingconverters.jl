@@ -203,7 +203,6 @@ unp = convert(PartialPose3XYYawNH, pxyy)
 
 @test RoME.compare(xyy, unp)
 
-@test false
 
 
 println("test PriorPoint2DensityNH")
