@@ -1,16 +1,23 @@
 # video at: https://vimeo.com/190052649
 
 
-addprocs(7)
-# using RoME, IncrementalInference, Gadfly, Colors
-for p in procs()
-# @everywhere begin
-remotecall_fetch(p, ()->using RoME)
-remotecall_fetch(p, ()->using IncrementalInference)
-remotecall_fetch(p, ()->using Gadfly)
-remotecall_fetch(p, ()->using Colors)
+# addprocs(7)
+# # using RoME, IncrementalInference, Gadfly, Colors
+# for p in procs()
+# # @everywhere begin
+# remotecall_fetch(p, ()->using RoME)
+# remotecall_fetch(p, ()->using IncrementalInference)
+# remotecall_fetch(p, ()->using Gadfly)
+# remotecall_fetch(p, ()->using Colors)
+# # end
 # end
+@everywhere begin
+using RoME
+using IncrementalInference
+using Gadfly
+using Colors
 end
+
 # , Gadfly
 
 # using CloudGraphs, Neo4j
@@ -62,7 +69,7 @@ function landmsInRange(GTl::Dict{String, Vector{Float64}}, cur::Vector{Float64};
 	return inrange
 end
 
-function isInFG!(fgl::FactorGraph, lbl::String; N=100, ready=0)
+function isInFG!(fgl::FactorGraph, lbl::Symbol; N=100, ready=0)
 	v = nothing
 	if !haskey(fgl.IDs, lbl)
 		init = 300*randn(2,N)
@@ -77,7 +84,7 @@ function addLandmsOnPose!(fgl::FactorGraph, pose::Graphs.ExVertex, GTl::Dict{Str
 			ready=0,N=100)
 	for gtl in GTl
 		println("addLandmsOnPose! -- adding $(gtl[1])")
-		v = isInFG!(fgl, gtl[1], N=N,ready=ready)
+		v = isInFG!(fgl, Symbol(gtl[1]), N=N,ready=ready)
 		# add the constraint
 		ppr = Point2DPoint2DRange([gtl[2]], 2.0, [1.0])
 		addFactor!(fgl, [pose;v], ppr, ready=ready)
@@ -85,32 +92,35 @@ function addLandmsOnPose!(fgl::FactorGraph, pose::Graphs.ExVertex, GTl::Dict{Str
 	nothing
 end
 
-function addNewPose!(fgl::FactorGraph, from::String, lbl::String, GTp;
+function addNewPose!(fgl::FactorGraph, from::Symbol, lbl::Symbol, GTp;
 			ready=0, N=N)
 
 	init = 300*randn(2,N)
 
 	v = addNode!(fgl, lbl, init, diagm([1000.0;1000.0]), N=N, ready=ready)
-	rhoZ = norm(GTp[lbl]-GTp[from])
+	rhoZ = norm(GTp[string(lbl)]-GTp[string(from)])
 	ppr = Point2DPoint2DRange([rhoZ], 3.0, [1.0])
-	f = addFactor!(fgl, [getVert(fgl, from);v], ppr, ready=ready)
-	pts = evalFactor2(fgl, f, v.index)
-	setVal!(v, pts)
-	updateFullVert!(fgl,v)
+	f = addFactor!(fgl, [from,lbl], ppr, ready=ready)
+  # f = addFactor!(fgl, [getVert(fgl, from);v], ppr, ready=ready)
+  initializeNode!(fgl,lbl)
+	# pts = evalFactor2(fgl, f, v.index)
+	# setVal!(v, pts)
+	# updateFullVert!(fgl,v)
 	getVert(fgl, lbl)
 end
 
 function drive(fgl::FactorGraph, GTp, GTl, from, to; N=100)
 	v = addNewPose!(fgl, from, to, GTp, N=N)
 	# v = getVert(fgl, to)
-	addLandmsOnPose!(fgl, v, landmsInRange(GTl, GTp[to], lim=120.0), N=N )
+	addLandmsOnPose!(fgl, v, landmsInRange(GTl, GTp[string(to)], lim=120.0), N=N )
+  println("added landmark")
 	writeGraphPdf(fgl)
 	nothing
 end
 
 function batchsolve(fgl::FactorGraph)
 	tree = wipeBuildNewTree!(fgl, drawpdf=true)
-	inferOverTree!(fgl, tree, N=N)
+	inferOverTreeR!(fgl, tree, N=N)
 	nothing
 end
 
@@ -233,7 +243,7 @@ end #everywhere
 function drawAllVidImages(GTp, GTl, fgl, ii, fr; drawranges=true, interp=false, t=0)
 	poselbls = ["l$(100+i)" for i in 0:ii]
 	lmlbls = ["l$(i)" for i in 1:4]
-	folderloc = "/home/dehann/irosVid"
+	folderloc = "/home/dehann/irosVidTemp"
 	rr = Dict{Int,RemoteRef}()
 
 	h12 = drawGroundTruth(GTp, poselbls, GTl, lmlbls, drawranges=drawranges, interp=interp, t=t)
@@ -372,7 +382,7 @@ function drawIllustrations(GTl, GTp, folderloc)
 end
 
 
-folderloc2 = "/home/dehann/irosVid"
+folderloc2 = "/home/dehann/irosVidTemp"
 drawIllustrations(GTl, GTp, folderloc2)
 
 
@@ -383,7 +393,7 @@ fg = initfg()
 
 # Some starting position
 init = 300*randn(2,N)
-v1 = addNode!(fg, "l100", init, diagm([1000.0;1000.0]), N=N, ready=0)
+v1 = addNode!(fg, :l100, init, diagm([1000.0;1000.0]), N=N, ready=0)
 
 
 lmv1 = landmsInRange(GTl, GTp["l100"])
@@ -391,10 +401,10 @@ addLandmsOnPose!(fg, v1, lmv1, N=N )
 
 # must pin landmarks for guage
 pp2 = PriorPoint2D(GTl["l1"], diagm([1.0;1.0]), [1.0])
-f = addFactor!(fg,[getVert(fg,"l1")], pp2)
+f = addFactor!(fg,[:l1], pp2)
+# f = addFactor!(fg,[getVert(fg,:l1)], pp2)
 pp2 = PriorPoint2D(GTl["l2"], diagm([1.0;1.0]), [1.0])
-f = addFactor!(fg, [getVert(fg,"l2")], pp2)
-
+f = addFactor!(fg, [:l2], pp2)
 
 
 writeGraphPdf(fg)
@@ -413,8 +423,8 @@ draw30AllFast(GTp, GTl, fg, 1, 0, 1, 29)
 
 
 
-
-addNewPose!(fg, "l100", "l101", GTp, N=N)
+addNewPose!(fg, :l100, :l101, GTp, N=N)
+initializeNode!(fg,:l101)
 writeGraphPdf(fg)
 batchsolve(fg)
 
@@ -426,7 +436,7 @@ draw30AllFast(GTp, GTl, fg, 1, 30, 0, 14, drawranges=false, interp=false)
 
 
 
-addLandmsOnPose!(fg, getVert(fg, "l101"),
+addLandmsOnPose!(fg, getVert(fg, :l101),
 								landmsInRange(GTl, GTp["l101"]), N=N )
 writeGraphPdf(fg)
 batchsolve(fg)
@@ -440,7 +450,10 @@ draw30AllFast(GTp, GTl, fg, 1, 45, 0, 14, interp=false)
 
 
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l101", "l102", N=N)
+drive(fg, GTp, GTl, :l101, :l102, N=N)
+initializeNode!(fg,:l102)
+writeGraphPdf(fg)
+
 batchsolve(fg)
 
 draw30AllFast(GTp, GTl, fgd, 2, 60, 0, 29)
@@ -449,17 +462,17 @@ draw30AllFast(GTp, GTl, fgd, 2, 60, 0, 29)
 
 
 
-
+# initializeNode!(fg,:l102)
 
 
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l102", "l103", N=N)
+drive(fg, GTp, GTl, :l102, :l103, N=N)
 batchsolve(fg)
 # drawLandms(fg,showmm=true)
-# h12 = drawGroundTruth(GTp, ["l$(100+i)" for i in 0:3], GTl, ["l$(i)" for i in 1:4])
+# h12 = drawGroundTruth(GTp, [:l$(00+i)" for i in 0:3], GTl, [:l$()" for i in 1:4])
 # drawQuadLandms(fg,file="irosVid/test4.png",h12=h12);
 # draw(PNG("irosVid/gt4.png",30cm,20cm),h12)
-# lstPosePl = RoME.drawMarginalContour(fg,"l103")
+# lstPosePl = RoME.drawMarginalContour(fg,:l103)
 # draw(PNG("irosVid/lst4.png",30cm,20cm),lstPosePl)
 # push!(h12.layers, lstPosePl.layers[1])
 # draw(PNG("irosVid/lstOver4.png",30cm,20cm),h12)
@@ -475,7 +488,10 @@ draw30AllFast(GTp, GTl, fgd, 3, 90, 0, 29)
 
 
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l103", "l104", N=N)
+drive(fg, GTp, GTl, :l103, :l104, N=N)
+# addLandmsOnPose!(fg, getVert(fg, :l104),
+# 								landmsInRange(GTl, GTp["l104"]), N=N )
+# writeGraphPdf(fg)
 batchsolve(fg)
 
 draw30AllFast(GTp, GTl, fgd, 4, 120, 0, 29)
@@ -488,7 +504,11 @@ draw30AllFast(GTp, GTl, fgd, 4, 120, 0, 29)
 
 
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l104", "l105", N=N)
+drive(fg, GTp, GTl, :l104, :l105, N=N)
+# addLandmsOnPose!(fg, getVert(fg, :l104),
+# 								landmsInRange(GTl, GTp["l104"]), N=N )
+writeGraphPdf(fg)
+
 batchsolve(fg)
 
 draw30AllFast(GTp, GTl, fgd, 5, 150, 0, 29)
@@ -500,7 +520,7 @@ draw30AllFast(GTp, GTl, fgd, 5, 150, 0, 29)
 
 
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l105", "l106", N=N)
+drive(fg, GTp, GTl, :l105, :l106, N=N)
 batchsolve(fg)
 
 # drawAllVidImages(GTp, GTl, fgd, 6, 7)
@@ -515,7 +535,7 @@ draw30AllFast(GTp, GTl, fgd, 6, 180, 0, 29)
 
 
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l106", "l107", N=N)
+drive(fg, GTp, GTl, :l106, :l107, N=N)
 batchsolve(fg)
 
 draw30AllFast(GTp, GTl, fgd, 7, 210, 0, 29)
@@ -529,7 +549,11 @@ draw30AllFast(GTp, GTl, fgd, 7, 210, 0, 29)
 
 
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l107", "l108", N=N)
+drive(fg, GTp, GTl, :l107, :l108, N=N)
+# addLandmsOnPose!(fg, getVert(fg, :l108),
+# 								landmsInRange(GTl, GTp["l108"]), N=N )
+writeGraphPdf(fg)
+
 batchsolve(fg)
 
 draw30AllFast(GTp, GTl, fgd, 8, 240, 0, 29)
@@ -542,7 +566,11 @@ draw30AllFast(GTp, GTl, fgd, 8, 240, 0, 29)
 
 
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l108", "l109", N=N)
+drive(fg, GTp, GTl, :l108, :l109, N=N)
+# addLandmsOnPose!(fg, getVert(fg, :l109),
+# 								landmsInRange(GTl, GTp["l109"]), N=N )
+writeGraphPdf(fg)
+
 batchsolve(fg)
 
 draw30AllFast(GTp, GTl, fgd, 9, 270, 0, 29)
@@ -554,9 +582,12 @@ draw30AllFast(GTp, GTl, fgd, 9, 270, 0, 29)
 
 
 
-
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l109", "l110", N=N)
+drive(fg, GTp, GTl, :l109, :l110, N=N)
+# addLandmsOnPose!(fg, getVert(fg, :l110),
+# 								landmsInRange(GTl, GTp["l110"]), N=N )
+writeGraphPdf(fg)
+
 batchsolve(fg)
 
 draw30AllFast(GTp, GTl, fgd, 10, 300, 0, 29)
@@ -569,7 +600,11 @@ draw30AllFast(GTp, GTl, fgd, 10, 300, 0, 29)
 
 
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l110", "l111", N=N)
+drive(fg, GTp, GTl, :l110, :l111, N=N)
+# addLandmsOnPose!(fg, getVert(fg, :l111),
+# 								landmsInRange(GTl, GTp["l111"]), N=N )
+writeGraphPdf(fg)
+
 batchsolve(fg)
 
 draw30AllFast(GTp, GTl, fgd, 11, 330, 0, 29)
@@ -583,8 +618,11 @@ draw30AllFast(GTp, GTl, fgd, 11, 330, 0, 29)
 
 
 fgd = deepcopy(fg)
-drive(fg, GTp, GTl, "l111", "l112", N=N)
+drive(fg, GTp, GTl, :l111, :l112, N=N)
 batchsolve(fg)
+
+writeGraphPdf(fg)
+wipeBuildNewTree!(fg, drawpdf=true)
 
 draw30AllFast(GTp, GTl, fgd, 12, 360, 0, 29)
 # [drawAllVidImages(GTp, GTl, fg, 12, i+360, interp=true, t=(30-i)/30.0) for i in 0:29]
@@ -594,9 +632,6 @@ draw30AllFast(GTp, GTl, fgd, 12, 360, 0, 29)
 
 draw30AllFast(GTp, GTl, fg, 12, 390, 0, 29, interp=false)
 # [drawAllVidImages(GTp, GTl, fg, 12, i+390) for i in 0:29]
-
-
-
 
 
 
