@@ -107,7 +107,7 @@ end
 type PartialPose3XYYawNH <: IncrementalInference.FunctorPairwiseNH
   xyy::Distributions.MvNormal
   partial::Tuple
-  nullhypothesis::::Distributions.Categorical
+  nullhypothesis::Distributions.Categorical
   PartialPose3XYYawNH() = new()
   PartialPose3XYYawNH(xyy::MvNormal, vh::Vector{Float64}) = new(xyy, (1,2,6),  Distributions.Categorical(vh))
 end
