@@ -234,6 +234,8 @@ export
   PackedPartialPriorRollPitchZ,
   PartialPose3XYYaw,
   PackedPartialPose3XYYaw,
+  PartialPose3XYYawNH,
+  PackedPartialPose3XYYawNH,
 
   # MultipleFeatures2D constraint functions
   MultipleFeatures2D,
