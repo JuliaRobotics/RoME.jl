@@ -144,7 +144,14 @@ function convert(::Type{PackedPartialPose3XYYawNH}, d::PartialPose3XYYawNH)
 end
 
 
-
+function compare(a::PartialPose3XYYawNH, b::PartialPose3XYYawNH; tol::Float64=1e-10)
+  TP = true
+  TP = TP && norm(a.xyy.μ-b.xyy.μ) < tol
+  TP = TP && norm(a.xyy.Σ.mat[:]-b.xyy.Σ.mat[:]) < tol
+  TP = TP && norm(collect(a.partial)-collect(b.partial)) < tol
+  TP = TP && norm(a.nullhypothesis.p-b.nullhypothesis.p) < tol
+  return TP
+end
 
 
 
