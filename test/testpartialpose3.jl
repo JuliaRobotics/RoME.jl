@@ -104,7 +104,7 @@ memcheck = getVal(v2)
 
 
 println("test predictbelief with two functions")
-val = predictbelief(fg, :x2, [:x2;:x1x2], N=N)
+val = predictbelief(fg, :x2, ls(fg, :x2), N=N)
 
 for i in 1:N
   val[6,i] = wrapRad(val[6,i])

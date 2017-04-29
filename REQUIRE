@@ -1,10 +1,10 @@
 julia 0.5
-IncrementalInference 0.2.7
+IncrementalInference 0.2.8
 Graphs 0.7.1
-TransformUtils 0.0.5
+TransformUtils 0.0.6
 CoordinateTransformations
 Rotations
-KernelDensityEstimate 0.2.3
+KernelDensityEstimate 0.2.4
 Distributions
 Colors
 Gadfly
