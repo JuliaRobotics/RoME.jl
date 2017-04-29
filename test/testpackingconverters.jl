@@ -193,6 +193,16 @@ unp = convert(PartialPose3XYYaw, pxyy)
 
 
 
+println("test conversions of PartialPose3XYYawNH")
+
+
+xyy = PartialPose3XYYawNH(MvNormal([1.0;2.0;0.5],0.1*eye(3)), [0.6;0.4])
+
+pxyy = convert(PackedPartialPose3XYYawNH, xyy)
+unp = convert(PartialPose3XYYawNH, pxyy)
+
+@test RoME.compare(xyy, unp)
+
 
 
 println("test PriorPoint2DensityNH")
