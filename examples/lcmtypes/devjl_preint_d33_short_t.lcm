@@ -1,0 +1,24 @@
+package devjl;
+
+// 3 angle and 3 vector representation of rigid delta 6DOF transform from pose i to j
+struct preint_d33_short_t
+{
+   int64_t utime;
+
+   double Dt;
+
+   double iDppj[3];
+   double iDvj[3];
+   double iDRj[9];
+
+   double dDw[3];
+   double dDa[3];
+
+   double dPdDa[9];
+   double dVdDa[9];
+   double dPdDw[9];
+   double dVdDw[9];
+   double dRdDw[9];
+
+  double Cov[256];
+}
