@@ -13,12 +13,12 @@ initCov = diagm([0.03;0.03;0.001])
 odoCov = diagm([3.0;3.0;0.01])
 
 # Some starting position
-v1 = addNode!(fg, :x1, zeros(3,1), diagm([1.0;1.0;0.1]), N=N)
+v1 = addNode!(fg, :x0, zeros(3,1), diagm([1.0;1.0;0.1]), N=N)
 initPosePrior = PriorPose2(zeros(3,1), initCov, [1.0])
 f1  = addFactor!(fg,[v1], initPosePrior)
 
 # and a second pose
-v2 = addNode!(fg, :x2, ([50.0;0.0;pi/2]')', diagm([1.0;1.0;0.05]), N=N)
+v2 = addNode!(fg, :x1, ([50.0;0.0;pi/2]')', diagm([1.0;1.0;0.05]), N=N)
 ppc = Pose2Pose2(([50.0;0.0;pi/2]')', odoCov, [1.0])
 f2 = addFactor!(fg, [v1;v2], ppc)
 
@@ -34,17 +34,17 @@ inferOverTreeR!(fg, tree,N=N)
 # inferOverTree!(fg, tree, N=N)
 
 # test post evaluation values are correct
-pts = getVal(fg, :x1)
+pts = getVal(fg, :x0)
 @test norm(Base.mean(pts,2)[1:2]-[0.0;0.0]) < 10.0
 @test abs(Base.mean(pts,2)[3]) < 0.5
 
-pts = getVal(fg, :x2)
+pts = getVal(fg, :x1)
 @test norm(Base.mean(pts,2)[1:2]-[50.0;0.0]) < 10.0
 @test abs(Base.mean(pts,2)[3]-pi/2) < 0.5
 
 
 # check that yaw is working
-v3 = addNode!(fg, :x3, ([0.0;0.0;0.0]')', diagm([1.0;1.0;0.05]), N=N)
+v3 = addNode!(fg, :x2, ([0.0;0.0;0.0]')', diagm([1.0;1.0;0.05]), N=N)
 ppc = Pose2Pose2(([50.0;0.0;0.0]')', odoCov, [1.0])
 f3 = addFactor!(fg, [v2;v3], ppc)
 
@@ -53,15 +53,15 @@ tree = wipeBuildNewTree!(fg)
 [inferOverTree!(fg, tree, N=N) for i in 1:2]
 
 # test post evaluation values are correct
-pts = getVal(fg, :x1)
+pts = getVal(fg, :x0)
 @test norm(Base.mean(pts,2)[1:2]-[0.0;0.0]) < 20.0
 @test abs(Base.mean(pts,2)[3]) < 0.5
 
-pts = getVal(fg, :x2)
+pts = getVal(fg, :x1)
 @test norm(Base.mean(pts,2)[1:2]-[50.0;0.0]) < 20.0
 @test abs(Base.mean(pts,2)[3] - pi/2) < 0.5
 
-pts = getVal(fg, :x3)
+pts = getVal(fg, :x2)
 @test norm(Base.mean(pts,2)[1:2]-[50.0;50.0]) < 20.0
 @test abs(Base.mean(pts,2)[3]-pi/2) < 0.5
 
