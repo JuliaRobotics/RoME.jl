@@ -3,6 +3,12 @@
 # include("dev/ISAMRemoteSolve.jl")
 
 
+immutable RangeAzimuthElevation
+  range::Float64
+  azimuth::Float64
+  elevation::Union{Void,Float64}
+end
+
 function convert{T <: CoordinateTransformations.AffineMap}(::Type{T}, x::SE3)
   q = convert(TransformUtils.Quaternion, x.R)
   Translation(x.t...) ∘ LinearMap( Rotations.Quat(q.s, q.v...) )
@@ -19,9 +25,34 @@ function convert(::Type{SE3}, t::Tuple{Symbol, Vector{Float64}})
   end
 end
 
+function convert(::Type{RangeAzimuthElevation}, val::Tuple{Symbol, Vector{Float64}})
+  if val[1] == :rangeazimuth
+    return RangeAzimuthElevation(val[2][1],val[2][2],nothing)
+  elseif val[1] == :rangeazimuthelevation
+    return RangeAzimuthElevation(val[2][1],val[2][2],val[2][3])
+  else
+    error("Unknown conversion from $(val[1]) to RangeAzimuthElevation.")
+  end
+end
+
 function veePose3(s::SE3)
   TransformUtils.veeEuler(s)
 end
+function veePose(s::SE3)
+  TransformUtils.veeEuler(s)
+end
+
+
+function \(s::SE3, wTr::CTs.Translation)
+  bTr = s.R.R'*(wTr.v-s.t)
+  Dtr = bTr
+  range = norm(Dtr)
+  azi = atan2(Dtr[2], Dtr[1])
+  elev = atan2(Dtr[3], Dtr[1])
+  RangeAzimuthElevation(range, azi, elev)
+end
+
+
 
 """
     getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)
@@ -72,7 +103,7 @@ end
 function getNextLbl(fgl::FactorGraph, chr)
   # TODO convert this to use a double lookup
   warn("getNextLbl(::FactorGraph..) to be deprecated, use getlastpose/landm(::SLAMWrapper..) instead.")
-  max = 0
+  max = -1
   maxid = -1
   for vid in fgl.IDs
   # for v in fgl.v #fgl.g.vertices # fgl.v
@@ -634,7 +665,7 @@ end
 
 # convenience function to add DIDSON sonar constraints to graph
 function addLinearArrayConstraint(fgl::FactorGraph,
-      rangebearing::Tuple,
+      rangebearing::Union{Tuple{Float64, Float64}, Vector{Float64}},
       pose::Symbol,
       landm::Symbol ;
       rangecov::Float64=3e-4,
