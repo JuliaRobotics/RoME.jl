@@ -16,7 +16,7 @@ using
   ProgressMeter
 
 
-import Base: +, convert
+import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
 import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
 
@@ -86,6 +86,9 @@ export
   projNewLandm!,
   malahanobisBR,
   veePose3,
+  veePose,
+  \,
+  RangeAzimuthElevation,
 
   # types
   BetweenPoses,
@@ -267,6 +270,8 @@ export
 
 abstract BetweenPoses <: IncrementalInference.FunctorPairwise
 
+typealias CTs CoordinateTransformations
+typealias TUs TransformUtils
 
 include("BayesTracker.jl")
 
