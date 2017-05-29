@@ -192,8 +192,8 @@ function drawGroundTruth(GTp, orderp, GTl=nothing, orderl=[]; drawranges=true, i
 		end
 	end
 	if length(orderl) > 0
-		push!(LAYERS, Gadfly.layer(x=Xlr, y=Ylr, Geom.point, Theme(default_color=colorant"red", default_point_size=4pt)  )[1]) # label=Lblr, Geom.label
-		push!(LAYERS, Gadfly.layer(x=Xla, y=Yla, Geom.point, Theme(default_color=colorant"cyan", default_point_size=4pt) )[1]) # label=Lbla, Geom.label
+		push!(LAYERS, Gadfly.layer(x=Xlr, y=Ylr, Geom.point, Theme(default_color=colorant"red", point_size=4pt)  )[1]) # label=Lblr, Geom.label
+		push!(LAYERS, Gadfly.layer(x=Xla, y=Yla, Geom.point, Theme(default_color=colorant"cyan", point_size=4pt) )[1]) # label=Lbla, Geom.label
 		if drawranges
 			idx = !interp ? length(X) : length(X)-1
 			gtlcur = landmsInRange(GTl, [X[idx];Y[idx]])
@@ -351,7 +351,7 @@ function drawFirstL3Illustration(GTl, GTp)
 	PL = union(PL, plotCircle(cent=l1,radius=rho1, c="gray").layers)
 	PL = union(PL, plotCircle(cent=l2,radius=rho2, c="gray").layers)
 
-	push!(PL, layer(x=[l3[1]], y=[l3[2]], Geom.point, Theme(default_color=colorant"cyan", default_point_size=4pt)  )[1] )
+	push!(PL, layer(x=[l3[1]], y=[l3[2]], Geom.point, Theme(default_color=colorant"cyan", point_size=4pt)  )[1] )
 
 	plot(PL,
 		Guide.title("Parametric illustration"),
