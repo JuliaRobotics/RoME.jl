@@ -7,7 +7,7 @@ Rotations
 KernelDensityEstimate 0.2.4
 Distributions
 Colors
-Gadfly
+Gadfly 0.6.2
 JLD
 HDF5
 Optim
