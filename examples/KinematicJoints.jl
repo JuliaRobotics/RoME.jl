@@ -83,15 +83,6 @@ plotPose3Pairs(fg, :x2)
 
 
 
-
-
-
-
-
-
-
-
-
 type ShoulderJoint <: FunctorPairwise
   Zij::Distribution
 end
@@ -134,6 +125,65 @@ visualizeallposes!(vis, fg, drawtype=:max)
 
 
 solveandvisualize(fg, vis)
+
+
+
+
+
+
+
+
+
+
+
+# reachability Examples
+
+
+N=300
+fg = RoME.initfg()
+
+# base
+addNode!(fg, :x1, dims=6)
+pos = PriorPose3(MvNormal(zeros(6),1e-6*eye(6)))
+addFactor!(fg, [:x1], pos) # base
+initializeNode!(fg, :x1)
+
+
+addNode!(fg, :x2, dims=6)
+hip = HipJoint(Uniform(-pi/3,pi/3))
+addFactor!(fg, [:x1, :x2], hip) # hio
+initializeNode!(fg, :x2)
+
+
+addNode!(fg, :x3, dims=6)
+should = ShoulderJoint(Uniform(-pi/4,pi/4))
+addFactor!(fg, [:x2, :x3], should) # hio
+initializeNode!(fg, :x3)
+
+
+visualizeallposes!(vis, fg, drawtype=:max)
+
+
+solveandvisualize(fg, vis)
+
+
+
+visualizeDensityMesh!(vis, fg, :x3)
+
+
+plotPose3Pairs(fg, :x3)
+
+getVal(fg, :x3)[5,1:10]
+
+plotKDE(fg, :x3, dims=[6])
+
+
+
+
+rand(Uniform(-1,1))
+
+
+
 
 
 
