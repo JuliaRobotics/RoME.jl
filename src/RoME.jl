@@ -16,7 +16,7 @@ using
   ProgressMeter
 
 
-import Base: +, convert
+import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
 import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
 
@@ -86,6 +86,9 @@ export
   projNewLandm!,
   malahanobisBR,
   veePose3,
+  veePose,
+  \,
+  RangeAzimuthElevation,
 
   # types
   BetweenPoses,
@@ -234,6 +237,8 @@ export
   PackedPartialPriorRollPitchZ,
   PartialPose3XYYaw,
   PackedPartialPose3XYYaw,
+  PartialPose3XYYawNH,
+  PackedPartialPose3XYYawNH,
 
   # MultipleFeatures2D constraint functions
   MultipleFeatures2D,
@@ -265,6 +270,8 @@ export
 
 abstract BetweenPoses <: IncrementalInference.FunctorPairwise
 
+typealias CTs CoordinateTransformations
+typealias TUs TransformUtils
 
 include("BayesTracker.jl")
 
@@ -279,6 +286,8 @@ include("BearingRangeDensity2D.jl")
 include("Pose3Pose3.jl")
 include("PartialPose3.jl")
 include("MultipleFeaturesConstraint.jl")
+
+include("InertialPose3.jl")
 
 include("Slam.jl")
 
