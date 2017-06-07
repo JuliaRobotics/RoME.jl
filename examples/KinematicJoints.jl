@@ -68,13 +68,12 @@ visualizeallposes!(vis, fg, drawtype=:max)
 
 solveandvisualize(fg, vis)
 
+
 Graphs.plot(fg.g)
 
 visualizeDensityMesh!(vis, fg, :x2)
 
-
 plotKDE(fg, :x2, dims=[4])
-
 
 plotPose3Pairs(fg, :x2)
 
@@ -102,25 +101,13 @@ end
 function (el::ShoulderJoint)(res, idx, meas, xi, xj)
   Xi = SE3(xi[1:3,idx],Euler(xi[4:6,idx]))
   Xj = SE3(xj[1:3,idx],Euler(xj[4:6,idx]))
-  wRbi = convert(SO3,Euler(xi[4:6,idx]))
-  wRbj = convert(SO3,Euler(xj[4:6,idx]))
 
-  biRbj = convert(SO3,so3(meas[1][idx]))
+  sho1 = SE3( zeros(3), convert(SO3,so3([meas[1][idx],0,0])) )
+  sho2 = SE3( [0,0,1.0], SO3(0) )
 
-  leftR = wRbj
-  rightR = wRbi*biRbj
-  dS = convert(so3, SO3(leftR.R\rightR.R))
-  res[4:6] = vee(dS)
+  del = (Xi ⊕ sho1 ⊕ sho2) \ Xj
 
-  # TODO -- get back to closed operator
-  # res[1:6] = veeEuler(delta)
-
-  leftTr = xj[1:3,idx]
-  rightTr = xi[1:3,idx] + biRbj.R * [0.0;0.0;1.0]
-
-
-  res[1:3] = leftTr - rightTr
-
+  res[1:6] = veeEuler(del)
   nothing
 end
 
