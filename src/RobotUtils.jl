@@ -687,6 +687,13 @@ function addLinearArrayConstraint(fgl::FactorGraph,
 end
 
 
+function addSoftEqualityPoint2D(fgl::FactorGraph, l1::Symbol, l2::Symbol;
+    dist=MvNormal([0.0;0.0],eye(2)), ready::Int=1 )
+  pp = Point2DPoint2D(dist)
+  addFactor!(fgl, [l1,l2], pp, ready=ready)
+end
+
+
 
 #
 # function +(p1::Rigid6DOF, p2::Rigid6DOF)

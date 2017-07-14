@@ -190,6 +190,7 @@ export
   cameraResidual!,
 
   # Point2D
+  Point2DPoint2D,
   Pose2DPoint2DBearingRange,
   PackedPose2DPoint2DBearingRange,
   Pose2DPoint2DRange,
@@ -265,7 +266,8 @@ export
   plotTrckStep,
   poseTrigAndAdd!,
   poseTrigAndAdd!,
-  processTreeTrackersUpdates!
+  processTreeTrackersUpdates!,
+  addSoftEqualityPoint2D
 
 
 abstract BetweenPoses <: IncrementalInference.FunctorPairwise

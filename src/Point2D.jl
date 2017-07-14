@@ -40,6 +40,30 @@ end
 
 
 
+type Point2DPoint2D <: IncrementalInference.FunctorPairwise
+    Zij::Distribution
+    Point2DPoint2D() = new()
+    Point2DPoint2D(x) = new(x)
+end
+function (pp2r::Point2DPoint2DRange)(
+      res::Array{Float64},
+      idx::Int,
+      meas::Tuple, # Array{Float64,2},
+      xi::Array{Float64,2},
+      xj::Array{Float64,2} )
+  #
+  # TODO -- still need to add multi-hypotheses support here
+  res[1]  = meas[1][1,idx] - (xj[1,idx] - xi[1,idx])
+  res[2]  = meas[1][2,idx] - (xj[2,idx] - xi[2,idx])
+  nothing
+end
+function getSample(pp2::Point2DPoint2D, N::Int=1)
+  return (rand(pp2,N),  )
+end
+
+
+
+
 type PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
   belief::BallTreeDensity
   nullhypothesis::Distributions.Categorical
