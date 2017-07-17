@@ -251,10 +251,10 @@ function initFactorGraph!{T <: AbstractString}(fg::FactorGraph;
 end
 
 function newLandm!{T <: AbstractString}(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
-                  N::Int=100, ready::Int=1)
+                  N::Int=100, ready::Int=1, labels::Vector{T}=String[])
 
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
-    vert=addNode!(fg, Symbol(lm), wPos, sig, N=N, ready=ready)
+    vert=addNode!(fg, Symbol(lm), wPos, sig, N=N, ready=ready, labels=labels)
 
     vert.attributes["age"] = 0
     vert.attributes["maxage"] = 0
@@ -334,12 +334,13 @@ function projNewLandmPoints(vps::Graphs.ExVertex, br::Array{Float64,1}, cov::Arr
 end
 
 function projNewLandm!{T <: AbstractString}(fg::FactorGraph, pose::T, lm::T, br::Array{Float64,1}, cov::Array{Float64,2};
-                        addfactor=true, N::Int=100, ready::Int=1)
+                        addfactor=true, N::Int=100, ready::Int=1,
+                        labels::Vector{T}=String[])
     #
     vps = getVert(fg,pose)
 
     lmPts = projNewLandmPoints(vps, br, cov)
-    vlm = newLandm!(fg, lm, lmPts, cov, N=N, ready=ready) # cov should not be required here
+    vlm = newLandm!(fg, lm, lmPts, cov, N=N, ready=ready, labels=labels) # cov should not be required here
     if addfactor
       fbr = addBRFG!(fg, pose, lm, br, cov, ready=ready)
       return vlm, fbr
