@@ -45,7 +45,7 @@ type Point2DPoint2D <: IncrementalInference.FunctorPairwise
     Point2DPoint2D() = new()
     Point2DPoint2D(x) = new(x)
 end
-function (pp2r::Point2DPoint2DRange)(
+function (pp2r::Point2DPoint2D)(
       res::Array{Float64},
       idx::Int,
       meas::Tuple, # Array{Float64,2},
@@ -60,6 +60,7 @@ end
 function getSample(pp2::Point2DPoint2D, N::Int=1)
   return (rand(pp2,N),  )
 end
+
 
 
 
@@ -139,9 +140,6 @@ end
 
 
 
-
-
-
 # ---------------------------------------------------------
 
 
@@ -197,4 +195,22 @@ function convert(::Type{PackedPoint2DPoint2DRange}, d::Point2DPoint2DRange)
 end
 function convert(::Type{Point2DPoint2DRange}, d::PackedPoint2DPoint2DRange)
   return Point2DPoint2DRange(d.Zij, d.Cov, d.W)
+end
+
+
+
+
+
+
+type PackedPoint2DPoint2D <: IncrementalInference.PackedInferenceType
+    mu::Float64
+    sigma::Float64
+    PackedPoint2DPoint2D() = new()
+    PackedPoint2DPoint2D(x, y) = new(x,y)
+end
+function convert(::Type{Point2DPoint2D}, d::PackedPoint2DPoint2D)
+  return Point2DPoint2D( Normal(d.mu, d.sigma) )
+end
+function convert(::Type{PackedPoint2DPoint2D}, d::Point2DPoint2D)
+  return PackedPoint2DPoint2D( d.Zij.μ, d.Zij.σ )
 end
