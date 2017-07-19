@@ -40,7 +40,7 @@ end
 
 
 
-type Point2DPoint2D <: IncrementalInference.FunctorPairwise
+type Point2DPoint2D <: RoME.BetweenPoses
     Zij::Distribution
     Point2DPoint2D() = new()
     Point2DPoint2D(x) = new(x)
@@ -203,14 +203,15 @@ end
 
 
 type PackedPoint2DPoint2D <: IncrementalInference.PackedInferenceType
-    mu::Float64
-    sigma::Float64
+    mu::Vector{Float64}
+    sigma::Vector{Float64}
+    sdim::Int
     PackedPoint2DPoint2D() = new()
-    PackedPoint2DPoint2D(x, y) = new(x,y)
+    PackedPoint2DPoint2D(x, y, d) = new(x,y,d)
 end
 function convert(::Type{Point2DPoint2D}, d::PackedPoint2DPoint2D)
-  return Point2DPoint2D( Normal(d.mu, d.sigma) )
+  return Point2DPoint2D( MvNormal(d.mu, reshapeVec2Mat(d.sigma, d.sdim)) )
 end
 function convert(::Type{PackedPoint2DPoint2D}, d::Point2DPoint2D)
-  return PackedPoint2DPoint2D( d.Zij.μ, d.Zij.σ )
+  return PackedPoint2DPoint2D( d.Zij.μ, d.Zij.Σ.mat[:], size(d.Zij.Σ.mat,1) )
 end
