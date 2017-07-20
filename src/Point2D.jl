@@ -58,7 +58,7 @@ function (pp2r::Point2DPoint2D)(
   nothing
 end
 function getSample(pp2::Point2DPoint2D, N::Int=1)
-  return (rand(pp2,N),  )
+  return (rand(pp2.Zij,N),  )
 end
 
 
