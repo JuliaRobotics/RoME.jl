@@ -423,7 +423,7 @@ drawIllustrations(GTl, GTp, folderloc2)
 
 fg = initfg()
 
-for N in collect(250:50:500)
+for N in collect(500:100:1000)
 
 fg = initfg()
 # fg.sessionname="SESSranges"
