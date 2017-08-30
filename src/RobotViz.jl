@@ -283,7 +283,7 @@ function drawMarginalContour(fgl::FactorGraph, lbl::String;
     xmin=-150,xmax=150,ymin=-150,ymax=150,n=200,
     api::DataLayerAPI=IncrementalInference.localapi )
   #
-  p = getVertKDE(fgl,lbl, api=api)  # p = getKDE(getVert(fgl,lbl))
+  p = getVertKDE(fgl,Symbol(lbl), api=api)  # p = getKDE(getVert(fgl,lbl))
   Gadfly.plot(z=(x,y)->evaluateDualTree(p,([x;y]')')[1],
     x=linspace(xmin,xmax,n),
     y=linspace(ymin,ymax,n),

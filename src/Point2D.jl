@@ -11,7 +11,7 @@ function getSample(p2::PriorPoint2D, N::Int=1)
   return (rand(p2.mv, N),)
 end
 
-type Point2DPoint2DRange <: IncrementalInference.FunctorPairwise
+type Point2DPoint2DRange <: IncrementalInference.FunctorPairwiseMinimize #Pairwise
     Zij::Vector{Float64} # bearing and range hypotheses as columns
     Cov::Float64
     W::Vector{Float64}
@@ -32,7 +32,7 @@ function (pp2r::Point2DPoint2DRange)(
   XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
   YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
-  nothing
+  # nothing
 end
 function getSample(pp2::Point2DPoint2DRange, N::Int=1)
   return (pp2.Cov*randn(1,N),  2*pi*rand(N))
