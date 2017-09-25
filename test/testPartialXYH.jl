@@ -28,14 +28,14 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, ((XYH1_2')',), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
@@ -70,14 +70,14 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, ((XYH1_2')',), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
@@ -112,7 +112,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -120,7 +120,7 @@ testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, ((XYH1_2')',), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
@@ -156,7 +156,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -164,7 +164,7 @@ testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, ((XYH1_2')',), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
@@ -202,7 +202,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -210,7 +210,7 @@ testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, ((XYH1_2')',), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
@@ -247,7 +247,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -255,7 +255,7 @@ testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, ((XYH1_2')',), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
@@ -294,7 +294,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -302,7 +302,7 @@ testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, ((XYH1_2')',), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
@@ -342,7 +342,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -350,7 +350,7 @@ testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, ((XYH1_2')',), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
@@ -394,7 +394,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -402,7 +402,7 @@ testpp3(res, 1, (veeEuler(x1Tx2),), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, ((XYH1_2')',), (veeEuler(wTx1)')', (veeEuler(wTx2)')')
+testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10

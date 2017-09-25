@@ -26,8 +26,8 @@ v1 = addNode!(fg, "l1", init, diagm([1000.0;1000.0]), N=N, ready=0)
 
 # Two landmarks
 L1, L2, L3 = [10.0;30], [30.0;-30], [70.0;30]
-l1 = addNode!(fg, "l2", (L1')', diagm([1.0;1.0]), N=N, ready=0)
-l2 = addNode!(fg, "l3", (L2')', diagm([1.0;1.0]), N=N, ready=0)
+l1 = addNode!(fg, "l2", reshape(L1,length(L1),1), diagm([1.0;1.0]), N=N, ready=0)
+l2 = addNode!(fg, "l3", reshape(L2,length(L2),1), diagm([1.0;1.0]), N=N, ready=0)
 
 # must pin landmarks for guage
 pp2 = PriorPoint2D(L1, diagm([1.0;1.0]), [1.0])

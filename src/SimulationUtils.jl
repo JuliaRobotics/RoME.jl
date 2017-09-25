@@ -2,7 +2,7 @@
 # And 2xN matrix of N landmark xy positions as variable nodes in factor graph
 function addSimMapFG!(fg::FactorGraph, lms::Array{Float64,2})
     for i in 1:size(lms,2)
-      newLandm!(fg,string('l',i), (lms[:,i]')', 0.001*eye(2))
+      newLandm!(fg,string('l',i), vectoarr2(lms[:,i]), 0.001*eye(2))
     end
     nothing
 end
