@@ -22,8 +22,8 @@ ipp = PriorPose2(zeros(3,1), initCov, [1.0])
 f1  = addFactor!(fg,[v1], ipp)
 
 # and a second pose
-v2 = addNode!(fg, :x2, ([50.0;0.0;pi/2]')', diagm([1.0;1.0;0.05]), N=N)
-ppc = Pose2Pose2(([50.0;0.0;pi/2]')', odoCov, [1.0])
+v2 = addNode!(fg, :x2, vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05]), N=N)
+ppc = Pose2Pose2(vectoarr2([50.0;0.0;pi/2]), odoCov, [1.0])
 f2 = addFactor!(fg, [v1;v2], ppc)
 
 
@@ -64,7 +64,7 @@ println("test conversions of Pose2DPoint2DBearingRange")
 
 
 # and a second pose
-v3 = addNode!(fg, :l1, ([50.0;50.0]')', diagm([1.0;1.0]), N=N)
+v3 = addNode!(fg, :l1, vectoarr2([50.0,50.0]), diagm([1.0;1.0]), N=N)
 # ppc = Pose2DPoint2DBearingRange([50.0;0.0;pi/2], 0.01*eye(2), [1.0])
 ppbr = Pose2DPoint2DBearingRange{Normal, Normal}(
               Normal(0.0, 0.005 ),

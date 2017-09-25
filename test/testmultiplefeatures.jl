@@ -63,11 +63,11 @@ idx = 1
 meas = getSample(mm2)
 
 
-wAbi = (x1')'
-wAbj = (x2')'
-wAo1 = (l1')'
-wAo2 = (l2')'
-wAo3 = (l3')'
+wAbi = reshape(x1,3,1)
+wAbj = reshape(x2,3,1)
+wAo1 = reshape(l1,2,1)
+wAo2 = reshape(l2,2,1)
+wAo3 = reshape(l3,2,1)
 
 
 println("test MultipleFeatures unit vector functions")

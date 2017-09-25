@@ -182,7 +182,7 @@ function addOdoFG!{T <: AbstractString}(
     end
 
     v = addNode!(fg, n, RES, cov, N=N, ready=ready, labels=labels)
-    pp = Pose2Pose2((DX')', cov, [1.0]) #[prev;v],
+    pp = Pose2Pose2(vectoarr2(DX), cov, [1.0]) #[prev;v],
     f = addFactor!(fg, [prev;v], pp, ready=ready)
     infor = inv(cov^2)
     addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
@@ -222,7 +222,7 @@ function addOdoFG!{PP <: RoME.BetweenPoses, T <: AbstractString}(
     if N==0
       N = size(X,2)
     end
-    vnext = addNode!(fgl, nextn, X⊕odo, [1.0]', N=N, ready=ready, labels=labels)
+    vnext = addNode!(fgl, nextn, X⊕odo, ones(1,1), N=N, ready=ready, labels=labels)
     fact = addFactor!(fgl, [vprev;vnext], odo)
     return vnext, fact
 end
@@ -243,7 +243,7 @@ function initFactorGraph!{T <: AbstractString}(fg::FactorGraph;
       ready::Int=1,
       labels::Vector{T}=String[]  )
   #
-  init = (init')'
+  init = vectoarr2(init)
   v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
   #
   addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]), ready=ready ) #[v1],
@@ -295,7 +295,7 @@ function addBRFG!{T <: AbstractString}(fg::FactorGraph,
   vlm.attributes["maxage"] = nage
   updateFullVert!(fg, vlm)
 
-  pbr = Pose2DPoint2DBearingRange((br')',  cov,  [1.0])
+  pbr = Pose2DPoint2DBearingRange(vectoarr2(br),  cov,  [1.0])
   f = addFactor!(fg, [vps;vlm], pbr, ready=ready ) #[vps;vlm],
 
   # only used for max likelihood unimodal tests.
@@ -313,7 +313,7 @@ function addMMBRFG!{T <: AbstractString}(fg::FactorGraph, pose::T,
     vlm1 = getVert(fg,lm[1])
     vlm2 = getVert(fg,lm[2])
 
-    pbr = Pose2DPoint2DBearingRange((br')',  cov,  w) #[vps;vlm1;vlm2],
+    pbr = Pose2DPoint2DBearingRange(vectoarr2(br),  cov,  w) #[vps;vlm1;vlm2],
     f = addFactor!(fg, [vps;vlm1;vlm2], pbr, ready=ready )
     return f
 end

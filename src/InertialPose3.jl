@@ -12,7 +12,7 @@ export
   PackedPriorInertialPose3,
   compare
 
-abstract PreintContainer
+@compat abstract type PreintContainer end
 
 type PreintegralCompensationGradients <: PreintContainer
   # First order terms
