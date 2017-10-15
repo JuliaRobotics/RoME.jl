@@ -270,7 +270,7 @@ function update(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1
 end
 function updatelin(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1}; N::Int=75)
 
-  bXl = resample(kde!((z')',s),N)
+  bXl = resample(kde!(vectoarr2(z),s),N)
   # take the product between predicted and measured position
   dummy = kde!(rand(length(z),N),[1.0])
   pGM, = prodAppxMSGibbsS(dummy, [bhatXl, bXl], Union{}, Union{}, 5)

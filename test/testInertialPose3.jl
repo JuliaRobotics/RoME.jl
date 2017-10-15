@@ -52,7 +52,7 @@ DATA[n][3][1,1]
 res = zeros(15)
 idx = 1
 # pos, so3, vel, bw, ba
-meas = ([0;0;9.81/2; 0;0;0; 0;0;9.81; 0;0;0; 0;0;0]')'
+meas = vectoarr2([0;0;9.81/2; 0;0;0; 0;0;9.81; 0;0;0; 0;0;0])
 wIPi = zeros(15,1)
 wIPj = zeros(15,1)
 
@@ -66,7 +66,7 @@ inerodo(res, idx, (meas,), wIPi, wIPj)
 
 using Optim
 
-ggo = (x) -> inerodo(res, idx, (meas,), wIPi, (x')')
+ggo = (x) -> inerodo(res, idx, (meas,), wIPi, vectoarr2(x))
 
 ggos = (x) -> ggo([x[1:5]...,0.0,x[6:end]...])
 
@@ -87,7 +87,7 @@ plot(z=ggoxy, x=ran, y=ran, Geom.contour)
 @show res
 using NLsolve
 
-gg = (x, res) -> inerodo(res, idx, (meas,), wIPi, (x')')
+gg = (x, res) -> inerodo(res, idx, (meas,), wIPi, vectoarr2(x))
 
 ret = nlsolve(gg, wIPj[:])
 

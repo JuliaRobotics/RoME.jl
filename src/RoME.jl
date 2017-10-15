@@ -13,7 +13,8 @@ using
   Gadfly,
   JLD,
   HDF5,
-  ProgressMeter
+  ProgressMeter,
+  Compat
 
 
 import Base: +, \, convert
@@ -268,13 +269,17 @@ export
   poseTrigAndAdd!,
   poseTrigAndAdd!,
   processTreeTrackersUpdates!,
-  addSoftEqualityPoint2D
+  addSoftEqualityPoint2D,
+  vectoarr2
 
 
-abstract BetweenPoses <: IncrementalInference.FunctorPairwise
+@compat abstract type BetweenPoses <: IncrementalInference.FunctorPairwise end
 
 typealias CTs CoordinateTransformations
 typealias TUs TransformUtils
+
+vectoarr2(v) = reshape(v, length(v),1)
+
 
 include("BayesTracker.jl")
 
