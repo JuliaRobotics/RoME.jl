@@ -11,7 +11,7 @@ function getSample(p2::PriorPoint2D, N::Int=1)
   return (rand(p2.mv, N),)
 end
 
-type Point2DPoint2DRange <: IncrementalInference.FunctorPairwise
+type Point2DPoint2DRange <: IncrementalInference.FunctorPairwiseMinimize #Pairwise
     Zij::Vector{Float64} # bearing and range hypotheses as columns
     Cov::Float64
     W::Vector{Float64}
@@ -32,11 +32,36 @@ function (pp2r::Point2DPoint2DRange)(
   XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
   YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
-  nothing
+  # nothing
 end
 function getSample(pp2::Point2DPoint2DRange, N::Int=1)
   return (pp2.Cov*randn(1,N),  2*pi*rand(N))
 end
+
+
+
+type Point2DPoint2D <: RoME.BetweenPoses
+    Zij::Distribution
+    Point2DPoint2D() = new()
+    Point2DPoint2D(x) = new(x)
+end
+function (pp2r::Point2DPoint2D)(
+      res::Array{Float64},
+      idx::Int,
+      meas::Tuple, # Array{Float64,2},
+      xi::Array{Float64,2},
+      xj::Array{Float64,2} )
+  #
+  # TODO -- still need to add multi-hypotheses support here
+  res[1]  = meas[1][1,idx] - (xj[1,idx] - xi[1,idx])
+  res[2]  = meas[1][2,idx] - (xj[2,idx] - xi[2,idx])
+  nothing
+end
+function getSample(pp2::Point2DPoint2D, N::Int=1)
+  return (rand(pp2.Zij,N),  )
+end
+
+
 
 
 
@@ -115,9 +140,6 @@ end
 
 
 
-
-
-
 # ---------------------------------------------------------
 
 
@@ -173,4 +195,23 @@ function convert(::Type{PackedPoint2DPoint2DRange}, d::Point2DPoint2DRange)
 end
 function convert(::Type{Point2DPoint2DRange}, d::PackedPoint2DPoint2DRange)
   return Point2DPoint2DRange(d.Zij, d.Cov, d.W)
+end
+
+
+
+
+
+
+type PackedPoint2DPoint2D <: IncrementalInference.PackedInferenceType
+    mu::Vector{Float64}
+    sigma::Vector{Float64}
+    sdim::Int
+    PackedPoint2DPoint2D() = new()
+    PackedPoint2DPoint2D(x, y, d) = new(x,y,d)
+end
+function convert(::Type{Point2DPoint2D}, d::PackedPoint2DPoint2D)
+  return Point2DPoint2D( MvNormal(d.mu, reshapeVec2Mat(d.sigma, d.sdim)) )
+end
+function convert(::Type{PackedPoint2DPoint2D}, d::Point2DPoint2D)
+  return PackedPoint2DPoint2D( d.Zij.μ, d.Zij.Σ.mat[:], size(d.Zij.Σ.mat,1) )
 end

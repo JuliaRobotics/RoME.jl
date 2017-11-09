@@ -161,7 +161,7 @@ constraint factor are returned as a tuple.
 """
 function addOdoFG!{T <: AbstractString}(
         fg::FactorGraph,
-        n::T,
+        n::Symbol,
         DX::Array{Float64,1},
         cov::Array{Float64,2};
         N::Int=0,
@@ -185,7 +185,7 @@ function addOdoFG!{T <: AbstractString}(
     pp = Pose2Pose2(vectoarr2(DX), cov, [1.0]) #[prev;v],
     f = addFactor!(fg, [prev;v], pp, ready=ready)
     infor = inv(cov^2)
-    addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
+    # addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
     return v, f
 end
 
@@ -251,10 +251,10 @@ function initFactorGraph!{T <: AbstractString}(fg::FactorGraph;
 end
 
 function newLandm!{T <: AbstractString}(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
-                  N::Int=100, ready::Int=1)
+                  N::Int=100, ready::Int=1, labels::Vector{T}=String[])
 
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
-    vert=addNode!(fg, lm, wPos, sig, N=N, ready=ready)
+    vert=addNode!(fg, Symbol(lm), wPos, sig, N=N, ready=ready, labels=labels)
 
     vert.attributes["age"] = 0
     vert.attributes["maxage"] = 0
@@ -295,13 +295,15 @@ function addBRFG!{T <: AbstractString}(fg::FactorGraph,
   vlm.attributes["maxage"] = nage
   updateFullVert!(fg, vlm)
 
-  pbr = Pose2DPoint2DBearingRange(vectoarr2(br),  cov,  [1.0])
+  # @show br, cov
+  pbr = Pose2DPoint2DBearingRange{Normal, Normal}(Normal(br[1], cov[1,1]), Normal(br[2],  cov[2,2]))
+  # pbr = Pose2DPoint2DBearingRange((br')',  cov,  [1.0])
   f = addFactor!(fg, [vps;vlm], pbr, ready=ready ) #[vps;vlm],
 
   # only used for max likelihood unimodal tests.
   u, P = pol2cart(br[[2;1]], diag(cov))
   infor = inv(P^2)
-  addLandmMeasRemote(vps.index,vlm.index,u,infor) # for iSAM1 remote solution as reference
+  # addLandmMeasRemote(vps.index,vlm.index,u,infor) # for iSAM1 remote solution as reference
   return f
 end
 
@@ -332,12 +334,13 @@ function projNewLandmPoints(vps::Graphs.ExVertex, br::Array{Float64,1}, cov::Arr
 end
 
 function projNewLandm!{T <: AbstractString}(fg::FactorGraph, pose::T, lm::T, br::Array{Float64,1}, cov::Array{Float64,2};
-                        addfactor=true, N::Int=100, ready::Int=1)
+                        addfactor=true, N::Int=100, ready::Int=1,
+                        labels::Vector{T}=String[])
     #
     vps = getVert(fg,pose)
 
     lmPts = projNewLandmPoints(vps, br, cov)
-    vlm = newLandm!(fg, lm, lmPts, cov, N=N, ready=ready) # cov should not be required here
+    vlm = newLandm!(fg, lm, lmPts, cov, N=N, ready=ready, labels=labels) # cov should not be required here
     if addfactor
       fbr = addBRFG!(fg, pose, lm, br, cov, ready=ready)
       return vlm, fbr
@@ -682,6 +685,13 @@ function addLinearArrayConstraint(fgl::FactorGraph,
   end
   addFactor!(fgl, [getVert(fgl, pose); getVert(fgl, landm)], cl)
   nothing
+end
+
+
+function addSoftEqualityPoint2D(fgl::FactorGraph, l1::Symbol, l2::Symbol;
+    dist=MvNormal([0.0;0.0],eye(2)), ready::Int=1 )
+  pp = Point2DPoint2D(dist)
+  addFactor!(fgl, [l1,l2], pp, ready=ready)
 end
 
 
