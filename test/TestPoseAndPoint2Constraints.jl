@@ -97,7 +97,7 @@ pts = evalFactor2(fg, f5, l1.index)
 println("test Pose2D plotting")
 
 # drawPoses(fg);
-drawPosesLandms(fg);
+# drawPosesLandms(fg);
 
 # using KernelDensityEstimate
 # using Gadfly

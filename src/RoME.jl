@@ -9,8 +9,8 @@ using
   Rotations,
   KernelDensityEstimate,
   Distributions,
-  Colors,
-  Gadfly,
+  # Colors,
+  # Gadfly,
   JLD,
   HDF5,
   ProgressMeter,
@@ -109,8 +109,6 @@ export
   get2DLandmSamples,
   get2DLandmMeans,
   get2DLandmMax,
-  drawMarginalContour,
-  accumulateMarginalContours,
 
   # helper functions
   getLastLandm2D,
@@ -131,19 +129,7 @@ export
   measUpdateTrackers!,
   assocMeasWFeats!,
 
-  # Some vizualization tools
-  plotLsrScanFeats,
-  drawFeatTrackers,
-  saveImgSeq,
   lsrBR,
-
-  # draw pose beliefs etc
-  drawPoses,
-  drawLandms,
-  drawPosesLandms,
-  drawSubmaps,
-  investigatePoseKDE,
-  plotPose3Pairs,
 
   # solve with isam in pytslam
   doISAMSolve,
@@ -155,8 +141,6 @@ export
   appendFactorGraph!,
   doBatchRun,
   rotateFeatsToWorld,
-
-  togglePrtStbLines,
 
   # Didson model
   evalPotential,
@@ -264,19 +248,38 @@ export
   makeInSituSys,
   makeGenericInSituSys,
   advOdoByRules,
-  progressExamplePlot,
-  plotTrckStep,
   poseTrigAndAdd!,
   poseTrigAndAdd!,
   processTreeTrackersUpdates!,
   addSoftEqualityPoint2D,
   vectoarr2
 
+  ## Visualization tools have been moved to RoMEPlotting.jl
+  # draw pose beliefs etc
+  # Some vizualization tools
+  # togglePrtStbLines,
+  # plotLsrScanFeats,
+  # drawFeatTrackers,
+  # saveImgSeq,
+  # drawPoses,
+  # drawLandms,
+  # drawPosesLandms,
+  # drawSubmaps,
+  # investigatePoseKDE,
+  # plotPose3Pairs,
+  # drawMarginalContour,
+  # accumulateMarginalContours,
+  # progressExamplePlot,
+  # plotTrckStep,
+
+
 
 @compat abstract type BetweenPoses <: IncrementalInference.FunctorPairwise end
 
-typealias CTs CoordinateTransformations
-typealias TUs TransformUtils
+@compat const VoidUnion{T} = Union{Void, T}
+
+@compat const CTs = CoordinateTransformations
+@compat const TUs = TransformUtils
 
 vectoarr2(v) = reshape(v, length(v),1)
 
@@ -299,7 +302,7 @@ include("InertialPose3.jl")
 
 include("Slam.jl")
 
-include("RobotViz.jl")
+# include("RobotViz.jl")
 include("RobotUtils.jl")
 
 include("SimulationUtils.jl")

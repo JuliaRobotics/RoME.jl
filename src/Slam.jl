@@ -1,8 +1,5 @@
 
 
-
-typealias VoidUnion{T} Union{Void, T}
-
 type SLAMWrapper
   fg::IncrementalInference.FactorGraph
   tree::VoidUnion{IncrementalInference.BayesTree}

@@ -58,7 +58,8 @@ function drawFeatTrackers(trkrs::Dict{Int64,Feature}, bfts::Array{Float64,2})
   p
 end
 
-lsrBR(a) = [a[2,:];a[1,:]]';
+# moved to RobotUtils.jl
+# lsrBR(a) = [a[2,:];a[1,:]]';
 
 function saveImgSeq(d::Dict{Int64,Array{Float64,2}}; from::Int=1,to::Int=10,step::Int=1)
   for i in from:step:to

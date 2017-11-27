@@ -40,7 +40,7 @@ end
 
 
 
-type Point2DPoint2D <: RoME.BetweenPoses
+type Point2DPoint2D <: BetweenPoses
     Zij::Distribution
     Point2DPoint2D() = new()
     Point2DPoint2D(x) = new(x)

@@ -35,6 +35,9 @@ function convert(::Type{RangeAzimuthElevation}, val::Tuple{Symbol, Vector{Float6
   end
 end
 
+# should be deprecated or indicated more clearly
+lsrBR(a) = [a[2,:];a[1,:]]';
+
 function veePose3(s::SE3)
   TransformUtils.veeEuler(s)
 end
