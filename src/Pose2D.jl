@@ -93,9 +93,9 @@ end
 
 type PackedPriorPose2  <: IncrementalInference.PackedInferenceType
     vecZij::Array{Float64,1} # 0rotations, 1translation in each column
-    dimz::Int64
+    dimz::Int
     vecCov::Array{Float64,1}
-    dimc::Int64
+    dimc::Int
     W::Array{Float64,1}
     PackedPriorPose2() = new()
     PackedPriorPose2(x...) = new(x[1], x[2], x[3], x[4], x[5])
@@ -120,9 +120,9 @@ end
 
 type PackedPose2Pose2  <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 2translations, 1rotation
-  dimz::Int64
+  dimz::Int
   vecCov::Array{Float64,1}
-  dimc::Int64
+  dimc::Int
   W::Array{Float64,1}
   PackedPose2Pose2() = new()
   PackedPose2Pose2(x...) = new(x[1], x[2], x[3], x[4], x[5])
@@ -165,7 +165,7 @@ function addPose2Pose2(x::Array{Float64,1}, dx::Array{Float64,1})
 end
 
 
-function evalPotential(obs::PriorPose2, Xi::Array{Graphs.ExVertex,1}; N::Int64=200)
+function evalPotential(obs::PriorPose2, Xi::Array{Graphs.ExVertex,1}; N::Int=200)
     cov = diag(obs.Cov)
     ret = zeros(3,N)
     warn("should not be running")
@@ -179,7 +179,7 @@ end
 
 
 
-function evalPotential(odom::Pose2Pose2, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+function evalPotential(odom::Pose2Pose2, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
     rz,cz = size(odom.Zij)
     Xval = Array{Float64,2}()
     XvalNull = Array{Float64,2}()

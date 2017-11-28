@@ -90,7 +90,7 @@ function doBatchRun(d, f; toT=30)
   return fg, tree, p
 end
 
-function saveImgSeq(d::Dict{Int64,Dict{Int64,Feature}}, lsrFeats::Dict{Int64,LaserFeatures}; from::Int=1,to::Int=10,step::Int=1)
+function saveImgSeq(d::Dict{Int,Dict{Int,Feature}}, lsrFeats::Dict{Int,LaserFeatures}; from::Int=1,to::Int=10,step::Int=1)
   for i in from:step:to
     p = drawFeatTrackers(d[i], lsrFeats[i].feats);
     Gadfly.draw(PNG(string("imgs/img",i,".png"),35cm,25cm),p)

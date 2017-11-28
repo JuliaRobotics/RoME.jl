@@ -22,22 +22,22 @@ end
 type GenericInSituSystem{T}
   xprev::Array{Float64,1}
   x::Array{Float64,1}
-  dOdo::Dict{Int64,Array{Float64,1}}
-  FeatAssc::Dict{Int64, Dict{Int64,Array{Float64,1}}}
+  dOdo::Dict{Int,Array{Float64,1}}
+  FeatAssc::Dict{Int, Dict{Int,Array{Float64,1}}}
   Tprev::Float64
   T0::Float64
-  poseid::Int64
+  poseid::Int
   wTbk1::Array{Float64,2}
   bk1Tbk::Array{Float64,2}
-  lstlaseridx::Int64
-  trackers::Dict{Int64,T}
+  lstlaseridx::Int
+  trackers::Dict{Int,T}
 end
 
 @compat const InSituSystem = GenericInSituSystem{Feature}
 
 function makeInSituSys(x::Array{Float64,1}, bfts0::Array{Float64,2})
-  dOdo = Dict{Int64,Array{Float64,1}}()
-  FeatAssc = Dict{Int64, Dict{Int64,Array{Float64,1}}}()
+  dOdo = Dict{Int,Array{Float64,1}}()
+  FeatAssc = Dict{Int, Dict{Int,Array{Float64,1}}}()
   Tprev = 0.0
   T0 = 0.0
   wTbk1 = SE2(x)
@@ -63,8 +63,8 @@ end
 
 
 function makeGenericInSituSys(x::Array{Float64,1})
-  dOdo = Dict{Int64,Array{Float64,1}}()
-  FeatAssc = Dict{Int64, Dict{Int64,Array{Float64,1}}}()
+  dOdo = Dict{Int,Array{Float64,1}}()
+  FeatAssc = Dict{Int, Dict{Int,Array{Float64,1}}}()
   Tprev = 0.0
   T0 = 0.0
   wTbk1 = SE2(x)
@@ -72,7 +72,7 @@ function makeGenericInSituSys(x::Array{Float64,1})
   poseid = 1
   dOdo[poseid] = [x[1];x[2];x[3];T0;0]
   lstlaseridx = 1
-  trackers = Dict{Int64,Any}()
+  trackers = Dict{Int,Any}()
   return GenericInSituSystem{Any}(
   x,
   x,
@@ -116,7 +116,7 @@ function poseTrigAndAdd!(instSys::InSituSystem, Ts::Float64,
 end
 
 
-function processTreeTrackersUpdates!(instSys::InSituSystem, lsrFeats::Dict{Int64,LaserFeatures},
+function processTreeTrackersUpdates!(instSys::InSituSystem, lsrFeats::Dict{Int,LaserFeatures},
                                     Ts::Float64, b1Dxb::Array{Float64,1}, DBG=Union{}; dbgflag=true)
   propAllTrackers!(instSys.trackers, b1Dxb, [0.05;0.05;0.004])
   newlsridx, Ta = getFeatsAtT(lsrFeats, Ts, prev=instSys.lstlaseridx)
@@ -134,15 +134,15 @@ function processTreeTrackersUpdates!(instSys::InSituSystem, lsrFeats::Dict{Int64
   nothing
 end
 
-function advOdoByRules(DRS::Array{Float64,2}, lsrFeats::Dict{Int64,LaserFeatures};
+function advOdoByRules(DRS::Array{Float64,2}, lsrFeats::Dict{Int,LaserFeatures};
                         distrule=20.0, timerule=30.0, yawrule=pi/3.0, trkfeats=true)
-  # DBG = Dict{Int,Dict{Int64,Array{BallTreeDensity,1}}}()
-  # DBG = Dict{Int,Dict{Int64,Feature}}()
+  # DBG = Dict{Int,Dict{Int,Array{BallTreeDensity,1}}}()
+  # DBG = Dict{Int,Dict{Int,Feature}}()
   DBG = Union{}
 
   bfts0 = lsrFeats[1].feats
   instSys = makeInSituSys(zeros(3), bfts0)
-  fdict = Dict{Int64,Array{Float64,1}}()
+  fdict = Dict{Int,Array{Float64,1}}()
   for f in instSys.trackers
     # if length(f[2].lastz) < 3
     #   error("HEY!! $(f[1])")
@@ -166,7 +166,7 @@ function advOdoByRules(DRS::Array{Float64,2}, lsrFeats::Dict{Int64,LaserFeatures
     end
     # subsample motion tracks for constructing the factor graph SLAM solution
     if poseTrigAndAdd!(instSys, DRS[i,1], distrule, timerule, yawrule)
-      fdict = Dict{Int64,Array{Float64,1}}()
+      fdict = Dict{Int,Array{Float64,1}}()
       for f in instSys.trackers
         mpt = vec(Base.mean(getPoints(f[2].bel),2))
         r,b = c2p(mpt)

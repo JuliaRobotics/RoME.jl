@@ -14,7 +14,7 @@ function plotLsrScanFeats(br::Array{Float64,2})
   Guide.yticks(ticks=collect(0:10:80)))
 end
 
-function drawFeatTrackers(trkrs::Dict{Int64,Feature}, bfts::Array{Float64,2})
+function drawFeatTrackers(trkrs::Dict{Int,Feature}, bfts::Array{Float64,2})
   musX = Float64[]
   varX = Float64[]
   musY = Float64[]
@@ -61,7 +61,7 @@ end
 # moved to RobotUtils.jl
 # lsrBR(a) = [a[2,:];a[1,:]]';
 
-function saveImgSeq(d::Dict{Int64,Array{Float64,2}}; from::Int=1,to::Int=10,step::Int=1)
+function saveImgSeq(d::Dict{Int,Array{Float64,2}}; from::Int=1,to::Int=10,step::Int=1)
   for i in from:step:to
     p = plotLsrScanFeats(lsrBR(d[i]));
     Gadfly.draw(PNG(string("imgs/img",i,".png"),25cm,25cm),p)
@@ -109,7 +109,7 @@ end
 #   return lbls
 # end
 
-function drawPoses(fg::FactorGraph; from::Int64=0,to::Int64=99999999,
+function drawPoses(fg::FactorGraph; from::Int=0,to::Int=99999999,
                     meanmax=:max, lbls=true, drawhist=true,
                     spscale::Float64=5.0,
                     api::DataLayerAPI=IncrementalInference.localapi  )
@@ -141,7 +141,7 @@ function drawPoses(fg::FactorGraph; from::Int64=0,to::Int64=99999999,
 end
 
 function drawLandms(fg::FactorGraph;
-              from::Int64=0, to::Int64=99999999, minnei::Int64=0,
+              from::Int=0, to::Int=99999999, minnei::Int=0,
               meanmax=:max,
               lbls=true,showmm=false,drawhist=true,
               c="red",
@@ -175,7 +175,7 @@ function drawLandms(fg::FactorGraph;
 end
 
 function drawPosesLandms(fg::FactorGraph;
-                    from::Int64=0, to::Int64=99999999, minnei::Int64=0,
+                    from::Int=0, to::Int=99999999, minnei::Int=0,
                     meanmax=:max,lbls=true,drawhist=true, MM=Union{}, showmm=true,
                     spscale::Float64=5.0,
                     api::DataLayerAPI=IncrementalInference.localapi  )

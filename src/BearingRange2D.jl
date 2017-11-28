@@ -138,7 +138,7 @@ function solveSetSeps(fnc::Function, Zbr::Array{Float64,1}, CovZ::Array{Float64,
 end
 
 # Xid is the one you want to get back
-function evalPotential(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+function evalPotential(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
     # TODO -- add null hypothesis here, might even be done one layer higher in call stack
     val = Array{Float64,2}()
     ini = Array{Graphs.ExVertex,1}()
@@ -199,7 +199,7 @@ function evalPotential(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVert
     return [val';nhvals']'
 end
 
-function evalPotentialNew(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+function evalPotentialNew(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
     # TODO -- add null hypothesis here, might even be done one layer higher in call stack
     val = Array{Float64,2}()
     ini = Array{Graphs.ExVertex,1}()
@@ -262,7 +262,7 @@ end
 
 
 # Solve for Xid, given values from vertices [Xi] and measurement rho
-function evalPotential(rho::Pose2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+function evalPotential(rho::Pose2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
   fromX, ret = nothing, nothing
   if Xi[1].index == Xid
     fromX = getVal( Xi[2] )

@@ -119,7 +119,7 @@ function drive(fgl::FactorGraph, GTp, GTl, from, to; N=100)
 	nothing
 end
 
-function batchsolve(fgl::FactorGraph; N::Int64=100)
+function batchsolve(fgl::FactorGraph; N::Int=100)
 	tree = wipeBuildNewTree!(fgl, drawpdf=true)
 	inferOverTree!(fgl, tree, N=N)
 	nothing

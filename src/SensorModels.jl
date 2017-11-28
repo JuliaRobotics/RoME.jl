@@ -1,6 +1,6 @@
 # Linear array sonar constraints
 
-# typealias FloatInt Union{Float64, Int64}
+# typealias FloatInt Union{Float64, Int}
 
 # These types should be consolidated in some form -- still exploring for good factorization
 type reuseLBRA
@@ -202,7 +202,7 @@ end
 
 
 
-# function evalPotential(meas::LinearRangeBearingElevation, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+# function evalPotential(meas::LinearRangeBearingElevation, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
 #   # Function soon to be replaced with improved functor version
 #   fromX, ret, ff = zeros(0,0), zeros(0,0), +
 #

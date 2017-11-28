@@ -94,12 +94,12 @@ end
 
 
 # Old evalPotential functions
-function evalPotential(prior::PriorPoint2D, Xi::Array{Graphs.ExVertex,1}; N::Int64=100)#, from::Int64)
+function evalPotential(prior::PriorPoint2D, Xi::Array{Graphs.ExVertex,1}; N::Int=100)#, from::Int)
     return rand(prior.mv, N)
 end
 
 # Solve for Xid, given values from vertices [Xi] and measurement rho
-function evalPotential(rho::Point2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int64)
+function evalPotential(rho::Point2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int)
   fromX, ret = nothing, nothing
   if Xi[1].index == Xid
     fromX = getVal( Xi[2] )
@@ -147,7 +147,7 @@ end
 type PackedPriorPoint2D  <: IncrementalInference.PackedInferenceType
     mu::Array{Float64,1}
     vecCov::Array{Float64,1}
-    dimc::Int64
+    dimc::Int
     W::Array{Float64,1}
     PackedPriorPoint2D() = new()
     PackedPriorPoint2D(x...) = new(x[1], x[2], x[3], x[4])

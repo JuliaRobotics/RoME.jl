@@ -17,7 +17,7 @@ function rangeCompAllPoses(fgl1::FactorGraph, fgl2::FactorGraph)
 end
 
 function rangeCompAllPoses(
-    valsbaseline::Dict{Int64,Array{Float64,1}},
+    valsbaseline::Dict{Int,Array{Float64,1}},
     fglbaseline::FactorGraph,
     fgltest::FactorGraph)
 

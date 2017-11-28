@@ -510,8 +510,8 @@ end
 
 function get2DSamples(fg::FactorGraph,
       sym;
-      from::Int64=0, to::Int64=999999999,
-      minnei::Int64=0,
+      from::Int=0, to::Int=999999999,
+      minnei::Int=0,
       api::DataLayerAPI=IncrementalInference.localapi  )
   #
   X = Array{Float64,1}()
@@ -537,15 +537,15 @@ function get2DSamples(fg::FactorGraph,
   return X,Y
 end
 
-function getAll2D(fg, sym; minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+function getAll2D(fg, sym; minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
   warn("getAll2D deprecated, use get2DSamples instead")
   return get2DSamples(fg, sym, minnei=minnei, api=api)
 end
 
 function get2DSampleMeans(fg::FactorGraph,
       sym;
-      from::Int64=0, to::Int64=9999999999,
-      minnei::Int64=0,
+      from::Int=0, to::Int=9999999999,
+      minnei::Int=0,
       api::DataLayerAPI=IncrementalInference.localapi  )
   #
   X = Array{Float64,1}()
@@ -588,11 +588,11 @@ function getAll2DPoses(fg::FactorGraph, api::DataLayerAPI=IncrementalInference.l
     return getAll2DSamples(fg, 'x', api=api)
 end
 
-function get2DPoseSamples(fg::FactorGraph; from::Int64=0, to::Int64=999999999, api::DataLayerAPI=IncrementalInference.localapi)
+function get2DPoseSamples(fg::FactorGraph; from::Int=0, to::Int=999999999, api::DataLayerAPI=IncrementalInference.localapi)
   return get2DSamples(fg, 'x'; from=from, to=to, api=api)
 end
 
-function get2DPoseMeans(fg::FactorGraph; from::Int64=0, to::Int64=999999999, api::DataLayerAPI=IncrementalInference.localapi)
+function get2DPoseMeans(fg::FactorGraph; from::Int=0, to::Int=999999999, api::DataLayerAPI=IncrementalInference.localapi)
   return get2DSampleMeans(fg, 'x', from=from, to=to, api=api)
 end
 
@@ -617,15 +617,15 @@ function get2DPoseMax(fgl::FactorGraph;
   return X, Y, Th, LB
 end
 
-function getAll2DLandmarks(fg::FactorGraph, minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+function getAll2DLandmarks(fg::FactorGraph, minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
     return getAll2DSamples(fg, 'l', minnei=minnei, api=api)
 end
 
-function get2DLandmSamples(fg::FactorGraph; from::Int64=0, to::Int64=999999999, minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+function get2DLandmSamples(fg::FactorGraph; from::Int=0, to::Int=999999999, minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
   return get2DSamples(fg, 'l', from=from, to=to, minnei=minnei, api=api)
 end
 
-function get2DLandmMeans(fg::FactorGraph; from::Int64=0, to::Int64=999999999, minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+function get2DLandmMeans(fg::FactorGraph; from::Int=0, to::Int=999999999, minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
   return get2DSampleMeans(fg, 'l', from=from, to=to, minnei=minnei, api=api)
 end
 

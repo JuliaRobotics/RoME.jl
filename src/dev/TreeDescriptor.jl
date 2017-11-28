@@ -9,7 +9,7 @@ type TreeDescriptor
   position::Array{Float64,1}
 end
 
-treelms = Dict{Int64,TreeDescriptor}()
+treelms = Dict{Int,TreeDescriptor}()
 
 # get the mean trajector index from sighing to this landmark
 function getLandmTrajIndxs(fgl::FactorGraph, lmlbl::String)
@@ -48,9 +48,9 @@ end
 # find idxs near mean idxs itol and range dtol
 function getAllLandmNearByIndx(LB, X, Y, MIDX, nearidx;
                               itol::Float64=5.0, dtol::Float64=20.0)
-  #permidx = Int64[]
+  #permidx = Int[]
   # feat id and descriptor
-  nnh = Dict{Int64, TreeDescriptor}()
+  nnh = Dict{Int, TreeDescriptor}()
 
   x = X[nearidx]; y = Y[nearidx];
   dtol2 = dtol^2
@@ -59,7 +59,7 @@ function getAllLandmNearByIndx(LB, X, Y, MIDX, nearidx;
     d2 = (x-xx)^2 + (y-yy)^2
     if d2 < dtol2 && abs(MIDX[nearidx]-MIDX[i]) < itol && i != nearidx
       #push!(permidx, i)
-      fid = parse(Int64, LB[i][2:end])
+      fid = parse(Int, LB[i][2:end])
       nnh[fid] = TreeDescriptor(Array{Float64,2}(), MIDX[i], [xx;yy])
     end
   end
@@ -70,7 +70,7 @@ function calcFeatDesc(fgl::FactorGraph, flbl::String, midx::Float64)
   lm = getVert(fgl,flbl)
 end
 
-function calcLandmDescriptions!(fgl::FactorGraph, lmd::Dict{Int64,TreeDescriptor})
+function calcLandmDescriptions!(fgl::FactorGraph, lmd::Dict{Int,TreeDescriptor})
   X,Y,th,LB = get2DLandmMeans(fgl)
   getAllLandmNearByIndx(LB,X,Y)
   MIDX = getAllLandmMeanTrajIndx(fgl, LB)
