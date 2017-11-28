@@ -40,7 +40,7 @@ type Pose2DPoint2DBearingRange{B <: Distributions.Distribution, R <: Distributio
     bearing::B
     range::R
     Pose2DPoint2DBearingRange() = new()
-    Pose2DPoint2DBearingRange{B,R}(x1::B,x2::R) = new(x1,x2)
+    Pose2DPoint2DBearingRange{B,R}(x1::B,x2::R) where {B,R} = new(x1,x2)
 end
 function getSample(pp2br::Pose2DPoint2DBearingRange, N::Int=1)
   b = rand(pp2br.bearing, N)
