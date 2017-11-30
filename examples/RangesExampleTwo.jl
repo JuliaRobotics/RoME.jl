@@ -12,7 +12,7 @@ using RoME, IncrementalInference, Gadfly, Colors, KernelDensityEstimate
 # # end
 # end
 
-@everywhere using RoME
+@everywhere using RoME, RoMEPlotting
 @everywhere using IncrementalInference
 @everywhere using Gadfly
 @everywhere using Colors
