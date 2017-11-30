@@ -159,14 +159,14 @@ which will automatically increment latest pose symbol x<k+1> for new node new no
 constraint factor are returned as a tuple.
 
 """
-function addOdoFG!{T <: AbstractString}(
+function addOdoFG!(
         fg::FactorGraph,
         n::Symbol,
         DX::Array{Float64,1},
         cov::Array{Float64,2};
         N::Int=0,
         ready::Int=1,
-        labels::Vector{T}=String[]  )
+        labels::Vector{<:AbstractString}=String[]  )
     #
     prev, X, nextn = getLastPose2D(fg)
     r,c = size(X)
