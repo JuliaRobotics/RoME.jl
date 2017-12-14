@@ -76,7 +76,7 @@ f4 = addFactor!(fg, [v1;l1], ppr)
 
 pts = evalFactor2(fg, f4, l1.index)
 # @show sum(sqrt(sum(pts.^2, 1 )) .< 5.0)
-@test sum(sqrt(sum(pts.^2, 1 )) .< 5.0) == 0
+@test sum(sqrt.(sum(pts.^2, 1 )) .< 5.0) == 0
 
 pts = evalFactor2(fg, f4, v1.index)
 # @show sum(sqrt(sum(pts.^2, 1 )) .< 5.0)
@@ -97,7 +97,7 @@ pts = evalFactor2(fg, f5, l1.index)
 println("test Pose2D plotting")
 
 # drawPoses(fg);
-drawPosesLandms(fg);
+# drawPosesLandms(fg);
 
 # using KernelDensityEstimate
 # using Gadfly

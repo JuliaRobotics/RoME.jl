@@ -1,18 +1,15 @@
 
 
-
-typealias VoidUnion{T} Union{Void, T}
-
 type SLAMWrapper
   fg::IncrementalInference.FactorGraph
   tree::VoidUnion{IncrementalInference.BayesTree}
   lndmidx::Int
   lastposesym::Symbol
   lastpose::SE3
-  lbl2usrid::Dict{Symbol,Int64}
-  usrid2lbl::Dict{Int64, Symbol}
+  lbl2usrid::Dict{Symbol,Int}
+  usrid2lbl::Dict{Int, Symbol}
   SLAMWrapper() = new()
-  SLAMWrapper(a,b,c) = new(a,b,c,:x1, SE3(0), Dict{Symbol,Int64}(), Dict{Int64,Symbol}()) # TODO to be deprecated
+  SLAMWrapper(a,b,c) = new(a,b,c,:x1, SE3(0), Dict{Symbol,Int}(), Dict{Int,Symbol}()) # TODO to be deprecated
 end
 
 

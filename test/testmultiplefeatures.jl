@@ -5,7 +5,7 @@ using Base.Test
 
 using Optim
 
-using Gadfly
+# using Gadfly
 
 x1 = [0.0;0;0]
 x2 = [1.0;-1.0;pi/2]

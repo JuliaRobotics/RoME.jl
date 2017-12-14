@@ -35,6 +35,9 @@ function convert(::Type{RangeAzimuthElevation}, val::Tuple{Symbol, Vector{Float6
   end
 end
 
+# should be deprecated or indicated more clearly
+lsrBR(a) = [a[2,:];a[1,:]]';
+
 function veePose3(s::SE3)
   TransformUtils.veeEuler(s)
 end
@@ -65,7 +68,7 @@ function getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)
   norm(x1[1:2]-x2[1:2])
 end
 
-function measureMeanDist{T <: AbstractString}(fg::FactorGraph, a::T, b::T)
+function measureMeanDist(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
     #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
     res = zeros(2)
     A = getVal(fg,a)
@@ -81,7 +84,7 @@ function measureMeanDist{T <: AbstractString}(fg::FactorGraph, a::T, b::T)
     return r, b
 end
 
-function predictBodyBR{T <: AbstractString}(fg::FactorGraph, a::T, b::T)
+function predictBodyBR(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
   res = zeros(2)
   A = getVal(fg,a)
   B = getVal(fg,b)
@@ -159,14 +162,14 @@ which will automatically increment latest pose symbol x<k+1> for new node new no
 constraint factor are returned as a tuple.
 
 """
-function addOdoFG!{T <: AbstractString}(
+function addOdoFG!(
         fg::FactorGraph,
         n::Symbol,
         DX::Array{Float64,1},
         cov::Array{Float64,2};
         N::Int=0,
         ready::Int=1,
-        labels::Vector{T}=String[]  )
+        labels::Vector{<:AbstractString}=String[]  )
     #
     prev, X, nextn = getLastPose2D(fg)
     r,c = size(X)
@@ -189,13 +192,13 @@ function addOdoFG!{T <: AbstractString}(
     return v, f
 end
 
-function addOdoFG!{T <: AbstractString}(
+function addOdoFG!(
         fg::FactorGraph,
         n::T,
         Z::Pose3Pose3;
         N::Int=0,
         ready::Int=1,
-        labels::Vector{T}=String[]  )
+        labels::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   DX=Z.μ
   cov=Z.Σ.mat
@@ -211,12 +214,12 @@ which will automatically increment latest pose symbol x<k+1> for new node new no
 constraint factor are returned as a tuple.
 
 """
-function addOdoFG!{PP <: RoME.BetweenPoses, T <: AbstractString}(
+function addOdoFG!(
         fgl::FactorGraph,
         odo::PP;
         N::Int=0,
         ready::Int=1,
-        labels::Vector{T}=String[] )
+        labels::Vector{T}=String[] ) where {PP <: RoME.BetweenPoses, T <: AbstractString}
     #
     vprev, X, nextn = getLastPose(fgl)
     if N==0
@@ -235,13 +238,13 @@ function initfg(;sessionname="NA")
   return fgl
 end
 
-function initFactorGraph!{T <: AbstractString}(fg::FactorGraph;
+function initFactorGraph!(fg::FactorGraph;
       P0::Array{Float64,2}=diagm([0.03;0.03;0.001]),
       init::Vector{Float64}=[0.0;0.0;0.0],
       N::Int=100,
       lbl::Symbol=:x1,
       ready::Int=1,
-      labels::Vector{T}=String[]  )
+      labels::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   init = vectoarr2(init)
   v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
@@ -250,8 +253,8 @@ function initFactorGraph!{T <: AbstractString}(fg::FactorGraph;
   return lbl
 end
 
-function newLandm!{T <: AbstractString}(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
-                  N::Int=100, ready::Int=1, labels::Vector{T}=String[])
+function newLandm!(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
+                  N::Int=100, ready::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
 
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
     vert=addNode!(fg, Symbol(lm), wPos, sig, N=N, ready=ready, labels=labels)
@@ -265,16 +268,16 @@ function newLandm!{T <: AbstractString}(fg::FactorGraph, lm::T, wPos::Array{Floa
     return vert
 end
 
-function updateLandmAge{T <: AbstractString}(vlm::Graphs.ExVertex, pose::T)
+function updateLandmAge(vlm::Graphs.ExVertex, pose::T) where {T <: AbstractString}
   error("still working here")
 end
 
-function addBRFG!{T <: AbstractString}(fg::FactorGraph,
+function addBRFG!(fg::FactorGraph,
       pose::T,
       lm::T,
       br::Array{Float64,1},
       cov::Array{Float64,2};
-      ready::Int=1  )
+      ready::Int=1  ) where {T <: AbstractString}
   #
   vps = getVert(fg,pose)
   vlm = getVert(fg,lm)
@@ -307,9 +310,9 @@ function addBRFG!{T <: AbstractString}(fg::FactorGraph,
   return f
 end
 
-function addMMBRFG!{T <: AbstractString}(fg::FactorGraph, pose::T,
+function addMMBRFG!(fg::FactorGraph, pose::T,
                   lm::Array{T,1}, br::Array{Float64,1},
-                  cov::Array{Float64,2}; w=[0.5;0.5], ready::Int=1)
+                  cov::Array{Float64,2}; w=[0.5;0.5], ready::Int=1) where {T <: AbstractString}
     #
     vps = getVert(fg,pose)
     vlm1 = getVert(fg,lm[1])
@@ -333,9 +336,9 @@ function projNewLandmPoints(vps::Graphs.ExVertex, br::Array{Float64,1}, cov::Arr
     return lmPts
 end
 
-function projNewLandm!{T <: AbstractString}(fg::FactorGraph, pose::T, lm::T, br::Array{Float64,1}, cov::Array{Float64,2};
+function projNewLandm!(fg::FactorGraph, pose::T, lm::T, br::Array{Float64,1}, cov::Array{Float64,2};
                         addfactor=true, N::Int=100, ready::Int=1,
-                        labels::Vector{T}=String[])
+                        labels::Vector{T}=String[]) where {T <: AbstractString}
     #
     vps = getVert(fg,pose)
 
@@ -381,7 +384,7 @@ function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
     return iv, maxl
 end
 
-function maxIvWithoutID{T <: AbstractString}(ivs::Dict{String, Float64}, l::T)
+function maxIvWithoutID(ivs::Dict{String, Float64}, l::T) where {T <: AbstractString}
   max = 0
   maxl = String("")
   for i in ivs
@@ -391,7 +394,7 @@ function maxIvWithoutID{T <: AbstractString}(ivs::Dict{String, Float64}, l::T)
 end
 
 # binary tests to distinguish how to automatically add a landmark to the existing factor graph
-function doAutoEvalTests{T <: AbstractString}(fgl::FactorGraph, ivs::Dict{T, Float64}, maxl::T, lmid::Int, lmindx::Int)
+function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{T, Float64}, maxl::T, lmid::Int, lmindx::Int) where {T <: AbstractString}
   maxAnyval = maxl != String("") ? ivs[maxl] : 0.0
   # maxid = fgl.IDs[maxl]
   lmidSugg = lmid != -1 # a landmark ID has been suggested
@@ -412,9 +415,9 @@ function doAutoEvalTests{T <: AbstractString}(fgl::FactorGraph, ivs::Dict{T, Flo
 end
 
 
-function evalAutoCases!{T <: AbstractString}(fgl::FactorGraph, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
+function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
                         pose::T, lmPts::Array{Float64,2}, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
-                        N::Int=100, ready::Int=1)
+                        N::Int=100, ready::Int=1 ) where {T <: AbstractString}
   lmidSugg, maxAnyExists, maxl2Exists, maxl2, lmIDExists, intgLmIDExists, lmSuggLbl, newlmindx = doAutoEvalTests(fgl,ivs,maxl,lmid, lmindx)
 
   println("evalAutoCases -- found=$(lmidSugg), $(maxAnyExists), $(maxl2Exists), $(lmIDExists), $(intgLmIDExists)")
@@ -466,8 +469,8 @@ function evalAutoCases!{T <: AbstractString}(fgl::FactorGraph, lmid::Int, ivs::D
   return vlm, fbr, newlmindx
 end
 
-function addAutoLandmBR!{T <: AbstractString}(fgl::FactorGraph, pose::T, lmid::Int, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
-                      N::Int=100, ready::Int=1)
+function addAutoLandmBR!(fgl::FactorGraph, pose::T, lmid::Int, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
+                      N::Int=100, ready::Int=1 ) where {T <: AbstractString}
     vps = getVert(fgl, pose)
     lmPts = projNewLandmPoints(vps, br, cov)
     lmkde = kde!(lmPts)
@@ -507,8 +510,8 @@ end
 
 function get2DSamples(fg::FactorGraph,
       sym;
-      from::Int64=0, to::Int64=999999999,
-      minnei::Int64=0,
+      from::Int=0, to::Int=999999999,
+      minnei::Int=0,
       api::DataLayerAPI=IncrementalInference.localapi  )
   #
   X = Array{Float64,1}()
@@ -534,15 +537,15 @@ function get2DSamples(fg::FactorGraph,
   return X,Y
 end
 
-function getAll2D(fg, sym; minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+function getAll2D(fg, sym; minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
   warn("getAll2D deprecated, use get2DSamples instead")
   return get2DSamples(fg, sym, minnei=minnei, api=api)
 end
 
 function get2DSampleMeans(fg::FactorGraph,
       sym;
-      from::Int64=0, to::Int64=9999999999,
-      minnei::Int64=0,
+      from::Int=0, to::Int=9999999999,
+      minnei::Int=0,
       api::DataLayerAPI=IncrementalInference.localapi  )
   #
   X = Array{Float64,1}()
@@ -585,11 +588,11 @@ function getAll2DPoses(fg::FactorGraph, api::DataLayerAPI=IncrementalInference.l
     return getAll2DSamples(fg, 'x', api=api)
 end
 
-function get2DPoseSamples(fg::FactorGraph; from::Int64=0, to::Int64=999999999, api::DataLayerAPI=IncrementalInference.localapi)
+function get2DPoseSamples(fg::FactorGraph; from::Int=0, to::Int=999999999, api::DataLayerAPI=IncrementalInference.localapi)
   return get2DSamples(fg, 'x'; from=from, to=to, api=api)
 end
 
-function get2DPoseMeans(fg::FactorGraph; from::Int64=0, to::Int64=999999999, api::DataLayerAPI=IncrementalInference.localapi)
+function get2DPoseMeans(fg::FactorGraph; from::Int=0, to::Int=999999999, api::DataLayerAPI=IncrementalInference.localapi)
   return get2DSampleMeans(fg, 'x', from=from, to=to, api=api)
 end
 
@@ -614,15 +617,15 @@ function get2DPoseMax(fgl::FactorGraph;
   return X, Y, Th, LB
 end
 
-function getAll2DLandmarks(fg::FactorGraph, minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+function getAll2DLandmarks(fg::FactorGraph, minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
     return getAll2DSamples(fg, 'l', minnei=minnei, api=api)
 end
 
-function get2DLandmSamples(fg::FactorGraph; from::Int64=0, to::Int64=999999999, minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+function get2DLandmSamples(fg::FactorGraph; from::Int=0, to::Int=999999999, minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
   return get2DSamples(fg, 'l', from=from, to=to, minnei=minnei, api=api)
 end
 
-function get2DLandmMeans(fg::FactorGraph; from::Int64=0, to::Int64=999999999, minnei::Int64=0, api::DataLayerAPI=IncrementalInference.localapi)
+function get2DLandmMeans(fg::FactorGraph; from::Int=0, to::Int=999999999, minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
   return get2DSampleMeans(fg, 'l', from=from, to=to, minnei=minnei, api=api)
 end
 

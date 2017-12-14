@@ -17,7 +17,7 @@ end
 type PackedPriorPose3  <: IncrementalInference.PackedInferenceType
     vecZi::Array{Float64,1} # 0rotations, 1translation in each column
     vecCov::Array{Float64,1}
-    dimc::Int64
+    dimc::Int
     PackedPriorPose3() = new()
     PackedPriorPose3(x...) = new(x[1], x[2], x[3])
 end
@@ -89,7 +89,7 @@ end
 type PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
   vecCov::Array{Float64,1}
-  dimc::Int64
+  dimc::Int
   PackedPose3Pose3() = new()
   PackedPose3Pose3(x...) = new(x[1], x[2], x[3])
 end
@@ -140,10 +140,10 @@ end
 type PackedPose3Pose3NH <: IncrementalInference.PackedInferenceType
   vecZij::Vector{Float64} # 3translations, 3rotation
   vecCov::Vector{Float64}
-  dimc::Int64
+  dimc::Int
   nullhypothesis::Vector{Float64}
   PackedPose3Pose3NH() = new()
-  PackedPose3Pose3NH(x1::Vector{Float64},x2::Vector{Float64},x3::Int64,x4::Vector{Float64}) = new(x1, x2, x3, x4)
+  PackedPose3Pose3NH(x1::Vector{Float64},x2::Vector{Float64},x3::Int,x4::Vector{Float64}) = new(x1, x2, x3, x4)
 end
 
 function convert(::Type{Pose3Pose3NH}, d::PackedPose3Pose3NH)
@@ -201,14 +201,14 @@ end
 
 # using Euler angles for linear sampling in product of potentials
 # Gaussian model for prior
-# function evalPotential(obs::PriorPose3, Xi::Array{Graphs.ExVertex,1}; N::Int64=200)
+# function evalPotential(obs::PriorPose3, Xi::Array{Graphs.ExVertex,1}; N::Int=200)
 #   mu = veeEuler(obs.Zi)
 #   return rand( MvNormal(mu, obs.Cov), N)
 # end
 #
 #
 # # Still limited to linear sampler, then reprojected onto ball -- TODO upgrade manifold sampler
-# function evalPotential(odom::Pose3Pose3, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int64=200)
+# function evalPotential(odom::Pose3Pose3, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=200)
 #     # rz,cz = size(odom.Zij)
 #     Xval = Array{Float64,2}()
 #     # implicit equation portion -- bi-directional pairwise function made explicit here
@@ -230,8 +230,8 @@ end
 # # Still limited to linear sampler, then reprojected onto ball -- TODO upgrade manifold sampler
 # function evalPotential(odom::Pose3Pose3NH,
 #       Xi::Array{Graphs.ExVertex,1},
-#       Xid::Int64;
-#       N::Int64=200)
+#       Xid::Int;
+#       N::Int=200)
 #    #
 #   # rz,cz = size(odom.Zij)
 #   Xval = Array{Float64,2}()

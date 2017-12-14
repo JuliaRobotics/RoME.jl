@@ -42,7 +42,7 @@ function handlepreints(channel, msgdata, storedata)
       rVelp=iDvj,
       pBw=dDw,
       pBa=dDa,
-      rnTime=round(Int64, iDtj*1000000000)
+      rnTime=round(Int, iDtj*1000000000)
   )
 
   picg = PreintegralCompensationGradients(
