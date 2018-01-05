@@ -35,47 +35,105 @@ function (s::Pose2Pose2_NEW)(res::Array{Float64},
   nothing
 end
 
+
+
 # Start with an empty graph
 fg = initfg(sessionname="SLAM2D_TUTORIAL")
 
 
 addNode!(fg, :x0, Pose2, labels=["POSE"])
 
+# TODO Must test dimension of uninitialized nodes
+# getVal(fg,:x0)
+
+
 # also add a PriorPose2 to pin the first pose at a fixed location
-addFactor!(fg, [:x0], Prior(MvNormal(zeros(3), diagm([1.0;1.0;0.1]))) )
+addFactor!(fg, [:x0], Prior(MvNormal([0.0;0.0;pi/3], diagm([1.0;1.0;0.01].^2))) )
 
 
 addNode!(fg, :x1, Pose2, labels=["POSE"])
+# getVal(fg,:x1)
 
-addFactor!(fg, [:x0;:x1], Pose2Pose2_NEW(MvNormal([10.0;0;pi/2], diagm([0.1;0.1;0.03].^2)))
-)
+addFactor!(fg, [:x0;:x1], Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.03].^2))))
 
-ls(fg, :x1)
 
-getSample(getData(getVert(fg, :x0x1f1, nt=:fnc)).fnc.usrfnc!,5)[1]
+# getSample(getData(getVert(fg, :x0x1f1, nt=:fnc)).fnc.usrfnc!,5)[1]
 
 # Graphs.plot(fg.g)
 
-using RoMEPlotting, Gadfly
-
-pl = plotKDE(fg, :x0);
 
 
-Gadfly.draw(PDF("tmpX0.pdf", 15cm, 15cm), pl)
+addNode!(fg, :x2, Pose2, labels=["POSE"])
 
-run(`evince tmpX0.pdf`)
+addFactor!(fg, [:x1;:x2], Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.03].^2))))
 
 
-Graphs.plot(fg.g)
+addNode!(fg, :x3, Pose2, labels=["POSE"])
+
+addFactor!(fg, [:x2;:x3], Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.03].^2))))
+
+
+
+addNode!(fg, :x4, Pose2, labels=["POSE"])
+
+addFactor!(fg, [:x3;:x4], Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.03].^2))))
+
+
+
+
+addNode!(fg, :x5, Pose2, labels=["POSE"])
+
+addFactor!(fg, [:x4;:x5], Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.03].^2))))
+
+
+addNode!(fg, :x6, Pose2, labels=["POSE"])
+
+addFactor!(fg, [:x5;:x6], Pose2Pose2_NEW(MvNormal([10.0;0;0], diagm([0.1;0.1;0.03].^2))))
+
 
 
 ensureAllInitialized!(fg)
 
 
 
-pl = plotKDE(fg, [:x0; :x1]);
+
+using RoMEPlotting, Gadfly
+
+
+
+
+pl = plotKDE(fg, [:x0; :x1; :x2; :x3; :x4; :x5; :x6]);
+
+Gadfly.draw(PDF("tmpX0123456.pdf", 15cm, 15cm), pl)
+
+@async run(`evince tmpX0123456.pdf`)
+
+
+drawPosesLandms(fg)
+# using Colors
+# Colorant
+
+
+
+
+# These functions need more work
+
+using KernelDensityEstimate
+
+function plot(::Type{Pose2}, p::Vector{BallTreeDensity})
+
+  xy = plotKDE(p,dims=[1;2])
+  th = plotKDE(p,dims=[3])
+
+  hstack(xy, th)
+end
+
+vert0 = getVert(fg, :x0)
+vert1 = getVert(fg, :x1)
+pl = plot(typeof(getData(vert).softtype), [getKDE(vert0); getKDE(vert1)])
 
 Gadfly.draw(PDF("tmpX01.pdf", 15cm, 15cm), pl)
+@async run(`evince tmpX01.pdf`)
 
 
 #
