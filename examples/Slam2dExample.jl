@@ -58,8 +58,11 @@ for i in 0:5
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
   addNode!(fg, nsym, Pose2, labels=["POSE"])
-  addFactor!(fg, [psym;nsym], Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2))))
+  addFactor!(fg, [psym;ensureAllInitialized!nsym], Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2))))
 end
+
+# Graphs.plot(fg.g)
+
 
 # Add landmarks with Bearing range measurements
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
@@ -103,12 +106,17 @@ Gadfly.draw(PDF("tmpPosesFg.pdf", 15cm, 15cm), pl)
 
 
 tree = wipeBuildNewTree!(fg)
+
+
+@async Graphs.plot(tree.bt)
+
+
 @time inferOverTree!(fg, tree)
 
 
 # Graphs.plot(tree.bt)
 
-Graphs.plot(fg.g)
+@async Graphs.plot(fg.g)
 
 
 # These functions need more work

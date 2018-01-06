@@ -98,6 +98,7 @@ end
 #-------------------------------------------------------------------------------
 # bearing only available
 
+# this factor type is still a work in progress
 type Pose2DPoint2DBearing{B <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
     bearing::B
     Pose2DPoint2DBearing{B}() where {B} = new{B}()
