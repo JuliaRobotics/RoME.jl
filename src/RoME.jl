@@ -179,6 +179,7 @@ export
   PackedPoint2DPoint2D,
   Pose2DPoint2DBearingRange,
   PackedPose2DPoint2DBearingRange,
+  Pose2DPoint2DBearing,
   Pose2DPoint2DRange,
   Point2DPoint2DRange,
   PackedPoint2DPoint2DRange,
