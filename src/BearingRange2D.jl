@@ -40,6 +40,7 @@ type Pose2DPoint2DBearingRange{B <: Distributions.Distribution, R <: Distributio
     bearing::B
     range::R
     Pose2DPoint2DBearingRange{B,R}() where {B,R} = new{B,R}()
+    Pose2DPoint2DBearingRange(x1::B,x2::R) where {B,R} = new{B,R}(x1,x2)
     Pose2DPoint2DBearingRange{B,R}(x1::B,x2::R) where {B,R} = new{B,R}(x1,x2)
 end
 function getSample(pp2br::Pose2DPoint2DBearingRange, N::Int=1)
@@ -86,6 +87,51 @@ function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearin
   return PackedPose2DPoint2DBearingRange(d.bearing.μ, d.bearing.σ,
                                          d.range.μ,   d.range.σ )
 end
+
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------
+# bearing only available
+
+type Pose2DPoint2DBearing{B <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
+    bearing::B
+    Pose2DPoint2DBearing{B}() where {B} = new{B}()
+    Pose2DPoint2DBearing(x1::B) where {B} = new{B}(x1)
+    Pose2DPoint2DBearing{B,R}(x1::B) where {B} = new{B}(x1)
+end
+function getSample(pp2br::Pose2DPoint2DBearing, N::Int=1)
+  return (rand(pp2br.bearing, N), )
+end
+# define the conditional probability constraint
+function (pp2br::Pose2DPoint2DBearing)(res::Array{Float64},
+        idx::Int,
+        meas::Tuple{Array{Float64,2}},
+        xi::Array{Float64,2},
+        lm::Array{Float64,2} )
+  #
+  # work in progress
+  res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
+  res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
+  nothing
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
