@@ -200,6 +200,11 @@ export
   Pose2DPoint2DRangeDensity,
   PackedPose2DPoint2DRangeDensity,
 
+  Pose2,
+  Point2,
+  Prior,
+  Pose2Pose2_NEW,
+
   # Pose2D
   PriorPose2,
   PackedPriorPose2,

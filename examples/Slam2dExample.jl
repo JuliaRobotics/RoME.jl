@@ -6,42 +6,9 @@ addprocs(3)
 # This tutorial follows from the ContinuousScalar example from IncrementalInference
 
 @everywhere begin
-using RoME, Distributions
-using IncrementalInference
-using TransformUtils
-
-import IncrementalInference: getSample
-
-struct Pose2 <: IncrementalInference.InferenceVariable
-  dims::Int
-  Pose2() = new(3)
-end
-struct Point2 <: IncrementalInference.InferenceVariable
-  dims::Int
-  Point2() = new(2)
-end
-
-
-struct Prior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}
-  z::T
-end
-getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
-
-struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}
-  z::T
-end
-getSample(s::Pose2Pose2_NEW, N::Int=1) = (rand(s.z,N), )
-function (s::Pose2Pose2_NEW)(res::Array{Float64},
-      idx::Int,
-      meas::Tuple,
-      wxi::Array{Float64,2},
-      wxj::Array{Float64,2}  )
-  # res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])
-  wXjhat = SE2(wxi[:,idx])*SE2(meas[1][:,idx]) #*SE2(pp2.Zij[:,1])*SE2(meas[1][:,idx])
-  jXjhat = SE2(wxj[:,idx]) \ wXjhat
-  se2vee!(res, jXjhat)
-  nothing
-end
+  using RoME, Distributions
+  using IncrementalInference
+  using TransformUtils
 end # everywhere
 
 
@@ -58,7 +25,7 @@ for i in 0:5
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
   addNode!(fg, nsym, Pose2, labels=["POSE"])
-  addFactor!(fg, [psym;ensureAllInitialized!nsym], Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2))))
+  addFactor!(fg, [psym;nsym], Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2))))
 end
 
 # Graphs.plot(fg.g)
