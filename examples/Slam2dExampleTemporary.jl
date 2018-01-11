@@ -6,14 +6,13 @@
 # This tutorial follows from the ContinuousScalar example from IncrementalInference
 
 # @everywhere begin
-  using RoME, Distributions
-  using IncrementalInference
-  using TransformUtils
+# using RoME
+  # using IncrementalInference, Distributions
+  # using TransformUtils
 # end # everywhere
 
 
-# using Caesar
-# backend_config, user_config = standardcloudgraphsetup(addrdict=user_config)
+using Caesar, RoME
 # function initialize!(backend_config,
 #                     user_config)
 #     println("[Caesar.jl] Setting up factor graph")
@@ -22,13 +21,29 @@
 #     return  SLAMWrapper(fg, nothing, 0)
 # end
 
+# include("$(ENV["HOME"])/Documents/blandauth.jl")
+include("$(ENV["HOME"])/Documents/blandauthlocal.jl"); user_config = addrdict
+backend_config, user_config = standardcloudgraphsetup(addrdict=addrdict)
+user_config["session"] = "SESSSLAM2D_TUTORIAL"
 
-# Start with an empty graph (local dictionary version)
-fg = initfg(sessionname="SLAM2D_TUTORIAL")
+
+
+
+
+# Start with an empty graph (local dictionary version) # fg = initfg(sessionname="SLAM2D_TUTORIAL")
+## TODO -- ISSUE Julia 0.6.2 dives into some StackOverflow problem using the functions, but fine when called separately.
+# fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+# fg = RoME.initfg(sessionname=addrdict["session"])
+fg = IncrementalInference.emptyFactorGraph()
+user_config["session"]
+fg.sessionname
+fg.sessionname = user_config["session"]
+fg.cg = backend_config
 
 # also add a PriorPose2 to pin the first pose at a fixed location
 addNode!(fg, :x0, Pose2, labels=["POSE"])
 addFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))
+
 # Prior(MvNormal([0.0;0.0;0], diagm([1.0;1.0;0.01].^2)))
 
 # Drive around in a hexagon
@@ -46,6 +61,8 @@ end
 ensureAllInitialized!(fg)
 
 
+
+getVert(fg, :x0)
 
 
 

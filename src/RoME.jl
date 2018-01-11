@@ -64,8 +64,7 @@ export
   loadjld,
   FactorGraph,
   initializeNode!,
-  plotKDE,
-  plot, # for Graphs.plot
+  ensureAllInitialized!,
   # overloaded functions from IIF
   # decodefg,
   # convertfrompackedfunctionnode,
