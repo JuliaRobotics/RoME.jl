@@ -64,6 +64,7 @@ export
   loadjld,
   FactorGraph,
   initializeNode!,
+  isInitialized,
   ensureAllInitialized!,
   # overloaded functions from IIF
   # decodefg,

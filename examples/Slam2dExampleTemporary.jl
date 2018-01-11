@@ -60,9 +60,9 @@ end
 
 ensureAllInitialized!(fg)
 
+isInitialized(fg, :x0)
 
-
-getVert(fg, :x0)
+getVal(fg, :x0)
 
 
 
