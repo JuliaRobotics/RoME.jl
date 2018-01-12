@@ -51,19 +51,34 @@ for i in 0:5
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
   addNode!(fg, nsym, Pose2, labels=["POSE"])
-  addFactor!(fg, [psym;nsym], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1.0])  )
+  addFactor!(fg, [psym;nsym], Pose2Pose2(reshape([10.0;0;pi/3],3,1), 0.01*eye(3), [1.0]), autoinit=true )
   # Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
 end
 
 # Graphs.plot(fg.g)
 
+isInitialized(fg, :x0)
+
+
 
 ensureAllInitialized!(fg)
 
-isInitialized(fg, :x0)
 
 getVal(fg, :x0)
+v = getVert(fg, :x0)
+getVal(v)
 
+importall CloudGraphs
+
+exvid = fg.IDs[:x0]
+neoID = fg.cgIDs[exvid]
+cvr = CloudGraphs.get_vertex(fg.cg, neoID, false)
+exv = CloudGraphs.cloudVertex2ExVertex(cvr)
+getVal(exv)
+# getData(exv)
+
+
+getData(fg.g.vertices[1])
 
 
 tree = wipeBuildNewTree!(fg)
