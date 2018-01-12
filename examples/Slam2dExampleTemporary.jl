@@ -57,20 +57,20 @@ end
 
 # Graphs.plot(fg.g)
 
-isInitialized(fg, :x0)
+isInitialized(fg, :x6)
 
 
 
 ensureAllInitialized!(fg)
 
 
-getVal(fg, :x0)
-v = getVert(fg, :x0)
+getVal(fg, :x6)
+v = getVert(fg, :x6)
 getVal(v)
 
 importall CloudGraphs
 
-exvid = fg.IDs[:x0]
+exvid = fg.IDs[:x6]
 neoID = fg.cgIDs[exvid]
 cvr = CloudGraphs.get_vertex(fg.cg, neoID, false)
 exv = CloudGraphs.cloudVertex2ExVertex(cvr)
