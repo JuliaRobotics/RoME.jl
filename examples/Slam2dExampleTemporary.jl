@@ -44,6 +44,17 @@ fg.cg = backend_config
 addNode!(fg, :x0, Pose2, labels=["POSE"])
 addFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))
 
+# what ??? -- TODO, one problem is that ls( , api=dlapi) does not report any neighbors
+ls(fg, :x0)
+
+
+isInitialized(fg, :x0)
+
+# to debug the zero lengths issue
+ensureAllInitialized!(fg)
+
+getVal(fg, :x0)
+
 # Prior(MvNormal([0.0;0.0;0], diagm([1.0;1.0;0.01].^2)))
 
 # Drive around in a hexagon
@@ -57,20 +68,20 @@ end
 
 # Graphs.plot(fg.g)
 
-isInitialized(fg, :x6)
+isInitialized(fg, :x5)
 
 
 
 ensureAllInitialized!(fg)
 
 
-getVal(fg, :x6)
-v = getVert(fg, :x6)
+getVal(fg, :x0)
+v = getVert(fg, :x0)
 getVal(v)
 
 importall CloudGraphs
 
-exvid = fg.IDs[:x6]
+exvid = fg.IDs[:x0]
 neoID = fg.cgIDs[exvid]
 cvr = CloudGraphs.get_vertex(fg.cg, neoID, false)
 exv = CloudGraphs.cloudVertex2ExVertex(cvr)
