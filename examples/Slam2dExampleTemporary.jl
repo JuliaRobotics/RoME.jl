@@ -31,30 +31,25 @@ user_config["session"] = "SESSSLAM2D_TUTORIAL"
 
 
 # Start with an empty graph (local dictionary version) # fg = initfg(sessionname="SLAM2D_TUTORIAL")
-## TODO -- ISSUE Julia 0.6.2 dives into some StackOverflow problem using the functions, but fine when called separately.
-# fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+## TODO -- ISSUE Julia 0.6.0-0.6.2 dives into some StackOverflow problem using the functions, but fine when called separately.
+fg = Caesar.initfg(sessionname=user_config["session"], cloudgraph=backend_config)
+
 # fg = RoME.initfg(sessionname=addrdict["session"])
-fg = IncrementalInference.emptyFactorGraph()
-user_config["session"]
-fg.sessionname
-fg.sessionname = user_config["session"]
-fg.cg = backend_config
+# fg = IncrementalInference.emptyFactorGraph()
+# user_config["session"]
+# fg.sessionname
+# fg.sessionname = user_config["session"]
+# fg.cg = backend_config
 
 # also add a PriorPose2 to pin the first pose at a fixed location
 addNode!(fg, :x0, Pose2, labels=["POSE"])
 addFactor!(fg, [:x0], PriorPose2(zeros(3,1), 0.01*eye(3), [1.0]))
 
-# what ??? -- TODO, one problem is that ls( , api=dlapi) does not report any neighbors
-ls(fg, :x0)
-
-
-isInitialized(fg, :x0)
-
-# to debug the zero lengths issue
-ensureAllInitialized!(fg)
-
-getVal(fg, :x0)
-
+# ls(fg, :x0)
+# isInitialized(fg, :x0)
+# # to debug the zero lengths issue
+# ensureAllInitialized!(fg)
+# getVal(fg, :x0)
 # Prior(MvNormal([0.0;0.0;0], diagm([1.0;1.0;0.01].^2)))
 
 # Drive around in a hexagon
@@ -66,13 +61,21 @@ for i in 0:5
   # Pose2Pose2_NEW(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
 end
 
-# Graphs.plot(fg.g)
 
+
+
+
+# Graphs.plot(fg.g)
 isInitialized(fg, :x5)
 
 
 
 ensureAllInitialized!(fg)
+
+
+using RoMEPlotting
+
+drawPoses(fg)
 
 
 getVal(fg, :x0)
