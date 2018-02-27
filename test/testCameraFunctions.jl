@@ -9,7 +9,7 @@ pt = [1.0;0.0;5.0]
 
 tol = 1e-8
 
-gg = (x, res) -> cameraResidual!(res, x, ci, ce, pt)
+gg = (res, x) -> cameraResidual!(res, x, ci, ce, pt)
 # res = zeros(2)
 # @time gg([0.0;0.0], res)
 
@@ -25,7 +25,7 @@ y = numericRootGenericRandomizedFnc(
 
 
 # using cameraResidual function
-gg = (x, res) -> cameraResidual!(res, x, ci, ce, pt)
+gg = (res, x) -> cameraResidual!(res, x, ci, ce, pt)
 # res = zeros(2)
 # @time gg([0.0;0.0], res)
 

@@ -15,11 +15,19 @@ end
 
 for i in 1:10
   eul = 0.25*randn(3)
-  gg = (x, res) -> rotationresidual!(res, eul, (zeros(0),x))
+  # res = zeros(3)
+  # @show rotationresidual!(res, eul, (zeros(0),x0))
+  # @show res
+  gg = (res, x) -> rotationresidual!(res, eul, (zeros(0),x))
+  x0 = 0.1*randn(3)
+  res = zeros(3)
+  # @show gg(res, x0)
+  # @show res
   y = numericRootGenericRandomizedFnc(
           gg,
-          3, 3, 0.1*randn(3)    )
+          3, 3, x0   )
   # test the result
-  @test TransformUtils.compare(convert(Quaternion, Euler(eul...)),
-                              convert(Quaternion, so3(y)), tol=1e-8)
+  @show q1 = convert(Quaternion, Euler(eul...))
+  @show q2 = convert(Quaternion, so3(y))
+  @test TransformUtils.compare(q1, q2, tol=1e-8)
 end
