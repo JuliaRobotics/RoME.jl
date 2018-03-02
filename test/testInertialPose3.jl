@@ -87,7 +87,7 @@ plot(z=ggoxy, x=ran, y=ran, Geom.contour)
 @show res
 using NLsolve
 
-gg = (x, res) -> inerodo(res, idx, (meas,), wIPi, vectoarr2(x))
+gg = (res, x) -> inerodo(res, idx, (meas,), wIPi, vectoarr2(x))
 
 ret = nlsolve(gg, wIPj[:])
 
