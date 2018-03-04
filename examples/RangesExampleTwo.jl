@@ -1,8 +1,8 @@
 # video at: https://vimeo.com/190052649
 
 
-# addprocs(7)
-# # using RoME, IncrementalInference, Gadfly, Colors
+addprocs(7)
+using RoME, IncrementalInference, Gadfly, Colors, KernelDensityEstimate
 # for p in procs()
 # # @everywhere begin
 # remotecall_fetch(p, ()->using RoME)
@@ -11,12 +11,13 @@
 # remotecall_fetch(p, ()->using Colors)
 # # end
 # end
-@everywhere begin
-using RoME
-using IncrementalInference
-using Gadfly
-using Colors
-end
+
+@everywhere using RoME, RoMEPlotting
+@everywhere using IncrementalInference
+@everywhere using Gadfly
+@everywhere using Colors
+@everywhere using KernelDensityEstimate
+# end
 
 # , Gadfly
 
@@ -118,9 +119,9 @@ function drive(fgl::FactorGraph, GTp, GTl, from, to; N=100)
 	nothing
 end
 
-function batchsolve(fgl::FactorGraph)
+function batchsolve(fgl::FactorGraph; N::Int=100)
 	tree = wipeBuildNewTree!(fgl, drawpdf=true)
-	inferOverTreeR!(fgl, tree, N=N)
+	inferOverTree!(fgl, tree, N=N)
 	nothing
 end
 
@@ -146,13 +147,13 @@ function drawLandmMargOver(fgl::FactorGraph, lbl::String,
 	hover = Gadfly.context()
 	if haskey(fgl.IDs,lbl)
 		hover =  drawMarginalContour(fgl,lbl)
-		for gtl in gtlayers
-			push!(hover.layers, gtl)
-		end
+		# for gtl in gtlayers
+		# 	push!(hover.layers, gtl)
+		# end
 	end
 
 	if length(file) > 0
-		Gadfly.draw(PNG(file,w,h),hover)
+		Gadfly.draw(PNG(file,w,h), hover)
 	end
 	hover
 end
@@ -202,13 +203,13 @@ function drawGroundTruth(GTp, orderp, GTl=nothing, orderl=[]; drawranges=true, i
 			end
 		end
 	end
-	plot(LAYERS,
+	Gadfly.plot(LAYERS,
 		Guide.title("Ground Truth"),
 		Coord.Cartesian(xmin=-150,xmax=150,ymin=-150, ymax=150))
 end
 
 function drawConvenience1(fgl, ii, fr, folderloc, h12, h12a, interp)
-	drawQuadLandms(fgl,file="$(folderloc)/test$(fr).png",h12=h12);
+	drawQuadLandms(fgl,file="$(folderloc)/overlms$(fr).png",h12=h12);
 	draw(PNG("$(folderloc)/gt$(fr).png",30cm,20cm),h12)
 	ii -= interp ? 1 : 0
 	lstPosePl = RoME.drawMarginalContour(fgl,"l$(100+ii)")
@@ -243,8 +244,8 @@ end #everywhere
 function drawAllVidImages(GTp, GTl, fgl, ii, fr; drawranges=true, interp=false, t=0)
 	poselbls = ["l$(100+i)" for i in 0:ii]
 	lmlbls = ["l$(i)" for i in 1:4]
-	folderloc = "/home/dehann/irosVidTemp"
-	rr = Dict{Int,RemoteRef}()
+	folderloc = "/home/dehann/irosVid/new"
+	rr = Dict{Int,Future}()
 
 	h12 = drawGroundTruth(GTp, poselbls, GTl, lmlbls, drawranges=drawranges, interp=interp, t=t)
 	# overlay ground truth and landmark estimation
@@ -295,7 +296,7 @@ function plotCircle(;cent=[0.0;0.0], radius=1.0, c="deepskyblue", N=200, drawcen
 	PL = []
 	push!(PL, layerCircle(cent=cent, radius=radius, c=c, N=N) )
 	!drawcent ? nothing : push!(PL, layer(x=[cent[1]],y=[cent[2]], Geom.point, Theme(default_color=parse(Colorant,c))))
-	plot(PL...)
+	Gadfly.plot(PL...)
 end
 
 
@@ -312,7 +313,7 @@ function drawFirstPoseIllustration(GTl, GTp)
 	PL = union(PL, plotCircle(cent=l1,radius=rho1, c="red", drawcent=true).layers)
 	PL = union(PL, plotCircle(cent=l2,radius=rho2, c="red", drawcent=true).layers)
 
-	plot(PL,
+	Gadfly.plot(PL,
 		Guide.title("Parametric illustration"),
 		Coord.Cartesian(xmin=-150,xmax=150,ymin=-150, ymax=150) )
 end
@@ -332,7 +333,7 @@ function drawSecondPoseIllustration(GTl, GTp)
 	PL = union(PL, plotCircle(cent=l1,radius=rho1, c="gray").layers)
 	PL = union(PL, plotCircle(cent=l2,radius=rho2, c="gray").layers)
 
-	plot(PL,
+	Gadfly.plot(PL,
 		Guide.title("Parametric illustration"),
 		Coord.Cartesian(xmin=-150,xmax=150,ymin=-150, ymax=150) )
 end
@@ -353,7 +354,7 @@ function drawFirstL3Illustration(GTl, GTp)
 
 	push!(PL, layer(x=[l3[1]], y=[l3[2]], Geom.point, Theme(default_color=colorant"cyan", point_size=4pt)  )[1] )
 
-	plot(PL,
+	Gadfly.plot(PL,
 		Guide.title("Parametric illustration"),
 		Coord.Cartesian(xmin=-150,xmax=150,ymin=-150, ymax=150) )
 end
@@ -382,11 +383,48 @@ function drawIllustrations(GTl, GTp, folderloc)
 end
 
 
-folderloc2 = "/home/dehann/irosVidTemp"
+function evaluateAccuracy(fgl::FactorGraph, GTp)
+  # get last pose
+  xx,ll = ls(fg)
+  maxPosition = 0
+  for l in ll
+    val = parse(Int,string(l)[2:end])
+    maxPosition = val >= 100 && val > maxPosition ? val : maxPosition
+  end
+  vsym = Symbol("l$(maxPosition)")
+  pX = getVertKDE(fg, vsym)
+  truePos = GTp[string(vsym)]
+
+  postlikeli = evaluateDualTree(pX, reshape(truePos,2,1))[1]
+  MaxPointError = truePos - getKDEMax(pX, N=1000)
+  return postlikeli, norm(MaxPointError)
+end
+
+function evaluateAllAccuracy(fgl::FactorGraph, GTp, GTl)
+  xx,ll = ls(fg)
+  LK = Float64[]
+  PE = Float64[]
+  for l in ll
+    pX = getVertKDE(fg, l)
+    truePos = haskey(GTp, string(l)) ? GTp[string(l)] : GTl[string(l)]
+    push!(LK, evaluateDualTree(pX, reshape(truePos,2,1))[1])
+    MaxPointError = truePos - getKDEMax(pX, N=1000)
+    push!(PE, norm(MaxPointError))
+  end
+  return LK, PE
+end
+
+
+folderloc2 = "/home/dehann/irosVid/new"
 drawIllustrations(GTl, GTp, folderloc2)
 
 
-N = 300
+# N = 100
+
+fg = initfg()
+
+for N in collect(25:25:25)
+
 fg = initfg()
 # fg.sessionname="SESSranges"
 # fg.cg = cloudGraph
@@ -409,7 +447,15 @@ f = addFactor!(fg, [:l2], pp2)
 
 writeGraphPdf(fg)
 
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","w")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","w")
+write(fid, "$(pe)\n")
+close(fid)
+
 
 drawAllVidImages(GTp, GTl, fg, 0, 0);
 draw30AllFast(GTp, GTl, fg, 1, 0, 1, 29)
@@ -426,7 +472,14 @@ draw30AllFast(GTp, GTl, fg, 1, 0, 1, 29)
 addNewPose!(fg, :l100, :l101, GTp, N=N)
 initializeNode!(fg,:l101)
 writeGraphPdf(fg)
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 draw30AllFast(GTp, GTl, fg, 1, 30, 0, 14, drawranges=false, interp=false)
 # [drawAllVidImages(GTp, GTl, fg, 1, 30+i, drawranges=false) for i in 0:14]
@@ -439,7 +492,14 @@ draw30AllFast(GTp, GTl, fg, 1, 30, 0, 14, drawranges=false, interp=false)
 addLandmsOnPose!(fg, getVert(fg, :l101),
 								landmsInRange(GTl, GTp["l101"]), N=N )
 writeGraphPdf(fg)
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 draw30AllFast(GTp, GTl, fg, 1, 45, 0, 14, interp=false)
 # [drawAllVidImages(GTp, GTl, fg, 1, 45+i) for i in 0:14]
@@ -454,7 +514,14 @@ drive(fg, GTp, GTl, :l101, :l102, N=N)
 initializeNode!(fg,:l102)
 writeGraphPdf(fg)
 
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 draw30AllFast(GTp, GTl, fgd, 2, 60, 0, 29)
 # [drawAllVidImages(GTp, GTl, fg, 2, i+60, interp=true, t=(30-i)/30.0) for i in 0:29]
@@ -467,7 +534,14 @@ draw30AllFast(GTp, GTl, fgd, 2, 60, 0, 29)
 
 fgd = deepcopy(fg)
 drive(fg, GTp, GTl, :l102, :l103, N=N)
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 # drawLandms(fg,showmm=true)
 # h12 = drawGroundTruth(GTp, [:l$(00+i)" for i in 0:3], GTl, [:l$()" for i in 1:4])
 # drawQuadLandms(fg,file="irosVid/test4.png",h12=h12);
@@ -492,7 +566,14 @@ drive(fg, GTp, GTl, :l103, :l104, N=N)
 # addLandmsOnPose!(fg, getVert(fg, :l104),
 # 								landmsInRange(GTl, GTp["l104"]), N=N )
 # writeGraphPdf(fg)
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 draw30AllFast(GTp, GTl, fgd, 4, 120, 0, 29)
 # [drawAllVidImages(GTp, GTl, fg, 4, i+120, interp=true, t=(30-i)/30.0) for i in 0:29]
@@ -509,7 +590,14 @@ drive(fg, GTp, GTl, :l104, :l105, N=N)
 # 								landmsInRange(GTl, GTp["l104"]), N=N )
 writeGraphPdf(fg)
 
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 draw30AllFast(GTp, GTl, fgd, 5, 150, 0, 29)
 # [drawAllVidImages(GTp, GTl, fg, 5, i+150, interp=true, t=(30-i)/30.0) for i in 0:29]
@@ -521,7 +609,14 @@ draw30AllFast(GTp, GTl, fgd, 5, 150, 0, 29)
 
 fgd = deepcopy(fg)
 drive(fg, GTp, GTl, :l105, :l106, N=N)
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 # drawAllVidImages(GTp, GTl, fgd, 6, 7)
 draw30AllFast(GTp, GTl, fgd, 6, 180, 0, 29)
@@ -536,7 +631,14 @@ draw30AllFast(GTp, GTl, fgd, 6, 180, 0, 29)
 
 fgd = deepcopy(fg)
 drive(fg, GTp, GTl, :l106, :l107, N=N)
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 draw30AllFast(GTp, GTl, fgd, 7, 210, 0, 29)
 # [drawAllVidImages(GTp, GTl, fg, 7, i+210, interp=true, t=(30-i)/30.0) for i in 0:29]
@@ -554,7 +656,14 @@ drive(fg, GTp, GTl, :l107, :l108, N=N)
 # 								landmsInRange(GTl, GTp["l108"]), N=N )
 writeGraphPdf(fg)
 
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 draw30AllFast(GTp, GTl, fgd, 8, 240, 0, 29)
 # [drawAllVidImages(GTp, GTl, fg, 8, i+240, interp=true, t=(30-i)/30.0) for i in 0:29]
@@ -571,7 +680,14 @@ drive(fg, GTp, GTl, :l108, :l109, N=N)
 # 								landmsInRange(GTl, GTp["l109"]), N=N )
 writeGraphPdf(fg)
 
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 draw30AllFast(GTp, GTl, fgd, 9, 270, 0, 29)
 # [drawAllVidImages(GTp, GTl, fg, 9, i+270, interp=true, t=(30-i)/30.0) for i in 0:29]
@@ -588,7 +704,14 @@ drive(fg, GTp, GTl, :l109, :l110, N=N)
 # 								landmsInRange(GTl, GTp["l110"]), N=N )
 writeGraphPdf(fg)
 
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 draw30AllFast(GTp, GTl, fgd, 10, 300, 0, 29)
 # [drawAllVidImages(GTp, GTl, fg, 10, i+300, interp=true, t=(30-i)/30.0) for i in 0:29]
@@ -605,7 +728,14 @@ drive(fg, GTp, GTl, :l110, :l111, N=N)
 # 								landmsInRange(GTl, GTp["l111"]), N=N )
 writeGraphPdf(fg)
 
-batchsolve(fg)
+batchsolve(fg, N=N)
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
 
 draw30AllFast(GTp, GTl, fgd, 11, 330, 0, 29)
 # [drawAllVidImages(GTp, GTl, fg, 11, i+330, interp=true, t=(30-i)/30.0) for i in 0:29]
@@ -619,7 +749,32 @@ draw30AllFast(GTp, GTl, fgd, 11, 330, 0, 29)
 
 fgd = deepcopy(fg)
 drive(fg, GTp, GTl, :l111, :l112, N=N)
-batchsolve(fg)
+
+tsec = @elapsed batchsolve(fg, N=N)
+fid = open("/home/dehann/Videos/slamedonutBatchTime_$(N).txt","w")
+write(fid, "$(tsec)")
+close(fid)
+
+lk, pe = evaluateAccuracy(fg, GTp)
+fid = open("/home/dehann/Videos/slamedonutLstPoseLks_$(N).txt","a")
+write(fid, "$(lk)\n")
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutLstPoseErr_$(N).txt","a")
+write(fid, "$(pe)\n")
+close(fid)
+
+LK, PE = evaluateAllAccuracy(fg, GTp, GTl)
+
+fid = open("/home/dehann/Videos/slamedonutAllPE_$(N).txt","w")
+for pe in PE
+  write(fid, "$(pe)\n")
+end
+close(fid)
+fid = open("/home/dehann/Videos/slamedonutAllLK_$(N).txt","w")
+for lk in LK
+  write(fid, "$(lk)\n")
+end
+close(fid)
 
 writeGraphPdf(fg)
 wipeBuildNewTree!(fg, drawpdf=true)
@@ -636,6 +791,14 @@ draw30AllFast(GTp, GTl, fg, 12, 390, 0, 29, interp=false)
 
 
 # run(`convert -delay 100 irosVid/test*.png irosVid/anim.gif`)
+
+run(`ffmpeg -y -i $(folderloc2)/lstOver%d.png -threads 8 -vcodec libx264 -s 1920x1080 -b:v 2M /home/dehann/Videos/slamedonutLastPose_$(N).mp4`)
+# run(`ffmpeg -y -i $(folderloc2)/lm3Over%d.png -vcodec libx264 -s 1920x1080 -b:v 2M /home/dehann/Videos/slamedonutLm3_$(N).mp4`)
+# run(`ffmpeg -y -i $(folderloc2)/lm4Over%d.png -vcodec libx264 -s 1920x1080 -b:v 2M /home/dehann/Videos/slamedonutLm4_$(N).mp4`)
+
+
+end
+
 
 
 #

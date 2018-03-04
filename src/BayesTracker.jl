@@ -1,9 +1,9 @@
 
 
 type Feature
-  id::Int64
-  age::Int64
-  lastzage::Int64
+  id::Int
+  age::Int
+  lastzage::Int
   lastz::Array{Float64,1}
   bel::BallTreeDensity
 end
@@ -16,7 +16,7 @@ function upplocal()
     return locpid
 end
 
-# trackers = Dict{Int64,Feature}()
+# trackers = Dict{Int,Feature}()
 
 
 function propagate(b1Xl::BallTreeDensity, bDxb1::Array{Float64,1}, s::Array{Float64,1})
@@ -32,7 +32,7 @@ function propagate(b1Xl::BallTreeDensity, bDxb1::Array{Float64,1}, s::Array{Floa
   return kde!( pts, "lcv");
 end
 
-function discardOldFeatures!(trkrs::Dict{Int64,Feature})
+function discardOldFeatures!(trkrs::Dict{Int,Feature})
   for ft in trkrs
     if ft[2].lastzage > 30 # TODO, still hand tuned for odo update rate
       println("deleting $(ft[1])")
@@ -42,7 +42,7 @@ function discardOldFeatures!(trkrs::Dict{Int64,Feature})
   nothing
 end
 
-function propAllTrackers!(trkrs::Dict{Int64,Feature}, bDxb1::Array{Float64,1}, s::Array{Float64,1})
+function propAllTrackers!(trkrs::Dict{Int,Feature}, bDxb1::Array{Float64,1}, s::Array{Float64,1})
   discardOldFeatures!(trkrs)
   rr = RemoteRef[]
   trkID = Int[]
@@ -106,9 +106,9 @@ function p2cPtsKDE(z::Array{Float64,1}, s::Array{Float64,1}; N::Int=50)
   return kde!(zPts, "lcv")
 end
 
-featid = map(Int64,0)
+featid = map(Int,0)
 
-function addNewFeatTrk!(trkrs::Dict{Int64,Feature}, z::Array{Float64,1}, s::Array{Float64,1})
+function addNewFeatTrk!(trkrs::Dict{Int,Feature}, z::Array{Float64,1}, s::Array{Float64,1})
   global featid
   # len = length(trkrs)
   featid+=1
@@ -121,7 +121,7 @@ end
 
 function initTrackersFrom(bearan::Array{Float64,2})
   global featid
-  tr = Dict{Int64, Feature}()
+  tr = Dict{Int, Feature}()
   featid = 0
   for i in 1:size(bearan,2)
     addNewFeatTrk!(tr, bearan[:,i], [0.5;0.03])
@@ -129,7 +129,7 @@ function initTrackersFrom(bearan::Array{Float64,2})
   return tr
 end
 
-function insertLkhdEvals!(lkhds::Array{Float64,2}, currFeats::Dict{Int64,Feature}, sightCart::Array{Float64,2})
+function insertLkhdEvals!(lkhds::Array{Float64,2}, currFeats::Dict{Int,Feature}, sightCart::Array{Float64,2})
   #@show size(lkhds), length(currFeats)
   lkpidx = Array{Int,1}(length(currFeats))
   idx = 0
@@ -143,7 +143,7 @@ function insertLkhdEvals!(lkhds::Array{Float64,2}, currFeats::Dict{Int64,Feature
   return lkpidx
 end
 
-function evalAllLikelihoods(currFeats::Dict{Int64, Feature}, sightFeats::Array{Float64,2})
+function evalAllLikelihoods(currFeats::Dict{Int, Feature}, sightFeats::Array{Float64,2})
   numfe = length(currFeats)
   numz = size(sightFeats,2)
   lkhds = zeros(numz, numfe)
@@ -159,11 +159,11 @@ function evalAllLikelihoods(currFeats::Dict{Int64, Feature}, sightFeats::Array{F
   return lkhds, lkpidx
 end
 
-function addNewFeats!(trckr::Dict{Int64,Feature}, lkhds::Array{Float64,2}, lkpidx::Array{Int,1},
+function addNewFeats!(trckr::Dict{Int,Feature}, lkhds::Array{Float64,2}, lkpidx::Array{Int,1},
                       allmeas::Array{Float64,2}, nidx::Array{Int,1})
 
   newfeIds = Int[]
-  # newfeats = Dict{Int64, Feature}()
+  # newfeats = Dict{Int, Feature}()
   newmeas = Float64[]
   if length(nidx) != 0
     if nidx[1] != -1
@@ -206,7 +206,7 @@ function divMaxAlong(lk::Array{Float64,2})
   return rlk./m2
 end
 
-function hardMatches!(ha::Dict{Int64,Array{Float64,1}}, dmdm::Array{Float64,2}, lkpidx::Array{Int,1}, allmeas::Array{Float64,2})
+function hardMatches!(ha::Dict{Int,Array{Float64,1}}, dmdm::Array{Float64,2}, lkpidx::Array{Int,1}, allmeas::Array{Float64,2})
   # check second maximum is much smaller
   dmdm[dmdm.==2.0]=-1.0
   m1b = (maximum(dmdm,1) .< 0.1)
@@ -227,7 +227,7 @@ function findMatches(lk::Array{Float64,2}, lkpidx::Array{Int,1}, allmeas::Array{
   dmac = divMaxAlong(lk)
   dmal = divMaxAcross(lk)
   dmdm = dmac+dmal
-  hardassoc = Dict{Int64,Array{Float64,1}}()
+  hardassoc = Dict{Int,Array{Float64,1}}()
   hardMatches!(hardassoc, deepcopy(dmdm), lkpidx, allmeas)
   return hardassoc
 end
@@ -244,9 +244,9 @@ end
 
 # will also add new features at the end of the tracking pool
 # currently only does hard associations, soft multihypothesis tracking work to follow
-function assocMeasWFeats!(trkrs::Dict{Int64, Feature}, fez::Array{Float64,2})
+function assocMeasWFeats!(trkrs::Dict{Int, Feature}, fez::Array{Float64,2})
   if size(fez,2) == 0
-    return Dict{Int64,Array{Float64,1}}() # no matches possible
+    return Dict{Int,Array{Float64,1}}() # no matches possible
   end
   lk, lkpidx = evalAllLikelihoods(trkrs, fez)
   hardassoc = findMatches(lk, lkpidx, fez)
@@ -270,7 +270,7 @@ function update(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1
 end
 function updatelin(bhatXl::BallTreeDensity, z::Array{Float64,1}, s::Array{Float64,1}; N::Int=75)
 
-  bXl = resample(kde!((z')',s),N)
+  bXl = resample(kde!(vectoarr2(z),s),N)
   # take the product between predicted and measured position
   dummy = kde!(rand(length(z),N),[1.0])
   pGM, = prodAppxMSGibbsS(dummy, [bhatXl, bXl], Union{}, Union{}, 5)
@@ -291,10 +291,10 @@ function doAsyncUpdate(oldFeat::Feature, meas::Array{Float64,1}, s::Array{Float6
   return Feature(oldFeat.id, oldFeat.age, 0, meas[1:3], bel)
 end
 
-function measUpdateTrackers!(trkrs::Dict{Int64,Feature}, assoc::Dict{Int64,Array{Float64,1}}, s::Array{Float64,1})
+function measUpdateTrackers!(trkrs::Dict{Int,Feature}, assoc::Dict{Int,Array{Float64,1}}, s::Array{Float64,1})
   # loop through all associated measurements
   # TODO --this can all be done in parallel to reduce computation time
-  # dbg = Dict{Int64,Array{BallTreeDensity,1}}()
+  # dbg = Dict{Int,Array{BallTreeDensity,1}}()
   rr = RemoteRef[]
   trkID = Int[]
   for meas in assoc

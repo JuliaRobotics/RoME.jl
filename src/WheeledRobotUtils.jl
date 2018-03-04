@@ -77,7 +77,7 @@ function fetchVecML()
   close(client)
   ss = split(res,'@')
   @show ss[1], ss[2], ss[3]
-  i = parse(Int64, (ss[1]))
+  i = parse(Int, (ss[1]))
   t = parse(Float64,(ss[2]))
   pts = ss[3]
   while client.status != 6 sleep(0.01) end
@@ -157,8 +157,8 @@ end
 
 # function advOdoByRules(DRS::Array{Float64,2};
 #                         distrule=20.0, timerule=30.0, yawrule=pi/3.0)
-#   dOdo = Dict{Int64,Array{Float64,1}}()
-#   dFtAssc = Dict{Int64, }
+#   dOdo = Dict{Int,Array{Float64,1}}()
+#   dFtAssc = Dict{Int, }
 #
 #   T0 = 0.0
 #   poseid = 1
@@ -197,7 +197,7 @@ function rotateFeatsToWorld(bfts, pose)
     return wfts
 end
 
-function plotPoseDict(dOdo::Dict{Int64,Array{Float64,1}};from=1,to=Inf)
+function plotPoseDict(dOdo::Dict{Int,Array{Float64,1}};from=1,to=Inf)
     len = length(dOdo)
     if len>to
       len = to
@@ -230,7 +230,7 @@ function fullrun(x)
      p=plotParVicPrk(DRS,x)
      draw(PNG("test.png",25cm,25cm),p)
      a = readall(`python floodfill.py`)
-     val = parse(Int64,a[1:(end-1)])
+     val = parse(Int,a[1:(end-1)])
      val
  end
 

@@ -56,15 +56,15 @@ println("Ensure vertex initialized properly")
 # start with to tight an initialization
 muX1 = Base.mean(getVal(fg,:x1),2)
 stdX1 = Base.std(getVal(fg,:x1),2)
-@test sum(map(Int,abs(muX1) .< 0.1)) == 6
+@test sum(map(Int,abs.(muX1) .< 0.1)) == 6
 @test sum(map(Int, 0.05 .< stdX1 .< 0.15)) == 6
 
 
 println("Testing PriorPose3 evaluation...")
 priorpts = evalFactor2(fg, fg.g.vertices[2], 1)
 means = Base.mean(priorpts,2)
-@test sum(map(Int,abs(means[1:3]) .> 0.5)) == 0
-@test sum(map(Int,abs(means[4:6]) .> 0.05)) == 0
+@test sum(map(Int,abs.(means[1:3]) .> 0.5)) == 0
+@test sum(map(Int,abs.(means[4:6]) .> 0.05)) == 0
 
 
 println("Adding Pose3Pose3 to graph...")
@@ -81,8 +81,8 @@ X2pts = evalFactor2(fg, fg.g.vertices[4], 3)
 X2ptsMean = Base.mean(X2pts,2)
 X1ptsMean = Base.mean(X1pts,2)
 @show X1ptsMean
-@test  sum(map(Int, abs(X1ptsMean) .< 1.0 )) == 6
-@test  sum(map(Int, abs(X2ptsMean - [10.0;0;0;0;0;0]) .< 1.0 )) == 6
+@test  sum(map(Int, abs.(X1ptsMean) .< 1.0 )) == 6
+@test  sum(map(Int, abs.(X2ptsMean - [10.0;0;0;0;0;0]) .< 1.0 )) == 6
 
 
 println("Construct Bayes tree and perform inference...")
@@ -93,15 +93,15 @@ println("Ensure basic parameters on x1,x2 after inference...")
 # check mean and covariances after one up and down pass over the tree
 muX1 = Base.mean(getVal(fg,:x1),2)
 stdX1 = Base.std(getVal(fg,:x1),2)
-@test sum(map(Int,abs(muX1[1:3]) .< 1.0)) == 3
-@test sum(map(Int,abs(muX1[4:6]) .< 0.1)) == 3
+@test sum(map(Int,abs.(muX1[1:3]) .< 1.0)) == 3
+@test sum(map(Int,abs.(muX1[4:6]) .< 0.1)) == 3
 @test sum(map(Int, 0.5 .< stdX1[1:3] .< 1.5)) == 3
 @test sum(map(Int, 0.025 .< stdX1[4:6] .< 0.25)) == 3
 muX2 = Base.mean(getVal(fg,:x2),2)
 stdX2 = Base.std(getVal(fg,:x2),2)
-@test sum(map(Int, abs(muX2[1:3]-[10.0;0;0]) .< 1.0)) == 3
-@test sum(map(Int, abs(muX2[4:6]) .< 0.1)) == 3
-@show println("previous test failure 0.75 .< $(round(stdX2[1:3],2)) .< 2.25")
+@test sum(map(Int, abs.(muX2[1:3]-[10.0;0;0]) .< 1.0)) == 3
+@test sum(map(Int, abs.(muX2[4:6]) .< 0.1)) == 3
+@show println("previous test failure 0.75 .< $(round.(stdX2[1:3],2)) .< 2.25")
 @test sum(map(Int, 0.75 .< stdX2[1:3] .< 2.25)) == 3
 @test sum(map(Int, 0.05 .< stdX2[4:6] .< 0.25)) == 3
 

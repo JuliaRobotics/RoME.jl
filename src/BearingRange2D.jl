@@ -39,8 +39,9 @@ type Pose2DPoint2DBearingRange{B <: Distributions.Distribution, R <: Distributio
     # W::Array{Float64,1}
     bearing::B
     range::R
-    Pose2DPoint2DBearingRange() = new()
-    Pose2DPoint2DBearingRange{B,R}(x1::B,x2::R) = new(x1,x2)
+    Pose2DPoint2DBearingRange{B,R}() where {B,R} = new{B,R}()
+    Pose2DPoint2DBearingRange(x1::B,x2::R) where {B,R} = new{B,R}(x1,x2)
+    Pose2DPoint2DBearingRange{B,R}(x1::B,x2::R) where {B,R} = new{B,R}(x1,x2)
 end
 function getSample(pp2br::Pose2DPoint2DBearingRange, N::Int=1)
   b = rand(pp2br.bearing, N)
@@ -89,6 +90,50 @@ end
 
 
 
+
+
+
+
+
+#-------------------------------------------------------------------------------
+# bearing only available
+
+# this factor type is still a work in progress
+type Pose2DPoint2DBearing{B <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
+    bearing::B
+    Pose2DPoint2DBearing{B}() where {B} = new{B}()
+    Pose2DPoint2DBearing(x1::B) where {B} = new{B}(x1)
+    Pose2DPoint2DBearing{B}(x1::B) where {B} = new{B}(x1)
+end
+function getSample(pp2br::Pose2DPoint2DBearing, N::Int=1)
+  return (rand(pp2br.bearing, N), )
+end
+# define the conditional probability constraint
+function (pp2br::Pose2DPoint2DBearing)(res::Array{Float64},
+        idx::Int,
+        meas::Tuple,
+        xi::Array{Float64,2},
+        lm::Array{Float64,2} )
+  #
+  res[1] = meas[1][idx] - atan2(lm[2,idx]-xi[2,idx], lm[1,idx]-xi[1,idx])
+  nothing
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # to be deprecated
 function pack3(xL1, xL2, p1, p2, p3, xF3)
     warn("RoME.BearingRange2D:pack3 to be deprecated")
@@ -122,7 +167,7 @@ function solvePose2(Zbr::Array{Float64,1}, par::Array{Float64,1}, init::Array{Fl
     shuffle!(p);
     p1 = p.==1; p2 = p.==2; p3 = p.==3
     #@show init, par
-    r = nlsolve(    (x, res) -> bearrang!(res, Zbr,  pack3(x[1], x[2], p1, p2, p3, init[p3]), par),
+    r = nlsolve(    (res, x) -> bearrang!(res, Zbr,  pack3(x[1], x[2], p1, p2, p3, init[p3]), par),
                     [init[p1];init[p2]] )
     return pack3(r.zero[1], r.zero[2], p1, p2, p3, init[p3]);
 end
@@ -138,7 +183,7 @@ function solveSetSeps(fnc::Function, Zbr::Array{Float64,1}, CovZ::Array{Float64,
 end
 
 # Xid is the one you want to get back
-function evalPotential(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+function evalPotential(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
     # TODO -- add null hypothesis here, might even be done one layer higher in call stack
     val = Array{Float64,2}()
     ini = Array{Graphs.ExVertex,1}()
@@ -199,7 +244,7 @@ function evalPotential(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVert
     return [val';nhvals']'
 end
 
-function evalPotentialNew(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+function evalPotentialNew(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
     # TODO -- add null hypothesis here, might even be done one layer higher in call stack
     val = Array{Float64,2}()
     ini = Array{Graphs.ExVertex,1}()
@@ -262,7 +307,7 @@ end
 
 
 # Solve for Xid, given values from vertices [Xi] and measurement rho
-function evalPotential(rho::Pose2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+function evalPotential(rho::Pose2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
   fromX, ret = nothing, nothing
   if Xi[1].index == Xid
     fromX = getVal( Xi[2] )

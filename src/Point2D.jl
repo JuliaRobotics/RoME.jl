@@ -11,7 +11,7 @@ function getSample(p2::PriorPoint2D, N::Int=1)
   return (rand(p2.mv, N),)
 end
 
-type Point2DPoint2DRange <: IncrementalInference.FunctorPairwise
+type Point2DPoint2DRange <: IncrementalInference.FunctorPairwiseMinimize #Pairwise
     Zij::Vector{Float64} # bearing and range hypotheses as columns
     Cov::Float64
     W::Vector{Float64}
@@ -32,11 +32,36 @@ function (pp2r::Point2DPoint2DRange)(
   XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
   YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
-  nothing
+  # nothing
 end
 function getSample(pp2::Point2DPoint2DRange, N::Int=1)
   return (pp2.Cov*randn(1,N),  2*pi*rand(N))
 end
+
+
+
+type Point2DPoint2D <: BetweenPoses
+    Zij::Distribution
+    Point2DPoint2D() = new()
+    Point2DPoint2D(x) = new(x)
+end
+function (pp2r::Point2DPoint2D)(
+      res::Array{Float64},
+      idx::Int,
+      meas::Tuple, # Array{Float64,2},
+      xi::Array{Float64,2},
+      xj::Array{Float64,2} )
+  #
+  # TODO -- still need to add multi-hypotheses support here
+  res[1]  = meas[1][1,idx] - (xj[1,idx] - xi[1,idx])
+  res[2]  = meas[1][2,idx] - (xj[2,idx] - xi[2,idx])
+  nothing
+end
+function getSample(pp2::Point2DPoint2D, N::Int=1)
+  return (rand(pp2.Zij,N),  )
+end
+
+
 
 
 
@@ -69,12 +94,12 @@ end
 
 
 # Old evalPotential functions
-function evalPotential(prior::PriorPoint2D, Xi::Array{Graphs.ExVertex,1}; N::Int64=100)#, from::Int64)
+function evalPotential(prior::PriorPoint2D, Xi::Array{Graphs.ExVertex,1}; N::Int=100)#, from::Int)
     return rand(prior.mv, N)
 end
 
 # Solve for Xid, given values from vertices [Xi] and measurement rho
-function evalPotential(rho::Point2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int64)
+function evalPotential(rho::Point2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int)
   fromX, ret = nothing, nothing
   if Xi[1].index == Xid
     fromX = getVal( Xi[2] )
@@ -115,9 +140,6 @@ end
 
 
 
-
-
-
 # ---------------------------------------------------------
 
 
@@ -125,7 +147,7 @@ end
 type PackedPriorPoint2D  <: IncrementalInference.PackedInferenceType
     mu::Array{Float64,1}
     vecCov::Array{Float64,1}
-    dimc::Int64
+    dimc::Int
     W::Array{Float64,1}
     PackedPriorPoint2D() = new()
     PackedPriorPoint2D(x...) = new(x[1], x[2], x[3], x[4])
@@ -173,4 +195,23 @@ function convert(::Type{PackedPoint2DPoint2DRange}, d::Point2DPoint2DRange)
 end
 function convert(::Type{Point2DPoint2DRange}, d::PackedPoint2DPoint2DRange)
   return Point2DPoint2DRange(d.Zij, d.Cov, d.W)
+end
+
+
+
+
+
+
+type PackedPoint2DPoint2D <: IncrementalInference.PackedInferenceType
+    mu::Vector{Float64}
+    sigma::Vector{Float64}
+    sdim::Int
+    PackedPoint2DPoint2D() = new()
+    PackedPoint2DPoint2D(x, y, d) = new(x,y,d)
+end
+function convert(::Type{Point2DPoint2D}, d::PackedPoint2DPoint2D)
+  return Point2DPoint2D( MvNormal(d.mu, reshapeVec2Mat(d.sigma, d.sdim)) )
+end
+function convert(::Type{PackedPoint2DPoint2D}, d::Point2DPoint2D)
+  return PackedPoint2DPoint2D( d.Zij.μ, d.Zij.Σ.mat[:], size(d.Zij.Σ.mat,1) )
 end

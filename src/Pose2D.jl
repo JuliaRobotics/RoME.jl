@@ -1,5 +1,42 @@
 # Pose2 functions for Robot Motion Estimate
 
+# TODO - move to IncrementalInference
+struct Prior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}
+  z::T
+end
+getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
+
+
+struct Pose2 <: IncrementalInference.InferenceVariable
+  dims::Int
+  Pose2() = new(3)
+end
+struct Point2 <: IncrementalInference.InferenceVariable
+  dims::Int
+  Point2() = new(2)
+end
+
+
+struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}
+  z::T
+  Pose2Pose2_NEW() where {T <: Distribution} = new{T}()
+  Pose2Pose2_NEW(z1::T) where {T <: Distribution} = new{T}(z1)
+  Pose2Pose2_NEW(mean::Vector{Float64}, cov::Array{Float64,2}) where {T <: Distribution} = new{Distributions.MvNormal}(MvNormal(mean, cov))
+end
+getSample(s::Pose2Pose2_NEW, N::Int=1) = (rand(s.z,N), )
+function (s::Pose2Pose2_NEW)(res::Array{Float64},
+      idx::Int,
+      meas::Tuple,
+      wxi::Array{Float64,2},
+      wxj::Array{Float64,2}  )
+  # res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])
+  wXjhat = SE2(wxi[:,idx])*SE2(meas[1][:,idx]) #*SE2(pp2.Zij[:,1])*SE2(meas[1][:,idx])
+  jXjhat = SE2(wxj[:,idx]) \ wXjhat
+  se2vee!(res, jXjhat)
+  nothing
+end
+
+
 
 type PriorPose2 <: IncrementalInference.FunctorSingleton
     Zi::Array{Float64,2}
@@ -93,9 +130,9 @@ end
 
 type PackedPriorPose2  <: IncrementalInference.PackedInferenceType
     vecZij::Array{Float64,1} # 0rotations, 1translation in each column
-    dimz::Int64
+    dimz::Int
     vecCov::Array{Float64,1}
-    dimc::Int64
+    dimc::Int
     W::Array{Float64,1}
     PackedPriorPose2() = new()
     PackedPriorPose2(x...) = new(x[1], x[2], x[3], x[4], x[5])
@@ -120,9 +157,9 @@ end
 
 type PackedPose2Pose2  <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 2translations, 1rotation
-  dimz::Int64
+  dimz::Int
   vecCov::Array{Float64,1}
-  dimc::Int64
+  dimc::Int
   W::Array{Float64,1}
   PackedPose2Pose2() = new()
   PackedPose2Pose2(x...) = new(x[1], x[2], x[3], x[4], x[5])
@@ -165,7 +202,7 @@ function addPose2Pose2(x::Array{Float64,1}, dx::Array{Float64,1})
 end
 
 
-function evalPotential(obs::PriorPose2, Xi::Array{Graphs.ExVertex,1}; N::Int64=200)
+function evalPotential(obs::PriorPose2, Xi::Array{Graphs.ExVertex,1}; N::Int=200)
     cov = diag(obs.Cov)
     ret = zeros(3,N)
     warn("should not be running")
@@ -179,7 +216,7 @@ end
 
 
 
-function evalPotential(odom::Pose2Pose2, Xi::Array{Graphs.ExVertex,1}, Xid::Int64; N::Int=100)
+function evalPotential(odom::Pose2Pose2, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
     rz,cz = size(odom.Zij)
     Xval = Array{Float64,2}()
     XvalNull = Array{Float64,2}()

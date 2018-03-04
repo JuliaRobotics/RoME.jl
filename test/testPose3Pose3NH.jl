@@ -43,15 +43,15 @@ println("Ensure vertex initialized properly")
 # start with to tight an initialization
 muX1 = Base.mean(getVal(fg,:x1),2)
 stdX1 = Base.std(getVal(fg,:x1),2)
-@test sum(map(Int,abs(muX1) .< 0.1)) == 6
+@test sum(map(Int,abs.(muX1) .< 0.1)) == 6
 @test sum(map(Int, 0.05 .< stdX1 .< 0.15)) == 6
 
 
 println("Testing PriorPose3 evaluation...")
 priorpts = evalFactor2(fg, fg.g.vertices[2], 1)
 means = Base.mean(priorpts,2)
-@test sum(map(Int,abs(means[1:3]) .> 0.5)) == 0
-@test sum(map(Int,abs(means[4:6]) .> 0.05)) == 0
+@test sum(map(Int,abs.(means[1:3]) .> 0.5)) == 0
+@test sum(map(Int,abs.(means[4:6]) .> 0.05)) == 0
 
 v2, f2 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
 v3, f3 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
@@ -63,8 +63,8 @@ X3pts = evalFactor2(fg, fg.g.vertices[6], 5)
 X2ptsMean = Base.mean(X2pts,2)
 X3ptsMean = Base.mean(X3pts,2)
 
-@test  sum(map(Int, abs(X2ptsMean) - [25.0;0;0;0;0;0] .< 5.0 )) == 6
-@test  sum(map(Int, abs(X3ptsMean - [50.0;0;0;0;0;0]) .< 5.0 )) == 6
+@test  sum(map(Int, abs.(X2ptsMean) - [25.0;0;0;0;0;0] .< 5.0 )) == 6
+@test  sum(map(Int, abs.(X3ptsMean - [50.0;0;0;0;0;0]) .< 5.0 )) == 6
 
 tree = wipeBuildNewTree!(fg)
 inferOverTreeR!(fg,tree,N=N)

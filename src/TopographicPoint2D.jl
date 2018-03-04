@@ -4,7 +4,7 @@ type TopographicPoint2D <: Singleton
   radiusOfInterest::Float64
 end
 
-function evalPotential(topo::TopographicPoint2D, Xi::Array{Graphs.ExVertex,1}; N::Int64=100)
+function evalPotential(topo::TopographicPoint2D, Xi::Array{Graphs.ExVertex,1}; N::Int=100)
   warn("evalPotential TopographicPoint2D is not finished yet")
   return topo.Heatmap
 end

@@ -12,7 +12,7 @@ export
   PackedPriorInertialPose3,
   compare
 
-abstract PreintContainer
+@compat abstract type PreintContainer end
 
 type PreintegralCompensationGradients <: PreintContainer
   # First order terms
@@ -36,14 +36,14 @@ type InertialPose3Container <: PreintContainer
   rVelp::Vector{Float64}
   pBw::Vector{Float64}
   pBa::Vector{Float64}
-  rnTime::Int64
+  rnTime::Int
   InertialPose3Container(;
         rRp::Array{Float64,2}=eye(3),
         rPosp::Vector{Float64}=zeros(3),
         rVelp::Vector{Float64}=zeros(3),
         pBw::Vector{Float64}=zeros(3),
         pBa::Vector{Float64}=zeros(3),
-        rnTime::Int64=0  ) = new( rRp,rPosp,rVelp,pBw,pBa,rnTime )
+        rnTime::Int=0  ) = new( rRp,rPosp,rVelp,pBw,pBa,rnTime )
 end
 
 function veeQuaternion(ip3::InertialPose3Container)
@@ -215,9 +215,9 @@ end
 type PackedInertialPose3 <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation, 3 velocities
   vecCov::Array{Float64,1}
-  dimc::Int64
+  dimc::Int
   vecpioc::Vector{Float64}
-  rnTime::Int64
+  rnTime::Int
   picgvecdPdDa::Vector{Float64}
   picgvecdVdDa::Vector{Float64}
   picgvecdPdDw::Vector{Float64}
@@ -293,7 +293,7 @@ end
 type PackedPriorInertialPose3 <: IncrementalInference.PackedInferenceType
   vecZi::Array{Float64,1} # 3translations, 3rotation, 3 velocities
   vecCov::Array{Float64,1}
-  dimc::Int64
+  dimc::Int
   PackedPriorInertialPose3() = new()
   PackedPriorInertialPose3(prip3::PriorInertialPose3) = new( prip3.Zi.μ, prip3.Zi.Σ.mat[:], size(prip3.Zi.Σ.mat,1)  )
 end

@@ -9,11 +9,12 @@ using
   Rotations,
   KernelDensityEstimate,
   Distributions,
-  Colors,
-  Gadfly,
+  # Colors,
+  # Gadfly,
   JLD,
   HDF5,
-  ProgressMeter
+  ProgressMeter,
+  Compat
 
 
 import Base: +, \, convert
@@ -63,8 +64,8 @@ export
   loadjld,
   FactorGraph,
   initializeNode!,
-  plotKDE,
-  plot, # for Graphs.plot
+  isInitialized,
+  ensureAllInitialized!,
   # overloaded functions from IIF
   # decodefg,
   # convertfrompackedfunctionnode,
@@ -108,8 +109,6 @@ export
   get2DLandmSamples,
   get2DLandmMeans,
   get2DLandmMax,
-  drawMarginalContour,
-  accumulateMarginalContours,
 
   # helper functions
   getLastLandm2D,
@@ -130,19 +129,7 @@ export
   measUpdateTrackers!,
   assocMeasWFeats!,
 
-  # Some vizualization tools
-  plotLsrScanFeats,
-  drawFeatTrackers,
-  saveImgSeq,
   lsrBR,
-
-  # draw pose beliefs etc
-  drawPoses,
-  drawLandms,
-  drawPosesLandms,
-  drawSubmaps,
-  investigatePoseKDE,
-  plotPose3Pairs,
 
   # solve with isam in pytslam
   doISAMSolve,
@@ -154,8 +141,6 @@ export
   appendFactorGraph!,
   doBatchRun,
   rotateFeatsToWorld,
-
-  togglePrtStbLines,
 
   # Didson model
   evalPotential,
@@ -190,8 +175,11 @@ export
   cameraResidual!,
 
   # Point2D
+  Point2DPoint2D,
+  PackedPoint2DPoint2D,
   Pose2DPoint2DBearingRange,
   PackedPose2DPoint2DBearingRange,
+  Pose2DPoint2DBearing,
   Pose2DPoint2DRange,
   Point2DPoint2DRange,
   PackedPoint2DPoint2DRange,
@@ -211,6 +199,11 @@ export
   PackedPose2DPoint2DBearingRangeDensity,
   Pose2DPoint2DRangeDensity,
   PackedPose2DPoint2DRangeDensity,
+
+  Pose2,
+  Point2,
+  Prior,
+  Pose2Pose2_NEW,
 
   # Pose2D
   PriorPose2,
@@ -261,17 +254,41 @@ export
   makeInSituSys,
   makeGenericInSituSys,
   advOdoByRules,
-  progressExamplePlot,
-  plotTrckStep,
   poseTrigAndAdd!,
   poseTrigAndAdd!,
-  processTreeTrackersUpdates!
+  processTreeTrackersUpdates!,
+  addSoftEqualityPoint2D,
+  vectoarr2
+
+  ## Visualization tools have been moved to RoMEPlotting.jl
+  # draw pose beliefs etc
+  # Some vizualization tools
+  # togglePrtStbLines,
+  # plotLsrScanFeats,
+  # drawFeatTrackers,
+  # saveImgSeq,
+  # drawPoses,
+  # drawLandms,
+  # drawPosesLandms,
+  # drawSubmaps,
+  # investigatePoseKDE,
+  # plotPose3Pairs,
+  # drawMarginalContour,
+  # accumulateMarginalContours,
+  # progressExamplePlot,
+  # plotTrckStep,
 
 
-abstract BetweenPoses <: IncrementalInference.FunctorPairwise
 
-typealias CTs CoordinateTransformations
-typealias TUs TransformUtils
+@compat abstract type BetweenPoses <: IncrementalInference.FunctorPairwise end
+
+@compat const VoidUnion{T} = Union{Void, T}
+
+@compat const CTs = CoordinateTransformations
+@compat const TUs = TransformUtils
+
+vectoarr2(v) = reshape(v, length(v),1)
+
 
 include("BayesTracker.jl")
 
@@ -291,7 +308,7 @@ include("InertialPose3.jl")
 
 include("Slam.jl")
 
-include("RobotViz.jl")
+# include("RobotViz.jl")
 include("RobotUtils.jl")
 
 include("SimulationUtils.jl")

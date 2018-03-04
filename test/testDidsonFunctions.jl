@@ -9,18 +9,6 @@ using RoME
 using Distributions
 
 
-# @everywhere begin
-# function (p::LinearRangeBearingElevation)(
-#       res::Vector{Float64},
-#       idx::Int,
-#       meas::Array{Float64,2},
-#       pose::Array{Float64,2},
-#       landm::Array{Float64,2}  )
-#   #
-#   println("LinearRangeBearingElevation is happening")
-#   residualLRBE!(res, p.meas[:,idx], pose[:,idx], landm[:,idx], p.reuse)
-#   nothing
-# end
 
 meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 
@@ -46,11 +34,7 @@ fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx
 @time for fp!.particleidx in 1:N
   numericRootGenericRandomizedFnc!( fr )
 end
-# LinearRangeBearingElevation(Distributions.Normal{Float64}(μ=0.2, σ=0.001),Distributions.Normal{Float64}(μ=3.0, σ=0.001),Distributions.Uniform{Float64}(a=-0.25133, b=0.25133))
-# X[1:3,:] = 0.1*randn(3,200)
-# @time for i in 1:200
-# 	project!(meas, X, pts, i, fp!)
-# end
+
 
 warn("still need to insert kld(..) test to ensure this is working")
 
@@ -74,7 +58,7 @@ fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 1, 1, (zeros(0,1),)
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
 fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
 # fp!(x, res)
-@time fp!(zeros(6), zeros(3))
+@time fp!(zeros(3), zeros(6))
 
 @show zDim = size(fp!.measurement[1],1)
 fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], zDim, fp!)
@@ -120,11 +104,9 @@ f1  = addFactor!(fg,[v1], initPosePrior)
 
 
 println("Adding LinearRangeBearingElevation to graph...")
-meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
-# for i in 1:N
-# 	project!(meas, X, pts, i, fp!)
-# end
 # implemented in SensorModels
+meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
+
 @time X = getVal(v1)
 @time pts = X + meas
 p1 = kde!(pts); # visual checking
