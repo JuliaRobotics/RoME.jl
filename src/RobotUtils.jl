@@ -177,14 +177,14 @@ function addOdoFG!(
       N = c
     end
     sig = diag(cov)
-    RES = zeros(r,c)
+    XnextInit = zeros(r,c)
     # increases the number of particles based on the number of modes in the measurement Z
     for i in 1:c
         ent = [randn()*sig[1]; randn()*sig[2]; randn()*sig[3]]
-        RES[:,i] = addPose2Pose2(X[:,i], DX + ent)
+        XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addNode!(fg, n, RES, cov, N=N, ready=ready, labels=labels)
+    v = addNode!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
     pp = Pose2Pose2(vectoarr2(DX), cov, [1.0]) #[prev;v],
     f = addFactor!(fg, [prev;v], pp, ready=ready)
     infor = inv(cov^2)

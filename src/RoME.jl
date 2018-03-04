@@ -64,8 +64,8 @@ export
   loadjld,
   FactorGraph,
   initializeNode!,
-  plotKDE,
-  plot, # for Graphs.plot
+  isInitialized,
+  ensureAllInitialized!,
   # overloaded functions from IIF
   # decodefg,
   # convertfrompackedfunctionnode,
@@ -179,6 +179,7 @@ export
   PackedPoint2DPoint2D,
   Pose2DPoint2DBearingRange,
   PackedPose2DPoint2DBearingRange,
+  Pose2DPoint2DBearing,
   Pose2DPoint2DRange,
   Point2DPoint2DRange,
   PackedPoint2DPoint2DRange,
@@ -198,6 +199,11 @@ export
   PackedPose2DPoint2DBearingRangeDensity,
   Pose2DPoint2DRangeDensity,
   PackedPose2DPoint2DRangeDensity,
+
+  Pose2,
+  Point2,
+  Prior,
+  Pose2Pose2_NEW,
 
   # Pose2D
   PriorPose2,
