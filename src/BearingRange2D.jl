@@ -78,12 +78,12 @@ type PackedPose2DPoint2DBearingRange <: IncrementalInference.PackedInferenceType
     rmu::Float64
     rsig::Float64
     PackedPose2DPoint2DBearingRange() = new()
-    PackedPose2DPoint2DBearingRange(x...) = new(x[1], x[2], x[3], x[4])
+    PackedPose2DPoint2DBearingRange(x1, x2, x3, x4) = new(x1, x2, x3, x4)
 end
-function convert(::Type{Pose2DPoint2DBearingRange{Normal, Normal}}, d::PackedPose2DPoint2DBearingRange)
-  return Pose2DPoint2DBearingRange{Distributions.Normal, Distributions.Normal}(Distributions.Normal(d.bmu,d.bsig), Distributions.Normal(d.rmu, d.rsig))
+function convert(::Type{Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}}, d::PackedPose2DPoint2DBearingRange) where T
+  return Pose2DPoint2DBearingRange{Distributions.Normal{T}, Distributions.Normal{T}}(Distributions.Normal{T}(d.bmu,d.bsig), Distributions.Normal(d.rmu, d.rsig))
 end
-function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal, Normal})
+function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}) where T
   return PackedPose2DPoint2DBearingRange(d.bearing.μ, d.bearing.σ,
                                          d.range.μ,   d.range.σ )
 end
