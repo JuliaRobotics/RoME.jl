@@ -169,8 +169,7 @@ function addOdoFG!(
         cov::Array{Float64,2};
         N::Int=0,
         ready::Int=1,
-        labels::Vector{<:AbstractString}=String[]  )
-    #
+        labels::Vector{<:AbstractString}=String[])
     prev, X, nextn = getLastPose2D(fg)
     r,c = size(X)
     if N==0
@@ -247,9 +246,9 @@ function initFactorGraph!(fg::FactorGraph;
       labels::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   init = vectoarr2(init)
-  v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
+  v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=["POSE";"VARIABLE";labels])
   #
-  addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]), ready=ready ) #[v1],
+  addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]), ready=ready, labels=["FACTOR";labels]) #[v1],
   return lbl
 end
 

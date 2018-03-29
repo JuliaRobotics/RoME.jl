@@ -33,7 +33,7 @@ end
 #-------------------------------------------------------------------------------
 # bearing and range available
 
-type Pose2DPoint2DBearingRange{B <: Distributions.Distribution, R <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
+struct Pose2DPoint2DBearingRange{B <: Distributions.Distribution, R <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
     # Zij::Array{Float64,2} # bearing and range hypotheses as columns
     # Cov::Array{Float64,2}
     # W::Array{Float64,1}
@@ -72,18 +72,18 @@ end
 
 passTypeThrough(d::FunctionNodeData{Pose2DPoint2DRange}) = d
 
-type PackedPose2DPoint2DBearingRange <: IncrementalInference.PackedInferenceType
+struct PackedPose2DPoint2DBearingRange <: IncrementalInference.PackedInferenceType
     bmu::Float64 # 0rotations, 1translation in each column
     bsig::Float64
     rmu::Float64
     rsig::Float64
     PackedPose2DPoint2DBearingRange() = new()
-    PackedPose2DPoint2DBearingRange(x...) = new(x[1], x[2], x[3], x[4])
+    PackedPose2DPoint2DBearingRange(x1, x2, x3, x4) = new(x1, x2, x3, x4)
 end
-function convert(::Type{Pose2DPoint2DBearingRange{Normal, Normal}}, d::PackedPose2DPoint2DBearingRange)
-  return Pose2DPoint2DBearingRange{Distributions.Normal, Distributions.Normal}(Distributions.Normal(d.bmu,d.bsig), Distributions.Normal(d.rmu, d.rsig))
+function convert(::Type{Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}}, d::PackedPose2DPoint2DBearingRange) where T <: Real
+  return Pose2DPoint2DBearingRange{Distributions.Normal{T}, Distributions.Normal{T}}(Distributions.Normal{T}(d.bmu,d.bsig), Distributions.Normal{T}(d.rmu, d.rsig))
 end
-function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal, Normal})
+function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}) where T
   return PackedPose2DPoint2DBearingRange(d.bearing.μ, d.bearing.σ,
                                          d.range.μ,   d.range.σ )
 end
