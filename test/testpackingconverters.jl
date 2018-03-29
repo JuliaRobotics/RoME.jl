@@ -66,17 +66,20 @@ println("test conversions of Pose2DPoint2DBearingRange")
 # and a second pose
 v3 = addNode!(fg, :l1, vectoarr2([50.0,50.0]), diagm([1.0;1.0]), N=N)
 # ppc = Pose2DPoint2DBearingRange([50.0;0.0;pi/2], 0.01*eye(2), [1.0])
-ppbr = Pose2DPoint2DBearingRange{Normal, Normal}(
+ppbr = Pose2DPoint2DBearingRange{Normal{Float64}, Normal{Float64}}(
               Normal(0.0, 0.005 ),
               Normal(50, 0.5) )
 f3 = addFactor!(fg, [:x2;:l1], ppbr)
 
 dd = convert(PackedPose2DPoint2DBearingRange, ppbr)
-upd = convert(RoME.Pose2DPoint2DBearingRange{Normal,Normal}, dd)
+upd = convert(
+        RoME.Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}},
+        dd
+      )
 
 
 packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2DPoint2DBearingRange}, getData(f3))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2DPoint2DBearingRange{Normal,Normal}}}, packeddata)
+unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}}}}, packeddata)
 
 @test ppbr.bearing.μ == unpackeddata.fnc.usrfnc!.bearing.μ
 @test ppbr.bearing.σ == unpackeddata.fnc.usrfnc!.bearing.σ
