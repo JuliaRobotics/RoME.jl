@@ -167,7 +167,7 @@ function solvePose2(Zbr::Array{Float64,1}, par::Array{Float64,1}, init::Array{Fl
     shuffle!(p);
     p1 = p.==1; p2 = p.==2; p3 = p.==3
     #@show init, par
-    r = nlsolve(    (x, res) -> bearrang!(res, Zbr,  pack3(x[1], x[2], p1, p2, p3, init[p3]), par),
+    r = nlsolve(    (res, x) -> bearrang!(res, Zbr,  pack3(x[1], x[2], p1, p2, p3, init[p3]), par),
                     [init[p1];init[p2]] )
     return pack3(r.zero[1], r.zero[2], p1, p2, p3, init[p3]);
 end
