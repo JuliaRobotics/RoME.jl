@@ -2,7 +2,7 @@
 
 
 # better to use bearingrange with [uniform bearing], numerical solving issue on 1D
-type Pose2DPoint2DRange <: IncrementalInference.FunctorPairwise
+mutable struct Pose2DPoint2DRange <: IncrementalInference.FunctorPairwise
     Zij::Vector{Float64} # bearing and range hypotheses as columns
     Cov::Float64
     W::Vector{Float64}
@@ -33,7 +33,7 @@ end
 #-------------------------------------------------------------------------------
 # bearing and range available
 
-struct Pose2DPoint2DBearingRange{B <: Distributions.Distribution, R <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
+mutable struct Pose2DPoint2DBearingRange{B <: Distributions.Distribution, R <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
     # Zij::Array{Float64,2} # bearing and range hypotheses as columns
     # Cov::Array{Float64,2}
     # W::Array{Float64,1}
@@ -72,7 +72,7 @@ end
 
 passTypeThrough(d::FunctionNodeData{Pose2DPoint2DRange}) = d
 
-struct PackedPose2DPoint2DBearingRange <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose2DPoint2DBearingRange <: IncrementalInference.PackedInferenceType
     bmu::Float64 # 0rotations, 1translation in each column
     bsig::Float64
     rmu::Float64
@@ -99,7 +99,7 @@ end
 # bearing only available
 
 # this factor type is still a work in progress
-type Pose2DPoint2DBearing{B <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
+mutable struct Pose2DPoint2DBearing{B <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
     bearing::B
     Pose2DPoint2DBearing{B}() where {B} = new{B}()
     Pose2DPoint2DBearing(x1::B) where {B} = new{B}(x1)

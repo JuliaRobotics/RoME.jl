@@ -17,7 +17,7 @@ struct Point2 <: IncrementalInference.InferenceVariable
 end
 
 
-struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}
+mutable struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}
   z::T
   Pose2Pose2_NEW() where {T <: Distribution} = new{T}()
   Pose2Pose2_NEW(z1::T) where {T <: Distribution} = new{T}(z1)
@@ -38,7 +38,7 @@ end
 
 
 
-type PriorPose2 <: IncrementalInference.FunctorSingleton
+mutable struct PriorPose2 <: IncrementalInference.FunctorSingleton
     Zi::Array{Float64,2}
     Cov::Array{Float64,2}
     W::Array{Float64,1}
@@ -50,7 +50,7 @@ function getSample(p2::PriorPose2, N::Int=1)
 end
 
 
-type Pose2Pose2 <: RoME.BetweenPoses # IncrementalInference.FunctorPairwise
+mutable struct Pose2Pose2 <: RoME.BetweenPoses # IncrementalInference.FunctorPairwise
     Zij::Array{Float64,2} # 2translations, 1rotation
     Cov::Array{Float64,2}
     W::Array{Float64,1}
@@ -128,7 +128,7 @@ end
 # ------------------------------------
 
 
-type PackedPriorPose2  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPriorPose2  <: IncrementalInference.PackedInferenceType
     vecZij::Array{Float64,1} # 0rotations, 1translation in each column
     dimz::Int
     vecCov::Array{Float64,1}
@@ -155,7 +155,7 @@ end
 # --------------------------------------------
 
 
-type PackedPose2Pose2  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose2Pose2  <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 2translations, 1rotation
   dimz::Int
   vecCov::Array{Float64,1}
