@@ -1,5 +1,5 @@
-addprocs(2)
-@show nprocs()
+#addprocs(2)
+#@show nprocs()
 
 using RoME
 using Base.Test
