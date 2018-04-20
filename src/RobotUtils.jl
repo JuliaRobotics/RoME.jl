@@ -169,21 +169,22 @@ function addOdoFG!(
         cov::Array{Float64,2};
         N::Int=0,
         ready::Int=1,
-        labels::Vector{<:AbstractString}=String[])
+        labels::Vector{<:AbstractString}=String[]  )
+    #
     prev, X, nextn = getLastPose2D(fg)
     r,c = size(X)
     if N==0
       N = c
     end
     sig = diag(cov)
-    XnextInit = zeros(r,c)
+    RES = zeros(r,c)
     # increases the number of particles based on the number of modes in the measurement Z
     for i in 1:c
         ent = [randn()*sig[1]; randn()*sig[2]; randn()*sig[3]]
-        XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
+        RES[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addNode!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
+    v = addNode!(fg, n, RES, cov, N=N, ready=ready, labels=labels)
     pp = Pose2Pose2(vectoarr2(DX), cov, [1.0]) #[prev;v],
     f = addFactor!(fg, [prev;v], pp, ready=ready)
     infor = inv(cov^2)
@@ -243,12 +244,19 @@ function initFactorGraph!(fg::FactorGraph;
       N::Int=100,
       lbl::Symbol=:x1,
       ready::Int=1,
+      firstPoseType::InferenceVariable=Pose2,
       labels::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   init = vectoarr2(init)
-  v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=["POSE";"VARIABLE";labels])
-  #
-  addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]), ready=ready, labels=["FACTOR";labels]) #[v1],
+  if firstPoseType == Pose2
+      v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
+      addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]), ready=ready ) #[v1],
+  end
+  if firstPoseType == Pose3
+      warn("This may go kaboom.")
+      v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
+      addFactor!(fg, [v1], PriorPose3(init, P0,  [1.0]), ready=ready ) #[v1],
+  end
   return lbl
 end
 
