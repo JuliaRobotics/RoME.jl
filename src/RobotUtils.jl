@@ -244,9 +244,10 @@ function initFactorGraph!(fg::FactorGraph;
       N::Int=100,
       lbl::Symbol=:x1,
       ready::Int=1,
-      firstPoseType::Union{InferenceVariable, Void}=Pose2,
-      labels::Vector{T}=String[]  ) where {T <: AbstractString}
+      firstPoseType::I=Pose2,
+      labels::Vector{T}=String[]  ) where {T <: AbstractString, I <: InferenceVariable}
   #
+  @show "HERERERERRERER!!!!!!!"
   init = vectoarr2(init)
   if firstPoseType == Pose2
       v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
