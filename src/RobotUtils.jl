@@ -244,8 +244,8 @@ function initFactorGraph!(fg::FactorGraph;
       N::Int=100,
       lbl::Symbol=:x1,
       ready::Int=1,
-      firstPoseType::I=Pose2,
-      labels::Vector{T}=String[]  ) where {T <: AbstractString, I <: InferenceVariable}
+      firstPoseType=Pose2,
+      labels::Vector{T}=String[]  ) where {T <: AbstractString}
   #
   @show "HERERERERRERER!!!!!!!"
   init = vectoarr2(init)
