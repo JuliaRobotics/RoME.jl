@@ -202,6 +202,8 @@ export
 
   Pose2,
   Point2,
+  Pose3,
+  Point3,
   Prior,
   Pose2Pose2_NEW,
 
@@ -296,6 +298,7 @@ include("SensorModels.jl")
 include("CameraModel.jl")
 include("Point2D.jl")
 include("Pose2D.jl")
+include("Pose3D.jl")
 include("BearingRange2D.jl")
 
 include("BearingRangeDensity2D.jl")

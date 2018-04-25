@@ -169,7 +169,8 @@ function addOdoFG!(
         cov::Array{Float64,2};
         N::Int=0,
         ready::Int=1,
-        labels::Vector{<:AbstractString}=String[])
+        labels::Vector{<:AbstractString}=String[]  )
+    #
     prev, X, nextn = getLastPose2D(fg)
     r,c = size(X)
     if N==0
@@ -238,19 +239,33 @@ function initfg(;sessionname="NA")
 end
 
 function initFactorGraph!(fg::FactorGraph;
-      P0::Array{Float64,2}=diagm([0.03;0.03;0.001]),
-      init::Vector{Float64}=[0.0;0.0;0.0],
+      P0::Union{Array{Float64,2},Void}=nothing,
+      init::Union{Vector{Float64},Void}=nothing,
       N::Int=100,
       lbl::Symbol=:x1,
       ready::Int=1,
-      labels::Vector{T}=String[]  ) where {T <: AbstractString}
+      firstPoseType=Pose2,
+      labels::Vector{<:AbstractString}=String[] )
   #
-  init = vectoarr2(init)
-  v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=["POSE";"VARIABLE";labels])
-  #
-  addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]), ready=ready, labels=["FACTOR";labels]) #[v1],
+  if firstPoseType == Pose2
+      init = init!=nothing ? init : zeros(3)
+      P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.001])
+      init = vectoarr2(init)
+      addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
+      # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
+      addFactor!(fg, [lbl;], PriorPose2(init, P0,  [1.0]), ready=ready ) #[v1],
+  end
+  if firstPoseType == Pose3
+      init = init!=nothing ? init : zeros(6)
+      P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.03;0.001;0.001;0.001])
+      addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
+      # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
+      addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready ) #[v1],
+  end
   return lbl
 end
+
+
 
 function newLandm!(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100, ready::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
