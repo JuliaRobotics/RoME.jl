@@ -177,14 +177,14 @@ function addOdoFG!(
       N = c
     end
     sig = diag(cov)
-    RES = zeros(r,c)
+    XnextInit = zeros(r,c)
     # increases the number of particles based on the number of modes in the measurement Z
     for i in 1:c
         ent = [randn()*sig[1]; randn()*sig[2]; randn()*sig[3]]
-        RES[:,i] = addPose2Pose2(X[:,i], DX + ent)
+        XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addNode!(fg, n, RES, cov, N=N, ready=ready, labels=labels)
+    v = addNode!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
     pp = Pose2Pose2(vectoarr2(DX), cov, [1.0]) #[prev;v],
     f = addFactor!(fg, [prev;v], pp, ready=ready)
     infor = inv(cov^2)
@@ -239,27 +239,33 @@ function initfg(;sessionname="NA")
 end
 
 function initFactorGraph!(fg::FactorGraph;
-      P0::Array{Float64,2}=diagm([0.03;0.03;0.001]),
-      init::Vector{Float64}=[0.0;0.0;0.0],
+      P0::Union{Array{Float64,2},Void}=nothing,
+      init::Union{Vector{Float64},Void}=nothing,
       N::Int=100,
       lbl::Symbol=:x1,
       ready::Int=1,
       firstPoseType=Pose2,
-      labels::Vector{T}=String[]  ) where {T <: AbstractString}
+      labels::Vector{<:AbstractString}=String[] )
   #
-  @show "HERERERERRERER!!!!!!!"
-  init = vectoarr2(init)
   if firstPoseType == Pose2
-      v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      addFactor!(fg, [v1], PriorPose2(init, P0,  [1.0]), ready=ready ) #[v1],
+      init = init!=nothing ? init : zeros(3)
+      P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.001])
+      init = vectoarr2(init)
+      addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
+      # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
+      addFactor!(fg, [lbl;], PriorPose2(init, P0,  [1.0]), ready=ready ) #[v1],
   end
   if firstPoseType == Pose3
-      warn("This may go kaboom.")
-      v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      addFactor!(fg, [v1], PriorPose3(init, P0,  [1.0]), ready=ready ) #[v1],
+      init = init!=nothing ? init : zeros(6)
+      P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.03;0.001;0.001;0.001])
+      addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
+      # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
+      addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready ) #[v1],
   end
   return lbl
 end
+
+
 
 function newLandm!(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100, ready::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
