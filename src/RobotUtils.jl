@@ -242,29 +242,34 @@ function initFactorGraph!(fg::FactorGraph;
       P0::Union{Array{Float64,2},Void}=nothing,
       init::Union{Vector{Float64},Void}=nothing,
       N::Int=100,
-      lbl::Symbol=:x1,
+      lbl::Symbol=:x0,
       ready::Int=1,
       firstPoseType=Pose2,
       labels::Vector{<:AbstractString}=String[])
   #
+  nodesymbols = Symbol[]
   if firstPoseType == Pose2
       init = init!=nothing ? init : zeros(3)
       P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.001])
       init = vectoarr2(init)
       addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
+      push!(nodesymbols, lbl)
       # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      addFactor!(fg, [lbl;], PriorPose2(init, P0,  [1.0]), ready=ready, labels=String["FACTOR"; labels]) #[v1],
+      fctVert = addFactor!(fg, [lbl;], PriorPose2(init, P0,  [1.0]), ready=ready, labels=String["FACTOR"; labels]) #[v1],
+      push!(nodesymbols, fctVert.label)
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
       P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.03;0.001;0.001;0.001])
       addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
+      push!(nodesymbols, lbl)
       # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
+      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
+      push!(nodesymbols, fctVert.label)
   end
-  return lbl
+  warn("initFactorGraph! -- returns variable and factor symbols ")
+  return nodesymbols
 end
-
 
 
 function newLandm!(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
