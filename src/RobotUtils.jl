@@ -245,22 +245,22 @@ function initFactorGraph!(fg::FactorGraph;
       lbl::Symbol=:x1,
       ready::Int=1,
       firstPoseType=Pose2,
-      labels::Vector{<:AbstractString}=String[] )
+      labels::Vector{<:AbstractString}=String[])
   #
   if firstPoseType == Pose2
       init = init!=nothing ? init : zeros(3)
       P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.001])
       init = vectoarr2(init)
-      addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
+      addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
       # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      addFactor!(fg, [lbl;], PriorPose2(init, P0,  [1.0]), ready=ready ) #[v1],
+      addFactor!(fg, [lbl;], PriorPose2(init, P0,  [1.0]), ready=ready, labels=String["FACTOR"; labels]) #[v1],
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
       P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.03;0.001;0.001;0.001])
-      addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
+      addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
       # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready ) #[v1],
+      addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
   end
   return lbl
 end
