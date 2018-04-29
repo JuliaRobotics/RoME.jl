@@ -9,7 +9,8 @@ getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 
 struct Pose2 <: IncrementalInference.InferenceVariable
   dims::Int
-  Pose2() = new(3)
+  labels::Vector{String}
+  Pose2() = new(3, String["POSE";])
 end
 struct Point2 <: IncrementalInference.InferenceVariable
   dims::Int
