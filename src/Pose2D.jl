@@ -1,20 +1,16 @@
 # Pose2 functions for Robot Motion Estimate
 
+struct Pose2 <: IncrementalInference.InferenceVariable
+  dims::Int
+  labels::Vector{String}
+  Pose2() = new(3, String["POSE";])
+end
+
 # TODO - move to IncrementalInference
 struct Prior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}
   z::T
 end
 getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
-
-
-struct Pose2 <: IncrementalInference.InferenceVariable
-  dims::Int
-  Pose2() = new(3)
-end
-struct Point2 <: IncrementalInference.InferenceVariable
-  dims::Int
-  Point2() = new(2)
-end
 
 
 mutable struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}

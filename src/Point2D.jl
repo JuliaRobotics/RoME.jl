@@ -1,7 +1,12 @@
-# Point2D type
+# Point2D mutable struct
 
+struct Point2 <: IncrementalInference.InferenceVariable
+  dims::Int
+  labels::Vector{String}
+  Point2() = new(2, String["";])
+end
 
-type PriorPoint2D <: IncrementalInference.FunctorSingleton
+mutable struct PriorPoint2D <: IncrementalInference.FunctorSingleton
   mv::MvNormal
   W::Array{Float64,1}
   PriorPoint2D() = new()
@@ -11,7 +16,7 @@ function getSample(p2::PriorPoint2D, N::Int=1)
   return (rand(p2.mv, N),)
 end
 
-type Point2DPoint2DRange <: IncrementalInference.FunctorPairwiseMinimize #Pairwise
+mutable struct Point2DPoint2DRange <: IncrementalInference.FunctorPairwiseMinimize #Pairwise
     Zij::Vector{Float64} # bearing and range hypotheses as columns
     Cov::Float64
     W::Vector{Float64}
@@ -40,7 +45,7 @@ end
 
 
 
-type Point2DPoint2D <: BetweenPoses
+mutable struct Point2DPoint2D <: BetweenPoses
     Zij::Distribution
     Point2DPoint2D() = new()
     Point2DPoint2D(x) = new(x)
@@ -65,7 +70,7 @@ end
 
 
 
-type PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
+mutable struct PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
   belief::BallTreeDensity
   nullhypothesis::Distributions.Categorical
   PriorPoint2DensityNH() = new()
@@ -74,7 +79,7 @@ end
 function getSample(p2::PriorPoint2DensityNH, N::Int=1)
   return (rand(p2.belief, N), )
 end
-type PackedPriorPoint2DensityNH <: IncrementalInference.PackedInferenceType
+mutable struct PackedPriorPoint2DensityNH <: IncrementalInference.PackedInferenceType
     rpts::Vector{Float64} # 0rotations, 1translation in each column
     rbw::Vector{Float64}
     dims::Int
@@ -144,7 +149,7 @@ end
 
 
 
-type PackedPriorPoint2D  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPriorPoint2D  <: IncrementalInference.PackedInferenceType
     mu::Array{Float64,1}
     vecCov::Array{Float64,1}
     dimc::Int
@@ -182,7 +187,7 @@ end
 
 
 
-type PackedPoint2DPoint2DRange  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPoint2DPoint2DRange  <: IncrementalInference.PackedInferenceType
     Zij::Vector{Float64} # bearing and range hypotheses as columns
     Cov::Float64
     W::Vector{Float64}
@@ -202,7 +207,7 @@ end
 
 
 
-type PackedPoint2DPoint2D <: IncrementalInference.PackedInferenceType
+mutable struct PackedPoint2DPoint2D <: IncrementalInference.PackedInferenceType
     mu::Vector{Float64}
     sigma::Vector{Float64}
     sdim::Int

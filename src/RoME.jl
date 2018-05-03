@@ -1,6 +1,5 @@
 module RoME
 
-
 using
   IncrementalInference,
   Graphs,
@@ -9,13 +8,11 @@ using
   Rotations,
   KernelDensityEstimate,
   Distributions,
-  # Colors,
-  # Gadfly,
   JLD,
   HDF5,
   ProgressMeter,
+  DocStringExtensions,
   Compat
-
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
