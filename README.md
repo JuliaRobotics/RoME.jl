@@ -1,13 +1,13 @@
 # RoME.jl
 
-[![Build Status](https://travis-ci.org/dehann/RoME.jl.svg?branch=master)](https://travis-ci.org/dehann/RoME.jl)
-[![codecov.io](https://codecov.io/github/dehann/RoME.jl/coverage.svg?branch=master)](https://codecov.io/github/dehann/RoME.jl?branch=master)
+[![Build Status](https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=master)](https://travis-ci.org/JuliaRobotics/RoME.jl)
+[![codecov.io](https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master)](https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master)
 
 [![RoME](http://pkg.julialang.org/badges/RoME_0.6.svg)](http://pkg.julialang.org/?pkg=RoME&ver=0.6)
 [![RoME](http://pkg.julialang.org/badges/RoME_0.7.svg)](http://pkg.julialang.org/?pkg=RoME&ver=0.7)
 
 
-Robot Motion Estimate: A set of functions for developing front-ends for SLAM in [Julia](www.julialang.org) which adds transform, visualization and convenience functions to the [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf) backend solver. The back-end solver is implemented in [IncrementalInference.jl](https://github.com/dehann/IncrementalInference.jl).
+Robot Motion Estimate: A set of functions for developing front-ends for SLAM in [Julia](www.julialang.org) which adds transform, visualization and convenience functions to the [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf) backend solver. The back-end solver is implemented in [IncrementalInference.jl](https://github.com/JuliaRobotics/IncrementalInference.jl).
 
 ## Introduction
 
@@ -15,7 +15,7 @@ This package forms part of the [Caesar.jl](https://github.com/dehann/Caesar.jl) 
 
 ## Example
 
-<a href="https://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/dehann/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="480" border="10" /></a>
+<a href="https://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="480" border="10" /></a>
 
 ## Installation
 
@@ -31,6 +31,6 @@ There are a few use cases in the examples folder, including the Victoria Park da
 
 Feel free to create and issue to resolve problems or if something is unclear.
 
-## Work in progress
+## Comments and Issues Welcome
 
-This is a work in progress package.
+Please don't hesitate to open issues or suggestions in line with [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).
