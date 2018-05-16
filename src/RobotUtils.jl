@@ -234,6 +234,7 @@ end
 function initfg(;sessionname="NA")
   fgl = emptyFactorGraph()
   fgl.sessionname=sessionname
+  # fgl.robotname = ?
   # registerCallback!(fgl, RoME.getSample) # RoME.evalPotention
   return fgl
 end
