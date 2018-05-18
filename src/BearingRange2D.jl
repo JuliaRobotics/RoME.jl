@@ -73,20 +73,61 @@ end
 passTypeThrough(d::FunctionNodeData{Pose2DPoint2DRange}) = d
 
 mutable struct PackedPose2DPoint2DBearingRange <: IncrementalInference.PackedInferenceType
-    bmu::Float64 # 0rotations, 1translation in each column
-    bsig::Float64
-    rmu::Float64
-    rsig::Float64
+    # bmu::Float64 # 0rotations, 1translation in each column
+    # bsig::Float64
+    # rmu::Float64
+    # rsig::Float64
+    bearstr::String
+    rangstr::String
     PackedPose2DPoint2DBearingRange() = new()
-    PackedPose2DPoint2DBearingRange(x1, x2, x3, x4) = new(x1, x2, x3, x4)
+    # PackedPose2DPoint2DBearingRange(x1, x2, x3, x4) = new(x1, x2, x3, x4)
+    PackedPose2DPoint2DBearingRange(s1::AS, s2::AS) where {AS <: AbstractString} = new(string(s1),string(s2))
 end
-function convert(::Type{Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}}, d::PackedPose2DPoint2DBearingRange) where T <: Real
-  return Pose2DPoint2DBearingRange{Distributions.Normal{T}, Distributions.Normal{T}}(Distributions.Normal{T}(d.bmu,d.bsig), Distributions.Normal{T}(d.rmu, d.rsig))
+
+function normalfromstring(str::AS) where {AS <: AbstractString}
+  meanstr = match(r"μ=[+-]?([0-9]*[.])?[0-9]+", str).match
+  mean = split(meanstr, '=')[2]
+  sigmastr = match(r"σ=[+-]?([0-9]*[.])?[0-9]+", str).match
+  sigma = split(sigmastr, '=')[2]
+  Normal{Float64}(parse(Float64,mean), parse(Float64,sigma))
 end
+
+function extractdistribution(str::AS)::Distributions.Distribution where {AS <: AbstractString}
+  if ismatch(r"Normal", str)
+    return normalfromstring(str)
+  else
+    error("Don't know how to extract distrubtion from str=$(str)")
+  end
+end
+
+# error with conversion of
+# GenericWrapParam{Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}}} to  GenericWrapParam{Pose2DPoint2DBearingRange}
+function convert(::Type{GenericWrapParam{Pose2DPoint2DBearingRange}}, d::GenericWrapParam{Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}}} )
+  warn("trying trivial conversion")
+  return d
+end
+
+function convert(::Type{Pose2DPoint2DBearingRange}, d::PackedPose2DPoint2DBearingRange)
+  # Pose2DPoint2DBearingRange()
+  warn("This is the primary converter for new P2P2BR")
+  Pose2DPoint2DBearingRange(extractdistribution(d.bearstr), extractdistribution(d.rangstr))
+end
+# function convert(::Type{Pose2DPoint2DBearingRange{D1, D2}}, d::PackedPose2DPoint2DBearingRange) where {D1, D2}
+#   error("This P2P2BR converter does not seem to work with current Julia 0.6.2 dispatch.")
+#   return Pose2DPoint2DBearingRange{Distributions.Normal{T}, Distributions.Normal{T}}(Distributions.Normal{T}(d.bmu,d.bsig), Distributions.Normal{T}(d.rmu, d.rsig))
+# end
+# # Something is wrong here -- dispatch is not finding this function!
+# function convert(::Type{Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}}, d::PackedPose2DPoint2DBearingRange) where {T <: Real}
+#   error("This is the right converter for P2P2BR")
+#   return Pose2DPoint2DBearingRange{Distributions.Normal{T}, Distributions.Normal{T}}(Distributions.Normal{T}(d.bmu,d.bsig), Distributions.Normal{T}(d.rmu, d.rsig))
+# end
 function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}) where T
-  return PackedPose2DPoint2DBearingRange(d.bearing.μ, d.bearing.σ,
-                                         d.range.μ,   d.range.σ )
+  return PackedPose2DPoint2DBearingRange(string(d.bearing), string(d.range))
 end
+# function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}) where T
+#   return PackedPose2DPoint2DBearingRange(d.bearing.μ, d.bearing.σ,
+#                                          d.range.μ,   d.range.σ )
+# end
 
 
 

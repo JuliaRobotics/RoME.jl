@@ -64,7 +64,7 @@ end
 
 
 
-type PackedPose2DPoint2DBearingRangeDensity <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose2DPoint2DBearingRangeDensity <: IncrementalInference.PackedInferenceType
     bpts::Vector{Float64} # 0rotations, 1translation in each column
     bbw::Vector{Float64}
     rpts::Vector{Float64}
@@ -84,7 +84,7 @@ end
 
 
 
-type PackedPose2DPoint2DRangeDensity <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose2DPoint2DRangeDensity <: IncrementalInference.PackedInferenceType
     rpts::Vector{Float64} # 0rotations, 1translation in each column
     rbw::Vector{Float64}
     PackedPose2DPoint2DRangeDensity() = new()
