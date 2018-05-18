@@ -3,7 +3,7 @@
 struct Point2 <: IncrementalInference.InferenceVariable
   dims::Int
   labels::Vector{String}
-  Point2() = new(2, String["";])
+  Point2() = new(2, String[])
 end
 
 mutable struct PriorPoint2D <: IncrementalInference.FunctorSingleton
