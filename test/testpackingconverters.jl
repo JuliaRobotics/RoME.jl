@@ -27,68 +27,70 @@ ppc = Pose2Pose2(vectoarr2([50.0;0.0;pi/2]), odoCov, [1.0])
 f2 = addFactor!(fg, [v1;v2], ppc)
 
 
-println("test conversions of PriorPose2")
-dd = convert(PackedPriorPose2, ipp)
-upd = convert(RoME.PriorPose2, dd)
+@testset "test conversions of PriorPose2" begin
+    dd = convert(PackedPriorPose2, ipp)
+    upd = convert(RoME.PriorPose2, dd)
 
-@test RoME.compare(ipp, upd)
+    @test RoME.compare(ipp, upd)
 
-packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose2}}, packeddata)
+    packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose2}}, packeddata)
 
-@test IncrementalInference.compare(getData(f1), unpackeddata)
+    @test IncrementalInference.compare(getData(f1), unpackeddata)
 
-packedv1data = VNDencoder(IncrementalInference.PackedVariableNodeData, getData(v1))
-upv1data = VNDdecoder(IncrementalInference.VariableNodeData, packedv1data)
+    # packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
+    # unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose2}}, packeddata)
 
-@test IncrementalInference.compare(getData(v1), upv1data)
+    packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
+    upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
+    # packedv1data = VNDencoder(IncrementalInference.PackedVariableNodeData, getData(v1))
+    # upv1data = VNDdecoder(IncrementalInference.VariableNodeData, packedv1data)
 
+    @test IncrementalInference.compare(getData(v1), upv1data)
+end
 
-println("test conversions of Pose2Pose2")
+@testset "test conversions of Pose2Pose2" begin
 
-dd = convert(PackedPose2Pose2, ppc)
-upd = convert(RoME.Pose2Pose2, dd)
+    dd = convert(PackedPose2Pose2, ppc)
+    upd = convert(RoME.Pose2Pose2, dd)
 
-# TODO -- fix ambiguity in compare function
-@test RoME.compare(ppc, upd)
+    # TODO -- fix ambiguity in compare function
+    @test RoME.compare(ppc, upd)
 
-packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Pose2}, getData(f2))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2Pose2}}, packeddata)
+    packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Pose2}, getData(f2))
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2Pose2}}, packeddata)
 
-# TODO -- fix ambibuity in compare function
-@test IncrementalInference.compare(getData(f2), unpackeddata)
-
-
-println("test conversions of Pose2DPoint2DBearingRange")
-
-
-# and a second pose
-v3 = addNode!(fg, :l1, vectoarr2([50.0,50.0]), diagm([1.0;1.0]), N=N)
-# ppc = Pose2DPoint2DBearingRange([50.0;0.0;pi/2], 0.01*eye(2), [1.0])
-ppbr = Pose2DPoint2DBearingRange{Normal{Float64}, Normal{Float64}}(
-              Normal(0.0, 0.005 ),
-              Normal(50, 0.5) )
-f3 = addFactor!(fg, [:x2;:l1], ppbr)
-
-dd = convert(PackedPose2DPoint2DBearingRange, ppbr)
-upd = convert(
-        RoME.Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}},
-        dd
-      )
+    # TODO -- fix ambibuity in compare function
+    @test IncrementalInference.compare(getData(f2), unpackeddata)
+end
 
 
-packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2DPoint2DBearingRange}, getData(f3))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}}}}, packeddata)
+@testset "test conversions of Pose2DPoint2DBearingRange" begin
+    # and a second pose
+    v3 = addNode!(fg, :l1, vectoarr2([50.0,50.0]), diagm([1.0;1.0]), N=N)
+    # ppc = Pose2DPoint2DBearingRange([50.0;0.0;pi/2], 0.01*eye(2), [1.0])
+    ppbr = Pose2DPoint2DBearingRange{Normal{Float64}, Normal{Float64}}(
+                  Normal(0.0, 0.005 ),
+                  Normal(50, 0.5) )
+    f3 = addFactor!(fg, [:x2;:l1], ppbr)
 
-@test ppbr.bearing.μ == unpackeddata.fnc.usrfnc!.bearing.μ
-@test ppbr.bearing.σ == unpackeddata.fnc.usrfnc!.bearing.σ
+    dd = convert(PackedPose2DPoint2DBearingRange, ppbr)
+    upd = convert(
+            RoME.Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}},
+            dd
+          )
 
-@test ppbr.range.μ == unpackeddata.fnc.usrfnc!.range.μ
-@test ppbr.range.σ == unpackeddata.fnc.usrfnc!.range.σ
 
+    packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2DPoint2DBearingRange}, getData(f3))
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2DPoint2DBearingRange}}, packeddata) # IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}}}}
 
-println("test conversions of PriorPose3")
+    @test ppbr.bearing.μ == unpackeddata.fnc.usrfnc!.bearing.μ
+    @test ppbr.bearing.σ == unpackeddata.fnc.usrfnc!.bearing.σ
+
+    @test ppbr.range.μ == unpackeddata.fnc.usrfnc!.range.μ
+    @test ppbr.range.σ == unpackeddata.fnc.usrfnc!.range.σ
+end
 
 # parameters
 N = 300
@@ -103,49 +105,48 @@ v1 = addNode!(fg,:x1,  0.1*randn(6,N))
 ipp = PriorPose3(MvNormal(zeros(6), initCov) )
 f1  = addFactor!(fg,[v1], ipp)
 
-dd = convert(PackedPriorPose3, ipp)
-upd = convert(RoME.PriorPose3, dd)
 
-# @test TransformUtils.compare(ipp.Zi, upd.Zi)
-@test norm(ipp.Zi.μ - upd.Zi.μ) < 1e-10
-@test norm(ipp.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
+@testset "test conversions of PriorPose3" begin
 
-packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, getData(f1))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose3}}, packeddata)
+    dd = convert(PackedPriorPose3, ipp)
+    upd = convert(RoME.PriorPose3, dd)
 
-# TODO -- fix ambibuity in compare function
-@test IncrementalInference.compare(getData(f1), unpackeddata)
+    # @test TransformUtils.compare(ipp.Zi, upd.Zi)
+    @test norm(ipp.Zi.μ - upd.Zi.μ) < 1e-10
+    @test norm(ipp.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
 
-packedv1data = VNDencoder(IncrementalInference.PackedVariableNodeData, getData(v1))
-upv1data = VNDdecoder(IncrementalInference.VariableNodeData, packedv1data)
+    packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, getData(f1))
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose3}}, packeddata)
 
-@test IncrementalInference.compare(getData(v1), upv1data)
+    # TODO -- fix ambibuity in compare function
+    @test IncrementalInference.compare(getData(f1), unpackeddata)
+
+    packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
+    upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
+
+    @test IncrementalInference.compare(getData(v1), upv1data)
+end
 
 
-
-
-println("test conversions of Pose3Pose3")
 
 pp3 = Pose3Pose3( MvNormal([25.0;0;0;0;0;0], odoCov) )
 v2, f2 = addOdoFG!(fg, pp3 )
 
-dd = convert(PackedPose3Pose3, pp3)
-upd = convert(RoME.Pose3Pose3, dd)
+@testset "test conversions of Pose3Pose3" begin
+    dd = convert(PackedPose3Pose3, pp3)
+    upd = convert(RoME.Pose3Pose3, dd)
 
 
-@test norm(pp3.Zij.μ - upd.Zij.μ) < 1e-10
-@test norm(pp3.Zij.Σ.mat - upd.Zij.Σ.mat) < 1e-8
+    @test norm(pp3.Zij.μ - upd.Zij.μ) < 1e-10
+    @test norm(pp3.Zij.Σ.mat - upd.Zij.Σ.mat) < 1e-8
 
-packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3}, getData(f2))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose3Pose3}}, packeddata)
+    packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3}, getData(f2))
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose3Pose3}}, packeddata)
 
-# TODO -- fix ambibuity in compare function
-@test IncrementalInference.compare(getData(f2), unpackeddata)
+    # TODO -- fix ambibuity in compare function
+    @test IncrementalInference.compare(getData(f2), unpackeddata)
+end
 
-
-
-
-println("test conversions of Pose3Pose3NH")
 
 odo = SE3(randn(3), convert(Quaternion, so3(0.1*randn(3)) ))
 odoc = Pose3Pose3NH( MvNormal(veeEuler(odo),odoCov), [0.5;0.5])
@@ -153,73 +154,72 @@ odoc = Pose3Pose3NH( MvNormal(veeEuler(odo),odoCov), [0.5;0.5])
 f3 = addFactor!(fg,[:x1;:x2],odoc)
 
 
-dd = convert(PackedPose3Pose3NH, odoc)
-upd = convert(RoME.Pose3Pose3NH, dd)
+@testset "test conversions of Pose3Pose3NH" begin
 
-@test norm(odoc.Zij.μ - upd.Zij.μ) < 1e-8
-@test norm(odoc.Zij.Σ.mat - upd.Zij.Σ.mat) < 1e-8
-@test norm(odoc.nullhypothesis.p - upd.nullhypothesis.p) < 1e-8
+    dd = convert(PackedPose3Pose3NH, odoc)
+    upd = convert(RoME.Pose3Pose3NH, dd)
 
-
-packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3NH}, getData(f3))
-unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose3Pose3NH}}, packeddata)
-
-# TODO -- fix ambibuity in compare function
-@test IncrementalInference.compare(getData(f3), unpackeddata)
+    @test norm(odoc.Zij.μ - upd.Zij.μ) < 1e-8
+    @test norm(odoc.Zij.Σ.mat - upd.Zij.Σ.mat) < 1e-8
+    @test norm(odoc.nullhypothesis.p - upd.nullhypothesis.p) < 1e-8
 
 
+    packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3NH}, getData(f3))
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose3Pose3NH}}, packeddata)
 
-
-println("test conversions of PartialPriorRollPitchZ")
-
-prpz = PartialPriorRollPitchZ(MvNormal([0.0;0.5],0.1*eye(2)),Normal(3.0,0.5))
-
-pprpz = convert(PackedPartialPriorRollPitchZ, prpz)
-unp = convert(PartialPriorRollPitchZ, pprpz)
-
-@test RoME.compare(prpz, unp)
+    # TODO -- fix ambibuity in compare function
+    @test IncrementalInference.compare(getData(f3), unpackeddata)
+end
 
 
 
+@testset "test conversions of PartialPriorRollPitchZ" begin
 
+    prpz = PartialPriorRollPitchZ(MvNormal([0.0;0.5],0.1*eye(2)),Normal(3.0,0.5))
 
-println("test conversions of PartialPose3XYYaw")
+    pprpz = convert(PackedPartialPriorRollPitchZ, prpz)
+    unp = convert(PartialPriorRollPitchZ, pprpz)
 
+    @test RoME.compare(prpz, unp)
 
-xyy = PartialPose3XYYaw(MvNormal([1.0;2.0;0.5],0.1*eye(3)))
-
-pxyy = convert(PackedPartialPose3XYYaw, xyy)
-unp = convert(PartialPose3XYYaw, pxyy)
-
-@test RoME.compare(xyy, unp)
-
-
-
-
-println("test conversions of PartialPose3XYYawNH")
-
-
-xyy = PartialPose3XYYawNH(MvNormal([1.0;2.0;0.5],0.1*eye(3)), [0.6;0.4])
-
-pxyy = convert(PackedPartialPose3XYYawNH, xyy)
-unp = convert(PartialPose3XYYawNH, pxyy)
-
-@test RoME.compare(xyy, unp)
+end
 
 
 
-println("test PriorPoint2DensityNH")
+@testset "test conversions of PartialPose3XYYaw" begin
+    xyy = PartialPose3XYYaw(MvNormal([1.0;2.0;0.5],0.1*eye(3)))
 
-prpt2 = PriorPoint2DensityNH(kde!(randn(2,100)),[0.25;0.75]  )
+    pxyy = convert(PackedPartialPose3XYYaw, xyy)
+    unp = convert(PartialPose3XYYaw, pxyy)
 
-pprpt2 = convert(PackedPriorPoint2DensityNH, prpt2)
-uprpt2 = convert(PriorPoint2DensityNH, pprpt2)
-
-@test norm(getPoints(prpt2.belief)-getPoints(uprpt2.belief)) < 1e-8
-
-@test norm(prpt2.nullhypothesis.p-uprpt2.nullhypothesis.p) < 1e-8
+    @test RoME.compare(xyy, unp)
+end
 
 
+
+@testset "test conversions of PartialPose3XYYawNH" begin
+
+    xyy = PartialPose3XYYawNH(MvNormal([1.0;2.0;0.5],0.1*eye(3)), [0.6;0.4])
+
+    pxyy = convert(PackedPartialPose3XYYawNH, xyy)
+    unp = convert(PartialPose3XYYawNH, pxyy)
+
+    @test RoME.compare(xyy, unp)
+end
+
+
+@testset "test PriorPoint2DensityNH" begin
+
+    prpt2 = PriorPoint2DensityNH(kde!(randn(2,100)),[0.25;0.75]  )
+
+    pprpt2 = convert(PackedPriorPoint2DensityNH, prpt2)
+    uprpt2 = convert(PriorPoint2DensityNH, pprpt2)
+
+    @test norm(getPoints(prpt2.belief)-getPoints(uprpt2.belief)) < 1e-8
+
+    @test norm(prpt2.nullhypothesis.p-uprpt2.nullhypothesis.p) < 1e-8
+
+end
 
 
 
