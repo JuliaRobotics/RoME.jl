@@ -100,16 +100,13 @@ function extractdistribution(str::AS)::Distributions.Distribution where {AS <: A
   end
 end
 
-# error with conversion of
-# GenericWrapParam{Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}}} to  GenericWrapParam{Pose2DPoint2DBearingRange}
-function convert(::Type{GenericWrapParam{Pose2DPoint2DBearingRange}}, d::GenericWrapParam{Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}}} )
-  warn("trying trivial conversion")
-  return d
+
+function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}) where T
+  return PackedPose2DPoint2DBearingRange(string(d.bearing), string(d.range))
 end
 
+# TODO -- should not be resorting to string, consider specialized code for parametric distribution types
 function convert(::Type{Pose2DPoint2DBearingRange}, d::PackedPose2DPoint2DBearingRange)
-  # Pose2DPoint2DBearingRange()
-  warn("This is the primary converter for new P2P2BR")
   Pose2DPoint2DBearingRange(extractdistribution(d.bearstr), extractdistribution(d.rangstr))
 end
 # function convert(::Type{Pose2DPoint2DBearingRange{D1, D2}}, d::PackedPose2DPoint2DBearingRange) where {D1, D2}
@@ -121,12 +118,15 @@ end
 #   error("This is the right converter for P2P2BR")
 #   return Pose2DPoint2DBearingRange{Distributions.Normal{T}, Distributions.Normal{T}}(Distributions.Normal{T}(d.bmu,d.bsig), Distributions.Normal{T}(d.rmu, d.rsig))
 # end
-function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}) where T
-  return PackedPose2DPoint2DBearingRange(string(d.bearing), string(d.range))
-end
 # function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}) where T
 #   return PackedPose2DPoint2DBearingRange(d.bearing.μ, d.bearing.σ,
 #                                          d.range.μ,   d.range.σ )
+# end
+# # error with conversion of
+# # GenericWrapParam{Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}}} to  GenericWrapParam{Pose2DPoint2DBearingRange}
+# function convert(::Type{GenericWrapParam{Pose2DPoint2DBearingRange}}, d::GenericWrapParam{Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}}} )
+#   warn("trying trivial conversion")
+#   return d
 # end
 
 
