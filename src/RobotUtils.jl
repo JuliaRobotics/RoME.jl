@@ -184,9 +184,10 @@ function addOdoFG!(
         XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addNode!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
+    v = addNode!(fg, n, Pose2, N=N, ready=ready, labels=labels)
+    # v = addNode!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
     pp = Pose2Pose2(vectoarr2(DX), cov, [1.0]) #[prev;v],
-    f = addFactor!(fg, [prev;v], pp, ready=ready)
+    f = addFactor!(fg, [prev;v], pp, ready=ready, autoinit=true )
     infor = inv(cov^2)
     # addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
     return v, f
@@ -225,8 +226,10 @@ function addOdoFG!(
     if N==0
       N = size(X,2)
     end
-    vnext = addNode!(fgl, nextn, X⊕odo, ones(1,1), N=N, ready=ready, labels=labels)
-    fact = addFactor!(fgl, [vprev;vnext], odo)
+    # vnext = addNode!(fgl, nextn, X⊕odo, ones(1,1), N=N, ready=ready, labels=labels)
+    vnext = addNode!(fgl, nextn, Pose2, N=N, ready=ready, labels=labels)
+    fact = addFactor!(fgl, [vprev;vnext], odo, autoinit=true)
+
     return vnext, fact
 end
 
@@ -278,7 +281,6 @@ function newLandm!(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Fl
     vert=addNode!(fg, Symbol(lm), Point2, N=N, ready=ready, labels=union(["LANDMARK";], labels))
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
     # vert=addNode!(fg, Symbol(lm), wPos, sig, N=N, ready=ready, labels=labels)
-
 
     vert.attributes["age"] = 0
     vert.attributes["maxage"] = 0
