@@ -275,8 +275,10 @@ end
 function newLandm!(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100, ready::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
 
+    vert=addNode!(fg, Symbol(lm), Point2, N=N, ready=ready, labels=union(["LANDMARK";], labels))
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
-    vert=addNode!(fg, Symbol(lm), wPos, sig, N=N, ready=ready, labels=labels)
+    # vert=addNode!(fg, Symbol(lm), wPos, sig, N=N, ready=ready, labels=labels)
+
 
     vert.attributes["age"] = 0
     vert.attributes["maxage"] = 0
@@ -317,10 +319,10 @@ function addBRFG!(fg::FactorGraph,
   vlm.attributes["maxage"] = nage
   updateFullVert!(fg, vlm)
 
-  # @show br, cov
-  pbr = Pose2DPoint2DBearingRange{Normal, Normal}(Normal(br[1], cov[1,1]), Normal(br[2],  cov[2,2]))
-  # pbr = Pose2DPoint2DBearingRange((br')',  cov,  [1.0])
-  f = addFactor!(fg, [vps;vlm], pbr, ready=ready ) #[vps;vlm],
+
+  pbr = Pose2DPoint2DBearingRange(Normal(br[1], cov[1,1]), Normal(br[2],  cov[2,2]))  #{Normal, Normal}
+  @show vps, vlm
+  f = addFactor!(fg, [vps;vlm], pbr, ready=ready, autoinit=true ) #[vps;vlm],
 
   # only used for max likelihood unimodal tests.
   u, P = pol2cart(br[[2;1]], diag(cov))
@@ -359,7 +361,7 @@ function projNewLandm!(fg::FactorGraph, pose::T, lm::T, br::Array{Float64,1}, co
                         addfactor=true, N::Int=100, ready::Int=1,
                         labels::Vector{T}=String[]) where {T <: AbstractString}
     #
-    vps = getVert(fg,pose)
+    vps = getVert(fg, pose)
 
     lmPts = projNewLandmPoints(vps, br, cov)
     vlm = newLandm!(fg, lm, lmPts, cov, N=N, ready=ready, labels=labels) # cov should not be required here
