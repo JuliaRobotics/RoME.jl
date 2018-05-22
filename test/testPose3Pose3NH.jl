@@ -39,7 +39,7 @@ v1 = addNode!(fg, :x1, Pose3, N=N) # , 0.1*randn(6,N)
 initPosePrior = PriorPose3( MvNormal( zeros(6), initCov) )
 f1  = addFactor!(fg,[v1], initPosePrior, autoinit=true)
 
-ls(fg, :x1)
+# ls(fg, :x1)
 
 ensureAllInitialized!(fg)
 
@@ -47,7 +47,8 @@ println("Ensure vertex initialized properly")
 # start with to tight an initialization
 muX1 = Base.mean(getVal(fg,:x1),2)
 stdX1 = Base.std(getVal(fg,:x1),2)
-@test sum(map(Int,abs.(muX1) .< 0.2)) == 6
+@test sum(map(Int,abs.(muX1[1:3]) .< 0.3)) == 3
+@test sum(map(Int,abs.(muX1[4:6]) .< 0.03)) == 3
 @test sum(map(Int,abs.(1.0-stdX1[1:3]) .< 0.3)) == 3
 @test sum(map(Int,abs.(0.01-stdX1[4:6]) .< 0.1)) == 3
 
