@@ -95,22 +95,22 @@ p2 = kde!(X2pts)
 
 using JLD, HDF5
 
-println("loading validation data for testing.")
-@load joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
-# @save joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
+@testset "loading validation data for testing." begin
+    @load joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
+    # @save joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
 
-p1t = kde!(X1ptst)
-p2t = kde!(X2ptst)
+    p1t = kde!(X1ptst)
+    p2t = kde!(X2ptst)
 
-# plotKDE([p2t;p2],c=["red";"blue"],dims=[1;2],levels=3)
-# kld(marginal(p1,[2]), marginal(p1t,[2]), method=:unscented)
+    # plotKDE([p2t;p2],c=["red";"blue"],dims=[1;2],levels=3)
+    # kld(marginal(p1,[2]), marginal(p1t,[2]), method=:unscented)
 
-t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
-t2 = minimum([abs(kld(p2, p2t)[1]) ; abs(kld(p2t, p2)[1])])
+    t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
+    t2 = minimum([abs(kld(p2, p2t)[1]) ; abs(kld(p2t, p2)[1])])
 
-@test t1 < 40.0
-@test t2 < 40.0
-
+    @test t1 < 40.0
+    @test t2 < 40.0
+end
 
 # plotKDE(margisal(p1,[1]))
 
