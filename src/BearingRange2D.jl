@@ -55,11 +55,6 @@ function (pp2br::Pose2DPoint2DBearingRange)(res::Array{Float64},
         xi::Array{Float64,2},
         lm::Array{Float64,2} )
   #
-  # @show size(lm), size(xi), size(meas[1])
-  # @show idx
-  # @show meas[1][:,idx]
-  # @show xi[:, idx]
-  # @show lm[:,idx]
   res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
   res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
   nothing
@@ -92,9 +87,22 @@ function normalfromstring(str::AS) where {AS <: AbstractString}
   Normal{Float64}(parse(Float64,mean), parse(Float64,sigma))
 end
 
-function extractdistribution(str::AS)::Distributions.Distribution where {AS <: AbstractString}
-  if ismatch(r"Normal", str)
+function categoricalfromstring(str::AS)::Distributions.Categorical where {AS <: AbstractString}
+  # pstr = match(r"p=\[", str).match
+  psubs = split(str, '=')[end]
+  psubs = split(psubs, '[')[end]
+  psubsub = split(psubs, ']')[1]
+  pw = split(psubsub, ',')
+  return Categorical(parse.(Float64, pw))
+end
+
+function extractdistribution(str::AS)::Union{Void, Distributions.Distribution} where {AS <: AbstractString}
+  if str == ""
+    return nothing
+  elseif ismatch(r"Normal", str)
     return normalfromstring(str)
+  elseif ismatch(r"Categorical", str)
+    return categoricalfromstring(str)
   else
     error("Don't know how to extract distrubtion from str=$(str)")
   end
@@ -130,7 +138,46 @@ end
 # end
 
 
+mutable struct Pose2DPoint2DBearingRangeMH{B <: Distributions.Distribution, R <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
+    bearing::B
+    range::R
+    hypothesis::Distributions.Categorical
+    Pose2DPoint2DBearingRangeMH{B,R}() where {B,R} = new{B,R}()
+    Pose2DPoint2DBearingRangeMH(x1::B,x2::R, w::Distributions.Categorical) where {B,R} = new{B,R}(x1,x2,w)
+    Pose2DPoint2DBearingRangeMH(x1::B,x2::R, w::Vector{Float64}=Float64[1.0;]) where {B,R} = new{B,R}(x1,x2,Categorical(w))
+end
+function getSample(pp2br::Pose2DPoint2DBearingRangeMH, N::Int=1)::Tuple{Array{Float64,2}, Vector{Int}}
+  b = rand(pp2br.bearing, N)
+  r = rand(pp2br.range, N)
+  s = rand(pp2br.hypothesis, N)
+  return ([b';r'], s)
+end
+# define the conditional probability constraint
+function (pp2br::Pose2DPoint2DBearingRangeMH)(res::Array{Float64},
+        idx::Int,
+        meas::Tuple{Array{Float64,2}, Vector{Int}},
+        xi::Array{Float64,2},
+        lms... )::Void  # ::Array{Float64,2}
+  #
+  res[1] = lms[meas[2][idx]][1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
+  res[2] = lms[meas[2][idx]][2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
+  nothing
+end
 
+mutable struct PackedPose2DPoint2DBearingRangeMH <: IncrementalInference.PackedInferenceType
+    bearstr::String
+    rangstr::String
+    hypostr::String
+    PackedPose2DPoint2DBearingRangeMH() = new()
+    PackedPose2DPoint2DBearingRangeMH(s1::AS, s2::AS, s3::AS) where {AS <: AbstractString} = new(string(s1),string(s2),string(s3))
+end
+function convert(::Type{PackedPose2DPoint2DBearingRangeMH}, d::Pose2DPoint2DBearingRangeMH{Normal{T}, Normal{T}}) where T
+  return PackedPose2DPoint2DBearingRangeMH(string(d.bearing), string(d.range), string(d.hypothesis))
+end
+# TODO -- should not be resorting to string, consider specialized code for parametric distribution types
+function convert(::Type{Pose2DPoint2DBearingRangeMH}, d::PackedPose2DPoint2DBearingRangeMH)
+  Pose2DPoint2DBearingRangeMH(extractdistribution(d.bearstr), extractdistribution(d.rangstr), extractdistribution(d.hypostr))
+end
 
 
 
@@ -177,7 +224,7 @@ end
 
 # to be deprecated
 function pack3(xL1, xL2, p1, p2, p3, xF3)
-    warn("RoME.BearingRange2D:pack3 to be deprecated")
+    error("RoME.BearingRange2D:pack3 to be deprecated")
     X = zeros(3)
     X[p1] = xL1
     X[p2] = xL2
@@ -186,6 +233,7 @@ function pack3(xL1, xL2, p1, p2, p3, xF3)
 end
 
 function bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
+  error("bearrang! is deprecated")
   wTb = SE2(X)
   bTl = wTb\[L[1:2];1.0]
   b = atan2(bTl[2],bTl[1])
@@ -204,6 +252,7 @@ end
 # old numeric residual function for pose 2 to pose 2 constraint function.
 function solvePose2(Zbr::Array{Float64,1}, par::Array{Float64,1}, init::Array{Float64,1})
     # TODO -- rework to ominus oplus and residual type method
+    error("solvePose2 is deprecated")
     p = collect(1:3);
     shuffle!(p);
     p1 = p.==1; p2 = p.==2; p3 = p.==3
@@ -215,6 +264,7 @@ end
 
 function solveSetSeps(fnc::Function, Zbr::Array{Float64,1}, CovZ::Array{Float64,2},
                       pars::Array{Float64,2}, inits::Array{Float64,2})
+    error("solveSetSeps is deprecated")
     out = zeros(size(inits))
     for i in 1:size(pars,2)
         ent = 1.0*[CovZ[1,1]*randn(); CovZ[2,2]*randn()]
@@ -226,6 +276,7 @@ end
 # Xid is the one you want to get back
 function evalPotential(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
     # TODO -- add null hypothesis here, might even be done one layer higher in call stack
+    error("evalPotential(brpho::Pose2DPoint2DBearingRange,...) should not be here anymore")
     val = Array{Float64,2}()
     ini = Array{Graphs.ExVertex,1}()
     par = Array{Graphs.ExVertex,1}()

@@ -35,16 +35,21 @@ odoCov = deepcopy(initCov)
 
 
 println("Adding PriorPose3 to graph...")
-v1 = addNode!(fg,:x1,  0.1*randn(6,N),  N=N)
+v1 = addNode!(fg, :x1, Pose3, N=N) # , 0.1*randn(6,N)
 initPosePrior = PriorPose3( MvNormal( zeros(6), initCov) )
-f1  = addFactor!(fg,[v1], initPosePrior)
+f1  = addFactor!(fg,[v1], initPosePrior, autoinit=true)
+
+ls(fg, :x1)
+
+ensureAllInitialized!(fg)
 
 println("Ensure vertex initialized properly")
 # start with to tight an initialization
 muX1 = Base.mean(getVal(fg,:x1),2)
 stdX1 = Base.std(getVal(fg,:x1),2)
-@test sum(map(Int,abs.(muX1) .< 0.1)) == 6
-@test sum(map(Int, 0.05 .< stdX1 .< 0.15)) == 6
+@test sum(map(Int,abs.(muX1) .< 0.2)) == 6
+@test sum(map(Int,abs.(1.0-stdX1[1:3]) .< 0.3)) == 3
+@test sum(map(Int,abs.(0.01-stdX1[4:6]) .< 0.1)) == 3
 
 
 println("Testing PriorPose3 evaluation...")
@@ -63,8 +68,9 @@ X3pts = evalFactor2(fg, fg.g.vertices[6], 5)
 X2ptsMean = Base.mean(X2pts,2)
 X3ptsMean = Base.mean(X3pts,2)
 
-@test  sum(map(Int, abs.(X2ptsMean) - [25.0;0;0;0;0;0] .< 5.0 )) == 6
-@test  sum(map(Int, abs.(X3ptsMean - [50.0;0;0;0;0;0]) .< 5.0 )) == 6
+@test  sum(map(Int, abs.(X2ptsMean) - [25.0;0;0;0;0;0] .< 5.0 ))  == 6
+@test  sum(map(Int, abs.(X3ptsMean -  [50.0;0;0;0;0;0]) .< 5.0 )) == 6
+
 
 tree = wipeBuildNewTree!(fg)
 inferOverTreeR!(fg,tree,N=N)
@@ -102,8 +108,8 @@ p2t = kde!(X2ptst)
 t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
 t2 = minimum([abs(kld(p2, p2t)[1]) ; abs(kld(p2t, p2)[1])])
 
-@test t1 < 30.0
-@test t2 < 30.0
+@test t1 < 40.0
+@test t2 < 40.0
 
 
 # plotKDE(margisal(p1,[1]))

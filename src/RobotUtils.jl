@@ -155,7 +155,7 @@ function odomKDE(p1,dx,cov)
 end
 
 """
-    addOdoFG!(fg, name, DX, cov, , N=100, ready=1)
+    $(SIGNATURES)
 
 Create a new variable node and insert odometry constraint factor between
 which will automatically increment latest pose symbol x<k+1> for new node new node and
@@ -194,21 +194,28 @@ function addOdoFG!(
 end
 
 function addOdoFG!(
-        fg::FactorGraph,
-        n::T,
+        fgl::FactorGraph,
+        # n::T,
         Z::Pose3Pose3;
         N::Int=0,
         ready::Int=1,
-        labels::Vector{T}=String[]  ) where {T <: AbstractString}
+        labels::Vector{<:AbstractString}=String[]  ) # where {T <: AbstractString}
   #
-  DX=Z.μ
-  cov=Z.Σ.mat
+  # DX=Z.μ
+  # cov=Z.Σ.mat
+  warn("You are here")
+  vprev, X, nextn = getLastPose(fgl)
+  vnext = addNode!(fgl, nextn, Pose3, ready=ready, labels=labels)
+  fact = addFactor!(fgl, [vprev;vnext], Z, autoinit=true)
 
-  addOdoFG(fg, n, DX, cov, N=N, ready=ready, labels=labels)
+  return vnext, fact
+
+  # error("addOdoFG!( , ::Pose3Pose3, ) not currently usable, there were breaking changes. Work in Progress")
+  # addOdoFG(fg, n, DX, cov, N=N, ready=ready, labels=labels)
 end
 
 """
-    addOdoFG!(fg, odo, N=100, ready=1)
+    $(SIGNATURES)
 
 Create a new variable node and insert odometry constraint factor between
 which will automatically increment latest pose symbol x<k+1> for new node new node and
@@ -217,10 +224,10 @@ constraint factor are returned as a tuple.
 """
 function addOdoFG!(
         fgl::FactorGraph,
-        odo::PP;
+        odo::Pose2Pose2;
         N::Int=0,
         ready::Int=1,
-        labels::Vector{T}=String[] ) where {PP <: RoME.BetweenPoses, T <: AbstractString}
+        labels::Vector{<:AbstractString}=String[] ) # where {PP <: RoME.BetweenPoses}
     #
     vprev, X, nextn = getLastPose(fgl)
     if N==0
@@ -335,14 +342,16 @@ end
 
 function addMMBRFG!(fg::FactorGraph, pose::T,
                   lm::Array{T,1}, br::Array{Float64,1},
-                  cov::Array{Float64,2}; w=[0.5;0.5], ready::Int=1) where {T <: AbstractString}
+                  cov::Array{Float64,2}; w::Vector{Float64}=Float64[0.5;0.5],
+                  ready::Int=1) where {T <: AbstractString}
     #
     vps = getVert(fg,pose)
     vlm1 = getVert(fg,lm[1])
     vlm2 = getVert(fg,lm[2])
 
-    pbr = Pose2DPoint2DBearingRange(vectoarr2(br),  cov,  w) #[vps;vlm1;vlm2],
-    f = addFactor!(fg, [vps;vlm1;vlm2], pbr, ready=ready )
+    # vectoarr2(br)
+    pbr = Pose2DPoint2DBearingRangeMH(Normal(br[1],cov[1,1]),  Normal(br[2],cov[2,2]), w) #[vps;vlm1;vlm2],
+    f = addFactor!(fg, [vps;vlm1;vlm2], pbr, ready=ready, autoinit=true )
     return f
 end
 
