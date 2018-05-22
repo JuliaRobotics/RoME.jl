@@ -109,8 +109,8 @@ using JLD, HDF5
     t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
     t2 = minimum([abs(kld(p2, p2t)[1]) ; abs(kld(p2t, p2)[1])])
 
-    @test t1 < 40.0
-    @test t2 < 40.0
+    @test t1 < 60.0
+    @test t2 < 60.0
 end
 
 # plotKDE(margisal(p1,[1]))
