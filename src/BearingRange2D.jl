@@ -79,35 +79,6 @@ mutable struct PackedPose2DPoint2DBearingRange <: IncrementalInference.PackedInf
     PackedPose2DPoint2DBearingRange(s1::AS, s2::AS) where {AS <: AbstractString} = new(string(s1),string(s2))
 end
 
-function normalfromstring(str::AS) where {AS <: AbstractString}
-  meanstr = match(r"μ=[+-]?([0-9]*[.])?[0-9]+", str).match
-  mean = split(meanstr, '=')[2]
-  sigmastr = match(r"σ=[+-]?([0-9]*[.])?[0-9]+", str).match
-  sigma = split(sigmastr, '=')[2]
-  Normal{Float64}(parse(Float64,mean), parse(Float64,sigma))
-end
-
-function categoricalfromstring(str::AS)::Distributions.Categorical where {AS <: AbstractString}
-  # pstr = match(r"p=\[", str).match
-  psubs = split(str, '=')[end]
-  psubs = split(psubs, '[')[end]
-  psubsub = split(psubs, ']')[1]
-  pw = split(psubsub, ',')
-  return Categorical(parse.(Float64, pw))
-end
-
-function extractdistribution(str::AS)::Union{Void, Distributions.Distribution} where {AS <: AbstractString}
-  if str == ""
-    return nothing
-  elseif ismatch(r"Normal", str)
-    return normalfromstring(str)
-  elseif ismatch(r"Categorical", str)
-    return categoricalfromstring(str)
-  else
-    error("Don't know how to extract distrubtion from str=$(str)")
-  end
-end
-
 
 function convert(::Type{PackedPose2DPoint2DBearingRange}, d::Pose2DPoint2DBearingRange{Normal{T}, Normal{T}}) where T
   return PackedPose2DPoint2DBearingRange(string(d.bearing), string(d.range))
