@@ -5,7 +5,7 @@ using IncrementalInference, CloudGraphs, Neo4j
 include("BlandAuthDB.jl")
 
 configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-cloudGraph = connect(configuration);
+cloudGraph = connect(configuration, IncrementalInference.getfnctype);
 # register types of interest in CloudGraphs
 registerGeneralVariableTypes!(cloudGraph)
 IncrementalInference.setCloudDataLayerAPI!()

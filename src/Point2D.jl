@@ -3,7 +3,7 @@
 struct Point2 <: IncrementalInference.InferenceVariable
   dims::Int
   labels::Vector{String}
-  Point2() = new(2, String["";])
+  Point2() = new(2, String[])
 end
 
 mutable struct PriorPoint2D <: IncrementalInference.FunctorSingleton
@@ -99,30 +99,30 @@ end
 
 
 # Old evalPotential functions
-function evalPotential(prior::PriorPoint2D, Xi::Array{Graphs.ExVertex,1}; N::Int=100)#, from::Int)
-    return rand(prior.mv, N)
-end
-
-# Solve for Xid, given values from vertices [Xi] and measurement rho
-function evalPotential(rho::Point2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int)
-  fromX, ret = nothing, nothing
-  if Xi[1].index == Xid
-    fromX = getVal( Xi[2] )
-    ret = deepcopy(getVal( Xi[1] )) # carry pose yaw row over if required
-  elseif Xi[2].index == Xid
-    fromX = getVal( Xi[1] )
-    ret = deepcopy(getVal( Xi[2] )) # carry pose yaw row over if required
-  end
-  r,c = size(fromX)
-  theta = 2*pi*rand(c)
-  noisy = rho.Cov*randn(c) + rho.Zij[1]
-
-  for i in 1:c
-    ret[1,i] = noisy[i]*cos(theta[i]) + fromX[1,i]
-    ret[2,i] = noisy[i]*sin(theta[i]) + fromX[2,i]
-  end
-  return ret
-end
+# function evalPotential(prior::PriorPoint2D, Xi::Array{Graphs.ExVertex,1}; N::Int=100)#, from::Int)
+#     return rand(prior.mv, N)
+# end
+#
+# # Solve for Xid, given values from vertices [Xi] and measurement rho
+# function evalPotential(rho::Point2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int)
+#   fromX, ret = nothing, nothing
+#   if Xi[1].index == Xid
+#     fromX = getVal( Xi[2] )
+#     ret = deepcopy(getVal( Xi[1] )) # carry pose yaw row over if required
+#   elseif Xi[2].index == Xid
+#     fromX = getVal( Xi[1] )
+#     ret = deepcopy(getVal( Xi[2] )) # carry pose yaw row over if required
+#   end
+#   r,c = size(fromX)
+#   theta = 2*pi*rand(c)
+#   noisy = rho.Cov*randn(c) + rho.Zij[1]
+#
+#   for i in 1:c
+#     ret[1,i] = noisy[i]*cos(theta[i]) + fromX[1,i]
+#     ret[2,i] = noisy[i]*sin(theta[i]) + fromX[2,i]
+#   end
+#   return ret
+# end
 
 
 

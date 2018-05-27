@@ -35,16 +35,22 @@ odoCov = deepcopy(initCov)
 
 
 println("Adding PriorPose3 to graph...")
-v1 = addNode!(fg,:x1,  0.1*randn(6,N),  N=N)
+v1 = addNode!(fg, :x1, Pose3, N=N) # , 0.1*randn(6,N)
 initPosePrior = PriorPose3( MvNormal( zeros(6), initCov) )
-f1  = addFactor!(fg,[v1], initPosePrior)
+f1  = addFactor!(fg,[v1], initPosePrior, autoinit=true)
+
+# ls(fg, :x1)
+
+ensureAllInitialized!(fg)
 
 println("Ensure vertex initialized properly")
 # start with to tight an initialization
 muX1 = Base.mean(getVal(fg,:x1),2)
 stdX1 = Base.std(getVal(fg,:x1),2)
-@test sum(map(Int,abs.(muX1) .< 0.1)) == 6
-@test sum(map(Int, 0.05 .< stdX1 .< 0.15)) == 6
+@test sum(map(Int,abs.(muX1[1:3]) .< 0.4)) == 3
+@test sum(map(Int,abs.(muX1[4:6]) .< 0.04)) == 3
+@test sum(map(Int,abs.(1.0-stdX1[1:3]) .< 0.3)) == 3
+@test sum(map(Int,abs.(0.01-stdX1[4:6]) .< 0.1)) == 3
 
 
 println("Testing PriorPose3 evaluation...")
@@ -63,8 +69,9 @@ X3pts = evalFactor2(fg, fg.g.vertices[6], 5)
 X2ptsMean = Base.mean(X2pts,2)
 X3ptsMean = Base.mean(X3pts,2)
 
-@test  sum(map(Int, abs.(X2ptsMean) - [25.0;0;0;0;0;0] .< 5.0 )) == 6
-@test  sum(map(Int, abs.(X3ptsMean - [50.0;0;0;0;0;0]) .< 5.0 )) == 6
+@test  sum(map(Int, abs.(X2ptsMean) - [25.0;0;0;0;0;0] .< 5.0 ))  == 6
+@test  sum(map(Int, abs.(X3ptsMean -  [50.0;0;0;0;0;0]) .< 5.0 )) == 6
+
 
 tree = wipeBuildNewTree!(fg)
 inferOverTreeR!(fg,tree,N=N)
@@ -89,22 +96,22 @@ p2 = kde!(X2pts)
 
 using JLD, HDF5
 
-println("loading validation data for testing.")
-@load joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
-# @save joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
+@testset "loading validation data for testing." begin
+    @load joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
+    # @save joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
 
-p1t = kde!(X1ptst)
-p2t = kde!(X2ptst)
+    p1t = kde!(X1ptst)
+    p2t = kde!(X2ptst)
 
-# plotKDE([p2t;p2],c=["red";"blue"],dims=[1;2],levels=3)
-# kld(marginal(p1,[2]), marginal(p1t,[2]), method=:unscented)
+    # plotKDE([p2t;p2],c=["red";"blue"],dims=[1;2],levels=3)
+    # kld(marginal(p1,[2]), marginal(p1t,[2]), method=:unscented)
 
-t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
-t2 = minimum([abs(kld(p2, p2t)[1]) ; abs(kld(p2t, p2)[1])])
+    t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
+    t2 = minimum([abs(kld(p2, p2t)[1]) ; abs(kld(p2t, p2)[1])])
 
-@test t1 < 30.0
-@test t2 < 30.0
-
+    @test t1 < 60.0
+    @test t2 < 60.0
+end
 
 # plotKDE(margisal(p1,[1]))
 

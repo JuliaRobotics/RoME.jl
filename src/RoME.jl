@@ -16,7 +16,7 @@ using
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
-import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
+import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution  #, compare
 
 export
   # pass throughs from TransformUtils
@@ -175,7 +175,9 @@ export
   Point2DPoint2D,
   PackedPoint2DPoint2D,
   Pose2DPoint2DBearingRange,
+  Pose2DPoint2DBearingRangeMH,
   PackedPose2DPoint2DBearingRange,
+  PackedPose2DPoint2DBearingRangeMH,
   Pose2DPoint2DBearing,
   Pose2DPoint2DRange,
   Point2DPoint2DRange,
