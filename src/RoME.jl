@@ -16,7 +16,7 @@ using
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
-import IncrementalInference: convert, getSample, reshapeVec2Mat  #, compare
+import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution  #, compare
 
 export
   # pass throughs from TransformUtils
