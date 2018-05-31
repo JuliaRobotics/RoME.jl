@@ -13,7 +13,7 @@ end
 getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 
 
-mutable struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}
+mutable struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Distributions.Distribution}
   z::T
   Pose2Pose2_NEW{T}() where {T <: Distribution} = new{T}()
   Pose2Pose2_NEW(z1::T) where {T <: Distribution} = new{T}(z1)

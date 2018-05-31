@@ -310,7 +310,6 @@ include("InertialPose3.jl")
 
 include("Slam.jl")
 
-# include("RobotViz.jl")
 include("RobotUtils.jl")
 
 include("SimulationUtils.jl")
