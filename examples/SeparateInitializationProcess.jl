@@ -27,7 +27,7 @@ struct Prior{T} <: IncrementalInference.FunctorSingleton where {T <: Distributio
 end
 getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 
-struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}
+mutable struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}
   z::T
   Pose2Pose2_NEW() where {T <: Distribution} = new{T}()
   Pose2Pose2_NEW(z1::T) where {T <: Distribution} = new{T}(z1)
@@ -35,13 +35,13 @@ struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Dis
 end
 getSample(s::Pose2Pose2_NEW, N::Int=1) = (rand(s.z,N), )
 function (s::Pose2Pose2_NEW)(res::Array{Float64},
-      userdata::Union{FactorMetadata,Void},
-      idx::Int,
-      meas::Tuple,
-      wxi::Array{Float64,2},
-      wxj::Array{Float64,2}  )
-  # res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])
-  wXjhat = SE2(wxi[:,idx])*SE2(meas[1][:,idx]) #*SE2(pp2.Zij[:,1])*SE2(meas[1][:,idx])
+            userdata::Union{FactorMetadata,Void},
+            idx::Int,
+            meas::Tuple,
+            wxi::Array{Float64,2},
+            wxj::Array{Float64,2}  )
+  #
+  wXjhat = SE2(wxi[:,idx])*SE2(meas[1][:,idx])
   jXjhat = SE2(wxj[:,idx]) \ wXjhat
   se2vee!(res, jXjhat)
   nothing

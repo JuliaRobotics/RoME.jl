@@ -10,7 +10,7 @@ end
 
 
 
-mutable struct DynPoint2DynPoint2 <: IncrementalInference.FunctorPairwise where {T <: Distribution}
+mutable struct DynPoint2DynPoint2{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}
   z::T
   DynPoint2DynPoint2{T}() where {T <: Distribution} = new{T}()
   DynPoint2DynPoint2(z1::T) where {T <: Distribution} = new{T}(z1)
