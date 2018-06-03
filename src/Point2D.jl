@@ -28,7 +28,7 @@ function getSample(pp2::Point2DPoint2DRange, N::Int=1)
 end
 function (pp2r::Point2DPoint2DRange)(
             res::Array{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple,
             xi::Array{Float64,2},
@@ -62,7 +62,7 @@ function getSample(pp2::Point2DPoint2D, N::Int=1)
 end
 function (pp2r::Point2DPoint2D)(
             res::Array{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple,
             xi::Array{Float64,2},

@@ -75,7 +75,7 @@ function getSample(pp3::Pose3Pose3, N::Int=1)
   return (rand(pp3.Zij, N), )
 end
 function (pp3::Pose3Pose3)(res::Array{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple,
             wXi::Array{Float64,2},
@@ -133,7 +133,7 @@ function getSample(pp3::Pose3Pose3NH, N::Int=1)
   return (rand(pp3.Zij, N), )
 end
 function (pp3::Pose3Pose3NH)(res::Array{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple,
             wXi::Array{Float64,2},

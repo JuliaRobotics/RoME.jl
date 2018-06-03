@@ -22,7 +22,7 @@ type LinearRangeBearingElevation <: FunctorPairwise
 end
 function (p::LinearRangeBearingElevation)(
             res::Vector{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple{Array{Float64,2}},
             pose::Array{Float64,2},

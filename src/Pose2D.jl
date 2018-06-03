@@ -21,7 +21,7 @@ mutable struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {
 end
 getSample(s::Pose2Pose2_NEW, N::Int=1) = (rand(s.z,N), )
 function (s::Pose2Pose2_NEW)(res::Array{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple,
             wxi::Array{Float64,2},
@@ -65,7 +65,7 @@ function getSample(pp2::Pose2Pose2, N::Int=1)
   return (rand(MvNormal(pp2.Zij[:,1],pp2.Cov),N), )
 end
 function (pp2::Pose2Pose2)(res::Array{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple{Array{Float64,2}},
             wxi::Array{Float64,2},

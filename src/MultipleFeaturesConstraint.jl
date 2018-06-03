@@ -107,7 +107,7 @@ end
 # redo with angles on sightings for minimization
 # NOTE -- an inefficient implementation
 function (mm2d::MultipleFeatures2D)(res::Array{Float64},
-          userdata::Union{Void, FactorMetadata},
+          userdata ,
           idx::Int, meas::Tuple,
           wAbi::Array{Float64,2},
           wAbj::Array{Float64,2},

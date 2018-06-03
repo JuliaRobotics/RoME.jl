@@ -60,7 +60,7 @@ function getSample(pxyy::PartialPose3XYYaw, N::Int=1)
   return (rand(pxyy.xyy,N), )
 end
 function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple{Array{Float64,2}},
             wXi::Array{Float64,2},
@@ -124,7 +124,7 @@ function getSample(pxyy::PartialPose3XYYawNH, N::Int=1)
   return (rand(pxyy.xyy,N), )
 end
 function (pxyy::PartialPose3XYYawNH)(res::Array{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple{Array{Float64,2}},
             wXi::Array{Float64,2},

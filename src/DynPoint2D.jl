@@ -19,7 +19,7 @@ getSample(dp2dp2::DynPoint2DynPoint2, N::Int=1) = (rand(s.z,N), )
 function (dp2dp2::DynPoint2DynPoint2)(
             res::Array{Float64},
             idx::Int,
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             meas::Tuple,
             Xi::Array{Float64,2},
             Xj::Array{Float64,2}  )

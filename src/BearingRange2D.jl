@@ -13,7 +13,7 @@ function getSample(pp2::Pose2DPoint2DRange, N::Int=1)
   return (pp2.Cov*randn(1,N),  2*pi*rand(N))
 end
 function (pp2r::Pose2DPoint2DRange)(res::Array{Float64},
-      userdata::Union{Void, FactorMetadata},
+      userdata ,
       idx::Int,
       meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
       xi::Array{Float64,2},
@@ -56,7 +56,7 @@ function getSample(pp2br::Pose2DPoint2DBearingRange, N::Int=1)
 end
 # define the conditional probability constraint
 function (pp2br::Pose2DPoint2DBearingRange)(res::Array{Float64},
-        userdata::Union{Void, FactorMetadata},
+        userdata ,
         idx::Int,
         meas::Tuple{Array{Float64,2}},
         xi::Array{Float64,2},
@@ -139,7 +139,7 @@ function getSample(pp2br::Pose2DPoint2DBearingRangeMH, N::Int=1)::Tuple{Array{Fl
 end
 # define the conditional probability constraint
 function (pp2br::Pose2DPoint2DBearingRangeMH)(res::Array{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple{Array{Float64,2}, Vector{Int}},
             xi::Array{Float64,2},
@@ -192,7 +192,7 @@ function getSample(pp2br::Pose2DPoint2DBearing, N::Int=1)
 end
 # define the conditional probability constraint
 function (pp2br::Pose2DPoint2DBearing)(res::Array{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple,
             xi::Array{Float64,2},

@@ -165,7 +165,7 @@ end
 
 function (ip3::InertialPose3)(
             res::Vector{Float64},
-            userdata::Union{Void, FactorMetadata},
+            userdata ,
             idx::Int,
             meas::Tuple,
             wIPi::Array{Float64,2},
