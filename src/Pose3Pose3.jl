@@ -149,7 +149,7 @@ function (pp3::Pose3Pose3NH)(res::Array{Float64},
             wXi::Array{Float64,2},
             wXj::Array{Float64,2}  )
   #
-  pp3(res, nothing, idx, meas, wXi, xXj)
+  pp3(res, nothing, idx, meas, wXi, wXj)
 end
 
 
