@@ -1,7 +1,7 @@
 # Partial Pose3 constraints
 
 
-type PartialPriorRollPitchZ <: IncrementalInference.FunctorSingleton
+mutable struct PartialPriorRollPitchZ <: IncrementalInference.FunctorSingleton
   rp::Distributions.MvNormal
   z::Distributions.Normal
   partial::Tuple
@@ -15,7 +15,7 @@ function getSample(pprz::PartialPriorRollPitchZ, N::Int=1)
   return ([rand(pprz.z,N)';rand(pprz.rp,N)], )
 end
 
-type PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInferenceType
+mutable struct PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInferenceType
   rpmu::Vector{Float64}
   rpsig::Vector{Float64}
   zmu::Float64
@@ -50,7 +50,7 @@ end
 # Partial pairwise constraint between poses X,Y,Yaw
 # ------------------------------------------------------------------------------
 
-type PartialPose3XYYaw <: RoME.BetweenPoses
+mutable struct PartialPose3XYYaw <: RoME.BetweenPoses
   xyy::Distributions.MvNormal
   partial::Tuple
   PartialPose3XYYaw() = new()
@@ -60,18 +60,27 @@ function getSample(pxyy::PartialPose3XYYaw, N::Int=1)
   return (rand(pxyy.xyy,N), )
 end
 function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
-                            idx::Int,
-                            meas::Tuple{Array{Float64,2}},
-                            wXi::Array{Float64,2},
-                            wXj::Array{Float64,2}  )
+            userdata::Union{Void, FactorMetadata},
+            idx::Int,
+            meas::Tuple{Array{Float64,2}},
+            wXi::Array{Float64,2},
+            wXj::Array{Float64,2}  )
   #
   wXjhat = SE2(wXi[[1;2;6],idx])*SE2(meas[1][:,idx]) #*SE2(pp2.Zij[:,1])*SE2(meas[1][:,idx])
   jXjhat = SE2(wXj[[1;2;6],idx]) \ wXjhat
   se2vee!(res, jXjhat)
   nothing
 end
+function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
+            idx::Int,
+            meas::Tuple{Array{Float64,2}},
+            wXi::Array{Float64,2},
+            wXj::Array{Float64,2}  )
+  #
+  pxyy(res, nothing, idx, meas, wXi, wXj)
+end
 
-type PackedPartialPose3XYYaw <: IncrementalInference.PackedInferenceType
+mutable struct PackedPartialPose3XYYaw <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
   vecCov::Array{Float64,1}
   PackedPartialPose3XYYaw() = new()
@@ -104,7 +113,7 @@ end
 
 
 
-type PartialPose3XYYawNH <: IncrementalInference.FunctorPairwiseNH
+mutable struct PartialPose3XYYawNH <: IncrementalInference.FunctorPairwiseNH
   xyy::Distributions.MvNormal
   partial::Tuple
   nullhypothesis::Distributions.Categorical
@@ -115,20 +124,28 @@ function getSample(pxyy::PartialPose3XYYawNH, N::Int=1)
   return (rand(pxyy.xyy,N), )
 end
 function (pxyy::PartialPose3XYYawNH)(res::Array{Float64},
-                            idx::Int,
-                            meas::Tuple{Array{Float64,2}},
-                            wXi::Array{Float64,2},
-                            wXj::Array{Float64,2}  )
+            userdata::Union{Void, FactorMetadata},
+            idx::Int,
+            meas::Tuple{Array{Float64,2}},
+            wXi::Array{Float64,2},
+            wXj::Array{Float64,2}  )
   #
   wXjhat = SE2(wXi[[1;2;6],idx])*SE2(meas[1][:,idx]) #*SE2(pp2.Zij[:,1])*SE2(meas[1][:,idx])
   jXjhat = SE2(wXj[[1;2;6],idx]) \ wXjhat
   se2vee!(res, jXjhat)
   nothing
 end
+function (pxyy::PartialPose3XYYawNH)(res::Array{Float64},
+            idx::Int,
+            meas::Tuple{Array{Float64,2}},
+            wXi::Array{Float64,2},
+            wXj::Array{Float64,2}  )
+  #
+  pxyy(res, nothing, idx, meas, wXi, wXj)
+end
 
 
-
-type PackedPartialPose3XYYawNH <: IncrementalInference.PackedInferenceType
+mutable struct PackedPartialPose3XYYawNH <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
   vecCov::Array{Float64,1}
   nullhypothesis::Vector{Float64}
