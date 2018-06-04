@@ -8,8 +8,9 @@ end
 
 mutable struct PriorPoint2D <: IncrementalInference.FunctorSingleton
   mv::MvNormal
-  W::Array{Float64,1}
+  W::Array{Float64,1} # TODO, deprecate the weight parameter
   PriorPoint2D() = new()
+  PriorPoint2D(dist::MvNormal, W) = new(dist, W)
   PriorPoint2D(mu, cov, W) = new(MvNormal(mu, cov), W)
 end
 function getSample(p2::PriorPoint2D, N::Int=1)
