@@ -13,7 +13,7 @@ v0 = addNode!(fg, :x0, DynPoint2(ut=0))
 v1 = addNode!(fg, :x1, DynPoint2(ut=1000_000))
 
 # Prior factor as boundary condition
-pp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);ones(2)], 0.1*eye(4)))
+pp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*eye(4)))
 f0 = addFactor!(fg, [:x0;], pp0)
 
 # conditional likelihood between Dynamic Point2
@@ -26,21 +26,22 @@ ensureAllInitialized!(fg)
 
 
 
-tree = wipeBuildBayesNewTree!(fg)
+
+
+tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree)
 
 
 
-using RoMEPlotting
 
-X1 = getValKDE(fg, :x1)
+using RoMEPlotting, KernelDensityEstimate #, KernelDensityEstimatePlotting
+
+# X1 = getVal(fg, :x1)
+x0 = getKDEMax(getVertKDE(fg, :x0))
+
+x1 = getKDEMax(getVertKDE(fg, :x1))
 
 
-getKDEMax(getValKDE(fg, :x1))
-
-
-
-drawLandm(fg)
 
 
 
