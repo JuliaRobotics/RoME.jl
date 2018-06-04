@@ -24,7 +24,7 @@ function (dp2dp2::DynPoint2DynPoint2)(
             Xi::Array{Float64,2},
             Xj::Array{Float64,2}  )
   #
-  z = meas[1][1,idx]
+  z = meas[1][:,idx]
   xi, xj = Xj[:,idx],Xj[:,idx]
   dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata
   res[1:2] = z[1:2] - (xj[1:2] - (xi[1:2]+dt*xi[3:4]))
