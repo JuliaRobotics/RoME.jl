@@ -176,6 +176,7 @@ export
   PackedPoint2DPoint2D,
   DynPoint2VelocityPrior,
   DynPoint2DynPoint2,
+  VelPoint2VelPoint2,
   Pose2DPoint2DBearingRange,
   Pose2DPoint2DBearingRangeMH,
   PackedPose2DPoint2DBearingRange,
