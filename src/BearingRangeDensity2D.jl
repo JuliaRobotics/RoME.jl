@@ -45,7 +45,7 @@ mutable struct Pose2DPoint2DRangeDensity <: IncrementalInference.FunctorPairwise
     Pose2DPoint2DRangeDensity(x...) = new(x[1])
 end
 function (pp2r::Pose2DPoint2DRangeDensity)(res::Array{Float64},
-            userdata ,
+            userdata,
             idx::Int,
             meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
             xi::Array{Float64,2},
