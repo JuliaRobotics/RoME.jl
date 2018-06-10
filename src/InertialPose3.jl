@@ -14,7 +14,7 @@ export
 
 @compat abstract type PreintContainer end
 
-type PreintegralCompensationGradients <: PreintContainer
+mutable struct PreintegralCompensationGradients <: PreintContainer
   # First order terms
   dPdDa::Array{Float64,2}
   dVdDa::Array{Float64,2}
@@ -30,7 +30,7 @@ type PreintegralCompensationGradients <: PreintContainer
         dVdDw::Array{Float64,2}=zeros(3,3),
         dRdDw::Array{Float64,2}=zeros(3,3)  ) = new(dPdDa,dVdDa,dPdDw,dVdDw,dRdDw)
 end
-type InertialPose3Container <: PreintContainer
+mutable struct InertialPose3Container <: PreintContainer
   rRp::Array{Float64,2}
   rPosp::Vector{Float64}
   rVelp::Vector{Float64}
@@ -164,11 +164,12 @@ end
 
 
 function (ip3::InertialPose3)(
-        res::Vector{Float64},
-        idx::Int,
-        meas::Tuple,
-        wIPi::Array{Float64,2},
-        wIPj::Array{Float64,2}  )
+            res::Vector{Float64},
+            userdata ,
+            idx::Int,
+            meas::Tuple,
+            wIPi::Array{Float64,2},
+            wIPj::Array{Float64,2}  )
   #
   # Function can be massively improved. Just getting it all wired at first.
   # get pointer to memory, local to this thread
@@ -211,8 +212,18 @@ function (ip3::InertialPose3)(
   # (res'*(ip3.Zij.Σ.mat\res))[1]
   nothing
 end
+function (ip3::InertialPose3)(
+            res::Vector{Float64},
+            idx::Int,
+            meas::Tuple,
+            wIPi::Array{Float64,2},
+            wIPj::Array{Float64,2}  )
+  #
+  ip3(res, nothing, idx, meas, wIPi, wIPj)
+end
 
-type PackedInertialPose3 <: IncrementalInference.PackedInferenceType
+
+mutable struct PackedInertialPose3 <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation, 3 velocities
   vecCov::Array{Float64,1}
   dimc::Int
@@ -282,7 +293,7 @@ end
 
 
 
-type PriorInertialPose3 <: IncrementalInference.FunctorSingleton
+mutable struct PriorInertialPose3 <: IncrementalInference.FunctorSingleton
   Zi::Distribution
 end
 function getSample(prip3::PriorInertialPose3, N::Int=1)
@@ -290,7 +301,7 @@ function getSample(prip3::PriorInertialPose3, N::Int=1)
 end
 
 
-type PackedPriorInertialPose3 <: IncrementalInference.PackedInferenceType
+mutable struct PackedPriorInertialPose3 <: IncrementalInference.PackedInferenceType
   vecZi::Array{Float64,1} # 3translations, 3rotation, 3 velocities
   vecCov::Array{Float64,1}
   dimc::Int

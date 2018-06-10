@@ -21,14 +21,24 @@ type LinearRangeBearingElevation <: FunctorPairwise
   LinearRangeBearingElevation( r::Tuple{Float64,Float64}, b::Tuple{Float64,Float64}; elev=Uniform(-0.25133,0.25133)) = new(Normal(r...),Normal(b...),elev, reuseLBRA(0))
 end
 function (p::LinearRangeBearingElevation)(
-      res::Vector{Float64},
-      idx::Int,
-      meas::Tuple{Array{Float64,2}},
-      pose::Array{Float64,2},
-      landm::Array{Float64,2}  )
+            res::Vector{Float64},
+            userdata ,
+            idx::Int,
+            meas::Tuple{Array{Float64,2}},
+            pose::Array{Float64,2},
+            landm::Array{Float64,2}  )
   #
   residualLRBE!(res, meas[1][:,idx], pose[:,idx], landm[:,idx], p.reuse)
   nothing
+end
+function (p::LinearRangeBearingElevation)(
+            res::Vector{Float64},
+            idx::Int,
+            meas::Tuple{Array{Float64,2}},
+            pose::Array{Float64,2},
+            landm::Array{Float64,2}  )
+  #
+  p(res, nothing, idx, meas, pose, landm)
 end
 
 function getSample!(y::Array{Float64,2}, las::LinearRangeBearingElevation, idx::Int )

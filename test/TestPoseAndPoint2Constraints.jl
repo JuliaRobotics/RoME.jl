@@ -13,7 +13,8 @@ initCov = diagm([0.03;0.03;0.001])
 odoCov = diagm([3.0;3.0;0.01])
 
 # Some starting position
-v1 = addNode!(fg, :x0, zeros(3,1), diagm([1.0;1.0;0.1]), N=N)
+v1 = addNode!(fg, :x0, Pose2, N=N)
+# v1 = addNode!(fg, :x0, zeros(3,1), diagm([1.0;1.0;0.1]), N=N)
 initPosePrior = PriorPose2(zeros(3,1), initCov, [1.0])
 f1  = addFactor!(fg,[v1], initPosePrior)
 

@@ -75,16 +75,24 @@ function getSample(pp3::Pose3Pose3, N::Int=1)
   return (rand(pp3.Zij, N), )
 end
 function (pp3::Pose3Pose3)(res::Array{Float64},
-      idx::Int,
-      meas::Tuple,
-      wXi::Array{Float64,2},
-      wXj::Array{Float64,2}  )
+            userdata ,
+            idx::Int,
+            meas::Tuple,
+            wXi::Array{Float64,2},
+            wXj::Array{Float64,2}  )
   #
   reusethrid = pp3.reuse[Threads.threadid()]
   fastpose3pose3residual!(reusethrid, res, idx, meas, wXi, wXj)
   nothing
 end
-
+function (pp3::Pose3Pose3)(res::Array{Float64},
+            idx::Int,
+            meas::Tuple,
+            wXi::Array{Float64,2},
+            wXj::Array{Float64,2}  )
+  #
+  pp3(res, nothing, idx, meas, wXi, wXj)
+end
 
 mutable struct PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
@@ -125,14 +133,23 @@ function getSample(pp3::Pose3Pose3NH, N::Int=1)
   return (rand(pp3.Zij, N), )
 end
 function (pp3::Pose3Pose3NH)(res::Array{Float64},
-      idx::Int,
-      meas::Tuple,
-      wXi::Array{Float64,2},
-      wXj::Array{Float64,2}  )
+            userdata ,
+            idx::Int,
+            meas::Tuple,
+            wXi::Array{Float64,2},
+            wXj::Array{Float64,2}  )
   #
   reusethrid = pp3.reuse[Threads.threadid()]
   fastpose3pose3residual!(reusethrid, res, idx, meas, wXi, wXj)
   nothing
+end
+function (pp3::Pose3Pose3NH)(res::Array{Float64},
+            idx::Int,
+            meas::Tuple,
+            wXi::Array{Float64,2},
+            wXj::Array{Float64,2}  )
+  #
+  pp3(res, nothing, idx, meas, wXi, wXj)
 end
 
 

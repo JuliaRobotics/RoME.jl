@@ -21,17 +21,25 @@ mutable struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {
 end
 getSample(s::Pose2Pose2_NEW, N::Int=1) = (rand(s.z,N), )
 function (s::Pose2Pose2_NEW)(res::Array{Float64},
-      idx::Int,
-      meas::Tuple,
-      wxi::Array{Float64,2},
-      wxj::Array{Float64,2}  )
-  # res[1] = meas[1][idx] - (X2[1,idx] - X1[1,idx])
-  wXjhat = SE2(wxi[:,idx])*SE2(meas[1][:,idx]) #*SE2(pp2.Zij[:,1])*SE2(meas[1][:,idx])
+            userdata ,
+            idx::Int,
+            meas::Tuple,
+            wxi::Array{Float64,2},
+            wxj::Array{Float64,2}  )
+  #
+  wXjhat = SE2(wxi[:,idx])*SE2(meas[1][:,idx])
   jXjhat = SE2(wxj[:,idx]) \ wXjhat
   se2vee!(res, jXjhat)
   nothing
 end
-
+function (s::Pose2Pose2_NEW)(res::Array{Float64},
+            idx::Int,
+            meas::Tuple,
+            wxi::Array{Float64,2},
+            wxj::Array{Float64,2}  )
+  #
+  s(res, nothing, idx, meas, wxi, wxj)
+end
 
 
 mutable struct PriorPose2 <: IncrementalInference.FunctorSingleton
@@ -57,10 +65,11 @@ function getSample(pp2::Pose2Pose2, N::Int=1)
   return (rand(MvNormal(pp2.Zij[:,1],pp2.Cov),N), )
 end
 function (pp2::Pose2Pose2)(res::Array{Float64},
-      idx::Int,
-      meas::Tuple{Array{Float64,2}},
-      wxi::Array{Float64,2},
-      wxj::Array{Float64,2}  )
+            userdata ,
+            idx::Int,
+            meas::Tuple{Array{Float64,2}},
+            wxi::Array{Float64,2},
+            wxj::Array{Float64,2}  )
   #
 
   # TODO -- extend to allow multiple measurements also
@@ -69,7 +78,14 @@ function (pp2::Pose2Pose2)(res::Array{Float64},
   se2vee!(res, jXjhat)
   nothing
 end
-
+function (pp2::Pose2Pose2)(res::Array{Float64},
+            idx::Int,
+            meas::Tuple{Array{Float64,2}},
+            wxi::Array{Float64,2},
+            wxj::Array{Float64,2}  )
+  #
+  pp2(res, nothing, idx, meas, wxi, wxj)
+end
 
 function compare(a::PriorPose2,b::PriorPose2; tol::Float64=1e-10)
   TP = true

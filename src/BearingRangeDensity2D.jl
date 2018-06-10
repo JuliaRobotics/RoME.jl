@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------------
 # bearing and range available
 
-type Pose2DPoint2DBearingRangeDensity <: IncrementalInference.FunctorPairwise
+mutable struct Pose2DPoint2DBearingRangeDensity <: IncrementalInference.FunctorPairwise
     bearing::BallTreeDensity
     range::BallTreeDensity
     Pose2DPoint2DBearingRangeDensity() = new()
@@ -16,44 +16,53 @@ function getSample(pp2br::Pose2DPoint2DBearingRangeDensity, N::Int=1)
 end
 # define the conditional probability constraint
 function (pp2br::Pose2DPoint2DBearingRangeDensity)(res::Array{Float64},
+        userdata ,
         idx::Int,
         meas::Tuple{Array{Float64,2}},
         xi::Array{Float64,2},
         lm::Array{Float64,2} )
   #
-  # @show size(lm), size(xi), size(meas[1])
-  # @show idx
-  # @show meas[1][:,idx]
-  # @show xi[:, idx]
-  # @show lm[:,idx]
   res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
   res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
   nothing
 end
-
+function (pp2br::Pose2DPoint2DBearingRangeDensity)(res::Array{Float64},
+            idx::Int,
+            meas::Tuple{Array{Float64,2}},
+            xi::Array{Float64,2},
+            lm::Array{Float64,2} )
+  #
+  pp2br(res, nothing, idx, meas, xi, lm)
+end
 
 
 
 
 # better to use bearingrange with [uniform bearing], numerical solving issue on 1D
-type Pose2DPoint2DRangeDensity <: IncrementalInference.FunctorPairwiseMinimize
+mutable struct Pose2DPoint2DRangeDensity <: IncrementalInference.FunctorPairwiseMinimize
     range::BallTreeDensity
     Pose2DPoint2DRangeDensity() = new()
     Pose2DPoint2DRangeDensity(x...) = new(x[1])
 end
 function (pp2r::Pose2DPoint2DRangeDensity)(res::Array{Float64},
-      idx::Int,
-      meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
-      xi::Array{Float64,2},
-      lm::Array{Float64,2}  )
-  #
-  # TODO -- still need to add multi-hypotheses support here
-
-  # @show size(lm), size(xi), size(meas), size(meas[1]), size(meas[2])
+            userdata,
+            idx::Int,
+            meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
+            xi::Array{Float64,2},
+            lm::Array{Float64,2}  )
+  # DONE in IIF -- still need to add multi-hypotheses support here
   XX = lm[1,idx] - (meas[1][1,idx]*cos(meas[2][idx]+xi[3,idx]) + xi[1,idx])
   YY = lm[2,idx] - (meas[1][1,idx]*sin(meas[2][idx]+xi[3,idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
   res[1]
+end
+function (pp2r::Pose2DPoint2DRangeDensity)(res::Array{Float64},
+            idx::Int,
+            meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
+            xi::Array{Float64,2},
+            lm::Array{Float64,2}  )
+  #
+  pp2r(res, nothing, idx, meas, xi, lm)
 end
 function getSample(pp2r::Pose2DPoint2DRangeDensity, N::Int=1)
   return (KernelDensityEstimate.sample(pp2r.range, N)[1],  2*pi*rand(N))

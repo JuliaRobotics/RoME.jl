@@ -9,26 +9,32 @@ mutable struct Pose2DPoint2DRange <: IncrementalInference.FunctorPairwise
     Pose2DPoint2DRange() = new()
     Pose2DPoint2DRange(x...) = new(x[1],x[2],x[3])
 end
+function getSample(pp2::Pose2DPoint2DRange, N::Int=1)
+  return (pp2.Cov*randn(1,N),  2*pi*rand(N))
+end
+function (pp2r::Pose2DPoint2DRange)(res::Array{Float64},
+      userdata ,
+      idx::Int,
+      meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
+      xi::Array{Float64,2},
+      lm::Array{Float64,2}  )
+  #
+  # DONE in IIF -- still need to add multi-hypotheses support here
+  # this is the noisy range
+  z = pp2r.Zij[1]+meas[1][1,idx]
+  XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
+  YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
+  res[1] = XX^2 + YY^2
+  nothing
+end
 function (pp2r::Pose2DPoint2DRange)(res::Array{Float64},
       idx::Int,
       meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
       xi::Array{Float64,2},
       lm::Array{Float64,2}  )
   #
-  # TODO -- still need to add multi-hypotheses support here
-  # this is the noisy range
-  z = pp2r.Zij[1]+meas[1][1,idx]
-  # theta = meas[2]
-  # @show size(lm), size(xi), size(meas), size(meas[1]), size(meas[2])
-  XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
-  YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
-  res[1] = XX^2 + YY^2
-  nothing
+  pp2r(res, nothing, idx, meas, xi, lm)
 end
-function getSample(pp2::Pose2DPoint2DRange, N::Int=1)
-  return (pp2.Cov*randn(1,N),  2*pi*rand(N))
-end
-
 
 #-------------------------------------------------------------------------------
 # bearing and range available
@@ -50,6 +56,7 @@ function getSample(pp2br::Pose2DPoint2DBearingRange, N::Int=1)
 end
 # define the conditional probability constraint
 function (pp2br::Pose2DPoint2DBearingRange)(res::Array{Float64},
+        userdata ,
         idx::Int,
         meas::Tuple{Array{Float64,2}},
         xi::Array{Float64,2},
@@ -59,7 +66,14 @@ function (pp2br::Pose2DPoint2DBearingRange)(res::Array{Float64},
   res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
   nothing
 end
-
+function (pp2br::Pose2DPoint2DBearingRange)(res::Array{Float64},
+        idx::Int,
+        meas::Tuple{Array{Float64,2}},
+        xi::Array{Float64,2},
+        lm::Array{Float64,2} )
+  #
+  pp2br(res, nothing, idx, meas, xi, lm)
+end
 
 
 
@@ -125,14 +139,23 @@ function getSample(pp2br::Pose2DPoint2DBearingRangeMH, N::Int=1)::Tuple{Array{Fl
 end
 # define the conditional probability constraint
 function (pp2br::Pose2DPoint2DBearingRangeMH)(res::Array{Float64},
-        idx::Int,
-        meas::Tuple{Array{Float64,2}, Vector{Int}},
-        xi::Array{Float64,2},
-        lms... )::Void  # ::Array{Float64,2}
+            userdata ,
+            idx::Int,
+            meas::Tuple{Array{Float64,2}, Vector{Int}},
+            xi::Array{Float64,2},
+            lms... )::Void  # ::Array{Float64,2}
   #
   res[1] = lms[meas[2][idx]][1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
   res[2] = lms[meas[2][idx]][2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
   nothing
+end
+function (pp2br::Pose2DPoint2DBearingRangeMH)(res::Array{Float64},
+            idx::Int,
+            meas::Tuple{Array{Float64,2}, Vector{Int}},
+            xi::Array{Float64,2},
+            lms... )::Void  #
+  #
+  pp2br(res, nothing, idx, meas, xi, lms...)
 end
 
 mutable struct PackedPose2DPoint2DBearingRangeMH <: IncrementalInference.PackedInferenceType
@@ -169,16 +192,23 @@ function getSample(pp2br::Pose2DPoint2DBearing, N::Int=1)
 end
 # define the conditional probability constraint
 function (pp2br::Pose2DPoint2DBearing)(res::Array{Float64},
-        idx::Int,
-        meas::Tuple,
-        xi::Array{Float64,2},
-        lm::Array{Float64,2} )
+            userdata ,
+            idx::Int,
+            meas::Tuple,
+            xi::Array{Float64,2},
+            lm::Array{Float64,2}  )
   #
   res[1] = meas[1][idx] - atan2(lm[2,idx]-xi[2,idx], lm[1,idx]-xi[1,idx])
   nothing
 end
-
-
+function (pp2br::Pose2DPoint2DBearing)(res::Array{Float64},
+            idx::Int,
+            meas::Tuple,
+            xi::Array{Float64,2},
+            lm::Array{Float64,2} )
+  #
+  pp2br(res, nothing, idx, meas, xi, lm)
+end
 
 
 

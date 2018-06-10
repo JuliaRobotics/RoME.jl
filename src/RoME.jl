@@ -174,6 +174,9 @@ export
   # Point2D
   Point2DPoint2D,
   PackedPoint2DPoint2D,
+  DynPoint2VelocityPrior,
+  DynPoint2DynPoint2,
+  VelPoint2VelPoint2,
   Pose2DPoint2DBearingRange,
   Pose2DPoint2DBearingRangeMH,
   PackedPose2DPoint2DBearingRange,
@@ -201,15 +204,16 @@ export
 
   Pose2,
   Point2,
+  DynPoint2,
   Pose3,
   Point3,
   Prior,
-  Pose2Pose2_NEW,
 
   # Pose2D
   PriorPose2,
   PackedPriorPose2,
-  Pose2Pose2,
+  Pose2Pose2_NEW,
+  Pose2Pose2, # will be deprecated soon
   PackedPose2Pose2,
   addPose2Pose2,
 
@@ -296,6 +300,7 @@ include("BayesTracker.jl")
 include("SensorModels.jl")
 include("CameraModel.jl")
 include("Point2D.jl")
+include("DynPoint2D.jl")
 include("Pose2D.jl")
 include("Pose3D.jl")
 include("BearingRange2D.jl")

@@ -35,7 +35,7 @@ odoCov = deepcopy(initCov)
 
 
 println("Adding PriorPose3 to graph...")
-v1 = addNode!(fg, :x1, Pose3, N=N) # , 0.1*randn(6,N)
+v1 = addNode!(fg, :x1, Pose3, N=N)
 initPosePrior = PriorPose3( MvNormal( zeros(6), initCov) )
 f1  = addFactor!(fg,[v1], initPosePrior, autoinit=true)
 

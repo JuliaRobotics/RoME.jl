@@ -12,7 +12,7 @@ end
 function getSample(el::ZJoint, N=1)
   return (rand(el.Zij, N),)
 end
-function (el::ZJoint)(res, idx, meas, xi, xj)
+function (el::ZJoint)(res, userdata, idx, meas, xi, xj)
   Xi = SE3(xi[1:3,idx],Euler(xi[4:6,idx]))
   Xj = SE3(xj[1:3,idx],Euler(xj[4:6,idx]))
 
@@ -32,16 +32,17 @@ function (el::ZJoint)(res, idx, meas, xi, xj)
   # res[1:6] = veeEuler(del)
   nothing
 end
+function (el::ZJoint)(res, idx, meas, xi, xj)
+  el(res, nothing, idx, meas, xi, xj)
+end
 
-
-
-type XJoint <: FunctorPairwise
+mutable struct XJoint <: FunctorPairwise
   Zij::Distribution
 end
 function getSample(el::XJoint, N=1)
   return (rand(el.Zij, N),)
 end
-function (el::XJoint)(res, idx, meas, xi, xj)
+function (el::XJoint)(res, userdata, idx, meas, xi, xj)
   Xi = SE3(xi[1:3,idx],Euler(xi[4:6,idx]))
   Xj = SE3(xj[1:3,idx],Euler(xj[4:6,idx]))
 
@@ -53,7 +54,9 @@ function (el::XJoint)(res, idx, meas, xi, xj)
   res[1:6] = veeEuler(del)
   nothing
 end
-
+function (el::XJoint)(res, idx, meas, xi, xj)
+  el(res, nothing, idx, meas, xi, xj)
+end
 
 
 
