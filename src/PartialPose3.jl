@@ -75,8 +75,7 @@ type PackedPartialPose3XYYaw <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
   vecCov::Array{Float64,1}
   PackedPartialPose3XYYaw() = new()
-  PackedPartialPose3XYYaw(x1::Vector{Float64}, x2::Array{Float64,1}) = new(x1, x2)
-  PackedPartialPose3XYYaw(x1::Vector{Float64}, x2::Array{Float64,2}) = new(x1, x2[:])
+  PackedPartialPose3XYYaw(x1::Vector{Float64}, x2::Array{Float64}) = new(x1, x2[:])
 end
 function convert(::Type{PartialPose3XYYaw}, d::PackedPartialPose3XYYaw)
   return PartialPose3XYYaw( Distributions.MvNormal(d.vecZij,
