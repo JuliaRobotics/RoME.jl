@@ -49,9 +49,6 @@ f2 = addFactor!(fg, [v1;v2], ppc)
 
     @test IncrementalInference.compare(getData(v1), upv1data)
 end
-#
-# dd = convert(PackedPose2Pose2, ppc)
-# upd = convert(RoME.Pose2Pose2, dd)
 
 
 @testset "test conversions of Pose2Pose2" begin

@@ -97,12 +97,10 @@ function compare(a::PriorPose2,b::PriorPose2; tol::Float64=1e-10)
 end
 function compare(a::Pose2Pose2,b::Pose2Pose2; tol::Float64=1e-10)
   TP = true
-  TP = TP && norm(a.z.μ-b.z.μ) < tol
+  TP = TP && norm(a.z.μ-b.z.μ) < (tol + 1e-5)
   TP = TP && norm(a.z.Σ.mat-b.z.Σ.mat) < tol
   return TP
 end
-
-
 
 
 

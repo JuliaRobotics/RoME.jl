@@ -95,11 +95,12 @@ muX1 = Base.mean(getVal(fg,:x1),2)
 stdX1 = Base.std(getVal(fg,:x1),2)
 @test sum(map(Int,abs.(muX1[1:3]) .< 1.0)) == 3
 @test sum(map(Int,abs.(muX1[4:6]) .< 0.1)) == 3
-@test sum(map(Int, 0.4 .< stdX1[1:3] .< 1.6)) == 3 # had a 2==3 failure here 
+@test sum(map(Int, 0.4 .< stdX1[1:3] .< 1.6)) == 3 # had a 2==3 failure here
 @test sum(map(Int, 0.025 .< stdX1[4:6] .< 0.25)) == 3
 muX2 = Base.mean(getVal(fg,:x2),2)
 stdX2 = Base.std(getVal(fg,:x2),2)
-@test sum(map(Int, abs.(muX2[1:3]-[10.0;0;0]) .< 1.0)) == 3
+@show muX2[1:3]-[10.0;0;0]
+@test sum(map(Int, abs.(muX2[1:3]-[10.0;0;0]) .< 1.5)) == 3
 @test sum(map(Int, abs.(muX2[4:6]) .< 0.1)) == 3
 @show println("previous test failure 0.75 .< $(round.(stdX2[1:3],2)) .< 2.25")
 @test sum(map(Int, 0.75 .< stdX2[1:3] .< 2.25)) == 3
