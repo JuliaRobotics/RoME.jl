@@ -134,8 +134,7 @@ type PackedPartialPose3XYYawNH <: IncrementalInference.PackedInferenceType
   vecCov::Array{Float64,1}
   nullhypothesis::Vector{Float64}
   PackedPartialPose3XYYawNH() = new()
-  PackedPartialPose3XYYawNH(x1::Vector{Float64}, x2::Vector{Float64},x3::Vector{Float64}) = new(x1, x2, x3)
-  PackedPartialPose3XYYawNH(x1::Vector{Float64}, x2::Array{Float64,2},x3::Vector{Float64}) = new(x1, x2[:], x3)
+  PackedPartialPose3XYYawNH(x1::Vector{Float64}, x2::Array{Float64}, x3::Vector{Float64}) = new(x1, x2[:], x3)
 end
 function convert(::Type{PartialPose3XYYawNH}, d::PackedPartialPose3XYYawNH)
   return PartialPose3XYYawNH( Distributions.MvNormal(d.vecZij,
