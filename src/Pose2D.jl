@@ -13,15 +13,16 @@ end
 getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 
 
-mutable struct Pose2Pose2_NEW{T} <: IncrementalInference.FunctorPairwise where {T <: Distributions.Distribution}
+mutable struct Pose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: Distributions.Distribution}
   z::T
-  Pose2Pose2_NEW{T}() where {T <: Distribution} = new{T}()
-  Pose2Pose2_NEW(z1::T) where {T <: Distribution} = new{T}(z1)
-  Pose2Pose2_NEW(mean::Vector{Float64}, cov::Array{Float64,2}) where {T <: Distribution} = new{Distributions.MvNormal}(MvNormal(mean, cov))
+  Pose2Pose2{T}() where {T <: Distribution} = new{T}()
+  Pose2Pose2(z1::T) where {T <: Distribution} = new{T}(z1)
 end
-getSample(s::Pose2Pose2_NEW, N::Int=1) = (rand(s.z,N), )
-function (s::Pose2Pose2_NEW)(res::Array{Float64},
-            userdata ,
+Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}) = Pose2Pose2(MvNormal(mean, cov))
+Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Float64}) = Pose2Pose2(MvNormal(mean, cov))
+getSample(s::Pose2Pose2, N::Int=1) = (rand(s.z,N), )
+function (s::Pose2Pose2)(res::Array{Float64},
+            userdata,
             idx::Int,
             meas::Tuple,
             wxi::Array{Float64,2},
@@ -32,7 +33,7 @@ function (s::Pose2Pose2_NEW)(res::Array{Float64},
   se2vee!(res, jXjhat)
   nothing
 end
-function (s::Pose2Pose2_NEW)(res::Array{Float64},
+function (s::Pose2Pose2)(res::Array{Float64},
             idx::Int,
             meas::Tuple,
             wxi::Array{Float64,2},
@@ -54,38 +55,38 @@ function getSample(p2::PriorPose2, N::Int=1)
 end
 
 
-mutable struct Pose2Pose2 <: RoME.BetweenPoses # IncrementalInference.FunctorPairwise
-    Zij::Array{Float64,2} # 2translations, 1rotation
-    Cov::Array{Float64,2}
-    W::Array{Float64,1}
-    Pose2Pose2() = new()
-    Pose2Pose2(x...) = new(x[1], x[2], x[3])
-end
-function getSample(pp2::Pose2Pose2, N::Int=1)
-  return (rand(MvNormal(pp2.Zij[:,1],pp2.Cov),N), )
-end
-function (pp2::Pose2Pose2)(res::Array{Float64},
-            userdata ,
-            idx::Int,
-            meas::Tuple{Array{Float64,2}},
-            wxi::Array{Float64,2},
-            wxj::Array{Float64,2}  )
-  #
-
-  # TODO -- extend to allow multiple measurements also
-  wXjhat = SE2(wxi[:,idx])*SE2(meas[1][:,idx]) #*SE2(pp2.Zij[:,1])*SE2(meas[1][:,idx])
-  jXjhat = SE2(wxj[:,idx]) \ wXjhat
-  se2vee!(res, jXjhat)
-  nothing
-end
-function (pp2::Pose2Pose2)(res::Array{Float64},
-            idx::Int,
-            meas::Tuple{Array{Float64,2}},
-            wxi::Array{Float64,2},
-            wxj::Array{Float64,2}  )
-  #
-  pp2(res, nothing, idx, meas, wxi, wxj)
-end
+# mutable struct Pose2Pose2 <: RoME.BetweenPoses # IncrementalInference.FunctorPairwise
+#     Zij::Array{Float64,2} # 2translations, 1rotation
+#     Cov::Array{Float64,2}
+#     W::Array{Float64,1}
+#     Pose2Pose2() = new()
+#     Pose2Pose2(x...) = new(x[1], x[2], x[3])
+# end
+# function getSample(pp2::Pose2Pose2, N::Int=1)
+#   return (rand(MvNormal(pp2.Zij[:,1],pp2.Cov),N), )
+# end
+# function (pp2::Pose2Pose2)(res::Array{Float64},
+#             userdata,
+#             idx::Int,
+#             meas::Tuple{Array{Float64,2}},
+#             wxi::Array{Float64,2},
+#             wxj::Array{Float64,2}  )
+#   #
+#
+#   # TODO -- extend to allow multiple measurements also
+#   wXjhat = SE2(wxi[:,idx])*SE2(meas[1][:,idx]) #*SE2(pp2.Zij[:,1])*SE2(meas[1][:,idx])
+#   jXjhat = SE2(wxj[:,idx]) \ wXjhat
+#   se2vee!(res, jXjhat)
+#   nothing
+# end
+# function (pp2::Pose2Pose2)(res::Array{Float64},
+#             idx::Int,
+#             meas::Tuple{Array{Float64,2}},
+#             wxi::Array{Float64,2},
+#             wxj::Array{Float64,2}  )
+#   #
+#   pp2(res, nothing, idx, meas, wxi, wxj)
+# end
 
 function compare(a::PriorPose2,b::PriorPose2; tol::Float64=1e-10)
   TP = true
@@ -96,9 +97,8 @@ function compare(a::PriorPose2,b::PriorPose2; tol::Float64=1e-10)
 end
 function compare(a::Pose2Pose2,b::Pose2Pose2; tol::Float64=1e-10)
   TP = true
-  TP = TP && norm(a.Zij-b.Zij) < tol
-  TP = TP && norm(a.Cov-b.Cov) < tol
-  TP = TP && norm(a.W-b.W) < tol
+  TP = TP && norm(a.z.μ-b.z.μ) < tol
+  TP = TP && norm(a.z.Σ.mat-b.z.Σ.mat) < tol
   return TP
 end
 
@@ -167,25 +167,38 @@ end
 # --------------------------------------------
 
 
+# mutable struct PackedPose2Pose2  <: IncrementalInference.PackedInferenceType
+#   vecZij::Array{Float64,1} # 2translations, 1rotation
+#   dimz::Int
+#   vecCov::Array{Float64,1}
+#   dimc::Int
+#   W::Array{Float64,1}
+#   PackedPose2Pose2() = new()
+#   PackedPose2Pose2(x...) = new(x[1], x[2], x[3], x[4], x[5])
+# end
+# function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)
+#   return Pose2Pose2(reshapeVec2Mat(d.vecZij,d.dimz),
+#                     reshapeVec2Mat(d.vecCov, d.dimc), d.W)
+# end
+# function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
+#   v1 = d.Zij[:];
+#   v2 = d.Cov[:];
+#   return PackedPose2Pose2(v1,size(d.Zij,1),
+#                           v2,size(d.Cov,1),
+#                           d.W)
+# end
+
+
 mutable struct PackedPose2Pose2  <: IncrementalInference.PackedInferenceType
-  vecZij::Array{Float64,1} # 2translations, 1rotation
-  dimz::Int
-  vecCov::Array{Float64,1}
-  dimc::Int
-  W::Array{Float64,1}
+  datastr::String
   PackedPose2Pose2() = new()
-  PackedPose2Pose2(x...) = new(x[1], x[2], x[3], x[4], x[5])
+  PackedPose2Pose2(x::String) = new(x)
 end
 function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)
-  return Pose2Pose2(reshapeVec2Mat(d.vecZij,d.dimz),
-                    reshapeVec2Mat(d.vecCov, d.dimc), d.W)
+  return Pose2Pose2(extractdistribution(d.datastr))
 end
 function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
-  v1 = d.Zij[:];
-  v2 = d.Cov[:];
-  return PackedPose2Pose2(v1,size(d.Zij,1),
-                          v2,size(d.Cov,1),
-                          d.W)
+  return PackedPose2Pose2(string(d.z))
 end
 
 

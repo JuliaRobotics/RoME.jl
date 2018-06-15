@@ -56,7 +56,7 @@ function getSample(pp2br::Pose2DPoint2DBearingRange, N::Int=1)
 end
 # define the conditional probability constraint
 function (pp2br::Pose2DPoint2DBearingRange)(res::Array{Float64},
-        userdata ,
+        userdata,
         idx::Int,
         meas::Tuple{Array{Float64,2}},
         xi::Array{Float64,2},

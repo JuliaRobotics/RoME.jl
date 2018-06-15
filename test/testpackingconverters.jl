@@ -23,7 +23,7 @@ f1  = addFactor!(fg,[v1], ipp)
 
 # and a second pose
 v2 = addNode!(fg, :x2, vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05]), N=N)
-ppc = Pose2Pose2(vectoarr2([50.0;0.0;pi/2]), odoCov, [1.0])
+ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov)
 f2 = addFactor!(fg, [v1;v2], ppc)
 
 
@@ -49,6 +49,10 @@ f2 = addFactor!(fg, [v1;v2], ppc)
 
     @test IncrementalInference.compare(getData(v1), upv1data)
 end
+#
+# dd = convert(PackedPose2Pose2, ppc)
+# upd = convert(RoME.Pose2Pose2, dd)
+
 
 @testset "test conversions of Pose2Pose2" begin
 

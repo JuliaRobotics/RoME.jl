@@ -3,7 +3,9 @@
 using RoME, IncrementalInference, Distributions
 using Base.Test
 
+
 begin
+
 
 N = 75
 fg = initfg()
@@ -18,9 +20,13 @@ v1 = addNode!(fg, :x0, Pose2, N=N)
 initPosePrior = PriorPose2(zeros(3,1), initCov, [1.0])
 f1  = addFactor!(fg,[v1], initPosePrior)
 
+@test Pose2Pose2(MvNormal(randn(2), eye(2))) != nothing
+@test Pose2Pose2(randn(2), eye(2)) != nothing
+@test Pose2Pose2(randn(2), eye(2),[1.0;]) != nothing
+
 # and a second pose
-v2 = addNode!(fg, :x1, vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05]), N=N)
-ppc = Pose2Pose2(vectoarr2([50.0;0.0;pi/2]), odoCov, [1.0])
+v2 = addNode!(fg, :x1, Pose2, N=N) # vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05])
+ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov, [1.0])
 f2 = addFactor!(fg, [v1;v2], ppc)
 
 # test evaluation of pose pose constraint
@@ -29,7 +35,7 @@ pts = evalFactor2(fg, f2, v2.index)
 @test abs(Base.mean(pts,2)[3]-pi/2) < 0.5
 
 # @show ls(fg)
-
+ensureAllInitialized!(fg)
 tree = wipeBuildNewTree!(fg)
 inferOverTreeR!(fg, tree,N=N)
 # inferOverTree!(fg, tree, N=N)
@@ -45,8 +51,8 @@ pts = getVal(fg, :x1)
 
 
 # check that yaw is working
-v3 = addNode!(fg, :x2, zeros(3,1), diagm([1.0;1.0;0.05]), N=N)
-ppc = Pose2Pose2(vectoarr2([50.0;0.0;0.0]), odoCov, [1.0])
+v3 = addNode!(fg, :x2, Pose2, N=N) # zeros(3,1), diagm([1.0;1.0;0.05])
+ppc = Pose2Pose2([50.0;0.0;0.0], odoCov, [1.0])
 f3 = addFactor!(fg, [v2;v3], ppc)
 
 
@@ -69,11 +75,16 @@ pts = getVal(fg, :x2)
 println("test bearing range evaluations")
 
 # new landmark
-l1 = addNode!(fg, :l1, zeros(2,1), diagm([1.0;1.0]), N=N)
+l1 = addNode!(fg, :l1, Point2, N=N) # zeros(2,1), diagm([1.0;1.0])
 # and pose to landmark constraint
 rhoZ1 = norm([10.0;0.0])
 ppr = Pose2DPoint2DBearingRange{Uniform, Normal}(Uniform(-pi,pi),Normal(rhoZ1,1.0))
 f4 = addFactor!(fg, [v1;l1], ppr)
+
+# res = zeros(2)
+# meas = getSample(ppr)
+# ppr(res,nothing,1,meas,xi,lm )
+
 
 pts = evalFactor2(fg, f4, l1.index)
 # @show sum(sqrt(sum(pts.^2, 1 )) .< 5.0)
