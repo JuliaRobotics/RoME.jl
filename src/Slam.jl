@@ -21,7 +21,8 @@ function addOdoFG!(slaml::SLAMWrapper, odo::Pose3Pose3;
   # vprev, X, nextn = getLastPose(fgl)
   npnum = parse(Int,string(slaml.lastposesym)[2:end]) + 1
   nextn = Symbol("x$(npnum)")
-  vnext = addNode!(slaml.fg, nextn, getVal(vprev) ⊕ odo, N=N, ready=ready, labels=["POSE"])
+  vnext = addNode!(slaml.fg, nextn, Pose2, N=N, ready=ready)
+  # vnext = addNode!(slaml.fg, nextn, getVal(vprev) ⊕ odo, N=N, ready=ready, labels=["POSE"])
   slaml.lastposesym = nextn
   fact = addFactor!(slaml.fg, [vprev;vnext], odo)
 
@@ -46,7 +47,8 @@ function addposeFG!(slaml::SLAMWrapper,
   # preinit
   vnext = nothing
   if !haskey(slaml.fg.IDs, nextn)
-    vnext = addNode!(slaml.fg, nextn, getVal(vprev), N=N, ready=ready, labels=["POSE"])
+    vnext = addNode!(slaml.fg, nextn, Pose2, N=N, ready=ready)
+    # vnext = addNode!(slaml.fg, nextn, getVal(vprev), N=N, ready=ready, labels=["POSE"])
   else
     vnext = getVert(slaml.fg, nextn) #, api=localapi # as optimization, assuming we already have latest vnest in slaml.fg
   end

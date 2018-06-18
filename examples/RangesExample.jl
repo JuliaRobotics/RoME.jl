@@ -21,13 +21,13 @@ fg.sessionname="SESSranges"
 odoCov = diagm([3.0;3.0;0.1])
 
 # Some starting position
-init = 300*randn(2,N)
-v1 = addNode!(fg, "l1", init, diagm([1000.0;1000.0]), N=N, ready=0)
+# init = 300*randn(2,N)
+v1 = addNode!(fg, :l1, Point2, N=N, ready=0)
 
 # Two landmarks
 L1, L2, L3 = [10.0;30], [30.0;-30], [70.0;30]
-l1 = addNode!(fg, "l2", reshape(L1,length(L1),1), diagm([1.0;1.0]), N=N, ready=0)
-l2 = addNode!(fg, "l3", reshape(L2,length(L2),1), diagm([1.0;1.0]), N=N, ready=0)
+l1 = addNode!(fg, :l2, Point2, N=N, ready=0)
+l2 = addNode!(fg, :l3, Point2, N=N, ready=0)
 
 # must pin landmarks for guage
 pp2 = PriorPoint2D(L1, diagm([1.0;1.0]), [1.0])
@@ -64,9 +64,9 @@ drawLandms(fg,showmm=true,from=4)
 P2 = [50.0;0.0]
 
 # drive forward 50 units
-# v2 = addOdoFG!(fg, "l4", [50.0;0.0;0.0], odoCov, ready=0, N=N)
+# v2 = addOdoFG!(fg, :l4, [50.0;0.0;0.0], odoCov, ready=0, N=N)
 ppr = Point2DPoint2DRange([norm(P1-P2)], 3.0, [1.0])
-v2 = addNode!(fg, "l4", init, diagm([3.0;3.0]), N=N, ready=0)
+v2 = addNode!(fg, :l4, Point2, N=N, ready=0)
 addFactor!(fg, [v1;v2], ppr, ready=0)
 
 
@@ -121,7 +121,7 @@ drawLandms(fg,showmm=true)
 
 # START seeing a new range signal
 ppr = Point2DPoint2DRange([norm(P2-L3)], 3.0, [1.0])
-l3 = addNode!(fg, "l5", init, diagm([3.0;3.0]), N=N, ready=0)
+l3 = addNode!(fg, :l5, Point2, N=N, ready=0)
 addFactor!(fg, [v2;l3], ppr, ready=0)
 
 
@@ -132,9 +132,9 @@ addFactor!(fg, [v2;l3], ppr, ready=0)
 P3 = [100.0;0.0]
 
 # drive forward 50 units
-# v2 = addOdoFG!(fg, "l4", [50.0;0.0;0.0], odoCov, ready=0, N=N)
+# v2 = addOdoFG!(fg, :l4, [50.0;0.0;0.0], odoCov, ready=0, N=N)
 ppr = Point2DPoint2DRange([norm(P2-P3)], 3.0, [1.0])
-v3 = addNode!(fg, "l6", init, diagm([3.0;3.0]), N=N, ready=0)
+v3 = addNode!(fg, :l6, Point2, N=N, ready=0)
 addFactor!(fg, [v2;v3], ppr, ready=0)
 
 
@@ -214,9 +214,9 @@ drawLandms(fg,showmm=true,from=5,to=5)
 P4 = [100.0;70.0]
 
 # drive forward 50 units
-# v2 = addOdoFG!(fg, "l4", [50.0;0.0;0.0], odoCov, ready=0, N=N)
+# v2 = addOdoFG!(fg, :l4, [50.0;0.0;0.0], odoCov, ready=0, N=N)
 ppr = Point2DPoint2DRange([norm(P3-P4)], 3.0, [1.0])
-v4 = addNode!(fg, "l7", init, diagm([3.0;3.0]), N=N, ready=0)
+v4 = addNode!(fg, :l7, Point2, N=N, ready=0)
 addFactor!(fg, [v3;v4], ppr, ready=0)
 
 
@@ -308,9 +308,9 @@ drawLandms(fg,showmm=true,from=5,to=5)
 P5 = [150.0;70.0]
 
 # drive forward 50 units
-# v2 = addOdoFG!(fg, "l4", [50.0;0.0;0.0], odoCov, ready=0, N=N)
+# v2 = addOdoFG!(fg, :l4, [50.0;0.0;0.0], odoCov, ready=0, N=N)
 ppr = Point2DPoint2DRange([norm(P4-P5)], 3.0, [1.0])
-v5 = addNode!(fg, "l8", init, diagm([3.0;3.0]), N=N, ready=0)
+v5 = addNode!(fg, :l8, Point2, N=N, ready=0)
 addFactor!(fg, [v4;v5], ppr, ready=0)
 
 
