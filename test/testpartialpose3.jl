@@ -54,7 +54,7 @@ f2 = addFactor!(fg, [:x1;:x2], xyy)
 
   # check that the prior new dims are updated to new and correct values
   # @show Base.mean(pts,2)[newdims]
-  @test sum(abs.(Base.mean(pts,2)[newdims]-mu1[[3;1;2]]) .< [0.3; 0.1; 0.1]) == 3
+  @test sum(abs.(Base.mean(pts,2)[newdims]-mu1[[3;1;2]]) .< [0.5; 0.1; 0.1]) == 3
 
   # ensure a forced re-evaluatoin
   @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
@@ -111,7 +111,7 @@ end
   end
 
   # ensure the newly updated values match what is specified in mu2
-  @test sum(abs.(Base.mean(pts[newdims,:],2)-mu2) .< [0.3;0.3;0.1]) == 3
+  @test sum(abs.(Base.mean(pts[newdims,:],2)-mu2) .< [0.5;0.5;0.1]) == 3
 
   # ensure a re-evaluation of the partial factor updates the partial variable dimensions correclty
   @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
