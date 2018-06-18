@@ -30,7 +30,7 @@ f1 = addFactor!(fg, [:x2], prpz)
 f2 = addFactor!(fg, [:x1;:x2], xyy)
 
 
-ls(fg, :x2)
+# ls(fg, :x2)
 
 @testset "test PartialPriorRollPitchZ evaluations" begin
 
@@ -54,7 +54,7 @@ ls(fg, :x2)
 
   # check that the prior new dims are updated to new and correct values
   # @show Base.mean(pts,2)[newdims]
-  @test norm(Base.mean(pts,2)[newdims]-mu1[[3;1;2]]) < 0.3
+  @test sum(abs.(Base.mean(pts,2)[newdims]-mu1[[3;1;2]]) .< [0.3; 0.1; 0.1]) == 3
 
   # ensure a forced re-evaluatoin
   @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
