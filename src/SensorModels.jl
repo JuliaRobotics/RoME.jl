@@ -38,7 +38,7 @@ function (p::LinearRangeBearingElevation)(
             pose::Array{Float64,2},
             landm::Array{Float64,2}  )
   #
-  warn("Deprecated: use (::LinearRangeBearingElevation)(,userdata,,,...) instead")
+  # warn("Deprecated: use (::LinearRangeBearingElevation)(,userdata,,,...) instead")
   p(res, nothing, idx, meas, pose, landm)
 end
 
