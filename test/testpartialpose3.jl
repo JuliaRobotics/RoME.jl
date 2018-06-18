@@ -7,7 +7,7 @@ using Base: Test
 N=50
 fg = initfg()
 
-v1 = addNode!(fg,:x1,0.001*randn(6,N),N=N)
+v1 = addNode!(fg,:x1, Pose3, N=N) # 0.001*randn(6,N)
 
 mu1 = [0.0;0.0; -10.0]
 prpz = PartialPriorRollPitchZ(
@@ -23,7 +23,7 @@ xyy = PartialPose3XYYaw(
   )
 )
 
-v2 = addNode!(fg,:x2,randn(6,N),N=N)
+v2 = addNode!(fg,:x2, Pose3, N=N) # randn(6,N)
 
 f1 = addFactor!(fg, [:x2], prpz)
 f2 = addFactor!(fg, [:x1;:x2], xyy)

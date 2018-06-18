@@ -26,6 +26,11 @@ println("[TEST] Pose2 evaluations...")
 include("TestPoseAndPoint2Constraints.jl")
 println("[SUCCESS]")
 
+
+@testset "[TEST] Pose2 evaluations..." begin
+  include("testDynPoint2D.jl")
+end
+
 println("[TEST] Pose3 evaluations...")
 include("threeDimLinearProductTest.jl")
 println("[SUCCESS]")

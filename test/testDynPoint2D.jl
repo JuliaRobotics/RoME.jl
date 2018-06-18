@@ -26,26 +26,18 @@ ensureAllInitialized!(fg)
 
 
 
-
-
 tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree)
 
 
 
-
-using RoMEPlotting, KernelDensityEstimate #, KernelDensityEstimatePlotting
+# using RoMEPlotting,
+using KernelDensityEstimate #, KernelDensityEstimatePlotting
 
 # X1 = getVal(fg, :x1)
 @show x0 = getKDEMax(getVertKDE(fg, :x0))
 
 @show x1 = getKDEMax(getVertKDE(fg, :x1))
-
-
-
-
-
-
 
 
 

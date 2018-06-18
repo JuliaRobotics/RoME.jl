@@ -17,12 +17,12 @@ initCov = diagm([0.03;0.03;0.001])
 odoCov = diagm([3.0;3.0;0.01])
 
 # Some starting position
-v1 = addNode!(fg, :x1, zeros(3,1), diagm([1.0;1.0;0.1]), N=N)
+v1 = addNode!(fg, :x1, Pose2, N=N) # zeros(3,1), diagm([1.0;1.0;0.1])
 ipp = PriorPose2(zeros(3,1), initCov, [1.0])
 f1  = addFactor!(fg,[v1], ipp)
 
 # and a second pose
-v2 = addNode!(fg, :x2, vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05]), N=N)
+v2 = addNode!(fg, :x2, Pose2, N=N) # vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05])
 ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov)
 f2 = addFactor!(fg, [v1;v2], ppc)
 
@@ -69,7 +69,7 @@ end
 
 @testset "test conversions of Pose2DPoint2DBearingRange" begin
     # and a second pose
-    v3 = addNode!(fg, :l1, vectoarr2([50.0,50.0]), diagm([1.0;1.0]), N=N)
+    v3 = addNode!(fg, :l1, Point2, N=N) # vectoarr2([50.0,50.0]), diagm([1.0;1.0])
     # ppc = Pose2DPoint2DBearingRange([50.0;0.0;pi/2], 0.01*eye(2), [1.0])
     ppbr = Pose2DPoint2DBearingRange{Normal{Float64}, Normal{Float64}}(
                   Normal(0.0, 0.005 ),
@@ -102,7 +102,7 @@ odoCov = deepcopy(initCov)
 # start new factor graph
 fg = initfg()
 
-v1 = addNode!(fg,:x1,  0.1*randn(6,N))
+v1 = addNode!(fg, :x1, Pose3, N=N) #  0.1*randn(6,N)
 ipp = PriorPose3(MvNormal(zeros(6), initCov) )
 f1  = addFactor!(fg,[v1], ipp)
 
