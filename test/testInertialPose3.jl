@@ -19,13 +19,13 @@ odoCov = deepcopy(initCov)
 
 
 println("Adding PriorInertialPose3 to graph...")
-v1 = addNode!(fg, :x1,  0.1*randn(15,N),  N=N)
+v1 = addNode!(fg, :x1, InertialPose3, N=N) #0.1*randn(15,N)
 initPosePrior = PriorInertialPose3( MvNormal( zeros(15), initCov) )
 f1  = addFactor!(fg, [v1], initPosePrior)
 
 
 n = 1
-v2 = addNode!(fg, :x2, dims=15,  N=N)
+v2 = addNode!(fg, :x2, InertialPose3, dims=15,  N=N)
 noise = MvNormal(zeros(15),(DATA[n][3]+DATA[n][3]')*0.5 )
 inerodo = InertialPose3(noise,DATA[n][1],DATA[n][2])
 f2  = addFactor!(fg, [v1;v2], inerodo )
@@ -58,7 +58,7 @@ wIPj = zeros(15,1)
 
 inerodo(res, idx, (meas,), wIPi, wIPj)
 # function (ip3::InertialPose3)(
-#         res::Vector{Float64},
+#         res::Vector{Float64},Inertial
 #         idx::Int,
 #         meas::Tuple,
 #         wIPi::Array{Float64,2},
@@ -119,9 +119,8 @@ spy(DATA[n][3])
 norm(DATA[n][3]-DATA[n][3]')
 
 
-
+ensureAllInitialized!(fg)
 tree = wipeBuildNewTree!(fg)
-
 inferOverTree!(fg, tree)
 
 
