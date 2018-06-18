@@ -48,7 +48,7 @@ odoCov = deepcopy(initCov)
 
 
 println("Adding PriorPose3 to graph...")
-v1 = addNode!(fg, :x1,  0.1*randn(6,N),  N=N)
+v1 = addNode!(fg, :x1, Pose3,  N=N) # 0.1*randn(6,N)
 initPosePrior = PriorPose3( MvNormal(zeros(6), initCov) )
 f1  = addFactor!(fg,[v1], initPosePrior)
 
@@ -71,7 +71,7 @@ println("Adding Pose3Pose3 to graph...")
 odo = SE3([10;0;0], Quaternion(0))
 pts0X2 = projectParticles(getVal(fg,:x1), MvNormal(veeEuler(odo), odoCov) )
 odoconstr = Pose3Pose3( MvNormal(veeEuler(odo), odoCov) )
-v2 = addNode!(fg,:x2,  pts0X2, N=N)
+v2 = addNode!(fg,:x2, Pose3, N=N) # pts0X2
 addFactor!(fg,[v1;v2],odoconstr)
 
 
