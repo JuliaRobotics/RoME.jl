@@ -5,5 +5,6 @@ struct Pose3 <: IncrementalInference.InferenceVariable
 end
 struct Point3 <: IncrementalInference.InferenceVariable
   dims::Int
-  Point3() = new(3)
+  labels::Vector{String}
+  Point3() = new(3, String[])
 end

@@ -177,6 +177,7 @@ export
   DynPoint2VelocityPrior,
   DynPoint2DynPoint2,
   VelPoint2VelPoint2,
+  Point2Point2Velocity,
   Pose2DPoint2DBearingRange,
   Pose2DPoint2DBearingRangeMH,
   PackedPose2DPoint2DBearingRange,
@@ -212,8 +213,8 @@ export
   # Pose2D
   PriorPose2,
   PackedPriorPose2,
-  Pose2Pose2_NEW,
-  Pose2Pose2, # will be deprecated soon
+  # Pose2Pose2_NEW,
+  Pose2Pose2,
   PackedPose2Pose2,
   addPose2Pose2,
 
@@ -323,6 +324,9 @@ include("FactorGraphAnalysisTools.jl")
 
 include("WheeledRobotUtils.jl")
 include("NavigationSystem.jl")
+
+
+include("Deprecated.jl")
 
 # include("dev/ISAMRemoteSolve.jl")
 

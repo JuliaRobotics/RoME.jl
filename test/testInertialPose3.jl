@@ -19,13 +19,13 @@ odoCov = deepcopy(initCov)
 
 
 println("Adding PriorInertialPose3 to graph...")
-v1 = addNode!(fg, :x1,  0.1*randn(15,N),  N=N)
+v1 = addNode!(fg, :x1, InertialPose3, N=N) #0.1*randn(15,N)
 initPosePrior = PriorInertialPose3( MvNormal( zeros(15), initCov) )
 f1  = addFactor!(fg, [v1], initPosePrior)
 
 
 n = 1
-v2 = addNode!(fg, :x2, dims=15,  N=N)
+v2 = addNode!(fg, :x2, InertialPose3, dims=15,  N=N)
 noise = MvNormal(zeros(15),(DATA[n][3]+DATA[n][3]')*0.5 )
 inerodo = InertialPose3(noise,DATA[n][1],DATA[n][2])
 f2  = addFactor!(fg, [v1;v2], inerodo )
@@ -56,17 +56,11 @@ meas = vectoarr2([0;0;9.81/2; 0;0;0; 0;0;9.81; 0;0;0; 0;0;0])
 wIPi = zeros(15,1)
 wIPj = zeros(15,1)
 
-inerodo(res, idx, (meas,), wIPi, wIPj)
-# function (ip3::InertialPose3)(
-#         res::Vector{Float64},
-#         idx::Int,
-#         meas::Tuple,
-#         wIPi::Array{Float64,2},
-#         wIPj::Array{Float64,2}  )
+inerodo(res, nothing, idx, (meas,), wIPi, wIPj)
 
 using Optim
 
-ggo = (x) -> inerodo(res, idx, (meas,), wIPi, vectoarr2(x))
+ggo = (x) -> inerodo(res, nothing, idx, (meas,), wIPi, vectoarr2(x))
 
 ggos = (x) -> ggo([x[1:5]...,0.0,x[6:end]...])
 
@@ -87,7 +81,7 @@ plot(z=ggoxy, x=ran, y=ran, Geom.contour)
 @show res
 using NLsolve
 
-gg = (res, x) -> inerodo(res, idx, (meas,), wIPi, vectoarr2(x))
+gg = (res, x) -> inerodo(res, nothing, idx, (meas,), wIPi, vectoarr2(x))
 
 ret = nlsolve(gg, wIPj[:])
 
@@ -119,9 +113,8 @@ spy(DATA[n][3])
 norm(DATA[n][3]-DATA[n][3]')
 
 
-
+ensureAllInitialized!(fg)
 tree = wipeBuildNewTree!(fg)
-
 inferOverTree!(fg, tree)
 
 
@@ -135,7 +128,7 @@ plotKDE(fg, :x1, dims=[4;5])
 
 writeGraphPdf(fg)
 run(`evince fg.pdf`)
-
+Base.rm("fg.pdf")
 
 
 

@@ -214,7 +214,6 @@ function addOdoFG!(
   #
   # DX=Z.μ
   # cov=Z.Σ.mat
-  warn("You are here")
   vprev, X, nextn = getLastPose(fgl)
   vnext = addNode!(fgl, nextn, Pose3, ready=ready, labels=labels)
   fact = addFactor!(fgl, [vprev;vnext], Z, autoinit=true)
@@ -260,6 +259,11 @@ function initfg(;sessionname="NA")
   return fgl
 end
 
+"""
+    $(SIGNATURES)
+
+Initialize a factor graph object as Pose2, Pose3, or neither and returns variable and factor symbols as array.
+"""
 function initFactorGraph!(fg::FactorGraph;
       P0::Union{Array{Float64,2},Void}=nothing,
       init::Union{Vector{Float64},Void}=nothing,
@@ -289,7 +293,6 @@ function initFactorGraph!(fg::FactorGraph;
       fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
       push!(nodesymbols, fctVert.label)
   end
-  warn("initFactorGraph! -- returns variable and factor symbols ")
   return nodesymbols
 end
 

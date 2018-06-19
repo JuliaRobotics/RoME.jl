@@ -74,7 +74,7 @@ function isInFG!(fgl::FactorGraph, lbl::Symbol; N=100, ready=0)
 	v = nothing
 	if !haskey(fgl.IDs, lbl)
 		init = 300*randn(2,N)
-		v = addNode!(fgl, lbl, init, diagm([1000.0;1000.0]), N=N, ready=ready)
+		v = addNode!(fgl, lbl, Point2, N=N, ready=ready) # init, diagm([1000.0;1000.0])
 	else
 		v = getVert(fgl, lbl)
 	end
@@ -93,49 +93,51 @@ function addLandmsOnPose!(fgl::FactorGraph, pose::Graphs.ExVertex, GTl::Dict{Str
 	nothing
 end
 
-function addNewPose!(fgl::FactorGraph, from::Symbol, lbl::Symbol, GTp;
-			ready=0, N=N)
-
-	init = 300*randn(2,N)
-
-	v = addNode!(fgl, lbl, init, diagm([1000.0;1000.0]), N=N, ready=ready)
-	rhoZ = norm(GTp[string(lbl)]-GTp[string(from)])
-	ppr = Point2DPoint2DRange([rhoZ], 3.0, [1.0])
-	f = addFactor!(fgl, [from,lbl], ppr, ready=ready)
-  # f = addFactor!(fgl, [getVert(fgl, from);v], ppr, ready=ready)
+function addNewPose!(fgl::FactorGraph,
+                     from::Symbol,
+                     lbl::Symbol,
+                     GTp;
+                     ready=0,
+                     N=N  )
+  #
+  init = 300*randn(2,N)
+  v = addNode!(fgl, lbl, Point2, N=N, ready=ready) #init, diagm([1000.0;1000.0])
+  rhoZ = norm(GTp[string(lbl)]-GTp[string(from)])
+  ppr = Point2DPoint2DRange([rhoZ], 3.0, [1.0])
+  f = addFactor!(fgl, [from,lbl], ppr, ready=ready)
   initializeNode!(fgl,lbl)
-	# pts = evalFactor2(fgl, f, v.index)
-	# setVal!(v, pts)
-	# updateFullVert!(fgl,v)
-	getVert(fgl, lbl)
+  getVert(fgl, lbl)
 end
 
 function drive(fgl::FactorGraph, GTp, GTl, from, to; N=100)
-	v = addNewPose!(fgl, from, to, GTp, N=N)
-	# v = getVert(fgl, to)
-	addLandmsOnPose!(fgl, v, landmsInRange(GTl, GTp[string(to)], lim=120.0), N=N )
+  v = addNewPose!(fgl, from, to, GTp, N=N)
+  addLandmsOnPose!(fgl, v, landmsInRange(GTl, GTp[string(to)], lim=120.0), N=N )
   println("added landmark")
-	writeGraphPdf(fgl)
-	nothing
+  writeGraphPdf(fgl)
+  nothing
 end
 
 function batchsolve(fgl::FactorGraph; N::Int=100)
-	tree = wipeBuildNewTree!(fgl, drawpdf=true)
-	inferOverTree!(fgl, tree, N=N)
-	nothing
+  tree = wipeBuildNewTree!(fgl, drawpdf=true)
+  inferOverTree!(fgl, tree, N=N)
+  nothing
 end
 
 @everywhere begin
-function drawQuadLandms(fgl; file="", w=30cm, h=20cm,
-			h11 = Gadfly.context(),
-			h12 = Gadfly.context())
-	h21 = haskey(fgl.IDs,"l3") ? drawMarginalContour(fgl,"l3") : Gadfly.context()
-	h22 = haskey(fgl.IDs,"l4") ? drawMarginalContour(fgl,"l4") : Gadfly.context()
-	hh = vstack(hstack(h11,h12),hstack(h21,h22))
-	if length(file) > 0
-		Gadfly.draw(PNG(file,w,h),hh)
-	end
-	hh
+function drawQuadLandms(fgl;
+                        file="",
+                        w=30cm,
+                        h=20cm,
+                        h11 = Gadfly.context(),
+                        h12 = Gadfly.context() )
+  #
+  h21 = haskey(fgl.IDs,"l3") ? drawMarginalContour(fgl,"l3") : Gadfly.context()
+  h22 = haskey(fgl.IDs,"l4") ? drawMarginalContour(fgl,"l4") : Gadfly.context()
+  hh = vstack(hstack(h11,h12),hstack(h21,h22))
+  if length(file) > 0
+    Gadfly.draw(PNG(file,w,h),hh)
+  end
+  hh
 end
 
 
@@ -431,7 +433,7 @@ fg = initfg()
 
 # Some starting position
 init = 300*randn(2,N)
-v1 = addNode!(fg, :l100, init, diagm([1000.0;1000.0]), N=N, ready=0)
+v1 = addNode!(fg, :l100, Point2, N=N, ready=0)
 
 
 lmv1 = landmsInRange(GTl, GTp["l100"])

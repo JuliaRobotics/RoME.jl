@@ -1,7 +1,7 @@
 # Linear array sonar constraints
 
 # These types should be consolidated in some form -- still exploring for good factorization
-type reuseLBRA
+mutable struct reuseLBRA
   wTb::SE3
   M::Array{Float64,2}
   E::Euler
@@ -12,7 +12,7 @@ type reuseLBRA
   reuseLBRA(::Int)=new(SE3(0),eye(4),Euler(0),ones(4),ones(4), zeros(3))
   reuseLBRA(a,b,c,d,e,f)=new(a,b,c,d,e,f)
 end
-type LinearRangeBearingElevation <: FunctorPairwise
+mutable struct LinearRangeBearingElevation <: FunctorPairwise
   range::Normal
   bearing::Normal
   elev::Uniform
@@ -22,7 +22,7 @@ type LinearRangeBearingElevation <: FunctorPairwise
 end
 function (p::LinearRangeBearingElevation)(
             res::Vector{Float64},
-            userdata ,
+            userdata,
             idx::Int,
             meas::Tuple{Array{Float64,2}},
             pose::Array{Float64,2},
@@ -30,15 +30,6 @@ function (p::LinearRangeBearingElevation)(
   #
   residualLRBE!(res, meas[1][:,idx], pose[:,idx], landm[:,idx], p.reuse)
   nothing
-end
-function (p::LinearRangeBearingElevation)(
-            res::Vector{Float64},
-            idx::Int,
-            meas::Tuple{Array{Float64,2}},
-            pose::Array{Float64,2},
-            landm::Array{Float64,2}  )
-  #
-  p(res, nothing, idx, meas, pose, landm)
 end
 
 function getSample!(y::Array{Float64,2}, las::LinearRangeBearingElevation, idx::Int )

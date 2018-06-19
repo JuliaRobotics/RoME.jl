@@ -18,13 +18,18 @@ println("[TEST] MultipleFeatures constraints")
 include("testmultiplefeatures.jl")
 println("[SUCCESS]")
 
-println("[TEST] Linear array functions evaluations...")
+println("[TEST] Linear array function evaluations...")
 include("testDidsonFunctions.jl")
 println("[SUCCESS]")
 
 println("[TEST] Pose2 evaluations...")
 include("TestPoseAndPoint2Constraints.jl")
 println("[SUCCESS]")
+
+
+@testset "[TEST] Pose2 evaluations..." begin
+  include("testDynPoint2D.jl")
+end
 
 println("[TEST] Pose3 evaluations...")
 include("threeDimLinearProductTest.jl")

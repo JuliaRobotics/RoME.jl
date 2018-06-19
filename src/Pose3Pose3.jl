@@ -75,7 +75,7 @@ function getSample(pp3::Pose3Pose3, N::Int=1)
   return (rand(pp3.Zij, N), )
 end
 function (pp3::Pose3Pose3)(res::Array{Float64},
-            userdata ,
+            userdata,
             idx::Int,
             meas::Tuple,
             wXi::Array{Float64,2},
@@ -84,14 +84,6 @@ function (pp3::Pose3Pose3)(res::Array{Float64},
   reusethrid = pp3.reuse[Threads.threadid()]
   fastpose3pose3residual!(reusethrid, res, idx, meas, wXi, wXj)
   nothing
-end
-function (pp3::Pose3Pose3)(res::Array{Float64},
-            idx::Int,
-            meas::Tuple,
-            wXi::Array{Float64,2},
-            wXj::Array{Float64,2}  )
-  #
-  pp3(res, nothing, idx, meas, wXi, wXj)
 end
 
 mutable struct PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
@@ -133,7 +125,7 @@ function getSample(pp3::Pose3Pose3NH, N::Int=1)
   return (rand(pp3.Zij, N), )
 end
 function (pp3::Pose3Pose3NH)(res::Array{Float64},
-            userdata ,
+            userdata,
             idx::Int,
             meas::Tuple,
             wXi::Array{Float64,2},
@@ -142,14 +134,6 @@ function (pp3::Pose3Pose3NH)(res::Array{Float64},
   reusethrid = pp3.reuse[Threads.threadid()]
   fastpose3pose3residual!(reusethrid, res, idx, meas, wXi, wXj)
   nothing
-end
-function (pp3::Pose3Pose3NH)(res::Array{Float64},
-            idx::Int,
-            meas::Tuple,
-            wXi::Array{Float64,2},
-            wXj::Array{Float64,2}  )
-  #
-  pp3(res, nothing, idx, meas, wXi, wXj)
 end
 
 
@@ -209,74 +193,6 @@ end
 ⊕(Xvert::Graphs.ExVertex, z::Pose3Pose3) = ⊕(getVal(Xvert), z)
 
 
-
-
-
-# 3 dimensionsal evaluation functions.
-# Transforms code is scattered, and will be moved to better location with stable 3D Examples
-# also worth it to consolidate if other affine transforms package is available
-
-# using Euler angles for linear sampling in product of potentials
-# Gaussian model for prior
-# function evalPotential(obs::PriorPose3, Xi::Array{Graphs.ExVertex,1}; N::Int=200)
-#   mu = veeEuler(obs.Zi)
-#   return rand( MvNormal(mu, obs.Cov), N)
-# end
-#
-#
-# # Still limited to linear sampler, then reprojected onto ball -- TODO upgrade manifold sampler
-# function evalPotential(odom::Pose3Pose3, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=200)
-#     # rz,cz = size(odom.Zij)
-#     Xval = Array{Float64,2}()
-#     # implicit equation portion -- bi-directional pairwise function made explicit here
-#     if Xid == Xi[1].index #odom.
-#         # reverse direction
-#         Z = inverse(odom.Zij)
-#         Xval = getVal(Xi[2])
-#     elseif Xid == Xi[2].index
-#         # forward direction
-#         Z = odom.Zij
-#         Xval = getVal(Xi[1])
-#     else
-#         error("Bad evalPairwise Pose3Pose3")
-#     end
-#
-#     return projectParticles(Xval, Z, odom.Cov)
-# end
-#
-# # Still limited to linear sampler, then reprojected onto ball -- TODO upgrade manifold sampler
-# function evalPotential(odom::Pose3Pose3NH,
-#       Xi::Array{Graphs.ExVertex,1},
-#       Xid::Int;
-#       N::Int=200)
-#    #
-#   # rz,cz = size(odom.Zij)
-#   Xval = Array{Float64,2}()
-#   # implicit equation portion -- bi-directional pairwise function made explicit here
-#   if Xid == Xi[1].index #odom.
-#       # reverse direction
-#       Z = inverse(odom.Zij)
-#       Xval = getVal(Xi[2])
-#       oldval = getVal(Xi[1])
-#   elseif Xid == Xi[2].index
-#       # forward direction
-#       Z = odom.Zij
-#       Xval = getVal(Xi[1])
-#       oldval = getVal(Xi[2])
-#   else
-#       error("Bad evalPairwise Pose3Pose3")
-#   end
-#
-#   skipdos = rand(odom.ValidHypot, N)
-#   dos, donts = skipdos .== 2, skipdos .== 1
-#
-#   projted = Array{Float64}(6, N)
-#   projted[:,dos] = projectParticles(Xval[:,dos], Z, odom.Cov)
-#
-#   projted[:,donts] = oldval[:,donts]
-#
-#   return projted
-# end
 
 
 
