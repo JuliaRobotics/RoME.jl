@@ -214,7 +214,6 @@ function addOdoFG!(
   #
   # DX=Z.μ
   # cov=Z.Σ.mat
-  warn("You are here")
   vprev, X, nextn = getLastPose(fgl)
   vnext = addNode!(fgl, nextn, Pose3, ready=ready, labels=labels)
   fact = addFactor!(fgl, [vprev;vnext], Z, autoinit=true)
