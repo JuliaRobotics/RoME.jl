@@ -26,14 +26,6 @@ function (pp2br::Pose2DPoint2DBearingRangeDensity)(res::Array{Float64},
   res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
   nothing
 end
-# function (pp2br::Pose2DPoint2DBearingRangeDensity)(res::Array{Float64},
-#             idx::Int,
-#             meas::Tuple{Array{Float64,2}},
-#             xi::Array{Float64,2},
-#             lm::Array{Float64,2} )
-#   #
-#   pp2br(res, nothing, idx, meas, xi, lm)
-# end
 
 
 
@@ -56,14 +48,6 @@ function (pp2r::Pose2DPoint2DRangeDensity)(res::Array{Float64},
   res[1] = XX^2 + YY^2
   res[1]
 end
-# function (pp2r::Pose2DPoint2DRangeDensity)(res::Array{Float64},
-#             idx::Int,
-#             meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
-#             xi::Array{Float64,2},
-#             lm::Array{Float64,2}  )
-#   #
-#   pp2r(res, nothing, idx, meas, xi, lm)
-# end
 function getSample(pp2r::Pose2DPoint2DRangeDensity, N::Int=1)
   return (KernelDensityEstimate.sample(pp2r.range, N)[1],  2*pi*rand(N))
 end

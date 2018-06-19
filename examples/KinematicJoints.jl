@@ -32,9 +32,6 @@ function (el::ZJoint)(res, userdata, idx, meas, xi, xj)
   # res[1:6] = veeEuler(del)
   nothing
 end
-# function (el::ZJoint)(res, idx, meas, xi, xj)
-#   el(res, nothing, idx, meas, xi, xj)
-# end
 
 mutable struct XJoint <: FunctorPairwise
   Zij::Distribution
@@ -54,9 +51,6 @@ function (el::XJoint)(res, userdata, idx, meas, xi, xj)
   res[1:6] = veeEuler(del)
   nothing
 end
-# function (el::XJoint)(res, idx, meas, xi, xj)
-#   el(res, nothing, idx, meas, xi, xj)
-# end
 
 
 

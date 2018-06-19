@@ -325,6 +325,9 @@ include("FactorGraphAnalysisTools.jl")
 include("WheeledRobotUtils.jl")
 include("NavigationSystem.jl")
 
+
+include("Deprecated.jl")
+
 # include("dev/ISAMRemoteSolve.jl")
 
 

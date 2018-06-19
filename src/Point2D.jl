@@ -42,15 +42,6 @@ function (pp2r::Point2DPoint2DRange)(
   res[1] = XX^2 + YY^2
   nothing
 end
-# function (pp2r::Point2DPoint2DRange)(
-#             res::Array{Float64},
-#             idx::Int,
-#             meas::Tuple, # Array{Float64,2},
-#             xi::Array{Float64,2},
-#             lm::Array{Float64,2} )
-#
-#   pp2r(res, nothing, idx, meas, xi, lm)
-# end
 
 
 mutable struct Point2DPoint2D <: BetweenPoses
@@ -73,15 +64,6 @@ function (pp2r::Point2DPoint2D)(
   res[2]  = meas[1][2,idx] - (xj[2,idx] - xi[2,idx])
   nothing
 end
-# function (pp2r::Point2DPoint2D)(
-#             res::Array{Float64},
-#             idx::Int,
-#             meas::Tuple,
-#             xi::Array{Float64,2},
-#             xj::Array{Float64,2} )
-#   #
-#   pp2r(res, nothing, idx, meas, xi, xj)
-# end
 
 
 

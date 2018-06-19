@@ -64,44 +64,7 @@ function getSample(mm2d::MultipleFeatures2D, N::Int=1)
   return (meas, beb, numb)
 end
 
-# function (mm2d::MultipleFeatures2D)(res::Array{Float64}, idx::Int, meas::Tuple,
-#           wAbi::Array{Float64,2},
-#           wAbj::Array{Float64,2},
-#           wAo1::Array{Float64,2},
-#           wAo2::Array{Float64,2},
-#           wAo3::Array{Float64,2}  )
-#   #
-#   wTbi, wTbj = SE2(wAbi[:,idx]), SE2(wAbj[:,idx])
-#   wTo = ( SE2([wAo1[:,idx];0.0]),SE2([wAo2[:,idx];0.0]),SE2([wAo3[:,idx];0.0]) )
-#
-#   # b, bhat, β = getUvecScaleBaseline2D(wTbi, wTbj, mm2d.bTc)
-#
-#   rhat, resid = zeros(2), zeros(2)
-#   # res[:] = -1e-5
-#   # res[3] = -3*β
-#
-#   for i in 1:3
-#     # sightings from first pose
-#     r1, rhathat1, α1 = getUvecScaleFeature2D(wTbi, mm2d.bTc, wTo[i])
-#     rhat[1] = cos(meas[1][i,idx,1])
-#     rhat[2] = sin(meas[1][i,idx,1])
-#     resid[1:2] = rhat-rhathat1
-#     res[1] += dot(resid, resid)
-#
-#     # sightingings from second pose
-#     r2, rhathat2, α2 = getUvecScaleFeature2D(wTbj, mm2d.bTc, wTo[i])
-#     rhat[1] = cos(meas[1][i,idx,2])
-#     rhat[2] = sin(meas[1][i,idx,2])
-#     resid[1:2] = rhat-rhathat2
-#     res[2] += dot(resid, resid)
-#
-#     # baseline constraint
-#     # res[3] += dot(r1, bhat)
-#     # res[3] += dot(r2, -bhat)
-#   end
-#
-#   nothing
-# end
+
 
 
 # redo with angles on sightings for minimization
@@ -167,16 +130,7 @@ function (mm2d::MultipleFeatures2D)(res::Array{Float64},
   end
   sum(res)
 end
-# function (mm2d::MultipleFeatures2D)(res::Array{Float64}, idx::Int, meas::Tuple,
-#           wAbi::Array{Float64,2},
-#           wAbj::Array{Float64,2},
-#           wAo1::Array{Float64,2},
-#           wAo2::Array{Float64,2},
-#           wAo3::Array{Float64,2},
-#           wAo3b::Union{Array{Float64,2},Bool}=false  )
-#   #
-#   mm2d(res, nothing, idx, meas, wAbi, wAbj, wAo1, wAo2, wAo3, wAo3b)
-# end
+
 
 
 

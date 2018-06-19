@@ -71,14 +71,7 @@ function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
   se2vee!(res, jXjhat)
   nothing
 end
-# function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
-#             idx::Int,
-#             meas::Tuple{Array{Float64,2}},
-#             wXi::Array{Float64,2},
-#             wXj::Array{Float64,2}  )
-#   #
-#   pxyy(res, nothing, idx, meas, wXi, wXj)
-# end
+
 
 mutable struct PackedPartialPose3XYYaw <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
@@ -135,14 +128,7 @@ function (pxyy::PartialPose3XYYawNH)(res::Array{Float64},
   se2vee!(res, jXjhat)
   nothing
 end
-# function (pxyy::PartialPose3XYYawNH)(res::Array{Float64},
-#             idx::Int,
-#             meas::Tuple{Array{Float64,2}},
-#             wXi::Array{Float64,2},
-#             wXj::Array{Float64,2}  )
-#   #
-#   pxyy(res, nothing, idx, meas, wXi, wXj)
-# end
+
 
 
 mutable struct PackedPartialPose3XYYawNH <: IncrementalInference.PackedInferenceType

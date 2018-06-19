@@ -56,17 +56,11 @@ meas = vectoarr2([0;0;9.81/2; 0;0;0; 0;0;9.81; 0;0;0; 0;0;0])
 wIPi = zeros(15,1)
 wIPj = zeros(15,1)
 
-inerodo(res, idx, (meas,), wIPi, wIPj)
-# function (ip3::InertialPose3)(
-#         res::Vector{Float64},Inertial
-#         idx::Int,
-#         meas::Tuple,
-#         wIPi::Array{Float64,2},
-#         wIPj::Array{Float64,2}  )
+inerodo(res, nothing, idx, (meas,), wIPi, wIPj)
 
 using Optim
 
-ggo = (x) -> inerodo(res, idx, (meas,), wIPi, vectoarr2(x))
+ggo = (x) -> inerodo(res, nothing, idx, (meas,), wIPi, vectoarr2(x))
 
 ggos = (x) -> ggo([x[1:5]...,0.0,x[6:end]...])
 
@@ -87,7 +81,7 @@ plot(z=ggoxy, x=ran, y=ran, Geom.contour)
 @show res
 using NLsolve
 
-gg = (res, x) -> inerodo(res, idx, (meas,), wIPi, vectoarr2(x))
+gg = (res, x) -> inerodo(res, nothing, idx, (meas,), wIPi, vectoarr2(x))
 
 ret = nlsolve(gg, wIPj[:])
 
@@ -134,7 +128,7 @@ plotKDE(fg, :x1, dims=[4;5])
 
 writeGraphPdf(fg)
 run(`evince fg.pdf`)
-
+Base.rm("fg.pdf")
 
 
 

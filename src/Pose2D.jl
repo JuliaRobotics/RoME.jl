@@ -33,14 +33,6 @@ function (s::Pose2Pose2)(res::Array{Float64},
   se2vee!(res, jXjhat)
   nothing
 end
-# function (s::Pose2Pose2)(res::Array{Float64},
-#             idx::Int,
-#             meas::Tuple,
-#             wxi::Array{Float64,2},
-#             wxj::Array{Float64,2}  )
-#   #
-#   s(res, nothing, idx, meas, wxi, wxj)
-# end
 
 
 mutable struct PriorPose2 <: IncrementalInference.FunctorSingleton
@@ -133,26 +125,7 @@ end
 # --------------------------------------------
 
 
-# mutable struct PackedPose2Pose2  <: IncrementalInference.PackedInferenceType
-#   vecZij::Array{Float64,1} # 2translations, 1rotation
-#   dimz::Int
-#   vecCov::Array{Float64,1}
-#   dimc::Int
-#   W::Array{Float64,1}
-#   PackedPose2Pose2() = new()
-#   PackedPose2Pose2(x...) = new(x[1], x[2], x[3], x[4], x[5])
-# end
-# function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)
-#   return Pose2Pose2(reshapeVec2Mat(d.vecZij,d.dimz),
-#                     reshapeVec2Mat(d.vecCov, d.dimc), d.W)
-# end
-# function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
-#   v1 = d.Zij[:];
-#   v2 = d.Cov[:];
-#   return PackedPose2Pose2(v1,size(d.Zij,1),
-#                           v2,size(d.Cov,1),
-#                           d.W)
-# end
+
 
 
 mutable struct PackedPose2Pose2  <: IncrementalInference.PackedInferenceType
@@ -172,82 +145,3 @@ end
 
 
 # --------------------------------------------
-
-
-
-# old code below
-
-# This has been moved to transform utils
-# TODO Switch to using SE(2) oplus
-# DX = [transx, transy, theta]
-function addPose2Pose2!(retval::Array{Float64,1}, x::Array{Float64,1}, dx::Array{Float64,1})
-  X = SE2(x)
-  DX = SE2(dx)
-  se2vee!(retval, X*DX)
-  nothing
-end
-function addPose2Pose2(x::Array{Float64,1}, dx::Array{Float64,1})
-    retval = zeros(3)
-    addPose2Pose2!(retval, x, dx)
-    return retval
-end
-
-
-function evalPotential(obs::PriorPose2, Xi::Array{Graphs.ExVertex,1}; N::Int=200)
-    cov = diag(obs.Cov)
-    ret = zeros(3,N)
-    warn("should not be running")
-    for j in 1:N
-      for i in 1:size(obs.Zi,1)
-        ret[i,j] += obs.Zi[i,1] + (cov[i]*randn())
-      end
-    end
-    return ret
-end
-
-
-
-function evalPotential(odom::Pose2Pose2, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
-    rz,cz = size(odom.Zij)
-    Xval = Array{Float64,2}()
-    XvalNull = Array{Float64,2}()
-    warn("should not be running")
-    # implicit equation portion -- bi-directional pairwise function
-    if Xid == Xi[1].index #odom.
-        #Z = (odom.Zij\eye(rz)) # this will be used for group operations
-        Z = se2vee(SE2(vec(odom.Zij)) \ eye(3))
-        Xval = getVal(Xi[2])
-        XvalNull = getVal(Xi[1])
-    elseif Xid == Xi[2].index
-        Z = odom.Zij
-        Xval = getVal(Xi[1])
-        XvalNull = getVal(Xi[2])
-    else
-        error("Bad evalPairwise Pose2Pose2")
-    end
-
-    r,c = size(Xval)
-    RES = zeros(r,c*cz)
-
-    # TODO -- this should be the covariate error from Distributions, only using diagonals here (approxmition for speed in first implementation)
-    # dd = size(Z,1) == r
-    ENT = randn(r,c)
-    HYP = rand(Categorical(odom.W),c) # TODO consolidate
-    HYP -= length(odom.W)>1 ? 1 : 0
-    for d in 1:r
-       @fastmath @inbounds ENT[d,:] = ENT[d,:].*odom.Cov[d,d]
-    end
-    # Repeat ENT values for new modes from meas
-    for j in 1:cz
-      for i in 1:c
-        if HYP[i]==1 # TODO consolidate hypotheses on Categorical
-          z = Z[1:r,j].+ENT[1:r,i]
-          RES[1:r,i*j] = addPose2Pose2(Xval[1:r,i], z )
-        else
-          RES[1:r,i*j] = XvalNull[1:r,i]
-        end
-      end
-    end
-
-    return RES
-end
