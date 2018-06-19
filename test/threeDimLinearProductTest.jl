@@ -59,12 +59,12 @@ end
   # start with initialization
   ensureAllInitialized!(fg)
   @test isInitialized(fg, :x1)
-  muX1 = Base.mean(getVal(fg,:x1),2)
-  stdX1 = Base.std(getVal(fg,:x1),2)
+  @show muX1 = Base.mean(getVal(fg,:x1),2)
+  @show stdX1 = Base.std(getVal(fg,:x1),2)
   @test sum(map(Int,abs.(muX1[1:3]) .< 0.5)) == 3
   @test sum(map(Int,abs.(muX1[4:6]) .< 0.05)) == 3
-  @test sum(map(Int, 0.75 .< stdX1[1:3] .< 1.25)) == 3
-  @test sum(map(Int, 0.075 .< stdX1[4:6] .< 0.125)) == 3
+  @test sum(map(Int, 0.5 .< stdX1[1:3] .< 1.5)) == 3
+  @test sum(map(Int, 0.05 .< stdX1[4:6] .< 0.15)) == 3
 end
 
 

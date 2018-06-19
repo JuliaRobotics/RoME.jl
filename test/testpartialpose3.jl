@@ -71,7 +71,7 @@ end
   meas = getSample(xyy)
   xi = zeros(6,1)
   xja = zeros(6,1)
-  xyy(res, idx, meas, xi, xja)
+  xyy(res, nothing, idx, meas, xi, xja)
   @test abs(res[1]-mu2[1]) < 0.2
   @test abs(res[2]-mu2[2]) < 0.2
   @test abs(res[3]-mu2[3]) < 0.2
@@ -79,11 +79,11 @@ end
   xjb = zeros(6,1)
   xjb[collect(xyy.partial),1] = mu2
   res = zeros(3)
-  xyy(res, idx, meas, xi, xjb)
+  xyy(res, nothing, idx, meas, xi, xjb)
   @test 0.0 < norm(res) < 0.2
 
   meas = getSample(xyy,100)
-  @test norm(Base.std(meas[1],2)- [0.01;0.01;0.002]) < 0.005
+  @test norm(Base.std(meas[1],2) - [0.01;0.01;0.002]) < 0.005
 end
 
 

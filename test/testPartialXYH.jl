@@ -3,7 +3,8 @@
 using RoME, CoordinateTransformations, Distributions, TransformUtils
 using Base: Test
 
-println("test x translation case")
+@testset "test x translation case" begin
+
 # trivial cases first, orientation based tests below
 wTx = Vector{AffineMap}(2)
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(Quat(1.0, 0, 0, 0))
@@ -28,24 +29,24 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testpp3(res, nothing, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testppxyh(res, nothing, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
+end
 
 
 
 
 
-
-println("test z translation case")
+@testset "test z translation case" begin
 # z translation only
 wTx = Vector{AffineMap}(2)
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(Quat(1.0, 0, 0, 0))
@@ -70,25 +71,26 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testpp3(res, nothing, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testppxyh(res, nothing, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
+end
 
 
 
 
 
-
-println("test roll and translate case 1")
+@testset "test roll and translate case 1" begin
 # different orientation, roll
+wTx = Vector{AffineMap}(2)
 sq2 = 1.0/sqrt(2)
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(Quat(sq2, sq2, 0, 0))
 wTx[2] = Translation(10.0, 0, 0) ∘ LinearMap(Quat(sq2, sq2, 0, 0))
@@ -112,7 +114,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testpp3(res, nothing, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -120,18 +122,20 @@ testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEule
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testppxyh(res, nothing, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
+end
 
 
 
 
 
 
+@testset "test roll and translate case 2" begin
 
-println("test roll and translate case 2")
+wTx = Vector{AffineMap}(2)
 # different orientation, roll
 sq2 = 1.0/sqrt(2)
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(Quat(sq2, sq2, 0, 0))
@@ -156,7 +160,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testpp3(res, nothing, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -164,10 +168,11 @@ testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEule
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testppxyh(res, nothing, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
+end
 
 
 
@@ -176,8 +181,9 @@ testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(vee
 
 
 
+@testset "test pitch and translate case 1" begin
 
-println("test pitch and translate case 1")
+wTx = Vector{AffineMap}(2)
 # different orientation, pitch
 qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
@@ -202,7 +208,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testpp3(res, nothing, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -210,19 +216,21 @@ testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEule
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testppxyh(res, nothing, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
+end
 
 
 
 
 
 
+@testset "test pitch and translate case 2" begin
 
-println("test pitch and translate case 2")
+wTx = Vector{AffineMap}(2)
 # different orientation, pitch
 qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
@@ -247,7 +255,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testpp3(res, nothing, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -255,11 +263,12 @@ testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEule
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testppxyh(res, nothing, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
+end
 
 
 
@@ -268,8 +277,9 @@ testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(vee
 
 
 
+@testset "test pitch and translate case 3" begin
 
-println("test pitch and translate case 3")
+wTx = Vector{AffineMap}(2)
 # different orientation, pitch
 qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
@@ -294,7 +304,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testpp3(res, nothing, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -302,11 +312,12 @@ testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEule
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testppxyh(res, nothing, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
+end
 
 
 
@@ -316,8 +327,9 @@ testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(vee
 
 
 
+@testset "test pitch and translate case 4" begin
 
-println("test pitch and translate case 4")
+wTx = Vector{AffineMap}(2)
 # different orientation, pitch
 qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
@@ -342,7 +354,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testpp3(res, nothing, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -350,11 +362,12 @@ testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEule
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testppxyh(res, nothing, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
+end
 
 
 
@@ -368,8 +381,9 @@ testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(vee
 
 
 
+@testset "test yaw and translate case 1" begin
 
-println("test yaw and translate case 1")
+wTx = Vector{AffineMap}(2)
 # different orientation, yaw
 qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/2,0,0,1.0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
@@ -394,7 +408,7 @@ prz2 = veeEuler(wTx1)[[3;4;5]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*eye(6)))
 res = zeros(6)
-testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testpp3(res, nothing, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -402,12 +416,12 @@ testpp3(res, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEule
 # test with PartialXYH
 testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*eye(3))  )
 res = zeros(3)
-testppxyh(res, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+testppxyh(res, nothing, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:2]) < 1e-10
 @test abs(res[3]) < 1e-10
 
-
+end
 
 
 

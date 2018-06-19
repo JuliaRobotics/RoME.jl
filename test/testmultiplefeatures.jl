@@ -92,7 +92,10 @@ res = zeros(3)
 wAbi[:] = 0.0
 # @show wAbi
 
-mm2(res, idx, meas,
+mm2(res,
+  nothing,
+  idx,
+  meas,
   wAbi,
   wAbj,
   wAo1,
@@ -107,7 +110,7 @@ function gg2(x::Float64,y::Float64)
 
   res = zeros(3)
 
-  mm2(res, idx, meas,
+  mm2(res, nothing, idx, meas,
     wAbi,
     wAbj,
     wAo1,
@@ -125,7 +128,7 @@ println("test as minimization problem to pose")
 function minmickey(x::Array{Float64,1})
   wAbi[1:3,1] = x[1:3]
   res = zeros(3)
-  mm2(res, idx, meas,
+  mm2(res, nothing, idx, meas,
     wAbi,
     wAbj,
     wAo1,
@@ -154,7 +157,7 @@ wAbi[:] = 0.0
 function minmickey(x::Array{Float64,1})
   wAo1[1:2,1] = x[1:2]
   res = zeros(3)
-  mm2(res, idx, meas,
+  mm2(res, nothing, idx, meas,
     wAbi,
     wAbj,
     wAo1,
