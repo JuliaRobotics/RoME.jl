@@ -31,16 +31,16 @@ function (p::LinearRangeBearingElevation)(
   residualLRBE!(res, meas[1][:,idx], pose[:,idx], landm[:,idx], p.reuse)
   nothing
 end
-function (p::LinearRangeBearingElevation)(
-            res::Vector{Float64},
-            idx::Int,
-            meas::Tuple{Array{Float64,2}},
-            pose::Array{Float64,2},
-            landm::Array{Float64,2}  )
-  #
-  # warn("Deprecated: use (::LinearRangeBearingElevation)(,userdata,,,...) instead")
-  p(res, nothing, idx, meas, pose, landm)
-end
+# function (p::LinearRangeBearingElevation)(
+#             res::Vector{Float64},
+#             idx::Int,
+#             meas::Tuple{Array{Float64,2}},
+#             pose::Array{Float64,2},
+#             landm::Array{Float64,2}  )
+#   #
+#   # warn("Deprecated: use (::LinearRangeBearingElevation)(,userdata,,,...) instead")
+#   p(res, nothing, idx, meas, pose, landm)
+# end
 
 function getSample!(y::Array{Float64,2}, las::LinearRangeBearingElevation, idx::Int )
   y[1,idx] = rand(las.range)

@@ -39,14 +39,15 @@ function (dp2dp2::DynPoint2DynPoint2)(
   res[3:4] = z[3:4] - (xj[3:4] - xi[3:4])
   nothing
 end
-function (dp2dp2::DynPoint2DynPoint2)(res::Array{Float64},
-            idx::Int,
-            meas::Tuple,
-            Xi::Array{Float64,2},
-            Xj::Array{Float64,2}  )
-  #
-  error("function (dp2dp2::DynPoint2DynPoint2) requires newer version of IncrementalInference that passes user data to the residual function.")
-end
+# function (dp2dp2::DynPoint2DynPoint2
+#             res::Array{Float64},
+#             idx::Int,
+#             meas::Tuple,
+#             Xi::Array{Float64,2},
+#             Xj::Array{Float64,2}  )
+#   #
+#   error("function (dp2dp2::DynPoint2DynPoint2) requires newer version of IncrementalInference that passes user data to the residual function.")
+# end
 
 
 mutable struct VelPoint2VelPoint2{T} <: IncrementalInference.FunctorPairwiseMinimize where {T <: Distribution}
@@ -74,15 +75,15 @@ function (vp2vp2::VelPoint2VelPoint2)(
   res[1] += sum((dp/dt - xi[3:4]).^2)  # (dp/dt - 0.5*(xj[3:4]+xi[3:4])) # midpoint integration
   res[1]
 end
-function (vp2vp2::VelPoint2VelPoint2)(
-                res::Array{Float64},
-                idx::Int,
-                meas::Tuple,
-                Xi::Array{Float64,2},
-                Xj::Array{Float64,2}  )
-  #
-    error("function (vp2vp2::VelPoint2VelPoint2) requires newer version of IncrementalInference that passes user data to the residual function.")
-end
+# function (vp2vp2::VelPoint2VelPoint2)(
+#                 res::Array{Float64},
+#                 idx::Int,
+#                 meas::Tuple,
+#                 Xi::Array{Float64,2},
+#                 Xj::Array{Float64,2}  )
+#   #
+#     error("function (vp2vp2::VelPoint2VelPoint2) requires newer version of IncrementalInference that passes user data to the residual function.")
+# end
 
 
 
@@ -110,12 +111,12 @@ function (p2p2v::Point2Point2Velocity)(
   res[1] += sum((dp/dt - 0.5*(xj[3:4]+xi[3:4])).^2)  # (dp/dt - 0.5*(xj[3:4]+xi[3:4])) # midpoint integration
   res[1]
 end
-function (p2p2v::Point2Point2Velocity)(
-                res::Array{Float64},
-                idx::Int,
-                meas::Tuple,
-                Xi::Array{Float64,2},
-                Xj::Array{Float64,2}  )
-  #
-    error("function (vp2vp2::VelPoint2VelPoint2) requires newer version of IncrementalInference that passes user data to the residual function.")
-end
+# function (p2p2v::Point2Point2Velocity)(
+#                 res::Array{Float64},
+#                 idx::Int,
+#                 meas::Tuple,
+#                 Xi::Array{Float64,2},
+#                 Xj::Array{Float64,2}  )
+#   #
+#     error("function (vp2vp2::VelPoint2VelPoint2) requires newer version of IncrementalInference that passes user data to the residual function.")
+# end

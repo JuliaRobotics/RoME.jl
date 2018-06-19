@@ -212,15 +212,15 @@ function (ip3::InertialPose3)(
   # (res'*(ip3.Zij.Σ.mat\res))[1]
   nothing
 end
-function (ip3::InertialPose3)(
-            res::Vector{Float64},
-            idx::Int,
-            meas::Tuple,
-            wIPi::Array{Float64,2},
-            wIPj::Array{Float64,2}  )
-  #
-  ip3(res, nothing, idx, meas, wIPi, wIPj)
-end
+# function (ip3::InertialPose3)(
+#             res::Vector{Float64},
+#             idx::Int,
+#             meas::Tuple,
+#             wIPi::Array{Float64,2},
+#             wIPj::Array{Float64,2}  )
+#   #
+#   ip3(res, nothing, idx, meas, wIPi, wIPj)
+# end
 
 
 mutable struct PackedInertialPose3 <: IncrementalInference.PackedInferenceType

@@ -60,7 +60,7 @@ function getSample(pxyy::PartialPose3XYYaw, N::Int=1)
   return (rand(pxyy.xyy,N), )
 end
 function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
-            userdata ,
+            userdata,
             idx::Int,
             meas::Tuple{Array{Float64,2}},
             wXi::Array{Float64,2},
@@ -71,14 +71,14 @@ function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
   se2vee!(res, jXjhat)
   nothing
 end
-function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
-            idx::Int,
-            meas::Tuple{Array{Float64,2}},
-            wXi::Array{Float64,2},
-            wXj::Array{Float64,2}  )
-  #
-  pxyy(res, nothing, idx, meas, wXi, wXj)
-end
+# function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
+#             idx::Int,
+#             meas::Tuple{Array{Float64,2}},
+#             wXi::Array{Float64,2},
+#             wXj::Array{Float64,2}  )
+#   #
+#   pxyy(res, nothing, idx, meas, wXi, wXj)
+# end
 
 mutable struct PackedPartialPose3XYYaw <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
@@ -124,7 +124,7 @@ function getSample(pxyy::PartialPose3XYYawNH, N::Int=1)
   return (rand(pxyy.xyy,N), )
 end
 function (pxyy::PartialPose3XYYawNH)(res::Array{Float64},
-            userdata ,
+            userdata,
             idx::Int,
             meas::Tuple{Array{Float64,2}},
             wXi::Array{Float64,2},
@@ -135,14 +135,14 @@ function (pxyy::PartialPose3XYYawNH)(res::Array{Float64},
   se2vee!(res, jXjhat)
   nothing
 end
-function (pxyy::PartialPose3XYYawNH)(res::Array{Float64},
-            idx::Int,
-            meas::Tuple{Array{Float64,2}},
-            wXi::Array{Float64,2},
-            wXj::Array{Float64,2}  )
-  #
-  pxyy(res, nothing, idx, meas, wXi, wXj)
-end
+# function (pxyy::PartialPose3XYYawNH)(res::Array{Float64},
+#             idx::Int,
+#             meas::Tuple{Array{Float64,2}},
+#             wXi::Array{Float64,2},
+#             wXj::Array{Float64,2}  )
+#   #
+#   pxyy(res, nothing, idx, meas, wXi, wXj)
+# end
 
 
 mutable struct PackedPartialPose3XYYawNH <: IncrementalInference.PackedInferenceType

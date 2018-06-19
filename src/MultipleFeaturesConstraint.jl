@@ -107,7 +107,7 @@ end
 # redo with angles on sightings for minimization
 # NOTE -- an inefficient implementation
 function (mm2d::MultipleFeatures2D)(res::Array{Float64},
-          userdata ,
+          userdata,
           idx::Int, meas::Tuple,
           wAbi::Array{Float64,2},
           wAbj::Array{Float64,2},
@@ -167,16 +167,16 @@ function (mm2d::MultipleFeatures2D)(res::Array{Float64},
   end
   sum(res)
 end
-function (mm2d::MultipleFeatures2D)(res::Array{Float64}, idx::Int, meas::Tuple,
-          wAbi::Array{Float64,2},
-          wAbj::Array{Float64,2},
-          wAo1::Array{Float64,2},
-          wAo2::Array{Float64,2},
-          wAo3::Array{Float64,2},
-          wAo3b::Union{Array{Float64,2},Bool}=false  )
-  #
-  mm2d(res, nothing, idx, meas, wAbi, wAbj, wAo1, wAo2, wAo3, wAo3b)
-end
+# function (mm2d::MultipleFeatures2D)(res::Array{Float64}, idx::Int, meas::Tuple,
+#           wAbi::Array{Float64,2},
+#           wAbj::Array{Float64,2},
+#           wAo1::Array{Float64,2},
+#           wAo2::Array{Float64,2},
+#           wAo3::Array{Float64,2},
+#           wAo3b::Union{Array{Float64,2},Bool}=false  )
+#   #
+#   mm2d(res, nothing, idx, meas, wAbi, wAbj, wAo1, wAo2, wAo3, wAo3b)
+# end
 
 
 
