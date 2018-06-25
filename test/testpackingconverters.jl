@@ -71,14 +71,14 @@ end
     # and a second pose
     v3 = addNode!(fg, :l1, Point2, N=N) # vectoarr2([50.0,50.0]), diagm([1.0;1.0])
     # ppc = Pose2DPoint2DBearingRange([50.0;0.0;pi/2], 0.01*eye(2), [1.0])
-    ppbr = Pose2DPoint2DBearingRange{Normal{Float64}, Normal{Float64}}(
+    ppbr = Pose2DPoint2DBearingRange(
                   Normal(0.0, 0.005 ),
                   Normal(50, 0.5) )
     f3 = addFactor!(fg, [:x2;:l1], ppbr)
 
     dd = convert(PackedPose2DPoint2DBearingRange, ppbr)
     upd = convert(
-            RoME.Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}},
+            RoME.Pose2DPoint2DBearingRange,
             dd
           )
 
