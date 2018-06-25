@@ -136,7 +136,7 @@ end
   estmu2mean = Base.mean(val[collect(getData(f2).fnc.usrfnc!.partial),:],2)
 
   @test sum(abs.(estmu1mean - mu1[[3;1;2]]) .< [0.7; 0.1; 0.1]) == 3
-  @test sum(abs.(estmu2mean - mu2) .< [0.6; 0.6; 0.1] ) == 3
+  @test sum(abs.(estmu2mean - mu2) .< [0.7; 0.7; 0.1] ) == 3
 
   memcheck = getVal(v2)
   @test 1e-10 < norm(val - memcheck)
