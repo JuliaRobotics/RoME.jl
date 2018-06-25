@@ -63,6 +63,7 @@ export
   initializeNode!,
   isInitialized,
   ensureAllInitialized!,
+  getPoints,
   # overloaded functions from IIF
   # decodefg,
   # convertfrompackedfunctionnode,

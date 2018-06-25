@@ -13,11 +13,11 @@ function getSample(pp2::Pose2DPoint2DRange, N::Int=1)
   return (pp2.Cov*randn(1,N),  2*pi*rand(N))
 end
 function (pp2r::Pose2DPoint2DRange)(res::Array{Float64},
-      userdata,
-      idx::Int,
-      meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
-      xi::Array{Float64,2},
-      lm::Array{Float64,2}  )
+                                    userdata,
+                                    idx::Int,
+                                    meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
+                                    xi::Array{Float64,2},
+                                    lm::Array{Float64,2}  )
   #
   # DONE in IIF -- still need to add multi-hypotheses support here
   # this is the noisy range
@@ -110,6 +110,7 @@ function (pp2br::Pose2DPoint2DBearingRangeMH)(res::Array{Float64},
             xi::Array{Float64,2},
             lms... )::Void  # ::Array{Float64,2}
   #
+  warn("Older interface, not analytically correct.")
   res[1] = lms[meas[2][idx]][1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
   res[2] = lms[meas[2][idx]][2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
   nothing
