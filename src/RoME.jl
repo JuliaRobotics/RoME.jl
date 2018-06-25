@@ -323,7 +323,7 @@ include("SimulationUtils.jl")
 
 include("FactorGraphAnalysisTools.jl")
 
-include("WheeledRobotUtils.jl")
+include("RobotDataTypes.jl") #WheeledRobotUtils
 include("NavigationSystem.jl")
 
 
