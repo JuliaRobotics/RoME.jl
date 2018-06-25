@@ -355,18 +355,18 @@ function addBRFG!(fg::FactorGraph,
   return f
 end
 
-function addMMBRFG!(fg::FactorGraph, pose::T,
-                  lm::Array{T,1}, br::Array{Float64,1},
-                  cov::Array{Float64,2}; w::Vector{Float64}=Float64[0.5;0.5],
-                  ready::Int=1) where {T <: AbstractString}
+function addMMBRFG!(fg::FactorGraph,
+                    syms::Array{Symbol,1}, br::Array{Float64,1},
+                    cov::Array{Float64,2}; w::Vector{Float64}=Float64[0.5;0.5],
+                    ready::Int=1) where {T <: AbstractString}
     #
-    vps = getVert(fg,pose)
-    vlm1 = getVert(fg,lm[1])
-    vlm2 = getVert(fg,lm[2])
+    # vps = getVert(fg,pose)
+    # vlm1 = getVert(fg,lm[1])
+    # vlm2 = getVert(fg,lm[2])
 
-    # vectoarr2(br)
-    pbr = Pose2DPoint2DBearingRangeMH(Normal(br[1],cov[1,1]),  Normal(br[2],cov[2,2]), w) #[vps;vlm1;vlm2],
-    f = addFactor!(fg, [vps;vlm1;vlm2], pbr, ready=ready, autoinit=true )
+    pbr = Pose2DPoint2DBearingRange(Normal(br[1],cov[1,1]),  Normal(br[2],cov[2,2]))
+    syms = Symbol.([pose;lm...])
+    f = addFactor!(fg, syms, pbr, multihypo=[1.0; w...], ready=ready, autoinit=true )
     return f
 end
 
@@ -383,9 +383,15 @@ function projNewLandmPoints(vps::Graphs.ExVertex, br::Array{Float64,1}, cov::Arr
     return lmPts
 end
 
-function projNewLandm!(fg::FactorGraph, pose::T, lm::T, br::Array{Float64,1}, cov::Array{Float64,2};
-                        addfactor=true, N::Int=100, ready::Int=1,
-                        labels::Vector{T}=String[]) where {T <: AbstractString}
+function projNewLandm!(fg::FactorGraph,
+                       pose::T,
+                       lm::T,
+                       br::Array{Float64,1},
+                       cov::Array{Float64,2};
+                       addfactor=true,
+                       N::Int=100,
+                       ready::Int=1,
+                       labels::Vector{T}=String[]  ) where {T <: AbstractString}
     #
     vps = getVert(fg, pose)
 
