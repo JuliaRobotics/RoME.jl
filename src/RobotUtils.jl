@@ -197,7 +197,7 @@ function addOdoFG!(
 
     v = addNode!(fg, n, Pose2, N=N, ready=ready, labels=labels)
     # v = addNode!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
-    pp = Pose2Pose2(vectoarr2(DX), cov, [1.0]) #[prev;v],
+    pp = Pose2Pose2(MvNormal(DX, cov)) #[prev;v],
     f = addFactor!(fg, [prev;v], pp, ready=ready, autoinit=true )
     infor = inv(cov^2)
     # addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
