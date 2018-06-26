@@ -89,7 +89,7 @@ function pack3(xL1, xL2, p1, p2, p3, xF3)
 end
 
 function bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
-  error("bearrang! is deprecated")
+  warn("bearrang! is deprecated")
   wTb = SE2(X)
   bTl = wTb\[L[1:2];1.0]
   b = atan2(bTl[2],bTl[1])

@@ -78,7 +78,7 @@ println("test bearing range evaluations")
 l1 = addNode!(fg, :l1, Point2, N=N) # zeros(2,1), diagm([1.0;1.0])
 # and pose to landmark constraint
 rhoZ1 = norm([10.0;0.0])
-ppr = Pose2DPoint2DBearingRange{Uniform, Normal}(Uniform(-pi,pi),Normal(rhoZ1,1.0))
+ppr = Pose2DPoint2DBearingRange(Uniform(-pi,pi),Normal(rhoZ1,1.0))
 f4 = addFactor!(fg, [v1;l1], ppr)
 
 # res = zeros(2)
