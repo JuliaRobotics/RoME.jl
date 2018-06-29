@@ -10,9 +10,10 @@ println("[TEST] numeric root...")
 include("testhigherdimroots.jl")
 println("[SUCCESS]")
 
-println("[TEST] Camera function evaluations...")
-include("testCameraFunctions.jl")
-println("[SUCCESS]")
+# Requires standardized testing strategy
+# println("[TEST] Camera function evaluations...")
+# include("testCameraFunctions.jl")
+# println("[SUCCESS]")
 
 println("[TEST] MultipleFeatures constraints")
 include("testmultiplefeatures.jl")
