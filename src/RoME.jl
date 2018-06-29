@@ -36,8 +36,8 @@ export
   # pass throughs from IncrementalInference
   FunctorSingleton,
   FunctorPairwise,
-  FunctorPairwiseNH,
-  FunctorSingletonNH,
+  FunctorPairwiseNH,   # will become obsolete
+  FunctorSingletonNH,  # will become obsolete
   ls,
   addFactor!,
   addNode!,
@@ -267,23 +267,7 @@ export
   addSoftEqualityPoint2D,
   vectoarr2
 
-  ## Visualization tools have been moved to RoMEPlotting.jl
-  # draw pose beliefs etc
-  # Some vizualization tools
-  # togglePrtStbLines,
-  # plotLsrScanFeats,
-  # drawFeatTrackers,
-  # saveImgSeq,
-  # drawPoses,
-  # drawLandms,
-  # drawPosesLandms,
-  # drawSubmaps,
-  # investigatePoseKDE,
-  # plotPose3Pairs,
-  # drawMarginalContour,
-  # accumulateMarginalContours,
-  # progressExamplePlot,
-  # plotTrckStep,
+
 
 
 
