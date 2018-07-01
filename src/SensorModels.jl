@@ -110,20 +110,21 @@ function backprojectRandomized!(meas::LinearRangeBearingElevation,
 end
 
 
-function backprojectRandomized!{T}(meas::LinearRangeBearingElevation,
-        landmark::Array{Float64,2},
-        pose::Array{Float64,2},
-        idx::Int,
-        gg::T  )
+function backprojectRandomized!(meas::LinearRangeBearingElevation,
+                                landmark::Array{Float64,2},
+                                pose::Array{Float64,2},
+                                idx::Int,
+                                gg::T   )
   #
   gg.landmark[1:3] = landmark[1:3,idx]
   gg.pose[1:6] = pose[1:6,idx]
   gg.z[1:3] = getSample(meas)
 
-  # println("doing this")
   fgr = FastGenericRoot{T}(6, 3, gg)
+
+
   #initial guess x0
-  copy!(fgr.X, pose[1:6,idx])
+  fgr.X[:] = view(pose, 1:6, idx)
 
   numericRootGenericRandomizedFnc!( fgr )
   pose[1:6,idx] = fgr.Y
