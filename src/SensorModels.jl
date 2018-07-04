@@ -85,74 +85,6 @@ function residualLRBE!(resid::Vector{Float64}, z::Vector{Float64}, X::Vector{Flo
 end
 
 
-# Convolution of conditional to project landmark location from position X (dim6)
-# Y (dim3) are projected points
-function project!(meas::LinearRangeBearingElevation, pose::Array{Float64,2}, landmark::Array{Float64,2}, idx::Int, ggtemp::Function)
-  z = getSample(meas)
-  # warn("didson project! to be upgraded") # TODO
-  gg = (res, x) -> residualLRBE!(res, z, pose[1:6,idx][:], x, ggtemp.reuse)
-  landmark[1:3,idx] = numericRootGenericRandomizedFnc(gg, 3, 3, landmark[1:3,idx][:])
-  # landmark[1:3,idx] = numericRootGenericRandomized(residualLRBE!, 3, getSample(meas), pose[1:6,idx][:], landmark[1:3,idx][:]) # ( bearrange3!,
-  # x0[1:3,idx] = numericRoot(bearrange3!, getSample(meas), fixed[1:6,idx], x0[1:3,idx]+0.01*randn(3))
-  nothing
-end
-
-# zsolving for pose given landmark [P | L]
-function backprojectRandomized!(meas::LinearRangeBearingElevation,
-        landmark::Array{Float64,2},
-        pose::Array{Float64,2},
-        idx::Int  )
-  #
-  z = getSample(meas)
-  gg = (res, x) -> residualLRBE!(res, z, x, landmark[1:3,idx][:])
-  pose[1:6,idx] = numericRootGenericRandomizedFnc(gg, 3, 6, pose[1:6,idx][:])
-  nothing
-end
-
-
-function backprojectRandomized!{T}(meas::LinearRangeBearingElevation,
-        landmark::Array{Float64,2},
-        pose::Array{Float64,2},
-        idx::Int,
-        gg::T  )
-  #
-  gg.landmark[1:3] = landmark[1:3,idx]
-  gg.pose[1:6] = pose[1:6,idx]
-  gg.z[1:3] = getSample(meas)
-
-  # println("doing this")
-  fgr = FastGenericRoot{T}(6, 3, gg)
-  #initial guess x0
-  copy!(fgr.X, pose[1:6,idx])
-
-  numericRootGenericRandomizedFnc!( fgr )
-  pose[1:6,idx] = fgr.Y
-	nothing
-end
-
-function backprojectRandomized!{T}( fgr::FastGenericRoot{T} )
-  #
-  # fgr.usrfnc.z[1:3] = getSample(fgr.z)
-  numericRootGenericRandomizedFnc!( fgr )
-  nothing
-end
-
-
-
-# convenience function for project!
-function project(meas::LinearRangeBearingElevation, X::Vector{Float64}, Y::Vector{Float64})
-  xx, yy = X', Y'
-  project!(meas, xx', yy', 1)
-  return yy[1:3]
-end
-
-
-# (p::WrapParam{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
-#     residualLRBE!(res, p.z, x, p.landmark, p.reuse)
-# (p::WrapParamArray{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
-#     residualLRBE!(res, p.z, x, p.landmark[:,p.idx], p.reuse)
-
-
 
 
 function +(arr::Array{Float64,2}, meas::LinearRangeBearingElevation)
@@ -172,3 +104,85 @@ function +(arr::Array{Float64,2}, meas::LinearRangeBearingElevation)
   end
   return L
 end
+
+
+
+
+
+
+
+
+# Deprecated
+
+#
+# # Convolution of conditional to project landmark location from position X (dim6)
+# # Y (dim3) are projected points
+# function project!(meas::LinearRangeBearingElevation, pose::Array{Float64,2}, landmark::Array{Float64,2}, idx::Int, ggtemp::Function)
+#   z = getSample(meas)
+#   # warn("didson project! to be upgraded") # TODO
+#   gg = (res, x) -> residualLRBE!(res, z, pose[1:6,idx][:], x, ggtemp.reuse)
+#   landmark[1:3,idx] = numericRootGenericRandomizedFnc(gg, 3, 3, landmark[1:3,idx][:])
+#   # landmark[1:3,idx] = numericRootGenericRandomized(residualLRBE!, 3, getSample(meas), pose[1:6,idx][:], landmark[1:3,idx][:]) # ( bearrange3!,
+#   # x0[1:3,idx] = numericRoot(bearrange3!, getSample(meas), fixed[1:6,idx], x0[1:3,idx]+0.01*randn(3))
+#   nothing
+# end
+#
+# # zsolving for pose given landmark [P | L]
+# function backprojectRandomized!(meas::LinearRangeBearingElevation,
+#         landmark::Array{Float64,2},
+#         pose::Array{Float64,2},
+#         idx::Int  )
+#   #
+#   z = getSample(meas)
+#   gg = (res, x) -> residualLRBE!(res, z, x, landmark[1:3,idx][:])
+#   pose[1:6,idx] = numericRootGenericRandomizedFnc(gg, 3, 6, pose[1:6,idx][:])
+#   nothing
+# end
+#
+#
+# function backprojectRandomized!(meas::LinearRangeBearingElevation,
+#                                 landmark::Array{Float64,2},
+#                                 pose::Array{Float64,2},
+#                                 idx::Int,
+#                                 gg::T   ) where {T}
+#   #
+#   gg.landmark[1:3] = landmark[1:3,idx]
+#   gg.pose[1:6] = pose[1:6,idx]
+#   gg.z[1:3] = getSample(meas)
+#
+#   fgr = FastGenericRoot{T}(6, 3, gg)
+#
+#
+#   #initial guess x0
+#   fgr.X[:] = view(pose, 1:6, idx)
+#
+#   numericRootGenericRandomizedFnc!( fgr )
+#   pose[1:6,idx] = fgr.Y
+# 	nothing
+# end
+#
+# function backprojectRandomized!{T}( fgr::FastGenericRoot{T} )
+#   #
+#   # fgr.usrfnc.z[1:3] = getSample(fgr.z)
+#   numericRootGenericRandomizedFnc!( fgr )
+#   nothing
+# end
+#
+#
+#
+# # convenience function for project!
+# function project(meas::LinearRangeBearingElevation, X::Vector{Float64}, Y::Vector{Float64})
+#   xx, yy = X', Y'
+#   project!(meas, xx', yy', 1)
+#   return yy[1:3]
+# end
+
+
+# (p::WrapParam{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
+#     residualLRBE!(res, p.z, x, p.landmark, p.reuse)
+# (p::WrapParamArray{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
+#     residualLRBE!(res, p.z, x, p.landmark[:,p.idx], p.reuse)
+
+
+
+#

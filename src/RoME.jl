@@ -36,8 +36,8 @@ export
   # pass throughs from IncrementalInference
   FunctorSingleton,
   FunctorPairwise,
-  FunctorPairwiseNH,
-  FunctorSingletonNH,
+  FunctorPairwiseNH,   # will become obsolete
+  FunctorSingletonNH,  # will become obsolete
   ls,
   addFactor!,
   addNode!,
@@ -128,17 +128,6 @@ export
   assocMeasWFeats!,
 
   lsrBR,
-
-  # solve with isam in pytslam
-  doISAMSolve,
-  drawCompPosesLandm,
-
-  # Victoria Park data specific
-  LaserFeatures,
-  addLandmarksFactoGraph!,
-  appendFactorGraph!,
-  doBatchRun,
-  rotateFeatsToWorld,
 
   # Didson model
   evalPotential,
@@ -265,25 +254,22 @@ export
   poseTrigAndAdd!,
   processTreeTrackersUpdates!,
   addSoftEqualityPoint2D,
-  vectoarr2
+  vectoarr2,
 
-  ## Visualization tools have been moved to RoMEPlotting.jl
-  # draw pose beliefs etc
-  # Some vizualization tools
-  # togglePrtStbLines,
-  # plotLsrScanFeats,
-  # drawFeatTrackers,
-  # saveImgSeq,
-  # drawPoses,
-  # drawLandms,
-  # drawPosesLandms,
-  # drawSubmaps,
-  # investigatePoseKDE,
-  # plotPose3Pairs,
-  # drawMarginalContour,
-  # accumulateMarginalContours,
-  # progressExamplePlot,
-  # plotTrckStep,
+  # jld required Features Type
+  LaserFeatures
+
+  # # solve with isam in pytslam
+  # doISAMSolve,
+  # drawCompPosesLandm,
+  #
+  # # Victoria Park data specific
+  # addLandmarksFactoGraph!,
+  # appendFactorGraph!,
+  # doBatchRun,
+  # rotateFeatsToWorld
+
+
 
 
 
