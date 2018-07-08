@@ -1,4 +1,98 @@
-using RoME, IncrementalInference
+## add more julia processes
+# nprocs() < 7 ? addprocs(7-nprocs()) : nothing
+
+# tell Julia that you want to use these modules/namespaces
+using RoME, Distributions
+
+
+GTp = Dict{Symbol, Vector{Float64}}()
+GTp[:l100] = [0.0;0]
+GTp[:l101] = [50.0;0]
+GTp[:l102] = [100.0;0]
+GTp[:l103] = [100.0;50.0]
+GTp[:l104] = [100.0;100.0]
+GTp[:l105] = [50.0;100.0]
+GTp[:l106] = [0.0;100.0]
+GTp[:l107] = [0.0;50.0]
+GTp[:l108] = [0.0;-50.0]
+GTp[:l109] = [0.0;-100.0]
+GTp[:l110] = [50.0;-100.0]
+GTp[:l111] = [100.0;-100.0]
+GTp[:l112] = [100.0;-50.0]
+
+GTl = Dict{Symbol, Vector{Float64}}()
+GTl[:l1] = [10.0;30]
+GTl[:l2] = [30.0;-30]
+GTl[:l3] = [80.0;40]
+GTl[:l4] = [120.0;-50]
+
+
+
+# create the factor graph object
+fg = initfg()
+
+# first pose with no initial estimate
+addNode!(fg, :l100, Point2)
+
+# add three landmarks
+addNode!(fg, :l1, Point2)
+addNode!(fg, :l2, Point2)
+addNode!(fg, :l3, Point2)
+
+# and put priors on :l101 and :l102
+addFactor!(fg, [:l1;], PriorPoint2D(GTl[:l1], eye(2), [1.0]))
+addFactor!(fg, [:l2;], PriorPoint2D(GTl[:l2], eye(2), [1.0]))
+
+
+# first range measurement
+rhoZ1 = norm(GTl[:l1]-GTp[:l100])
+ppr = Point2DPoint2DRange([rhoZ1], 2.0, [1.0])
+addFactor!(fg, [:l100;:l1], ppr)
+
+# second range measurement
+rhoZ2 = norm(GTl[:l2]-GTp[:l100])
+ppr = Point2DPoint2DRange([rhoZ2], 3.0, [1.0])
+addFactor!(fg, [:l100; :l2], ppr)
+
+# second range measurement
+rhoZ3 = norm(GTl[:l3]-GTp[:l100])
+ppr = Point2DPoint2DRange([rhoZ3], 3.0, [1.0])
+addFactor!(fg, [:l100; :l3], ppr)
+
+
+writeGraphPdf(fg)
+
+
+tree = wipeBuildNewTree!(fg)
+inferOverTree!(fg, tree)
+
+
+
+using RoMEPlotting
+
+
+drawLandms(fg, from=100)
+
+drawLandms(fg, to=99)
+
+
+
+using KernelDensityEstimatePlotting, Gadfly
+
+
+
+pl = plotKDE(fg, :l100, dims=[1;2])
+Gadfly.draw(PDF("/tmp/testL100.pdf", 20cm, 10cm),pl)
+
+pl = plotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)
+Gadfly.draw(PDF("/tmp/testL1_2.pdf", 20cm, 10cm),pl)
+
+
+
+
+
+0
+
 
 # using CloudGraphs, Neo4j
 # include("BlandAuthDB.jl")

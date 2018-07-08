@@ -40,7 +40,7 @@ function (pp2r::Point2DPoint2DRange)(
   XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
   YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
-  nothing
+  res[1]
 end
 
 

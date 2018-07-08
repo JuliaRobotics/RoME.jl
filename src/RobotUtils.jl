@@ -694,12 +694,15 @@ function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{Stri
   end
   return retlbs
 end
+function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{Symbol,1})
+  removeKeysFromArr(fgl, torm, string.(lbl))
+end
 
 function get2DLandmMax(fgl::FactorGraph;
                 from::Int=-99999999999,
                 to::Int=9999999999,
-                showmm=false, MM=Union{},
-                api::DataLayerAPI=IncrementalInference.localapi  )
+                showmm=false, MM::Dict{Int,T}=Dict{Int,Int}(),
+                api::DataLayerAPI=IncrementalInference.localapi  ) where {T}
   #
   xLB,lLB = ls(fgl) # TODO add: from, to, special option 'x'
   if !showmm lLB = removeKeysFromArr(fgl, collect(keys(MM)), lLB); end
@@ -711,7 +714,7 @@ function get2DLandmMax(fgl::FactorGraph;
     @show lb
     @show lbl = string(lb)
     if from <= parse(Int,lbl[2:end]) <=to
-      mv = getKDEMax(getVertKDE(fgl,lb, api=api))
+      mv = getKDEMax(getVertKDE(fgl, Symbol(lb), api=api))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(LB, lbl)
