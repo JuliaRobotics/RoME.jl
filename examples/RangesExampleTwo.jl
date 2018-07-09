@@ -36,7 +36,7 @@ using RoME, IncrementalInference, Gadfly, Colors, KernelDensityEstimate
 GTp = Dict{String, Vector{Float64}}()
 GTl = Dict{String, Vector{Float64}}()
 
-
+#
 GTp["l100"] = [0.0;0]
 GTp["l101"] = [50.0;0]
 GTp["l102"] = [100.0;0]
@@ -118,6 +118,7 @@ function drive(fgl::FactorGraph, GTp, GTl, from, to; N=100)
 end
 
 function batchsolve(fgl::FactorGraph; N::Int=100)
+  warn("Deprecated for IncrementalInference.batchSolve! instead.")
   tree = wipeBuildNewTree!(fgl, drawpdf=true)
   inferOverTree!(fgl, tree, N=N)
   nothing
