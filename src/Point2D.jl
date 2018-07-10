@@ -6,16 +6,21 @@ struct Point2 <: IncrementalInference.InferenceVariable
   Point2() = new(2, String[])
 end
 
-mutable struct PriorPoint2D <: IncrementalInference.FunctorSingleton
-  mv::MvNormal
-  W::Array{Float64,1} # TODO, deprecate the weight parameter
-  PriorPoint2D() = new()
-  PriorPoint2D(dist::MvNormal, W) = new(dist, W)
-  PriorPoint2D(mu, cov, W) = new(MvNormal(mu, cov), W)
+mutable struct PriorPoint2{T} <: IncrementalInference.FunctorSingleton where {T <: Distributions.Distribution}
+  Z::T
+  # W::Array{Float64,1} # TODO, deprecate the weight parameter
+  PriorPoint2() = new()
+  PriorPoint2{T}(dist::T) where {T <: Distributions.Distribution} = new{T}(dist)
 end
-function getSample(p2::PriorPoint2D, N::Int=1)
-  return (rand(p2.mv, N),)
+function PriorPoint2D(mu, cov, W)
+  warn("PriorPoint2D(mu, cov, W) is deprecated, use PriorPoint(MvNormal(...)) or any other distributions type instead.")
+  PriorPoint2{MvNormal{Float64}}(MvNormal(mu, cov))
 end
+function getSample(p2::PriorPoint2, N::Int=1)
+  return (rand(p2.Z, N),)
+end
+
+
 
 mutable struct Point2DPoint2DRange <: IncrementalInference.FunctorPairwiseMinimize #Pairwise
     Zij::Vector{Float64} # bearing and range hypotheses as columns
@@ -107,24 +112,26 @@ end
 
 
 
-mutable struct PackedPriorPoint2D  <: IncrementalInference.PackedInferenceType
-    mu::Array{Float64,1}
-    vecCov::Array{Float64,1}
-    dimc::Int
-    W::Array{Float64,1}
-    PackedPriorPoint2D() = new()
-    PackedPriorPoint2D(x...) = new(x[1], x[2], x[3], x[4])
+mutable struct PackedPriorPoint2  <: IncrementalInference.PackedInferenceType
+    # mu::Array{Float64,1}
+    # vecCov::Array{Float64,1}
+    # dimc::Int
+    # W::Array{Float64,1}
+    str::String
+    PackedPriorPoint2() = new()
+    PackedPriorPoint2(x::String) = new(x)
 end
 
 passTypeThrough(d::FunctionNodeData{Point2DPoint2DRange}) = d
 
-function convert(::Type{PriorPoint2D}, d::PackedPriorPoint2D)
-  Cov = reshapeVec2Mat(d.vecCov, d.dimc)
-  return PriorPoint2D(d.mu, Cov, d.W)
+function convert(::Type{PriorPoint2}, d::PackedPriorPoint2)
+  # Cov = reshapeVec2Mat(d.vecCov, d.dimc)
+  distr = extractdistribution(d.str)
+  return PriorPoint2{typeof(distr)}(distr)
 end
-function convert(::Type{PackedPriorPoint2D}, d::PriorPoint2D)
-  v2 = d.mv.Σ.mat[:];
-  return PackedPriorPoint2D(d.mv.μ, v2, size(d.mv.Σ.mat,1), d.W)
+function convert(::Type{PackedPriorPoint2}, d::PriorPoint2)
+  # v2 = d.mv.Σ.mat[:];
+  return PackedPriorPoint2(string(d.Z))
 end
 
 

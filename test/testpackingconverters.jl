@@ -1,12 +1,33 @@
 # test packing functions
 
 
-using RoME
 using Distributions
-using TransformUtils
 using KernelDensityEstimate
+using TransformUtils
+using RoME
 
 using Base.Test
+
+
+
+
+@testset "test PriorPoint2" begin
+
+  prpt2 = PriorPoint2{MvNormal}( MvNormal([0.25;0.75], diagm([1.0;2.0]))  )
+
+  pprpt2 = convert(PackedPriorPoint2, prpt2)
+  uprpt2 = convert(PriorPoint2, pprpt2)
+
+  @test norm(prpt2.Z.μ - uprpt2.Z.μ) < 1e-8
+
+  @test norm(prpt2.Z.Σ.mat - uprpt2.Z.Σ.mat) < 1e-8
+
+  # test backwards compatibility, TODO remove
+  prpt2 = PriorPoint2D([0.25;0.75], diagm([1.0;2.0]), [1.0;]  )
+
+end
+
+
 
 
 N = 100
@@ -25,6 +46,7 @@ f1  = addFactor!(fg,[v1], ipp)
 v2 = addNode!(fg, :x2, Pose2, N=N) # vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05])
 ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov)
 f2 = addFactor!(fg, [v1;v2], ppc)
+
 
 
 @testset "test conversions of PriorPose2" begin

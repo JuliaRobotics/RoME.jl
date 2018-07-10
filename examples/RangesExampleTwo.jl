@@ -441,10 +441,10 @@ lmv1 = landmsInRange(GTl, GTp["l100"])
 addLandmsOnPose!(fg, v1, lmv1, N=N )
 
 # must pin landmarks for guage
-pp2 = PriorPoint2D(GTl["l1"], diagm([1.0;1.0]), [1.0])
+pp2 = PriorPoint2{MvNormal}(MvNormal(GTl["l1"], diagm([1.0;1.0])))
 f = addFactor!(fg,[:l1], pp2)
 # f = addFactor!(fg,[getVert(fg,:l1)], pp2)
-pp2 = PriorPoint2D(GTl["l2"], diagm([1.0;1.0]), [1.0])
+pp2 = PriorPoint2{MvNormal}(MvNormal(GTl["l2"], diagm([1.0;1.0])))
 f = addFactor!(fg, [:l2], pp2)
 
 

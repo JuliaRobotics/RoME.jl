@@ -94,8 +94,8 @@ end
   X2ptsMean = Base.mean(X2pts,2)
   X1ptsMean = Base.mean(X1pts,2)
   @show X1ptsMean
-  @test  sum(map(Int, abs.(X1ptsMean) .< 1.0 )) == 6
-  @test  sum(map(Int, abs.(X2ptsMean - [10.0;0;0;0;0;0]) .< 1.0 )) == 6
+  @test  sum(map(Int, abs.(X1ptsMean) .< 1.25 )) == 6
+  @test  sum(map(Int, abs.(X2ptsMean - [10.0;0;0;0;0;0]) .< 1.25 )) == 6
 end
 
 
