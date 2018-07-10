@@ -34,10 +34,17 @@ getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 mutable struct Pose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: Distributions.Distribution}
   z::T
   Pose2Pose2{T}() where {T <: Distribution} = new{T}()
-  Pose2Pose2(z1::T) where {T <: Distribution} = new{T}(z1)
+  Pose2Pose2{T}(z1::T) where {T <: Distribution} = new{T}(z1)
 end
-Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}) = Pose2Pose2(MvNormal(mean, cov))
-Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Float64}) = Pose2Pose2(MvNormal(mean, cov))
+Pose2Pose2(z::T) where {T <: Distributions.Distribution} = Pose2Pose2{T}(z)
+function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2})
+  warn("Pose2Pose2(mu,cov) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))")
+  Pose2Pose2(MvNormal(mean, cov))
+end
+function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Float64})
+  warn("Pose2Pose2(mu,cov,w) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))")
+  Pose2Pose2(MvNormal(mean, cov))
+end
 getSample(s::Pose2Pose2, N::Int=1) = (rand(s.z,N), )
 function (s::Pose2Pose2)(res::Array{Float64},
             userdata,
@@ -54,16 +61,14 @@ end
 
 
 mutable struct PriorPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: Distributions.Distribution}
-    # Zi::Array{Float64,2}
-    # Cov::Array{Float64,2}
-    # W::Array{Float64,1}
     Z::T
     PriorPose2() = new()
     PriorPose2{T}(x::T) where {T <: Distributions.Distribution}  = new{T}(x)
 end
+PriorPose2(x::T) where {T <: Distributions.Distribution} = PriorPose2{T}(x)
 function PriorPose2(mu::Array{Float64}, cov::Array{Float64,2}, W::Vector{Float64})
-  warn("PriorPose2(mu,cov,W) is deprecated in favor of PriorPose2{T}(T(...)) -- use for example PriorPose2{MvNormal}(MvNormal(mu, cov))")
-  PriorPose2{MvNormal}(MvNormal(mu[:], cov))
+  warn("PriorPose2(mu,cov,W) is deprecated in favor of PriorPose2(T(...)) -- use for example PriorPose2(MvNormal(mu, cov))")
+  PriorPose2(MvNormal(mu[:], cov))
 end
 function getSample(p2::PriorPose2, N::Int=1)
   return (rand(p2.Z,N), )

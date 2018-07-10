@@ -39,7 +39,7 @@ odoCov = diagm([3.0;3.0;0.01])
 
 # Some starting position
 v1 = addNode!(fg, :x1, Pose2, N=N) # zeros(3,1), diagm([1.0;1.0;0.1])
-ipp = PriorPose2{MvNormal}(MvNormal(zeros(3), initCov))
+ipp = PriorPose2(MvNormal(zeros(3), initCov))
 f1  = addFactor!(fg,[v1], ipp)
 
 # and a second pose
