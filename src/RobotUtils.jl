@@ -277,11 +277,11 @@ function initFactorGraph!(fg::FactorGraph;
   if firstPoseType == Pose2
       init = init!=nothing ? init : zeros(3)
       P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.001])
-      init = vectoarr2(init)
+      # init = vectoarr2(init)
       addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
       push!(nodesymbols, lbl)
       # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose2(init, P0,  [1.0]), ready=ready, labels=String["FACTOR"; labels]) #[v1],
+      fctVert = addFactor!(fg, [lbl;], PriorPose2{MvNormal}(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
       push!(nodesymbols, fctVert.label)
   end
   if firstPoseType == Pose3

@@ -39,13 +39,13 @@ odoCov = diagm([3.0;3.0;0.01])
 
 # Some starting position
 v1 = addNode!(fg, :x1, Pose2, N=N) # zeros(3,1), diagm([1.0;1.0;0.1])
-ipp = PriorPose2(zeros(3,1), initCov, [1.0])
+ipp = PriorPose2{MvNormal}(MvNormal(zeros(3), initCov))
 f1  = addFactor!(fg,[v1], ipp)
 
 # and a second pose
 v2 = addNode!(fg, :x2, Pose2, N=N) # vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05])
 ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov)
-f2 = addFactor!(fg, [v1;v2], ppc)
+f2 = addFactor!(fg, [:x1;:x2], ppc)
 
 
 
@@ -53,21 +53,18 @@ f2 = addFactor!(fg, [v1;v2], ppc)
     dd = convert(PackedPriorPose2, ipp)
     upd = convert(RoME.PriorPose2, dd)
 
-    @test RoME.compare(ipp, upd)
+    @test RoME.compare(ipp, upd) # temp use of RoME.compare
 
     packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
     unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose2}}, packeddata)
 
-    @test IncrementalInference.compare(getData(f1), unpackeddata)
+    # getData(f1)
+    # unpackeddata
 
-    # packeddata = FNDencode(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
-    # unpackeddata = FNDdecode(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose2}}, packeddata)
+    @test RoME.compare(getData(f1), unpackeddata) # temp use of RoME.compare
 
     packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
     upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
-
-    # packedv1data = VNDencoder(IncrementalInference.PackedVariableNodeData, getData(v1))
-    # upv1data = VNDdecoder(IncrementalInference.VariableNodeData, packedv1data)
 
     @test IncrementalInference.compare(getData(v1), upv1data)
 end
