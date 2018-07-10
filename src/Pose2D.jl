@@ -1,3 +1,21 @@
+
+# TODO -- temporary overwriting of this function, and should be removed from here when IIF 4.0.0 is tagged.
+import IncrementalInference: compare
+
+function compare(a::IncrementalInference.GenericFunctionNodeData{T1,S},b::IncrementalInference.GenericFunctionNodeData{T2,S}) where {T1, T2, S}
+  # TODO -- beef up this comparison to include the gwp
+  TP = true
+  TP = TP && a.fncargvID == b.fncargvID
+  TP = TP && a.eliminated == b.eliminated
+  TP = TP && a.potentialused == b.potentialused
+  TP = TP && a.edgeIDs == b.edgeIDs
+  TP = TP && a.frommodule == b.frommodule
+  # TP = TP && typeof(a.fnc) == typeof(b.fnc)
+  return TP
+end
+
+
+
 # Pose2 functions for Robot Motion Estimate
 
 struct Pose2 <: IncrementalInference.InferenceVariable
@@ -35,24 +53,28 @@ function (s::Pose2Pose2)(res::Array{Float64},
 end
 
 
-mutable struct PriorPose2 <: IncrementalInference.FunctorSingleton
-    Zi::Array{Float64,2}
-    Cov::Array{Float64,2}
-    W::Array{Float64,1}
+mutable struct PriorPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: Distributions.Distribution}
+    # Zi::Array{Float64,2}
+    # Cov::Array{Float64,2}
+    # W::Array{Float64,1}
+    Z::T
     PriorPose2() = new()
-    PriorPose2(x...) = new(x[1], x[2], x[3])
+    PriorPose2{T}(x::T) where {T <: Distributions.Distribution}  = new{T}(x)
+end
+function PriorPose2(mu::Array{Float64}, cov::Array{Float64,2}, W::Vector{Float64})
+  warn("PriorPose2(mu,cov,W) is deprecated in favor of PriorPose2{T}(T(...)) -- use for example PriorPose2{MvNormal}(MvNormal(mu, cov))")
+  PriorPose2{MvNormal}(MvNormal(mu[:], cov))
 end
 function getSample(p2::PriorPose2, N::Int=1)
-  return (rand(MvNormal(p2.Zi[:,1],p2.Cov),N), )
+  return (rand(p2.Z,N), )
 end
 
 
 
 function compare(a::PriorPose2,b::PriorPose2; tol::Float64=1e-10)
   TP = true
-  TP = TP && norm(a.Zi-b.Zi) < tol
-  TP = TP && norm(a.Cov-b.Cov) < tol
-  TP = TP && norm(a.W-b.W) < tol
+  TP = TP && norm(a.Z.μ-b.Z.μ) < tol
+  TP = TP && norm(a.Z.Σ.mat-b.Z.Σ.mat) < tol
   return TP
 end
 function compare(a::Pose2Pose2,b::Pose2Pose2; tol::Float64=1e-10)
@@ -99,25 +121,25 @@ end
 
 
 mutable struct PackedPriorPose2  <: IncrementalInference.PackedInferenceType
-    vecZij::Array{Float64,1} # 0rotations, 1translation in each column
-    dimz::Int
-    vecCov::Array{Float64,1}
-    dimc::Int
-    W::Array{Float64,1}
+    # vecZij::Array{Float64,1} # 0rotations, 1translation in each column
+    # dimz::Int
+    # vecCov::Array{Float64,1}
+    # dimc::Int
+    # W::Array{Float64,1}
+    str::String
     PackedPriorPose2() = new()
-    PackedPriorPose2(x...) = new(x[1], x[2], x[3], x[4], x[5])
+    PackedPriorPose2(x::String) = new(x)
 end
 function convert(::Type{PriorPose2}, d::PackedPriorPose2)
-  Zi = reshapeVec2Mat(d.vecZij,d.dimz)
-  Cov = reshapeVec2Mat(d.vecCov, d.dimc)
-  return PriorPose2(Zi, Cov, d.W)
+  # Zi = reshapeVec2Mat(d.vecZij,d.dimz)
+  # Cov = reshapeVec2Mat(d.vecCov, d.dimc)
+  distr = extractdistribution(d.str)
+  return PriorPose2{typeof(distr)}(distr)
 end
 function convert(::Type{PackedPriorPose2}, d::PriorPose2)
-  v1 = d.Zi[:];
-  v2 = d.Cov[:];
-  return PackedPriorPose2(v1,size(d.Zi,1),
-                          v2,size(d.Cov,1),
-                          d.W)
+  # v1 = d.Zi[:];
+  # v2 = d.Cov[:];
+  return PackedPriorPose2(string(d.Z))
 end
 
 
