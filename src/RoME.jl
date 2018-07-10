@@ -176,8 +176,10 @@ export
   Pose2DPoint2DRange,
   Point2DPoint2DRange,
   PackedPoint2DPoint2DRange,
-  PriorPoint2D,
-  PackedPriorPoint2D,
+  PriorPoint2,
+  PriorPoint2D, # to be deprecated
+  PackedPriorPoint2,
+  PackedPriorPoint2D, # to be deprecated`
   solveLandm,
   solvePose2,
   solveSetSeps,

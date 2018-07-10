@@ -42,8 +42,8 @@ addNode!(fg, :l2, Point2)
 addNode!(fg, :l3, Point2)
 
 # and put priors on :l101 and :l102
-addFactor!(fg, [:l1;], PriorPoint2D(GTl[:l1], eye(2), [1.0]))
-addFactor!(fg, [:l2;], PriorPoint2D(GTl[:l2], eye(2), [1.0]))
+addFactor!(fg, [:l1;], PriorPoint2{MvNormal}(MvNormal(GTl[:l1], eye(2))))
+addFactor!(fg, [:l2;], PriorPoint2{MvNormal}(MvNormal(GTl[:l2], eye(2))))
 
 
 # first range measurement

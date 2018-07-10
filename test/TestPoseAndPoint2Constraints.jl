@@ -99,7 +99,7 @@ pts = evalFactor2(fg, f4, v1.index)
 
 
 # add a prior to landmark
-pp2 = PriorPoint2D([10.0;0.0], diagm([1.0;1.0]), [1.0])
+pp2 = PriorPoint2{MvNormal}(MvNormal([10.0;0.0], diagm([1.0;1.0])))
 
 f5 = addFactor!(fg,[l1], pp2)
 pts = evalFactor2(fg, f5, l1.index)
