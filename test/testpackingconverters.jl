@@ -66,7 +66,7 @@ f2 = addFactor!(fg, [:x1;:x2], ppc)
     packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
     upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
-    @test RoME.compare(getData(v1), upv1data) # temp use of RoME.compare
+    @test IncrementalInference.compare(getData(v1), upv1data)
 end
 
 
