@@ -12,6 +12,7 @@ mutable struct PriorPoint2{T} <: IncrementalInference.FunctorSingleton where {T 
   PriorPoint2() = new()
   PriorPoint2{T}(dist::T) where {T <: Distributions.Distribution} = new{T}(dist)
 end
+PriorPoint2(z::T) where {T <: Distributions.Distribution} = PriorPoint2{T}(z)
 function PriorPoint2D(mu, cov, W)
   warn("PriorPoint2D(mu, cov, W) is deprecated, use PriorPoint{T}(T(...)) instead -- e.g. PriorPoint2{MvNormal}(MvNormal(...) or any other Distributions.Distribution type instead.")
   PriorPoint2{MvNormal{Float64}}(MvNormal(mu, cov))

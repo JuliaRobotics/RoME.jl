@@ -13,7 +13,7 @@ using Base.Test
 
 @testset "test PriorPoint2" begin
 
-  prpt2 = PriorPoint2{MvNormal}( MvNormal([0.25;0.75], diagm([1.0;2.0]))  )
+  prpt2 = PriorPoint2( MvNormal([0.25;0.75], diagm([1.0;2.0]))  )
 
   pprpt2 = convert(PackedPriorPoint2, prpt2)
   uprpt2 = convert(PriorPoint2, pprpt2)
