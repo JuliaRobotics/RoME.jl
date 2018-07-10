@@ -68,7 +68,7 @@ end
 PriorPose2(x::T) where {T <: Distributions.Distribution} = PriorPose2{T}(x)
 function PriorPose2(mu::Array{Float64}, cov::Array{Float64,2}, W::Vector{Float64})
   warn("PriorPose2(mu,cov,W) is deprecated in favor of PriorPose2(T(...)) -- use for example PriorPose2(MvNormal(mu, cov))")
-  PriorPose2{MvNormal}(MvNormal(mu[:], cov))
+  PriorPose2(MvNormal(mu[:], cov))
 end
 function getSample(p2::PriorPose2, N::Int=1)
   return (rand(p2.Z,N), )

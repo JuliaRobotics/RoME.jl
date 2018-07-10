@@ -179,7 +179,7 @@ initCov = 0.05*eye(3)
 initCov[3,3] = 0.001
 odoCov = deepcopy(initCov)
 
-ipp = PriorPose2{MvNormal}(MvNormal(zeros(3), initCov^2))
+ipp = PriorPose2(MvNormal(zeros(3), initCov^2))
 
 v1 = addNode!(fg, :x1, Pose2, N=N) #0.01*randn(3,N), diagm([1.0;1.0;0.1])
 
@@ -191,7 +191,7 @@ v2 = addNode!(fg, :x2, Pose2, N=N)  # pts2, diagm([1.0;1.0;0.1])
 
 px2 = zeros(3)
 px2[1:3] = [1.1;-1.0;pi/2]
-ipp2 = PriorPose2{MvNormal}(MvNormal(px2, initCov^2))
+ipp2 = PriorPose2(MvNormal(px2, initCov^2))
 f1  = addFactor!(fg,[:x2], ipp2)
 
 

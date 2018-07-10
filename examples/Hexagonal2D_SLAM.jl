@@ -12,7 +12,7 @@ fg = initfg()
 addNode!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-addFactor!(fg, [:x0], PriorPose2{MvNormal}(MvNormal(zeros(3), 0.01*eye(3))))
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))))
 
 # Drive around in a hexagon
 for i in 0:5
