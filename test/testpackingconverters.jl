@@ -53,7 +53,7 @@ f2 = addFactor!(fg, [:x1;:x2], ppc)
     dd = convert(PackedPriorPose2, ipp)
     upd = convert(RoME.PriorPose2, dd)
 
-    @test RoME.compare(ipp, upd)
+    @test RoME.compare(ipp, upd) # temp use of RoME.compare
 
     packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
     unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose2}}, packeddata)
@@ -61,12 +61,12 @@ f2 = addFactor!(fg, [:x1;:x2], ppc)
     # getData(f1)
     # unpackeddata
 
-    @test IncrementalInference.compare(getData(f1), unpackeddata)
+    @test RoME.compare(getData(f1), unpackeddata) # temp use of RoME.compare
 
     packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
     upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
-    @test IncrementalInference.compare(getData(v1), upv1data)
+    @test RoME.compare(getData(v1), upv1data) # temp use of RoME.compare
 end
 
 
