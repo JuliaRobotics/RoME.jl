@@ -73,6 +73,34 @@ end
 
 
 
+mutable struct Point2Point2WorldBearing{T} <: IncrementalInference.FunctorPairwise where {T <: Distributions.Distribution}
+    Z::T
+    rangemodel::Rayleigh
+    # zDim::Tuple{Int, Int}
+    Point2Point2WorldBearing() = new()
+    Point2Point2WorldBearing{T}(x::T) where {T <: Distributions.Distribution} = new{T}(x, Rayleigh(100))
+end
+Point2Point2WorldBearing(x::T) where {T <: Distributions.Distribution} = Point2Point2WorldBearing{T}(x)
+function getSample(pp2::Point2Point2WorldBearing, N::Int=1)
+  return (rand(pp2.Z,N), rand(pp2.rangemodel,N))
+end
+function (pp2r::Point2Point2WorldBearing)(
+          res::Array{Float64},
+          userdata::FactorMetadata,
+          idx::Int,
+          meas::Tuple,
+          pi::Array{Float64,2},
+          pj::Array{Float64,2} )
+  #
+  # noisy bearing measurement
+  z, r = meas[1][idx], meas[2][idx]
+  dx, dy = pj[1,idx]-pi[1,idx], pj[2,idx]-pi[2,idx]
+  res[1] = z - atan2(dy,dx)
+  res[2] = r - norm([dx; dy])
+  nothing
+end
+
+
 
 mutable struct PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
   belief::BallTreeDensity
@@ -153,6 +181,22 @@ function convert(::Type{Point2DPoint2DRange}, d::PackedPoint2DPoint2DRange)
   return Point2DPoint2DRange(d.Zij, d.Cov, d.W)
 end
 
+
+
+
+
+mutable struct PackedPoint2Point2WorldBearing  <: IncrementalInference.PackedInferenceType
+    str::String
+    # NOTE Not storing rangemodel which may cause inconsistencies if the implementation parameters change
+    PackedPoint2Point2WorldBearing() = new()
+    PackedPoint2Point2WorldBearing(x::String) = new(x)
+end
+function convert(::Type{Point2Point2WorldBearing}, d::PackedPoint2Point2WorldBearing)
+  return Point2Point2WorldBearing( extractdistribution(d.str) )
+end
+function convert(::Type{PackedPoint2Point2WorldBearing}, d::Point2Point2WorldBearing)
+  return PackedPoint2Point2WorldBearing( string(d.Z) )
+end
 
 
 
