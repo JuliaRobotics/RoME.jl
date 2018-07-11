@@ -164,6 +164,14 @@ export
   # Point2D
   Point2DPoint2D,
   PackedPoint2DPoint2D,
+  Point2Point2WorldBearing,
+  PackedPoint2Point2WorldBearing,
+  Point2DPoint2DRange,
+  PackedPoint2DPoint2DRange,
+  PriorPoint2,
+  PriorPoint2D, # to be deprecated
+  PackedPriorPoint2,
+  PackedPriorPoint2D, # to be deprecated`
   DynPoint2VelocityPrior,
   DynPoint2DynPoint2,
   VelPoint2VelPoint2,
@@ -174,12 +182,6 @@ export
   PackedPose2DPoint2DBearingRangeMH,
   Pose2DPoint2DBearing,
   Pose2DPoint2DRange,
-  Point2DPoint2DRange,
-  PackedPoint2DPoint2DRange,
-  PriorPoint2,
-  PriorPoint2D, # to be deprecated
-  PackedPriorPoint2,
-  PackedPriorPoint2D, # to be deprecated`
   solveLandm,
   solvePose2,
   solveSetSeps,
