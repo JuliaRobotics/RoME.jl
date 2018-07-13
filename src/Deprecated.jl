@@ -130,9 +130,9 @@ function solveSetSeps(fnc::Function, Zbr::Array{Float64,1}, CovZ::Array{Float64,
 end
 
 # Xid is the one you want to get back
-function evalPotential(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
+function evalPotential(brpho::Pose2Point2BearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
     # TODO -- add null hypothesis here, might even be done one layer higher in call stack
-    error("evalPotential(brpho::Pose2DPoint2DBearingRange,...) should not be here anymore")
+    error("evalPotential(brpho::Pose2Point2BearingRange,...) should not be here anymore")
     val = Array{Float64,2}()
     ini = Array{Graphs.ExVertex,1}()
     par = Array{Graphs.ExVertex,1}()
@@ -192,7 +192,7 @@ function evalPotential(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVert
     return [val';nhvals']'
 end
 
-function evalPotentialNew(brpho::Pose2DPoint2DBearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
+function evalPotentialNew(brpho::Pose2Point2BearingRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
     # TODO -- add null hypothesis here, might even be done one layer higher in call stack
     error("deprecated")
     val = Array{Float64,2}()
@@ -256,7 +256,7 @@ end
 
 
 # Solve for Xid, given values from vertices [Xi] and measurement rho
-function evalPotential(rho::Pose2DPoint2DRange, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
+function evalPotential(rho::Pose2Point2Range, Xi::Array{Graphs.ExVertex,1}, Xid::Int; N::Int=100)
   error("deprecated")
   fromX, ret = nothing, nothing
   if Xi[1].index == Xid

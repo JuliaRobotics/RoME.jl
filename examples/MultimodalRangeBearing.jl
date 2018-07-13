@@ -29,7 +29,7 @@ addNode!(fg, :x0, Pose2)
 # addFactor!(fg, [:x0], Prior(MvNormal([0.0;0.0;0], diagm([1.0;1.0;0.01].^2))) )
 
 
-p2br = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))
+p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
 
 addFactor!(fg, [:x0;], NorthSouthPartial(Normal(0,1.0)))

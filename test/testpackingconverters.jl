@@ -86,24 +86,24 @@ end
 end
 
 
-@testset "test conversions of Pose2DPoint2DBearingRange" begin
+@testset "test conversions of Pose2Point2BearingRange" begin
     # and a second pose
     v3 = addNode!(fg, :l1, Point2, N=N) # vectoarr2([50.0,50.0]), diagm([1.0;1.0])
-    # ppc = Pose2DPoint2DBearingRange([50.0;0.0;pi/2], 0.01*eye(2), [1.0])
-    ppbr = Pose2DPoint2DBearingRange(
+    # ppc = Pose2Point2BearingRange([50.0;0.0;pi/2], 0.01*eye(2), [1.0])
+    ppbr = Pose2Point2BearingRange(
                   Normal(0.0, 0.005 ),
                   Normal(50, 0.5) )
     f3 = addFactor!(fg, [:x2;:l1], ppbr)
 
-    dd = convert(PackedPose2DPoint2DBearingRange, ppbr)
+    dd = convert(PackedPose2Point2BearingRange, ppbr)
     upd = convert(
-            RoME.Pose2DPoint2DBearingRange,
+            RoME.Pose2Point2BearingRange,
             dd
           )
 
 
-    packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2DPoint2DBearingRange}, getData(f3))
-    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2DPoint2DBearingRange}}, packeddata) # IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2DPoint2DBearingRange{Normal{Float64},Normal{Float64}}}}
+    packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Point2BearingRange}, getData(f3))
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2Point2BearingRange}}, packeddata) # IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2Point2BearingRange{Normal{Float64},Normal{Float64}}}}
 
     @test ppbr.bearing.μ == unpackeddata.fnc.usrfnc!.bearing.μ
     @test ppbr.bearing.σ == unpackeddata.fnc.usrfnc!.bearing.σ
