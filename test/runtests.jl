@@ -32,6 +32,8 @@ println("[SUCCESS]")
   include("testDynPoint2D.jl")
 end
 
+include("testPoint2Point2WorldBearing.jl")
+
 include("testBearingRange2D.jl")
 
 include("testMultimodalRangeBearing.jl")

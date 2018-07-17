@@ -91,7 +91,7 @@ export
   RangeAzimuthElevation,
 
   # types
-  BetweenPoses,
+  # BetweenPoses,
 
   # helper functions
   get2DSamples,
@@ -165,6 +165,14 @@ export
   # Point2D
   Point2DPoint2D,
   PackedPoint2DPoint2D,
+  Point2Point2WorldBearing,
+  PackedPoint2Point2WorldBearing,
+  Point2DPoint2DRange,
+  PackedPoint2DPoint2DRange,
+  PriorPoint2,
+  PriorPoint2D, # to be deprecated
+  PackedPriorPoint2,
+  PackedPriorPoint2D, # to be deprecated`
   DynPoint2VelocityPrior,
   DynPoint2DynPoint2,
   VelPoint2VelPoint2,
@@ -279,7 +287,7 @@ export
 
 
 
-@compat abstract type BetweenPoses <: IncrementalInference.FunctorPairwise end
+# @compat abstract type BetweenPoses <: IncrementalInference.FunctorPairwise end
 
 @compat const VoidUnion{T} = Union{Void, T}
 

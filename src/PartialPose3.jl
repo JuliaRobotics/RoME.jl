@@ -50,7 +50,7 @@ end
 # Partial pairwise constraint between poses X,Y,Yaw
 # ------------------------------------------------------------------------------
 
-mutable struct PartialPose3XYYaw <: RoME.BetweenPoses
+mutable struct PartialPose3XYYaw <: FunctorPairwise #RoME.BetweenPoses
   xyy::Distributions.MvNormal
   partial::Tuple
   PartialPose3XYYaw() = new()
