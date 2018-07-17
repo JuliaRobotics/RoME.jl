@@ -174,7 +174,8 @@ export
   Pose2Point2BearingRangeMH,
   PackedPose2Point2BearingRange,
   PackedPose2Point2BearingRangeMH,
-  Pose2DPoint2DBearing,
+  Pose2Point2Bearing,
+  Pose2DPoint2DBearing, # deprecated
   Pose2Point2Range,
   Point2DPoint2DRange,
   PackedPoint2DPoint2DRange,

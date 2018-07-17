@@ -45,7 +45,7 @@ predictbelief(fg, :x0, ls(fg, :x0))
 
 
 @test true
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 end
 
 

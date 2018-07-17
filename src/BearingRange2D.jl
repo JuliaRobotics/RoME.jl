@@ -12,7 +12,7 @@ SamplableBelief = Union{Distributions.Distribution, KernelDensityEstimate.BallTr
 # better to use bearingrange with [uniform bearing], numerical solving issue on 1D
 mutable struct Pose2Point2Range{T} <: IncrementalInference.FunctorPairwise
   Z::T
-  Pose2Point2Range{T}() = new()
+  Pose2Point2Range{T}() where T = new()
   Pose2Point2Range{T}(Z::T) where {T <: SamplableBelief} = new{T}(Z)
 end
 Pose2Point2Range(Z::T) where {T <: SamplableBelief} = Pose2Point2Range{T}(Z)
@@ -66,12 +66,8 @@ function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
         xi::Array{Float64,2},
         lm::Array{Float64,2} )
   #
-  # @show idx, meas[1][idx], meas[2][idx], xi[:,idx], lm[:,idx]
   res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
   res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
-  # if isnan(xi[1,idx])
-  #   error("Went NaN")
-  # end
   nothing
 end
 
@@ -151,17 +147,21 @@ end
 # bearing only available
 
 # this factor type is still a work in progress
-mutable struct Pose2DPoint2DBearing{B <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
+mutable struct Pose2Point2Bearing{B <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
     bearing::B
-    Pose2DPoint2DBearing{B}() where {B} = new{B}()
-    Pose2DPoint2DBearing(x1::B) where {B} = new{B}(x1)
-    Pose2DPoint2DBearing{B}(x1::B) where {B} = new{B}(x1)
+    Pose2Point2Bearing{B}() where B = new{B}()
+    Pose2Point2Bearing{B}(x1::B) where {B <: Distributions.Distribution} = new{B}(x1)
 end
-function getSample(pp2br::Pose2DPoint2DBearing, N::Int=1)
+Pose2Point2Bearing(x1::B) where {B <: Distributions.Distribution} = Pose2Point2Bearing{B}(x1)
+function Pose2DPoint2DBearing(x1::B) where {B <: Distributions.Distribution}
+  warn("Pose2DPoint2DBearing deprecated in favor of Pose2Point2Bearing.")
+  Pose2Point2Bearing(B)
+end
+function getSample(pp2br::Pose2Point2Bearing, N::Int=1)
   return (rand(pp2br.bearing, N), )
 end
 # define the conditional probability constraint
-function (pp2br::Pose2DPoint2DBearing)(res::Array{Float64},
+function (pp2br::Pose2Point2Bearing)(res::Array{Float64},
             userdata,
             idx::Int,
             meas::Tuple,
