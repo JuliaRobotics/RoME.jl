@@ -82,7 +82,7 @@ addFactor!(fg, [:x0], Prior(MvNormal(zeros(3), 0.01*eye(3))), autoinit=false)
 setVal!(fg, :x0, zeros(3,1))
 
 ##----------- sanity check that predictbelief plumbing is doing the right thing
-pts = predictbelief(fg, :x0, :, N=75)
+pts = predictbelief(fg, :x0, ls(fg, :x0), N=75)
 @test sum(abs.(Base.mean(pts,2)) .< [0.1; 0.1; 0.1]) == 3
 @test sum([0.05; 0.05; 0.05] .< Base.std(pts,2) .< [0.15; 0.15; 0.15]) == 3
 #------------
