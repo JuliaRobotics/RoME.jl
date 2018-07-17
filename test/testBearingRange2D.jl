@@ -102,7 +102,7 @@ addFactor!(fg, [:x0; :l1], p2br, autoinit=false)
 # writeGraphPdf(fg)
 
 # check the forward convolution is working properly
-pts = predictbelief(fg, :l1, :, N=75)
+pts = predictbelief(fg, :l1, ls(fg, :l1), N=75)
 @test sum(abs.(Base.mean(pts,2) - [20.0; 0.0]) .< [2.0; 2.0]) == 2
 @test sum([0.1; 0.1] .< Base.std(pts,2) .< [3.0; 3.0]) == 2
 
@@ -141,7 +141,7 @@ addFactor!(fg, [:x0; :l1], p2br, autoinit=false)
 # writeGraphPdf(fg)
 
 # check the forward convolution is working properly
-pts = predictbelief(fg, :x0, :, N=75)
+pts = predictbelief(fg, :x0, ls(fg, :x0), N=75)
 
 @test sum(abs.(Base.mean(pts,2)) .< [2.0; 2.0; 2.0]) == 3
 @test sum([0.1; 0.1; 0.01] .< Base.std(pts,2) .< [3.0; 3.0; 1.0]) == 3
