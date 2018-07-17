@@ -27,10 +27,11 @@ f1  = addFactor!(fg,[v1], initPosePrior)
 # and a second pose
 v2 = addNode!(fg, :x1, Pose2, N=N) # vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05])
 ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov, [1.0])
-f2 = addFactor!(fg, [v1;v2], ppc)
+f2 = addFactor!(fg, [:x0;:x1], ppc)
 
 # test evaluation of pose pose constraint
-pts = evalFactor2(fg, f2, v2.index)
+pts = approxConv(fg, :x0x1f1, :x1)
+# pts = evalFactor2(fg, f2, v2.index)
 @test norm(Base.mean(pts,2)[1:2]-[50.0;0.0]) < 10.0
 @test abs(Base.mean(pts,2)[3]-pi/2) < 0.5
 
@@ -79,22 +80,24 @@ l1 = addNode!(fg, :l1, Point2, N=N) # zeros(2,1), diagm([1.0;1.0])
 # and pose to landmark constraint
 rhoZ1 = norm([10.0;0.0])
 ppr = Pose2Point2BearingRange(Uniform(-pi,pi),Normal(rhoZ1,1.0))
-f4 = addFactor!(fg, [v1;l1], ppr)
-
-# res = zeros(2)
-# meas = getSample(ppr)
-# ppr(res,nothing,1,meas,xi,lm )
+f4 = addFactor!(fg, [:x0;:l1], ppr)
 
 
-pts = evalFactor2(fg, f4, l1.index)
-# @show sum(sqrt(sum(pts.^2, 1 )) .< 5.0)
+pts = approxConv(fg, :x0l1f1, :l1, N=N)
+# pts = evalFactor2(fg, f4, l1.index, N=N)
+## res = zeros(2)
+## meas = getSample(ppr)
+## ppr(res,nothing,1,meas,xi,lm )
+
+# all points should lie in a ring around 0,0
 @test sum(sqrt.(sum(pts.^2, 1 )) .< 5.0) == 0
+@test sum(sqrt.(sum(pts.^2, 1 )) .< 15.0) == N
 
-pts = evalFactor2(fg, f4, v1.index)
+
+pts = approxConv(fg, :x0l1f1, :x0)
+# pts = evalFactor2(fg, f4, v1.index, N=200)
 # @show sum(sqrt(sum(pts.^2, 1 )) .< 5.0)
 # @test sum(sqrt(sum(pts.^2, 1 )) .< 5.0) == 0
-
-
 
 
 

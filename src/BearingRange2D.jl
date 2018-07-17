@@ -17,13 +17,13 @@ mutable struct Pose2Point2Range{T} <: IncrementalInference.FunctorPairwise
 end
 Pose2Point2Range(Z::T) where {T <: SamplableBelief} = Pose2Point2Range{T}(Z)
 
-function Pose2DPoint2DRange(x1::Vector{T},x2::Array{T,2},x3) where {T <: Real}
+function Pose2DPoint2DRange(x1::T,x2::Vector{T},x3) where {T <: Real}
   warn("Pose2Point2Range(mu,cov,w) is being deprecated in favor of Pose2Point2Range(T(...)), such as Pose2Point2Range(MvNormal(mu, cov))")
-  Pose2Point2Range(MvNormal(x1, x2))
+  Pose2Point2Range(Normal(x1, x2))
 end
 
 function getSample(pp2::Pose2Point2Range, N::Int=1)
-  return (pp2.Cov*randn(1,N),  2*pi*rand(N))
+  return (rand(pp2.Z,N),  2*pi*rand(N))
 end
 function (pp2r::Pose2Point2Range)(res::Array{Float64},
                                     userdata,
@@ -56,21 +56,26 @@ Pose2Point2BearingRange(x1::B,x2::R) where {B <: SamplableBelief,R <: SamplableB
 function getSample(pp2br::Pose2Point2BearingRange, N::Int=1)
   b = rand(pp2br.bearing, N)
   r = rand(pp2br.range, N)
-  return (b, r)
+  return ([b'; r'],)
 end
 # define the conditional probability constraint
 function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
         userdata::FactorMetadata,
         idx::Int,
-        meas::Tuple{Vector{Float64}, Vector{Float64}},
+        meas::Tuple{Array{Float64,2}},
         xi::Array{Float64,2},
         lm::Array{Float64,2} )
   #
-  res[1] = lm[1,idx] - (meas[2][idx]*cos(meas[1][idx]+xi[3,idx]) + xi[1,idx])
-  res[2] = lm[2,idx] - (meas[2][idx]*sin(meas[1][idx]+xi[3,idx]) + xi[2,idx])
+  # @show idx, meas[1][idx], meas[2][idx], xi[:,idx], lm[:,idx]
+  res[1] = lm[1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
+  res[2] = lm[2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
+  # if isnan(xi[1,idx])
+  #   error("Went NaN")
+  # end
   nothing
 end
 
+# import RoME: Pose2Point2BearingRange
 
 
 # Support for database based solving

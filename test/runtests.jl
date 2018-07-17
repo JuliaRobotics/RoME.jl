@@ -32,6 +32,8 @@ println("[SUCCESS]")
   include("testDynPoint2D.jl")
 end
 
+include("testBearingRange2D.jl")
+
 include("testMultimodalRangeBearing.jl")
 
 println("[TEST] Pose3 evaluations...")
