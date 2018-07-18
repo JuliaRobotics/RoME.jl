@@ -34,6 +34,8 @@ end
 
 include("testPoint2Point2WorldBearing.jl")
 
+include("testBearingRange2D.jl")
+
 include("testMultimodalRangeBearing.jl")
 
 println("[TEST] Pose3 evaluations...")

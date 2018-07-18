@@ -62,7 +62,7 @@ end
 
 mutable struct PriorPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: Distributions.Distribution}
     Z::T
-    PriorPose2() = new()
+    PriorPose2{T}() where T = new{T}()
     PriorPose2{T}(x::T) where {T <: Distributions.Distribution}  = new{T}(x)
 end
 PriorPose2(x::T) where {T <: Distributions.Distribution} = PriorPose2{T}(x)

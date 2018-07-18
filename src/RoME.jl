@@ -18,6 +18,7 @@ import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
 import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution  #, compare
 
+
 export
   # pass throughs from TransformUtils
   SE2,
@@ -90,7 +91,7 @@ export
   RangeAzimuthElevation,
 
   # types
-  BetweenPoses,
+  # BetweenPoses,
 
   # helper functions
   get2DSamples,
@@ -176,12 +177,20 @@ export
   DynPoint2DynPoint2,
   VelPoint2VelPoint2,
   Point2Point2Velocity,
-  Pose2DPoint2DBearingRange,
-  Pose2DPoint2DBearingRangeMH,
-  PackedPose2DPoint2DBearingRange,
-  PackedPose2DPoint2DBearingRangeMH,
-  Pose2DPoint2DBearing,
-  Pose2DPoint2DRange,
+  Pose2Point2BearingRange,
+  Pose2DPoint2DBearingRange, # begin deprecated
+  Pose2Point2BearingRangeMH,
+  PackedPose2Point2BearingRange,
+  PackedPose2Point2BearingRangeMH,
+  Pose2Point2Bearing,
+  Pose2DPoint2DBearing, # deprecated
+  Pose2Point2Range,
+  Point2DPoint2DRange,
+  PackedPoint2DPoint2DRange,
+  PriorPoint2,
+  PriorPoint2D, # to be deprecated
+  PackedPriorPoint2,
+  PackedPriorPoint2D, # to be deprecated`
   solveLandm,
   solvePose2,
   solveSetSeps,
@@ -192,10 +201,11 @@ export
   PackedPriorPoint2DensityNH,
 
   # acoustics
-  Pose2DPoint2DBearingRangeDensity,
-  PackedPose2DPoint2DBearingRangeDensity,
-  Pose2DPoint2DRangeDensity,
-  PackedPose2DPoint2DRangeDensity,
+  Pose2Point2BearingRangeDensity,
+  PackedPose2Point2BearingRangeDensity,
+  Pose2Point2RangeDensity,
+  Pose2DPoint2DRangeDensity, # to be deprecated
+  PackedPose2Point2RangeDensity,
 
   Pose2,
   Point2,
@@ -277,7 +287,7 @@ export
 
 
 
-@compat abstract type BetweenPoses <: IncrementalInference.FunctorPairwise end
+# @compat abstract type BetweenPoses <: IncrementalInference.FunctorPairwise end
 
 @compat const VoidUnion{T} = Union{Void, T}
 
@@ -297,7 +307,7 @@ include("Pose2D.jl")
 include("Pose3D.jl")
 include("BearingRange2D.jl")
 
-include("BearingRangeDensity2D.jl")
+# include("BearingRangeDensity2D.jl")
 
 include("Pose3Pose3.jl")
 include("PartialPose3.jl")

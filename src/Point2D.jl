@@ -9,7 +9,7 @@ end
 mutable struct PriorPoint2{T} <: IncrementalInference.FunctorSingleton where {T <: Distributions.Distribution}
   Z::T
   # W::Array{Float64,1} # TODO, deprecate the weight parameter
-  PriorPoint2() = new()
+  PriorPoint2{T}() where T = new()
   PriorPoint2{T}(dist::T) where {T <: Distributions.Distribution} = new{T}(dist)
 end
 PriorPoint2(z::T) where {T <: Distributions.Distribution} = PriorPoint2{T}(z)
@@ -50,7 +50,7 @@ function (pp2r::Point2DPoint2DRange)(
 end
 
 
-mutable struct Point2DPoint2D <: BetweenPoses
+mutable struct Point2DPoint2D <: FunctorPairwise #BetweenPoses
     Zij::Distribution
     Point2DPoint2D() = new()
     Point2DPoint2D(x) = new(x)

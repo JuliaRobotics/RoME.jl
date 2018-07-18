@@ -140,7 +140,7 @@ end
 
 Zij is entropy of veeLie15, pioc is preintegral measurements, pido is compensation gradients.
 """
-type InertialPose3 <: RoME.BetweenPoses
+type InertialPose3 <: FunctorPairwise #RoME.BetweenPoses
   Zij::Distribution
   pioc::InertialPose3Container
   picg::PreintegralCompensationGradients

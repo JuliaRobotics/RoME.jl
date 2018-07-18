@@ -40,7 +40,7 @@ Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 # Add landmarks with Bearing range measurements
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
-p2br = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))
+p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 
 # Initialize :l1 numerical values but do not rerun solver
@@ -50,7 +50,7 @@ Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 
 # Add landmarks with Bearing range measurements
-p2br2 = Pose2DPoint2DBearingRange(Normal(0,0.1),Normal(20.0,1.0))
+p2br2 = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x6; :l1], p2br2)
 
 # solve

@@ -171,7 +171,6 @@ end
 Create a new variable node and insert odometry constraint factor between
 which will automatically increment latest pose symbol x<k+1> for new node new node and
 constraint factor are returned as a tuple.
-
 """
 function addOdoFG!(
         fg::FactorGraph,
@@ -344,7 +343,7 @@ function addBRFG!(fg::FactorGraph,
   updateFullVert!(fg, vlm)
 
 
-  pbr = Pose2DPoint2DBearingRange(Normal(br[1], cov[1,1]), Normal(br[2],  cov[2,2]))  #{Normal, Normal}
+  pbr = Pose2Point2BearingRange(Normal(br[1], cov[1,1]), Normal(br[2],  cov[2,2]))  #{Normal, Normal}
   @show vps, vlm
   f = addFactor!(fg, [vps;vlm], pbr, ready=ready, autoinit=true ) #[vps;vlm],
 
@@ -364,7 +363,7 @@ function addMMBRFG!(fg::FactorGraph,
     # vlm1 = getVert(fg,lm[1])
     # vlm2 = getVert(fg,lm[2])
 
-    pbr = Pose2DPoint2DBearingRange(Normal(br[1],cov[1,1]),  Normal(br[2],cov[2,2]))
+    pbr = Pose2Point2BearingRange(Normal(br[1],cov[1,1]),  Normal(br[2],cov[2,2]))
     syms = Symbol.([pose;lm...])
     f = addFactor!(fg, syms, pbr, multihypo=[1.0; w...], ready=ready, autoinit=true )
     return f

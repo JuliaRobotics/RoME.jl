@@ -65,7 +65,7 @@ function fastpose3pose3residual!(reusethrid::PP3REUSE,
   nothing
 end
 
-mutable struct Pose3Pose3 <: RoME.BetweenPoses
+mutable struct Pose3Pose3 <: FunctorPairwise # RoME.BetweenPoses
     Zij::Distribution
     reuse::Vector{PP3REUSE}
     Pose3Pose3() = new()
