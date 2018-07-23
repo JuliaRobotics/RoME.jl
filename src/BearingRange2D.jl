@@ -1,14 +1,5 @@
 # Bearing and Range constraints for 2D
 
-SamplableBelief = Union{Distributions.Distribution, KernelDensityEstimate.BallTreeDensity}
-
-# function samplebelief(d::Distribution, N::Int=1)
-#   rand(d, N)
-# end
-# function samplebelief(d::BallTreeDensity, N::Int=1)
-#   KernelDensityEstimate.sample(d, N)[1]
-# end
-
 # better to use bearingrange with [uniform bearing], numerical solving issue on 1D
 mutable struct Pose2Point2Range{T} <: IncrementalInference.FunctorPairwise
   Z::T
@@ -16,11 +7,6 @@ mutable struct Pose2Point2Range{T} <: IncrementalInference.FunctorPairwise
   Pose2Point2Range{T}(Z::T) where {T <: SamplableBelief} = new{T}(Z)
 end
 Pose2Point2Range(Z::T) where {T <: SamplableBelief} = Pose2Point2Range{T}(Z)
-
-function Pose2DPoint2DRange(x1::T,x2::Vector{T},x3) where {T <: Real}
-  warn("Pose2Point2Range(mu,cov,w) is being deprecated in favor of Pose2Point2Range(T(...)), such as Pose2Point2Range(MvNormal(mu, cov))")
-  Pose2Point2Range(Normal(x1, x2))
-end
 
 function getSample(pp2::Pose2Point2Range, N::Int=1)
   return (rand(pp2.Z,N),  2*pi*rand(N))
@@ -96,48 +82,6 @@ function convert(::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRan
 end
 
 
-mutable struct Pose2Point2BearingRangeMH{B <: Distributions.Distribution, R <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
-    bearing::B
-    range::R
-    hypothesis::Distributions.Categorical
-    Pose2Point2BearingRangeMH{B,R}() where {B,R} = new{B,R}()
-    Pose2Point2BearingRangeMH(x1::B,x2::R, w::Distributions.Categorical) where {B,R} = new{B,R}(x1,x2,w)
-    Pose2Point2BearingRangeMH(x1::B,x2::R, w::Vector{Float64}=Float64[1.0;]) where {B,R} = new{B,R}(x1,x2,Categorical(w))
-end
-function getSample(pp2br::Pose2Point2BearingRangeMH, N::Int=1)::Tuple{Array{Float64,2}, Vector{Int}}
-  b = rand(pp2br.bearing, N)
-  r = rand(pp2br.range, N)
-  s = rand(pp2br.hypothesis, N)
-  return ([b';r'], s)
-end
-# define the conditional probability constraint
-function (pp2br::Pose2Point2BearingRangeMH)(res::Array{Float64},
-            userdata,
-            idx::Int,
-            meas::Tuple{Array{Float64,2}, Vector{Int}},
-            xi::Array{Float64,2},
-            lms... )::Void  # ::Array{Float64,2}
-  #
-  warn("Older interface, not analytically correct.")
-  res[1] = lms[meas[2][idx]][1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
-  res[2] = lms[meas[2][idx]][2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
-  nothing
-end
-
-mutable struct PackedPose2Point2BearingRangeMH <: IncrementalInference.PackedInferenceType
-    bearstr::String
-    rangstr::String
-    hypostr::String
-    PackedPose2Point2BearingRangeMH() = new()
-    PackedPose2Point2BearingRangeMH(s1::AS, s2::AS, s3::AS) where {AS <: AbstractString} = new(string(s1),string(s2),string(s3))
-end
-function convert(::Type{PackedPose2Point2BearingRangeMH}, d::Pose2Point2BearingRangeMH{Normal{T}, Normal{T}}) where T
-  return PackedPose2Point2BearingRangeMH(string(d.bearing), string(d.range), string(d.hypothesis))
-end
-# TODO -- should not be resorting to string, consider specialized code for parametric distribution types
-function convert(::Type{Pose2Point2BearingRangeMH}, d::PackedPose2Point2BearingRangeMH)
-  Pose2Point2BearingRangeMH(extractdistribution(d.bearstr), extractdistribution(d.rangstr), extractdistribution(d.hypostr))
-end
 
 
 
@@ -153,12 +97,8 @@ mutable struct Pose2Point2Bearing{B <: Distributions.Distribution} <: Incrementa
     Pose2Point2Bearing{B}(x1::B) where {B <: Distributions.Distribution} = new{B}(x1)
 end
 Pose2Point2Bearing(x1::B) where {B <: Distributions.Distribution} = Pose2Point2Bearing{B}(x1)
-function Pose2DPoint2DBearing(x1::B) where {B <: Distributions.Distribution}
-  warn("Pose2DPoint2DBearing deprecated in favor of Pose2Point2Bearing.")
-  Pose2Point2Bearing(B)
-end
 function getSample(pp2br::Pose2Point2Bearing, N::Int=1)
-  return (rand(pp2br.bearing, N), )
+  return (reshape(rand(pp2br.bearing, N),1,N), )
 end
 # define the conditional probability constraint
 function (pp2br::Pose2Point2Bearing)(res::Array{Float64},
@@ -171,27 +111,6 @@ function (pp2br::Pose2Point2Bearing)(res::Array{Float64},
   res[1] = meas[1][idx] - atan2(lm[2,idx]-xi[2,idx], lm[1,idx]-xi[1,idx])
   nothing
 end
-
-
-
-
-# mutable struct PackedPose2Point2BearingRangeDensity <: IncrementalInference.PackedInferenceType
-#     bpts::Vector{Float64} # 0rotations, 1translation in each column
-#     bbw::Vector{Float64}
-#     rpts::Vector{Float64}
-#     rbw::Vector{Float64}
-#     PackedPose2Point2BearingRangeDensity() = new()
-#     PackedPose2Point2BearingRangeDensity(x...) = new(x[1], x[2], x[3], x[4])
-# end
-# function convert(::Type{Pose2Point2BearingRangeDensity}, d::PackedPose2Point2BearingRangeDensity)
-#   return Pose2Point2BearingRangeDensity(
-#     kde!( EasyMessage(d.bpts',d.bbw)), kde!(EasyMessage(d.rpts', d.rbw) )
-#   )
-# end
-# function convert(::Type{PackedPose2Point2BearingRangeDensity}, d::Pose2Point2BearingRangeDensity)
-#   return PackedPose2Point2BearingRangeDensity(getPoints(d.bearing)[1,:], getBW(d.bearing)[:,1],
-#                                                 getPoints(d.range)[1,:], getBW(d.range)[:,1] )
-# end
 
 
 
