@@ -1,5 +1,20 @@
 
+
 # old type interfaces
+
+function Point2DPoint2DRange(mu,stdev,w)
+  warn("Point2DPoint2DRange deprecated in favor of Point2Point2Range{<:SamplableBelief}.")
+  Point2Point2Range{Normal}(Normal(mu,stdev))
+end
+function Point2DPoint2D(d::D) where {D <: SamplableBelief}
+  warn("Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}.")
+  Point2Point2{D}(d)
+end
+function Point2DPoint2D(mu::Array{Float64}, cov::Array{Float64,2}, W::Array{Float64,1})
+  warn("Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}.")
+
+  Point2Point2{MvNormal}(MvNormal(mu[:], cov))
+end
 
 function Pose2DPoint2DBearing(x1::B) where {B <: Distributions.Distribution}
   warn("Pose2DPoint2DBearing deprecated in favor of Pose2Point2Bearing.")
