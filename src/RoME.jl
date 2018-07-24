@@ -163,16 +163,19 @@ export
   cameraResidual!,
 
   # Point2D
-  Point2DPoint2D,
+  Point2Point2,
+  Point2DPoint2D, # deprecated
   PackedPoint2DPoint2D,
   Point2Point2WorldBearing,
   PackedPoint2Point2WorldBearing,
-  Point2DPoint2DRange,
+  Point2Point2Range,
+  PackedPoint2Point2Range,
+  Point2DPoint2DRange, # deprecated
   PackedPoint2DPoint2DRange,
   PriorPoint2,
-  PriorPoint2D, # to be deprecated
   PackedPriorPoint2,
-  PackedPriorPoint2D, # to be deprecated`
+  PriorPoint2D, # deprecated
+  PackedPriorPoint2D,
   DynPoint2VelocityPrior,
   DynPoint2DynPoint2,
   VelPoint2VelPoint2,
@@ -188,9 +191,9 @@ export
   Point2DPoint2DRange,
   PackedPoint2DPoint2DRange,
   PriorPoint2,
-  PriorPoint2D, # to be deprecated
+  PriorPoint2D, # deprecated
   PackedPriorPoint2,
-  PackedPriorPoint2D, # to be deprecated`
+  PackedPriorPoint2D, # deprecated`
   solveLandm,
   solvePose2,
   solveSetSeps,

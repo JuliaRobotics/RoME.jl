@@ -23,17 +23,15 @@ end
 
 
 
-mutable struct Point2DPoint2DRange <: IncrementalInference.FunctorPairwiseMinimize #Pairwise
-    Zij::Vector{Float64} # bearing and range hypotheses as columns
-    Cov::Float64
-    W::Vector{Float64}
-    Point2DPoint2DRange() = new()
-    Point2DPoint2DRange(x...) = new(x[1],x[2],x[3])
+mutable struct Point2Point2Range{D <: SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
+  Z::D
+  Point2Point2Range{D}() where {D} = new{D}()
+  Point2Point2Range{D}(d::D) where {D <: SamplableBelief}= new{D}(d)
 end
-function getSample(pp2::Point2DPoint2DRange, N::Int=1)
+function getSample(pp2::Point2Point2Range, N::Int=1)
   return (pp2.Cov*randn(1,N),  2*pi*rand(N))
 end
-function (pp2r::Point2DPoint2DRange)(
+function (pp2r::Point2Point2Range)(
             res::Array{Float64},
             userdata,
             idx::Int,
@@ -50,17 +48,17 @@ function (pp2r::Point2DPoint2DRange)(
 end
 
 
-mutable struct Point2DPoint2D <: FunctorPairwise #BetweenPoses
-    Zij::Distribution
-    Point2DPoint2D() = new()
-    Point2DPoint2D(x) = new(x)
+mutable struct Point2Point2{D <: SamplableBelief} <: FunctorPairwise #BetweenPoses
+    Zij::D
+    Point2Point2() = new()
+    Point2Point2(x) = new(x)
 end
-function getSample(pp2::Point2DPoint2D, N::Int=1)
+function getSample(pp2::Point2Point2, N::Int=1)
   return (rand(pp2.Zij,N),  )
 end
-function (pp2r::Point2DPoint2D)(
+function (pp2r::Point2Point2)(
             res::Array{Float64},
-            userdata,
+            userdata::FactorMetadata,
             idx::Int,
             meas::Tuple,
             xi::Array{Float64,2},
@@ -73,16 +71,19 @@ end
 
 
 
-mutable struct Point2Point2WorldBearing{T} <: IncrementalInference.FunctorPairwise where {T <: Distributions.Distribution}
+mutable struct Point2Point2WorldBearing{T} <: IncrementalInference.FunctorPairwise where {T <: SamplableBelief}
     Z::T
     rangemodel::Rayleigh
     # zDim::Tuple{Int, Int}
     Point2Point2WorldBearing() = new()
-    Point2Point2WorldBearing{T}(x::T) where {T <: Distributions.Distribution} = new{T}(x, Rayleigh(100))
+    Point2Point2WorldBearing{T}(x::T) where {T <: SamplableBelief} = new{T}(x, Rayleigh(100))
 end
-Point2Point2WorldBearing(x::T) where {T <: Distributions.Distribution} = Point2Point2WorldBearing{T}(x)
+Point2Point2WorldBearing(x::T) where {T <: SamplableBelief} = Point2Point2WorldBearing{T}(x)
 function getSample(pp2::Point2Point2WorldBearing, N::Int=1)
-  return (rand(pp2.Z,N), rand(pp2.rangemodel,N))
+  sp = Array{Float64,2}(2,N)
+  sp[1,:] = rand(pp2.Z,N)
+  sp[2,:] = rand(pp2.rangemodel,N)
+  return (sp, )
 end
 function (pp2r::Point2Point2WorldBearing)(
           res::Array{Float64},
@@ -93,7 +94,7 @@ function (pp2r::Point2Point2WorldBearing)(
           pj::Array{Float64,2} )
   #
   # noisy bearing measurement
-  z, r = meas[1][idx], meas[2][idx]
+  z, r = meas[1][1,idx], meas[1][2,idx]
   dx, dy = pj[1,idx]-pi[1,idx], pj[2,idx]-pi[2,idx]
   res[1] = z - atan2(dy,dx)
   res[2] = r - norm([dx; dy])
@@ -142,16 +143,12 @@ end
 
 
 mutable struct PackedPriorPoint2  <: IncrementalInference.PackedInferenceType
-    # mu::Array{Float64,1}
-    # vecCov::Array{Float64,1}
-    # dimc::Int
-    # W::Array{Float64,1}
     str::String
     PackedPriorPoint2() = new()
     PackedPriorPoint2(x::String) = new(x)
 end
 
-passTypeThrough(d::FunctionNodeData{Point2DPoint2DRange}) = d
+passTypeThrough(d::FunctionNodeData{Point2Point2Range}) = d
 
 function convert(::Type{PriorPoint2}, d::PackedPriorPoint2)
   # Cov = reshapeVec2Mat(d.vecCov, d.dimc)
@@ -166,19 +163,16 @@ end
 
 
 
-mutable struct PackedPoint2DPoint2DRange  <: IncrementalInference.PackedInferenceType
-    Zij::Vector{Float64} # bearing and range hypotheses as columns
-    Cov::Float64
-    W::Vector{Float64}
-    PackedPoint2DPoint2DRange() = new()
-    PackedPoint2DPoint2DRange(x...) = new(x[1],x[2],x[3])
-    PackedPoint2DPoint2DRange(x::Point2DPoint2DRange) = new(x.Zij,x.Cov,x.W)
+mutable struct PackedPoint2Point2Range  <: IncrementalInference.PackedInferenceType
+  str::String
+  PackedPoint2Point2Range() = new()
+  PackedPoint2Point2Range(s::AS) where {AS <: AbstractString} = new(s)
 end
-function convert(::Type{PackedPoint2DPoint2DRange}, d::Point2DPoint2DRange)
-  return PackedPoint2DPoint2DRange(d)
+function convert(::Type{PackedPoint2Point2Range}, d::Point2Point2Range)
+  return PackedPoint2Point2Range(string(d.Z))
 end
-function convert(::Type{Point2DPoint2DRange}, d::PackedPoint2DPoint2DRange)
-  return Point2DPoint2DRange(d.Zij, d.Cov, d.W)
+function convert(::Type{Point2Point2Range}, d::PackedPoint2Point2Range)
+  return Point2Point2Range(extractdistribution(d.str))
 end
 
 
@@ -191,27 +185,28 @@ mutable struct PackedPoint2Point2WorldBearing  <: IncrementalInference.PackedInf
     PackedPoint2Point2WorldBearing() = new()
     PackedPoint2Point2WorldBearing(x::String) = new(x)
 end
-function convert(::Type{Point2Point2WorldBearing}, d::PackedPoint2Point2WorldBearing)
-  return Point2Point2WorldBearing( extractdistribution(d.str) )
-end
 function convert(::Type{PackedPoint2Point2WorldBearing}, d::Point2Point2WorldBearing)
   return PackedPoint2Point2WorldBearing( string(d.Z) )
 end
-
-
-
-
-
-mutable struct PackedPoint2DPoint2D <: IncrementalInference.PackedInferenceType
-    mu::Vector{Float64}
-    sigma::Vector{Float64}
-    sdim::Int
-    PackedPoint2DPoint2D() = new()
-    PackedPoint2DPoint2D(x, y, d) = new(x,y,d)
+function convert(::Type{Point2Point2WorldBearing}, d::PackedPoint2Point2WorldBearing)
+  return Point2Point2WorldBearing( extractdistribution(d.str) )
 end
-function convert(::Type{Point2DPoint2D}, d::PackedPoint2DPoint2D)
-  return Point2DPoint2D( MvNormal(d.mu, reshapeVec2Mat(d.sigma, d.sdim)) )
+
+
+
+
+
+mutable struct PackedPoint2Point2 <: IncrementalInference.PackedInferenceType
+    # mu::Vector{Float64}
+    # sigma::Vector{Float64}
+    # sdim::Int
+    str::String
+    PackedPoint2Point2() = new()
+    PackedPoint2Point2(s::AS) where {AS <: AbstractString} = new(s)
 end
-function convert(::Type{PackedPoint2DPoint2D}, d::Point2DPoint2D)
-  return PackedPoint2DPoint2D( d.Zij.μ, d.Zij.Σ.mat[:], size(d.Zij.Σ.mat,1) )
+function convert(::Type{Point2Point2}, d::PackedPoint2Point2)
+  return Point2Point2( extractdistribution(d.str) )
+end
+function convert(::Type{PackedPoint2Point2}, d::Point2Point2)
+  return PackedPoint2Point2( string(d.Zij) )
 end
