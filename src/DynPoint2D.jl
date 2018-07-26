@@ -44,16 +44,17 @@ end
 mutable struct VelPoint2VelPoint2{T} <: IncrementalInference.FunctorPairwiseMinimize where {T <: Distribution}
   z::T
   VelPoint2VelPoint2{T}() where {T <: Distribution} = new{T}()
-  VelPoint2VelPoint2(z1::T) where {T <: Distribution} = new{T}(z1)
+  VelPoint2VelPoint2{T}(z1::T) where {T <: Distribution} = new{T}(z1)
 end
+VelPoint2VelPoint2(z1::T) where {T <: Distribution} = VelPoint2VelPoint2{T}(z1)
 getSample(vp2vp2::VelPoint2VelPoint2, N::Int=1) = (rand(vp2vp2.z,N), )
-function (vp2vp2::VelPoint2VelPoint2)(
+function (vp2vp2::VelPoint2VelPoint2{D})(
                 res::Array{Float64},
                 userdata,
                 idx::Int,
                 meas::Tuple,
                 Xi::Array{Float64,2},
-                Xj::Array{Float64,2}  )
+                Xj::Array{Float64,2}  ) where D
   #
   z = meas[1][:,idx]
   xi, xj = Xi[:,idx], Xj[:,idx]
@@ -63,7 +64,8 @@ function (vp2vp2::VelPoint2VelPoint2)(
   res[1] = 0.0
   res[1] += sum((z[1:2] - dp).^2)
   res[1] += sum((z[3:4] - dv).^2)
-  res[1] += sum((dp/dt - xi[3:4]).^2)  # (dp/dt - 0.5*(xj[3:4]+xi[3:4])) # midpoint integration
+  # res[1] += sum((dp/dt - xi[3:4]).^2) # zeroth order integration
+  res[1] += sum((dp/dt - 0.5*(xj[3:4]+xi[3:4])).^2)  # first order integration
   res[1]
 end
 
