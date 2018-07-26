@@ -106,6 +106,8 @@ addNode!(fg, :x1, DynPoint2(ut=0))
 pp = DynPoint2VelocityPrior(MvNormal(pμ,pσ))
 addFactor!(fg, [:x1;], pp, autoinit=false)
 
+ensureAllInitialized!(fg)
+
 addNode!(fg, :x2, DynPoint2(ut=1_000_000))
 dpμ = [1.0;0;0;0];
 dpσ = diagm([1.0;1;0.5;0.01].^2)
@@ -115,11 +117,11 @@ addFactor!(fg, [:x1,:x2], vp, autoinit=false)
 # writeGraphPdf(fg)
 
 # note, nothign is initialized yet...
-isInitialized(fg, :x1)
-isInitialized(fg, :x2)
+@test isInitialized(fg, :x1)
+@test !isInitialized(fg, :x2)
 
 # lets init the first
-doautoinit!(fg, :x1)
+# IncrementalInference.doautoinit!(fg, :x1)
 
 X1 = getVal(fg, :x1)
 @test 0.7*N < sum(-0.5 .< X1[1,:] .< 0.5)
