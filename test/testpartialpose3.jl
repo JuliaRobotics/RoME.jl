@@ -112,7 +112,7 @@ end
 
   # ensure the newly updated values match what is specified in mu2
   @show abs.(Base.mean(pts[newdims,:],2)-mu2)
-  @test sum(abs.(Base.mean(pts[newdims,:],2)-mu2) .< [0.6;0.6;0.15]) == 3
+  @test sum(abs.(Base.mean(pts[newdims,:],2)-mu2) .< [0.7;0.7;0.15]) == 3
 
   # ensure a re-evaluation of the partial factor updates the partial variable dimensions correclty
   @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
@@ -137,7 +137,7 @@ end
   estmu2mean = Base.mean(val[collect(getData(f2).fnc.usrfnc!.partial),:],2)
 
   @test sum(abs.(estmu1mean - mu1[[3;1;2]]) .< [0.7; 0.1; 0.1]) == 3
-  @test sum(abs.(estmu2mean - mu2) .< [0.7; 0.7; 0.1] ) == 3
+  @test sum(abs.(estmu2mean - mu2) .< [0.7; 0.7; 0.15] ) == 3
 
   memcheck = getVal(v2)
   @test 1e-10 < norm(val - memcheck)
