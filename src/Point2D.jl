@@ -50,19 +50,20 @@ end
 
 mutable struct Point2Point2{D <: SamplableBelief} <: FunctorPairwise #BetweenPoses
     Zij::D
-    Point2Point2() = new()
-    Point2Point2(x) = new(x)
+    Point2Point2{T}() where T = new{T}()
+    Point2Point2{T}(x::T) where {T <: Sampleable} = new{T}(x)
 end
+Point2Point2(x::T) where {T <: Sampleable} = Point2Point2{T}(x)
 function getSample(pp2::Point2Point2, N::Int=1)
   return (rand(pp2.Zij,N),  )
 end
-function (pp2r::Point2Point2)(
+function (pp2r::Point2Point2{T})(
             res::Array{Float64},
             userdata::FactorMetadata,
             idx::Int,
             meas::Tuple,
             xi::Array{Float64,2},
-            xj::Array{Float64,2} )
+            xj::Array{Float64,2} ) where T
   #
   res[1]  = meas[1][1,idx] - (xj[1,idx] - xi[1,idx])
   res[2]  = meas[1][2,idx] - (xj[2,idx] - xi[2,idx])
