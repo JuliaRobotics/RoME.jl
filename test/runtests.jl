@@ -23,6 +23,8 @@ println("[TEST] Linear array function evaluations...")
 include("testDidsonFunctions.jl")
 println("[SUCCESS]")
 
+include("testPoint2Point2.jl")
+
 println("[TEST] Pose2 evaluations...")
 include("TestPoseAndPoint2Constraints.jl")
 println("[SUCCESS]")
