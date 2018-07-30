@@ -28,17 +28,17 @@ mutable struct Point2Point2Range{D <: SamplableBelief} <: IncrementalInference.F
   Point2Point2Range{D}() where {D} = new{D}()
   Point2Point2Range{D}(d::D) where {D <: SamplableBelief} = new{D}(d)
 end
-Point2Point2Range(d::D) where {D <: SamplableBelief} = Point2Point2{D}(d)
-function getSample(pp2::Point2Point2Range, N::Int=1)
+Point2Point2Range(d::D) where {D <: SamplableBelief} = Point2Point2Range{D}(d)
+function getSample(pp2::Point2Point2Range{T}, N::Int=1) where {T <: SamplableBelief}
   return (reshape(rand(pp2.Z,N),1,N),  2*pi*rand(N))
 end
-function (pp2r::Point2Point2Range)(
+function (pp2r::Point2Point2Range{T})(
             res::Array{Float64},
             userdata::FactorMetadata,
             idx::Int,
             meas::Tuple,
             xi::Array{Float64,2},
-            lm::Array{Float64,2} )
+            lm::Array{Float64,2} ) where {T <: SamplableBelief}
   #
   z = meas[2][idx]
   XX = lm[1,idx] - (z*cos(meas[1][1,idx]) + xi[1,idx])
