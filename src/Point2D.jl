@@ -30,20 +30,19 @@ mutable struct Point2Point2Range{D <: SamplableBelief} <: IncrementalInference.F
 end
 Point2Point2Range(d::D) where {D <: SamplableBelief} = Point2Point2{D}(d)
 function getSample(pp2::Point2Point2Range, N::Int=1)
-  return (rand(pp2.Z,N),  2*pi*rand(N))
+  return (reshape(rand(pp2.Z,N),1,N),  2*pi*rand(N))
 end
 function (pp2r::Point2Point2Range)(
             res::Array{Float64},
-            userdata,
+            userdata::FactorMetadata,
             idx::Int,
             meas::Tuple,
             xi::Array{Float64,2},
             lm::Array{Float64,2} )
   #
-  # this is the noisy range
-  z = pp2r.Zij[1]+meas[1][1,idx]
-  XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
-  YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
+  z = meas[2][idx]
+  XX = lm[1,idx] - (z*cos(meas[1][1,idx]) + xi[1,idx])
+  YY = lm[2,idx] - (z*sin(meas[1][1,idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
   res[1]
 end
