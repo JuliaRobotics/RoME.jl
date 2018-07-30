@@ -26,21 +26,21 @@ end
 mutable struct Point2Point2Range{D <: SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
   Z::D
   Point2Point2Range{D}() where {D} = new{D}()
-  Point2Point2Range{D}(d::D) where {D <: SamplableBelief}= new{D}(d)
+  Point2Point2Range{D}(d::D) where {D <: SamplableBelief} = new{D}(d)
 end
-function getSample(pp2::Point2Point2Range, N::Int=1)
-  return (pp2.Cov*randn(1,N),  2*pi*rand(N))
+Point2Point2Range(d::D) where {D <: SamplableBelief} = Point2Point2Range{D}(d)
+function getSample(pp2::Point2Point2Range{T}, N::Int=1) where {T <: SamplableBelief}
+  return (reshape(rand(pp2.Z,N),1,N),  2*pi*rand(N))
 end
-function (pp2r::Point2Point2Range)(
+function (pp2r::Point2Point2Range{T})(
             res::Array{Float64},
-            userdata,
+            userdata::FactorMetadata,
             idx::Int,
             meas::Tuple,
             xi::Array{Float64,2},
-            lm::Array{Float64,2} )
+            lm::Array{Float64,2} ) where {T <: SamplableBelief}
   #
-  # this is the noisy range
-  z = pp2r.Zij[1]+meas[1][1,idx]
+  z = meas[1][1,idx]
   XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
   YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
