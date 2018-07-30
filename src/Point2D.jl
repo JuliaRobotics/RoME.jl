@@ -26,8 +26,9 @@ end
 mutable struct Point2Point2Range{D <: SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
   Z::D
   Point2Point2Range{D}() where {D} = new{D}()
-  Point2Point2Range{D}(d::D) where {D <: SamplableBelief}= new{D}(d)
+  Point2Point2Range{D}(d::D) where {D <: SamplableBelief} = new{D}(d)
 end
+Point2Point2Range(d::D) where {D <: SamplableBelief} = Point2Point2{D}(d)
 function getSample(pp2::Point2Point2Range, N::Int=1)
   return (rand(Z,N),  2*pi*rand(N))
 end
