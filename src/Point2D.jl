@@ -40,9 +40,9 @@ function (pp2r::Point2Point2Range{T})(
             xi::Array{Float64,2},
             lm::Array{Float64,2} ) where {T <: SamplableBelief}
   #
-  z = meas[2][idx]
-  XX = lm[1,idx] - (z*cos(meas[1][1,idx]) + xi[1,idx])
-  YY = lm[2,idx] - (z*sin(meas[1][1,idx]) + xi[2,idx])
+  z = meas[1][1,idx]
+  XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
+  YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
   res[1]
 end
