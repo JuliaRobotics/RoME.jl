@@ -30,7 +30,7 @@ mutable struct Point2Point2Range{D <: SamplableBelief} <: IncrementalInference.F
 end
 Point2Point2Range(d::D) where {D <: SamplableBelief} = Point2Point2{D}(d)
 function getSample(pp2::Point2Point2Range, N::Int=1)
-  return (rand(Z,N),  2*pi*rand(N))
+  return (rand(pp2.Z,N),  2*pi*rand(N))
 end
 function (pp2r::Point2Point2Range)(
             res::Array{Float64},
