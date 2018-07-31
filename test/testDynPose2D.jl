@@ -40,7 +40,8 @@ X1 = getVal(fg, :x1)
 
 @test N <= sum(abs.(X1[1,:] - 10.0) .< 0.5)
 @test N <= sum(abs.(X1[2,:] - 0.0) .< 0.5)
-@test N <= sum(abs.(TU.wrapRad.(X1[3,:]) - 0.0) .< 0.025)
+@show TU.wrapRad.(X1[3,:])
+@test N <= sum(abs.(TU.wrapRad.(X1[3,:]) - 0.0) .< 0.1)
 @test N <= sum(abs.(X1[4,:] - 10.0) .< 0.5)
 @test N <= sum(abs.(X1[5,:] - 0.0) .< 0.5)
 
