@@ -24,7 +24,7 @@ function convert{T <: CoordinateTransformations.AffineMap}(::Type{T}, x::SE3)
   Translation(x.t...) ∘ convert(AffineMap{Rotations.Quat{Float64}}, x.R)
 end
 function convert{T <: CoordinateTransformations.AffineMap{Rotations.Quat{Float64}}}(::Type{SE3}, x::T)
-  SE3(x.linear[1:3], TransformUtils.Quaternion(x.m.w, [x.m.x,x.m.y,x.m.z]) )
+  SE3(x.translation[1:3], TransformUtils.Quaternion(x.linear.w, [x.linear.x,x.linear.y,x.linear.z]) )
 end
 
 function convert(::Type{SE3}, t::Tuple{Symbol, Vector{Float64}})
