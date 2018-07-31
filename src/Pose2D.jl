@@ -31,12 +31,12 @@ end
 getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 
 
-mutable struct Pose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: Distributions.Distribution}
+mutable struct Pose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: SamplableBelief}
   z::T
-  Pose2Pose2{T}() where {T <: Distribution} = new{T}()
-  Pose2Pose2{T}(z1::T) where {T <: Distribution} = new{T}(z1)
+  Pose2Pose2{T}() where {T <: SamplableBelief} = new{T}()
+  Pose2Pose2{T}(z1::T) where {T <: SamplableBelief} = new{T}(z1)
 end
-Pose2Pose2(z::T) where {T <: Distributions.Distribution} = Pose2Pose2{T}(z)
+Pose2Pose2(z::T) where {T <: SamplableBelief} = Pose2Pose2{T}(z)
 function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2})
   warn("Pose2Pose2(mu,cov) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))")
   Pose2Pose2(MvNormal(mean, cov))
@@ -45,16 +45,16 @@ function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Flo
   warn("Pose2Pose2(mu,cov,w) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))")
   Pose2Pose2(MvNormal(mean, cov))
 end
-getSample(s::Pose2Pose2, N::Int=1) = (rand(s.z,N), )
-function (s::Pose2Pose2)(res::Array{Float64},
+getSample(s::Pose2Pose2{<:SamplableBelief}, N::Int=1) = (rand(s.z,N), )
+function (s::Pose2Pose2{<:SamplableBelief})(res::Array{Float64},
             userdata,
             idx::Int,
             meas::Tuple,
             wxi::Array{Float64,2},
             wxj::Array{Float64,2}  )
   #
-  wXjhat = SE2(wxi[:,idx])*SE2(meas[1][:,idx])
-  jXjhat = SE2(wxj[:,idx]) \ wXjhat
+  wXjhat = SE2(wxi[1:3,idx])*SE2(meas[1][1:3,idx])
+  jXjhat = SE2(wxj[1:3,idx]) \ wXjhat
   se2vee!(res, jXjhat)
   nothing
 end
