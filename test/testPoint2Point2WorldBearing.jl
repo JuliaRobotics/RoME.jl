@@ -43,12 +43,12 @@ pts = getVal(fg, :x1)
 @test 0.8*N < sum(-75 .< pts[2,:] .< -25)
 
 
-@test 0 <= sum(0 .< pts[1,:]) < 0.05*N
-@test 0 <= sum(0 .< pts[2,:]) < 0.05*N
+@test 0 <= sum(0 .< pts[1,:]) < 0.1*N
+@test 0 <= sum(0 .< pts[2,:]) < 0.1*N
 
 
-@test 0 <= sum(pts[1,:] .< -100.0) < 0.05*N
-@test 0 <= sum(pts[2,:] .< -100.0) < 0.05*N
+@test 0 <= sum(pts[1,:] .< -100.0) < 0.1*N
+@test 0 <= sum(pts[2,:] .< -100.0) < 0.1*N
 
 
 end
