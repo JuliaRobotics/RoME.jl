@@ -163,6 +163,7 @@ export
   cameraResidual!,
 
   # Point2D
+  Point2,
   Point2Point2,
   Point2DPoint2D, # deprecated
   PackedPoint2DPoint2D,
@@ -176,10 +177,6 @@ export
   PackedPriorPoint2,
   PriorPoint2D, # deprecated
   PackedPriorPoint2D,
-  DynPoint2VelocityPrior,
-  DynPoint2DynPoint2,
-  VelPoint2VelPoint2,
-  Point2Point2Velocity,
   Pose2Point2BearingRange,
   Pose2DPoint2DBearingRange, # begin deprecated
   Pose2Point2BearingRangeMH,
@@ -194,14 +191,23 @@ export
   PriorPoint2D, # deprecated
   PackedPriorPoint2,
   PackedPriorPoint2D, # deprecated`
+  # Point2D with null hypotheses
+  PriorPoint2DensityNH,
+  PackedPriorPoint2DensityNH,
+
+  # Velocity in Point2 types
+  DynPoint2,
+  DynPoint2VelocityPrior,
+  DynPoint2DynPoint2,
+  VelPoint2VelPoint2,
+  Point2Point2Velocity,
+
+  # likely to be deprecated
   solveLandm,
   solvePose2,
   solveSetSeps,
   addPose2Pose2!,
 
-  # Point2D with null hypotheses
-  PriorPoint2DensityNH,
-  PackedPriorPoint2DensityNH,
 
   # acoustics
   Pose2Point2BearingRangeDensity,
@@ -210,25 +216,28 @@ export
   Pose2DPoint2DRangeDensity, # to be deprecated
   PackedPose2Point2RangeDensity,
 
+  # Pose2D
   Pose2,
-  Point2,
-  DynPoint2,
+  PriorPose2,
+  PackedPriorPose2,
+  Pose2Pose2,
+  PackedPose2Pose2,
+  # velocity in Pose2
+  DynPose2,
+  DynPose2VelocityPrior,
+  VelPose2VelPose2,
+  # Will be deprecated
+  addPose2Pose2,
+
+  # MultipleFeatures2D constraint functions
+  MultipleFeatures2D,
+  getUvecScaleFeature2D,
+  getUvecScaleBaseline2D,
+
+  # Pose3, Three dimensional
   Pose3,
   Point3,
   Prior,
-
-  # Pose2D
-  PriorPose2,
-  PackedPriorPose2,
-  # Pose2Pose2_NEW,
-  Pose2Pose2,
-  PackedPose2Pose2,
-  addPose2Pose2,
-
-  # packedTypes
-  passTypeThrough,
-
-  # Pose3D
   PriorPose3,
   PackedPriorPose3,
   Pose3Pose3,
@@ -246,10 +255,9 @@ export
   PartialPose3XYYawNH,
   PackedPartialPose3XYYawNH,
 
-  # MultipleFeatures2D constraint functions
-  MultipleFeatures2D,
-  getUvecScaleFeature2D,
-  getUvecScaleBaseline2D,
+
+  # Various utilities
+  passTypeThrough,
 
   # SLAM specific functions
   SLAMWrapper,
@@ -299,6 +307,7 @@ include("CameraModel.jl")
 include("Point2D.jl")
 include("DynPoint2D.jl")
 include("Pose2D.jl")
+include("DynPose2D.jl")
 include("Pose3D.jl")
 include("BearingRange2D.jl")
 

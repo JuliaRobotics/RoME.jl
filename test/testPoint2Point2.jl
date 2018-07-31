@@ -39,11 +39,11 @@ addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)))
 tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree, N=N)
 
-@test sum( 90 .< getVal(fg, :l1)[1,:] .< 110 ) > 50
-@test sum( -10 .< getVal(fg, :l1)[2,:] .< 10 ) > 50
+@test sum( 90 .< getVal(fg, :l1)[1,:] .< 110 ) > 40
+@test sum( -10 .< getVal(fg, :l1)[2,:] .< 10 ) > 40
 
-@test sum( -10 .< getVal(fg, :l1)[1,:] .< 10 ) > 50
-@test sum( 90 .< getVal(fg, :l1)[2,:] .< 110 ) > 50
+@test sum( -10 .< getVal(fg, :l1)[1,:] .< 10 ) > 40
+@test sum( 90 .< getVal(fg, :l1)[2,:] .< 110 ) > 40
 
 end
 
