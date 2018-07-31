@@ -18,7 +18,7 @@ pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), diagm([0.01; 0.01; 0.001].^2)),
 addFactor!(fg, [:x0;], pp0)
 
 # initialize the first pose
-doautoinit!(fg, getVert(fg,:x0))
+doautoinit!(fg, [getVert(fg,:x0);])
 
 addNode!(fg, :x1, DynPose2(ut=1000_000))
 
