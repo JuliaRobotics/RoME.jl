@@ -45,13 +45,16 @@ function (vp2vp2::VelPose2VelPose2{T1,T2})(
   z = meas[1][:,idx]
   wxi, wxj = Xi[:,idx], Xj[:,idx]
   dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata
-  fill!(vp2vp2.reuseres, 0.0)
-  vp2vp2.Zpose(myres, userdata, idx, meas, Xi, Xj)
+  # fill!(vp2vp2.reuseres, 0.0)
+  vp2vp2.Zpose(vp2vp2.reuseres, userdata, idx, meas, Xi, Xj)
   dv = (wxj[4:5]-wxi[4:5])
   # calculate the residual
   res[1] = sum((vp2vp2.reuseres).^2)
   res[1] += sum((z[4:5] - dv).^2)
-  dx = se2vee(SE2(wxi[1:3,idx]) \ SE2(wxj[1:3,idx]))
+  dx = se2vee(SE2(wxi[1:3]) \ SE2(wxj[1:3]))
   res[1] += sum((dx[1:2]/dt - 0.5*(wxj[4:5]+wxi[4:5])).^2)  # first order integration
   res[1]
 end
+
+
+#

@@ -40,6 +40,8 @@ include("testBearingRange2D.jl")
 
 include("testMultimodalRangeBearing.jl")
 
+include("testDynPose2D.jl")
+
 println("[TEST] Pose3 evaluations...")
 include("threeDimLinearProductTest.jl")
 println("[SUCCESS]")
