@@ -65,11 +65,14 @@ export
   isInitialized,
   ensureAllInitialized!,
   getPoints,
+  FactorMetadata,
+  doautoinit!,
   # overloaded functions from IIF
   # decodefg,
   # convertfrompackedfunctionnode,
 
   # RoME specific functions
+  SamplableBelief,
   initfg,
   measureMeanDist,
   predictBodyBR,
@@ -228,6 +231,7 @@ export
   DynPose2,
   DynPose2VelocityPrior,
   VelPose2VelPose2,
+  DynPose2Pose2,
   # Will be deprecated
   addPose2Pose2,
 
