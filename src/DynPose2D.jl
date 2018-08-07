@@ -86,4 +86,65 @@ function (vp2vp2::DynPose2Pose2{T})(
 end
 
 
+
+
+
+
+
+
+## Packing types
+
+
+mutable struct PackedDynPose2VelocityPrior <: IncrementalInference.PackedInferenceType
+  strpose::AbstractString
+  strvel::AbstractString
+  PackedDynPose2VelocityPrior() = new()
+  PackedDynPose2VelocityPrior(z1::AS, z2::AS) where {AS <: AbstractString} = new(z1, z2)
+end
+
+function convert(::Type{PackedDynPose2VelocityPrior}, d::DynPose2VelocityPrior)
+  return PackedDynPose2VelocityPrior(string(d.Zpose),string(d.Zvel))
+end
+function convert(::Type{DynPose2VelocityPrior}, d::PackedDynPose2VelocityPrior)
+  posedistr = extractdistribution(d.strpose)
+  veldistr = extractdistribution(d.strvel)
+  return DynPose2VelocityPrior(posedistr, veldistr)
+end
+
+
+
+mutable struct PackedVelPose2VelPose2 <: IncrementalInference.PackedInferenceType
+  strpose::AbstractString
+  strvel::AbstractString
+  PackedVelPose2VelPose2() = new()
+  PackedVelPose2VelPose2(z1::AS, z2::AS) where {AS <: AbstractString} = new(z1, z2)
+end
+
+function convert(::Type{PackedVelPose2VelPose2}, d::VelPose2VelPose2)
+  return PackedVelPose2VelPose2(string(d.Zpose),string(d.Zvel))
+end
+function convert(::Type{VelPose2VelPose2}, d::PackedVelPose2VelPose2)
+  posedistr = extractdistribution(d.strpose)
+  veldistr = extractdistribution(d.strvel)
+  return VelPose2VelPose2(posedistr, veldistr)
+end
+
+
+
+
+mutable struct PackedDynPose2Pose2 <: IncrementalInference.PackedInferenceType
+  strpose::AbstractString
+  PackedDynPose2Pose2() = new()
+  PackedDynPose2Pose2(z1::AS) where {AS <: AbstractString} = new(z1)
+end
+
+function convert(::Type{PackedDynPose2Pose2}, d::DynPose2Pose2)
+  return PackedDynPose2Pose2(string(d.Zpose))
+end
+function convert(::Type{DynPose2Pose2}, d::PackedDynPose2Pose2)
+  posedistr = extractdistribution(d.strpose)
+  return DynPose2Pose2(posedistr)
+end
+
+
 #

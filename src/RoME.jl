@@ -230,8 +230,11 @@ export
   # velocity in Pose2
   DynPose2,
   DynPose2VelocityPrior,
+  PackedDynPose2VelocityPrior,
   VelPose2VelPose2,
+  PackedVelPose2VelPose2,
   DynPose2Pose2,
+  PackedDynPose2Pose2,
   # Will be deprecated
   addPose2Pose2,
 
