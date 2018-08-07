@@ -201,6 +201,8 @@ export
   DynPoint2DynPoint2,
   VelPoint2VelPoint2,
   Point2Point2Velocity,
+  PackedDynPoint2VelocityPrior,
+  PackedVelPoint2VelPoint2,
 
   # likely to be deprecated
   solveLandm,

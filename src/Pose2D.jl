@@ -135,16 +135,16 @@ mutable struct PackedPriorPose2  <: IncrementalInference.PackedInferenceType
     PackedPriorPose2() = new()
     PackedPriorPose2(x::String) = new(x)
 end
+function convert(::Type{PackedPriorPose2}, d::PriorPose2)
+  # v1 = d.Zi[:];
+  # v2 = d.Cov[:];
+  return PackedPriorPose2(string(d.Z))
+end
 function convert(::Type{PriorPose2}, d::PackedPriorPose2)
   # Zi = reshapeVec2Mat(d.vecZij,d.dimz)
   # Cov = reshapeVec2Mat(d.vecCov, d.dimc)
   distr = extractdistribution(d.str)
   return PriorPose2{typeof(distr)}(distr)
-end
-function convert(::Type{PackedPriorPose2}, d::PriorPose2)
-  # v1 = d.Zi[:];
-  # v2 = d.Cov[:];
-  return PackedPriorPose2(string(d.Z))
 end
 
 

@@ -13,8 +13,9 @@ end
 mutable struct DynPoint2VelocityPrior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}
   z::T
   DynPoint2VelocityPrior{T}() where {T <: Distribution} = new{T}()
-  DynPoint2VelocityPrior(z1::T) where {T <: Distribution} = new{T}(z1)
+  DynPoint2VelocityPrior{T}(z1::T) where {T <: Distribution} = new{T}(z1)
 end
+DynPoint2VelocityPrior(z1::T) where {T <: Distribution} = DynPoint2VelocityPrior{T}(z1)
 getSample(dp2v::DynPoint2VelocityPrior, N::Int=1) = (rand(dp2v.z,N), )
 
 
@@ -95,3 +96,42 @@ function (p2p2v::Point2Point2Velocity)(
   res[1] += sum((dp/dt - 0.5*(xj[3:4]+xi[3:4])).^2)  # (dp/dt - 0.5*(xj[3:4]+xi[3:4])) # midpoint integration
   res[1]
 end
+
+
+## Packing Types================================================================
+
+
+
+mutable struct PackedDynPoint2VelocityPrior <: IncrementalInference.PackedInferenceType
+  str::AbstractString
+  PackedDynPoint2VelocityPrior() = new()
+  PackedDynPoint2VelocityPrior(z1::AS) where {AS <: AbstractString} = new(z1)
+end
+
+function convert(::Type{PackedDynPoint2VelocityPrior}, d::DynPoint2VelocityPrior)
+  return PackedDynPoint2VelocityPrior(string(d.z))
+end
+function convert(::Type{DynPoint2VelocityPrior}, d::PackedDynPoint2VelocityPrior)
+  distr = extractdistribution(d.str)
+  return DynPoint2VelocityPrior(distr)
+end
+
+
+
+mutable struct PackedVelPoint2VelPoint2 <: IncrementalInference.PackedInferenceType
+  str::AbstractString
+  PackedVelPoint2VelPoint2() = new{T}()
+  PackedVelPoint2VelPoint2(z1::AS) where {AS <: AbstractString} = new(z1)
+end
+
+function convert(::Type{PackedVelPoint2VelPoint2}, d::VelPoint2VelPoint2)
+  return PackedVelPoint2VelPoint2(string(d.z))
+end
+function convert(::Type{VelPoint2VelPoint2}, d::PackedVelPoint2VelPoint2)
+  distr = extractdistribution(d.str)
+  return VelPoint2VelPoint2(distr)
+end
+
+
+
+#
