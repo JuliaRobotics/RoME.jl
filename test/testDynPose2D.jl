@@ -50,6 +50,38 @@ warn("wrapRad issue, accepting 80% as good enough until issue JuliaRobotics/RoME
 end
 
 
+@testset "test distribution compare functions..." begin
+
+mu = randn(6)
+mv1 = MvNormal(deepcopy(mu), eye(6))
+mv2 = MvNormal(deepcopy(mu), eye(6))
+mv3 = MvNormal(randn(6), eye(6))
+@test RoME.compare(mv1, mv2)
+@test !RoME.compare(mv1, mv3)
+@test !RoME.compare(mv2, mv3)
+
+end
+
+
+@testset "test DynPose2 packing converters..." begin
+
+pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), diagm([0.01; 0.01; 0.001].^2)),
+                            MvNormal([10.0;0], diagm([0.1; 0.1].^2)))
+
+pp = convert(PackedDynPose2VelocityPrior, pp0)
+ppu = convert(DynPose2VelocityPrior, pp)
+
+@test RoME.compare(pp0, ppu)
+
+dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], diagm([0.01;0.01;0.001].^2)),
+                          MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
+
+pp = convert(PackedVelPose2VelPose2, dp2dp2)
+ppu = convert(VelPose2VelPose2, pp)
+
+@test RoME.compare(dp2dp2, ppu)
+
+end
 
 
 

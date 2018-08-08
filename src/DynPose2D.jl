@@ -88,8 +88,28 @@ end
 
 
 
+## Compare functions
+
+function compare(a::MvNormal, b::MvNormal; tol::Float64=1e-10)::Bool
+  TP = true
+  TP = TP && norm(a.μ - b.μ)<tol
+  TP = TP && sum(norm.(a.Σ.mat - b.Σ.mat))<tol
+  return TP
+end
 
 
+function compare(a::DynPose2VelocityPrior, b::DynPose2VelocityPrior)::Bool
+  RoME.compare(a.Zpose, b.Zpose) && RoME.compare(a.Zvel, b.Zvel)
+end
+
+
+function compare(a::VelPose2VelPose2, b::VelPose2VelPose2; tol::Float64=1e-10)::Bool
+  TP = true
+  TP = TP && RoME.compare(a.Zpose, b.Zpose)
+  TP = TP && RoME.compare(a.Zvel, b.Zvel)
+  TP = TP && norm(a.reuseres - b.reuseres) < tol
+  return TP
+end
 
 
 ## Packing types
@@ -121,7 +141,7 @@ mutable struct PackedVelPose2VelPose2 <: IncrementalInference.PackedInferenceTyp
 end
 
 function convert(::Type{PackedVelPose2VelPose2}, d::VelPose2VelPose2)
-  return PackedVelPose2VelPose2(string(d.Zpose),string(d.Zvel))
+  return PackedVelPose2VelPose2(string(d.Zpose.z),string(d.Zvel))
 end
 function convert(::Type{VelPose2VelPose2}, d::PackedVelPose2VelPose2)
   posedistr = extractdistribution(d.strpose)
@@ -139,12 +159,16 @@ mutable struct PackedDynPose2Pose2 <: IncrementalInference.PackedInferenceType
 end
 
 function convert(::Type{PackedDynPose2Pose2}, d::DynPose2Pose2)
-  return PackedDynPose2Pose2(string(d.Zpose))
+  return PackedDynPose2Pose2(string(d.Zpose.z))
 end
 function convert(::Type{DynPose2Pose2}, d::PackedDynPose2Pose2)
   posedistr = extractdistribution(d.strpose)
   return DynPose2Pose2(posedistr)
 end
+
+
+
+
 
 
 #
