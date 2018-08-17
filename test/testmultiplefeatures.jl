@@ -70,7 +70,8 @@ wAo2 = reshape(l2,2,1)
 wAo3 = reshape(l3,2,1)
 
 
-println("test MultipleFeatures unit vector functions")
+@testset "test MultipleFeatures unit vector functions..." begin
+
 res, rhat, resid = zeros(3),zeros(2), zeros(2)
 
 for i in 1:3
@@ -84,8 +85,10 @@ end
 
 @test 0.0 <= res[1] < 1e-5
 
+end
 
-println("test residual function")
+
+@testset "test residual function..." begin
 
 res = zeros(3)
 
@@ -123,8 +126,9 @@ YY = linspace(-pi/4,pi/4,100)
 gg2(0.0,0.0)
 # Gadfly.plot(z=gg2,x=XX,y=YY, Geom.contour)
 
-# ar99
-println("test as minimization problem to pose")
+end
+
+
 function minmickey(x::Array{Float64,1})
   wAbi[1:3,1] = x[1:3]
   res = zeros(3)
@@ -139,6 +143,10 @@ function minmickey(x::Array{Float64,1})
 end
 
 
+# ar99
+@testset "test as minimization problem to pose..." begin
+
+
 gg = (x,y) -> minmickey([x;y;0.0])
 # gg = (x,y) -> x*y
 # plot(z=gg, x=linspace(-2,2,100),y=linspace(-2,2,100), Geom.contour)
@@ -151,9 +159,9 @@ gg(0.0,0.1)
 
 @test norm(res) < 1e-3
 
+end
 
-println("test as minimization problem to landmark")
-wAbi[:] = 0.0
+
 function minmickey(x::Array{Float64,1})
   wAo1[1:2,1] = x[1:2]
   res = zeros(3)
@@ -166,6 +174,11 @@ function minmickey(x::Array{Float64,1})
 
   return sum(res[1:2])
 end
+
+
+@testset "test as minimization problem to landmark..." begin
+
+wAbi[:] = 0.0
 
 gg = (x,y) -> minmickey([x;y])
 #plot(z=gg, x=linspace(1,2,100),y=linspace(-1,1,100), Geom.contour(levels=50))
@@ -194,13 +207,11 @@ px2[1:3] = [1.1;-1.0;pi/2]
 ipp2 = PriorPose2(MvNormal(px2, initCov^2))
 f1  = addFactor!(fg,[:x2], ipp2)
 
-
 vl1 = addNode!(fg, :l1, Pose2, N=N) # rand(MvNormal(l1,0.001*eye(2)),N), diagm([1.0;1.0])
 vl2 = addNode!(fg, :l2, Pose2, N=N) # rand(MvNormal(l2,0.001*eye(2)),N), diagm([1.0;1.0])
 vl3 = addNode!(fg, :l3, Pose2, N=N) # rand(MvNormal(l3,0.001*eye(2)),N), diagm([1.0;1.0])
 
-
-f2 = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2)
+f2 = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2 )
 
 
 ensureAllInitialized!(fg)
@@ -213,6 +224,10 @@ tree = wipeBuildNewTree!(fg)
 # spyCliqMat(tree.cliques[1])
 
 [inferOverTreeR!(fg,tree, N=N, dbg=true) for i in 1:1]
+
+
+
+end
 
 # lets see what is happening during MCMC runs
 # plotMCMC(tree, :l2, show=true, levels=3) # make true to see pictures, false for testing
@@ -248,11 +263,10 @@ tree = wipeBuildNewTree!(fg)
 # Gadfly.draw(PDF("/home/dehann/Desktop/test.pdf",20cm,15cm),cc)
 
 
+
+
+
 println("test ambiguous bi-modal multifeature constraint operation")
-
-
-
-
 
 mm2 = MultipleFeatures2D(
   xir1,

@@ -80,17 +80,15 @@ println("Adding Pose3Pose3NH to graph...")
 
 odo3 = SE3([-35;0;0], Quaternion(0))
 odoc3 = Pose3Pose3NH( MvNormal(veeEuler(odo3), odoCov), [0.5;0.5]) # define 50/50% hypothesis
-addFactor!(fg,[v3;v1],odoc3)
 
+@test ls(fg)[1] == [:x1;:x2;:x3]
+addFactor!(fg,[:x3;:x1],odoc3)
 
-X1pts = evalFactor2(fg, fg.g.vertices[7], 1, N=N)
-X2pts = evalFactor2(fg, fg.g.vertices[7], 5, N=N)
+X1pts = approxConv(fg, :x3x1f1, :x1, N=N)
+X2pts = approxConv(fg, :x3x1f1, :x3, N=N)
 
 p1 = kde!(X1pts)
 p2 = kde!(X2pts)
-
-
-# plotKDE([marginal(p1,[1]),marginal(p1t,[1])], c=["black";"red"])
 
 
 using JLD, HDF5
@@ -112,6 +110,11 @@ using JLD, HDF5
     @test t2 < 80.0
 end
 
-# plotKDE(margisal(p1,[1]))
+
+
+# using KernelDensityEstimatePlotting
+# plotKDE([p1; p1t], dims=[1], c=["black";"red"])
+
+
 
 # warn("incomplete Pose3Pose3NH tests.")
