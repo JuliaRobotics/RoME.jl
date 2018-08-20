@@ -21,8 +21,6 @@ function getSample(p2::PriorPoint2, N::Int=1)
   return (rand(p2.Z, N),)
 end
 
-
-
 mutable struct Point2Point2Range{D <: SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
   Z::D
   Point2Point2Range{D}() where {D} = new{D}()
@@ -44,9 +42,10 @@ function (pp2r::Point2Point2Range{T})(
   XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
   YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
+  # @show "fnc", pointer(res), res
   res[1]
 end
-
+# import RoME: Point2Point2Range
 
 mutable struct Point2Point2{D <: SamplableBelief} <: FunctorPairwise #BetweenPoses
     Zij::D

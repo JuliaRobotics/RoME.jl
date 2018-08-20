@@ -291,7 +291,10 @@ export
   vectoarr2,
 
   # jld required Features Type
-  LaserFeatures
+  LaserFeatures,
+
+  IIF,
+  KDE
 
   # # solve with isam in pytslam
   # doISAMSolve,
@@ -304,6 +307,8 @@ export
   # rotateFeatsToWorld
 
 
+const IIF = IncrementalInference
+const KDE = KernelDensityEstimate
 
 
 
