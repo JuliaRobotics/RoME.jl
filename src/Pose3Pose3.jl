@@ -46,11 +46,11 @@ mutable struct PP3REUSE
 end
 
 function fastpose3pose3residual!(reusethrid::PP3REUSE,
-      res::Array{Float64},
-      idx::Int,
-      meas::Tuple,
-      wXi::Array{Float64,2},
-      wXj::Array{Float64,2}  )
+                                 res::Array{Float64},
+                                 idx::Int,
+                                 meas::Tuple,
+                                 wXi::Array{Float64,2},
+                                 wXj::Array{Float64,2}  )
   #
   reusethrid.wTi.t[1:3] = wXi[1:3,idx]
   TransformUtils.convert!(reusethrid.wTi.R, Euler(wXi[4,idx],wXi[5,idx],wXi[6,idx]))
@@ -65,21 +65,21 @@ function fastpose3pose3residual!(reusethrid::PP3REUSE,
   nothing
 end
 
-mutable struct Pose3Pose3 <: FunctorPairwise # RoME.BetweenPoses
+mutable struct Pose3Pose3 <: FunctorPairwise
     Zij::Distribution
     reuse::Vector{PP3REUSE}
     Pose3Pose3() = new()
-    Pose3Pose3(s) = new(s, fill(PP3REUSE(), Threads.nthreads() )  )
+    Pose3Pose3(s) = new(s, PP3REUSE[PP3REUSE() for i in 1:Threads.nthreads()]  )
 end
 function getSample(pp3::Pose3Pose3, N::Int=1)
   return (rand(pp3.Zij, N), )
 end
 function (pp3::Pose3Pose3)(res::Array{Float64},
-            userdata,
-            idx::Int,
-            meas::Tuple,
-            wXi::Array{Float64,2},
-            wXj::Array{Float64,2}  )
+                           userdata::FactorMetadata,
+                           idx::Int,
+                           meas::Tuple,
+                           wXi::Array{Float64,2},
+                           wXj::Array{Float64,2}  )
   #
   reusethrid = pp3.reuse[Threads.threadid()]
   fastpose3pose3residual!(reusethrid, res, idx, meas, wXi, wXj)

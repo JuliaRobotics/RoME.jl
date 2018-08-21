@@ -40,11 +40,11 @@ addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)))
 tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree, N=N)
 
-@test sum( 90 .< getVal(fg, :l1)[1,:] .< 110 ) > 40
-@test sum( -10 .< getVal(fg, :l1)[2,:] .< 10 ) > 40
+@test sum( 90 .< getVal(fg, :l1)[1,:] .< 110 ) > 32
+@test sum( -10 .< getVal(fg, :l1)[2,:] .< 10 ) > 32
 
-@test sum( -10 .< getVal(fg, :l1)[1,:] .< 10 ) > 40
-@test sum( 90 .< getVal(fg, :l1)[2,:] .< 110 ) > 40
+@test sum( -10 .< getVal(fg, :l1)[1,:] .< 10 ) > 32
+@test sum( 90 .< getVal(fg, :l1)[2,:] .< 110 ) > 32
 
 voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
 @test sum( getVal(fg, :l1)[2,voidsel1] .< 80 ) < 10
@@ -65,19 +65,20 @@ end
 
 # setVal!(fg, :x0, zeros(2,1))
 # setVal!(fg, :l1, zeros(2,1))
-#
+# #
 # using RoMEPlotting, KernelDensityEstimatePlotting
 #
-# plotKDE(fg, :l1)
+# plotKDE(fg, :x0)
 #
 #
-# pts = IIF.approxConv(fg, :x0l1f1, :l1, N=1)
+# pts1 = IIF.approxConv(fg, :x0l1f1, :l1, N=N)
 #
-# plotKDE(KDE.kde!(pts))
-
-
-
-
+# plotKDE(KDE.kde!(pts1))
+#
+#
+# pts2 = IIF.approxConv(fg, :x1l1f1, :l1, N=N)
+#
+# plotKDE([KDE.kde!(pts1); KDE.kde!(pts2)])
 
 
 

@@ -207,16 +207,26 @@ px2[1:3] = [1.1;-1.0;pi/2]
 ipp2 = PriorPose2(MvNormal(px2, initCov^2))
 f1  = addFactor!(fg,[:x2], ipp2)
 
-vl1 = addNode!(fg, :l1, Pose2, N=N) # rand(MvNormal(l1,0.001*eye(2)),N), diagm([1.0;1.0])
-vl2 = addNode!(fg, :l2, Pose2, N=N) # rand(MvNormal(l2,0.001*eye(2)),N), diagm([1.0;1.0])
-vl3 = addNode!(fg, :l3, Pose2, N=N) # rand(MvNormal(l3,0.001*eye(2)),N), diagm([1.0;1.0])
+vl1 = addNode!(fg, :l1, Point2, N=N) # rand(MvNormal(l1,0.001*eye(2)),N), diagm([1.0;1.0])
+vl2 = addNode!(fg, :l2, Point2, N=N) # rand(MvNormal(l2,0.001*eye(2)),N), diagm([1.0;1.0])
+vl3 = addNode!(fg, :l3, Point2, N=N) # rand(MvNormal(l3,0.001*eye(2)),N), diagm([1.0;1.0])
 
-f2 = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2 )
+# # why is explicit call to autoinit required here? should not be necessary
+# doautoinit!(fg, :x1)
+# doautoinit!(fg, :x2)
 
+f2 = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2, threadmodel=SingleThreaded )
 
-ensureAllInitialized!(fg)
+# getVal(fg, :l3)
+#
+# writeGraphPdf(fg)
 
-ef2pts = evalFactor2(fg, f2, fg.IDs[:l2])
+data = getData(f2)
+# fieldnames(data.fnc)
+@test data.fnc.threadmodel == SingleThreaded
+
+ef2pts = approxConv(fg, :x1x2l1l2l3f1, :l2)
+# evalFactor2(fg, f2, fg.IDs[:l2])
 
 
 ensureAllInitialized!(fg)

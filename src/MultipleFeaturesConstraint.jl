@@ -113,22 +113,23 @@ function (mm2d::MultipleFeatures2D)(res::Array{Float64},
   the3 = atan2(se2vee(cjTo3)[2], se2vee(cjTo3)[1])
   the3b = dobimodal ? atan2(se2vee(cjTo3b)[2], se2vee(cjTo3b)[1]) : nothing
 
-  res[2] = 0.0
-  res[2] += ( meas[1][1,idx,2] - the1 )^2
-  res[2] += ( meas[1][2,idx,2] - the2 )^2
+  # res[2] = 0.0
+  tempres = 0.0
+  tempres += ( meas[1][1,idx,2] - the1 )^2
+  tempres += ( meas[1][2,idx,2] - the2 )^2
 
   if dobimodal
     if !meas[2][idx]
       # 3a case
-      res[2] += ( meas[1][3,idx,2] - the3 )^2
+      tempres += ( meas[1][3,idx,2] - the3 )^2
     else
       # 3b case
-      res[2] += ( meas[1][3,idx,2] - the3b )^2
+      tempres += ( meas[1][3,idx,2] - the3b )^2
     end
   else
-    res[2] += ( meas[1][3,idx,2] - the3 )^2
+    tempres += ( meas[1][3,idx,2] - the3 )^2
   end
-  sum(res)
+  res[1]+tempres
 end
 
 

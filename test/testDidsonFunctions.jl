@@ -23,6 +23,7 @@ push!(t,pts)
 
 fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 2, 1, (zeros(0,1),) , RoME.getSample)
 
+
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
 fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
 # fp!(x, res)
@@ -112,14 +113,24 @@ meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 # p1 = kde!(pts); # visual checking
 
 v2 = addNode!(fg, :l1, Point3, N=N)
-f2 = addFactor!(fg, [:x1;:l1], meas)
+f2 = addFactor!(fg, [:x1;:l1], meas) #, threadmodel=MultiThreaded)
 
 # ensureAllInitialized!(fg)
 # getVal(fg, :x1)
 
-L1pts = evalFactor2(fg, f2, fg.IDs[:l1])
-X1pts = evalFactor2(fg, f2, fg.IDs[:x1])
+L1pts = approxConv(fg, :x1l1f1, :l1)
+# L1pts = evalFactor2(fg, f2, fg.IDs[:l1])
 
+
+data = getData(f2)
+data
+
+
+X1pts = approxConv(fg, :x1l1f1, :x1)
+# X1pts = evalFactor2(fg, f2, fg.IDs[:x1])
+
+# isInitialized(fg, :l1)
+# getVal(fg, :l1)
 
 ensureAllInitialized!(fg)
 tree = wipeBuildNewTree!(fg)
