@@ -9,7 +9,7 @@ end
 Pose2Point2Range(Z::T) where {T <: SamplableBelief} = Pose2Point2Range{T}(Z)
 
 function getSample(pp2::Pose2Point2Range, N::Int=1)
-  return (rand(pp2.Z,N),  2*pi*rand(N))
+  return (reshape(rand(pp2.Z,N),1,N) ,  2*pi*rand(N))
 end
 function (pp2r::Pose2Point2Range)(res::Array{Float64},
                                     userdata,
