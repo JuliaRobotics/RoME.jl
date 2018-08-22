@@ -86,18 +86,22 @@ end
 end
 
 
+# Noticed a DomainError on convolutions here after mutlithreading upgrade.  Previously used fill(PP3REUSE, Threads.nthreads())
 @testset "Testing Pose3Pose3 evaluation..." begin
-  ensureAllInitialized!(fg)
-  @test isInitialized(fg, :x2)
-  X1pts = evalFactor2(fg, fg.g.vertices[4], 1)
-  X2pts = evalFactor2(fg, fg.g.vertices[4], 3)
-  X2ptsMean = Base.mean(X2pts,2)
-  X1ptsMean = Base.mean(X1pts,2)
-  @show X1ptsMean
-  @test  sum(map(Int, abs.(X1ptsMean) .< 1.25 )) == 6
-  @test  sum(map(Int, abs.(X2ptsMean - [10.0;0;0;0;0;0]) .< 1.25 )) == 6
-end
 
+ensureAllInitialized!(fg)
+@test isInitialized(fg, :x2)
+X1pts = approxConv(fg, :x1x2f1, :x1)
+# X1pts = evalFactor2(fg, fg.g.vertices[4], 1)
+X2pts = approxConv(fg, :x1x2f1, :x2)
+# X2pts = evalFactor2(fg, fg.g.vertices[4], 3)
+X2ptsMean = Base.mean(X2pts,2)
+X1ptsMean = Base.mean(X1pts,2)
+@show X1ptsMean
+@test  sum(map(Int, abs.(X1ptsMean) .< 1.25 )) == 6
+@test  sum(map(Int, abs.(X2ptsMean - [10.0;0;0;0;0;0]) .< 1.25 )) == 6
+
+end
 
 @testset "Construct Bayes tree and perform inference..." begin
   tree = prepBatchTree!(fg);
