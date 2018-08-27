@@ -357,7 +357,7 @@ end
 function addMMBRFG!(fg::FactorGraph,
                     syms::Array{Symbol,1}, br::Array{Float64,1},
                     cov::Array{Float64,2}; w::Vector{Float64}=Float64[0.5;0.5],
-                    ready::Int=1) where {T <: AbstractString}
+                    ready::Int=1)
     #
     # vps = getVert(fg,pose)
     # vlm1 = getVert(fg,lm[1])
