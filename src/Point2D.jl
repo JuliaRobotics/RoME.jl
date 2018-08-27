@@ -75,7 +75,7 @@ mutable struct Point2Point2WorldBearing{T} <: IncrementalInference.FunctorPairwi
     Z::T
     rangemodel::Rayleigh
     # zDim::Tuple{Int, Int}
-    Point2Point2WorldBearing() = new()
+    Point2Point2WorldBearing{T}() where T = new{T}()
     Point2Point2WorldBearing{T}(x::T) where {T <: SamplableBelief} = new{T}(x, Rayleigh(100))
 end
 Point2Point2WorldBearing(x::T) where {T <: SamplableBelief} = Point2Point2WorldBearing{T}(x)
