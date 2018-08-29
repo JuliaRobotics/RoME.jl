@@ -116,13 +116,14 @@ end
 
 function getNextLbl(fgl::FactorGraph, chr)
   # TODO convert this to use a double lookup
-  warn("getNextLbl(::FactorGraph..) to be deprecated, use getlastpose/landm(::SLAMWrapper..) instead.")
+  # warn("getNextLbl(::FactorGraph..) to be deprecated, use getlastpose/landm(::SLAMWrapper..) instead.")
   max = -1
   maxid = -1
   for vid in fgl.IDs
   # for v in fgl.v #fgl.g.vertices # fgl.v
       v = (vid[2], fgl.g.vertices[vid[2]])
       if v[2].attributes["label"][1] == chr
+        # TODO test for allnums first, ex. :x1_2
         val = parse(Int,v[2].attributes["label"][2:end])
         if max < val
           max = val

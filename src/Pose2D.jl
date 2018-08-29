@@ -24,11 +24,11 @@ struct Pose2 <: IncrementalInference.InferenceVariable
   Pose2() = new(3, String["POSE";])
 end
 
-# TODO - move to IncrementalInference
-struct Prior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}
-  z::T
-end
-getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
+# # Done - move to IncrementalInference
+# struct Prior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}
+#   z::T
+# end
+# getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 
 
 mutable struct Pose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: SamplableBelief}

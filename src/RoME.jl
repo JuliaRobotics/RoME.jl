@@ -72,7 +72,7 @@ export
   # convertfrompackedfunctionnode,
 
   # RoME specific functions
-  SamplableBelief,
+  # SamplableBelief, moved to IIF
   initfg,
   measureMeanDist,
   predictBodyBR,
@@ -246,7 +246,7 @@ export
   # Pose3, Three dimensional
   Pose3,
   Point3,
-  Prior,
+  # Prior, # moved to IIF
   PriorPose3,
   PackedPriorPose3,
   Pose3Pose3,

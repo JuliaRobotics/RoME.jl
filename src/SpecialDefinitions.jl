@@ -1,5 +1,6 @@
 
-SamplableBelief = Union{Distributions.Distribution, KernelDensityEstimate.BallTreeDensity, IIF.AliasingScalarSampler}
+# import IncrementalInference: SamplableBelief
+# SamplableBelief = Union{Distributions.Distribution, KernelDensityEstimate.BallTreeDensity, IIF.AliasingScalarSampler}
 
 # @compat abstract type BetweenPoses <: IncrementalInference.FunctorPairwise end
 
