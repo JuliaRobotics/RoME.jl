@@ -56,7 +56,7 @@ rr(res, nothing, 1, (zeros(3),), R1, R2)
 end
 
 
-@testset "test FastRootGenericWrapParam functions" begin
+@testset "test CommonConvWrapper functions" begin
 
 
 N = 10
@@ -102,7 +102,7 @@ ccw = CommonConvWrapper(rr, t[1], zDim, t, measurement=(eul,))
 ccw(res, x0)
 
 # and return complete fr/gwp
-forn in 1:N
+for n in 1:N
 
 ccw.cpt[Threads.threadid()].particleidx = n
 numericRootGenericRandomizedFnc!( ccw )
