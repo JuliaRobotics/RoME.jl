@@ -81,33 +81,37 @@ t = Array{Array{Float64,2},1}()
 push!(t,A)
 push!(t,B)
 rr = RotationTest(MvNormal(zeros(3), 0.001*eye(3)))
-
-gwp = GenericWrapParam{RotationTest}(rr, t, 1, 1)
-
-@time gwp(res, x0)
+#
+# gwp = GenericWrapParam{RotationTest}(rr, t, 1, 1)
+#
+# @time gwp(res, x0)
 
 # gwp.activehypo
 # gwp.hypotheses
 # gwp.params
 
 # @show gwp.varidx
-gwp.measurement = (eul, )
+# gwp.measurement = (eul, )
 zDim = 3
-fr = FastRootGenericWrapParam{RotationTest}(gwp.params[gwp.varidx], zDim, gwp)
+# fr = FastRootGenericWrapParam{RotationTest}(gwp.params[gwp.varidx], zDim, gwp)
 
-@test fr.xDim == 3
+ccw = CommonConvWrapper(rr, t[1], zDim, t, measurement=(eul,))
+
+@test ccw.xDim == 3
+
+ccw(res, x0)
 
 # and return complete fr/gwp
-for gwp.particleidx in 1:N
-# gwp(x, res)
-numericRootGenericRandomizedFnc!( fr )
+forn in 1:N
+
+ccw.cpt[Threads.threadid()].particleidx = n
+numericRootGenericRandomizedFnc!( ccw )
 
 # test the result
-qq = convert(Quaternion, Euler(eul[:,gwp.particleidx]...))
-q1 = convert(Quaternion, so3(fr.Y))
-q2 = convert(Quaternion, so3(B[:,gwp.particleidx]))
+qq = convert(Quaternion, Euler(eul[:,ccw.cpt[Threads.threadid()].particleidx]...))
+q1 = convert(Quaternion, so3(ccw.cpt[Threads.threadid()].Y))
+q2 = convert(Quaternion, so3(B[:,ccw.cpt[Threads.threadid()].particleidx]))
 @test TransformUtils.compare(q1*q_conj(q2), qq, tol=1e-8)
-
 
 end # particle for
 

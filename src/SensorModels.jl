@@ -86,26 +86,6 @@ end
 
 
 
-# deprecated -- should use the approxConv infrastructure instead
-# function +(arr::Array{Float64,2}, meas::LinearRangeBearingElevation)
-#   N = size(arr,2)
-#   L = zeros(3,N);
-#   t = Array{Array{Float64,2},1}()
-#   push!(t,arr)
-#   push!(t,L)
-#
-#   fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 2, 1, (zeros(0,1),) , getSample)
-#   # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
-#   fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
-#   # fp!(x, res)
-#   fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], 3, fp!)
-#   for fp!.particleidx in 1:N
-#     numericRootGenericRandomizedFnc!( fr )
-#   end
-#   return L
-# end
-
-
 
 
 
