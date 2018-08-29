@@ -81,19 +81,8 @@ t = Array{Array{Float64,2},1}()
 push!(t,A)
 push!(t,B)
 rr = RotationTest(MvNormal(zeros(3), 0.001*eye(3)))
-#
-# gwp = GenericWrapParam{RotationTest}(rr, t, 1, 1)
-#
-# @time gwp(res, x0)
 
-# gwp.activehypo
-# gwp.hypotheses
-# gwp.params
-
-# @show gwp.varidx
-# gwp.measurement = (eul, )
 zDim = 3
-# fr = FastRootGenericWrapParam{RotationTest}(gwp.params[gwp.varidx], zDim, gwp)
 
 ccw = CommonConvWrapper(rr, t[1], zDim, t, measurement=(eul,))
 

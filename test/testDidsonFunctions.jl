@@ -21,19 +21,13 @@ t = Array{Array{Float64,2},1}()
 push!(t,X)
 push!(t,pts)
 
-# fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 2, 1, (zeros(0,1),) , RoME.getSample)
-
 
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
 measurement = getSample(meas, N)
-# fp!(x, res)
-# @time fp!(zeros(3), zeros(3))
-
 
 @show zDim = size(measurement[1],1)
 
 ccw = CommonConvWrapper(meas, t[2], zDim, t, measurement=measurement, varidx=2)
-# fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], zDim, fp!)
 
 @time ccw(zeros(3), zeros(3))
 @time ccw(zeros(3))
@@ -67,18 +61,12 @@ push!(t,L)
 measurement = getSample(meas, N)
 zDim = size(measurement,1)
 ccw = CommonConvWrapper(meas, t[1], zDim, t, varidx=1, measurement=measurement)
-# fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 1, 1, (zeros(0,1),) , RoME.getSample)
 
 
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
-# fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
-# fp!(x, res)
-# @time fp!(zeros(3), zeros(6))
 @time ccw(zeros(3), zeros(6))
 @time ccw(zeros(6))
 
-# @show zDim = size(fp!.measurement[1],1)
-# fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], zDim, fp!)
 
 @time for n in 1:N
   ccw.cpt[Threads.nthreads()].particleidx = n
@@ -137,7 +125,6 @@ f2 = addFactor!(fg, [:x1;:l1], meas) #, threadmodel=MultiThreaded)
 
 
 L1pts = approxConv(fg, :x1l1f1, :l1)
-# L1pts = evalFactor2(fg, f2, fg.IDs[:l1])
 
 
 data = getData(f2)
@@ -145,7 +132,6 @@ data
 
 
 X1pts = approxConv(fg, :x1l1f1, :x1)
-# X1pts = evalFactor2(fg, f2, fg.IDs[:x1])
 
 # isInitialized(fg, :l1)
 # getVal(fg, :l1)
