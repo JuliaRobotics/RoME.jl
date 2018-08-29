@@ -5,7 +5,7 @@
 
 [![RoME](http://pkg.julialang.org/badges/RoME_0.6.svg)](http://pkg.julialang.org/?pkg=RoME&ver=0.6)
 [![RoME](http://pkg.julialang.org/badges/RoME_0.7.svg)](http://pkg.julialang.org/?pkg=RoME&ver=0.7)
-
+[![RoME](http://pkg.julialang.org/badges/RoME_1.0.svg)](http://pkg.julialang.org/?pkg=RoME&ver=1.0)
 
 Robot Motion Estimate: A set of functions for developing front-ends for SLAM in [Julia](www.julialang.org) which adds transform, visualization and convenience functions to the [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf) backend solver. The back-end solver is implemented in [IncrementalInference.jl](https://github.com/JuliaRobotics/IncrementalInference.jl).
 
