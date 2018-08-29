@@ -21,20 +21,30 @@ t = Array{Array{Float64,2},1}()
 push!(t,X)
 push!(t,pts)
 
-fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 2, 1, (zeros(0,1),) , RoME.getSample)
+# fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 2, 1, (zeros(0,1),) , RoME.getSample)
 
 
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
-fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
+measurement = getSample(meas, N)
 # fp!(x, res)
-@time fp!(zeros(3), zeros(3))
+# @time fp!(zeros(3), zeros(3))
 
-@show zDim = size(fp!.measurement[1],1)
-fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], zDim, fp!)
 
-@time for fp!.particleidx in 1:N
-  numericRootGenericRandomizedFnc!( fr )
+@show zDim = size(measurement[1],1)
+
+ccw = CommonConvWrapper(meas, t[2], zDim, t, measurement=measurement, varidx=2)
+# fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], zDim, fp!)
+
+@time ccw(zeros(3), zeros(3))
+@time ccw(zeros(3))
+
+
+
+@time for n in 1:N
+  ccw.cpt[Threads.threadid()].particleidx = n
+  numericRootGenericRandomizedFnc!( ccw ) #fr
 end
+
 
 
 warn("still need to insert kld(..) test to ensure this is working")
@@ -54,18 +64,25 @@ t = Array{Array{Float64,2},1}()
 push!(t,pts)
 push!(t,L)
 
-fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 1, 1, (zeros(0,1),) , RoME.getSample)
+measurement = getSample(meas, N)
+zDim = size(measurement,1)
+ccw = CommonConvWrapper(meas, t[1], zDim, t, varidx=1, measurement=measurement)
+# fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 1, 1, (zeros(0,1),) , RoME.getSample)
+
 
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
-fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
+# fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
 # fp!(x, res)
-@time fp!(zeros(3), zeros(6))
+# @time fp!(zeros(3), zeros(6))
+@time ccw(zeros(3), zeros(6))
+@time ccw(zeros(6))
 
-@show zDim = size(fp!.measurement[1],1)
-fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], zDim, fp!)
+# @show zDim = size(fp!.measurement[1],1)
+# fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], zDim, fp!)
 
-@time for fp!.particleidx in 1:N
-  numericRootGenericRandomizedFnc!( fr )
+@time for n in 1:N
+  ccw.cpt[Threads.nthreads()].particleidx = n
+  numericRootGenericRandomizedFnc!( ccw )
 end
 
 
@@ -109,7 +126,7 @@ println("Adding LinearRangeBearingElevation to graph...")
 meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 
 @time X = getVal(v1)
-@time pts = X + meas
+# @time pts = approxConvBinary(X, meas, 3)  # TODO add back when IIF v0.3.8+ is available
 # p1 = kde!(pts); # visual checking
 
 v2 = addNode!(fg, :l1, Point3, N=N)
@@ -117,6 +134,7 @@ f2 = addFactor!(fg, [:x1;:l1], meas) #, threadmodel=MultiThreaded)
 
 # ensureAllInitialized!(fg)
 # getVal(fg, :x1)
+
 
 L1pts = approxConv(fg, :x1l1f1, :l1)
 # L1pts = evalFactor2(fg, f2, fg.IDs[:l1])
@@ -136,65 +154,3 @@ ensureAllInitialized!(fg)
 tree = wipeBuildNewTree!(fg)
 inferOverTreeR!(fg, tree, N=N)
 # inferOverTree!(fg, tree, N=N)
-
-
-
-
-# using ProfileView
-# Profile.clear()
-
-# @time for i in 1:200
-#   backprojectRandomized!(meas, L, pts, i, fp!)
-# end
-#
-# # ProfileView.view()
-#
-#
-# # work on speeding up and refactoring the numericroot operation
-# # did not yet have the desired affect, lots of memory still being claimed
-# println("Compute with FastGenericRoot memory structure")
-# fgr = FastGenericRoot{WrapParam}(6, 3, fp!)
-# @time for idx in 1:200
-#   fp!.landmark[1:3] = L[1:3,idx]
-#   fp!.pose[1:6] = pts[1:6,idx]
-#   fp!.z[1:3] = getSample(meas)
-#   copy!(fgr.X, pts[1:6,idx]) #initial guess x0
-#   numericRootGenericRandomizedFnc!( fgr )
-#   # backprojectRandomized!(fgr)
-# 	pts[1:6,idx] = fgr.Y[1:6]
-# end
-#
-#
-# pts, L = 0.01*randn(6,200), zeros(3,200);
-# L[1,:] += 3.0
-# L[2,:] += 0.65
-#
-#
-# # going faster
-# fpA! = WrapParamArray(L, pts, zeros(3), 1, reuseLBRA(0))
-#
-# # @everywhere begin
-# # (p::WrapParamArray{reuseLBRA})(x::Vector{Float64}, res::Vector{Float64}) =
-# #     residualLRBE!(res, p.z, x, p.landmark[:,p.idx], p.reuse)
-# # end
-# # Profile.clear()
-#
-# println("Compute with FastGenericRoot memory structure")
-# fgr = FastGenericRoot{WrapParamArray}(6, 3, fpA!)
-#
-# @time for idx in 1:200
-#   fpA!.idx = idx
-#   getSample!(fpA!.z,  meas)
-#   # fpA!.z[1:3] = getSample(meas)
-#   copy!(fgr.X, pts[1:6,idx]) #initial guess x0
-#   numericRootGenericRandomizedFnc!( fgr )
-#   # backprojectRandomized!( fgr )
-# 	pts[1:6,idx] = fgr.Y[1:6]
-# end
-#
-
-# ProfileView.view()
-
-
-
-#  visualization
