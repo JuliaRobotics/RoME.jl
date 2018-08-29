@@ -56,7 +56,7 @@ f2 = addFactor!(fg, [:x1;:x2], ppc)
     @test RoME.compare(ipp, upd) # temp use of RoME.compare
 
     packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
-    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose2}}, packeddata)
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{CommonConvWrapper{RoME.PriorPose2}}, packeddata)
 
     # getData(f1)
     # unpackeddata
@@ -79,7 +79,7 @@ end
     @test RoME.compare(ppc, upd)
 
     packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Pose2}, getData(f2))
-    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2Pose2}}, packeddata)
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{CommonConvWrapper{RoME.Pose2Pose2}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
     @test IncrementalInference.compare(getData(f2), unpackeddata)
@@ -103,7 +103,7 @@ end
 
 
     packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Point2BearingRange}, getData(f3))
-    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2Point2BearingRange}}, packeddata) # IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose2Point2BearingRange{Normal{Float64},Normal{Float64}}}}
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{CommonConvWrapper{RoME.Pose2Point2BearingRange}}, packeddata) # IncrementalInference.FunctionNodeData{CommonConvWrapper{RoME.Pose2Point2BearingRange{Normal{Float64},Normal{Float64}}}}
 
     @test ppbr.bearing.μ == unpackeddata.fnc.usrfnc!.bearing.μ
     @test ppbr.bearing.σ == unpackeddata.fnc.usrfnc!.bearing.σ
@@ -136,7 +136,7 @@ f1  = addFactor!(fg,[v1], ipp)
     @test norm(ipp.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
 
     packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, getData(f1))
-    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.PriorPose3}}, packeddata)
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{CommonConvWrapper{RoME.PriorPose3}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
     @test IncrementalInference.compare(getData(f1), unpackeddata)
@@ -161,7 +161,7 @@ v2, f2 = addOdoFG!(fg, pp3 )
     @test norm(pp3.Zij.Σ.mat - upd.Zij.Σ.mat) < 1e-8
 
     packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3}, getData(f2))
-    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose3Pose3}}, packeddata)
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{CommonConvWrapper{RoME.Pose3Pose3}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
     @test IncrementalInference.compare(getData(f2), unpackeddata)
@@ -185,7 +185,7 @@ f3 = addFactor!(fg,[:x1;:x2],odoc)
 
 
     packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3NH}, getData(f3))
-    unpackeddata = convert(IncrementalInference.FunctionNodeData{GenericWrapParam{RoME.Pose3Pose3NH}}, packeddata)
+    unpackeddata = convert(IncrementalInference.FunctionNodeData{CommonConvWrapper{RoME.Pose3Pose3NH}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
     @test IncrementalInference.compare(getData(f3), unpackeddata)

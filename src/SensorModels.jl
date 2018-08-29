@@ -12,7 +12,7 @@ mutable struct reuseLBRA
   reuseLBRA(::Int)=new(SE3(0),eye(4),Euler(0),ones(4),ones(4), zeros(3))
   reuseLBRA(a,b,c,d,e,f)=new(a,b,c,d,e,f)
 end
-mutable struct LinearRangeBearingElevation <: FunctorPairwise
+mutable struct LinearRangeBearingElevation <: FunctorPairwiseMinimize
   range::Normal
   bearing::Normal
   elev::Uniform
@@ -29,7 +29,7 @@ function (p::LinearRangeBearingElevation)(
             landm::Array{Float64,2}  )
   #
   residualLRBE!(res, meas[1][:,idx], pose[:,idx], landm[:,idx], p.reuse[Threads.threadid()])
-  nothing
+  return res[1]
 end
 
 function getSample!(y::Array{Float64,2}, las::LinearRangeBearingElevation, idx::Int )
@@ -79,31 +79,11 @@ function residualLRBE!(resid::Vector{Float64}, z::Vector{Float64}, X::Vector{Flo
   # TODO upgrade so the - sign here is used on a manifold too, ominus(z,  ominus(tt, variables...)  )
   # TODO just switch directly to parameterized function
   ominus!(reuse, X, L)
-  resid[1:3] = z - reuse.rbe
+  resid[1] = norm(z - reuse.rbe)
   # resid[:] = z - ominus!(LinearRangeBearingElevation, X, L)
   nothing
 end
 
-
-
-
-function +(arr::Array{Float64,2}, meas::LinearRangeBearingElevation)
-  N = size(arr,2)
-  L = zeros(3,N);
-  t = Array{Array{Float64,2},1}()
-  push!(t,arr)
-  push!(t,L)
-
-  fp! = GenericWrapParam{LinearRangeBearingElevation}(meas, t, 2, 1, (zeros(0,1),) , getSample)
-  # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
-  fp!.measurement = fp!.samplerfnc(fp!.usrfnc!, N)
-  # fp!(x, res)
-  fr = FastRootGenericWrapParam{LinearRangeBearingElevation}(fp!.params[fp!.varidx], 3, fp!)
-  for fp!.particleidx in 1:N
-    numericRootGenericRandomizedFnc!( fr )
-  end
-  return L
-end
 
 
 
