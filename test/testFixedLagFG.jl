@@ -4,16 +4,6 @@ using Base.Test
 using RoME, Distributions
 
 
-## Steps -- first cut doing in pieces (manually)
-# ----------------------------------------------
-# 1. drive a few poses in a cicle
-# 2. Stop and solve when shorter than fixed lag length
-# 3. Drive a couple more, longer than fixed lag window
-# 4. Duplicate crop the "old fragment" of fg and solve against original Prior
-# 5. Use old-fragment estimates of separator as priors against keep window fg
-# 6. Solve the keep window portion
-# 7. repeat from step 3.
-
 # start with an empty factor graph object
 fg = initfg() # FUTURE: (quasifixedwindow=50, autosolve=true)
 
