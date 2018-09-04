@@ -4,6 +4,19 @@ using Base.Test
 using RoME, Distributions
 
 
+# TODO -- use this for cleanup
+function driveSomeMore!(fg::FactorGraph, idx)
+    for i in idx:(idx+5)
+      psym = Symbol("x$i")
+      nsym = Symbol("x$(i+1)")
+      addNode!(fg, nsym, Pose2)
+      pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
+      addFactor!(fg, [psym;nsym], pp )
+    end
+    return Symbol("x$(idx+5)")
+end
+
+
 # start with an empty factor graph object
 fg = initfg() # FUTURE: (quasifixedwindow=50, autosolve=true)
 
