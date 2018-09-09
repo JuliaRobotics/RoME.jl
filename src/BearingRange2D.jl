@@ -31,7 +31,6 @@ end
 # bearing and range available
 
 
-
 mutable struct Pose2Point2BearingRange{B <: SamplableBelief, R <: SamplableBelief} <: IncrementalInference.FunctorPairwise
     bearing::B
     range::R
@@ -40,9 +39,10 @@ mutable struct Pose2Point2BearingRange{B <: SamplableBelief, R <: SamplableBelie
 end
 Pose2Point2BearingRange(x1::B,x2::R) where {B <: SamplableBelief,R <: SamplableBelief} = Pose2Point2BearingRange{B,R}(x1,x2)
 function getSample(pp2br::Pose2Point2BearingRange, N::Int=1)
-  b = rand(pp2br.bearing, N)
-  r = rand(pp2br.range, N)
-  return ([b'; r'],)
+  smpls = zeros(2, N)
+  smpls[1,:] = rand(pp2br.bearing, N)[:]
+  smpls[2,:] = rand(pp2br.range, N)[:]
+  return (smpls,)
 end
 # define the conditional probability constraint
 function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
