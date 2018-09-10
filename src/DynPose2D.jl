@@ -19,7 +19,7 @@ mutable struct DynPose2 <: IncrementalInference.InferenceVariable
   ut::Int64 # microsecond time
   dims::Int
   labels::Vector{String}
-  DynPose2(;ut::Int64=0, labels::Vector{<:AbstractString}=String["POSE";]) = new(ut, 5, labels)
+  DynPose2(;ut::Int64=-9999999999, labels::Vector{<:AbstractString}=String["POSE";]) = new(ut, 5, labels)
 end
 
 

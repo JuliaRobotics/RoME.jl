@@ -33,7 +33,6 @@ export
   compare,
   convert,
 
-
   # pass throughs from IncrementalInference
   FunctorSingleton,
   FunctorPairwise,
@@ -64,6 +63,7 @@ export
   getPoints,
   FactorMetadata,
   doautoinit!,
+  batchSolve!,
   # overloaded functions from IIF
   # decodefg,
   # convertfrompackedfunctionnode,
