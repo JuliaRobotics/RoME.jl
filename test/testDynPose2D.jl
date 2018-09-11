@@ -85,7 +85,105 @@ end
 
 
 
+@testset "test many DynPose2 chain for remaining stationary..." begin
 
+N = 75
+fg = initfg()
+
+# add first pose locations
+addNode!(fg, :x0, DynPose2(ut=0))
+
+# Prior factor as boundary condition
+pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), diagm([0.01; 0.01; 0.001].^2)),
+                            MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
+addFactor!(fg, [:x0;], pp0)
+
+sym = :x0
+k = 0
+for sy in Symbol[Symbol("x$i") for i in 1:10]
+
+k+=1
+addNode!(fg, sy, DynPose2(ut=1000_000*k))
+
+# conditional likelihood between Dynamic Point2
+dp2dp2 = VelPose2VelPose2(MvNormal([0.0;0;0], diagm([0.01;0.01;0.001].^2)),
+                          MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
+addFactor!(fg, [sym;sy], dp2dp2)
+sym =sy
+
+end
+
+
+x5 = KDE.getKDEMax(getVertKDE(fg, :x5))
+
+@test abs(x5[1]) < 1.0
+@test abs(x5[2]) < 1.0
+@test abs(x5[3]) < 0.1
+@test abs(x5[4]) < 0.5
+@test abs(x5[5]) < 0.5
+
+x10 = KDE.getKDEMax(getVertKDE(fg, :x10))
+
+@test abs(x10[1]) < 1.0
+@test abs(x10[2]) < 1.0
+@test abs(x10[3]) < 0.1
+@test abs(x10[4]) < 0.5
+@test abs(x10[5]) < 0.5
+
+batchSolve!(fg)
+
+x5 = KDE.getKDEMax(getVertKDE(fg, :x5))
+
+@test abs(x5[1]) < 1.0
+@test abs(x5[2]) < 1.0
+@test abs(x5[3]) < 0.1
+@test abs(x5[4]) < 0.5
+@test abs(x5[5]) < 0.5
+
+x10 = KDE.getKDEMax(getVertKDE(fg, :x10))
+
+@test abs(x10[1]) < 1.0
+@test abs(x10[2]) < 1.0
+@test abs(x10[3]) < 0.1
+@test abs(x10[4]) < 0.5
+@test abs(x10[5]) < 0.5
+
+
+# using RoMEPlotting
+# ensureAllInitialized!(fg)
+# drawPoses(fg)
+
+# pull the tail end out with position
+pp10 = DynPose2VelocityPrior(MvNormal([10.0;0;0], diagm([0.01; 0.01; 0.001].^2)),
+                            MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
+addFactor!(fg, [:x10;], pp10)
+
+
+# plotLocalProduct(fg, :x10, dims=[1;2])
+
+batchSolve!(fg)
+# drawPoses(fg)
+
+
+x10 = KDE.getKDEMax(getVertKDE(fg, :x10))
+
+@test 5.0 < x10[1]
+@test abs(x10[2]) < 1.0
+@test abs(x10[3]) < 0.1
+@test abs(x10[4]) < 1.0
+@test abs(x10[5]) < 0.5
+
+
+x5 = KDE.getKDEMax(getVertKDE(fg, :x5))
+
+@test 0.0 < x5[1] < 10.0
+@test abs(x5[2]) < 1.0
+@test abs(x5[3]) < 0.1
+@test abs(x5[4]) < 2.0
+@test abs(x5[5]) < 0.5
+
+
+end
 
 
 #
