@@ -118,15 +118,18 @@ x5 = KDE.getKDEMax(getVertKDE(fg, :x5))
 
 @test abs(x5[1]) < 1.0
 @test abs(x5[2]) < 1.0
-@test -0.1 <= x5[3] < 0.1 || 0.95*2*pi <= x5[3] <=2pi
+@test -0.1 <= x5[3] < 0.1 || 0.95*2*pi <= x5[3] <= 2.05*pi
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
+
+
+ensureAllInitialized!(fg)
 
 x10 = KDE.getKDEMax(getVertKDE(fg, :x10))
 
 @test abs(x10[1]) < 1.0
 @test abs(x10[2]) < 1.0
-@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <=2pi
+@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <= 2.05*pi
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
 
@@ -136,7 +139,7 @@ x5 = KDE.getKDEMax(getVertKDE(fg, :x5))
 
 @test abs(x5[1]) < 1.0
 @test abs(x5[2]) < 1.0
-@test -0.1 <= x5[3] < 0.1 || 0.95*2*pi <= x5[3] <=2pi
+@test -0.1 <= x5[3] < 0.1 || 0.95*2*pi <= x5[3] <= 2.05*pi
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
@@ -144,7 +147,7 @@ x10 = KDE.getKDEMax(getVertKDE(fg, :x10))
 
 @test abs(x10[1]) < 1.0
 @test abs(x10[2]) < 1.0
-@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <=2pi
+@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <= 2.05*pi
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
 
@@ -169,7 +172,7 @@ x10 = KDE.getKDEMax(getVertKDE(fg, :x10))
 
 @test 5.0 < x10[1]
 @test abs(x10[2]) < 1.0
-@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <=2pi
+@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <= 2.05*pi
 @test abs(x10[4]) < 1.0
 @test abs(x10[5]) < 0.5
 
@@ -181,7 +184,7 @@ XX = KDE.getKDEMax(getVertKDE(fg, sym))
 @show sym, round(XX,5)
 @test 0.0 < XX[1] < 10.0
 @test abs(XX[2]) < 1.0
-@test -0.1 <= XX[3] < 0.1 || 0.95*2*pi <= XX[3] <=2pi
+@test -0.1 <= XX[3] < 0.1 || 0.95*2*pi <= XX[3] <= 2.05*pi
 @test abs(XX[4]) < 2.0
 @test abs(XX[5]) < 0.5
 
