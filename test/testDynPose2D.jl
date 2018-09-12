@@ -206,7 +206,7 @@ end
 
 
 
-@testset "test many DynPose2 chain stationary and 'pulled'..." begin
+@testset "test many DynPose2 sideways velocity..." begin
 
 N = 75
 fg = initfg()
@@ -264,7 +264,6 @@ end
 
 
 
-end
 
 
 
