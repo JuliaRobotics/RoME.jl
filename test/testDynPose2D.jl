@@ -237,9 +237,17 @@ x0 = KDE.getKDEMax(getVertKDE(fg, :x0))
 @test 0.0 < x0[1] < 2.0
 @test abs(x0[2]) < 0.5
 @test abs(x0[3] - pi/2) < 0.1
-@test 0.0 < x0[4] < 0.2
-@test x0[5] < 0.5
+@test abs(x0[4]) < 0.4
+@test -1.5 < x0[5] < -0.5
 
+
+x1 = KDE.getKDEMax(getVertKDE(fg, :x1))
+
+@test 0.0 < x1[1] < 2.0
+@test abs(x1[2]) < 0.5
+@test abs(x1[3] - pi/2) < 0.1
+@test abs(x1[4]) < 0.4
+@test -1.5 < x1[5] < -0.5
 
 
 end
