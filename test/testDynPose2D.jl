@@ -175,7 +175,7 @@ x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 @test 5.0 < x10[1]
 @test abs(x10[2]) < 1.0
 @test abs(TU.wrapRad(x10[3])) < 0.6
-@test 0.0 < x10[4] < 1.0
+@test -0.1 < x10[4] < 1.0
 @test abs(x10[5]) < 0.5
 
 
