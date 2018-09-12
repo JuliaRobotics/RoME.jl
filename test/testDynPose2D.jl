@@ -185,7 +185,7 @@ XX = KDE.getKDEMax(getVertKDE(fg, sym))
 @test 0.0 < XX[1] < 10.0
 @test abs(XX[2]) < 1.0
 @test -0.1 <= XX[3] < 0.1 || 0.95*2*pi <= XX[3] <= 2.05*pi
-@test 0.0 < XX[4] < 2.0
+@test -0.1 < XX[4] < 2.0
 @test abs(XX[5]) < 0.5
 
 end
