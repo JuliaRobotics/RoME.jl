@@ -174,7 +174,7 @@ x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 @test 5.0 < x10[1]
 @test abs(x10[2]) < 1.0
-@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <= 2.05*pi
+@test abs(TU.wrapRad(x10[3])) < 0.6
 @test 0.0 < x10[4] < 1.0
 @test abs(x10[5]) < 0.5
 
@@ -186,7 +186,7 @@ XX = KDE.getKDEMean(getVertKDE(fg, sym))
 @show sym, round(XX,5)
 @test -0.4 < XX[1] < 10.0
 @test abs(XX[2]) < 1.0
-@test -0.4 <= XX[3] < 0.4 || 0.8*2*pi <= XX[3] <= 2.2*pi
+@test abs(TU.wrapRad(XX[3])) < 0.6
 @test -0.1 < XX[4] < 2.0
 @test abs(XX[5]) < 0.5
 
