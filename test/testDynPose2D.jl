@@ -118,7 +118,7 @@ x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 
 @test abs(x5[1]) < 1.0
 @test abs(x5[2]) < 1.0
-@test -0.1 <= x5[3] < 0.1 || 0.95*2*pi <= x5[3] <= 2.05*pi
+@test abs(wrapRad(x5[3]) < 0.4
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
@@ -129,7 +129,7 @@ x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 @test abs(x10[1]) < 1.0
 @test abs(x10[2]) < 1.0
-@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <= 2.05*pi
+@test abs(wrapRad(x10[3]) < 0.4
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
 
@@ -144,7 +144,7 @@ x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 
 @test abs(x5[1]) < 1.0
 @test abs(x5[2]) < 1.0
-@test -0.1 <= x5[3] < 0.1 || 0.95*2*pi <= x5[3] <= 2.05*pi
+@test abs(wrapRad(x5[3]) < 0.4
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
@@ -152,7 +152,7 @@ x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 @test abs(x10[1]) < 1.0
 @test abs(x10[2]) < 1.0
-@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <= 2.05*pi
+@test abs(wrapRad(x10[3]) < 0.4
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
 
