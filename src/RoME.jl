@@ -223,6 +223,7 @@ export
   PriorPose2,
   PackedPriorPose2,
   PartialPriorYawPose2,
+  PackedPartialPriorYawPose2,
   Pose2Pose2,
   PackedPose2Pose2,
   # velocity in Pose2

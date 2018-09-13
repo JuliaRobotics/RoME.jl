@@ -133,6 +133,21 @@ end
 
 
 
+mutable struct PackedPartialPriorYawPose2 <: IncrementalInference.PackedInferenceType
+    Z::String
+    PackedPartialPriorYawPose2() where T = new()
+    PackedPartialPriorYawPose2(x::T) where {T <: AbstractString}  = new(x)
+end
+
+function convert(::Type{PackedPartialPriorYawPose2}, d::PartialPriorYawPose2)
+  PackedPartialPriorYawPose2(string(d.Z))
+end
+function convert(::Type{PartialPriorYawPose2}, d::PackedPartialPriorYawPose2)
+  PartialPriorYawPose2(extractdistribution(d.Z))
+end
+
+
+
 
 # NOTE, for database support -- will be reduced to macro in future
 # ------------------------------------
