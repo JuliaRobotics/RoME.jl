@@ -20,7 +20,7 @@ function (pp2r::Pose2Point2Range)(res::Array{Float64},
   #
   # DONE in IIF -- still need to add multi-hypotheses support here
   # this is the noisy range
-  z = pp2r.Zij[1]+meas[1][1,idx]
+  z = meas[1][1,idx]
   XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
   YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
   res[1] = XX^2 + YY^2
