@@ -108,7 +108,7 @@ function (pp2br::Pose2Point2Bearing)(res::Array{Float64},
             xi::Array{Float64,2},
             lm::Array{Float64,2}  )
   #
-  res[1] = meas[1][idx] - atan2(lm[2,idx]-xi[2,idx], lm[1,idx]-xi[1,idx])
+  res[1] = TransformUtils.wrapRad(meas[1][idx] - atan2(lm[2,idx]-xi[2,idx], lm[1,idx]-xi[1,idx]))
   nothing
 end
 
