@@ -135,7 +135,7 @@ end
 
 mutable struct PackedPartialPriorYawPose2 <: IncrementalInference.PackedInferenceType
     Z::String
-    PackedPartialPriorYawPose2() where T = new()
+    PackedPartialPriorYawPose2() = new()
     PackedPartialPriorYawPose2(x::T) where {T <: AbstractString}  = new(x)
 end
 
