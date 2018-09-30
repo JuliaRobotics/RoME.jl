@@ -38,13 +38,25 @@ Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 # Add a landmark l1
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
 
+bear1 = atan2(10,20)
+bear2 = atan2(10,10) - pi/3
+
+
 # Add landmarks with Bearing range measurements at x0, x6, x12, x18, x24, x30...
 vars = ls(fg)[1] # Get variables
 for xIndex in 1:6:length(vars)
     info("Creating factor between $(vars[xIndex]) and l1...")
-    p2br = Pose2Point2Bearing(Normal(0,0.05))
-    addFactor!(fg, [vars[xIndex]; :l1], p2br)
+    p2br = Pose2Point2Bearing(Normal(bear1,0.05))
+    addFactor!(fg, [@show vars[xIndex]; :l1], p2br)
+    p2br = Pose2Point2Bearing(Normal(bear2,0.05))
+    addFactor!(fg, [@show vars[xIndex+1]; :l1], p2br)
 end
+
+# plotKDE(fg, [:x0;:x6;:x12], dims=[1;2])
+# plotKDE(fg, [:x0;:x6;:x12], dims=[3])
+# plotKDE(fg, [:x1;:x7;:x13], dims=[1;2])
+
+# writeGraphPdf(fg)
 
 # Initialize :l1 numerical values but do not rerun solver
 ensureAllInitialized!(fg)
