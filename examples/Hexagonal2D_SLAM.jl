@@ -15,7 +15,7 @@ fg = initfg()
 addNode!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
-addFactor!(fg, [Symbol("x0")], IIF.Prior( MvNormal([10; 10; pi/6.0], diagm([0.1;0.1;0.05].^2)) ))
+addFactor!(fg, [:x0], IIF.Prior( MvNormal([10; 10; pi/6.0], diagm([0.1;0.1;0.05].^2)) ))
 
 # Drive around in a hexagon
 for i in 0:5
