@@ -119,6 +119,34 @@ end
 
 
 
+mutable struct PartialPriorYawPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: IIF.SamplableBelief}
+    Z::T
+    partial::Tuple
+    PartialPriorYawPose2{T}() where T = new{T}()
+    PartialPriorYawPose2{T}(x::T) where {T <: IIF.SamplableBelief}  = new{T}(x, (3,))
+end
+PartialPriorYawPose2(x::T) where {T <: IIF.SamplableBelief} = PartialPriorYawPose2{T}(x)
+
+function getSample(p2::PartialPriorYawPose2, N::Int=1)
+  return (reshape(rand(p2.Z,N),1,N), )
+end
+
+
+
+mutable struct PackedPartialPriorYawPose2 <: IncrementalInference.PackedInferenceType
+    Z::String
+    PackedPartialPriorYawPose2() where T = new()
+    PackedPartialPriorYawPose2(x::T) where {T <: AbstractString}  = new(x)
+end
+
+function convert(::Type{PackedPartialPriorYawPose2}, d::PartialPriorYawPose2)
+  PackedPartialPriorYawPose2(string(d.Z))
+end
+function convert(::Type{PartialPriorYawPose2}, d::PackedPartialPriorYawPose2)
+  PartialPriorYawPose2(extractdistribution(d.Z))
+end
+
+
 
 
 # NOTE, for database support -- will be reduced to macro in future

@@ -106,7 +106,7 @@ k+=1
 addNode!(fg, sy, DynPose2(ut=1000_000*k))
 
 # conditional likelihood between Dynamic Point2
-dp2dp2 = VelPose2VelPose2(MvNormal([0.0;0;0], diagm([0.01;0.01;0.001].^2)),
+dp2dp2 = VelPose2VelPose2(MvNormal([0.0;0;0], diagm([1.0;0.1;0.001].^2)),
                           MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
 addFactor!(fg, [sym;sy], dp2dp2)
 sym =sy
@@ -114,44 +114,45 @@ sym =sy
 end
 
 
-x5 = KDE.getKDEMax(getVertKDE(fg, :x5))
+x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 
 @test abs(x5[1]) < 1.0
 @test abs(x5[2]) < 1.0
-@test -0.1 <= x5[3] < 0.1 || 0.95*2*pi <= x5[3] <= 2.05*pi
+@test abs(wrapRad(x5[3]) < 0.4
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
 
 ensureAllInitialized!(fg)
 
-x10 = KDE.getKDEMax(getVertKDE(fg, :x10))
+x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 @test abs(x10[1]) < 1.0
 @test abs(x10[2]) < 1.0
-@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <= 2.05*pi
+@test abs(wrapRad(x10[3]) < 0.4
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
 
 # using RoMEPlotting
 # drawPoses(fg)
-
+# plotPose(fg, [:x10])
 
 batchSolve!(fg)
 
-x5 = KDE.getKDEMax(getVertKDE(fg, :x5))
+
+x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 
 @test abs(x5[1]) < 1.0
 @test abs(x5[2]) < 1.0
-@test -0.1 <= x5[3] < 0.1 || 0.95*2*pi <= x5[3] <= 2.05*pi
+@test abs(wrapRad(x5[3]) < 0.4
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
-x10 = KDE.getKDEMax(getVertKDE(fg, :x10))
+x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 @test abs(x10[1]) < 1.0
 @test abs(x10[2]) < 1.0
-@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <= 2.05*pi
+@test abs(wrapRad(x10[3]) < 0.4
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
 
@@ -165,27 +166,28 @@ addFactor!(fg, [:x10;], pp10)
 
 
 batchSolve!(fg)
+# run(`evince /tmp/bt.pdf`)
 
 
 
-x10 = KDE.getKDEMax(getVertKDE(fg, :x10))
+x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 @test 5.0 < x10[1]
 @test abs(x10[2]) < 1.0
-@test -0.1 <= x10[3] < 0.1 || 0.95*2*pi <= x10[3] <= 2.05*pi
-@test 0.0 < x10[4] < 1.0
+@test abs(TU.wrapRad(x10[3])) < 0.6
+@test -0.1 < x10[4] < 1.0
 @test abs(x10[5]) < 0.5
 
 
 for sym in [Symbol("x$i") for i in 2:9]
 
-XX = KDE.getKDEMax(getVertKDE(fg, sym))
+XX = KDE.getKDEMean(getVertKDE(fg, sym))
 
 @show sym, round(XX,5)
-@test 0.0 < XX[1] < 10.0
+@test -0.4 < XX[1] < 10.0
 @test abs(XX[2]) < 1.0
-@test -0.1 <= XX[3] < 0.1 || 0.95*2*pi <= XX[3] <= 2.05*pi
-@test 0.0 < XX[4] < 2.0
+@test abs(TU.wrapRad(XX[3])) < 0.6
+@test -0.1 < XX[4] < 2.0
 @test abs(XX[5]) < 0.5
 
 end
@@ -193,16 +195,18 @@ end
 end
 
 
+# using RoMEPlotting
 # plotLocalProduct(fg, :x10, dims=[1;2])
 # drawPoses(fg)
+# plotPose(fg, [:x9],levels=1);
+#
+# plotPose(fg, [:x1;:x2;:x3;:x4;:x5;:x6;:x7;:x8;:x9;:x10],levels=1);
 
-# plotPose(fg, [:x1;:x2;:x3;:x4;:x5;:x6;:x7;:x8;:x9;:x10]);
+# savejld(fg) # tempfg.jld
 
 
 
-
-
-@testset "test many DynPose2 chain stationary and 'pulled'..." begin
+@testset "test many DynPose2 sideways velocity..." begin
 
 N = 75
 fg = initfg()
@@ -232,14 +236,22 @@ batchSolve!(fg)
 
 
 # test for velocity in the body frame
-x0 = KDE.getKDEMax(getVertKDE(fg, :x0))
+x0 = KDE.getKDEMean(getVertKDE(fg, :x0))
 
-@test 0.0 < x0[1] < 2.0
+@test -0.4 < x0[1] < 2.0
 @test abs(x0[2]) < 0.5
 @test abs(x0[3] - pi/2) < 0.1
-@test 0.0 < x0[4] < 0.2
-@test x0[5] < 0.5
+@test abs(x0[4]) < 0.4
+@test -1.5 < x0[5] < -0.5
 
+
+x1 = KDE.getKDEMean(getVertKDE(fg, :x1))
+
+@test -0.1 < x1[1] < 2.0
+@test abs(x1[2]) < 0.5
+@test abs(x1[3] - pi/2) < 0.1
+@test abs(x1[4]) < 0.4
+@test -1.5 < x1[5] < -0.5
 
 
 end
@@ -252,7 +264,6 @@ end
 
 
 
-end
 
 
 
