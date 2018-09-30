@@ -183,7 +183,7 @@ for sym in [Symbol("x$i") for i in 2:9]
 
 XX = KDE.getKDEMean(getVertKDE(fg, sym))
 
-@show sym, round(XX,5)
+@show sym, round.(XX,5)
 @test -0.4 < XX[1] < 10.0
 @test abs(XX[2]) < 1.0
 @test abs(TU.wrapRad(XX[3])) < 0.6
