@@ -23,7 +23,7 @@ using Base.Test
   @test norm(prpt2.Z.Σ.mat - uprpt2.Z.Σ.mat) < 1e-8
 
   # test backwards compatibility, TODO remove
-  prpt2 = PriorPoint2D([0.25;0.75], diagm([1.0;2.0]), [1.0;]  )
+  prpt2 = PriorPoint2D( MvNormal([0.25;0.75], diagm([1.0;2.0].^2)  )
 
 end
 
@@ -44,7 +44,7 @@ f1  = addFactor!(fg,[v1], ipp)
 
 # and a second pose
 v2 = addNode!(fg, :x2, Pose2, N=N) # vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05])
-ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov)
+ppc = Pose2Pose2( MvNormal([50.0;0.0;pi/2], odoCov) )
 f2 = addFactor!(fg, [:x1;:x2], ppc)
 
 

@@ -91,7 +91,7 @@ end
 # bearing only available
 
 # this factor type is still a work in progress
-mutable struct Pose2Point2Bearing{B <: Distributions.Distribution} <: IncrementalInference.FunctorPairwise
+mutable struct Pose2Point2Bearing{B <: Distributions.Distribution} <: IncrementalInference.FunctorPairwiseMinimize
     bearing::B
     Pose2Point2Bearing{B}() where B = new{B}()
     Pose2Point2Bearing{B}(x1::B) where {B <: Distributions.Distribution} = new{B}(x1)
@@ -108,8 +108,8 @@ function (pp2br::Pose2Point2Bearing)(res::Array{Float64},
             xi::Array{Float64,2},
             lm::Array{Float64,2}  )
   #
-  res[1] = TransformUtils.wrapRad(meas[1][idx] - atan2(lm[2,idx]-xi[2,idx], lm[1,idx]-xi[1,idx]))
-  nothing
+  res[1] = ( meas[1][idx] - atan2(lm[2,idx]-xi[2,idx], lm[1,idx]-xi[1,idx]) )^2
+  return res[1]
 end
 
 

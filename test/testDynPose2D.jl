@@ -118,7 +118,7 @@ x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 
 @test abs(x5[1]) < 1.0
 @test abs(x5[2]) < 1.0
-@test abs(wrapRad(x5[3]) < 0.4
+@test abs(TU.wrapRad(x5[3])) < 0.4
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
@@ -129,7 +129,7 @@ x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 @test abs(x10[1]) < 1.0
 @test abs(x10[2]) < 1.0
-@test abs(wrapRad(x10[3]) < 0.4
+@test abs(TU.wrapRad(x10[3])) < 0.4
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
 
@@ -144,7 +144,7 @@ x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 
 @test abs(x5[1]) < 1.0
 @test abs(x5[2]) < 1.0
-@test abs(wrapRad(x5[3]) < 0.4
+@test abs(TU.wrapRad(x5[3])) < 0.4
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
@@ -152,7 +152,7 @@ x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 @test abs(x10[1]) < 1.0
 @test abs(x10[2]) < 1.0
-@test abs(wrapRad(x10[3]) < 0.4
+@test abs(TU.wrapRad(x10[3])) < 0.4
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
 
@@ -183,7 +183,7 @@ for sym in [Symbol("x$i") for i in 2:9]
 
 XX = KDE.getKDEMean(getVertKDE(fg, sym))
 
-@show sym, round(XX,5)
+@show sym, round.(XX,5)
 @test -0.4 < XX[1] < 10.0
 @test abs(XX[2]) < 1.0
 @test abs(TU.wrapRad(XX[3])) < 0.6
