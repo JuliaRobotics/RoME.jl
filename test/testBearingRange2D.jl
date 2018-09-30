@@ -77,7 +77,7 @@ fg = initfg()
 
 #add pose with partial constraint
 addNode!(fg, :x0, Pose2)
-addFactor!(fg, [:x0], Prior(MvNormal(zeros(3), 0.01*eye(3))), autoinit=false)
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))), autoinit=false) # TODO IIF.Prior
 # force particular initialization
 setVal!(fg, :x0, zeros(3,1))
 
@@ -123,7 +123,7 @@ fg = initfg()
 
 # Add landmark
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
-addFactor!(fg, [:l1], Prior(MvNormal([20.0;0.0], diagm([1.0;1.0].^2))),  autoinit=false )
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([20.0;0.0], diagm([1.0;1.0].^2))),  autoinit=false ) # TODO IIF.Prior
 li = zeros(2,1); li[1,1] = 20.0;
 setVal!(fg, :l1, li)
 
