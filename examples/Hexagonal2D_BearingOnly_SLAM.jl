@@ -32,6 +32,7 @@ using Compose
 # For Juno/Jupyter style use
 pl = drawPoses(fg)
 # For scripting use-cases you can export the image
+Gadfly.push_theme(:default) # light background, where Juno uses dark background
 Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 # Add a landmark l1
