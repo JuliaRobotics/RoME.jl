@@ -23,7 +23,7 @@ using Base.Test
   @test norm(prpt2.Z.Σ.mat - uprpt2.Z.Σ.mat) < 1e-8
 
   # test backwards compatibility, TODO remove
-  prpt2 = PriorPoint2D( MvNormal([0.25;0.75], diagm([1.0;2.0].^2)  )
+  prpt2 = PriorPoint2D( MvNormal([0.25;0.75], diagm([1.0;2.0].^2)  ) )
 
 end
 
