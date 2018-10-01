@@ -21,13 +21,13 @@ function getSample(p2::PriorPoint2, N::Int=1)
   return (rand(p2.Z, N),)
 end
 
-mutable struct Point2Point2Range{D <: SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
+mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
   Z::D
   Point2Point2Range{D}() where {D} = new{D}()
-  Point2Point2Range{D}(d::D) where {D <: SamplableBelief} = new{D}(d)
+  Point2Point2Range{D}(d::D) where {D <: IIF.SamplableBelief} = new{D}(d)
 end
-Point2Point2Range(d::D) where {D <: SamplableBelief} = Point2Point2Range{D}(d)
-function getSample(pp2::Point2Point2Range{T}, N::Int=1) where {T <: SamplableBelief}
+Point2Point2Range(d::D) where {D <: IIF.SamplableBelief} = Point2Point2Range{D}(d)
+function getSample(pp2::Point2Point2Range{T}, N::Int=1) where {T <: IIF.SamplableBelief}
   return (reshape(rand(pp2.Z,N),1,N),  2*pi*rand(N))
 end
 function (pp2r::Point2Point2Range{T})(
@@ -36,7 +36,7 @@ function (pp2r::Point2Point2Range{T})(
             idx::Int,
             meas::Tuple,
             xi::Array{Float64,2},
-            lm::Array{Float64,2} ) where {T <: SamplableBelief}
+            lm::Array{Float64,2} ) where {T <: IIF.SamplableBelief}
   #
   z = meas[1][1,idx]
   XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
@@ -47,7 +47,7 @@ function (pp2r::Point2Point2Range{T})(
 end
 # import RoME: Point2Point2Range
 
-mutable struct Point2Point2{D <: SamplableBelief} <: FunctorPairwise #BetweenPoses
+mutable struct Point2Point2{D <: IIF.SamplableBelief} <: FunctorPairwise #BetweenPoses
     Zij::D
     Point2Point2{T}() where T = new{T}()
     Point2Point2{T}(x::T) where {T <: Sampleable} = new{T}(x)
@@ -71,14 +71,14 @@ end
 
 
 
-mutable struct Point2Point2WorldBearing{T} <: IncrementalInference.FunctorPairwise where {T <: SamplableBelief}
+mutable struct Point2Point2WorldBearing{T} <: IncrementalInference.FunctorPairwise where {T <: IIF.SamplableBelief}
     Z::T
     rangemodel::Rayleigh
     # zDim::Tuple{Int, Int}
     Point2Point2WorldBearing{T}() where T = new{T}()
-    Point2Point2WorldBearing{T}(x::T) where {T <: SamplableBelief} = new{T}(x, Rayleigh(100))
+    Point2Point2WorldBearing{T}(x::T) where {T <: IIF.SamplableBelief} = new{T}(x, Rayleigh(100))
 end
-Point2Point2WorldBearing(x::T) where {T <: SamplableBelief} = Point2Point2WorldBearing{T}(x)
+Point2Point2WorldBearing(x::T) where {T <: IIF.SamplableBelief} = Point2Point2WorldBearing{T}(x)
 function getSample(pp2::Point2Point2WorldBearing, N::Int=1)
   sp = Array{Float64,2}(2,N)
   sp[1,:] = rand(pp2.Z,N)

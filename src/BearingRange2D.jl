@@ -4,9 +4,9 @@
 mutable struct Pose2Point2Range{T} <: IncrementalInference.FunctorPairwise
   Z::T
   Pose2Point2Range{T}() where T = new()
-  Pose2Point2Range{T}(Z::T) where {T <: SamplableBelief} = new{T}(Z)
+  Pose2Point2Range{T}(Z::T) where {T <: IIF.SamplableBelief} = new{T}(Z)
 end
-Pose2Point2Range(Z::T) where {T <: SamplableBelief} = Pose2Point2Range{T}(Z)
+Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range{T}(Z)
 
 function getSample(pp2::Pose2Point2Range, N::Int=1)
   return (reshape(rand(pp2.Z,N),1,N) ,  2*pi*rand(N))
@@ -31,13 +31,13 @@ end
 # bearing and range available
 
 
-mutable struct Pose2Point2BearingRange{B <: SamplableBelief, R <: SamplableBelief} <: IncrementalInference.FunctorPairwise
+mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwise
     bearing::B
     range::R
     Pose2Point2BearingRange{B,R}() where {B,R} = new{B,R}()
-    Pose2Point2BearingRange{B,R}(x1::B,x2::R) where {B <: SamplableBelief,R <: SamplableBelief} = new{B,R}(x1,x2)
+    Pose2Point2BearingRange{B,R}(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = new{B,R}(x1,x2)
 end
-Pose2Point2BearingRange(x1::B,x2::R) where {B <: SamplableBelief,R <: SamplableBelief} = Pose2Point2BearingRange{B,R}(x1,x2)
+Pose2Point2BearingRange(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = Pose2Point2BearingRange{B,R}(x1,x2)
 function getSample(pp2br::Pose2Point2BearingRange, N::Int=1)
   smpls = zeros(2, N)
   smpls[1,:] = rand(pp2br.bearing, N)[:]
@@ -71,13 +71,13 @@ mutable struct PackedPose2Point2BearingRange <: IncrementalInference.PackedInfer
     PackedPose2Point2BearingRange(s1::AS, s2::AS) where {AS <: AbstractString} = new(string(s1),string(s2))
 end
 
-function convert(::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange{B, R}) where {B <: SamplableBelief, R <: SamplableBelief}
+function convert(::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange{B, R}) where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}
   return PackedPose2Point2BearingRange(string(d.bearing), string(d.range))
 end
 
 # TODO -- should not be resorting to string, consider specialized code for parametric distribution types and KDEs
 function convert(::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange)
- # where {B <: SamplableBelief, R <: SamplableBelief}
+ # where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}
   Pose2Point2BearingRange(extractdistribution(d.bearstr), extractdistribution(d.rangstr))
 end
 

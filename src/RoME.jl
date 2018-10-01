@@ -64,12 +64,9 @@ export
   FactorMetadata,
   doautoinit!,
   batchSolve!,
-  # overloaded functions from IIF
-  # decodefg,
-  # convertfrompackedfunctionnode,
 
   # RoME specific functions
-  SamplableBelief, # moved to IIF 0.3.9
+  # IIF.SamplableBelief, # moved to IIF 0.3.9
   initfg,
   measureMeanDist,
   predictBodyBR,
@@ -89,9 +86,6 @@ export
   veePose,
   \,
   RangeAzimuthElevation,
-
-  # types
-  # BetweenPoses,
 
   # helper functions
   get2DSamples,

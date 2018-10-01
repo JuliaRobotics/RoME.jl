@@ -3,10 +3,10 @@
 # old type interfaces
 
 function Point2DPoint2DRange(mu,stdev,w)
-  warn("Point2DPoint2DRange deprecated in favor of Point2Point2Range{<:SamplableBelief}.")
+  warn("Point2DPoint2DRange deprecated in favor of Point2Point2Range{<:IIF.SamplableBelief}.")
   Point2Point2Range{Normal}(Normal(mu,stdev))
 end
-function Point2DPoint2D(d::D) where {D <: SamplableBelief}
+function Point2DPoint2D(d::D) where {D <: IIF.SamplableBelief}
   warn("Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}.")
   Point2Point2{D}(d)
 end
