@@ -61,10 +61,12 @@ end
 
 N = 10
 
+i=1
 for i in 1:5
 
 
 eul = 0.25*randn(3, N)
+
 # res = zeros(3)
 # @show rotationresidual!(res, eul, (zeros(0),x0))
 # @show res
@@ -84,13 +86,17 @@ rr = RotationTest(MvNormal(zeros(3), 0.001*eye(3)))
 
 zDim = 3
 
-ccw = CommonConvWrapper(rr, t[1], zDim, t, measurement=(eul,))
+ccw = CommonConvWrapper(rr, t[1], zDim, t, measurement=(eul,)) # old bug where measurement is not patched through fixed in IIF v0.3.9
 
 @test ccw.xDim == 3
+
+# TODO remove
+ccw.measurement = (eul,)
 
 ccw(res, x0)
 
 # and return complete fr/gwp
+n = 1
 for n in 1:N
 
 ccw.cpt[Threads.threadid()].particleidx = n
