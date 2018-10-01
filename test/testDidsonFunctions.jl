@@ -29,6 +29,10 @@ measurement = getSample(meas, N)
 
 ccw = CommonConvWrapper(meas, t[2], zDim, t, measurement=measurement, varidx=2)
 
+# TODO remove
+ccw.measurement = measurement
+ccw.cpt[1].res = zeros(1)
+
 @time ccw(zeros(3), zeros(3))
 @time ccw(zeros(3))
 
@@ -62,6 +66,9 @@ measurement = getSample(meas, N)
 zDim = size(measurement,1)
 ccw = CommonConvWrapper(meas, t[1], zDim, t, varidx=1, measurement=measurement)
 
+# TODO remove
+ccw.measurement = measurement
+ccw.cpt[1].res = zeros(1)
 
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
 @time ccw(zeros(3), zeros(6))
@@ -128,7 +135,7 @@ L1pts = approxConv(fg, :x1l1f1, :l1)
 
 
 data = getData(f2)
-data
+# data
 
 
 X1pts = approxConv(fg, :x1l1f1, :x1)

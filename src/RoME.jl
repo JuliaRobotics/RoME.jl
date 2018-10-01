@@ -69,7 +69,7 @@ export
   # convertfrompackedfunctionnode,
 
   # RoME specific functions
-  # SamplableBelief, moved to IIF
+  SamplableBelief, # moved to IIF 0.3.9
   initfg,
   measureMeanDist,
   predictBodyBR,
@@ -304,12 +304,6 @@ export
   # appendFactorGraph!,
   # doBatchRun,
   # rotateFeatsToWorld
-
-
-const IIF = IncrementalInference
-const KDE = KernelDensityEstimate
-
-
 
 include("SpecialDefinitions.jl")
 
