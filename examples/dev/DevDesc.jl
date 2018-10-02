@@ -148,7 +148,7 @@ function bestDescriptors(d::Dict{String, Vector{Float64}};
 
   #construct matrix of hamming distances
   n = length(ks)
-  H = 99999*eye(Int, n, n)
+  H = 99999*Matrix{Int}(LinearAlgebra.I, n, n) # eye(Int, n, n)
   for i in 1:(n-1), j = (i+1):n
     H[i,j] = hamming(allDescr[ks[i]],allDescr[ks[j]])
   end
