@@ -112,7 +112,7 @@ end
 
   # ensure the newly updated values match what is specified in mu2
   @show abs.(Base.mean(pts[newdims,:],2)-mu2)
-  @test sum(abs.(Base.mean(pts[newdims,:],2)-mu2) .< [0.7;0.7;0.15]) == 3
+  @test sum(abs.(Base.mean(pts[newdims,:],2)-mu2) .< [0.7;0.7;0.2]) == 3
 
   # ensure a re-evaluation of the partial factor updates the partial variable dimensions correclty
   @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
