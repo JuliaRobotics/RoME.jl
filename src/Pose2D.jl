@@ -31,12 +31,12 @@ end
 # getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 
 
-mutable struct Pose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: SamplableBelief}
+mutable struct Pose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: IIF.SamplableBelief}
   z::T
-  Pose2Pose2{T}() where {T <: SamplableBelief} = new{T}()
-  Pose2Pose2{T}(z1::T) where {T <: SamplableBelief} = new{T}(z1)
+  Pose2Pose2{T}() where {T <: IIF.SamplableBelief} = new{T}()
+  Pose2Pose2{T}(z1::T) where {T <: IIF.SamplableBelief} = new{T}(z1)
 end
-Pose2Pose2(z::T) where {T <: SamplableBelief} = Pose2Pose2{T}(z)
+Pose2Pose2(z::T) where {T <: IIF.SamplableBelief} = Pose2Pose2{T}(z)
 function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2})
   warn("Pose2Pose2(mu,cov) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))")
   Pose2Pose2(MvNormal(mean, cov))
@@ -45,8 +45,8 @@ function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Flo
   warn("Pose2Pose2(mu,cov,w) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))")
   Pose2Pose2(MvNormal(mean, cov))
 end
-getSample(s::Pose2Pose2{<:SamplableBelief}, N::Int=1) = (rand(s.z,N), )
-function (s::Pose2Pose2{<:SamplableBelief})(res::Array{Float64},
+getSample(s::Pose2Pose2{<:IIF.SamplableBelief}, N::Int=1) = (rand(s.z,N), )
+function (s::Pose2Pose2{<:IIF.SamplableBelief})(res::Array{Float64},
             userdata,
             idx::Int,
             meas::Tuple,
@@ -119,13 +119,13 @@ end
 
 
 
-mutable struct PartialPriorYawPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: SamplableBelief}
+mutable struct PartialPriorYawPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: IIF.SamplableBelief}
     Z::T
     partial::Tuple
     PartialPriorYawPose2{T}() where T = new{T}()
-    PartialPriorYawPose2{T}(x::T) where {T <: SamplableBelief}  = new{T}(x, (3,))
+    PartialPriorYawPose2{T}(x::T) where {T <: IIF.SamplableBelief}  = new{T}(x, (3,))
 end
-PartialPriorYawPose2(x::T) where {T <: SamplableBelief} = PartialPriorYawPose2{T}(x)
+PartialPriorYawPose2(x::T) where {T <: IIF.SamplableBelief} = PartialPriorYawPose2{T}(x)
 
 function getSample(p2::PartialPriorYawPose2, N::Int=1)
   return (reshape(rand(p2.Z,N),1,N), )
