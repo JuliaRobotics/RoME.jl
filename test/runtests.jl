@@ -51,9 +51,9 @@ include("testPose3Pose3NH.jl")
 println("[SUCCESS]")
 
 println("[TEST] saving to and loading from .jld file")
-savejld(fg, file="tempfg.jld" )
-fgu = loadjld( file="tempfg.jld" )
-Base.rm("tempfg.jld")
+savejld(fg, file="tempfg.jld2" )
+fgu = loadjld( file="tempfg.jld2" )
+Base.rm("tempfg.jld2")
 println("Success")
 
 println("[TEST] partial pose3 evaluations...")
