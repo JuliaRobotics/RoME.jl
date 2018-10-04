@@ -104,7 +104,7 @@ fg = initfg()
 N = 100
 warn("Breaks if not set to 100")
 
-initCov = eye(6)
+initCov = Matrix{Float64}(LinearAlgebra.I, 6,6)
 [initCov[i,i] = 0.01 for i in 4:6];
 odoCov = deepcopy(initCov)
 

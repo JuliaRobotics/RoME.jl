@@ -106,7 +106,7 @@ function predictBodyBR(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
   By = Base.mean(vec(B[2,:]))
   wL = SE2([Bx;By;0.0])
   wBb = SE2([Ax;Ay;Ath])
-  bL = se2vee((wBb \ eye(3)) * wL)
+  bL = se2vee((wBb \ Matrix{Float64}(LinearAlgebra.I, 3,3)) * wL)
   dx = bL[1] - 0.0
   dy = bL[2] - 0.0
   b = (atan2(dy,dx))
@@ -542,7 +542,7 @@ function malahanobisBR(measA, preA, cov::Array{Float64,2})
     mala2 = Union{}
     #Malahanobis distance
     if false
-      lambda = cov \ eye(2)
+      lambda = cov \ Matrix{Float64}(LinearAlgebra.I, 2,2)
       mala2 = res' * lambda * res
     else
       mala2 = res' * (cov \ res)
@@ -748,7 +748,7 @@ end
 
 
 function addSoftEqualityPoint2D(fgl::FactorGraph, l1::Symbol, l2::Symbol;
-    dist=MvNormal([0.0;0.0],eye(2)), ready::Int=1 )
+    dist=MvNormal([0.0;0.0],Matrix{Float64}(LinearAlgebra.I, 2,2)), ready::Int=1 )
   pp = Point2DPoint2D(dist)
   addFactor!(fgl, [l1,l2], pp, ready=ready)
 end
@@ -769,7 +769,7 @@ end
 #                    Dict())
 # end
 #
-# function makePose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*eye(6))
+# function makePose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*Matrix{Float64}(LinearAlgebra.I, 6,6))
 #     return PoseSE3(ut,
 #                    name,
 #                    Rigid6DOF( q, t ),
@@ -777,7 +777,7 @@ end
 #                    Dict())
 # end
 
-# function makeDynPose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*eye(18))
+# function makeDynPose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*Matrix{Float64}(LinearAlgebra.I, 18,18))
 #     return DynPose3(ut,
 #                     name,
 #                     Dynamic6DOF( q, t, [0.,0,0], [0.,0,0] ),
@@ -787,12 +787,12 @@ end
 # end
 #
 # function wTo(p::PoseSE3)
-#     T = eye(4)
+#     T = Matrix{Float64}(LinearAlgebra.I, 4,4)
 #     T[1:3,1:3] =  convert(SO3, p.mu.rot).R
 #     T[1:3,4] = p.mu.trl
 #     return T
 # end
 #
 # function oTw(p::PoseSE3)
-#     return wTo(p) \ eye(4)
+#     return wTo(p) \ Matrix{Float64}(LinearAlgebra.I, 4,4)
 # end

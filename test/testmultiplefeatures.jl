@@ -188,7 +188,7 @@ gg = (x,y) -> minmickey([x;y])
 N=50
 fg = initfg()
 
-initCov = 0.05*eye(3)
+initCov = 0.05*Matrix{Float64}(LinearAlgebra.I, 3,3)
 initCov[3,3] = 0.001
 odoCov = deepcopy(initCov)
 
@@ -207,9 +207,9 @@ px2[1:3] = [1.1;-1.0;pi/2]
 ipp2 = PriorPose2(MvNormal(px2, initCov^2))
 f1  = addFactor!(fg,[:x2], ipp2)
 
-vl1 = addNode!(fg, :l1, Point2, N=N) # rand(MvNormal(l1,0.001*eye(2)),N), diagm([1.0;1.0])
-vl2 = addNode!(fg, :l2, Point2, N=N) # rand(MvNormal(l2,0.001*eye(2)),N), diagm([1.0;1.0])
-vl3 = addNode!(fg, :l3, Point2, N=N) # rand(MvNormal(l3,0.001*eye(2)),N), diagm([1.0;1.0])
+vl1 = addNode!(fg, :l1, Point2, N=N) # rand(MvNormal(l1,0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)),N), diagm([1.0;1.0])
+vl2 = addNode!(fg, :l2, Point2, N=N) # rand(MvNormal(l2,0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)),N), diagm([1.0;1.0])
+vl3 = addNode!(fg, :l3, Point2, N=N) # rand(MvNormal(l3,0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)),N), diagm([1.0;1.0])
 
 # # why is explicit call to autoinit required here? should not be necessary
 # doautoinit!(fg, :x1)

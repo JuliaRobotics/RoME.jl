@@ -7,10 +7,10 @@ using Base: Test
 fg = initfg()
 
 addNode!(fg, :x0, Point2)
-addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), eye(2))))
+addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
 addNode!(fg, :x1, Point2)
-addFactor!(fg, [:x0;:x1], Point2Point2(MvNormal([10;0.0], eye(2))))
+addFactor!(fg, [:x0;:x1], Point2Point2(MvNormal([10;0.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
 tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree)
@@ -27,10 +27,10 @@ N=200
 fg = initfg()
 
 addNode!(fg, :x0, Point2, N=N)
-addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], eye(2))))
+addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
 addNode!(fg, :x1, Point2, N=N)
-addFactor!(fg, [:x1], PriorPoint2(MvNormal([0.0;100.0], eye(2))))
+addFactor!(fg, [:x1], PriorPoint2(MvNormal([0.0;100.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
 addNode!(fg, :l1, Point2, N=N)
 addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)))

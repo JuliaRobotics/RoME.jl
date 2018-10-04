@@ -28,7 +28,7 @@ println("Test if null hypothesis occurs as expected...")
 N = 100
 fg = initfg()
 
-initCov = eye(6)
+initCov = Matrix{Float64}(LinearAlgebra.I, 6,6)
 [initCov[i,i] = 0.01^2 for i in 4:6];
 odoCov = deepcopy(initCov)
 

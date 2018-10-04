@@ -13,12 +13,12 @@ N = 100
 fg = initfg()
 
 addNode!(fg, :x0, Point2)
-addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), eye(2))))
+addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
 ensureAllInitialized!(fg)
 
 addNode!(fg, :x1, Point2)
-# addFactor!(fg, [:x1], PriorPoint2(MvNormal([0.0;-30.0], 100*eye(2))))
+# addFactor!(fg, [:x1], PriorPoint2(MvNormal([0.0;-30.0], 100*Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
 
 pp2 = Point2Point2WorldBearing(Normal(-3pi/4,0.1))
@@ -26,7 +26,7 @@ addFactor!(fg, [:x0;:x1], pp2)
 
 
 addNode!(fg, :x2, Point2)
-addFactor!(fg, [:x2], PriorPoint2(MvNormal([0.0;-100.0], eye(2))))
+addFactor!(fg, [:x2], PriorPoint2(MvNormal([0.0;-100.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
 
 pp2 = Point2Point2WorldBearing(Normal(3pi/4,0.1))

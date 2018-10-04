@@ -54,7 +54,7 @@ end
 #  R(th) = [[cos(th);-sin(th)]';[sin(th);cos(th)]'];
 #
 #  function SE2(X::Array{Float64,1})
-#      T = eye(3)
+#      T = Matrix{Float64}(LinearAlgebra.I, 3,3)
 #      T[1:2,1:2] = R(X[3])
 #      T[1,3] = X[1]
 #      T[2,3] = X[2]

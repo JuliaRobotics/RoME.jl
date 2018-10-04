@@ -68,8 +68,8 @@ function evalPotential(odom::Pose2Pose2, Xi::Array{Graphs.ExVertex,1}, Xid::Int;
     warn("should not be running")
     # implicit equation portion -- bi-directional pairwise function
     if Xid == Xi[1].index #odom.
-        #Z = (odom.Zij\eye(rz)) # this will be used for group operations
-        Z = se2vee(SE2(vec(odom.Zij)) \ eye(3))
+        #Z = (odom.Zij\Matrix{Float64}(LinearAlgebra.I, rz,rz)) # this will be used for group operations
+        Z = se2vee(SE2(vec(odom.Zij)) \ Matrix{Float64}(LinearAlgebra.I, 3,3))
         Xval = getVal(Xi[2])
         XvalNull = getVal(Xi[1])
     elseif Xid == Xi[2].index

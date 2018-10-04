@@ -7,7 +7,7 @@ using Base.Test
 tf = SE3([0.0;0.0;0.0], AngleAxis(pi/4,[0;0;1.0]))# Euler(pi/4,0.0,0.0) )
 
 N = 1
-initCov = 0.0001*eye(6)
+initCov = 0.0001*Matrix{Float64}(LinearAlgebra.I, 6,6)
 [initCov[i,i] = 0.000001 for i in 4:6];
 odoCov = deepcopy(initCov)
 odo = Pose3Pose3( MvNormal(veeEuler(tf), odoCov) )
@@ -24,7 +24,7 @@ Y = X ⊕ odo
 tf = SE3([0.0;0.0;0.0], AngleAxis(pi/4,[0;0;1.0]))# Euler(pi/4,0.0,0.0) )
 
 N = 1
-initCov = 0.01*eye(6)
+initCov = 0.01*Matrix{Float64}(LinearAlgebra.I, 6,6)
 [initCov[i,i] = 0.001 for i in 4:6];
 odoCov = deepcopy(initCov)
 odo = Pose3Pose3(  MvNormal(veeEuler(tf), odoCov) )
@@ -42,7 +42,7 @@ Y = X ⊕ odo
 N = 75
 fg = initfg()
 
-initCov = eye(6)
+initCov = Matrix{Float64}(LinearAlgebra.I, 6,6)
 [initCov[i,i] = 0.01 for i in 4:6];
 odoCov = deepcopy(initCov)
 

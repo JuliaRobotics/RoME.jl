@@ -20,9 +20,9 @@ v1 = addNode!(fg, :x0, Pose2, N=N)
 initPosePrior = PriorPose2(MvNormal(zeros(3), initCov))
 f1  = addFactor!(fg,[v1], initPosePrior)
 
-@test Pose2Pose2(MvNormal(randn(2), eye(2))) != nothing
-@test Pose2Pose2(randn(2), eye(2)) != nothing
-@test Pose2Pose2(randn(2), eye(2),[1.0;]) != nothing
+@test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) != nothing
+@test Pose2Pose2(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2)) != nothing
+@test Pose2Pose2(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2),[1.0;]) != nothing
 
 # and a second pose
 v2 = addNode!(fg, :x1, Pose2, N=N) # vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05])

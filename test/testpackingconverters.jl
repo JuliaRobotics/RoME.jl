@@ -89,7 +89,7 @@ end
 @testset "test conversions of Pose2Point2BearingRange" begin
     # and a second pose
     v3 = addNode!(fg, :l1, Point2, N=N) # vectoarr2([50.0,50.0]), diagm([1.0;1.0])
-    # ppc = Pose2Point2BearingRange([50.0;0.0;pi/2], 0.01*eye(2), [1.0])
+    # ppc = Pose2Point2BearingRange([50.0;0.0;pi/2], 0.01*Matrix{Float64}(LinearAlgebra.I, 2,2), [1.0])
     ppbr = Pose2Point2BearingRange(
                   Normal(0.0, 0.005 ),
                   Normal(50, 0.5) )
@@ -113,7 +113,7 @@ end
 
 # parameters
 N = 300
-initCov = eye(6)
+initCov = Matrix{Float64}(LinearAlgebra.I, 6,6)
 [initCov[i,i] = 0.01 for i in 4:6];
 odoCov = deepcopy(initCov)
 
@@ -194,7 +194,7 @@ end
 
 @testset "test conversions of PartialPriorRollPitchZ" begin
 
-    prpz = PartialPriorRollPitchZ(MvNormal([0.0;0.5],0.1*eye(2)),Normal(3.0,0.5))
+    prpz = PartialPriorRollPitchZ(MvNormal([0.0;0.5],0.1*Matrix{Float64}(LinearAlgebra.I, 2,2)),Normal(3.0,0.5))
 
     pprpz = convert(PackedPartialPriorRollPitchZ, prpz)
     unp = convert(PartialPriorRollPitchZ, pprpz)
@@ -206,7 +206,7 @@ end
 
 
 @testset "test conversions of PartialPose3XYYaw" begin
-    xyy = PartialPose3XYYaw(MvNormal([1.0;2.0;0.5],0.1*eye(3)))
+    xyy = PartialPose3XYYaw(MvNormal([1.0;2.0;0.5],0.1*Matrix{Float64}(LinearAlgebra.I, 3,3)))
 
     pxyy = convert(PackedPartialPose3XYYaw, xyy)
     unp = convert(PartialPose3XYYaw, pxyy)
@@ -218,7 +218,7 @@ end
 
 @testset "test conversions of PartialPose3XYYawNH" begin
 
-    xyy = PartialPose3XYYawNH(MvNormal([1.0;2.0;0.5],0.1*eye(3)), [0.6;0.4])
+    xyy = PartialPose3XYYawNH(MvNormal([1.0;2.0;0.5],0.1*Matrix{Float64}(LinearAlgebra.I, 3,3)), [0.6;0.4])
 
     pxyy = convert(PackedPartialPose3XYYawNH, xyy)
     unp = convert(PartialPose3XYYawNH, pxyy)

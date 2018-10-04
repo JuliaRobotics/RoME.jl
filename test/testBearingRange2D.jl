@@ -77,7 +77,7 @@ fg = initfg()
 
 #add pose with partial constraint
 addNode!(fg, :x0, Pose2)
-addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))), autoinit=false) # TODO IIF.Prior
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))), autoinit=false) # TODO IIF.Prior
 # force particular initialization
 setVal!(fg, :x0, zeros(3,1))
 

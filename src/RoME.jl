@@ -1,18 +1,24 @@
 module RoME
 
+using Reexport
+
+@reexport using RoME
+@reexport using TransformUtils
+
 using
-  IncrementalInference,
+  LinearAlgebra,
+  Distributed,
+  Statistics,
   Graphs,
-  TransformUtils,
+  KernelDensityEstimate,
+  IncrementalInference,
   CoordinateTransformations,
   Rotations,
-  KernelDensityEstimate,
   Distributions,
-  JLD,
+  JLD2,
   HDF5,
   ProgressMeter,
-  DocStringExtensions,
-  Compat
+  DocStringExtensions
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
@@ -20,54 +26,7 @@ import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribu
 
 
 export
-  # pass throughs from TransformUtils
-  SE2,
-  se2vee,
-  se2vee!,
-  SE3,
-  Euler,
-  Quaternion,
-  AngleAxis,
-  SO3,
-  so3,
-  compare,
-  convert,
-
-  # pass throughs from IncrementalInference
-  FunctorSingleton,
-  FunctorPairwise,
-  FunctorPairwiseNH,   # will become obsolete
-  FunctorSingletonNH,  # will become obsolete
-  ls,
-  addFactor!,
-  addNode!,
-  getVert,
-  getVertKDE,
-  getVal,
-  setVal!,
-  getData,
-  FNDencode,
-  FNDdecode,
-  localProduct,
-  predictbelief,
-  wipeBuildNewTree!,
-  inferOverTree!,
-  inferOverTreeR!,
-  writeGraphPdf,
-  savejld,
-  loadjld,
-  FactorGraph,
-  initializeNode!,
-  isInitialized,
-  ensureAllInitialized!,
-  getPoints,
-  FactorMetadata,
-  doautoinit!,
-  batchSolve!,
-
-  # RoME specific functions
-  # IIF.SamplableBelief, # moved to IIF 0.3.9
-  initfg,
+  initfg,  # RoME specific functions
   measureMeanDist,
   predictBodyBR,
   getLastPose,

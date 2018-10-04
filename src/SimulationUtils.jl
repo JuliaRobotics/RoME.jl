@@ -2,7 +2,7 @@
 # And 2xN matrix of N landmark xy positions as variable nodes in factor graph
 function addSimMapFG!(fg::FactorGraph, lms::Array{Float64,2})
     for i in 1:size(lms,2)
-      newLandm!(fg,string('l',i), vectoarr2(lms[:,i]), 0.001*eye(2))
+      newLandm!(fg,string('l',i), vectoarr2(lms[:,i]), 0.001*Matrix{Float64}(LinearAlgebra.I, 2,2))
     end
     nothing
 end
@@ -11,7 +11,7 @@ end
 function simOdo!(fgGT::FactorGraph, fg::FactorGraph, DX::Array{Float64,1};
     noiserate=2.0*[3e-2;3e-2;1.5e-3], driftrate=[0.0;0.0;0.0], detLM=Union{})
     prev, X, nextn = getLastPose2D(fg)
-    addOdoFG!(fgGT, nextn, DX, 0.001*eye(3))
+    addOdoFG!(fgGT, nextn, DX, 0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))
 
     r = norm(DX[1:2])
     xn = noiserate[1]*r

@@ -9,7 +9,7 @@ mutable struct reuseLBRA
   outp::Vector{Float64}
   rbe::Vector{Float64}
   reuseLBRA()=new()
-  reuseLBRA(::Int)=new(SE3(0),eye(4),Euler(0),ones(4),ones(4), zeros(3))
+  reuseLBRA(::Int)=new(SE3(0),Matrix{Float64}(LinearAlgebra.I, 4,4),Euler(0),ones(4),ones(4), zeros(3))
   reuseLBRA(a,b,c,d,e,f)=new(a,b,c,d,e,f)
 end
 mutable struct LinearRangeBearingElevation <: FunctorPairwiseMinimize

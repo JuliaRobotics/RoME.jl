@@ -8,7 +8,7 @@ N=50
 fg = initfg()
 
 v1 = addNode!(fg,:x1, Pose3, N=N) # 0.001*randn(6,N)
-f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal(zeros(6),1e-2*eye(6))))
+f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal(zeros(6),1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 
 mu1 = [0.0;0.0; -10.0]
 prpz = PartialPriorRollPitchZ(

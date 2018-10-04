@@ -64,7 +64,7 @@ fg = RoME.initfg()
 
 # base
 addNode!(fg, :x1, dims=6)
-pos = PriorPose3(MvNormal(zeros(6),1e-6*eye(6)))
+pos = PriorPose3(MvNormal(zeros(6),1e-6*Matrix{Float64}(LinearAlgebra.I, 6,6)))
 addFactor!(fg, [:x1], pos) # base
 initializeNode!(fg, :x1)
 
@@ -157,7 +157,7 @@ fg = RoME.initfg()
 
 # base
 addNode!(fg, :x1, dims=6)
-pos = PriorPose3(MvNormal(zeros(6),1e-6*eye(6)))
+pos = PriorPose3(MvNormal(zeros(6),1e-6*Matrix{Float64}(LinearAlgebra.I, 6,6)))
 addFactor!(fg, [:x1], pos) # base
 initializeNode!(fg, :x1)
 

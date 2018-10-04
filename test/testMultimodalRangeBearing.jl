@@ -7,10 +7,10 @@ import IncrementalInference: getSample
 mutable struct NorthSouthPartial{T} <: FunctorSingleton
   Z::T
   partial::Tuple
-  NorthSouthPartial() = new()
-  NorthSouthPartial{D}(Z::D) where {D <: Distribution} = new{D}(Z, (2,))
+  NorthSouthPartial{D}() where D = new{D}()
+  NorthSouthPartial{D}(Z::D) where {D <: IIF.SamplableBelief} = new{D}(Z, (2,))
 end
-NorthSouthPartial(Z::D) where {D <: Distribution} = NorthSouthPartial{D}(Z)
+NorthSouthPartial(Z::D) where {D <: IIF.SamplableBelief} = NorthSouthPartial{D}(Z)
 
 getSample(ns::NorthSouthPartial, N=1) = (reshape(rand(ns.Z, N),1,N),)
 
@@ -26,8 +26,8 @@ fg = initfg(sessionname="MULTIMODAL_2D_TUTORIAL")
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
 addNode!(fg, :l2, Point2, labels=["LANDMARK"])
 
-addFactor!(fg, [:l1], PriorPoint2(MvNormal([10.0;0.0], diagm([1.0;1.0].^2))) ) # TODO IIF.Prior with IIF v0.3.9
-addFactor!(fg, [:l2], PriorPoint2(MvNormal([30.0;0.0], diagm([1.0;1.0].^2))) ) # TODO IIF.Prior with IIF v0.3.9
+addFactor!(fg, [:l1], Prior(MvNormal([10.0;0.0], diagm([1.0;1.0].^2))) )
+addFactor!(fg, [:l2], Prior(MvNormal([30.0;0.0], diagm([1.0;1.0].^2))) )
 
 setVal!(fg, :l1, predictbelief(fg, :l1, [:l1f1;]))
 setVal!(fg, :l2, predictbelief(fg, :l2, [:l2f1;]))

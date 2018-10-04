@@ -9,7 +9,7 @@ using Base: Test
 
   N = 100
   fg = initfg()
-  initFactorGraph!(fg, init=zeros(3), P0=0.1*eye(3), N=N, lbl=:x0, ready=0,   firstPoseType=Pose2)
+  initFactorGraph!(fg, init=zeros(3), P0=0.1*Matrix{Float64}(LinearAlgebra.I, 3,3), N=N, lbl=:x0, ready=0,   firstPoseType=Pose2)
   @test true
 end
 
@@ -18,7 +18,7 @@ end
 @testset "Base Pose3 initialization" begin
   N = 100
   fg = initfg()
-  initCov = eye(6)
+  initCov = Matrix{Float64}(LinearAlgebra.I, 6,6)
   [initCov[i,i] = 0.01^2 for i in 4:6];
   initFactorGraph!(fg, P0=initCov, init=zeros(6), N=N, lbl=:x0, ready=0,   firstPoseType=Pose3)
   @test true

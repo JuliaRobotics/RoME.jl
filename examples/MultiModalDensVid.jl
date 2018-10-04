@@ -35,7 +35,7 @@ v1a = getVert(fg, "x1")
 v1b = getVert(fg, "x13")
 
 DX = zeros(3,1)
-pp = Pose2Pose2(DX, 0.1*eye(3), [1.0]) #[prev;v],
+pp = Pose2Pose2(DX, 0.1*Matrix{Float64}(LinearAlgebra.I, 3,3), [1.0]) #[prev;v],
 f = addFactor!(fg, [v1a;v1b], pp, ready=0)
 
 v1c = getVert(fg, "x7")
@@ -43,13 +43,13 @@ v1c = getVert(fg, "x7")
 DX = zeros(3,1)
 DX[2] = 38.63
 DX[3] = pi
-pp = Pose2Pose2(DX, 0.1*eye(3), [1.0]) #[prev;v],
+pp = Pose2Pose2(DX, 0.1*Matrix{Float64}(LinearAlgebra.I, 3,3), [1.0]) #[prev;v],
 f = addFactor!(fg, [v1a;v1c], pp, ready=0)
 
 
 v2a = getVert(fg, "x4")
 v2b = getVert(fg, "x10")
-pp = Pose2Pose2(DX, 0.1*eye(3), [0.1;0.9]) #[prev;v],
+pp = Pose2Pose2(DX, 0.1*Matrix{Float64}(LinearAlgebra.I, 3,3), [0.1;0.9]) #[prev;v],
 f = addFactor!(fg, [v2a;v2b], pp, ready=0)
 
 

@@ -33,7 +33,7 @@ type GenericInSituSystem{T}
   trackers::Dict{Int,T}
 end
 
-@compat const InSituSystem = GenericInSituSystem{Feature}
+const InSituSystem = GenericInSituSystem{Feature}
 
 function makeInSituSys(x::Array{Float64,1}, bfts0::Array{Float64,2})
   dOdo = Dict{Int,Array{Float64,1}}()

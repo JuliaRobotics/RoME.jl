@@ -53,9 +53,9 @@ end
 @testset "test distribution compare functions..." begin
 
 mu = randn(6)
-mv1 = MvNormal(deepcopy(mu), eye(6))
-mv2 = MvNormal(deepcopy(mu), eye(6))
-mv3 = MvNormal(randn(6), eye(6))
+mv1 = MvNormal(deepcopy(mu), Matrix{Float64}(LinearAlgebra.I, 6,6))
+mv2 = MvNormal(deepcopy(mu), Matrix{Float64}(LinearAlgebra.I, 6,6))
+mv3 = MvNormal(randn(6), Matrix{Float64}(LinearAlgebra.I, 6,6))
 @test RoME.compare(mv1, mv2)
 @test !RoME.compare(mv1, mv3)
 @test !RoME.compare(mv2, mv3)

@@ -11,7 +11,7 @@ N = 100
 fg = initfg()
 
 
-initCov = 0.001*eye(15)
+initCov = 0.001*Matrix{Float64}(LinearAlgebra.I, 15,15)
 [initCov[i,i] = 0.0001^2 for i in 4:6];
 [initCov[i,i] = 0.0002^2 for i in 10:15];
 odoCov = deepcopy(initCov)
