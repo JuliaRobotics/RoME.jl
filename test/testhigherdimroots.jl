@@ -1,5 +1,8 @@
-using RoME, IncrementalInference, TransformUtils, Distributions
-using Base.Test
+
+using LinearAlgebra
+using RoME
+# , IncrementalInference, TransformUtils, Distributions
+using Test
 # import  IncrementalInference: getSample
 
 

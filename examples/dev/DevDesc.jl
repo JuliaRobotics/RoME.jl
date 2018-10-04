@@ -59,7 +59,7 @@ calcang(x1::Vector{Float64},x2::Vector{Float64}) = atan(x2[2]-x1[2], x2[1]-x1[1]
 calcrange(x1::Vector{Float64},x2::Vector{Float64}) = norm(x1-x2)
 
 function orderedBinIndex(x::Float64; start::Float64=0.0, stop::Float64=1.0,N::Int=3)
-  refSpace= linspace(start, stop, N+1)
+  refSpace= range(start, stop=stop, length=N+1)
   if N == 1
     return 1
   end

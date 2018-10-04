@@ -334,7 +334,7 @@ function (pp2br::Pose2Point2BearingRangeMH)(res::Array{Float64},
             idx::Int,
             meas::Tuple{Array{Float64,2}, Vector{Int}},
             xi::Array{Float64,2},
-            lms... )::Void  # ::Array{Float64,2}
+            lms... )::Nothing  # ::Array{Float64,2}
   #
   @warn "Older interface, not analytically correct."
   res[1] = lms[meas[2][idx]][1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])

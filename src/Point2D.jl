@@ -107,7 +107,8 @@ mutable struct PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
   belief::BallTreeDensity
   nullhypothesis::Distributions.Categorical
   PriorPoint2DensityNH() = new()
-  PriorPoint2DensityNH(belief, p) = new(belief, Distributions.Categorical(p))
+  PriorPoint2DensityNH(belief, p::Distributions.Categorical) = new(belief, p)
+  PriorPoint2DensityNH(belief, p::Vector{Float64}) = new(belief, Distributions.Categorical(p))
 end
 function getSample(p2::PriorPoint2DensityNH, N::Int=1)
   return (rand(p2.belief, N), )

@@ -290,7 +290,7 @@ end
 
 
 function layerCircle(;cent=[0.0;0.0], radius=1.0, c="deepskyblue", N=200)
-	TH = linspace(0,2pi,200)
+	TH = range(0,stop=2pi,length=200)
 	X = real(radius*exp(TH*im))+cent[1]
 	Y = imag(radius*exp(TH*im))+cent[2]
 	layer(x=X,y=Y, Geom.path(), Theme(default_color=parse(Colorant,c)))

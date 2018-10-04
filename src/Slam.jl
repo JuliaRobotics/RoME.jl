@@ -2,7 +2,7 @@
 
 type SLAMWrapper
   fg::IncrementalInference.FactorGraph
-  tree::VoidUnion{IncrementalInference.BayesTree}
+  tree::NothingUnion{IncrementalInference.BayesTree}
   lndmidx::Int
   lastposesym::Symbol
   lastpose::SE3

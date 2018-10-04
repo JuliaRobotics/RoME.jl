@@ -19,7 +19,7 @@ function triggerPose(x, xprev, Tnow, Tprev,
   return 0
 end
 
-type GenericInSituSystem{T}
+mutable struct GenericInSituSystem{T}
   xprev::Array{Float64,1}
   x::Array{Float64,1}
   dOdo::Dict{Int,Array{Float64,1}}

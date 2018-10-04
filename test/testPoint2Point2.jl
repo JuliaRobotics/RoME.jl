@@ -1,10 +1,12 @@
-using RoME, Distributions
+using RoME
+using Statistics
+# , Distributions
 
-using Base: Test
+using Test
 
 @testset "basic Point2Point2 test" begin
 
-fg = initfg()
+global fg = initfg()
 
 addNode!(fg, :x0, Point2)
 addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), Matrix{Float64}(LinearAlgebra.I, 2,2))))
@@ -12,19 +14,19 @@ addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), Matrix{Float64}(LinearAlgeb
 addNode!(fg, :x1, Point2)
 addFactor!(fg, [:x0;:x1], Point2Point2(MvNormal([10;0.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
-tree = wipeBuildNewTree!(fg)
+global tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree)
 
-@test sum( abs.(Base.mean(getVal(fg, :x0),2) - [0.0;0]) .< [0.5;0.5]) == 2
-@test sum( abs.(Base.mean(getVal(fg, :x1),2) - [10.0;0]) .< [0.5;0.5]) == 2
+@test sum( abs.(Statistics.mean(getVal(fg, :x0),2) - [0.0;0]) .< [0.5;0.5]) == 2
+@test sum( abs.(Statistics.mean(getVal(fg, :x1),2) - [10.0;0]) .< [0.5;0.5]) == 2
 
 end
 
 
 @testset "test Point2Point2Range{T}..." begin
 
-N=200
-fg = initfg()
+global N=200
+global fg = initfg()
 
 addNode!(fg, :x0, Point2, N=N)
 addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
@@ -37,7 +39,7 @@ addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)))
 addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)))
 
 
-tree = wipeBuildNewTree!(fg)
+global tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree, N=N)
 
 @test sum( 90 .< getVal(fg, :l1)[1,:] .< 110 ) > 32
@@ -46,10 +48,10 @@ inferOverTree!(fg, tree, N=N)
 @test sum( -10 .< getVal(fg, :l1)[1,:] .< 10 ) > 32
 @test sum( 90 .< getVal(fg, :l1)[2,:] .< 110 ) > 32
 
-voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
+global voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
 @test sum( getVal(fg, :l1)[2,voidsel1] .< 80 ) < 10
 
-voidsel2 =  10.0 .< getVal(fg, :l1)[2,:]
+global voidsel2 =  10.0 .< getVal(fg, :l1)[2,:]
 @test sum( getVal(fg, :l1)[1,voidsel2] .< 80 ) < 10
 
 @test sum( 120 .< abs.(getVal(fg, :l1)[1,:]) ) < 10

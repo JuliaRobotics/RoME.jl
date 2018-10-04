@@ -6,7 +6,7 @@ using RoMEPlotting, Gadfly
 const TU = TransformUtils
 
 # true landmark locations
-gtl = Dict{Symbol, Vector{Float64}}()
+global gtl = Dict{Symbol, Vector{Float64}}()
 gtl[:l1] = [1.0;-1.0;0]
 gtl[:l2] = [2.0;-1.0;0]
 gtl[:l3] = [3.0;-1.0;0]
@@ -18,7 +18,7 @@ gtl[:l13] = [3.0;1.0;0]
 gtl[:l14] = [4.0;1.0;0]
 
 # true pose locations
-gtp = Dict{Symbol,Vector{Float64}}()
+global gtp = Dict{Symbol,Vector{Float64}}()
 gtp[:x0] = [0.0;0;0]
 gtp[:x1] = [0.5;0;0]
 gtp[:x2] = [1.0;0;0]
@@ -28,7 +28,7 @@ gtp[:x5] = [3.0;0;0]
 
 
 # calculate true measurements
-gtpt = Dict{Symbol, Vector{Float64}}()
+global gtpt = Dict{Symbol, Vector{Float64}}()
 for (ps,gp) in gtp, (ls,gl) in gtl
   gtpt[Symbol("$(ps)$(ls)")] = se2vee(SE2(gp) \ SE2(gl))
 end
@@ -37,16 +37,16 @@ end
 
 
 # Figure export folder
-currdirtime = now()
-imgdir = joinpath(ENV["HOME"], "Pictures", "testimgs", "$(currdirtime)")
+global currdirtime = now()
+global imgdir = joinpath(ENV["HOME"], "Pictures", "testimgs", "$(currdirtime)")
 mkdir(imgdir)
 
 
 
 # construct the factor graph
 
-N=75
-fg = initfg()
+global N=75
+global fg = initfg()
 
 addNode!(fg, :x0, Pose2)
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2)))))
@@ -56,13 +56,13 @@ addFactor!(fg, [:x0;:l1], Pose2Pose2(MvNormal(gtpt[:x0l1],Matrix(Diagonal([0.1;0
 addNode!(fg, :l11, Pose2)
 addFactor!(fg, [:x0;:l11], Pose2Pose2(MvNormal(gtpt[:x0l11],Matrix(Diagonal([0.1;0.1;0.01].^2)))) )
 
-tree = wipeBuildNewTree!(fg)
+global tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree, N=N)
 
-psid = 0
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
+global psid = 0
+global pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"x$(psid).png"),30cm, 25cm),pl)
-pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
+global pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 
@@ -80,14 +80,14 @@ addFactor!(fg, [:x1;:l12], Pose2Pose2(MvNormal(gtpt[:x1l12],Matrix(Diagonal([0.1
 
 # writeGraphPdf(fg)
 
-tree = wipeBuildNewTree!(fg)
+global tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree, N=N)
 
 
-psid = 1
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
+global psid = 1
+global pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"x$(psid).png"),30cm, 25cm),pl)
-pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
+global pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 
@@ -105,14 +105,14 @@ addFactor!(fg, [:x2;:l3], Pose2Pose2(MvNormal(gtpt[:x2l3], Matrix(Diagonal([0.1;
 
 # writeGraphPdf(fg)
 
-tree = wipeBuildNewTree!(fg)
+global tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree, N=N)
 
 
-psid = 2
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
+global psid = 2
+global pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"x$(psid).png"),30cm, 25cm),pl)
-pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
+global pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 
@@ -130,14 +130,14 @@ addFactor!(fg, [:x3;:l13], Pose2Pose2(MvNormal(gtpt[:x3l13], Matrix(Diagonal([0.
 
 # writeGraphPdf(fg)
 
-tree = wipeBuildNewTree!(fg)
+global tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree, N=N)
 
 
-psid = 3
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
+global psid = 3
+global pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"x$(psid).png"),30cm, 25cm),pl)
-pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
+global pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 
@@ -162,14 +162,14 @@ addFactor!(fg, [:x4;:l14], Pose2Pose2(MvNormal(gtpt[:x4l14], Matrix(Diagonal([0.
 
 # writeGraphPdf(fg)
 
-tree = wipeBuildNewTree!(fg)
+global tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree, N=N)
 
 
-psid = 4
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
+global psid = 4
+global pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"x$(psid).png"),30cm, 25cm),pl)
-pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
+global pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 
@@ -190,14 +190,14 @@ addFactor!(fg, [:x5;:l14], Pose2Pose2(MvNormal(gtpt[:x5l14], Matrix(Diagonal([0.
 
 # writeGraphPdf(fg)
 
-tree = wipeBuildNewTree!(fg)
+global tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree, N=N)
 
 
-psid = 5
-pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
+global psid = 5
+global pl = drawPosesLandms(fg, spscale=0.1, drawhist=false)#,   meanmax=:mean,xmin=-3,xmax=6,ymin=-5,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"x$(psid).png"),30cm, 25cm),pl)
-pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
+global pl = drawPosesLandms(fg, spscale=0.1)#,   meanmax=:mean,xmin=-3,xmax=3,ymin=-2,ymax=2);
 Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 

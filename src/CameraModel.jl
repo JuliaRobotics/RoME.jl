@@ -1,7 +1,7 @@
 
 mutable struct CameraIntrinsic
   K::Array{Float64,2}
-  CameraIntrinsic(::Void) = new()
+  CameraIntrinsic(::Nothing) = new()
   CameraIntrinsic(;x0=320.0,y0=240.0,fx=510.0,fy=510.0,s=0.0) = new([[fx;s;x0]';[0.0;fy;y0]';[0.0;0;1]'])
 end
 
@@ -9,14 +9,14 @@ end
 mutable struct CameraExtrinsic
   R::SO3
   t::Vector{Float64}
-  CameraExtrinsic(::Void) = new()
+  CameraExtrinsic(::Nothing) = new()
   CameraExtrinsic(;R=SO3(0),t=zeros(3)) = new(R, t)
 end
 mutable struct CameraModelFull
   ci::CameraIntrinsic
   ce::CameraExtrinsic
   # cd::CameraDistortion
-  CameraModelFull(::Void) = new()
+  CameraModelFull(::Nothing) = new()
   CameraModelFull(;ci=CameraIntrinsic(), ce=CameraExtrinsic()) = new(ci,ce)
 end
 function project!(ret::Vector{Float64}, ci::CameraIntrinsic, ce::CameraExtrinsic, pt::Vector{Float64})

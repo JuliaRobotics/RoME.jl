@@ -1,9 +1,9 @@
 
 
-immutable RangeAzimuthElevation
+mutable struct RangeAzimuthElevation
   range::Float64
   azimuth::Float64
-  elevation::Union{Void,Float64}
+  elevation::Union{Nothing,Float64}
 end
 
 function convert(::Type{Rotations.Quat}, q::TransformUtils.Quaternion)
@@ -13,14 +13,14 @@ function convert(::Type{Rotations.Quat}, x::SO3)
   q = convert(TransformUtils.Quaternion, x)
   convert(Rotations.Quat, q)
 end
-function convert{T <: CoordinateTransformations.AffineMap}(::Type{T}, x::SO3)
+function convert(::Type{T}, x::SO3) where {T <: CoordinateTransformations.AffineMap}
   LinearMap( convert(Quat, x) )
 end
 
-function convert{T <: CoordinateTransformations.AffineMap}(::Type{T}, x::SE3)
+function convert(::Type{T}, x::SE3) where {T <: CoordinateTransformations.AffineMap}
   Translation(x.t...) ∘ convert(AffineMap{Rotations.Quat{Float64}}, x.R)
 end
-function convert{T <: CoordinateTransformations.AffineMap{Rotations.Quat{Float64}}}(::Type{SE3}, x::T)
+function convert(::Type{SE3}, x::T) where {T <: CoordinateTransformations.AffineMap{Rotations.Quat{Float64}}}
   SE3(x.translation[1:3], TransformUtils.Quaternion(x.linear.w, [x.linear.x,x.linear.y,x.linear.z]) )
 end
 
@@ -261,8 +261,8 @@ end
 Initialize a factor graph object as Pose2, Pose3, or neither and returns variable and factor symbols as array.
 """
 function initFactorGraph!(fg::FactorGraph;
-      P0::Union{Array{Float64,2},Void}=nothing,
-      init::Union{Vector{Float64},Void}=nothing,
+      P0::Union{Array{Float64,2},Nothing}=nothing,
+      init::Union{Vector{Float64},Nothing}=nothing,
       N::Int=100,
       lbl::Symbol=:x0,
       ready::Int=1,

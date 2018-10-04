@@ -66,8 +66,8 @@ function ominus!(reuse::reuseLBRA, X::Vector{Float64}, L::Array{Float64})
   reuse.inp[1:3] = L[1:3]
   reuse.outp[1:4] = reuse.M\reuse.inp  # bTl  # costly
   reuse.rbe[1] = norm(reuse.outp[1:3])
-  reuse.rbe[2] = atan(reuse.outp[2],	reuse.outp[1])
-  reuse.rbe[3] = -atan(reuse.outp[3], reuse.outp[1]) #-
+  reuse.rbe[2] = atan(reuse.outp[2],  reuse.outp[1])
+  reuse.rbe[3] = -atan(reuse.outp[3], reuse.outp[1])
   nothing
 end
 
