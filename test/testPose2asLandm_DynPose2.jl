@@ -55,16 +55,16 @@ N=100
 fg = initfg()
 
 addNode!(fg, :x0, DynPose2(ut=0))
-addFactor!(fg, [:x0], DynPose2VelocityPrior(MvNormal(zeros(3),diagm([0.01;0.01;0.001].^2)),
-                                            MvNormal(zeros(2),diagm([0.05;0.05].^2))) )
+addFactor!(fg, [:x0], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
+                                            MvNormal(zeros(2),Matrix(Diagonal([0.05;0.05].^2)))) )
 
 IIF.doautoinit!(fg, :x0)
 
 addNode!(fg, :l1, Pose2)
-addFactor!(fg, [:x0;:l1], DynPose2Pose2(MvNormal(gtpt[:x0l1],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x0;:l1], DynPose2Pose2(MvNormal(gtpt[:x0l1],Matrix(Diagonal([0.1;0.1;0.01].^2)))) )
 
 addNode!(fg, :l11, Pose2)
-addFactor!(fg, [:x0;:l11], DynPose2Pose2(MvNormal(gtpt[:x0l11],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x0;:l11], DynPose2Pose2(MvNormal(gtpt[:x0l11],Matrix(Diagonal([0.1;0.1;0.01].^2)))) )
 
 
 pts = IIF.approxConv(fg, :x0l1f1, :l1, N=N)
@@ -85,8 +85,8 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 # pose :x1
 addNode!(fg, :x1, DynPose2(ut=1000_000))
-addFactor!(fg, [:x0;:x1],VelPose2VelPose2(MvNormal(zeros(3),diagm([xposesig;yposesig;thetasig].^2)),
-                                          MvNormal(zeros(2),diagm([xvelsig;yvelsig].^2))) )
+addFactor!(fg, [:x0;:x1],VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
+                                          MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
 
 #
@@ -96,12 +96,12 @@ addFactor!(fg, [:x0;:x1],VelPose2VelPose2(MvNormal(zeros(3),diagm([xposesig;ypos
 # IIF.approxConv(fg, :x0x1f1, :x1)
 
 
-addFactor!(fg, [:x1;:l1], DynPose2Pose2(MvNormal(gtpt[:x1l1],diagm([0.1;0.1;0.01].^2))) )
-addFactor!(fg, [:x1;:l11], DynPose2Pose2(MvNormal(gtpt[:x1l11],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x1;:l1], DynPose2Pose2(MvNormal(gtpt[:x1l1],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
+addFactor!(fg, [:x1;:l11], DynPose2Pose2(MvNormal(gtpt[:x1l11],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 addNode!(fg, :l2, Pose2)
-addFactor!(fg, [:x1;:l2], DynPose2Pose2(MvNormal(gtpt[:x1l2],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x1;:l2], DynPose2Pose2(MvNormal(gtpt[:x1l2],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 addNode!(fg, :l12, Pose2)
-addFactor!(fg, [:x1;:l12], DynPose2Pose2(MvNormal(gtpt[:x1l12],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x1;:l12], DynPose2Pose2(MvNormal(gtpt[:x1l12],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 
 # writeGraphPdf(fg)
 
@@ -121,13 +121,13 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 # pose :x2
 addNode!(fg, :x2, DynPose2(ut=2000_000))
-addFactor!(fg, [:x1;:x2], VelPose2VelPose2(MvNormal(zeros(3),diagm([xposesig;yposesig;thetasig].^2)),
-                                           MvNormal(zeros(2),diagm([xvelsig;yvelsig].^2))) )
+addFactor!(fg, [:x1;:x2], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
+                                           MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
-addFactor!(fg, [:x2;:l2], DynPose2Pose2(MvNormal(gtpt[:x2l2],diagm([0.1;0.1;0.01].^2))) )
-addFactor!(fg, [:x2;:l12], DynPose2Pose2(MvNormal(gtpt[:x2l12],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x2;:l2], DynPose2Pose2(MvNormal(gtpt[:x2l2],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
+addFactor!(fg, [:x2;:l12], DynPose2Pose2(MvNormal(gtpt[:x2l12],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 addNode!(fg, :l3, Pose2)
-addFactor!(fg, [:x2;:l3], DynPose2Pose2(MvNormal(gtpt[:x2l3],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x2;:l3], DynPose2Pose2(MvNormal(gtpt[:x2l3],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 
 # writeGraphPdf(fg)
 
@@ -148,12 +148,12 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 # gtp[:x3] = [2.0;0;0]
 addNode!(fg, :x3, DynPose2(ut=3000_000))
-addFactor!(fg, [:x2;:x3], VelPose2VelPose2(MvNormal(zeros(3),diagm([xposesig;yposesig;thetasig].^2)),
-                                           MvNormal(zeros(2),diagm([xvelsig;yvelsig].^2))) )
+addFactor!(fg, [:x2;:x3], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
+                                           MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
-addFactor!(fg, [:x3;:l3], DynPose2Pose2(MvNormal(gtpt[:x3l3],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x3;:l3], DynPose2Pose2(MvNormal(gtpt[:x3l3],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 addNode!(fg, :l13, Pose2)
-addFactor!(fg, [:x3;:l13], DynPose2Pose2(MvNormal(gtpt[:x3l13],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x3;:l13], DynPose2Pose2(MvNormal(gtpt[:x3l13],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 
 # writeGraphPdf(fg)
 
@@ -175,16 +175,16 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 # pose :x4
 # gtp[:x4] = [2.5;0;0]
 addNode!(fg, :x4, DynPose2(ut=4000_000))
-addFactor!(fg, [:x3;:x4], VelPose2VelPose2(MvNormal(zeros(3),diagm([xposesig;yposesig;thetasig].^2)),
-                                           MvNormal(zeros(2),diagm([xvelsig;yvelsig].^2))) )
+addFactor!(fg, [:x3;:x4], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
+                                           MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
 
-addFactor!(fg, [:x4;:l3], DynPose2Pose2(MvNormal(gtpt[:x4l3],diagm([0.1;0.1;0.01].^2))) )
-addFactor!(fg, [:x4;:l13], DynPose2Pose2(MvNormal(gtpt[:x4l13],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x4;:l3], DynPose2Pose2(MvNormal(gtpt[:x4l3],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
+addFactor!(fg, [:x4;:l13], DynPose2Pose2(MvNormal(gtpt[:x4l13],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 addNode!(fg, :l4, Pose2)
-addFactor!(fg, [:x4;:l4], DynPose2Pose2(MvNormal(gtpt[:x4l4],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x4;:l4], DynPose2Pose2(MvNormal(gtpt[:x4l4],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 addNode!(fg, :l14, Pose2)
-addFactor!(fg, [:x4;:l14], DynPose2Pose2(MvNormal(gtpt[:x4l14],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x4;:l14], DynPose2Pose2(MvNormal(gtpt[:x4l14],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 
 
 
@@ -210,11 +210,11 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 # pose :x5
 # gtp[:x5] = [3.0;0;0]
 addNode!(fg, :x5, DynPose2(ut=5000_000))
-addFactor!(fg, [:x4;:x5], VelPose2VelPose2(MvNormal(zeros(3),diagm([xposesig;yposesig;thetasig].^2)),
-                                           MvNormal(zeros(2),diagm([xvelsig;yvelsig].^2))) )
+addFactor!(fg, [:x4;:x5], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
+                                           MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
-addFactor!(fg, [:x5;:l4], DynPose2Pose2(MvNormal(gtpt[:x5l4],diagm([0.1;0.1;0.01].^2))) )
-addFactor!(fg, [:x5;:l14], DynPose2Pose2(MvNormal(gtpt[:x5l14],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x5;:l4], DynPose2Pose2(MvNormal(gtpt[:x5l4],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
+addFactor!(fg, [:x5;:l14], DynPose2Pose2(MvNormal(gtpt[:x5l14],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 
 
 # writeGraphPdf(fg)
@@ -238,11 +238,11 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 # pose :x6
 # gtp[:x6] = [3.0;0;0]
 addNode!(fg, :x6, DynPose2(ut=6000_000))
-addFactor!(fg, [:x5;:x6], VelPose2VelPose2(MvNormal(zeros(3),diagm([xposesig;yposesig;thetasig].^2)),
-                                           MvNormal(zeros(2),diagm([xvelsig;yvelsig].^2))) )
+addFactor!(fg, [:x5;:x6], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
+                                           MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
-addFactor!(fg, [:x6;:l4], DynPose2Pose2(MvNormal(gtpt[:x6l4],diagm([0.1;0.1;0.01].^2))) )
-# addFactor!(fg, [:x6;:l14], DynPose2Pose2(MvNormal(gtpt[:x6l14],diagm([0.1;0.1;0.01].^2))) )
+addFactor!(fg, [:x6;:l4], DynPose2Pose2(MvNormal(gtpt[:x6l4],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
+# addFactor!(fg, [:x6;:l14], DynPose2Pose2(MvNormal(gtpt[:x6l14],Matrix(Diagonal([0.1;0.1;0.01].^2))) ))
 
 
 # writeGraphPdf(fg)

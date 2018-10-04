@@ -45,7 +45,7 @@ end
 
 
 
-warn("still need to insert kld(..) test to ensure this is working")
+@warn "still need to insert kld(..) test to ensure this is working"
 
 p1 = kde!(pts);
 
@@ -102,7 +102,7 @@ p2 = kde!(pts);
 fg = initfg()
 # @show fg.registeredModuleFunctions
 N = 100
-warn("Breaks if not set to 100")
+@warn "Breaks if not set to 100"
 
 initCov = Matrix{Float64}(LinearAlgebra.I, 6,6)
 [initCov[i,i] = 0.01 for i in 4:6];

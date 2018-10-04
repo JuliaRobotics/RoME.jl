@@ -1,7 +1,4 @@
 
-# warn("Must remove optional dev/ISAMRemoteSolve.jl dependency here.")
-# include("dev/ISAMRemoteSolve.jl")
-
 
 immutable RangeAzimuthElevation
   range::Float64
@@ -60,8 +57,8 @@ function \(s::SE3, wTr::CTs.Translation)
   bTr = s.R.R'*(wTr.v-s.t)
   Dtr = bTr
   range = norm(Dtr)
-  azi = atan2(Dtr[2], Dtr[1])
-  elev = atan2(Dtr[3], Dtr[1])
+  azi = atan(Dtr[2], Dtr[1])
+  elev = atan(Dtr[3], Dtr[1])
   RangeAzimuthElevation(range, azi, elev)
 end
 
@@ -90,7 +87,7 @@ function measureMeanDist(fg::FactorGraph, a::T, b::T) where {T <: AbstractString
     By = Base.mean(vec(B[2,:]))
     dx = Bx - Ax
     dy = By - Ay
-    b = atan2(dy,dx)
+    b = atan(dy,dx)
     r = sqrt(dx^2 + dy^2)
     return r, b
 end
@@ -109,14 +106,13 @@ function predictBodyBR(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
   bL = se2vee((wBb \ Matrix{Float64}(LinearAlgebra.I, 3,3)) * wL)
   dx = bL[1] - 0.0
   dy = bL[2] - 0.0
-  b = (atan2(dy,dx))
+  b = (atan(dy,dx))
   r = sqrt(dx^2 + dy^2)
   return b, r
 end
 
 function getNextLbl(fgl::FactorGraph, chr)
   # TODO convert this to use a double lookup
-  # warn("getNextLbl(::FactorGraph..) to be deprecated, use getlastpose/landm(::SLAMWrapper..) instead.")
   max = -1
   maxid = -1
   for vid in fgl.IDs
@@ -276,7 +272,7 @@ function initFactorGraph!(fg::FactorGraph;
   nodesymbols = Symbol[]
   if firstPoseType == Pose2
       init = init!=nothing ? init : zeros(3)
-      P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.001])
+      P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.001]))
       # init = vectoarr2(init)
       addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
       push!(nodesymbols, lbl)
@@ -286,7 +282,7 @@ function initFactorGraph!(fg::FactorGraph;
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
-      P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.03;0.001;0.001;0.001])
+      P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.03;0.001;0.001;0.001]))
       addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
       push!(nodesymbols, lbl)
       # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
@@ -330,7 +326,7 @@ function addBRFG!(fg::FactorGraph,
   for nei in getOutNeighbors(fg, vlm)
     if nei.label == testlbl
       # TODO -- makes function call brittle
-      warn("We already have $(testlbl), skipping this constraint")
+      @warn "We already have $(testlbl), skipping this constraint"
       return nothing
     end
   end
@@ -505,13 +501,13 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{T, Float64}, maxl
   elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
     # odd case, does not intersect with suggestion, but does with some previous landm
     # add MMBR
-    warn("evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected")
+    @warn "evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected"
     addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov, ready=ready)
     vlm = getVert(fgl,lmSuggLbl)
   elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
   #   # landm exists but no intersection with existing or suggested lmid
   #   # may suggest some error
-    warn("evalAutoCases! -- no intersect with suggested $(lmSuggLbl) or map detected, adding  new landmark MM constraint incase")
+    @warn "evalAutoCases! -- no intersect with suggested $(lmSuggLbl) or map detected, adding  new landmark MM constraint incase"
     v,L,lm = getLastLandm2D(fgl)
     vlm = newLandm!(fgl, lm, lmPts, cov, N=N, ready=ready)
     addMMBRFG!(fgl, pose, [lm; lmSuggLbl], br, cov, ready=ready)
@@ -591,7 +587,7 @@ function get2DSamples(fg::FactorGraph,
 end
 
 function getAll2D(fg, sym; minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
-  warn("getAll2D deprecated, use get2DSamples instead")
+  @warn "getAll2D deprecated, use get2DSamples instead"
   return get2DSamples(fg, sym, minnei=minnei, api=api)
 end
 

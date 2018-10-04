@@ -1,8 +1,9 @@
 
-using RoME, IncrementalInference, TransformUtils, Distributions
-using KernelDensityEstimate
-using Base.Test
-
+using RoME, Distributions
+# using KernelDensityEstimate
+using Test
+using DelimitedFiles
+using Statistics
 
 @testset "Test syntax for null hypothesis matrix substitution" begin
   function ff(X::Array{Float64,2})
@@ -18,7 +19,7 @@ using Base.Test
   B = zeros(3,5)
   B[:,dos] = ff(A[:,dos])
 
-  @test sum(sum(B[:,dos],2) .== sum(dos),1)[1,1] == 3
+  @test sum(sum(B[:,dos],dims=2) .== sum(dos),dims=1)[1,1] == 3
 end
 
 
@@ -44,8 +45,8 @@ ensureAllInitialized!(fg)
 
 println("Ensure vertex initialized properly")
 # start with to tight an initialization
-muX1 = Base.mean(getVal(fg,:x1),2)
-stdX1 = Base.std(getVal(fg,:x1),2)
+muX1 = Statistics.mean(getVal(fg,:x1),dims=2)
+stdX1 = Statistics.std(getVal(fg,:x1),dims=2)
 @test sum(map(Int,abs.(muX1[1:3]) .< 0.4)) == 3
 @test sum(map(Int,abs.(muX1[4:6]) .< 0.04)) == 3
 @test sum(map(Int,abs.(1.0-stdX1[1:3]) .< 0.3)) == 3
@@ -53,8 +54,9 @@ stdX1 = Base.std(getVal(fg,:x1),2)
 
 
 println("Testing PriorPose3 evaluation...")
-priorpts = evalFactor2(fg, fg.g.vertices[2], 1)
-means = Base.mean(priorpts,2)
+priorpts = approxConv(fg, :x1f1, :x1)
+# priorpts = evalFactor2(fg, fg.g.vertices[2], 1)
+means = Statistics.mean(priorpts,dims=2)
 @test sum(map(Int,abs.(means[1:3]) .> 0.5)) == 0
 @test sum(map(Int,abs.(means[4:6]) .> 0.05)) == 0
 
@@ -63,10 +65,11 @@ v3, f3 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
 
 println("Testing Pose3Pose3 evaluation...")
 X1pts = getVal(fg, :x1)
-X2pts = evalFactor2(fg, fg.g.vertices[6], 3, N=N)
-X3pts = evalFactor2(fg, fg.g.vertices[6], 5)
-X2ptsMean = Base.mean(X2pts,2)
-X3ptsMean = Base.mean(X3pts,2)
+X2pts = approxConv(fg, :x2x3f1, :x2, N=N)
+# X2pts = evalFactor2(fg, fg.g.vertices[6], 3, N=N)
+X3pts = approxConv(fg, :x2x3f1, :x3)
+X2ptsMean = Statistics.mean(X2pts,dims=2)
+X3ptsMean = Statistics.mean(X3pts,dims=2)
 
 @test  sum(map(Int, abs.(X2ptsMean) - [25.0;0;0;0;0;0] .< 5.0 ))  == 6
 @test  sum(map(Int, abs.(X3ptsMean -  [50.0;0;0;0;0;0]) .< 5.0 )) == 6
@@ -91,11 +94,11 @@ p1 = kde!(X1pts)
 p2 = kde!(X2pts)
 
 
-using JLD, HDF5
-
 @testset "loading validation data for testing." begin
-    @load joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
     # @save joinpath(dirname(@__FILE__),"testvalidation.jld") X1ptst X2ptst
+    tstdtdir = dirname(@__FILE__)
+    X1ptst = readdlm(joinpath(tstdtdir, "X1ptst.csv"),',')
+    X2ptst = readdlm(joinpath(tstdtdir, "X2ptst.csv"),',')
 
     p1t = kde!(X1ptst)
     p2t = kde!(X2ptst)
@@ -114,7 +117,3 @@ end
 
 # using KernelDensityEstimatePlotting
 # plotKDE([p1; p1t], dims=[1], c=["black";"red"])
-
-
-
-# warn("incomplete Pose3Pose3NH tests.")

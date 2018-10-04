@@ -13,8 +13,8 @@ fg = initfg()
 addNode!(fg, :x0, DynPose2(ut=0))
 
 # Prior factor as boundary condition
-pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), diagm([0.01; 0.01; 0.001].^2)),
-                            MvNormal([10.0;0], diagm([0.1; 0.1].^2)))
+pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
+                            MvNormal([10.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [:x0;], pp0)
 
 # initialize the first pose
@@ -23,8 +23,8 @@ IncrementalInference.doautoinit!(fg, [getVert(fg,:x0);])
 addNode!(fg, :x1, DynPose2(ut=1000_000))
 
 # conditional likelihood between Dynamic Point2
-dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], diagm([0.01;0.01;0.001].^2)),
-                          MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
+dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], Matrix(Diagonal([0.01;0.01;0.001].^2))),
+                          MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [:x0;:x1], dp2dp2)
 
 # getVal(fg,:x0)
@@ -42,7 +42,7 @@ X1 = getVal(fg, :x1)
 @test 0.9*N <= sum(abs.(X1[2,:] - 0.0) .< 0.5)
 @show TU.wrapRad.(X1[3,:])
 @test 0.8*N <= sum(abs.(TU.wrapRad.(X1[3,:]) - 0.0) .< 0.1)
-warn("wrapRad issue, accepting 80% as good enough until issue JuliaRobotics/RoME.jl#90 is fixed.")
+@warn "wrapRad issue, accepting 80% as good enough until issue JuliaRobotics/RoME.jl#90 is fixed."
 @test 0.9*N <= sum(abs.(X1[4,:] - 10.0) .< 0.5)
 @test 0.9*N <= sum(abs.(X1[5,:] - 0.0) .< 0.5)
 
@@ -65,16 +65,16 @@ end
 
 @testset "test DynPose2 packing converters..." begin
 
-pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), diagm([0.01; 0.01; 0.001].^2)),
-                            MvNormal([10.0;0], diagm([0.1; 0.1].^2)))
+pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
+                            MvNormal([10.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 
 pp = convert(PackedDynPose2VelocityPrior, pp0)
 ppu = convert(DynPose2VelocityPrior, pp)
 
 @test RoME.compare(pp0, ppu)
 
-dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], diagm([0.01;0.01;0.001].^2)),
-                          MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
+dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], Matrix(Diagonal([0.01;0.01;0.001].^2))),
+                          MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 
 pp = convert(PackedVelPose2VelPose2, dp2dp2)
 ppu = convert(VelPose2VelPose2, pp)
@@ -94,8 +94,8 @@ fg = initfg()
 addNode!(fg, :x0, DynPose2(ut=0))
 
 # Prior factor as boundary condition
-pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), diagm([0.01; 0.01; 0.001].^2)),
-                            MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
+pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
+                            MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [:x0;], pp0)
 
 sym = :x0
@@ -106,8 +106,8 @@ k+=1
 addNode!(fg, sy, DynPose2(ut=1000_000*k))
 
 # conditional likelihood between Dynamic Point2
-dp2dp2 = VelPose2VelPose2(MvNormal([0.0;0;0], diagm([1.0;0.1;0.001].^2)),
-                          MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
+dp2dp2 = VelPose2VelPose2(MvNormal([0.0;0;0], Matrix(Diagonal([1.0;0.1;0.001].^2))),
+                          MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [sym;sy], dp2dp2)
 sym =sy
 
@@ -159,8 +159,8 @@ x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 
 # pull the tail end out with position
-pp10 = DynPose2VelocityPrior(MvNormal([10.0;0;0], diagm([0.01; 0.01; 0.001].^2)),
-                            MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
+pp10 = DynPose2VelocityPrior(MvNormal([10.0;0;0], Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
+                            MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [:x10;], pp10)
 
 
@@ -215,20 +215,20 @@ fg = initfg()
 addNode!(fg, :x0, DynPose2(ut=0))
 
 # Prior factor as boundary condition
-pp0 = DynPose2VelocityPrior(MvNormal([0.0;0.0;pi/2], diagm([0.01; 0.01; 0.001].^2)),
-                            MvNormal([0.0;0], diagm([0.5; 0.5].^2)))
+pp0 = DynPose2VelocityPrior(MvNormal([0.0;0.0;pi/2], Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
+                            MvNormal([0.0;0], Matrix(Diagonal([0.5; 0.5].^2))))
 addFactor!(fg, [:x0;], pp0)
 
 
 addNode!(fg, :x1, DynPose2(ut=1000_000))
 
-pp0 = DynPose2VelocityPrior(MvNormal([1.0;0.0;pi/2], diagm([0.01; 0.01; 0.001].^2)),
-                            MvNormal([0.0;0], diagm([0.5; 0.5].^2)))
+pp0 = DynPose2VelocityPrior(MvNormal([1.0;0.0;pi/2], Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
+                            MvNormal([0.0;0], Matrix(Diagonal([0.5; 0.5].^2))))
 addFactor!(fg, [:x1;], pp0)
 
 # conditional likelihood between Dynamic Point2
-dp2dp2 = VelPose2VelPose2(MvNormal([0.0;-1.0;0], diagm([0.01;0.01;0.001].^2)),
-                          MvNormal([0.0;0], diagm([0.1; 0.1].^2)))
+dp2dp2 = VelPose2VelPose2(MvNormal([0.0;-1.0;0], Matrix(Diagonal([0.01;0.01;0.001].^2))),
+                          MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [:x0;:x1], dp2dp2)
 
 

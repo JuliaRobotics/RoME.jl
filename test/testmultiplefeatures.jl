@@ -18,25 +18,25 @@ L = [l1';l2';l3']
 
 # plot(x=L[:,1],y=L[:,2],Geom.point)
 
-the11 = atan2(l1[2],l1[1])
-the12 = atan2(l2[2],l2[1])
-the13 = atan2(l3[2],l3[1])
+the11 = atan(l1[2],l1[1])
+the12 = atan(l2[2],l2[1])
+the13 = atan(l3[2],l3[1])
 
 Xi = SE2(x1)
 Xj = SE2(x2)
 Δxij = se2vee(Xi\Xj)
 
 tl1 = se2vee(Xj \ SE2([l1;0.0]))[1:2]
-the21 = atan2(tl1[2],tl1[1])
+the21 = atan(tl1[2],tl1[1])
 
 tl2 = se2vee(Xj \ SE2([l2;0.0]))[1:2]
-the22 = atan2(tl2[2],tl2[1])
+the22 = atan(tl2[2],tl2[1])
 
 tl3 = se2vee(Xj \ SE2([l3;0.0]))[1:2]
-the23 = atan2(tl3[2],tl3[1])
+the23 = atan(tl3[2],tl3[1])
 
 tl3b = se2vee(Xj \ SE2([l3b;0.0]))[1:2]
-the23b = atan2(tl3b[2],tl3b[1])
+the23b = atan(tl3b[2],tl3b[1])
 
 xir1 = Normal(the11,1e-4)
 xir2 = Normal(the12,1e-4)
@@ -194,22 +194,21 @@ odoCov = deepcopy(initCov)
 
 ipp = PriorPose2(MvNormal(zeros(3), initCov^2))
 
-v1 = addNode!(fg, :x1, Pose2, N=N) #0.01*randn(3,N), diagm([1.0;1.0;0.1])
+v1 = addNode!(fg, :x1, Pose2, N=N)
 
 f1  = addFactor!(fg,[:x1], ipp)
 
-# pts2 = [0.014*randn(1,N)+1;  0.014*randn(1,N)-1; 0.002*randn(1,N)+pi/2]
 
-v2 = addNode!(fg, :x2, Pose2, N=N)  # pts2, diagm([1.0;1.0;0.1])
+v2 = addNode!(fg, :x2, Pose2, N=N)
 
 px2 = zeros(3)
 px2[1:3] = [1.1;-1.0;pi/2]
 ipp2 = PriorPose2(MvNormal(px2, initCov^2))
 f1  = addFactor!(fg,[:x2], ipp2)
 
-vl1 = addNode!(fg, :l1, Point2, N=N) # rand(MvNormal(l1,0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)),N), diagm([1.0;1.0])
-vl2 = addNode!(fg, :l2, Point2, N=N) # rand(MvNormal(l2,0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)),N), diagm([1.0;1.0])
-vl3 = addNode!(fg, :l3, Point2, N=N) # rand(MvNormal(l3,0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)),N), diagm([1.0;1.0])
+vl1 = addNode!(fg, :l1, Point2, N=N)
+vl2 = addNode!(fg, :l2, Point2, N=N)
+vl3 = addNode!(fg, :l3, Point2, N=N)
 
 # # why is explicit call to autoinit required here? should not be necessary
 # doautoinit!(fg, :x1)

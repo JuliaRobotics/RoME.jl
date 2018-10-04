@@ -17,8 +17,8 @@ fg.sessionname="SESSANIM"
 fg.cg = cloudGraph
 
 
-initCov = diagm([0.03;0.03;0.001])
-odoCov = diagm([3.0;3.0;0.4])
+initCov = Matrix(Diagonal([0.03;0.03;0.001].^2))
+odoCov = Matrix(Diagonal([3.0;3.0;0.4].^2))
 
 x1 = initFactorGraph!(fg, ready=0, N=N)
 println("Starting $(fg.sessionname) at $(x1), at $(getKDEMax(getVertKDE(fg,x1)))")

@@ -14,7 +14,7 @@ mutable struct PriorPoint2{T} <: IncrementalInference.FunctorSingleton where {T 
 end
 PriorPoint2(z::T) where {T <: Distributions.Distribution} = PriorPoint2{T}(z)
 function PriorPoint2D(mu, cov, W)
-  warn("PriorPoint2D(mu, cov, W) is deprecated, use PriorPoint{T}(T(...)) instead -- e.g. PriorPoint2{MvNormal}(MvNormal(...) or any other Distributions.Distribution type instead.")
+  @warn "PriorPoint2D(mu, cov, W) is deprecated, use PriorPoint{T}(T(...)) instead -- e.g. PriorPoint2{MvNormal}(MvNormal(...) or any other Distributions.Distribution type instead."
   PriorPoint2{MvNormal{Float64}}(MvNormal(mu, cov))
 end
 function getSample(p2::PriorPoint2, N::Int=1)
@@ -96,7 +96,7 @@ function (pp2r::Point2Point2WorldBearing)(
   # noisy bearing measurement
   z, r = meas[1][1,idx], meas[1][2,idx]
   dx, dy = pj[1,idx]-pi[1,idx], pj[2,idx]-pi[2,idx]
-  res[1] = z - atan2(dy,dx)
+  res[1] = z - atan(dy,dx)
   res[2] = r - norm([dx; dy])
   nothing
 end

@@ -6,7 +6,7 @@ import IncrementalInference: getSample
 using TransformUtils
 
 
-type ZJoint <: FunctorPairwise
+mutable struct ZJoint <: FunctorPairwise
   Zij::Distribution
 end
 function getSample(el::ZJoint, N=1)

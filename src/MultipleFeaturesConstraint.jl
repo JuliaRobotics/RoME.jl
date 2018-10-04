@@ -99,19 +99,19 @@ function (mm2d::MultipleFeatures2D)(res::Array{Float64},
   cjTo3 = (wTbj * mm2d.bTc) \ wTo3
   cjTo3b = dobimodal ? (wTbj * mm2d.bTc) \ wTo3 : nothing
 
-  the1 = atan2(se2vee(ciTo1)[2], se2vee(ciTo1)[1])
-  the2 = atan2(se2vee(ciTo2)[2], se2vee(ciTo2)[1])
-  the3 = atan2(se2vee(ciTo3)[2], se2vee(ciTo3)[1])
+  the1 = atan(se2vee(ciTo1)[2], se2vee(ciTo1)[1])
+  the2 = atan(se2vee(ciTo2)[2], se2vee(ciTo2)[1])
+  the3 = atan(se2vee(ciTo3)[2], se2vee(ciTo3)[1])
 
   res[1] = 0.0
   res[1] += ( meas[1][1,idx,1] - the1 )^2
   res[1] += ( meas[1][2,idx,1] - the2 )^2
   res[1] += ( meas[1][3,idx,1] - the3 )^2
 
-  the1 = atan2(se2vee(cjTo1)[2], se2vee(cjTo1)[1])
-  the2 = atan2(se2vee(cjTo2)[2], se2vee(cjTo2)[1])
-  the3 = atan2(se2vee(cjTo3)[2], se2vee(cjTo3)[1])
-  the3b = dobimodal ? atan2(se2vee(cjTo3b)[2], se2vee(cjTo3b)[1]) : nothing
+  the1 = atan(se2vee(cjTo1)[2], se2vee(cjTo1)[1])
+  the2 = atan(se2vee(cjTo2)[2], se2vee(cjTo2)[1])
+  the3 = atan(se2vee(cjTo3)[2], se2vee(cjTo3)[1])
+  the3b = dobimodal ? atan(se2vee(cjTo3b)[2], se2vee(cjTo3b)[1]) : nothing
 
   # res[2] = 0.0
   tempres = 0.0

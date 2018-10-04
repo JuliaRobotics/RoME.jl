@@ -55,7 +55,7 @@ function drawDictLinesLayers(pl, pts::Dict{String, Vector{Float64}}, from::Strin
   return pl
 end
 
-calcang(x1::Vector{Float64},x2::Vector{Float64}) = atan2(x2[2]-x1[2], x2[1]-x1[1])
+calcang(x1::Vector{Float64},x2::Vector{Float64}) = atan(x2[2]-x1[2], x2[1]-x1[1])
 calcrange(x1::Vector{Float64},x2::Vector{Float64}) = norm(x1-x2)
 
 function orderedBinIndex(x::Float64; start::Float64=0.0, stop::Float64=1.0,N::Int=3)

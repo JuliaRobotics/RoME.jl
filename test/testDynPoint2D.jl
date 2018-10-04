@@ -113,7 +113,7 @@ end
 
 N=100
 pμ = [0.0,0,10.0,0]
-pσ = diagm([0.1;0.1;0.1;0.1].^2)
+pσ = Matrix(Diagonal([0.1;0.1;0.1;0.1].^2))
 
 fg = initfg();
 
@@ -125,7 +125,7 @@ ensureAllInitialized!(fg)
 
 addNode!(fg, :x2, DynPoint2(ut=1_000_000))
 dpμ = [10.0;0;0;0];
-dpσ = diagm([1.0;1;0.5;0.01].^2)
+dpσ = Matrix(Diagonal([1.0;1;0.5;0.01].^2))
 vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
 addFactor!(fg, [:x1,:x2], vp, autoinit=false)
 

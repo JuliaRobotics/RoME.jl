@@ -2,19 +2,18 @@ module RoME
 
 using Reexport
 
-@reexport using RoME
+@reexport using IncrementalInference
 @reexport using TransformUtils
+@reexport using Distributions
+@reexport using KernelDensityEstimate
 
 using
-  LinearAlgebra,
   Distributed,
+  LinearAlgebra,
   Statistics,
   Graphs,
-  KernelDensityEstimate,
-  IncrementalInference,
-  CoordinateTransformations,
   Rotations,
-  Distributions,
+  CoordinateTransformations,
   JLD2,
   HDF5,
   ProgressMeter,

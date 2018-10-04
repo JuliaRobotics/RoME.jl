@@ -13,7 +13,7 @@ using Base.Test
 
 @testset "test PriorPoint2" begin
 
-  prpt2 = PriorPoint2( MvNormal([0.25;0.75], diagm([1.0;2.0]))  )
+  prpt2 = PriorPoint2( MvNormal([0.25;0.75], Matrix(Diagonal([1.0;2.0]))) )
 
   pprpt2 = convert(PackedPriorPoint2, prpt2)
   uprpt2 = convert(PriorPoint2, pprpt2)
@@ -23,7 +23,7 @@ using Base.Test
   @test norm(prpt2.Z.Σ.mat - uprpt2.Z.Σ.mat) < 1e-8
 
   # test backwards compatibility, TODO remove
-  prpt2 = PriorPoint2( MvNormal([0.25;0.75], diagm([1.0;2.0].^2)  ) )
+  prpt2 = PriorPoint2( MvNormal([0.25;0.75], Matrix(Diagonal([1.0;2.0].^2))  ) )
 
 end
 
@@ -34,16 +34,16 @@ N = 100
 fg = initfg()
 
 
-initCov = diagm([0.03;0.03;0.001])
-odoCov = diagm([3.0;3.0;0.01])
+initCov = Matrix(Diagonal([0.03;0.03;0.001]))
+odoCov = Matrix(Diagonal([3.0;3.0;0.01]))
 
 # Some starting position
-v1 = addNode!(fg, :x1, Pose2, N=N) # zeros(3,1), diagm([1.0;1.0;0.1])
+v1 = addNode!(fg, :x1, Pose2, N=N)
 ipp = PriorPose2(MvNormal(zeros(3), initCov))
 f1  = addFactor!(fg,[v1], ipp)
 
 # and a second pose
-v2 = addNode!(fg, :x2, Pose2, N=N) # vectoarr2([50.0;0.0;pi/2]), diagm([1.0;1.0;0.05])
+v2 = addNode!(fg, :x2, Pose2, N=N)
 ppc = Pose2Pose2( MvNormal([50.0;0.0;pi/2], odoCov) )
 f2 = addFactor!(fg, [:x1;:x2], ppc)
 
@@ -88,7 +88,7 @@ end
 
 @testset "test conversions of Pose2Point2BearingRange" begin
     # and a second pose
-    v3 = addNode!(fg, :l1, Point2, N=N) # vectoarr2([50.0,50.0]), diagm([1.0;1.0])
+    v3 = addNode!(fg, :l1, Point2, N=N)
     # ppc = Pose2Point2BearingRange([50.0;0.0;pi/2], 0.01*Matrix{Float64}(LinearAlgebra.I, 2,2), [1.0])
     ppbr = Pose2Point2BearingRange(
                   Normal(0.0, 0.005 ),

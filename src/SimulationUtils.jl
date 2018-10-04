@@ -17,7 +17,7 @@ function simOdo!(fgGT::FactorGraph, fg::FactorGraph, DX::Array{Float64,1};
     xn = noiserate[1]*r
     yn = noiserate[2]*r
     thn = noiserate[3]*r
-    cov = diagm([xn;yn;thn])
+    cov = Matrix(Diagonal([xn;yn;thn]))
     DXn = DX + [xn*randn();yn*randn();thn*randn()] + r*driftrate
     addOdoFG!(fg, nextn, DXn, cov)
 

@@ -123,7 +123,7 @@ fg = initfg()
 
 # Add landmark
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
-addFactor!(fg, [:l1], PriorPoint2(MvNormal([20.0;0.0], diagm([1.0;1.0].^2))),  autoinit=false ) # TODO IIF.Prior
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([20.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))),  autoinit=false ) # TODO IIF.Prior
 li = zeros(2,1); li[1,1] = 20.0;
 setVal!(fg, :l1, li)
 
