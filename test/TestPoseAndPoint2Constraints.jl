@@ -1,10 +1,12 @@
 # test Pose2DPoint2D constraint evaluation function
 
-using RoME, IncrementalInference, Distributions
-using Base.Test
+using LinearAlgebra, Statistics
+using Test
+using RoME
+# , IncrementalInference, Distributions
 
 
-begin
+@testset "test pose and point combinations..." begin
 
 
 global N = 75
@@ -31,8 +33,8 @@ global f2 = addFactor!(fg, [:x0;:x1], ppc)
 # test evaluation of pose pose constraint
 global pts = approxConv(fg, :x0x1f1, :x1)
 # pts = evalFactor2(fg, f2, v2.index)
-@test norm(Base.mean(pts,2)[1:2]-[50.0;0.0]) < 10.0
-@test abs(Base.mean(pts,2)[3]-pi/2) < 0.5
+@test norm(Statistics.mean(pts,dims=2)[1:2] - [50.0;0.0]) < 10.0
+@test abs(Statistics.mean(pts,dims=2)[3] - pi/2) < 0.5
 
 # @show ls(fg)
 ensureAllInitialized!(fg)
@@ -42,12 +44,12 @@ inferOverTreeR!(fg, tree,N=N)
 
 # test post evaluation values are correct
 global pts = getVal(fg, :x0)
-@test norm(Base.mean(pts,2)[1:2]-[0.0;0.0]) < 10.0
-@test abs(Base.mean(pts,2)[3]) < 0.5
+@test norm(Statistics.mean(pts, dims=2)[1:2] - [0.0;0.0]) < 10.0
+@test abs(Statistics.mean(pts, dims=2)[3]) < 0.5
 
 global pts = getVal(fg, :x1)
-@test norm(Base.mean(pts,2)[1:2]-[50.0;0.0]) < 10.0
-@test abs(Base.mean(pts,2)[3]-pi/2) < 0.5
+@test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;0.0]) < 10.0
+@test abs(Statistics.mean(pts, dims=2)[3]-pi/2) < 0.5
 
 
 # check that yaw is working
@@ -61,16 +63,16 @@ global tree = wipeBuildNewTree!(fg)
 
 # test post evaluation values are correct
 global pts = getVal(fg, :x0)
-@test norm(Base.mean(pts,2)[1:2]-[0.0;0.0]) < 20.0
-@test abs(Base.mean(pts,2)[3]) < 0.5
+@test norm(Statistics.mean(pts, dims=2)[1:2]-[0.0;0.0]) < 20.0
+@test abs(Statistics.mean(pts, dims=2)[3]) < 0.5
 
 global pts = getVal(fg, :x1)
-@test norm(Base.mean(pts,2)[1:2]-[50.0;0.0]) < 20.0
-@test abs(Base.mean(pts,2)[3] - pi/2) < 0.5
+@test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;0.0]) < 20.0
+@test abs(Statistics.mean(pts, dims=2)[3] - pi/2) < 0.5
 
 global pts = getVal(fg, :x2)
-@test norm(Base.mean(pts,2)[1:2]-[50.0;50.0]) < 20.0
-@test abs(Base.mean(pts,2)[3]-pi/2) < 0.5
+@test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;50.0]) < 20.0
+@test abs(Statistics.mean(pts, dims=2)[3]-pi/2) < 0.5
 
 println("test bearing range evaluations")
 
@@ -89,8 +91,8 @@ global pts = approxConv(fg, :x0l1f1, :l1, N=N)
 ## ppr(res,nothing,1,meas,xi,lm )
 
 # all points should lie in a ring around 0,0
-@test sum(sqrt.(sum(pts.^2, 1 )) .< 5.0) == 0
-@test sum(sqrt.(sum(pts.^2, 1 )) .< 15.0) == N
+@test sum(sqrt.(sum(pts.^2, dims=1 )) .< 5.0) == 0
+@test sum(sqrt.(sum(pts.^2, dims=1 )) .< 15.0) == N
 
 
 global pts = approxConv(fg, :x0l1f1, :x0)
@@ -106,7 +108,7 @@ global pp2 = PriorPoint2(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0]))))
 global f5 = addFactor!(fg,[l1], pp2)
 global pts = evalFactor2(fg, f5, l1.index)
 
-@test norm(Base.mean(pts,2)[:]-[10.0;0.0]) < 5.0
+@test norm(Statistics.mean(pts, dims=2)[:]-[10.0;0.0]) < 5.0
 
 # println("test Pose2D plotting")
 

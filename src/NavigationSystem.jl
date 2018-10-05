@@ -4,12 +4,12 @@ function triggerPose(x, xprev, Tnow, Tprev,
                     distrule, timerule, yawrule)
 
   if norm(x[1:2]-xprev[1:2]) >= distrule
-    @show Tnow, round(x,2), round(xprev,2)
+    @show Tnow, round(x,digits=2), round(xprev,digits=2)
     @show norm(x[1:2]-xprev[1:2])
     return 1
   end
   if abs(x[3]-xprev[3]) >= yawrule
-    @show Tnow, round(x,2), round(xprev,2)
+    @show Tnow, round(x,digits=2), round(xprev,digits=2)
     @show abs(x[3]-xprev[3])
     return 2
   end

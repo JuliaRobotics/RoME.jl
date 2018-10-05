@@ -15,7 +15,6 @@ using
   Rotations,
   CoordinateTransformations,
   JLD2,
-  HDF5,
   ProgressMeter,
   DocStringExtensions
 

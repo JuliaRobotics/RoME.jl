@@ -86,7 +86,7 @@ setVal!(fg, :x0, zeros(3,1))
 ##----------- sanity check that predictbelief plumbing is doing the right thing
 global pts = predictbelief(fg, :x0, ls(fg, :x0), N=75)
 @test sum(abs.(Statistics.mean(pts,dims=2)) .< [0.1; 0.1; 0.1]) == 3
-@test sum([0.05; 0.05; 0.05] .< Statistics.std(pts,2) .< [0.15; 0.15; 0.15]) == 3
+@test sum([0.05; 0.05; 0.05] .< Statistics.std(pts,dims=2) .< [0.15; 0.15; 0.15]) == 3
 #------------
 
 # Add landmark

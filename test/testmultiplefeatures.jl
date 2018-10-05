@@ -93,7 +93,7 @@ end
 
 global res = zeros(3)
 
-wAbi[:] = 0.0
+wAbi[:] .= 0.0
 # @show wAbi
 
 mm2(res,
@@ -179,7 +179,7 @@ end
 
 @testset "test as minimization problem to landmark..." begin
 
-wAbi[:] = 0.0
+wAbi[:] .= 0.0
 
 gg = (x,y) -> minmickey([x;y])
 #plot(z=gg, x=range(1,stop=2,length=100),y=range(-1,stop=1,length=100), Geom.contour(levels=50))
@@ -276,7 +276,7 @@ end
 
 
 
-println("test ambiguous bi-modal multifeature constraint operation")
+@testset "test ambiguous bi-modal multifeature constraint operation" begin
 
 global mm2 = MultipleFeatures2D(
   xir1,
@@ -290,6 +290,8 @@ global mm2 = MultipleFeatures2D(
   SE2(zeros(3))  )
 
 
+
+end
 
 
 

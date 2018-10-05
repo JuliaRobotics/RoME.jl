@@ -8,7 +8,7 @@ using Test
 @testset "test x translation case" begin
 
 # trivial cases first, orientation based tests below
-global wTx = Vector{AffineMap}(2)
+global wTx = Vector{AffineMap}(undef, 2)
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(Quat(1.0, 0, 0, 0))
 wTx[2] = Translation(10.0, 0, 0) ∘ LinearMap(Quat(1.0, 0, 0, 0))
 
@@ -50,7 +50,7 @@ end
 
 @testset "test z translation case" begin
 # z translation only
-global wTx = Vector{AffineMap}(2)
+global wTx = Vector{AffineMap}(undef,2)
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(Quat(1.0, 0, 0, 0))
 wTx[2] = Translation(0, 0, 10.0) ∘ LinearMap(Quat(1.0, 0, 0, 0))
 
@@ -92,7 +92,7 @@ end
 
 @testset "test roll and translate case 1" begin
 # different orientation, roll
-global wTx = Vector{AffineMap}(2)
+global wTx = Vector{AffineMap}(undef, 2)
 global sq2 = 1.0/sqrt(2)
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(Quat(sq2, sq2, 0, 0))
 wTx[2] = Translation(10.0, 0, 0) ∘ LinearMap(Quat(sq2, sq2, 0, 0))
@@ -137,7 +137,7 @@ end
 
 @testset "test roll and translate case 2" begin
 
-global wTx = Vector{AffineMap}(2)
+global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, roll
 global sq2 = 1.0/sqrt(2)
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(Quat(sq2, sq2, 0, 0))
@@ -185,7 +185,7 @@ end
 
 @testset "test pitch and translate case 1" begin
 
-global wTx = Vector{AffineMap}(2)
+global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
 global qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
@@ -232,7 +232,7 @@ end
 
 @testset "test pitch and translate case 2" begin
 
-global wTx = Vector{AffineMap}(2)
+global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
 global qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
@@ -281,7 +281,7 @@ end
 
 @testset "test pitch and translate case 3" begin
 
-global wTx = Vector{AffineMap}(2)
+global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
 global qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
@@ -331,7 +331,7 @@ end
 
 @testset "test pitch and translate case 4" begin
 
-global wTx = Vector{AffineMap}(2)
+global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
 global qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
@@ -385,7 +385,7 @@ end
 
 @testset "test yaw and translate case 1" begin
 
-global wTx = Vector{AffineMap}(2)
+global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, yaw
 global qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/2,0,0,1.0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)

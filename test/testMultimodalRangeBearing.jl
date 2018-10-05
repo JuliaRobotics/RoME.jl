@@ -1,6 +1,6 @@
-using RoME, Distributions
-using Base: Test
-# using RoMEPlotting
+using RoME
+using Test
+# using RoMEPlotting, Distributions
 
 import IncrementalInference: getSample
 

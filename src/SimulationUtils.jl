@@ -38,7 +38,7 @@ function showTruePredBR(fgGT::FactorGraph, fg::FactorGraph, ps::String, lm::Stri
     truA, preA = truePredBR(fgGT, fg, ps, lm)
     measA = truA + [cov[1,1]*randn();cov[2,2]*randn()]
     mala = malahanobisBR(measA, preA, cov)
-    println(ps,lm, ": true BR=$(round(truA,3)), pred BR=$(round(preA,3)), mala=$(round(mala,3))")
+    println(ps,lm, ": true BR=$(round(truA,digits=3)), pred BR=$(round(preA,digits=3)), mala=$(round(mala,digits=3))")
 end
 
 function crossMalaBR(fgGT::FactorGraph, fg::FactorGraph,

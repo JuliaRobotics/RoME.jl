@@ -56,8 +56,8 @@ global meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 
 global N = 200
 global pts, L = 0.01*randn(6,N), zeros(3,N);
-L[1,:] += 3.0
-L[2,:] += 0.65
+L[1,:] .+= 3.0
+L[2,:] .+= 0.65
 global t = Array{Array{Float64,2},1}()
 push!(t,pts)
 push!(t,L)

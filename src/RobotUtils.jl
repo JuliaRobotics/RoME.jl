@@ -278,7 +278,7 @@ function initFactorGraph!(fg::FactorGraph;
       push!(nodesymbols, lbl)
       # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
       fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
-      push!(nodesymbols, fctVert.label)
+      push!(nodesymbols, Symbol(fctVert.label))
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
@@ -287,7 +287,7 @@ function initFactorGraph!(fg::FactorGraph;
       push!(nodesymbols, lbl)
       # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
       fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
-      push!(nodesymbols, fctVert.label)
+      push!(nodesymbols, Symbol(fctVert.label))
   end
   return nodesymbols
 end

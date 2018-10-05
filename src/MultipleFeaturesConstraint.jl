@@ -48,7 +48,7 @@ end
 
 function getSample(mm2d::MultipleFeatures2D, N::Int=1)
 
-  meas = Array{Float64,3}(3,N,2)
+  meas = Array{Float64,3}(undef, 3,N,2)
   meas[1,:,1] = rand(mm2d.xir1,N)
   meas[2,:,1] = rand(mm2d.xir2,N)
   meas[3,:,1] = rand(mm2d.xir3,N)

@@ -1,8 +1,9 @@
 # testing Point2Point2WorldBearing factor
 
-using RoME, IncrementalInference, Distributions
+using RoME
+# , IncrementalInference, Distributions
 
-using Base: Test
+using Test
 
 
 

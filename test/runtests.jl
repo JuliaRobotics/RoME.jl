@@ -2,10 +2,10 @@
 #@show nprocs()
 
 using RoME
-using Base.Test
+using Test
 
 # might be unnecessary
-using JLD2, HDF5
+using JLD2  #, HDF5
 
 println("[TEST] numeric root...")
 include("testhigherdimroots.jl")

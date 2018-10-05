@@ -1,5 +1,6 @@
 
-using RoME, Distributions
+using RoME
+# , Distributions
 # using KernelDensityEstimate
 using Test
 using DelimitedFiles
@@ -49,8 +50,8 @@ global muX1 = Statistics.mean(getVal(fg,:x1),dims=2)
 global stdX1 = Statistics.std(getVal(fg,:x1),dims=2)
 @test sum(map(Int,abs.(muX1[1:3]) .< 0.4)) == 3
 @test sum(map(Int,abs.(muX1[4:6]) .< 0.04)) == 3
-@test sum(map(Int,abs.(1.0-stdX1[1:3]) .< 0.3)) == 3
-@test sum(map(Int,abs.(0.01-stdX1[4:6]) .< 0.1)) == 3
+@test sum(map(Int,abs.(1.0 .- stdX1[1:3]) .< 0.3)) == 3
+@test sum(map(Int,abs.(0.01 .- stdX1[4:6]) .< 0.1)) == 3
 
 
 println("Testing PriorPose3 evaluation...")

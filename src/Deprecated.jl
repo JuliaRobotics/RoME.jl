@@ -235,7 +235,7 @@ function evalPotentialNew(brpho::Pose2Point2BearingRange, Xi::Array{Graphs.ExVer
     l2 = mmodes ? getVal(brpho.Xi[3]) : nothing
     nPts = size(x,2)
 
-    pars = Array{Float64,2}(size(x))
+    pars = Array{Float64,2}(undef,size(x))
 
     # discrete option, marginalized out before message is sent
     Gamma = mmodes ? rand(Categorical(brpho.W),nPts) : ones(Int,nPts)

@@ -59,7 +59,7 @@ function ominus(::Type{LinearRangeBearingElevation}, X::Vector{Float64}, L::Vect
 end
 
 function ominus!(reuse::reuseLBRA, X::Vector{Float64}, L::Array{Float64})
-  copy!(reuse.wTb.t, X[1:3])
+  copyto!(reuse.wTb.t, X[1:3])
   reuse.E.R, reuse.E.P, reuse.E.Y = X[4], X[5], X[6]
   convert!(reuse.wTb.R, reuse.E)  # costly
   matrix!(reuse.M, reuse.wTb)

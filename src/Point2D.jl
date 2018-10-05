@@ -80,7 +80,7 @@ mutable struct Point2Point2WorldBearing{T} <: IncrementalInference.FunctorPairwi
 end
 Point2Point2WorldBearing(x::T) where {T <: IIF.SamplableBelief} = Point2Point2WorldBearing{T}(x)
 function getSample(pp2::Point2Point2WorldBearing, N::Int=1)
-  sp = Array{Float64,2}(2,N)
+  sp = Array{Float64,2}(undef, 2,N)
   sp[1,:] = rand(pp2.Z,N)
   sp[2,:] = rand(pp2.rangemodel,N)
   return (sp, )

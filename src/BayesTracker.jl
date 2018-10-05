@@ -192,16 +192,16 @@ end
 
 # agnostic to feature idex permutations
 function divMaxAcross(lk::Array{Float64,2})
-  rlk = round(lk,5)
-  m1 = maximum(rlk, 1)
+  rlk = round.(lk, digits=5)
+  m1 = maximum(rlk, dims=1)
   m1[m1.==0.0] = 1.0
   return rlk./m1
 end
 
 # agnostic to featidxpermutations
 function divMaxAlong(lk::Array{Float64,2})
-  rlk = round(lk,5)
-  m2 = maximum(rlk, 2)
+  rlk = round.(lk, digits=5)
+  m2 = maximum(rlk, dims=2)
   m2[m2.==0.0] = 1.0
   return rlk./m2
 end
