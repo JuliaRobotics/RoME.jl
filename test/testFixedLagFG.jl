@@ -1,7 +1,9 @@
 # example for fixed lag operation
 
-using Base.Test
-using RoME, Distributions
+using Test
+using RoME
+using LinearAlgebra
+# , Distributions
 
 
 # TODO -- use this for cleanup
@@ -32,12 +34,12 @@ fg.isfixedlag = true
 println("STEP 1: Driving around a bit")
 addNode!(fg, :x0, Pose2)
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))) )
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I,3,3))) )
 for i in 0:5
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
   addNode!(fg, nsym, Pose2)
-  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
+  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
   addFactor!(fg, [psym;nsym], pp )
 end
 
@@ -56,7 +58,7 @@ for i in 6:11
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
   addNode!(fg, nsym, Pose2)
-  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
+  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
   addFactor!(fg, [psym;nsym], pp )
 end
 
