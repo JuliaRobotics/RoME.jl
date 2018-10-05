@@ -20,7 +20,7 @@ end
 
 
 # start with an empty factor graph object
-fg = initfg() # FUTURE: (quasifixedwindow=50, autosolve=true)
+global fg = initfg() # FUTURE: (quasifixedwindow=50, autosolve=true)
 
 # Set up a quasi fixed-lag horizon of 8 nodes and enable the fixed-lag solving.
 # If the graph grows over 8 nodes, the older nodes will be frozen to limit the computational window.
@@ -45,7 +45,7 @@ end
 
 # Add node linking initial pose with a bearing range measurement landmark
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
-p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 
 ## 2. Solve graph when shorter than fixed length - should solve full session.
@@ -80,10 +80,18 @@ X6 = deepcopy(getVal(fg, :x6))
 # Now solve again, which will freeze vertices < 5
 println("STEP 4: Solve graph when shorter than fixed length, and show time to solve")
 @time IIF.batchSolve!(fg)
+# fg.isfixedlag
+# tofreeze = fg.fifo[1:(end-fg.qfl)]
+# @test length(tofreeze) > 0
+# IIF.setfreeze!.(fg, tofreeze)
+#
+# fifoFreeze!(fg)
+# global tree = IIF.wipeBuildNewTree!(fg)
+# inferOverTreeR!(fg, tree)
 
 # Confirm that the initial nodes (x0 - x5) are frozen.
-@test getData(fg, :x5).isfrozen == true
-@test getData(fg, :x6).isfrozen == false
+@test getData(fg, :x5).ismargin
+@test getData(fg, :x6).ismargin == false
 
 # X5 should be exactly same
 # X6 should be different
