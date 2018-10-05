@@ -20,13 +20,13 @@ fg = initfg(sessionname="MULTIMODAL_2D_TUTORIAL")
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
 addNode!(fg, :l2, Point2, labels=["LANDMARK"])
 
-addFactor!(fg, [:l1], Prior(MvNormal([10.0;0.0], diagm([1.0;1.0].^2))) )
-addFactor!(fg, [:l2], Prior(MvNormal([30.0;0.0], diagm([1.0;1.0].^2))) )
+addFactor!(fg, [:l1], Prior(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
+addFactor!(fg, [:l2], Prior(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 
 setVal!(getVert(fg, :l2), zeros(2,100))
 
 addNode!(fg, :x0, Pose2)
-# addFactor!(fg, [:x0], Prior(MvNormal([0.0;0.0;0], diagm([1.0;1.0;0.01].^2))) )
+# addFactor!(fg, [:x0], Prior(MvNormal([0.0;0.0;0], Matrix(Diagonal([1.0;1.0;0.01].^2)))) )
 
 
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
@@ -67,5 +67,5 @@ X0pts = getPoints(X0)
 #   psym = Symbol("x$i")
 #   nsym = Symbol("x$(i+1)")
 #   addNode!(fg, nsym, Pose2, labels=["POSE"])
-#   addFactor!(fg, [psym;nsym], Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2))))
+#   addFactor!(fg, [psym;nsym], Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2)))))
 # end

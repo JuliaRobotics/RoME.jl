@@ -1,8 +1,8 @@
 
 
-type SLAMWrapper
+mutable struct SLAMWrapper
   fg::IncrementalInference.FactorGraph
-  tree::VoidUnion{IncrementalInference.BayesTree}
+  tree::NothingUnion{IncrementalInference.BayesTree}
   lndmidx::Int
   lastposesym::Symbol
   lastpose::SE3

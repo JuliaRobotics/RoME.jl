@@ -42,8 +42,8 @@ addNode!(fg, :l2, Point2)
 addNode!(fg, :l3, Point2)
 
 # and put priors on :l101 and :l102
-addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], eye(2))))
-addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], eye(2))))
+addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], Matrix{Float64}(LinearAlgebra.I, 2,2))))
+addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
 
 # first range measurement
@@ -103,7 +103,7 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
     ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
     addFactor!(fgl, [prev_sym;pos_sym], ppr)
   else
-    warn("Variable node $pos_sym already in the factor graph.")
+    @warn "Variable node $pos_sym already in the factor graph."
   end
   beacons = keys(GTl)
   for ll in beacons

@@ -74,7 +74,7 @@ function isInFG!(fgl::FactorGraph, lbl::Symbol; N=100, ready=0)
 	v = nothing
 	if !haskey(fgl.IDs, lbl)
 		init = 300*randn(2,N)
-		v = addNode!(fgl, lbl, Point2, N=N, ready=ready) # init, diagm([1000.0;1000.0])
+		v = addNode!(fgl, lbl, Point2, N=N, ready=ready)
 	else
 		v = getVert(fgl, lbl)
 	end
@@ -101,7 +101,7 @@ function addNewPose!(fgl::FactorGraph,
                      N=N  )
   #
   init = 300*randn(2,N)
-  v = addNode!(fgl, lbl, Point2, N=N, ready=ready) #init, diagm([1000.0;1000.0])
+  v = addNode!(fgl, lbl, Point2, N=N, ready=ready)
   rhoZ = norm(GTp[string(lbl)]-GTp[string(from)])
   ppr = Point2DPoint2DRange([rhoZ], 3.0, [1.0])
   f = addFactor!(fgl, [from,lbl], ppr, ready=ready)
@@ -118,7 +118,7 @@ function drive(fgl::FactorGraph, GTp, GTl, from, to; N=100)
 end
 
 function batchsolve(fgl::FactorGraph; N::Int=100)
-  warn("Deprecated for IncrementalInference.batchSolve! instead.")
+  @warn "Deprecated for IncrementalInference.batchSolve! instead."
   tree = wipeBuildNewTree!(fgl, drawpdf=true)
   inferOverTree!(fgl, tree, N=N)
   nothing
@@ -290,7 +290,7 @@ end
 
 
 function layerCircle(;cent=[0.0;0.0], radius=1.0, c="deepskyblue", N=200)
-	TH = linspace(0,2pi,200)
+	TH = range(0,stop=2pi,length=200)
 	X = real(radius*exp(TH*im))+cent[1]
 	Y = imag(radius*exp(TH*im))+cent[2]
 	layer(x=X,y=Y, Geom.path(), Theme(default_color=parse(Colorant,c)))
@@ -441,10 +441,10 @@ lmv1 = landmsInRange(GTl, GTp["l100"])
 addLandmsOnPose!(fg, v1, lmv1, N=N )
 
 # must pin landmarks for guage
-pp2 = PriorPoint2(MvNormal(GTl["l1"], diagm([1.0;1.0])))
+pp2 = PriorPoint2(MvNormal(GTl["l1"], Matrix(Diagonal([1.0;1.0]))))
 f = addFactor!(fg,[:l1], pp2)
 # f = addFactor!(fg,[getVert(fg,:l1)], pp2)
-pp2 = PriorPoint2(MvNormal(GTl["l2"], diagm([1.0;1.0])))
+pp2 = PriorPoint2(MvNormal(GTl["l2"], Matrix(Diagonal([1.0;1.0]))))
 f = addFactor!(fg, [:l2], pp2)
 
 

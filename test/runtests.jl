@@ -2,9 +2,10 @@
 #@show nprocs()
 
 using RoME
-using Base.Test
+using Test
 
-using JLD, HDF5
+# might be unnecessary
+using JLD2  #, HDF5
 
 println("[TEST] numeric root...")
 include("testhigherdimroots.jl")
@@ -53,9 +54,9 @@ include("testPose3Pose3NH.jl")
 println("[SUCCESS]")
 
 println("[TEST] saving to and loading from .jld file")
-savejld(fg, file="tempfg.jld" )
-fgu = loadjld( file="tempfg.jld" )
-Base.rm("tempfg.jld")
+savejld(fg, file="tempfg.jld2" )
+fgu = loadjld( file="tempfg.jld2" )
+Base.rm("tempfg.jld2")
 println("Success")
 
 println("[TEST] partial pose3 evaluations...")

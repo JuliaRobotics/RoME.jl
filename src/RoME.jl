@@ -1,18 +1,22 @@
 module RoME
 
+using Reexport
+
+@reexport using IncrementalInference
+@reexport using TransformUtils
+@reexport using Distributions
+@reexport using KernelDensityEstimate
+
 using
-  IncrementalInference,
+  Distributed,
+  LinearAlgebra,
+  Statistics,
   Graphs,
-  TransformUtils,
-  CoordinateTransformations,
   Rotations,
-  KernelDensityEstimate,
-  Distributions,
-  JLD,
-  HDF5,
+  CoordinateTransformations,
+  JLD2,
   ProgressMeter,
-  DocStringExtensions,
-  Compat
+  DocStringExtensions
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
@@ -20,57 +24,7 @@ import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribu
 
 
 export
-  # pass throughs from TransformUtils
-  SE2,
-  se2vee,
-  se2vee!,
-  SE3,
-  Euler,
-  Quaternion,
-  AngleAxis,
-  SO3,
-  so3,
-  compare,
-  convert,
-
-
-  # pass throughs from IncrementalInference
-  FunctorSingleton,
-  FunctorPairwise,
-  FunctorPairwiseNH,   # will become obsolete
-  FunctorSingletonNH,  # will become obsolete
-  ls,
-  addFactor!,
-  addNode!,
-  getVert,
-  getVertKDE,
-  getVal,
-  setVal!,
-  getData,
-  FNDencode,
-  FNDdecode,
-  localProduct,
-  predictbelief,
-  wipeBuildNewTree!,
-  inferOverTree!,
-  inferOverTreeR!,
-  writeGraphPdf,
-  savejld,
-  loadjld,
-  FactorGraph,
-  initializeNode!,
-  isInitialized,
-  ensureAllInitialized!,
-  getPoints,
-  FactorMetadata,
-  doautoinit!,
-  # overloaded functions from IIF
-  # decodefg,
-  # convertfrompackedfunctionnode,
-
-  # RoME specific functions
-  # SamplableBelief, moved to IIF
-  initfg,
+  initfg,  # RoME specific functions
   measureMeanDist,
   predictBodyBR,
   getLastPose,
@@ -89,9 +43,6 @@ export
   veePose,
   \,
   RangeAzimuthElevation,
-
-  # types
-  # BetweenPoses,
 
   # helper functions
   get2DSamples,
@@ -222,6 +173,8 @@ export
   Pose2,
   PriorPose2,
   PackedPriorPose2,
+  PartialPriorYawPose2,
+  PackedPartialPriorYawPose2,
   Pose2Pose2,
   PackedPose2Pose2,
   # velocity in Pose2
@@ -302,12 +255,6 @@ export
   # appendFactorGraph!,
   # doBatchRun,
   # rotateFeatsToWorld
-
-
-const IIF = IncrementalInference
-const KDE = KernelDensityEstimate
-
-
 
 include("SpecialDefinitions.jl")
 
