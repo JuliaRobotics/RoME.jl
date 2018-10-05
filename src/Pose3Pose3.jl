@@ -7,7 +7,7 @@
 mutable struct PriorPose3 <: IncrementalInference.FunctorSingleton
     Zi::Distribution
     PriorPose3() = new()
-    PriorPose3(st::FloatInt, sr::Float64) = new( MvNormal(zeros(6), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]] )  )
+    PriorPose3(st::FloatInt, sr::Float64) = new( MvNormal(zeros(6), [[st*Matrix{Float64}(LinearAlgebra.I, 3,3);zeros(3,3)];[zeros(3);sr*Matrix{Float64}(LinearAlgebra.I, 3,3)]] )  )
     PriorPose3(s::Distribution) = new(s)
 end
 function getSample(p3::PriorPose3, N::Int=1)
@@ -119,7 +119,7 @@ mutable struct Pose3Pose3NH <: IncrementalInference.FunctorPairwiseNH
     Pose3Pose3NH() = new()
     Pose3Pose3NH(s::Distribution, vh::Vector{Float64}) = new(s, Distributions.Categorical(vh), fill(PP3REUSE(), Threads.nthreads() )  )
     # Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Float64) = new(s,c, Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
-    # Pose3Pose3NH(st::FloatInt, sr::Float64;vh::Float64=1.0) = new(SE3(0), [[st*eye(3);zeros(3,3)];[zeros(3);sr*eye(3)]], Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
+    # Pose3Pose3NH(st::FloatInt, sr::Float64;vh::Float64=1.0) = new(SE3(0), [[st*Matrix{Float64}(LinearAlgebra.I, 3,3);zeros(3,3)];[zeros(3);sr*Matrix{Float64}(LinearAlgebra.I, 3,3)]], Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
 end
 function getSample(pp3::Pose3Pose3NH, N::Int=1)
   return (rand(pp3.Zij, N), )

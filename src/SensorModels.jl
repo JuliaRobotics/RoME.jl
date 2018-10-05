@@ -9,7 +9,7 @@ mutable struct reuseLBRA
   outp::Vector{Float64}
   rbe::Vector{Float64}
   reuseLBRA()=new()
-  reuseLBRA(::Int)=new(SE3(0),eye(4),Euler(0),ones(4),ones(4), zeros(3))
+  reuseLBRA(::Int)=new(SE3(0),Matrix{Float64}(LinearAlgebra.I, 4,4),Euler(0),ones(4),ones(4), zeros(3))
   reuseLBRA(a,b,c,d,e,f)=new(a,b,c,d,e,f)
 end
 mutable struct LinearRangeBearingElevation <: FunctorPairwiseMinimize
@@ -53,21 +53,21 @@ function ominus(::Type{LinearRangeBearingElevation}, X::Vector{Float64}, L::Vect
   # rangeBearing3(X, L)
   wTb = SE3(X[1:3], Euler(X[4:6]...))
   bTl = matrix(wTb)\[L[1:3];1.0]
-  b = atan2(bTl[2],	bTl[1])
-  el = -atan2(bTl[3], bTl[1])
+  b = atan(bTl[2],	bTl[1])
+  el = -atan(bTl[3], bTl[1])
   return [norm(bTl[1:3]); b; el]
 end
 
 function ominus!(reuse::reuseLBRA, X::Vector{Float64}, L::Array{Float64})
-  copy!(reuse.wTb.t, X[1:3])
+  copyto!(reuse.wTb.t, X[1:3])
   reuse.E.R, reuse.E.P, reuse.E.Y = X[4], X[5], X[6]
   convert!(reuse.wTb.R, reuse.E)  # costly
   matrix!(reuse.M, reuse.wTb)
   reuse.inp[1:3] = L[1:3]
   reuse.outp[1:4] = reuse.M\reuse.inp  # bTl  # costly
   reuse.rbe[1] = norm(reuse.outp[1:3])
-  reuse.rbe[2] = atan2(reuse.outp[2],	reuse.outp[1])
-  reuse.rbe[3] = -atan2(reuse.outp[3], reuse.outp[1]) #-
+  reuse.rbe[2] = atan(reuse.outp[2],  reuse.outp[1])
+  reuse.rbe[3] = -atan(reuse.outp[3], reuse.outp[1])
   nothing
 end
 

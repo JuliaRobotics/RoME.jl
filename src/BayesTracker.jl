@@ -1,6 +1,6 @@
 
 
-type Feature
+mutable struct Feature
   id::Int
   age::Int
   lastzage::Int
@@ -74,7 +74,7 @@ end
 # Input [x;y]
 # Ouput range, bearing
 function c2p(x::Array{Float64,1})
-  b = atan2(x[2],x[1])
+  b = atan(x[2],x[1])
   r = norm(x)
   return r, b
 end
@@ -83,7 +83,7 @@ end
 # Output [x;y], Cov_cart
 function pol2cart(z::Array{Float64,1}, s::Array{Float64,1})
   u, Rt = p2c(z)
-  Pp2 = diagm(s.^2)
+  Pp2 = Matrix(Diagonal(s.^2))
   P = abs(sqrtm(Rt*Pp2*(Rt')))
   return u, P
 end
@@ -93,7 +93,7 @@ end
 function cart2pol(z::Array{Float64,1}, s::Array{Float64,1})
   r, b = c2p(z)
   Rt = R(b)
-  Pp2 = diagm(s.^2)
+  Pp2 = Matrix(Diagonal(s.^2))
   P = abs(sqrtm(Rt'*Pp2*(Rt)))
   return [b;r], P
 end
@@ -192,16 +192,16 @@ end
 
 # agnostic to feature idex permutations
 function divMaxAcross(lk::Array{Float64,2})
-  rlk = round(lk,5)
-  m1 = maximum(rlk, 1)
+  rlk = round.(lk, digits=5)
+  m1 = maximum(rlk, dims=1)
   m1[m1.==0.0] = 1.0
   return rlk./m1
 end
 
 # agnostic to featidxpermutations
 function divMaxAlong(lk::Array{Float64,2})
-  rlk = round(lk,5)
-  m2 = maximum(rlk, 2)
+  rlk = round.(lk, digits=5)
+  m2 = maximum(rlk, dims=2)
   m2[m2.==0.0] = 1.0
   return rlk./m2
 end

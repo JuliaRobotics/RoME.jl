@@ -28,7 +28,7 @@ bTw = (wL'\bDX')' # use transpose for pivoted Cholesky inverse
 wTb = inv(bTw)
 
 # answers
-wThetab = atan2(wTb[1,2], wTb[1,1])
+wThetab = atan(wTb[1,2], wTb[1,1])
 wTransb = wTb[1:2,3]
 
 # Brute force least squares: (A'A)\(A')*y

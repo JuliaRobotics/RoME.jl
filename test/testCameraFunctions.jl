@@ -1,7 +1,8 @@
 # test camera functions
 
-using RoME, IncrementalInference
-using Base.Test
+using RoME
+# , IncrementalInference
+using Test
 
 ci = CameraIntrinsic()
 ce = CameraExtrinsic()

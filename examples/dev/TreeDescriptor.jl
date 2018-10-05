@@ -3,7 +3,7 @@
 
 
 
-type TreeDescriptor
+mutable struct TreeDescriptor
   description::Array{Float64,2}
   meanidx::Float64
   position::Array{Float64,1}
