@@ -12,8 +12,6 @@ using Distributions
 
 global meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 
-# Functor for efficient functional programming, avoids type_inference at each call
-# fp! = WrapParam{reuseLBRA}(zeros(3), zeros(6), zeros(3), reuseLBRA(0))
 
 global N = 100
 global X, pts = 0.01*randn(6,N), zeros(3,N);
