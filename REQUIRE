@@ -12,3 +12,4 @@ Optim 0.16.0
 ProgressMeter 0.6.0
 DocStringExtensions 0.5.0
 Reexport 0.2.0
+DistributedFactorGraphs
