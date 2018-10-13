@@ -2,7 +2,10 @@
 nprocs() < 3 ? addprocs(4-nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces
+using IncrementalInference
 using RoME, Distributions
+## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist
+using RoMEPlotting
 
 # start with an empty factor graph object
 fg = initfg()
@@ -10,9 +13,10 @@ fg = initfg()
 # Add the first pose :x0
 addNode!(fg, :x0, Pose2)
 
-# Add at a fixed location PriorPose2 to pin :x0 to a starting location
-addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))))
+# Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
+addFactor!(fg, [:x0], IIF.Prior( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2)) )))
 
+<<<<<<< HEAD
 # Drive around in a hexagon a number of times
 for i in 0:120
     psym = Symbol("x$i")
@@ -20,14 +24,26 @@ for i in 0:120
     addNode!(fg, nsym, Pose2)
     pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.5;0.5;0.1].^2)))
     addFactor!(fg, [psym;nsym], pp )
+=======
+# Drive around in a hexagon
+for i in 0:5
+  psym = Symbol("x$i")
+  nsym = Symbol("x$(i+1)")
+  addNode!(fg, nsym, Pose2)
+  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+  addFactor!(fg, [psym;nsym], pp )
+>>>>>>> 4375e68ca680d8a452d3b933dd63573116ef7069
 end
 
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
 batchSolve!(fg)
+<<<<<<< HEAD
 
 ## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist
 using RoMEPlotting
 using Compose
+=======
+>>>>>>> 4375e68ca680d8a452d3b933dd63573116ef7069
 
 # For Juno/Jupyter style use
 pl = drawPoses(fg)
@@ -56,6 +72,7 @@ batchSolve!(fg)
 # redraw to see that additional information aids in refining the results
 pl = drawPosesLandms(fg)
 Gadfly.draw(Gadfly.PDF("/tmp/test3.pdf", 20cm, 10cm),pl)  # or PNG(...)
+<<<<<<< HEAD
 
 # But actually we also should see l1 from x1, x7, x8....
 # Let's add that as additional information, it'll be at same range but 10m closer
@@ -76,3 +93,5 @@ batchSolve!(fg)
 
 # redraw to see that additional information aids in refining the results
 pl = drawPosesLandms(fg)
+=======
+>>>>>>> 4375e68ca680d8a452d3b933dd63573116ef7069

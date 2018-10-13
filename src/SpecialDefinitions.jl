@@ -1,12 +1,12 @@
 
-# import IncrementalInference: SamplableBelief
-# SamplableBelief = Union{Distributions.Distribution, KernelDensityEstimate.BallTreeDensity, IIF.AliasingScalarSampler}
+const IIF = IncrementalInference
+const KDE = KernelDensityEstimate
 
-# @compat abstract type BetweenPoses <: IncrementalInference.FunctorPairwise end
+const NothingUnion{T} = Union{Nothing, T}
 
-@compat const VoidUnion{T} = Union{Void, T}
+const CTs = CoordinateTransformations
+const TUs = TransformUtils
 
-@compat const CTs = CoordinateTransformations
-@compat const TUs = TransformUtils
+
 
 vectoarr2(v) = reshape(v, length(v),1)

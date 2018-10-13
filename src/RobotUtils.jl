@@ -1,12 +1,9 @@
 
-# warn("Must remove optional dev/ISAMRemoteSolve.jl dependency here.")
-# include("dev/ISAMRemoteSolve.jl")
 
-
-immutable RangeAzimuthElevation
+mutable struct RangeAzimuthElevation
   range::Float64
   azimuth::Float64
-  elevation::Union{Void,Float64}
+  elevation::Union{Nothing,Float64}
 end
 
 function convert(::Type{Rotations.Quat}, q::TransformUtils.Quaternion)
@@ -16,14 +13,14 @@ function convert(::Type{Rotations.Quat}, x::SO3)
   q = convert(TransformUtils.Quaternion, x)
   convert(Rotations.Quat, q)
 end
-function convert{T <: CoordinateTransformations.AffineMap}(::Type{T}, x::SO3)
+function convert(::Type{T}, x::SO3) where {T <: CoordinateTransformations.AffineMap}
   LinearMap( convert(Quat, x) )
 end
 
-function convert{T <: CoordinateTransformations.AffineMap}(::Type{T}, x::SE3)
+function convert(::Type{T}, x::SE3) where {T <: CoordinateTransformations.AffineMap}
   Translation(x.t...) ∘ convert(AffineMap{Rotations.Quat{Float64}}, x.R)
 end
-function convert{T <: CoordinateTransformations.AffineMap{Rotations.Quat{Float64}}}(::Type{SE3}, x::T)
+function convert(::Type{SE3}, x::T) where {T <: CoordinateTransformations.AffineMap{Rotations.Quat{Float64}}}
   SE3(x.translation[1:3], TransformUtils.Quaternion(x.linear.w, [x.linear.x,x.linear.y,x.linear.z]) )
 end
 
@@ -60,8 +57,8 @@ function \(s::SE3, wTr::CTs.Translation)
   bTr = s.R.R'*(wTr.v-s.t)
   Dtr = bTr
   range = norm(Dtr)
-  azi = atan2(Dtr[2], Dtr[1])
-  elev = atan2(Dtr[3], Dtr[1])
+  azi = atan(Dtr[2], Dtr[1])
+  elev = atan(Dtr[3], Dtr[1])
   RangeAzimuthElevation(range, azi, elev)
 end
 
@@ -90,7 +87,7 @@ function measureMeanDist(fg::FactorGraph, a::T, b::T) where {T <: AbstractString
     By = Base.mean(vec(B[2,:]))
     dx = Bx - Ax
     dy = By - Ay
-    b = atan2(dy,dx)
+    b = atan(dy,dx)
     r = sqrt(dx^2 + dy^2)
     return r, b
 end
@@ -106,17 +103,16 @@ function predictBodyBR(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
   By = Base.mean(vec(B[2,:]))
   wL = SE2([Bx;By;0.0])
   wBb = SE2([Ax;Ay;Ath])
-  bL = se2vee((wBb \ eye(3)) * wL)
+  bL = se2vee((wBb \ Matrix{Float64}(LinearAlgebra.I, 3,3)) * wL)
   dx = bL[1] - 0.0
   dy = bL[2] - 0.0
-  b = (atan2(dy,dx))
+  b = (atan(dy,dx))
   r = sqrt(dx^2 + dy^2)
   return b, r
 end
 
 function getNextLbl(fgl::FactorGraph, chr)
   # TODO convert this to use a double lookup
-  # warn("getNextLbl(::FactorGraph..) to be deprecated, use getlastpose/landm(::SLAMWrapper..) instead.")
   max = -1
   maxid = -1
   for vid in fgl.IDs
@@ -265,8 +261,8 @@ end
 Initialize a factor graph object as Pose2, Pose3, or neither and returns variable and factor symbols as array.
 """
 function initFactorGraph!(fg::FactorGraph;
-      P0::Union{Array{Float64,2},Void}=nothing,
-      init::Union{Vector{Float64},Void}=nothing,
+      P0::Union{Array{Float64,2},Nothing}=nothing,
+      init::Union{Vector{Float64},Nothing}=nothing,
       N::Int=100,
       lbl::Symbol=:x0,
       ready::Int=1,
@@ -276,22 +272,22 @@ function initFactorGraph!(fg::FactorGraph;
   nodesymbols = Symbol[]
   if firstPoseType == Pose2
       init = init!=nothing ? init : zeros(3)
-      P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.001])
+      P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.001]))
       # init = vectoarr2(init)
       addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
       push!(nodesymbols, lbl)
       # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
       fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
-      push!(nodesymbols, fctVert.label)
+      push!(nodesymbols, Symbol(fctVert.label))
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
-      P0 = P0!=nothing ? P0 : diagm([0.03;0.03;0.03;0.001;0.001;0.001])
+      P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.03;0.001;0.001;0.001]))
       addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
       push!(nodesymbols, lbl)
       # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
       fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
-      push!(nodesymbols, fctVert.label)
+      push!(nodesymbols, Symbol(fctVert.label))
   end
   return nodesymbols
 end
@@ -330,7 +326,7 @@ function addBRFG!(fg::FactorGraph,
   for nei in getOutNeighbors(fg, vlm)
     if nei.label == testlbl
       # TODO -- makes function call brittle
-      warn("We already have $(testlbl), skipping this constraint")
+      @warn "We already have $(testlbl), skipping this constraint"
       return nothing
     end
   end
@@ -505,13 +501,13 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{T, Float64}, maxl
   elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
     # odd case, does not intersect with suggestion, but does with some previous landm
     # add MMBR
-    warn("evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected")
+    @warn "evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected"
     addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov, ready=ready)
     vlm = getVert(fgl,lmSuggLbl)
   elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
   #   # landm exists but no intersection with existing or suggested lmid
   #   # may suggest some error
-    warn("evalAutoCases! -- no intersect with suggested $(lmSuggLbl) or map detected, adding  new landmark MM constraint incase")
+    @warn "evalAutoCases! -- no intersect with suggested $(lmSuggLbl) or map detected, adding  new landmark MM constraint incase"
     v,L,lm = getLastLandm2D(fgl)
     vlm = newLandm!(fgl, lm, lmPts, cov, N=N, ready=ready)
     addMMBRFG!(fgl, pose, [lm; lmSuggLbl], br, cov, ready=ready)
@@ -542,7 +538,7 @@ function malahanobisBR(measA, preA, cov::Array{Float64,2})
     mala2 = Union{}
     #Malahanobis distance
     if false
-      lambda = cov \ eye(2)
+      lambda = cov \ Matrix{Float64}(LinearAlgebra.I, 2,2)
       mala2 = res' * lambda * res
     else
       mala2 = res' * (cov \ res)
@@ -591,7 +587,7 @@ function get2DSamples(fg::FactorGraph,
 end
 
 function getAll2D(fg, sym; minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
-  warn("getAll2D deprecated, use get2DSamples instead")
+  @warn "getAll2D deprecated, use get2DSamples instead"
   return get2DSamples(fg, sym, minnei=minnei, api=api)
 end
 
@@ -748,7 +744,7 @@ end
 
 
 function addSoftEqualityPoint2D(fgl::FactorGraph, l1::Symbol, l2::Symbol;
-    dist=MvNormal([0.0;0.0],eye(2)), ready::Int=1 )
+    dist=MvNormal([0.0;0.0],Matrix{Float64}(LinearAlgebra.I, 2,2)), ready::Int=1 )
   pp = Point2DPoint2D(dist)
   addFactor!(fgl, [l1,l2], pp, ready=ready)
 end
@@ -769,7 +765,7 @@ end
 #                    Dict())
 # end
 #
-# function makePose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*eye(6))
+# function makePose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*Matrix{Float64}(LinearAlgebra.I, 6,6))
 #     return PoseSE3(ut,
 #                    name,
 #                    Rigid6DOF( q, t ),
@@ -777,7 +773,7 @@ end
 #                    Dict())
 # end
 
-# function makeDynPose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*eye(18))
+# function makeDynPose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*Matrix{Float64}(LinearAlgebra.I, 18,18))
 #     return DynPose3(ut,
 #                     name,
 #                     Dynamic6DOF( q, t, [0.,0,0], [0.,0,0] ),
@@ -787,12 +783,12 @@ end
 # end
 #
 # function wTo(p::PoseSE3)
-#     T = eye(4)
+#     T = Matrix{Float64}(LinearAlgebra.I, 4,4)
 #     T[1:3,1:3] =  convert(SO3, p.mu.rot).R
 #     T[1:3,4] = p.mu.trl
 #     return T
 # end
 #
 # function oTw(p::PoseSE3)
-#     return wTo(p) \ eye(4)
+#     return wTo(p) \ Matrix{Float64}(LinearAlgebra.I, 4,4)
 # end

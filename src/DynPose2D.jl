@@ -2,14 +2,14 @@
 
 
 
-mutable struct DynPose2VelocityPrior{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: SamplableBelief,T2 <: SamplableBelief}
+mutable struct DynPose2VelocityPrior{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief}
   Zpose::T1
   Zvel::T2
-  DynPose2VelocityPrior{T1,T2}() where {T1 <: SamplableBelief,T2 <: SamplableBelief} = new{T1,T2}()
-  DynPose2VelocityPrior{T1,T2}(z1::T1,z2::T2) where {T1 <: SamplableBelief,T2 <: SamplableBelief} = new{T1,T2}(z1,z2)
+  DynPose2VelocityPrior{T1,T2}() where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = new{T1,T2}()
+  DynPose2VelocityPrior{T1,T2}(z1::T1,z2::T2) where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = new{T1,T2}(z1,z2)
 end
-DynPose2VelocityPrior(z1::T1,z2::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = DynPose2VelocityPrior{T1,T2}(z1,z2)
-getSample(dp2v::DynPose2VelocityPrior{T1,T2}, N::Int=1) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = ([rand(dp2v.Zpose,N);rand(dp2v.Zvel,N)], )
+DynPose2VelocityPrior(z1::T1,z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = DynPose2VelocityPrior{T1,T2}(z1,z2)
+getSample(dp2v::DynPose2VelocityPrior{T1,T2}, N::Int=1) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = ([rand(dp2v.Zpose,N);rand(dp2v.Zvel,N)], )
 
 
 
@@ -25,14 +25,14 @@ end
 
 
 
-mutable struct VelPose2VelPose2{T1,T2} <: IncrementalInference.FunctorPairwiseMinimize where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+mutable struct VelPose2VelPose2{T1,T2} <: IncrementalInference.FunctorPairwiseMinimize where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief}
   Zpose::Pose2Pose2{T1} #Zpose::T1
   Zvel::T2
   reuseres::Vector{Vector{Float64}}
-  VelPose2VelPose2{T1,T2}() where {T1 <: SamplableBelief, T2 <: SamplableBelief} = new{T1,T2}()
-  VelPose2VelPose2{T1,T2}(z1::T1, z2::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = new{T1,T2}(Pose2Pose2(z1),z2,[zeros(3) for i in 1:Threads.nthreads()])
+  VelPose2VelPose2{T1,T2}() where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}()
+  VelPose2VelPose2{T1,T2}(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}(Pose2Pose2(z1),z2,[zeros(3) for i in 1:Threads.nthreads()])
 end
-VelPose2VelPose2(z1::T1, z2::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = VelPose2VelPose2{T1,T2}(z1, z2)
+VelPose2VelPose2(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = VelPose2VelPose2{T1,T2}(z1, z2)
 getSample(vp2vp2::VelPose2VelPose2, N::Int=1) = ([rand(vp2vp2.Zpose.z,N);rand(vp2vp2.Zvel,N)], )
 function (vp2vp2::VelPose2VelPose2{T1,T2})(
                 res::Array{Float64},
@@ -40,7 +40,7 @@ function (vp2vp2::VelPose2VelPose2{T1,T2})(
                 idx::Int,
                 meas::Tuple,
                 Xi::Array{Float64,2},
-                Xj::Array{Float64,2}  ) where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+                Xj::Array{Float64,2}  ) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief}
   #
   z = meas[1][:,idx]
   wxi, wxj = Xi[:,idx], Xj[:,idx]
@@ -58,21 +58,21 @@ function (vp2vp2::VelPose2VelPose2{T1,T2})(
   res[1]
 end
 
-# import RoME: VelPose2VelPose2, SamplableBelief
+# import RoME: VelPose2VelPose2, IIF.SamplableBelief
 # import IncrementalInference: FactorMetadata
 
 
 
 
 
-mutable struct DynPose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: SamplableBelief}
+mutable struct DynPose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: IIF.SamplableBelief}
   Zpose::Pose2Pose2{T} #Zpose::T1
   # reuseres::Vector{Float64}
   partial::Tuple
-  DynPose2Pose2{T}() where {T <: SamplableBelief} = new{T}()
-  DynPose2Pose2{T}(z1::T) where {T <: SamplableBelief} = new{T}(Pose2Pose2(z1), (1,2,3))
+  DynPose2Pose2{T}() where {T <: IIF.SamplableBelief} = new{T}()
+  DynPose2Pose2{T}(z1::T) where {T <: IIF.SamplableBelief} = new{T}(Pose2Pose2(z1), (1,2,3))
 end
-DynPose2Pose2(z1::T) where {T <: SamplableBelief} = DynPose2Pose2{T}(z1)
+DynPose2Pose2(z1::T) where {T <: IIF.SamplableBelief} = DynPose2Pose2{T}(z1)
 getSample(vp2vp2::DynPose2Pose2, N::Int=1) = (rand(vp2vp2.Zpose.z,N), )
 function (vp2vp2::DynPose2Pose2{T})(
                 res::Array{Float64},
@@ -80,7 +80,7 @@ function (vp2vp2::DynPose2Pose2{T})(
                 idx::Int,
                 meas::Tuple,
                 Xi::Array{Float64,2},
-                Xj::Array{Float64,2}  ) where {T <: SamplableBelief}
+                Xj::Array{Float64,2}  ) where {T <: IIF.SamplableBelief}
   #
   vp2vp2.Zpose(res, userdata, idx, meas, Xi, Xj)
   nothing
