@@ -12,7 +12,8 @@ using
   HDF5,
   ProgressMeter,
   DocStringExtensions,
-  Compat
+  Compat,
+  DistributedFactorGraphs
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
