@@ -13,7 +13,7 @@ mutable struct PartialPriorRollPitchZ{T1,T2} <: IncrementalInference.FunctorSing
 end
 PartialPriorRollPitchZ(rp::T1,z::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = PartialPriorRollPitchZ{T1,T2}(rp, z)
 function getSample(pprz::PartialPriorRollPitchZ, N::Int=1)
-  return ([rand(pprz.z,N);rand(pprz.rp,N)'], )
+  return ([rand(pprz.z,N)';rand(pprz.rp,N)], )
 end
 
 mutable struct PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInferenceType

@@ -21,7 +21,8 @@ xyy = PartialPose3XYYaw(
   MvNormal(
     mu2,
     [1e-4 0.0 0.0; 0.0 1e-4 0.0; 0.0 0.0 4e-6]
-  )
+  ),
+  Normal( mu2[3], 0.0281 )
 )
 
 v2 = addNode!(fg,:x2, Pose3, N=N) # randn(6,N)
@@ -33,34 +34,33 @@ f2 = addFactor!(fg, [:x1;:x2], xyy)
 # ls(fg, :x2)
 
 @testset "test PartialPriorRollPitchZ evaluations" begin
+      # ensure that at least the first pose is already initialized
+    @test isInitialized(fg, :x1)
+    ensureAllInitialized!(fg)
+    @test isInitialized(fg, :x2)
 
-  # ensure that at least the first pose is already initialized
-  @test isInitialized(fg, :x1)
-  ensureAllInitialized!(fg)
-  @test isInitialized(fg, :x2)
+    # get values and ensure that a re-evaluation produces consistent results
+    X2pts = getVal(v2)
+    pts = evalFactor2(fg, f1, v2.index, N=N)
 
-  # get values and ensure that a re-evaluation produces consistent results
-  X2pts = getVal(v2)
-  pts = evalFactor2(fg, f1, v2.index, N=N)
+    newdims = collect(getData(f1).fnc.usrfnc!.partial)
+    olddims = setdiff(collect(1:6), newdims)
 
-  newdims = collect(getData(f1).fnc.usrfnc!.partial)
-  olddims = setdiff(collect(1:6), newdims)
+    @test size(pts, 1) == 6
+    @test size(pts, 2) == N
 
-  @test size(pts, 1) == 6
-  @test size(pts, 2) == N
+    # check that untouched dimensions (not in the partial list) truely remain untouched
+    @test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10
 
-  # check that untouched dimensions (not in the partial list) truely remain untouched
-  @test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10
+    # check that the prior new dims are updated to new and correct values
+    # @show Base.mean(pts,2)[newdims]
+    @test sum(abs.(Base.mean(pts,2)[newdims]-mu1[[3;1;2]]) .< [0.5; 0.1; 0.1]) == 3
 
-  # check that the prior new dims are updated to new and correct values
-  # @show Base.mean(pts,2)[newdims]
-  @test sum(abs.(Base.mean(pts,2)[newdims]-mu1[[3;1;2]]) .< [0.5; 0.1; 0.1]) == 3
+    # ensure a forced re-evaluatoin
+    @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
 
-  # ensure a forced re-evaluatoin
-  @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
-
-  # memcheck that the exact same values are used
-  @test norm(X2pts - getVal(v2)) < 1e-10
+    # memcheck that the exact same values are used
+    @test norm(X2pts - getVal(v2)) < 1e-10
 end
 
 
