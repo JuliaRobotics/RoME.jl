@@ -3,7 +3,7 @@
 using RoME, Distributions
 using RoMEPlotting, Gadfly
 
-const TU = TransformUtils
+# const TU = TransformUtils
 
 # true landmark locations
 global gtl = Dict{Symbol, Vector{Float64}}()

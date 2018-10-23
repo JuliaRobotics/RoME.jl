@@ -6,7 +6,7 @@ using Statistics
 # using KernelDensityEstimate
 using Test
 
-const TU = TransformUtils
+# const TU = TransformUtils
 
 global tf = SE3([0.0;0.0;0.0], TU.AngleAxis(pi/4,[0;0;1.0]))# Euler(pi/4,0.0,0.0) )
 
