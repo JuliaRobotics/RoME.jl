@@ -153,8 +153,8 @@ global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 
 global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
-@test abs(x10[1]) < 1.75
-@test abs(x10[2]) < 1.75
+@test abs(x10[1]) < 2.0
+@test abs(x10[2]) < 2.0
 @test abs(TU.wrapRad(x10[3])) < 0.5
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
