@@ -14,7 +14,7 @@ mutable struct PriorPoint2{T} <: IncrementalInference.FunctorSingleton where {T 
 end
 PriorPoint2(z::T) where {T <: Distributions.Distribution} = PriorPoint2{T}(z)
 function PriorPoint2D(mu, cov, W)
-  warn("PriorPoint2D(mu, cov, W) is deprecated, use PriorPoint{T}(T(...)) instead -- e.g. PriorPoint2{MvNormal}(MvNormal(...) or any other Distributions.Distribution type instead.")
+  @warn "PriorPoint2D(mu, cov, W) is deprecated, use PriorPoint{T}(T(...)) instead -- e.g. PriorPoint2{MvNormal}(MvNormal(...) or any other Distributions.Distribution type instead."
   PriorPoint2{MvNormal{Float64}}(MvNormal(mu, cov))
 end
 function getSample(p2::PriorPoint2, N::Int=1)
@@ -80,7 +80,7 @@ mutable struct Point2Point2WorldBearing{T} <: IncrementalInference.FunctorPairwi
 end
 Point2Point2WorldBearing(x::T) where {T <: IIF.SamplableBelief} = Point2Point2WorldBearing{T}(x)
 function getSample(pp2::Point2Point2WorldBearing, N::Int=1)
-  sp = Array{Float64,2}(2,N)
+  sp = Array{Float64,2}(undef, 2,N)
   sp[1,:] = rand(pp2.Z,N)
   sp[2,:] = rand(pp2.rangemodel,N)
   return (sp, )
@@ -96,7 +96,7 @@ function (pp2r::Point2Point2WorldBearing)(
   # noisy bearing measurement
   z, r = meas[1][1,idx], meas[1][2,idx]
   dx, dy = pj[1,idx]-pi[1,idx], pj[2,idx]-pi[2,idx]
-  res[1] = z - atan2(dy,dx)
+  res[1] = z - atan(dy,dx)
   res[2] = r - norm([dx; dy])
   nothing
 end
@@ -107,7 +107,8 @@ mutable struct PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
   belief::BallTreeDensity
   nullhypothesis::Distributions.Categorical
   PriorPoint2DensityNH() = new()
-  PriorPoint2DensityNH(belief, p) = new(belief, Distributions.Categorical(p))
+  PriorPoint2DensityNH(belief, p::Distributions.Categorical) = new(belief, p)
+  PriorPoint2DensityNH(belief, p::Vector{Float64}) = new(belief, Distributions.Categorical(p))
 end
 function getSample(p2::PriorPoint2DensityNH, N::Int=1)
   return (rand(p2.belief, N), )

@@ -2,10 +2,10 @@
 const IIF = IncrementalInference
 const KDE = KernelDensityEstimate
 
-const VoidUnion{T} = Union{Void, T}
+const NothingUnion{T} = Union{Nothing, T}
 
 const CTs = CoordinateTransformations
-const TUs = TransformUtils
+const TU = TransformUtils
 
 
 

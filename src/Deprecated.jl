@@ -3,26 +3,26 @@
 # old type interfaces
 
 function Point2DPoint2DRange(mu,stdev,w)
-  warn("Point2DPoint2DRange deprecated in favor of Point2Point2Range{<:IIF.SamplableBelief}.")
+  @warn "Point2DPoint2DRange deprecated in favor of Point2Point2Range{<:IIF.SamplableBelief}."
   Point2Point2Range{Normal}(Normal(mu,stdev))
 end
 function Point2DPoint2D(d::D) where {D <: IIF.SamplableBelief}
-  warn("Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}.")
+  @warn "Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}."
   Point2Point2{D}(d)
 end
 function Point2DPoint2D(mu::Array{Float64}, cov::Array{Float64,2}, W::Array{Float64,1})
-  warn("Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}.")
+  @warn "Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}."
 
   Point2Point2{MvNormal}(MvNormal(mu[:], cov))
 end
 
 function Pose2DPoint2DBearing(x1::B) where {B <: Distributions.Distribution}
-  warn("Pose2DPoint2DBearing deprecated in favor of Pose2Point2Bearing.")
+  @warn "Pose2DPoint2DBearing deprecated in favor of Pose2Point2Bearing."
   Pose2Point2Bearing(B)
 end
 
 function Pose2DPoint2DRange(x1::T,x2::Vector{T},x3) where {T <: Real}
-  warn("Pose2Point2Range(mu,cov,w) is being deprecated in favor of Pose2Point2Range(T(...)), such as Pose2Point2Range(MvNormal(mu, cov))")
+  @warn "Pose2Point2Range(mu,cov,w) is being deprecated in favor of Pose2Point2Range(T(...)), such as Pose2Point2Range(MvNormal(mu, cov))"
   Pose2Point2Range(Normal(x1, x2))
 end
 
@@ -50,7 +50,7 @@ end
 function evalPotential(obs::PriorPose2, Xi::Array{Graphs.ExVertex,1}; N::Int=200)
     cov = diag(obs.Cov)
     ret = zeros(3,N)
-    warn("should not be running")
+    @warn "should not be running"
     for j in 1:N
       for i in 1:size(obs.Zi,1)
         ret[i,j] += obs.Zi[i,1] + (cov[i]*randn())
@@ -65,11 +65,11 @@ function evalPotential(odom::Pose2Pose2, Xi::Array{Graphs.ExVertex,1}, Xid::Int;
     rz,cz = size(odom.Zij)
     Xval = Array{Float64,2}()
     XvalNull = Array{Float64,2}()
-    warn("should not be running")
+    @warn "should not be running"
     # implicit equation portion -- bi-directional pairwise function
     if Xid == Xi[1].index #odom.
-        #Z = (odom.Zij\eye(rz)) # this will be used for group operations
-        Z = se2vee(SE2(vec(odom.Zij)) \ eye(3))
+        #Z = (odom.Zij\Matrix{Float64}(LinearAlgebra.I, rz,rz)) # this will be used for group operations
+        Z = se2vee(SE2(vec(odom.Zij)) \ Matrix{Float64}(LinearAlgebra.I, 3,3))
         Xval = getVal(Xi[2])
         XvalNull = getVal(Xi[1])
     elseif Xid == Xi[2].index
@@ -119,10 +119,10 @@ function pack3(xL1, xL2, p1, p2, p3, xF3)
 end
 
 function bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
-  warn("bearrang! is deprecated")
+  @warn "bearrang! is deprecated"
   wTb = SE2(X)
   bTl = wTb\[L[1:2];1.0]
-  b = atan2(bTl[2],bTl[1])
+  b = atan(bTl[2],bTl[1])
   residual[1] = Z[2]-norm(bTl[1:2])
   residual[2] = Z[1]-b
   nothing
@@ -235,7 +235,7 @@ function evalPotentialNew(brpho::Pose2Point2BearingRange, Xi::Array{Graphs.ExVer
     l2 = mmodes ? getVal(brpho.Xi[3]) : nothing
     nPts = size(x,2)
 
-    pars = Array{Float64,2}(size(x))
+    pars = Array{Float64,2}(undef,size(x))
 
     # discrete option, marginalized out before message is sent
     Gamma = mmodes ? rand(Categorical(brpho.W),nPts) : ones(Int,nPts)
@@ -334,9 +334,9 @@ function (pp2br::Pose2Point2BearingRangeMH)(res::Array{Float64},
             idx::Int,
             meas::Tuple{Array{Float64,2}, Vector{Int}},
             xi::Array{Float64,2},
-            lms... )::Void  # ::Array{Float64,2}
+            lms... )::Nothing  # ::Array{Float64,2}
   #
-  warn("Older interface, not analytically correct.")
+  @warn "Older interface, not analytically correct."
   res[1] = lms[meas[2][idx]][1,idx] - (meas[1][2,idx]*cos(meas[1][1,idx]+xi[3,idx]) + xi[1,idx])
   res[2] = lms[meas[2][idx]][2,idx] - (meas[1][2,idx]*sin(meas[1][1,idx]+xi[3,idx]) + xi[2,idx])
   nothing

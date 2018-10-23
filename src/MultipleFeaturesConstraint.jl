@@ -48,7 +48,7 @@ end
 
 function getSample(mm2d::MultipleFeatures2D, N::Int=1)
 
-  meas = Array{Float64,3}(3,N,2)
+  meas = Array{Float64,3}(undef, 3,N,2)
   meas[1,:,1] = rand(mm2d.xir1,N)
   meas[2,:,1] = rand(mm2d.xir2,N)
   meas[3,:,1] = rand(mm2d.xir3,N)
@@ -99,19 +99,19 @@ function (mm2d::MultipleFeatures2D)(res::Array{Float64},
   cjTo3 = (wTbj * mm2d.bTc) \ wTo3
   cjTo3b = dobimodal ? (wTbj * mm2d.bTc) \ wTo3 : nothing
 
-  the1 = atan2(se2vee(ciTo1)[2], se2vee(ciTo1)[1])
-  the2 = atan2(se2vee(ciTo2)[2], se2vee(ciTo2)[1])
-  the3 = atan2(se2vee(ciTo3)[2], se2vee(ciTo3)[1])
+  the1 = atan(se2vee(ciTo1)[2], se2vee(ciTo1)[1])
+  the2 = atan(se2vee(ciTo2)[2], se2vee(ciTo2)[1])
+  the3 = atan(se2vee(ciTo3)[2], se2vee(ciTo3)[1])
 
   res[1] = 0.0
   res[1] += ( meas[1][1,idx,1] - the1 )^2
   res[1] += ( meas[1][2,idx,1] - the2 )^2
   res[1] += ( meas[1][3,idx,1] - the3 )^2
 
-  the1 = atan2(se2vee(cjTo1)[2], se2vee(cjTo1)[1])
-  the2 = atan2(se2vee(cjTo2)[2], se2vee(cjTo2)[1])
-  the3 = atan2(se2vee(cjTo3)[2], se2vee(cjTo3)[1])
-  the3b = dobimodal ? atan2(se2vee(cjTo3b)[2], se2vee(cjTo3b)[1]) : nothing
+  the1 = atan(se2vee(cjTo1)[2], se2vee(cjTo1)[1])
+  the2 = atan(se2vee(cjTo2)[2], se2vee(cjTo2)[1])
+  the3 = atan(se2vee(cjTo3)[2], se2vee(cjTo3)[1])
+  the3b = dobimodal ? atan(se2vee(cjTo3b)[2], se2vee(cjTo3b)[1]) : nothing
 
   # res[2] = 0.0
   tempres = 0.0

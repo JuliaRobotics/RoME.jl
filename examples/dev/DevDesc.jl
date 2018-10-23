@@ -55,11 +55,11 @@ function drawDictLinesLayers(pl, pts::Dict{String, Vector{Float64}}, from::Strin
   return pl
 end
 
-calcang(x1::Vector{Float64},x2::Vector{Float64}) = atan2(x2[2]-x1[2], x2[1]-x1[1])
+calcang(x1::Vector{Float64},x2::Vector{Float64}) = atan(x2[2]-x1[2], x2[1]-x1[1])
 calcrange(x1::Vector{Float64},x2::Vector{Float64}) = norm(x1-x2)
 
 function orderedBinIndex(x::Float64; start::Float64=0.0, stop::Float64=1.0,N::Int=3)
-  refSpace= linspace(start, stop, N+1)
+  refSpace= range(start, stop=stop, length=N+1)
   if N == 1
     return 1
   end
@@ -148,7 +148,7 @@ function bestDescriptors(d::Dict{String, Vector{Float64}};
 
   #construct matrix of hamming distances
   n = length(ks)
-  H = 99999*eye(Int, n, n)
+  H = 99999*Matrix{Int}(LinearAlgebra.I, n, n)
   for i in 1:(n-1), j = (i+1):n
     H[i,j] = hamming(allDescr[ks[i]],allDescr[ks[j]])
   end
@@ -347,7 +347,7 @@ end
 
 # @show A = rand(4,4)
 #
-# A = 16*eye(4,4)
+# A = 16*Matrix{Float64}(LinearAlgebra.I, 4,4)
 # for i in 1:3, j in (i+1):4
 # A[i,j] = i*j
 # end

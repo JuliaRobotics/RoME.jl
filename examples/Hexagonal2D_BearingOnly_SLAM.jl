@@ -11,14 +11,14 @@ fg = initfg()
 addNode!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*eye(3))))
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))))
 
 # Drive around in a hexagon a number of times
 for i in 0:12
     psym = Symbol("x$i")
     nsym = Symbol("x$(i+1)")
     addNode!(fg, nsym, Pose2)
-    pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
+    pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal( [0.1;0.1;0.1].^2 ) )))
     addFactor!(fg, [psym;nsym], pp )
 end
 
@@ -38,8 +38,8 @@ Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 # Add a landmark l1
 addNode!(fg, :l1, Point2, labels=["LANDMARK"])
 
-bear1 = atan2(10,20)
-bear2 = atan2(10,10) - pi/3
+bear1 = atan(10,20)
+bear2 = atan(10,10) - pi/3
 
 
 # Add landmarks with Bearing range measurements at x0, x6, x12, x18, x24, x30...

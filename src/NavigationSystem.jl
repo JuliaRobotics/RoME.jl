@@ -4,12 +4,12 @@ function triggerPose(x, xprev, Tnow, Tprev,
                     distrule, timerule, yawrule)
 
   if norm(x[1:2]-xprev[1:2]) >= distrule
-    @show Tnow, round(x,2), round(xprev,2)
+    @show Tnow, round(x,digits=2), round(xprev,digits=2)
     @show norm(x[1:2]-xprev[1:2])
     return 1
   end
   if abs(x[3]-xprev[3]) >= yawrule
-    @show Tnow, round(x,2), round(xprev,2)
+    @show Tnow, round(x,digits=2), round(xprev,digits=2)
     @show abs(x[3]-xprev[3])
     return 2
   end
@@ -19,7 +19,7 @@ function triggerPose(x, xprev, Tnow, Tprev,
   return 0
 end
 
-type GenericInSituSystem{T}
+mutable struct GenericInSituSystem{T}
   xprev::Array{Float64,1}
   x::Array{Float64,1}
   dOdo::Dict{Int,Array{Float64,1}}
@@ -33,7 +33,7 @@ type GenericInSituSystem{T}
   trackers::Dict{Int,T}
 end
 
-@compat const InSituSystem = GenericInSituSystem{Feature}
+const InSituSystem = GenericInSituSystem{Feature}
 
 function makeInSituSys(x::Array{Float64,1}, bfts0::Array{Float64,2})
   dOdo = Dict{Int,Array{Float64,1}}()
