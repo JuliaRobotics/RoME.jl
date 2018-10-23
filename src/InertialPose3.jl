@@ -12,7 +12,7 @@ export
   PackedPriorInertialPose3,
   compare
 
-@compat abstract type PreintContainer end
+abstract type PreintContainer end
 
 mutable struct PreintegralCompensationGradients <: PreintContainer
   # First order terms
@@ -38,7 +38,7 @@ mutable struct InertialPose3Container <: PreintContainer
   pBa::Vector{Float64}
   rnTime::Int
   InertialPose3Container(;
-        rRp::Array{Float64,2}=eye(3),
+        rRp::Array{Float64,2}=Matrix{Float64}(LinearAlgebra.I, 3,3),
         rPosp::Vector{Float64}=zeros(3),
         rVelp::Vector{Float64}=zeros(3),
         pBw::Vector{Float64}=zeros(3),
@@ -82,7 +82,7 @@ end
 function constructL(posei::InertialPose3Container, Dt::Float64)
   biRw = posei.rRp'
   L = zeros(15,30)
-  L[1:3,1:3] = eye(3)
+  L[1:3,1:3] = Matrix{Float64}(LinearAlgebra.I, 3,3)
   L[7:9,7:9] = biRw
   L[10:12,10:12] = biRw
   L[7:9,19:21] = -biRw
@@ -92,15 +92,15 @@ function constructL(posei::InertialPose3Container, Dt::Float64)
 end
 
 # First term in Taylor expansion
-function constructC1{T <: PreintContainer}(posei::InertialPose3Container, pido::T, Dt::Float64)
+function constructC1(posei::InertialPose3Container, pido::T, Dt::Float64) where {T <: PreintContainer}
   biRw = posei.rRp'
   C1 = zeros(15,30)
   g1 = -biRw*Dt
   g2 = 0.5*g1*Dt
-  C1[4:6,4:6] = eye(3)
-  C1[13:15,13:15] = eye(3)
-  C1[4:6,16:18] = -eye(3)
-  C1[13:15,25:27] = -eye(3)
+  C1[4:6,4:6] = Matrix{Float64}(LinearAlgebra.I, 3,3)
+  C1[13:15,13:15] = Matrix{Float64}(LinearAlgebra.I, 3,3)
+  C1[4:6,16:18] = -Matrix{Float64}(LinearAlgebra.I, 3,3)
+  C1[13:15,25:27] = -Matrix{Float64}(LinearAlgebra.I, 3,3)
   C1[7:9,28:30] = g1
   C1[10:12,28:30] = g2
   C1[1:3,16:18] = pido.dRdDw
@@ -111,12 +111,12 @@ function constructC1{T <: PreintContainer}(posei::InertialPose3Container, pido::
   return C1
 end
 
-function preintMeas{T <: PreintContainer}(pido::T)
+function preintMeas(pido::T) where {T <: PreintContainer}
   return [logmap(SO3(pido.rRp)); pido.pBw; pido.rVelp; pido.rPosp; pido.pBa]
   # return [logmap(SO3(pido.iRj));zeros(3);pido.iDvj;pido.iDppj;zeros(3)] # temporarily suppressing bias updates
 end
 
-function predictDeltaXij{T <: PreintContainer}(pido::T, posei::InertialPose3Container, posej::InertialPose3Container; rGrav=[0.0;0.0;9.81])
+function predictDeltaXij(pido::T, posei::InertialPose3Container, posej::InertialPose3Container; rGrav=[0.0;0.0;9.81]) where {T <: PreintContainer}
   zet = zetaEmbedding(posei, posej, rGrav=rGrav)
   Dt = Float64(posej.rnTime - posei.rnTime)*1e-9
   L = constructL(posei,Dt)
@@ -140,7 +140,7 @@ end
 
 Zij is entropy of veeLie15, pioc is preintegral measurements, pido is compensation gradients.
 """
-type InertialPose3 <: FunctorPairwise #RoME.BetweenPoses
+mutable struct InertialPose3 <: FunctorPairwise #RoME.BetweenPoses
   Zij::Distribution
   pioc::InertialPose3Container
   picg::PreintegralCompensationGradients

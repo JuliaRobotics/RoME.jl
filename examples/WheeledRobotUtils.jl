@@ -16,7 +16,7 @@
 #
 # export R, SE2, se2vee, wrapRad
 
-type LaserFeatures
+mutable struct LaserFeatures
   t::Float64
   feats::Array{Float64,2}
 end
@@ -38,35 +38,6 @@ end
  # 2.80381
  # 0.828329
  # 1.0199
-
-
-# warn("Moved SE2 functions to TransformUtils")
-#  function wrapRad(th::Float64)
-#    if th >= pi
-#      th -= 2.0*pi
-#    end
-#    if th < -pi
-#      th += 2.0*pi
-#    end
-#    return th
-#  end
-#
-#  R(th) = [[cos(th);-sin(th)]';[sin(th);cos(th)]'];
-#
-#  function SE2(X::Array{Float64,1})
-#      T = eye(3)
-#      T[1:2,1:2] = R(X[3])
-#      T[1,3] = X[1]
-#      T[2,3] = X[2]
-#      return T
-#  end
-#
-#  function se2vee(T::Array{Float64,2})
-#      retval = zeros(3,1)
-#      retval[1:2,1] = T[1:2,3]
-#      retval[3,1] = wrapRad(atan2(-T[1,2], T[1,1]))
-#      return retval
-#  end
 
 
 
