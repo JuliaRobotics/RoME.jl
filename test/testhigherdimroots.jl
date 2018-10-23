@@ -21,7 +21,6 @@ function (rt::RotationTest)(res::Vector{Float64}, userdata, idx, meas, var1, var
   q12 = q1*q_conj(q2)
   qq = dq*q_conj(q12)
   vee!(res, convert(so3, qq))
-  @show res
   nothing
 end
 
