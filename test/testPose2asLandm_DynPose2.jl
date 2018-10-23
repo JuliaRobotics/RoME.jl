@@ -1,10 +1,10 @@
 # build test case for using Pose2Pose2 to landmarks -- to help AprilTag
 
-using RoME, Distributions
+using RoME  #, Distributions
 using RoMEPlotting, Gadfly
 
-const IIF = IncrementalInference
-const TU = TransformUtils
+# const IIF = IncrementalInference
+# const TU = TransformUtils
 
 # true landmark locations
 global gtl = Dict{Symbol, Vector{Float64}}()
