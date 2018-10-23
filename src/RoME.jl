@@ -244,7 +244,8 @@ export
   LaserFeatures,
 
   IIF,
-  KDE
+  KDE,
+  TU
 
   # # solve with isam in pytslam
   # doISAMSolve,

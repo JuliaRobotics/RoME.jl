@@ -5,7 +5,7 @@ const KDE = KernelDensityEstimate
 const NothingUnion{T} = Union{Nothing, T}
 
 const CTs = CoordinateTransformations
-const TUs = TransformUtils
+const TU = TransformUtils
 
 
 
