@@ -145,16 +145,16 @@ inferOverTreeR!(fg, tree, N=N)
 
 global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 
-@test abs(x5[1]) < 1.25
-@test abs(x5[2]) < 1.25
+@test abs(x5[1]) < 1.5
+@test abs(x5[2]) < 1.5
 @test abs(TU.wrapRad(x5[3])) < 0.4
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
 global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
-@test abs(x10[1]) < 2.0
-@test abs(x10[2]) < 2.0
+@test abs(x10[1]) < 2.75
+@test abs(x10[2]) < 2.75
 @test abs(TU.wrapRad(x10[3])) < 0.5
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
