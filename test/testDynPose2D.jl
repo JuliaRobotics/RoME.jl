@@ -2,7 +2,7 @@ using RoME
 # , IncrementalInference, Distributions
 using Test
 
-const TU = TransformUtils
+# const TU = TransformUtils
 
 
 @testset "test DynPose2 and velocity..." begin
