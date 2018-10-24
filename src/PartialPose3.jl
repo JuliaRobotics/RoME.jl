@@ -5,8 +5,8 @@ mutable struct PartialPriorRollPitchZ{T1,T2} <: IncrementalInference.FunctorSing
   rp::T1
   z::T2
   partial::Tuple
-  PartialPriorRollPitchZ{T1,T2}() = new{T1,T2}()
-  PartialPriorRollPitchZ{T1,T2}(rp::T1,z::T2) = new{T1,T2}(rp, z, (3,4,5))
+  PartialPriorRollPitchZ{T1,T2}() where {T1, T2} = new{T1,T2}()
+  PartialPriorRollPitchZ{T1,T2}(rp::T1,z::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}(rp, z, (3,4,5))
   # PartialPriorRollPitchZ(x1,x2,x3,x4) = new(MvNormal(x1,x2), Normal(x3,x4), (3,4,5))
   # PartialPriorRollPitchZ(rpz::PackedPartialPriorRollPitchZ) = new(MvNormal(d.rpmu, reshapeVec2Mat(d.rpsig,2)),
                                                     # Normal(rpz.zmu, rpz.zsig) )
@@ -74,10 +74,10 @@ mutable struct PartialPose3XYYaw{T1,T2} <: FunctorPairwise where {T1 <: Samplabl
   xy::T1
   yaw::T2
   partial::Tuple
-  PartialPose3XYYaw{T1,T2}() = new()
-  PartialPose3XYYaw{T1,T2}(xy::T1, yaw::T2) = new(xy, yaw, (1,2,6))
+  PartialPose3XYYaw{T1,T2}() where {T1, T2} = new()
+  PartialPose3XYYaw{T1,T2}(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new(xy, yaw, (1,2,6))
 end
-PartialPose3XYYaw(xy::T1, yaw::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} =  PartialPose3XYYaw{T1,T2}(xy, yaw)
+PartialPose3XYYaw(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} =  PartialPose3XYYaw{T1,T2}(xy, yaw)
 function getSample(pxyy::PartialPose3XYYaw, N::Int=1)
   return ([rand(pxyy.xy,N);rand(pxyy.yaw,N)'], )
 end

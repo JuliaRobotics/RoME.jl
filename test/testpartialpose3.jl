@@ -5,6 +5,7 @@ using RoME
 # using IncrementalInference, TransformUtils
 using Test
 
+
 global N=50
 global fg = initfg()
 
@@ -35,37 +36,39 @@ global f2 = addFactor!(fg, [:x1;:x2], xyy)
 # ls(fg, :x2)
 
 @testset "test PartialPriorRollPitchZ evaluations" begin
-      # ensure that at least the first pose is already initialized
-    @test isInitialized(fg, :x1)
-    ensureAllInitialized!(fg)
-    @test isInitialized(fg, :x2)
 
-    # get values and ensure that a re-evaluation produces consistent results
-    X2pts = getVal(v2)
-    pts = evalFactor2(fg, f1, v2.index, N=N)
+# ensure that at least the first pose is already initialized
+@test isInitialized(fg, :x1)
+ensureAllInitialized!(fg)
+@test isInitialized(fg, :x2)
 
-  # get values and ensure that a re-evaluation produces consistent results
-  global X2pts = getVal(v2)
-  global pts = evalFactor2(fg, f1, v2.index, N=N)
+# get values and ensure that a re-evaluation produces consistent results
+X2pts = getVal(v2)
+pts = evalFactor2(fg, f1, v2.index, N=N)
 
-  global newdims = collect(getData(f1).fnc.usrfnc!.partial)
-  global olddims = setdiff(collect(1:6), newdims)
+# get values and ensure that a re-evaluation produces consistent results
+global X2pts = getVal(v2)
+global pts = evalFactor2(fg, f1, v2.index, N=N)
 
-    @test size(pts, 1) == 6
-    @test size(pts, 2) == N
+global newdims = collect(getData(f1).fnc.usrfnc!.partial)
+global olddims = setdiff(collect(1:6), newdims)
 
-    # check that untouched dimensions (not in the partial list) truely remain untouched
-    @test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10
+@test size(pts, 1) == 6
+@test size(pts, 2) == N
 
-  # check that the prior new dims are updated to new and correct values
-  # @show Statistics.mean(pts,dims=2)[newdims]
-  @test sum(abs.(Statistics.mean(pts,dims=2)[newdims]-mu1[[3;1;2]]) .< [0.5; 0.1; 0.1]) == 3
+# check that untouched dimensions (not in the partial list) truely remain untouched
+@test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10
 
-    # ensure a forced re-evaluatoin
-    @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
+# check that the prior new dims are updated to new and correct values
+# @show Statistics.mean(pts,dims=2)[newdims]
+@test sum(abs.(Statistics.mean(pts,dims=2)[newdims]-mu1[[3;1;2]]) .< [0.5; 0.1; 0.1]) == 3
 
-    # memcheck that the exact same values are used
-    @test norm(X2pts - getVal(v2)) < 1e-10
+# ensure a forced re-evaluatoin
+@test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
+
+# memcheck that the exact same values are used
+@test norm(X2pts - getVal(v2)) < 1e-10
+
 end
 
 
