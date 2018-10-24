@@ -111,7 +111,6 @@ end
 """
 Converter: Dict{String, Any} -> PartialPose3XYYaw
 """
-
 function convert(::Type{Dict{String, Any}}, fact::RoME.PartialPose3XYYaw)
     pf = Dict{String, Any}(
         "measurement" => [

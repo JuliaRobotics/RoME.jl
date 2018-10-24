@@ -59,12 +59,12 @@ fgu = loadjld( file="tempfg.jld2" )
 Base.rm("tempfg.jld2")
 println("Success")
 
-println("[TEST] partial pose3 evaluations...")
-include("testpartialpose3.jl")
-println("[SUCCESS]")
-
 println("[TEST] PartialPose3XYYaw evaluations...")
 include("testPartialXYH.jl")
+println("[SUCCESS]")
+
+println("[TEST] partial pose3 evaluations...")
+include("testpartialpose3.jl")
 println("[SUCCESS]")
 
 println("[TEST] packing converters...")

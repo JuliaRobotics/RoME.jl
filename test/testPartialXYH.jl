@@ -36,7 +36,12 @@ testpp3(res, FactorMetadata(), 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)),
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+global testppxyh = PartialPose3XYYaw(
+  MvNormal(XYH1_2[1:2], 0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)),
+  Normal(XYH1_2[3], 0.001)
+)
+# global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+
 global res = zeros(3)
 testppxyh(res, FactorMetadata(), 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
@@ -49,6 +54,7 @@ end
 
 
 @testset "test z translation case" begin
+
 # z translation only
 global wTx = Vector{AffineMap}(undef,2)
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(Quat(1.0, 0, 0, 0))
@@ -78,7 +84,7 @@ testpp3(res, FactorMetadata(), 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)),
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 global res = zeros(3)
 testppxyh(res, FactorMetadata(), 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
@@ -91,6 +97,7 @@ end
 
 
 @testset "test roll and translate case 1" begin
+
 # different orientation, roll
 global wTx = Vector{AffineMap}(undef, 2)
 global sq2 = 1.0/sqrt(2)
@@ -122,7 +129,7 @@ testpp3(res, FactorMetadata(), 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)),
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 global res = zeros(3)
 testppxyh(res, FactorMetadata(), 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
@@ -168,7 +175,7 @@ testpp3(res, FactorMetadata(), 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)),
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 global res = zeros(3)
 testppxyh(res, FactorMetadata(), 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:2]) < 1e-10
@@ -216,7 +223,7 @@ testpp3(res, FactorMetadata(), 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)),
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 global res = zeros(3)
 testppxyh(res, FactorMetadata(), 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
@@ -263,7 +270,7 @@ testpp3(res, FactorMetadata(), 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)),
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 global res = zeros(3)
 testppxyh(res, FactorMetadata(), 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
@@ -312,7 +319,7 @@ testpp3(res, FactorMetadata(), 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)),
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 global res = zeros(3)
 testppxyh(res, FactorMetadata(), 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
@@ -362,7 +369,7 @@ testpp3(res, FactorMetadata(), 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)),
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 global res = zeros(3)
 testppxyh(res, FactorMetadata(), 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
@@ -416,7 +423,7 @@ testpp3(res, FactorMetadata(), 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)),
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+global testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 global res = zeros(3)
 testppxyh(res, FactorMetadata(), 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
