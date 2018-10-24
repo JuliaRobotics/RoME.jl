@@ -43,12 +43,11 @@ ensureAllInitialized!(fg)
 @test isInitialized(fg, :x2)
 
 # get values and ensure that a re-evaluation produces consistent results
-X2pts = getVal(v2)
-pts = evalFactor2(fg, f1, v2.index, N=N)
-
-# get values and ensure that a re-evaluation produces consistent results
 global X2pts = getVal(v2)
-global pts = evalFactor2(fg, f1, v2.index, N=N)
+global pts = IIF.approxConv(fg, :x1f1, :x2, N=N)
+# global pts = evalFactor2(fg, f1, v2.index, N=N)
+
+sum(isnan.(X2pts))
 
 global newdims = collect(getData(f1).fnc.usrfnc!.partial)
 global olddims = setdiff(collect(1:6), newdims)
