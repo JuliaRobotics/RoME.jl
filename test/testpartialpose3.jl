@@ -30,7 +30,7 @@ global xyy = PartialPose3XYYaw(
 global v2 = addNode!(fg,:x2, Pose3, N=N) # randn(6,N)
 
 global f1 = addFactor!(fg, [:x2], prpz)
-global f2 = addFactor!(fg, [:x1;:x2], xyy)
+global f2 = addFactor!(fg, [:x1;:x2], xyy, autoinit=false)
 
 
 # ls(fg, :x2)
