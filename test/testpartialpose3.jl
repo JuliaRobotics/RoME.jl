@@ -39,15 +39,22 @@ global f2 = addFactor!(fg, [:x1;:x2], xyy)
 
 # ensure that at least the first pose is already initialized
 @test isInitialized(fg, :x1)
+
+X1pts = getVal(fg, :x1)
+@test sum(isnan.(X1pts)) == 0
+
+pts = predictbelief(fg, :x2, [:x2f1; :x1x2f1])
+
 ensureAllInitialized!(fg)
 @test isInitialized(fg, :x2)
 
 # get values and ensure that a re-evaluation produces consistent results
-global X2pts = getVal(v2)
+global X2pts = getVal(fg, :x2)
+@test sum(isnan.(X2pts)) == 0
+
 global pts = IIF.approxConv(fg, :x1f1, :x2, N=N)
 # global pts = evalFactor2(fg, f1, v2.index, N=N)
 
-sum(isnan.(X2pts))
 
 global newdims = collect(getData(f1).fnc.usrfnc!.partial)
 global olddims = setdiff(collect(1:6), newdims)
