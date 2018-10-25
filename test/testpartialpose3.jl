@@ -73,18 +73,18 @@ end
   global xi = zeros(6,1)
   global xja = zeros(6,1)
   xyy(res, nothing, idx, meas, xi, xja)
-  @test abs(res[1]-mu2[1]) < 0.2
-  @test abs(res[2]-mu2[2]) < 0.2
+  @test abs(res[1]-mu2[1]) < 0.3
+  @test abs(res[2]-mu2[2]) < 0.3
   @test abs(res[3]-mu2[3]) < 0.2
 
   global xjb = zeros(6,1)
   xjb[collect(xyy.partial),1] = mu2
   global res = zeros(3)
   xyy(res, nothing, idx, meas, xi, xjb)
-  @test 0.0 < norm(res) < 0.2
+  @test 0.0 < norm(res) < 0.3
 
   global meas = getSample(xyy,100)
-  @test norm(Statistics.std(meas[1],dims=2) - [0.01;0.01;0.002]) < 0.005
+  @test norm(Statistics.std(meas[1],dims=2) - [0.01;0.01;0.002]) < 0.01
 end
 
 
