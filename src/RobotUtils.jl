@@ -618,10 +618,10 @@ function get2DSampleMeans(fg::FactorGraph,
   allIDs = sort(allIDs)
 
   for id in allIDs
-    X=[X;Base.mean( vec( getVal(fg,string(sym,id), api=api)[1,:] ) )]
-    Y=[Y;Base.mean( vec( getVal(fg, string(sym,id), api=api)[2,:] ) )]
+    X=[X;Base.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[1,:] ) )]
+    Y=[Y;Base.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[2,:] ) )]
     if sym == 'x'
-      Th=[Th;Base.mean( vec( getVal(fg, string(sym,id), api=api)[3,:] ) )]
+      Th=[Th;Base.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[3,:] ) )]
     end
     push!(LB, string(sym,id))
   end
