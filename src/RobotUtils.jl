@@ -81,10 +81,10 @@ function measureMeanDist(fg::FactorGraph, a::T, b::T) where {T <: AbstractString
     res = zeros(2)
     A = getVal(fg,a)
     B = getVal(fg,b)
-    Ax = Base.mean(vec(A[1,:]))
-    Ay = Base.mean(vec(A[2,:]))
-    Bx = Base.mean(vec(B[1,:]))
-    By = Base.mean(vec(B[2,:]))
+    Ax = Statistics.mean(vec(A[1,:]))
+    Ay = Statistics.mean(vec(A[2,:]))
+    Bx = Statistics.mean(vec(B[1,:]))
+    By = Statistics.mean(vec(B[2,:]))
     dx = Bx - Ax
     dy = By - Ay
     b = atan(dy,dx)
@@ -96,11 +96,11 @@ function predictBodyBR(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
   res = zeros(2)
   A = getVal(fg,a)
   B = getVal(fg,b)
-  Ax = Base.mean(vec(A[1,:]))
-  Ay = Base.mean(vec(A[2,:]))
-  Ath = Base.mean(vec(A[3,:]))
-  Bx = Base.mean(vec(B[1,:]))
-  By = Base.mean(vec(B[2,:]))
+  Ax = Statistics.mean(vec(A[1,:]))
+  Ay = Statistics.mean(vec(A[2,:]))
+  Ath = Statistics.mean(vec(A[3,:]))
+  Bx = Statistics.mean(vec(B[1,:]))
+  By = Statistics.mean(vec(B[2,:]))
   wL = SE2([Bx;By;0.0])
   wBb = SE2([Ax;Ay;Ath])
   bL = se2vee((wBb \ Matrix{Float64}(LinearAlgebra.I, 3,3)) * wL)
@@ -618,10 +618,10 @@ function get2DSampleMeans(fg::FactorGraph,
   allIDs = sort(allIDs)
 
   for id in allIDs
-    X=[X;Base.mean( vec( getVal(fg,string(sym,id), api=api)[1,:] ) )]
-    Y=[Y;Base.mean( vec( getVal(fg, string(sym,id), api=api)[2,:] ) )]
+    X=[X; Statistics.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[1,:] ) )]
+    Y=[Y; Statistics.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[2,:] ) )]
     if sym == 'x'
-      Th=[Th;Base.mean( vec( getVal(fg, string(sym,id), api=api)[3,:] ) )]
+      Th=[Th; Statistics.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[3,:] ) )]
     end
     push!(LB, string(sym,id))
   end
