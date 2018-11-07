@@ -6,14 +6,12 @@ using RoME, Distributions
 ## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist
 using RoMEPlotting
 using Compose
-using TimerOutputs
-
-const to = TimerOutput()
+# Using this for plotting.
+using Gadfly
 
 # start with an empty factor graph object
 fg = initfg()
-# fg.isfixedlag = false
-# fg.qfl = 10
+# DO NOT enable fixed-lag operation
 
 # Add the first pose :x0
 addNode!(fg, :x0, Pose2)
@@ -105,7 +103,6 @@ end
 # This demonstrates batch solving linearity. We should only use this
 # for offline, batch solving, and this forms the problem statement for
 # why fixed-lag solving.
-using Gadfly
 Gadfly.plot(x=1:length(solveTimesFixedLag), y=solveTimesFixedLag, Geom.path,
     Guide.title("Solving Time vs. Iteration for Fixed-Lag Operation"),
     Guide.xlabel("Solving Iteration"),
