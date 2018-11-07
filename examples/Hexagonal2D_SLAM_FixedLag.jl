@@ -62,7 +62,9 @@ Gadfly.plot(x=1:length(solveTimes), y=solveTimes, Geom.path,
     Guide.xlabel("Solving Iteration"),
     Guide.ylabel("Solving Time (seconds)"))
 
+#############################
 ##### ---- Fixed lag mode ---
+#############################
 
 fgFixedLag = initfg()
 fgFixedLag.isfixedlag = true
@@ -104,7 +106,7 @@ end
 # for offline, batch solving, and this forms the problem statement for
 # why fixed-lag solving.
 using Gadfly
-Gadfly.plot(x=1:length(solveTimesFixedLag), y=solveTimes, Geom.path,
+Gadfly.plot(x=1:length(solveTimesFixedLag), y=solveTimesFixedLag, Geom.path,
     Guide.title("Solving Time vs. Iteration for Fixed-Lag Operation"),
     Guide.xlabel("Solving Iteration"),
     Guide.ylabel("Solving Time (seconds)"))
