@@ -4,10 +4,15 @@
 # tell Julia that you want to use these modules/namespaces
 using RoME, Distributions
 ## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist
-using RoMEPlotting
+# using RoMEPlotting
 using Compose
 # Using this for trend plotting.
 using Gadfly
+
+
+numVariables = 200
+solveEveryNVariables = 6
+lagLength = 15
 
 # Standard Hexagonal example for totalIterations - solve every iterationsPerSolve iterations.
 function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPerSolve::Int)#::Vector{Float64}
@@ -40,7 +45,7 @@ function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPe
             @info "Performing inference!"
             if fg.isfixedlag
                 @info "Quasi fixed-lag is enabled (a feature currently in testing)!"
-                fifoFreeze!(fgl)
+                fifoFreeze!(fg)
             end
             tBuild = @timed tree = wipeBuildNewTree!(fg)
             tInfer = @timed inferOverTree!(fg, tree, N=100)
@@ -53,53 +58,87 @@ end
 # start with an empty factor graph object
 fg = initfg()
 # DO NOT enable fixed-lag operation
-solveTimes = runHexagonalExample(fg, 20, 6)
-t = @timed batchSolve!(fg)
+solverTimesForBatch = runHexagonalExample(fg, numVariables, solveEveryNVariables)
+# t = @timed batchSolve!(fg)
 # Plot the many iterations to see that it succeeded.
-drawPosesLandms(fg)
+# drawPosesLandms(fg)
 
 # Plot the time taken per solve for the whole graph.
 # This demonstrates batch solving linearity. We should only use this
 # for offline, batch solving, and this forms the problem statement for
 # why fixed-lag solving.
-using Gadfly
-Gadfly.plot(x=1:length(solveTimes), y=solveTimes, Geom.path,
-    Guide.title("Solving Time vs. Iteration for Complete Graph"),
-    Guide.xlabel("Solving Iteration"),
-    Guide.ylabel("Solving Time (seconds)"))
+# using Gadfly
+# Gadfly.plot(x=1:length(solveTimes), y=solveTimes, Geom.path,
+#     Guide.title("Solving Time vs. Iteration for Complete Graph"),
+#     Guide.xlabel("Solving Iteration"),
+#     Guide.ylabel("Solving Time (seconds)"))
 
 #############################
 ##### ---- Fixed lag mode ---
 #############################
 
 # Batch control for 60 - no fixed lag and [buildBayes, infer]
-# [0.339419, 2.92293]
-# [1.20682, 9.57546]
-# [2.13343, 17.3296]
-# [3.06916, 26.7324]
-# [4.0266, 37.0113]
-# [5.12491, 47.7176]
-# [7.0712, 75.0297]
-# [10.116, 88.8075]
-# [11.8314, 104.447]
-# [13.2786, 118.219]
-# [14.3143, 127.049]
+# solverTimesForBatch = [[0.339419, 2.92293],
+# [1.20682, 9.57546],
+# [2.13343, 17.3296],
+# [3.06916, 26.7324],
+# [4.0266, 37.0113],
+# [5.12491, 47.7176],
+# [7.0712, 75.0297],
+# [10.116, 88.8075],
+# [11.8314, 104.447],
+# [13.2786, 118.219],
+# [14.3143, 127.049]]
+
+# Fixed lag
+# [5.0763, 13.0591]
+# [0.0895069, 6.71251]
+# [0.0607179, 8.96031]
+# [0.140903, 10.9674]
+# [0.311809, 12.6977]
+# [0.669601, 15.1875]
+# [1.17332, 17.8367]
+# [1.78019, 20.373]
+# [2.63709, 24.3739]
+# [3.773, 29.1994]
+# [5.10071, 34.9171]
 
 fgFixedLag = initfg()
 fgFixedLag.isfixedlag = true
-fgFixedLag.qfl = 10
+fgFixedLag.qfl = lagLength
 
-solveTimesFixedLag = runHexagonalExample(fgFixedLag, 60, 6)
+solveTimesFixedLag = runHexagonalExample(fgFixedLag, numVariables, solveEveryNVariables)
+
 # tFixed = @timed batchSolve!(fgFixedLag)
-@show tFixed[2]
+# @show tFixed[2]
 # Plot the many iterations to see that it succeeded.
-drawPosesLandms(fg)
+# drawPosesLandms(fg)
 
 # Plot the time taken per solve for the whole graph.
 # This demonstrates batch solving linearity. We should only use this
 # for offline, batch solving, and this forms the problem statement for
 # why fixed-lag solving.
-Gadfly.plot(x=1:length(solveTimesFixedLag), y=solveTimesFixedLag, Geom.path,
+# Gadfly.plot(x=1:length(inferTimes), y=inferTimes, Geom.path,
+#     Guide.title("Solving Time vs. Iteration for Fixed-Lag Operation"),
+#     Guide.xlabel("Solving Iteration"),
+#     Guide.ylabel("Solving Time (seconds)"))
+
+#### PLOTTING
+
+using Gadfly
+
+using Colors
+
+PP = []
+
+batchTimes = [solverTimesForBatch[i][2] for i in 1:length(solverTimesForBatch)]
+inferTimes = [solveTimesFixedLag[i][2] for i in 1:length(solveTimesFixedLag)]
+
+push!(PP, Gadfly.layer(x=1:length(inferTimes), y=inferTimes, Geom.path, Theme(default_color=colorant"green"))[1]);
+push!(PP, Gadfly.layer(x=1:length(batchTimes), y=batchTimes, Geom.path, Theme(default_color=colorant"magenta"))[1]);
+
+Gadfly.plot(PP...,
     Guide.title("Solving Time vs. Iteration for Fixed-Lag Operation"),
     Guide.xlabel("Solving Iteration"),
-    Guide.ylabel("Solving Time (seconds)"))
+    Guide.ylabel("Solving Time (seconds)"),
+    Guide.manual_color_key("Legend", ["fixed", "batch"], ["green", "magenta"]))
