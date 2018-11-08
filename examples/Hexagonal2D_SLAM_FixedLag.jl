@@ -6,11 +6,11 @@ using RoME, Distributions
 ## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist
 using RoMEPlotting
 using Compose
-# Using this for plotting.
+# Using this for trend plotting.
 using Gadfly
 
 # Standard Hexagonal example for totalIterations - solve every iterationsPerSolve iterations.
-function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPerSolve::Int)::Vector{Int}
+function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPerSolve::Int)#::Vector{Float64}
     # Add the first pose :x0
     addNode!(fg, :x0, Pose2)
 
@@ -38,8 +38,13 @@ function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPe
         end
         if i % iterationsPerSolve == 0
             @info "Performing inference!"
-            t = @timed batchSolve!(fg)
-            push!(solveTimes, t[2])
+            if fg.isfixedlag
+                @info "Quasi fixed-lag is enabled (a feature currently in testing)!"
+                fifoFreeze!(fgl)
+            end
+            tBuild = @timed tree = wipeBuildNewTree!(fg)
+            tInfer = @timed inferOverTree!(fg, tree, N=100)
+            push!(solveTimes, [tBuild[2], tInfer[2]])
         end
     end
     return solveTimes
@@ -48,7 +53,8 @@ end
 # start with an empty factor graph object
 fg = initfg()
 # DO NOT enable fixed-lag operation
-solveTimes = runHexagonalExample(fg, 100, 6)
+solveTimes = runHexagonalExample(fg, 20, 6)
+t = @timed batchSolve!(fg)
 # Plot the many iterations to see that it succeeded.
 drawPosesLandms(fg)
 
@@ -66,11 +72,26 @@ Gadfly.plot(x=1:length(solveTimes), y=solveTimes, Geom.path,
 ##### ---- Fixed lag mode ---
 #############################
 
+# Batch control for 60 - no fixed lag and [buildBayes, infer]
+# [0.339419, 2.92293]
+# [1.20682, 9.57546]
+# [2.13343, 17.3296]
+# [3.06916, 26.7324]
+# [4.0266, 37.0113]
+# [5.12491, 47.7176]
+# [7.0712, 75.0297]
+# [10.116, 88.8075]
+# [11.8314, 104.447]
+# [13.2786, 118.219]
+# [14.3143, 127.049]
+
 fgFixedLag = initfg()
 fgFixedLag.isfixedlag = true
 fgFixedLag.qfl = 10
 
-solveTimesFixedLag = runHexagonalExample(fgFixedLag, 100, 6)
+solveTimesFixedLag = runHexagonalExample(fgFixedLag, 60, 6)
+# tFixed = @timed batchSolve!(fgFixedLag)
+@show tFixed[2]
 # Plot the many iterations to see that it succeeded.
 drawPosesLandms(fg)
 
