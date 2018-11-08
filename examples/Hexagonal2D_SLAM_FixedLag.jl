@@ -100,3 +100,8 @@ Gadfly.plot(PP...,
     Guide.manual_color_key("Legend", ["fixed", "batch"], ["green", "magenta"]))
 
 #### EXPORT the data
+using JLD2, FileIO
+savejld(fg, "batchSolve.jld2")
+savejld(fg, "fixedSolve.jld2")
+using JLD2, FileIO
+@save "results.jld2" solverTimesForBatch solveTimesFixedLag
