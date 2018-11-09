@@ -1,5 +1,6 @@
 # add more julia processes
-# nprocs() < 3 ? addprocs(4-nprocs()) : nothing
+using Distributed
+nprocs() < 2 ? addprocs(2-nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces
 using RoME, Distributions
@@ -8,14 +9,16 @@ using RoME, Distributions
 using Compose
 # Using this for trend plotting.
 using Gadfly
+# Using for capturing data.
+using DataFrames
 
 
 numVariables = 200
-solveEveryNVariables = 6
-lagLength = 15
+solveEveryNVariables = 20
+lagLength = 30
 
 # Standard Hexagonal example for totalIterations - solve every iterationsPerSolve iterations.
-function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPerSolve::Int)#::Vector{Float64}
+function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPerSolve::Int)::DataFrame
     # Add the first pose :x0
     addNode!(fg, :x0, Pose2)
 
@@ -26,7 +29,7 @@ function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPe
     addNode!(fg, :l1, Point2, labels=["LANDMARK"])
 
     # Drive around in a hexagon a number of times
-    solveTimes = []
+    solveTimes = DataFrame(GraphSize = [], TimeBuildBayesTree = [], TimeSolveGraph = [])
     for i in 0:totalIterations
         psym = Symbol("x$i")
         nsym = Symbol("x$(i+1)")
@@ -41,7 +44,7 @@ function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPe
             p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
             addFactor!(fg, [psym; :l1], p2br)
         end
-        if i % iterationsPerSolve == 0
+        if i % iterationsPerSolve == 0 && i != 0
             @info "Performing inference!"
             if fg.isfixedlag
                 @info "Quasi fixed-lag is enabled (a feature currently in testing)!"
@@ -49,7 +52,8 @@ function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPe
             end
             tBuild = @timed tree = wipeBuildNewTree!(fg)
             tInfer = @timed inferOverTree!(fg, tree, N=100)
-            push!(solveTimes, [tBuild[2], tInfer[2]])
+            graphSize = length([ls(fg)[1]..., ls(fg)[2]...])
+            push!(solveTimes, (graphSize, tBuild[2], tInfer[2]))
         end
     end
     return solveTimes
@@ -59,6 +63,7 @@ end
 fg = initfg()
 # DO NOT enable fixed-lag operation
 solverTimesForBatch = runHexagonalExample(fg, numVariables, solveEveryNVariables)
+# savejld(fg, "batchSolve.jld2")
 
 #############################
 ##### ---- Fixed lag mode ---
@@ -68,40 +73,42 @@ fgFixedLag = initfg()
 fgFixedLag.isfixedlag = true
 fgFixedLag.qfl = lagLength
 
-solveTimesFixedLag = runHexagonalExample(fgFixedLag, numVariables, solveEveryNVariables)
+solverTimesFixedLag = runHexagonalExample(fgFixedLag, numVariables, solveEveryNVariables)
+# savejld(fgFixedLag, "fixedSolve.jld2")
 
 #### Visualization
 
 # Plot the many iterations to see that it succeeded.
 # Batch
-drawPosesLandms(fg)
+# drawPosesLandms(fg)
 
 # Fixed lag
-drawPosesLandms(fgFixedLag)
+# drawPosesLandms(fgFixedLag)
 
 #### PLOTTING of Results
 
 using Gadfly
-
 using Colors
+using CSV
 
-PP = []
+# Make a clean dataset
+rename!(solverTimesForBatch, :TimeBuildBayesTree => :Batch_BayedBuild, :TimeSolveGraph => :Batch_SolveGraph);
+rename!(solverTimesFixedLag, :TimeBuildBayesTree => :FixedLag_BayedBuild, :TimeSolveGraph => :FixedLag_SolveGraph);
+timingMerged = DataFrames.join(solverTimesForBatch, solverTimesFixedLag, on=:GraphSize)
+CSV.write("timing_comparison.csv", timingMerged)
 
-batchTimes = [solverTimesForBatch[i][2] for i in 1:length(solverTimesForBatch)]
-lagTimes = [solveTimesFixedLag[i][2] for i in 1:length(solveTimesFixedLag)]
+# PP = []
+# push!(PP, Gadfly.layer(x=timingMerged[:GraphSize], y=timingMerged[:FixedLag_SolveGraph], Geom.path, Theme(default_color=colorant"green"))[1]);
+# push!(PP, Gadfly.layer(x=timingMerged[:GraphSize], y=timingMerged[:Batch_SolveGraph], Geom.path, Theme(default_color=colorant"magenta"))[1]);
+#
+# plt = Gadfly.plot(PP...,
+#     Guide.title("Solving Time vs. Iteration for Fixed-Lag Operation"),
+#     Guide.xlabel("Solving Iteration"),
+#     Guide.ylabel("Solving Time (seconds)"),
+#     Guide.manual_color_key("Legend", ["fixed", "batch"], ["green", "magenta"]))
+# Gadfly.draw(PNG("results_comparison.png", 12cm, 15cm), plt)
 
-push!(PP, Gadfly.layer(x=1:length(lagTimes), y=lagTimes, Geom.path, Theme(default_color=colorant"green"))[1]);
-push!(PP, Gadfly.layer(x=1:length(batchTimes), y=batchTimes, Geom.path, Theme(default_color=colorant"magenta"))[1]);
-
-Gadfly.plot(PP...,
-    Guide.title("Solving Time vs. Iteration for Fixed-Lag Operation"),
-    Guide.xlabel("Solving Iteration"),
-    Guide.ylabel("Solving Time (seconds)"),
-    Guide.manual_color_key("Legend", ["fixed", "batch"], ["green", "magenta"]))
 
 #### EXPORT the data
 using JLD2, FileIO
-savejld(fg, "batchSolve.jld2")
-savejld(fg, "fixedSolve.jld2")
-using JLD2, FileIO
-@save "results.jld2" solverTimesForBatch solveTimesFixedLag
+@save "results.jld2" timingMerged
