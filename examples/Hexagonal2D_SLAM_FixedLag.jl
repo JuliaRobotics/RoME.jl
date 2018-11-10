@@ -13,7 +13,7 @@ using Gadfly
 using DataFrames
 
 
-numVariables = 200
+numVariables = 300
 solveEveryNVariables = 20
 lagLength = 30
 
