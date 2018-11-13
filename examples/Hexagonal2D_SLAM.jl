@@ -1,4 +1,5 @@
 # add more julia processes
+using Distributed
 nprocs() < 3 ? addprocs(4-nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces

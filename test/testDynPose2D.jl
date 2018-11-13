@@ -7,7 +7,7 @@ using Test
 
 @testset "test DynPose2 and velocity..." begin
 
-global N = 75
+global N = 100
 global fg = initfg()
 
 # add first pose locations
@@ -88,7 +88,7 @@ end
 
 @testset "test many DynPose2 chain stationary and 'pulled'..." begin
 
-global N = 75
+global N = 100
 global fg = initfg()
 
 # add first pose locations
@@ -211,7 +211,7 @@ end
 
 @testset "test many DynPose2 sideways velocity..." begin
 
-global N = 75
+global N = 100
 global fg = initfg()
 
 # add first pose locations
