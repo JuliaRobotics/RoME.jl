@@ -103,7 +103,7 @@ end
   @test 0.0 < norm(res) < 0.3
 
   global meas = getSample(xyy,100)
-  @test norm(Statistics.std(meas[1],dims=2) - [0.01;0.01;0.002]) < 0.01
+  @test norm(Statistics.std(meas[1],dims=2) - [0.01;0.01;0.002]) < 0.05
 
 end
 

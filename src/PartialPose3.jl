@@ -55,14 +55,21 @@ function convert(::Type{Dict{String, Any}}, fact::RoME.PartialPriorRollPitchZ)
     return pf
 end
 
+
+function compare(a::Normal, b::Normal; tol::Float64=1e-10)
+  TP = true
+  TP = TP && abs(a.μ - b.μ) < tol
+  TP = TP && abs(a.σ - b.σ) < tol
+  TP
+end
+
 function compare(a::PartialPriorRollPitchZ, b::PartialPriorRollPitchZ; tol::Float64=1e-10)
   TP = true
-  TP = TP && compare(a.rp, b.rp) < tol
-  TP = TP && compare(a.z, b.z) < tol
+  TP = TP && compare(a.rp, b.rp)
+  TP = TP && compare(a.z, b.z)
   TP = TP && norm(collect(a.partial)-collect(b.partial)) < tol
   return TP
 end
-
 
 
 
@@ -99,13 +106,13 @@ mutable struct PackedPartialPose3XYYaw <: IncrementalInference.PackedInferenceTy
   xydata::String
   yawdata::String
   PackedPartialPose3XYYaw() = new()
-  PackedPartialPose3XYYaw(xy::Vector{Float64}, yaw::Array{Float64}) = new(x1, x2[:])
+  PackedPartialPose3XYYaw(xy::String, yaw::String) = new(xy, yaw)
 end
 function convert(::Type{PartialPose3XYYaw}, d::PackedPartialPose3XYYaw)
   return PartialPose3XYYaw( extractdistribution(d.xydata), extractdistribution(d.yawdata) )
 end
 function convert(::Type{PackedPartialPose3XYYaw}, d::PartialPose3XYYaw)
-  return PackedPartialPose3XYYaw( d.xy, d.yaw )
+  return PackedPartialPose3XYYaw( string(d.xy), string(d.yaw) )
 end
 
 """
@@ -136,8 +143,8 @@ end
 
 function compare(a::PartialPose3XYYaw, b::PartialPose3XYYaw; tol::Float64=1e-10)
   TP = true
-  TP = TP && norm(a.xyy.μ-b.xyy.μ) < tol
-  TP = TP && norm(a.xyy.Σ.mat[:]-b.xyy.Σ.mat[:]) < tol
+  TP = TP && compare(a.xy, b.xy)
+  TP = TP && compare(a.yaw, b.yaw)
   TP = TP && norm(collect(a.partial)-collect(b.partial)) < tol
   return TP
 end
