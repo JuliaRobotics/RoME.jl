@@ -203,9 +203,12 @@ end
 end
 
 
-
 @testset "test conversions of PartialPose3XYYaw" begin
-    global xyy = PartialPose3XYYaw(MvNormal([1.0;2.0;0.5],0.1*Matrix{Float64}(LinearAlgebra.I, 3,3)))
+    global xyy = PartialPose3XYYaw(
+             MvNormal( [1.0;2.0],
+                        0.1*Matrix{Float64}(LinearAlgebra.I, 2,2) ),
+             Normal(0.5, 0.1)
+           )
 
     global pxyy = convert(PackedPartialPose3XYYaw, xyy)
     global unp = convert(PartialPose3XYYaw, pxyy)
