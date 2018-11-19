@@ -4,6 +4,9 @@
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PriorPose3 <: IncrementalInference.FunctorSingleton
     Zi::Distribution
     PriorPose3() = new()
@@ -14,6 +17,9 @@ function getSample(p3::PriorPose3, N::Int=1)
   # mv = Distributions.MvNormal(veeEuler(p3.Zi), p3.Cov)
   return (rand(p3.Zi, N),)
 end
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPriorPose3  <: IncrementalInference.PackedInferenceType
     vecZi::Array{Float64,1} # 0rotations, 1translation in each column
     vecCov::Array{Float64,1}
@@ -38,6 +44,9 @@ end
 
 # ------------------------------------
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PP3REUSE
   wTi::SE3
   wTj::SE3
@@ -65,6 +74,9 @@ function fastpose3pose3residual!(reusethrid::PP3REUSE,
   nothing
 end
 
+"""
+$(TYPEDEF)
+"""
 mutable struct Pose3Pose3 <: FunctorPairwise
     Zij::Distribution
     reuse::Vector{PP3REUSE}
@@ -86,6 +98,9 @@ function (pp3::Pose3Pose3)(res::Array{Float64},
   nothing
 end
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
   vecCov::Array{Float64,1}
@@ -112,6 +127,9 @@ end
 
 # -----------------------
 
+"""
+$(TYPEDEF)
+"""
 mutable struct Pose3Pose3NH <: IncrementalInference.FunctorPairwiseNH
     Zij::Distribution
     nullhypothesis::Distributions.Categorical
@@ -138,6 +156,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPose3Pose3NH <: IncrementalInference.PackedInferenceType
   vecZij::Vector{Float64} # 3translations, 3rotation
   vecCov::Vector{Float64}

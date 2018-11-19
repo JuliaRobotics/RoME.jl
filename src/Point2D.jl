@@ -1,11 +1,16 @@
-# Point2D mutable struct
 
+"""
+$(TYPEDEF)
+"""
 struct Point2 <: IncrementalInference.InferenceVariable
   dims::Int
   labels::Vector{String}
   Point2() = new(2, String[])
 end
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PriorPoint2{T} <: IncrementalInference.FunctorSingleton where {T <: Distributions.Distribution}
   Z::T
   # W::Array{Float64,1} # TODO, deprecate the weight parameter
@@ -21,6 +26,9 @@ function getSample(p2::PriorPoint2, N::Int=1)
   return (rand(p2.Z, N),)
 end
 
+"""
+$(TYPEDEF)
+"""
 mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
   Z::D
   Point2Point2Range{D}() where {D} = new{D}()
@@ -47,6 +55,9 @@ function (pp2r::Point2Point2Range{T})(
 end
 # import RoME: Point2Point2Range
 
+"""
+$(TYPEDEF)
+"""
 mutable struct Point2Point2{D <: IIF.SamplableBelief} <: FunctorPairwise #BetweenPoses
     Zij::D
     Point2Point2{T}() where T = new{T}()
@@ -71,6 +82,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct Point2Point2WorldBearing{T} <: IncrementalInference.FunctorPairwise where {T <: IIF.SamplableBelief}
     Z::T
     rangemodel::Rayleigh
@@ -103,6 +117,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
   belief::BallTreeDensity
   nullhypothesis::Distributions.Categorical
@@ -113,6 +130,9 @@ end
 function getSample(p2::PriorPoint2DensityNH, N::Int=1)
   return (rand(p2.belief, N), )
 end
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPriorPoint2DensityNH <: IncrementalInference.PackedInferenceType
     rpts::Vector{Float64} # 0rotations, 1translation in each column
     rbw::Vector{Float64}
@@ -143,6 +163,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPriorPoint2  <: IncrementalInference.PackedInferenceType
     str::String
     PackedPriorPoint2() = new()
@@ -164,6 +187,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPoint2Point2Range  <: IncrementalInference.PackedInferenceType
   str::String
   PackedPoint2Point2Range() = new()
@@ -180,6 +206,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPoint2Point2WorldBearing  <: IncrementalInference.PackedInferenceType
     str::String
     # NOTE Not storing rangemodel which may cause inconsistencies if the implementation parameters change
@@ -197,6 +226,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPoint2Point2 <: IncrementalInference.PackedInferenceType
     # mu::Vector{Float64}
     # sigma::Vector{Float64}
