@@ -1,5 +1,8 @@
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct SLAMWrapper
   fg::IncrementalInference.FactorGraph
   tree::NothingUnion{IncrementalInference.BayesTree}

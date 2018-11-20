@@ -18,6 +18,9 @@ end
 
 # Pose2 functions for Robot Motion Estimate
 
+"""
+$(TYPEDEF)
+"""
 struct Pose2 <: IncrementalInference.InferenceVariable
   dims::Int
   labels::Vector{String}
@@ -31,6 +34,9 @@ end
 # getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct Pose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: IIF.SamplableBelief}
   z::T
   Pose2Pose2{T}() where {T <: IIF.SamplableBelief} = new{T}()
@@ -60,6 +66,9 @@ function (s::Pose2Pose2{<:IIF.SamplableBelief})(res::Array{Float64},
 end
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PriorPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: Distributions.Distribution}
     Z::T
     PriorPose2{T}() where T = new{T}()
@@ -119,6 +128,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PartialPriorYawPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: IIF.SamplableBelief}
     Z::T
     partial::Tuple
@@ -133,6 +145,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPartialPriorYawPose2 <: IncrementalInference.PackedInferenceType
     Z::String
     PackedPartialPriorYawPose2() = new()
@@ -153,6 +168,9 @@ end
 # ------------------------------------
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPriorPose2  <: IncrementalInference.PackedInferenceType
     # vecZij::Array{Float64,1} # 0rotations, 1translation in each column
     # dimz::Int
@@ -183,6 +201,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPose2Pose2  <: IncrementalInference.PackedInferenceType
   datastr::String
   PackedPose2Pose2() = new()

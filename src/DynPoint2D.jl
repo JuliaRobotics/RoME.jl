@@ -2,6 +2,9 @@
 
 
 # x, y, dx/dt, dy/dt
+"""
+$(TYPEDEF)
+"""
 mutable struct DynPoint2 <: IncrementalInference.InferenceVariable
   ut::Int64 # microsecond time
   dims::Int
@@ -10,6 +13,9 @@ mutable struct DynPoint2 <: IncrementalInference.InferenceVariable
 end
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct DynPoint2VelocityPrior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}
   z::T
   DynPoint2VelocityPrior{T}() where {T <: Distribution} = new{T}()
@@ -19,6 +25,9 @@ DynPoint2VelocityPrior(z1::T) where {T <: Distribution} = DynPoint2VelocityPrior
 getSample(dp2v::DynPoint2VelocityPrior, N::Int=1) = (rand(dp2v.z,N), )
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct DynPoint2DynPoint2{T} <: IncrementalInference.FunctorPairwise where {T <: Distribution}
   z::T
   DynPoint2DynPoint2{T}() where {T <: Distribution} = new{T}()
@@ -42,6 +51,9 @@ function (dp2dp2::DynPoint2DynPoint2)(
 end
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct VelPoint2VelPoint2{T} <: IncrementalInference.FunctorPairwiseMinimize where {T <: Distribution}
   z::T
   VelPoint2VelPoint2{T}() where {T <: Distribution} = new{T}()
@@ -72,6 +84,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct Point2Point2Velocity{T} <: IncrementalInference.FunctorPairwiseMinimize where {T <: Distribution}
   z::T
   Point2Point2Velocity{T}() where {T <: Distribution} = new{T}()
@@ -102,6 +117,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedDynPoint2VelocityPrior <: IncrementalInference.PackedInferenceType
   str::AbstractString
   PackedDynPoint2VelocityPrior() = new()
@@ -118,6 +136,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedVelPoint2VelPoint2 <: IncrementalInference.PackedInferenceType
   str::AbstractString
   PackedVelPoint2VelPoint2() = new{T}()

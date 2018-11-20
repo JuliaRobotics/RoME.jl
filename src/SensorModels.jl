@@ -1,6 +1,9 @@
 # Linear array sonar constraints
 
 # These types should be consolidated in some form -- still exploring for good factorization
+"""
+$(TYPEDEF)
+"""
 mutable struct reuseLBRA
   wTb::SE3
   M::Array{Float64,2}
@@ -12,6 +15,10 @@ mutable struct reuseLBRA
   reuseLBRA(::Int)=new(SE3(0),Matrix{Float64}(LinearAlgebra.I, 4,4),Euler(0),ones(4),ones(4), zeros(3))
   reuseLBRA(a,b,c,d,e,f)=new(a,b,c,d,e,f)
 end
+
+"""
+$(TYPEDEF)
+"""
 mutable struct LinearRangeBearingElevation <: FunctorPairwiseMinimize
   range::Normal
   bearing::Normal

@@ -14,6 +14,9 @@ export
 
 abstract type PreintContainer end
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PreintegralCompensationGradients <: PreintContainer
   # First order terms
   dPdDa::Array{Float64,2}
@@ -30,6 +33,9 @@ mutable struct PreintegralCompensationGradients <: PreintContainer
         dVdDw::Array{Float64,2}=zeros(3,3),
         dRdDw::Array{Float64,2}=zeros(3,3)  ) = new(dPdDa,dVdDa,dPdDw,dVdDw,dRdDw)
 end
+"""
+$(TYPEDEF)
+"""
 mutable struct InertialPose3Container <: PreintContainer
   rRp::Array{Float64,2}
   rPosp::Vector{Float64}
@@ -136,11 +142,10 @@ end
 
 
 """
-    InertialPose3(zij::Distributions.MvNormal, pioc::InertialPose3Container, pido::PreintegralCompensationGradients)
-
-Zij is entropy of veeLie15, pioc is preintegral measurements, pido is compensation gradients.
+$(TYPEDEF)
 """
 mutable struct InertialPose3 <: FunctorPairwise #RoME.BetweenPoses
+  # Zij is entropy of veeLie15, pioc is preintegral measurements, pido is compensation gradients.
   Zij::Distribution
   pioc::InertialPose3Container
   picg::PreintegralCompensationGradients
@@ -214,6 +219,9 @@ function (ip3::InertialPose3)(
 end
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedInertialPose3 <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation, 3 velocities
   vecCov::Array{Float64,1}
@@ -284,6 +292,9 @@ end
 
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PriorInertialPose3 <: IncrementalInference.FunctorSingleton
   Zi::Distribution
 end
@@ -292,6 +303,9 @@ function getSample(prip3::PriorInertialPose3, N::Int=1)
 end
 
 
+"""
+$(TYPEDEF)
+"""
 mutable struct PackedPriorInertialPose3 <: IncrementalInference.PackedInferenceType
   vecZi::Array{Float64,1} # 3translations, 3rotation, 3 velocities
   vecCov::Array{Float64,1}
