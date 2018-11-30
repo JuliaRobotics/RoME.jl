@@ -13,7 +13,7 @@ mutable struct PartialPriorRollPitchZ{T1,T2} <: IncrementalInference.FunctorSing
 end
 PartialPriorRollPitchZ(rp::T1,z::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = PartialPriorRollPitchZ{T1,T2}(rp, z)
 function getSample(pprz::PartialPriorRollPitchZ, N::Int=1)
-  return ([rand(pprz.z,N)';rand(pprz.rp,N)], )
+  return ([rand(pprz.z,N)[:]';rand(pprz.rp,N)], )
 end
 
 mutable struct PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInferenceType
@@ -85,8 +85,9 @@ mutable struct PartialPose3XYYaw{T1,T2} <: FunctorPairwise where {T1 <: Samplabl
   PartialPose3XYYaw{T1,T2}(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new(xy, yaw, (1,2,6))
 end
 PartialPose3XYYaw(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} =  PartialPose3XYYaw{T1,T2}(xy, yaw)
+
 function getSample(pxyy::PartialPose3XYYaw, N::Int=1)
-  return ([rand(pxyy.xy,N);rand(pxyy.yaw,N)'], )
+  return ([rand(pxyy.xy,N);rand(pxyy.yaw,N)[:]'], )
 end
 function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
             userdata,
