@@ -1,6 +1,6 @@
 # Partial Pose3 constraints
 
-
+# TODO duplicate  PriorPose3ZRP
 mutable struct PartialPriorRollPitchZ{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   rp::T1
   z::T2
@@ -76,6 +76,8 @@ end
 
 # Partial pairwise constraint between poses X,Y,Yaw
 # ------------------------------------------------------------------------------
+
+# TODO duplicate name Pose3Pose3XYYaw
 
 mutable struct PartialPose3XYYaw{T1,T2} <: FunctorPairwise where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   xy::T1
