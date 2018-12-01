@@ -207,14 +207,8 @@ export
   PackedPose3Pose3NH,
 
   # partial Pose3
-  PartialPriorRollPitchZ,
-  PackedPartialPriorRollPitchZ,
-  PartialPose3XYYaw,
-  PackedPartialPose3XYYaw,
-  PartialPose3XYYawNH,
-  PackedPartialPose3XYYawNH,
-
-
+  PriorPose3ZRP,
+  Pose3Pose3XYYaw,
   # Various utilities
   passTypeThrough,
 
@@ -245,7 +239,16 @@ export
 
   IIF,
   KDE,
-  TU
+  TU,
+
+  # Deprecated
+  PartialPriorRollPitchZ,
+  PackedPartialPriorRollPitchZ,
+  PartialPose3XYYaw,
+  PackedPartialPose3XYYaw,
+  PartialPose3XYYawNH,
+  PackedPartialPose3XYYawNH
+
 
   # # solve with isam in pytslam
   # doISAMSolve,

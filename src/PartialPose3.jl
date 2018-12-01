@@ -1,15 +1,59 @@
 # Partial Pose3 constraints
 
-# TODO duplicate  PriorPose3ZRP
+"""
+$(TYPEDEF)
+"""
+mutable struct PriorPose3ZRP{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+  z::T1
+  rp::T2
+  partial::Tuple
+  PriorPose3ZRP{T1,T2}() where {T1, T2} = new{T1,T2}()
+  PriorPose3ZRP{T1,T2}(z::T1,rp::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}(z, rp, (3,4,5))
+end
+PriorPose3ZRP(z::T1,rp::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = PriorPose3ZRP{T1,T2}(z, rp)
+function getSample(pprz::PriorPose3ZRP, N::Int=1)
+  return ([rand(pprz.z,N)[:]';rand(pprz.rp,N)], )
+end
+
+
+"""
+Converter: PartialPriorRollPitchZ::Dict{String, Any} -> PartialPriorRollPitchZ
+
+Deprecated in favor of PriorPose3ZRP
+"""
+function convert(::Type{RoME.PriorPose3ZRP}, fact::Dict{String, Any})
+    rp = fact["measurement"][1]
+    z = fact["measurement"][2]
+    rp = convert(_evalType(rp["distType"]), rp)
+    z = convert(_evalType(z["distType"]), z)
+    return PriorPose3ZRP(rp, z)
+end
+
+"""
+Converter: PriorPose3ZRP::Dict{String, Any} -> PriorPose3ZRP
+
+Deprecated in favor of PriorPose3ZRP
+"""
+function convert(::Type{Dict{String, Any}}, fact::RoME.PriorPose3ZRP)
+    pf = Dict{String, Any}(
+        "measurement" => [
+            convert(Dict{String, Any}, fact.rp),
+            convert(Dict{String, Any}, fact.z)
+        ],
+        "factorType" => "PriorPose3ZRP"
+    )
+    return pf
+end
+
+"""
+$(TYPEDEF)
+"""
 mutable struct PartialPriorRollPitchZ{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   rp::T1
   z::T2
   partial::Tuple
   PartialPriorRollPitchZ{T1,T2}() where {T1, T2} = new{T1,T2}()
   PartialPriorRollPitchZ{T1,T2}(rp::T1,z::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}(rp, z, (3,4,5))
-  # PartialPriorRollPitchZ(x1,x2,x3,x4) = new(MvNormal(x1,x2), Normal(x3,x4), (3,4,5))
-  # PartialPriorRollPitchZ(rpz::PackedPartialPriorRollPitchZ) = new(MvNormal(d.rpmu, reshapeVec2Mat(d.rpsig,2)),
-                                                    # Normal(rpz.zmu, rpz.zsig) )
 end
 PartialPriorRollPitchZ(rp::T1,z::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = PartialPriorRollPitchZ{T1,T2}(rp, z)
 function getSample(pprz::PartialPriorRollPitchZ, N::Int=1)
@@ -92,6 +136,31 @@ function getSample(pxyy::PartialPose3XYYaw, N::Int=1)
   return ([rand(pxyy.xy,N);rand(pxyy.yaw,N)[:]'], )
 end
 function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
+            userdata,
+            idx::Int,
+            meas::Tuple{Array{Float64,2}},
+            wXi::Array{Float64,2},
+            wXj::Array{Float64,2}  )
+  #
+  wXjhat = SE2(wXi[[1;2;6],idx]) * SE2(meas[1][1:3,idx])
+  jXjhat = SE2(wXj[[1;2;6],idx]) \ wXjhat
+  se2vee!(res, jXjhat)
+  nothing
+end
+
+mutable struct Pose3Pose3XYYaw{T1,T2} <: FunctorPairwise where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+  xy::T1
+  yaw::T2
+  partial::Tuple
+  Pose3Pose3XYYaw{T1,T2}() where {T1, T2} = new()
+  Pose3Pose3XYYaw{T1,T2}(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new(xy, yaw, (1,2,6))
+end
+Pose3Pose3XYYaw(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} =  Pose3Pose3XYYaw{T1,T2}(xy, yaw)
+
+function getSample(pxyy::Pose3Pose3XYYaw, N::Int=1)
+  return ([rand(pxyy.xy,N);rand(pxyy.yaw,N)[:]'], )
+end
+function (pxyy::Pose3Pose3XYYaw)(res::Array{Float64},
             userdata,
             idx::Int,
             meas::Tuple{Array{Float64,2}},
