@@ -271,12 +271,12 @@ include("DynPoint2D.jl")
 include("Pose2D.jl")
 include("DynPose2D.jl")
 include("Pose3D.jl")
-include("BearingRange2D.jl")
+include("factors/BearingRange2D.jl")
 
 # include("BearingRangeDensity2D.jl")
 
-include("Pose3Pose3.jl")
-include("PartialPose3.jl")
+include("factors/Pose3Pose3.jl")
+include("factors/PartialPose3.jl")
 include("MultipleFeaturesConstraint.jl")
 
 include("InertialPose3.jl")
