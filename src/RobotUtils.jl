@@ -683,7 +683,7 @@ function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{Stri
   retlbs = String[]
   for i in 1:length(lbl)
     id = parse(Int,lbl[i][2:end])
-    if findfirst(torm,id) == 0
+    if something(findfirst(isequal(id), torm), 0) == 0 #findfirst(torm,id) == 0
       push!(retlbs, lbl[i])
     else
       println("removeKeysFromArr -- skipping $(lbl[i]), id=$(id)")
