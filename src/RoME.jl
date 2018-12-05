@@ -207,14 +207,8 @@ export
   PackedPose3Pose3NH,
 
   # partial Pose3
-  PartialPriorRollPitchZ,
-  PackedPartialPriorRollPitchZ,
-  PartialPose3XYYaw,
-  PackedPartialPose3XYYaw,
-  PartialPose3XYYawNH,
-  PackedPartialPose3XYYawNH,
-
-
+  PriorPose3ZRP,
+  Pose3Pose3XYYaw,
   # Various utilities
   passTypeThrough,
 
@@ -245,7 +239,16 @@ export
 
   IIF,
   KDE,
-  TU
+  TU,
+
+  # Deprecated
+  PartialPriorRollPitchZ,
+  PackedPartialPriorRollPitchZ,
+  PartialPose3XYYaw,
+  PackedPartialPose3XYYaw,
+  PartialPose3XYYawNH,
+  PackedPartialPose3XYYawNH
+
 
   # # solve with isam in pytslam
   # doISAMSolve,
@@ -268,12 +271,12 @@ include("DynPoint2D.jl")
 include("Pose2D.jl")
 include("DynPose2D.jl")
 include("Pose3D.jl")
-include("BearingRange2D.jl")
+include("factors/BearingRange2D.jl")
 
 # include("BearingRangeDensity2D.jl")
 
-include("Pose3Pose3.jl")
-include("PartialPose3.jl")
+include("factors/Pose3Pose3.jl")
+include("factors/PartialPose3.jl")
 include("MultipleFeaturesConstraint.jl")
 
 include("InertialPose3.jl")

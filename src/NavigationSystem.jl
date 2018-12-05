@@ -1,4 +1,7 @@
 
+## TODO: revamp these older functions to newer API in IIF/RoME/Caesar (Nov2018)
+# standardize a common front-end design with feature tracking and real-time integration
+# part of DFG discussion
 
 function triggerPose(x, xprev, Tnow, Tprev,
                     distrule, timerule, yawrule)

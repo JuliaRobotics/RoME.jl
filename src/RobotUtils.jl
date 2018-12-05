@@ -402,6 +402,7 @@ end
 
 function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
                           currage=0, maxdeltaage=Inf)
+    # TODO upgrade to using MMD test
     # all landmarks of interest
     xx,ll = ls(fgl)
     # output result
