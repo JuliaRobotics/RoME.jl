@@ -3,8 +3,7 @@ using Distributed
 nprocs() < 3 ? addprocs(4-nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces
-using IncrementalInference
-using RoME, Distributions
+using RoME
 ## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist
 using RoMEPlotting
 
@@ -56,3 +55,9 @@ batchSolve!(fg)
 # redraw
 pl = drawPosesLandms(fg)
 Gadfly.draw(Gadfly.PDF("/tmp/test3.pdf", 20cm, 10cm),pl)  # or PNG(...)
+
+
+# isInitialized(fg, :l1)
+# stuff = IIF.approxConv(fg, :x6l1f1, :l1)
+
+#
