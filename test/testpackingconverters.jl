@@ -143,7 +143,7 @@ global f1  = addFactor!(fg,[v1], ipp)
     # TODO -- fix ambibuity in compare function
     @test compareAll(getData(f1), unpackeddata, skip=[:fnc;])
     @test compareAll(getData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!])
-    @test compareAll(getData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!)
+    @test compareAll(getData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;])
     @test compareAll(getData(f1).fnc.usrfnc!.Zi, unpackeddata.fnc.usrfnc!.Zi, skip=[:Σ;])
     @test compareAll(getData(f1).fnc.usrfnc!.Zi.Σ, unpackeddata.fnc.usrfnc!.Zi.Σ)
     @test compareAll(getData(f1).fnc.cpt, unpackeddata.fnc.cpt)
@@ -154,6 +154,8 @@ global f1  = addFactor!(fg,[v1], ipp)
     global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
     @test compareAll(getData(v1), upv1data, skip=[:softtype;])
+    @test compareAll(getData(v1).softtype, upv1data.softtype)
+
 end
 
 
