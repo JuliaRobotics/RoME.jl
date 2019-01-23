@@ -112,6 +112,18 @@ function (pp2br::Pose2Point2Bearing)(res::Array{Float64},
   return res[1]
 end
 
+# Packing and Unpacking
+mutable struct PackedPose2Point2Bearing <: IncrementalInference.PackedInferenceType
+    bearstr::String
+    PackedPose2Point2Bearing() = new()
+    PackedPose2Point2Bearing(s1::AS) where {AS <: AbstractString} = new(string(s1))
+end
+function convert(::Type{PackedPose2Point2Bearing}, d::Pose2Point2Bearing{B}) where {B <: IIF.SamplableBelief}
+  return PackedPose2Point2Bearing(string(d.bearing))
+end
+function convert(::Type{Pose2Point2Bearing}, d::PackedPose2Point2Bearing)
+  Pose2Point2Bearing(extractdistribution(d.bearstr))
+end
 
 
 
