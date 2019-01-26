@@ -19,11 +19,11 @@ addFactor!(fg, [:x0], IIF.Prior( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1
 
 # Drive around in a hexagon
 for i in 0:5
-  psym = Symbol("x$i")
-  nsym = Symbol("x$(i+1)")
-  addNode!(fg, nsym, Pose2)
-  pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-  addFactor!(fg, [psym;nsym], pp )
+    psym = Symbol("x$i")
+    nsym = Symbol("x$(i+1)")
+    addNode!(fg, nsym, Pose2)
+    pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+    addFactor!(fg, [psym;nsym], pp )
 end
 
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
