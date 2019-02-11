@@ -62,12 +62,15 @@ global f2 = addFactor!(fg, [:x1;:x2], ppc)
 
     @test RoME.compare(getData(f1), unpackeddata) # temp use of RoME.compare
 
+    setSerializationNamespace!("Main" => Main)
+
     global packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
     global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
-    @test IncrementalInference.compare(getData(v1), upv1data)
-end
+    @test compareAll(getData(v1), upv1data, skip=[:softtype;])
+    @test compareFields(getData(v1).softtype, upv1data.softtype)
 
+end
 
 @testset "test conversions of Pose2Pose2" begin
 
@@ -108,7 +111,8 @@ end
     @test ppbr.bearing.σ == unpackeddata.fnc.usrfnc!.bearing.σ
 
     @test ppbr.range.μ == unpackeddata.fnc.usrfnc!.range.μ
-    @test ppbr.range.σ == unpackeddata.fnc.usrfnc!.range.σ end
+    @test ppbr.range.σ == unpackeddata.fnc.usrfnc!.range.σ
+end
 
 # parameters
 global N = 300
@@ -137,13 +141,23 @@ global f1  = addFactor!(fg,[v1], ipp)
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose3}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test IncrementalInference.compare(getData(f1), unpackeddata)
+    @test compareAll(getData(f1), unpackeddata, skip=[:fnc;])
+    @test compareAll(getData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!])
+    @test compareAll(getData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;])
+    @test compareAll(getData(f1).fnc.usrfnc!.Zi, unpackeddata.fnc.usrfnc!.Zi, skip=[:Σ;])
+    @test compareAll(getData(f1).fnc.usrfnc!.Zi.Σ, unpackeddata.fnc.usrfnc!.Zi.Σ)
+    @test compareAll(getData(f1).fnc.cpt, unpackeddata.fnc.cpt)
+    @test compareAll(getData(f1).fnc.params, unpackeddata.fnc.params)
+    @test compareAll(getData(f1).fnc.threadmodel, unpackeddata.fnc.threadmodel)
 
     global packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
     global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
-    @test IncrementalInference.compare(getData(v1), upv1data)
+    @test compareAll(getData(v1), upv1data, skip=[:softtype;])
+    @test compareAll(getData(v1).softtype, upv1data.softtype)
+
 end
+
 
 
 
