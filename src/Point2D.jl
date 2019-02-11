@@ -5,7 +5,8 @@ $(TYPEDEF)
 struct Point2 <: IncrementalInference.InferenceVariable
   dims::Int
   labels::Vector{String}
-  Point2() = new(2, String[])
+  manifolds::Tuple{Symbol,Symbol}
+  Point2() = new(2, String[], (:Euclid, :Euclid))
 end
 
 """
