@@ -251,6 +251,12 @@ export
   PackedPartialPose3XYYawNH
 
 
+# doesnt seem to work
+# @info "Setting IncrementalInference de-serialization namespace RoME"
+# setSerializationNamespace!("RoME" => RoME)
+# @info "done..."
+
+
   # # solve with isam in pytslam
   # doISAMSolve,
   # drawCompPosesLandm,
