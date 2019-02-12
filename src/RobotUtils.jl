@@ -191,7 +191,7 @@ function addOdoFG!(
         XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addNode!(fg, n, Pose2(labels=["POSE";]), N=N, ready=ready, labels=labels)
+    v = addNode!(fg, n, Pose2, N=N, ready=ready, labels=[labels;"POSE"])
     # v = addNode!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
     pp = Pose2Pose2(MvNormal(DX, cov)) #[prev;v],
     f = addFactor!(fg, [prev;v], pp, ready=ready, autoinit=true )
