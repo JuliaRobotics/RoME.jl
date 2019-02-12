@@ -20,13 +20,13 @@ global odoCov = deepcopy(initCov)
 
 
 println("Adding PriorInertialPose3 to graph...")
-global v1 = addNode!(fg, :x1, InertialPose3, N=N) #0.1*randn(15,N)
+global v1 = addVariable!(fg, :x1, InertialPose3, N=N) #0.1*randn(15,N)
 global initPosePrior = PriorInertialPose3( MvNormal( zeros(15), initCov) )
 global f1  = addFactor!(fg, [v1], initPosePrior)
 
 
 global n = 1
-global v2 = addNode!(fg, :x2, InertialPose3, dims=15,  N=N)
+global v2 = addVariable!(fg, :x2, InertialPose3, dims=15,  N=N)
 global noise = MvNormal(zeros(15),(DATA[n][3]+DATA[n][3]')*0.5 )
 global inerodo = InertialPose3(noise,DATA[n][1],DATA[n][2])
 global f2  = addFactor!(fg, [v1;v2], inerodo )

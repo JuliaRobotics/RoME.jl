@@ -36,7 +36,7 @@ global odoCov = deepcopy(initCov)
 
 
 println("Adding PriorPose3 to graph...")
-global v1 = addNode!(fg, :x1, Pose3, N=N)
+global v1 = addVariable!(fg, :x1, Pose3, N=N)
 global initPosePrior = PriorPose3( MvNormal( zeros(6), initCov) )
 global f1  = addFactor!(fg,[v1], initPosePrior, autoinit=true)
 

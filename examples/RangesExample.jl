@@ -34,12 +34,12 @@ GTl[:l4] = [120.0;-50]
 fg = initfg()
 
 # first pose with no initial estimate
-addNode!(fg, :l100, Point2)
+addVariable!(fg, :l100, Point2)
 
 # add three landmarks
-addNode!(fg, :l1, Point2)
-addNode!(fg, :l2, Point2)
-addNode!(fg, :l3, Point2)
+addVariable!(fg, :l1, Point2)
+addVariable!(fg, :l2, Point2)
+addVariable!(fg, :l3, Point2)
 
 # and put priors on :l101 and :l102
 addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], Matrix{Float64}(LinearAlgebra.I, 2,2))))
@@ -98,7 +98,7 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
   prev_sym = Symbol("l$(maximum(Int[parse(Int,string(currvar[i])[2:end]) for i in 2:length(currvar)]))")
   if !(pos_sym in currvar)
     println("Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.")
-    addNode!(fgl, pos_sym, Point2)
+    addVariable!(fgl, pos_sym, Point2)
     @show rho = norm(GTp[prev_sym] - GTp[pos_sym])
     ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
     addFactor!(fgl, [prev_sym;pos_sym], ppr)
@@ -113,7 +113,7 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
       ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
       if !(ll in currvar)
         println("Adding variable vertex $ll, not yet in fgl::FactorGraph.")
-        addNode!(fgl, ll, Point2)
+        addVariable!(fgl, ll, Point2)
       end
       addFactor!(fgl, [pos_sym;ll], ppr)
     end

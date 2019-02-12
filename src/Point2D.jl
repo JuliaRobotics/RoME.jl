@@ -5,7 +5,8 @@ $(TYPEDEF)
 struct Point2 <: IncrementalInference.InferenceVariable
   dims::Int
   labels::Vector{String}
-  Point2() = new(2, String[])
+  manifolds::Tuple{Symbol,Symbol}
+  Point2(;labels::Vector{<:AbstractString}=String[]) = new(2, labels, (:Euclid, :Euclid))
 end
 
 """
@@ -143,7 +144,7 @@ mutable struct PackedPriorPoint2DensityNH <: IncrementalInference.PackedInferenc
 end
 function convert(::Type{PriorPoint2DensityNH}, d::PackedPriorPoint2DensityNH)
   return PriorPoint2DensityNH(
-            kde!(EasyMessage( reshapeVec2Mat(d.rpts, d.dims), d.rbw)),
+            AMP.kde!(EasyMessage( reshapeVec2Mat(d.rpts, d.dims), d.rbw, (:Euclid, :Euclid))),
             Distributions.Categorical(d.nh)  )
 end
 function convert(::Type{PackedPriorPoint2DensityNH}, d::PriorPoint2DensityNH)

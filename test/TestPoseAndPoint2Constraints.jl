@@ -17,7 +17,7 @@ global initCov = Matrix(Diagonal([0.03;0.03;0.001]))
 global odoCov = Matrix(Diagonal([3.0;3.0;0.01]))
 
 # Some starting position
-global v1 = addNode!(fg, :x0, Pose2, N=N)
+global v1 = addVariable!(fg, :x0, Pose2, N=N)
 global initPosePrior = PriorPose2(MvNormal(zeros(3), initCov))
 global f1  = addFactor!(fg,[v1], initPosePrior)
 
@@ -26,7 +26,7 @@ global f1  = addFactor!(fg,[v1], initPosePrior)
 @test Pose2Pose2(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2),[1.0;]) != nothing
 
 # and a second pose
-global v2 = addNode!(fg, :x1, Pose2, N=N)
+global v2 = addVariable!(fg, :x1, Pose2, N=N)
 global ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov, [1.0])
 global f2 = addFactor!(fg, [:x0;:x1], ppc)
 
@@ -53,7 +53,7 @@ global pts = getVal(fg, :x1)
 
 
 # check that yaw is working
-global v3 = addNode!(fg, :x2, Pose2, N=N)
+global v3 = addVariable!(fg, :x2, Pose2, N=N)
 global ppc = Pose2Pose2([50.0;0.0;0.0], odoCov, [1.0])
 global f3 = addFactor!(fg, [v2;v3], ppc)
 
@@ -77,7 +77,7 @@ global pts = getVal(fg, :x2)
 println("test bearing range evaluations")
 
 # new landmark
-global l1 = addNode!(fg, :l1, Point2, N=N)
+global l1 = addVariable!(fg, :l1, Point2, N=N)
 # and pose to landmark constraint
 global rhoZ1 = norm([10.0;0.0])
 global ppr = Pose2Point2BearingRange(Uniform(-pi,pi),Normal(rhoZ1,1.0))

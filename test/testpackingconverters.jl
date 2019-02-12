@@ -37,12 +37,12 @@ global initCov = Matrix(Diagonal([0.03;0.03;0.001]))
 global odoCov = Matrix(Diagonal([3.0;3.0;0.01]))
 
 # Some starting position
-global v1 = addNode!(fg, :x1, Pose2, N=N)
+global v1 = addVariable!(fg, :x1, Pose2, N=N)
 global ipp = PriorPose2(MvNormal(zeros(3), initCov))
 global f1  = addFactor!(fg,[v1], ipp)
 
 # and a second pose
-global v2 = addNode!(fg, :x2, Pose2, N=N)
+global v2 = addVariable!(fg, :x2, Pose2, N=N)
 global ppc = Pose2Pose2( MvNormal([50.0;0.0;pi/2], odoCov) )
 global f2 = addFactor!(fg, [:x1;:x2], ppc)
 
@@ -90,7 +90,7 @@ end
 
 @testset "test conversions of Pose2Point2BearingRange" begin
     # and a second pose
-    global v3 = addNode!(fg, :l1, Point2, N=N)
+    global v3 = addVariable!(fg, :l1, Point2, N=N)
     # ppc = Pose2Point2BearingRange([50.0;0.0;pi/2], 0.01*Matrix{Float64}(LinearAlgebra.I, 2,2), [1.0])
     global ppbr = Pose2Point2BearingRange(
                   Normal(0.0, 0.005 ),
@@ -123,7 +123,7 @@ global odoCov = deepcopy(initCov)
 # start new factor graph
 global fg = initfg()
 
-global v1 = addNode!(fg, :x1, Pose3, N=N) #  0.1*randn(6,N)
+global v1 = addVariable!(fg, :x1, Pose3, N=N) #  0.1*randn(6,N)
 global ipp = PriorPose3(MvNormal(zeros(6), initCov) )
 global f1  = addFactor!(fg,[v1], ipp)
 

@@ -24,7 +24,8 @@ $(TYPEDEF)
 struct Pose2 <: IncrementalInference.InferenceVariable
   dims::Int
   labels::Vector{String}
-  Pose2() = new(3, String["POSE";])
+  manifolds::Tuple{Symbol,Symbol,Symbol}
+  Pose2(;labels::Vector{<:AbstractString}=String[]) = new(3, labels, (:Euclid, :Euclid, :Circular))
 end
 
 # # Done - move to IncrementalInference

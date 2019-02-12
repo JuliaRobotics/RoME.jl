@@ -195,21 +195,21 @@ global odoCov = deepcopy(initCov)
 
 global ipp = PriorPose2(MvNormal(zeros(3), initCov^2))
 
-global v1 = addNode!(fg, :x1, Pose2, N=N)
+global v1 = addVariable!(fg, :x1, Pose2, N=N)
 
 global f1  = addFactor!(fg,[:x1], ipp)
 
 
-global v2 = addNode!(fg, :x2, Pose2, N=N)
+global v2 = addVariable!(fg, :x2, Pose2, N=N)
 
 global px2 = zeros(3)
 px2[1:3] = [1.1;-1.0;pi/2]
 global ipp2 = PriorPose2(MvNormal(px2, initCov^2))
 global f1  = addFactor!(fg,[:x2], ipp2)
 
-global vl1 = addNode!(fg, :l1, Point2, N=N)
-global vl2 = addNode!(fg, :l2, Point2, N=N)
-global vl3 = addNode!(fg, :l3, Point2, N=N)
+global vl1 = addVariable!(fg, :l1, Point2, N=N)
+global vl2 = addVariable!(fg, :l2, Point2, N=N)
+global vl3 = addVariable!(fg, :l3, Point2, N=N)
 
 # # why is explicit call to autoinit required here? should not be necessary
 # doautoinit!(fg, :x1)

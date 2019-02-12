@@ -11,7 +11,7 @@ function driveSomeMore!(fg::FactorGraph, idx)
     for i in idx:(idx+5)
       psym = Symbol("x$i")
       nsym = Symbol("x$(i+1)")
-      addNode!(fg, nsym, Pose2)
+      addVariable!(fg, nsym, Pose2)
       pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm([0.1;0.1;0.1].^2)))
       addFactor!(fg, [psym;nsym], pp )
     end
@@ -32,19 +32,19 @@ fg.isfixedlag = true
 ## 1. Drive around in a hexagon
 # Add the first pose :x0
 println("STEP 1: Driving around a bit")
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I,3,3))) )
 for i in 0:5
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
-  addNode!(fg, nsym, Pose2)
+  addVariable!(fg, nsym, Pose2)
   pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
   addFactor!(fg, [psym;nsym], pp )
 end
 
 # Add node linking initial pose with a bearing range measurement landmark
-addNode!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
 global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 
@@ -57,7 +57,7 @@ println("STEP 3: Drive a couple more, longer than fixed lag window")
 for i in 6:11
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
-  addNode!(fg, nsym, Pose2)
+  addVariable!(fg, nsym, Pose2)
   pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
   addFactor!(fg, [psym;nsym], pp )
 end

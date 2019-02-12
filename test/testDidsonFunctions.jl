@@ -109,7 +109,7 @@ global odoCov = deepcopy(initCov)
 println("Adding PriorPose3 to graph...")
 # X, pts = 0.01*randn(6,N), zeros(3,N);
 
-global v1 = addNode!(fg,:x1, Pose3,  N=N)
+global v1 = addVariable!(fg,:x1, Pose3,  N=N)
 global initPosePrior = PriorPose3( MvNormal(zeros(6), initCov) )
 global f1  = addFactor!(fg,[v1], initPosePrior)
 
@@ -122,7 +122,7 @@ global meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 # @time pts = approxConvBinary(X, meas, 3)  # TODO add back when IIF v0.3.8+ is available
 # p1 = kde!(pts); # visual checking
 
-global v2 = addNode!(fg, :l1, Point3, N=N)
+global v2 = addVariable!(fg, :l1, Point3, N=N)
 global f2 = addFactor!(fg, [:x1;:l1], meas) #, threadmodel=MultiThreaded)
 
 # ensureAllInitialized!(fg)
