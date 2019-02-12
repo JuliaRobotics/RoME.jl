@@ -6,6 +6,7 @@ using Reexport
 @reexport using TransformUtils
 @reexport using Distributions
 @reexport using KernelDensityEstimate
+@reexport using ApproxManifoldProducts
 
 using
   Distributed,
@@ -22,6 +23,7 @@ import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
 import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution  #, compare
 
+const AMP = ApproxManifoldProducts
 
 export
   initfg,  # RoME specific functions

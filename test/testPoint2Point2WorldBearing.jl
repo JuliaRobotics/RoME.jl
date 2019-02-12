@@ -48,8 +48,8 @@ global pts = getVal(fg, :x1)
 @test 0 <= sum(0 .< pts[2,:]) < 0.1*N
 
 
-@test 0 <= sum(pts[1,:] .< -100.0) < 0.1*N
-@test 0 <= sum(pts[2,:] .< -100.0) < 0.1*N
+@test 0 <= sum(pts[1,:] .< -100.0) < 0.15*N
+@test 0 <= sum(pts[2,:] .< -100.0) < 0.15*N
 
 
 end
