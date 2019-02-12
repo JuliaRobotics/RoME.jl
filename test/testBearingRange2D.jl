@@ -80,7 +80,7 @@ global N = 1
 global fg = initfg()
 
 #add pose with partial constraint
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))), autoinit=false) # TODO IIF.Prior
 # force particular initialization
 setVal!(fg, :x0, zeros(3,1))
@@ -92,7 +92,7 @@ global pts = predictbelief(fg, :x0, ls(fg, :x0), N=75)
 #------------
 
 # Add landmark
-addNode!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
 global li = zeros(2,1); li[1,1] = 20.0;
 setVal!(fg, :l1, li)
 
@@ -126,13 +126,13 @@ global N = 1
 global fg = initfg()
 
 # Add landmark
-addNode!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
 addFactor!(fg, [:l1], PriorPoint2(MvNormal([20.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))),  autoinit=false ) # TODO IIF.Prior
 global li = zeros(2,1); li[1,1] = 20.0;
 setVal!(fg, :l1, li)
 
 #add pose with partial constraint
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 # force particular initialization
 setVal!(fg, :x0, zeros(3,1))
 

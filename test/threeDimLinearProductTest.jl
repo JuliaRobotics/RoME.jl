@@ -52,7 +52,7 @@ global odoCov = deepcopy(initCov)
 
 
 @testset "Adding PriorPose3 to graph..." begin
-  global v1 = addNode!(fg, :x1, Pose3,  N=N) # 0.1*randn(6,N)
+  global v1 = addVariable!(fg, :x1, Pose3,  N=N) # 0.1*randn(6,N)
   global initPosePrior = PriorPose3( MvNormal(zeros(6), initCov) )
   global f1  = addFactor!(fg,[:x1;], initPosePrior)
   @test !isInitialized(fg, :x1)
@@ -84,7 +84,7 @@ end
   global odo = SE3([10;0;0], Quaternion(0))
   global pts0X2 = projectParticles(getVal(fg,:x1), MvNormal(veeEuler(odo), odoCov) )
   global odoconstr = Pose3Pose3( MvNormal(veeEuler(odo), odoCov) )
-  global v2 = addNode!(fg,:x2, Pose3, N=N) # pts0X2
+  global v2 = addVariable!(fg,:x2, Pose3, N=N) # pts0X2
   addFactor!(fg,[:x1;:x2],odoconstr)
   @test !isInitialized(fg, :x2)
 end

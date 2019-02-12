@@ -191,8 +191,8 @@ function addOdoFG!(
         XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addNode!(fg, n, Pose2, N=N, ready=ready, labels=[labels;"POSE"])
-    # v = addNode!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
+    v = addVariable!(fg, n, Pose2, N=N, ready=ready, labels=[labels;"POSE"])
+    # v = addVariable!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
     pp = Pose2Pose2(MvNormal(DX, cov)) #[prev;v],
     f = addFactor!(fg, [prev;v], pp, ready=ready, autoinit=true )
     infor = inv(cov^2)
@@ -211,7 +211,7 @@ function addOdoFG!(
   # DX=Z.μ
   # cov=Z.Σ.mat
   vprev, X, nextn = getLastPose(fgl)
-  vnext = addNode!(fgl, nextn, Pose3, ready=ready, labels=labels)
+  vnext = addVariable!(fgl, nextn, Pose3, ready=ready, labels=labels)
   fact = addFactor!(fgl, [vprev;vnext], Z, autoinit=true)
 
   return vnext, fact
@@ -239,8 +239,8 @@ function addOdoFG!(
     if N==0
       N = size(X,2)
     end
-    # vnext = addNode!(fgl, nextn, X⊕odo, ones(1,1), N=N, ready=ready, labels=labels)
-    vnext = addNode!(fgl, nextn, Pose2, N=N, ready=ready, labels=labels)
+    # vnext = addVariable!(fgl, nextn, X⊕odo, ones(1,1), N=N, ready=ready, labels=labels)
+    vnext = addVariable!(fgl, nextn, Pose2, N=N, ready=ready, labels=labels)
     fact = addFactor!(fgl, [vprev;vnext], odo, autoinit=true)
 
     return vnext, fact
@@ -274,18 +274,18 @@ function initFactorGraph!(fg::FactorGraph;
       init = init!=nothing ? init : zeros(3)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.001]))
       # init = vectoarr2(init)
-      addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
+      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
       push!(nodesymbols, lbl)
-      # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
+      # v1 = addVariable!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
       fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.03;0.001;0.001;0.001]))
-      addNode!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
+      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
       push!(nodesymbols, lbl)
-      # v1 = addNode!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
+      # v1 = addVariable!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
       fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
@@ -296,9 +296,9 @@ end
 function newLandm!(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100, ready::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
 
-    vert=addNode!(fg, Symbol(lm), Point2, N=N, ready=ready, labels=union(["LANDMARK";], labels))
+    vert=addVariable!(fg, Symbol(lm), Point2, N=N, ready=ready, labels=union(["LANDMARK";], labels))
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
-    # vert=addNode!(fg, Symbol(lm), wPos, sig, N=N, ready=ready, labels=labels)
+    # vert=addVariable!(fg, Symbol(lm), wPos, sig, N=N, ready=ready, labels=labels)
 
     vert.attributes["age"] = 0
     vert.attributes["maxage"] = 0
@@ -736,7 +736,7 @@ function addLinearArrayConstraint(fgl::FactorGraph,
   if !haskey(fgl.IDs, landm)
     pts = getVal(fgl, pose) + cl
     N = size(pts,2)
-    vl1 = addNode!(fgl, landm,  pts,  N=N)
+    vl1 = addVariable!(fgl, landm,  pts,  N=N)
     println("Automatically added $(landm) to the factor graph")
   end
   addFactor!(fgl, [getVert(fgl, pose); getVert(fgl, landm)], cl)

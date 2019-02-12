@@ -10,7 +10,7 @@ using Test
 global N=50
 global fg = initfg()
 
-global v1 = addNode!(fg,:x1, Pose3, N=N) # 0.001*randn(6,N)
+global v1 = addVariable!(fg,:x1, Pose3, N=N) # 0.001*randn(6,N)
 global f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal(zeros(6),1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 
 global sigx = 0.01
@@ -31,7 +31,7 @@ global xyy = PartialPose3XYYaw(
   Normal( mu2[3], sigth )
 )
 
-global v2 = addNode!(fg,:x2, Pose3, N=N) # randn(6,N)
+global v2 = addVariable!(fg,:x2, Pose3, N=N) # randn(6,N)
 
 global f1 = addFactor!(fg, [:x2], prpz, autoinit=false)
 global f2 = addFactor!(fg, [:x1;:x2], xyy, autoinit=false)

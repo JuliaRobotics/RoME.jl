@@ -12,7 +12,7 @@ using RoMEPlotting
 fg = initfg()
 
 # Add the first pose :x0
-addNode!(fg, :x0, Pose2)
+addVariable!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
 addFactor!(fg, [:x0], IIF.Prior( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2)) )))
@@ -21,7 +21,7 @@ addFactor!(fg, [:x0], IIF.Prior( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1
 for i in 0:5
     psym = Symbol("x$i")
     nsym = Symbol("x$(i+1)")
-    addNode!(fg, nsym, Pose2)
+    addVariable!(fg, nsym, Pose2)
     pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
     addFactor!(fg, [psym;nsym], pp )
 end
@@ -35,7 +35,7 @@ pl = drawPoses(fg)
 Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 # Add landmarks with Bearing range measurements
-addNode!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 

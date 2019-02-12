@@ -8,10 +8,10 @@ using Test
 
 global fg = initfg()
 
-addNode!(fg, :x0, Point2)
+addVariable!(fg, :x0, Point2)
 addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
-addNode!(fg, :x1, Point2)
+addVariable!(fg, :x1, Point2)
 addFactor!(fg, [:x0;:x1], Point2Point2(MvNormal([10;0.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
 global tree = wipeBuildNewTree!(fg)
@@ -28,13 +28,13 @@ end
 global N=200
 global fg = initfg()
 
-addNode!(fg, :x0, Point2, N=N)
+addVariable!(fg, :x0, Point2, N=N)
 addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
-addNode!(fg, :x1, Point2, N=N)
+addVariable!(fg, :x1, Point2, N=N)
 addFactor!(fg, [:x1], PriorPoint2(MvNormal([0.0;100.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
-addNode!(fg, :l1, Point2, N=N)
+addVariable!(fg, :l1, Point2, N=N)
 addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)))
 addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)))
 

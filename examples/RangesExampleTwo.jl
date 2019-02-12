@@ -74,7 +74,7 @@ function isInFG!(fgl::FactorGraph, lbl::Symbol; N=100, ready=0)
 	v = nothing
 	if !haskey(fgl.IDs, lbl)
 		init = 300*randn(2,N)
-		v = addNode!(fgl, lbl, Point2, N=N, ready=ready)
+		v = addVariable!(fgl, lbl, Point2, N=N, ready=ready)
 	else
 		v = getVert(fgl, lbl)
 	end
@@ -101,7 +101,7 @@ function addNewPose!(fgl::FactorGraph,
                      N=N  )
   #
   init = 300*randn(2,N)
-  v = addNode!(fgl, lbl, Point2, N=N, ready=ready)
+  v = addVariable!(fgl, lbl, Point2, N=N, ready=ready)
   rhoZ = norm(GTp[string(lbl)]-GTp[string(from)])
   ppr = Point2DPoint2DRange([rhoZ], 3.0, [1.0])
   f = addFactor!(fgl, [from,lbl], ppr, ready=ready)
@@ -434,7 +434,7 @@ fg = initfg()
 
 # Some starting position
 init = 300*randn(2,N)
-v1 = addNode!(fg, :l100, Point2, N=N, ready=0)
+v1 = addVariable!(fg, :l100, Point2, N=N, ready=0)
 
 
 lmv1 = landmsInRange(GTl, GTp["l100"])
