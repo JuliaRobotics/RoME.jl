@@ -144,7 +144,7 @@ end # testset
 ## repeat one of the examples but in a factor graph
 
 
-@testset "Factor graph based test of SE(2) equivalent..." begin
+@testset "Factor graph based test of SE(2) equivalent using only Priors..." begin
 
 N = 100
 
@@ -187,6 +187,20 @@ stuff = IIF.localProduct(fg, :x1)
 # plotPose(Pose2(), [stuff[2];stuff[1]], levels=2, c=["cyan";"cyan";"red"])
 
 ##
+
+end
+
+
+
+
+
+
+@testset "Factor graph based test of SE(2) equivalent using Priors and Conditional Likelihoods..." begin
+
+N = 100
+
+@warn "not implemented yet"
+
 
 end
 
