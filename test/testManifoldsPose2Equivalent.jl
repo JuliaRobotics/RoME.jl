@@ -1,4 +1,6 @@
-3# use Pose2 and test that the manifold products are working
+# use Pose2 and test that the manifold products are working
+using Statistics
+using Test
 using RoME, Distributions
 # using KernelDensityEstimate
 
@@ -7,6 +9,8 @@ using RoME, Distributions
 
 using ApproxManifoldProducts
 const AMP = ApproxManifoldProducts
+
+##
 
 
 @testset "Testing hand constructed product of SE(2) equivalent..." begin
@@ -135,6 +139,57 @@ end # testset
 #
 # pl |> PNG("/tmp/test.png",12cm,10cm)
 # @async run(`eog /tmp/test.png`)
+
+
+## repeat one of the examples but in a factor graph
+
+
+@testset "Factor graph based test of SE(2) equivalent..." begin
+
+N = 100
+
+#test as priors on one node
+
+pts2a = 3.0*randn(1,N)
+pts2b = 3.0*randn(1,N)
+pts2c = TransformUtils.wrapRad.(0.15*randn(1,N).+0.9pi)
+q = manikde!([pts2a;pts2b;pts2c], Pose2().manifolds  )
+
+
+pts3a = 3.0*randn(1,N).+4.0
+pts3b = 3.0*randn(1,N).+4.0
+pts3c = TransformUtils.wrapRad.(0.15*randn(1,N).-0.9pi)
+r = manikde!([pts3a;pts3b;pts3c], Pose2().manifolds  )
+
+
+fg = initfg()
+
+addVariable!(fg, :x1, Pose2)
+
+addFactor!(fg, [:x1], Prior(q))
+addFactor!(fg, [:x1], Prior(r))
+
+# writeGraphPdf(fg, show=true)
+
+
+stuff = IIF.localProduct(fg, :x1)
+
+
+@test 0.95*N < sum( -10 .< getPoints(stuff[1])[1,:] .< 15)
+@test 0.95*N < sum( -10 .< getPoints(stuff[1])[2,:] .< 15)
+
+@test 0.95*N < sum(2.7 .< abs.(getPoints(stuff[1])[3,:]) .< 1.01*pi)
+
+
+##
+# plotPose(Pose2(), [getVertKDE(fg, :x1)])
+#
+# plotPose(Pose2(), [stuff[2];stuff[1]], levels=2, c=["cyan";"cyan";"red"])
+
+##
+
+end
+
 
 
 ##
