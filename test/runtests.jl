@@ -11,6 +11,8 @@ println("[TEST] numeric root...")
 include("testhigherdimroots.jl")
 println("[SUCCESS]")
 
+include("testManifoldsPose2Equivalent.jl")
+
 # Requires standardized testing strategy
 # println("[TEST] Camera function evaluations...")
 # include("testCameraFunctions.jl")
