@@ -243,6 +243,7 @@ export
   IIF,
   KDE,
   TU,
+  AMP,
 
   # Deprecated
   PartialPriorRollPitchZ,
