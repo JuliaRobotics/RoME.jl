@@ -1,34 +1,26 @@
 # video at: https://vimeo.com/190052649
 
+using Distributed
 
-addprocs(7)
-using RoME, IncrementalInference, Gadfly, Colors, KernelDensityEstimate
-# for p in procs()
-# # @everywhere begin
-# remotecall_fetch(p, ()->using RoME)
-# remotecall_fetch(p, ()->using IncrementalInference)
-# remotecall_fetch(p, ()->using Gadfly)
-# remotecall_fetch(p, ()->using Colors)
-# # end
-# end
+addprocs(3)
 
-@everywhere using RoME, RoMEPlotting
-@everywhere using IncrementalInference
+##
+
+using RoME
+using Gadfly, Colors
+using RoMEPlotting
+using RoME, IncrementalInference, KernelDensityEstimate
+
+
 @everywhere using Gadfly
-@everywhere using Colors
 @everywhere using KernelDensityEstimate
-# end
+@everywhere using RoME, RoMEPlotting
+@everywhere using Colors
 
-# , Gadfly
 
-# using CloudGraphs, Neo4j
-# include("BlandAuthDB.jl")
-#
-# configuration = CloudGraphs.CloudGraphConfiguration(dbaddress, 7474, dbusr, dbpwd, mongoaddress, 27017, false, "", "");
-# cloudGraph = connect(configuration);
-# # register types of interest in CloudGraphs
-# registerGeneralVariableTypes!(cloudGraph)
-# IncrementalInference.setCloudDataLayerAPI!()
+##
+
+
 
 # togglePrtStbLines()
 
@@ -87,7 +79,7 @@ function addLandmsOnPose!(fgl::FactorGraph, pose::Graphs.ExVertex, GTl::Dict{Str
 		println("addLandmsOnPose! -- adding $(gtl[1])")
 		v = isInFG!(fgl, Symbol(gtl[1]), N=N,ready=ready)
 		# add the constraint
-		ppr = Point2DPoint2DRange([gtl[2]], 2.0, [1.0])
+		ppr = Point2Point2Range( Normal(gtl[2], 2.0) ) # [gtl[2]], 2.0, [1.0])
 		addFactor!(fgl, [pose;v], ppr, ready=ready)
 	end
 	nothing
@@ -103,9 +95,9 @@ function addNewPose!(fgl::FactorGraph,
   init = 300*randn(2,N)
   v = addVariable!(fgl, lbl, Point2, N=N, ready=ready)
   rhoZ = norm(GTp[string(lbl)]-GTp[string(from)])
-  ppr = Point2DPoint2DRange([rhoZ], 3.0, [1.0])
+  ppr = Point2Point2Range( Normal(rhoZ, 3.0) )
   f = addFactor!(fgl, [from,lbl], ppr, ready=ready)
-  initializeNode!(fgl,lbl)
+  initVariable!(fgl,lbl)
   getVert(fgl, lbl)
 end
 
@@ -124,6 +116,8 @@ function batchsolve(fgl::FactorGraph; N::Int=100)
   nothing
 end
 
+##
+
 @everywhere begin
 function drawQuadLandms(fgl;
                         file="",
@@ -132,8 +126,8 @@ function drawQuadLandms(fgl;
                         h11 = Gadfly.context(),
                         h12 = Gadfly.context() )
   #
-  h21 = haskey(fgl.IDs,"l3") ? drawMarginalContour(fgl,"l3") : Gadfly.context()
-  h22 = haskey(fgl.IDs,"l4") ? drawMarginalContour(fgl,"l4") : Gadfly.context()
+  h21 = haskey(fgl.IDs,"l3") ? RoMEPlotting.drawMarginalContour(fgl,"l3") : Gadfly.context()
+  h22 = haskey(fgl.IDs,"l4") ? RoMEPlotting.drawMarginalContour(fgl,"l4") : Gadfly.context()
   hh = vstack(hstack(h11,h12),hstack(h21,h22))
   if length(file) > 0
     Gadfly.draw(PNG(file,w,h),hh)
@@ -149,7 +143,7 @@ function drawLandmMargOver(fgl::FactorGraph, lbl::String,
 
 	hover = Gadfly.context()
 	if haskey(fgl.IDs,lbl)
-		hover =  drawMarginalContour(fgl,lbl)
+		hover =  RoMEPlotting.drawMarginalContour(fgl,lbl)
 		# for gtl in gtlayers
 		# 	push!(hover.layers, gtl)
 		# end
@@ -213,13 +207,13 @@ end
 
 function drawConvenience1(fgl, ii, fr, folderloc, h12, h12a, interp)
 	drawQuadLandms(fgl,file="$(folderloc)/overlms$(fr).png",h12=h12);
-	draw(PNG("$(folderloc)/gt$(fr).png",30cm,20cm),h12)
+	Gadfly.draw(PNG("$(folderloc)/gt$(fr).png",30cm,20cm),h12)
 	ii -= interp ? 1 : 0
-	lstPosePl = RoME.drawMarginalContour(fgl,"l$(100+ii)")
+	lstPosePl = RoMEPlotting.drawMarginalContour(fgl,"l$(100+ii)")
 	ii += interp ? 1 : 0
-	draw(PNG("$(folderloc)/lst$(fr).png",30cm,20cm),lstPosePl)
+	Gadfly.draw(PNG("$(folderloc)/lst$(fr).png",30cm,20cm),lstPosePl)
 	push!(h12a.layers, lstPosePl.layers[1])
-	draw(PNG("$(folderloc)/lstOver$(fr).png",30cm,20cm),h12a)
+	Gadfly.draw(PNG("$(folderloc)/lstOver$(fr).png",30cm,20cm),h12a)
 	nothing
 end
 
@@ -229,7 +223,7 @@ function drawConvenience2(fgl, fr, folderloc, h12b)
 
 	@sync begin
 		allposesfile2 = "$(folderloc)/allPoses$(fr).png"
-		@async draw(PNG(allposesfile2,30cm,20cm),ppl)
+		@async Gadfly.draw(PNG(allposesfile2,30cm,20cm),ppl)
 
 		# for l in ppl.layers
 		templyrs = union(h12b.layers, ppl.layers)
@@ -237,7 +231,7 @@ function drawConvenience2(fgl, fr, folderloc, h12b)
 		# end
 
 		allposesfile = "$(folderloc)/allPosesOver$(fr).png"
-		draw(PNG(allposesfile,30cm,20cm),h12b)
+		Gadfly.draw(PNG(allposesfile,30cm,20cm),h12b)
 	end
 	nothing
 end
@@ -290,9 +284,9 @@ end
 
 
 function layerCircle(;cent=[0.0;0.0], radius=1.0, c="deepskyblue", N=200)
-	TH = range(0,stop=2pi,length=200)
-	X = real(radius*exp(TH*im))+cent[1]
-	Y = imag(radius*exp(TH*im))+cent[2]
+	TH = collect(range(0,stop=2pi,length=200))
+	X = real(radius*exp.(TH*im)).+cent[1]
+	Y = imag(radius*exp.(TH*im)).+cent[2]
 	layer(x=X,y=Y, Geom.path(), Theme(default_color=parse(Colorant,c)))
 end
 function plotCircle(;cent=[0.0;0.0], radius=1.0, c="deepskyblue", N=200, drawcent=false)
@@ -366,20 +360,20 @@ end
 function drawIllustrations(GTl, GTp, folderloc)
 	pl = drawGroundTruth(GTp, String[], GTl, ["l$(i)" for i in 1:4], drawranges=false, interp=false, t=0)
 	filename = "$(folderloc)/gtPos0.png"
-	draw(PNG(filename,30cm,20cm),pl)
+	Gadfly.draw(PNG(filename,30cm,20cm),pl)
 
 	# first pose location
 	pl2 = drawFirstPoseIllustration(GTl, GTp)
 	filename2 = "$(folderloc)/gtArc0.png"
-	draw(PNG(filename2,30cm,20cm),pl2)
+	Gadfly.draw(PNG(filename2,30cm,20cm),pl2)
 
 	pl3 = drawSecondPoseIllustration(GTl, GTp)
 	filename3 = "$(folderloc)/gtPose2Pred.png"
-	draw(PNG(filename3,30cm,20cm),pl3)
+	Gadfly.draw(PNG(filename3,30cm,20cm),pl3)
 
 	pl4 = drawFirstL3Illustration(GTl, GTp)
 	filename4 = "$(folderloc)/gtLm3Pred.png"
-	draw(PNG(filename4,30cm,20cm),pl4)
+	Gadfly.draw(PNG(filename4,30cm,20cm),pl4)
 
 
 	nothing
@@ -418,37 +412,66 @@ function evaluateAllAccuracy(fgl::FactorGraph, GTp, GTl)
 end
 
 
-folderloc2 = "/home/dehann/irosVid/new"
+##
+
+
+folderloc2 = "/home/dehann/irosVid"
 drawIllustrations(GTl, GTp, folderloc2)
+
 
 
 # N = 100
 
-fg = initfg()
+# fg = initfg()
 
-for N in collect(25:25:25)
+N=100
+# for N in collect(25:25:25)
 
 fg = initfg()
 # fg.sessionname="SESSranges"
 # fg.cg = cloudGraph
 
 # Some starting position
-init = 300*randn(2,N)
+
+# writeGraphPdf(fg)
+
+# must pin landmarks for guage
+addVariable!(fg, :l1,Point2)
+pp2 = PriorPoint2(MvNormal(GTl["l1"], Matrix(Diagonal([1.0;1.0]))))
+f = addFactor!(fg,[:l1], pp2, autoinit=true)
+# pts = approxConv(fg, :l1f1, :l1)
+# pp = AMP.manikde!(pts, Point2().manifolds)
+# setValKDE!(getVert(fg, :l1), deepcopy(pp))
+
+# f = addFactor!(fg,[getVert(fg,:l1)], pp2)
+addVariable!(fg, :l2, Point2)
+pp2 = PriorPoint2(MvNormal(GTl["l2"], Matrix(Diagonal([1.0;1.0]))))
+f = addFactor!(fg, [:l2], pp2, autoinit=true)
+# pts = approxConv(fg, :l2f1, :l2)
+# pp = AMP.manikde!(pts, Point2().manifolds)
+# setValKDE!(getVert(fg, :l2), deepcopy(pp))
+
+
 v1 = addVariable!(fg, :l100, Point2, N=N, ready=0)
-
-
 lmv1 = landmsInRange(GTl, GTp["l100"])
 addLandmsOnPose!(fg, v1, lmv1, N=N )
 
-# must pin landmarks for guage
-pp2 = PriorPoint2(MvNormal(GTl["l1"], Matrix(Diagonal([1.0;1.0]))))
-f = addFactor!(fg,[:l1], pp2)
-# f = addFactor!(fg,[getVert(fg,:l1)], pp2)
-pp2 = PriorPoint2(MvNormal(GTl["l2"], Matrix(Diagonal([1.0;1.0]))))
-f = addFactor!(fg, [:l2], pp2)
+doautoinit!(fg, :l100)
+
+# ls(fg, :l100)
+# isInitialized(fg, :l3)
+# getVal(fg, :l100)
+
+# ls(fg,  :l100)
+# pts = approxConv(fg, :l100l3f1, :l3)
+# pp = AMP.manikde!(pts, Point2().manifolds)
+# setValKDE!(getVert(fg, :l3), deepcopy(pp))
 
 
-writeGraphPdf(fg)
+
+# writeGraphPdf(fg)
+
+
 
 batchsolve(fg, N=N)
 lk, pe = evaluateAccuracy(fg, GTp)
@@ -473,7 +496,7 @@ draw30AllFast(GTp, GTl, fg, 1, 0, 1, 29)
 
 
 addNewPose!(fg, :l100, :l101, GTp, N=N)
-initializeNode!(fg,:l101)
+initVariable!(fg,:l101)
 writeGraphPdf(fg)
 batchsolve(fg, N=N)
 lk, pe = evaluateAccuracy(fg, GTp)
@@ -514,7 +537,7 @@ draw30AllFast(GTp, GTl, fg, 1, 45, 0, 14, interp=false)
 
 fgd = deepcopy(fg)
 drive(fg, GTp, GTl, :l101, :l102, N=N)
-initializeNode!(fg,:l102)
+initVariable!(fg,:l102)
 writeGraphPdf(fg)
 
 batchsolve(fg, N=N)
@@ -532,7 +555,7 @@ draw30AllFast(GTp, GTl, fgd, 2, 60, 0, 29)
 
 
 
-# initializeNode!(fg,:l102)
+# initVariable!(fg,:l102)
 
 
 fgd = deepcopy(fg)
@@ -548,11 +571,11 @@ close(fid)
 # drawLandms(fg,showmm=true)
 # h12 = drawGroundTruth(GTp, [:l$(00+i)" for i in 0:3], GTl, [:l$()" for i in 1:4])
 # drawQuadLandms(fg,file="irosVid/test4.png",h12=h12);
-# draw(PNG("irosVid/gt4.png",30cm,20cm),h12)
-# lstPosePl = RoME.drawMarginalContour(fg,:l103)
-# draw(PNG("irosVid/lst4.png",30cm,20cm),lstPosePl)
+# Gadfly.draw(PNG("irosVid/gt4.png",30cm,20cm),h12)
+# lstPosePl = RoMEPlotting.drawMarginalContour(fg,:l103)
+# Gadfly.draw(PNG("irosVid/lst4.png",30cm,20cm),lstPosePl)
 # push!(h12.layers, lstPosePl.layers[1])
-# draw(PNG("irosVid/lstOver4.png",30cm,20cm),h12)
+# Gadfly.draw(PNG("irosVid/lstOver4.png",30cm,20cm),h12)
 # drawAllVidImages(GTp, GTl, fg, 3, 4)
 
 draw30AllFast(GTp, GTl, fgd, 3, 90, 0, 29)
@@ -795,7 +818,7 @@ draw30AllFast(GTp, GTl, fg, 12, 390, 0, 29, interp=false)
 
 # run(`convert -delay 100 irosVid/test*.png irosVid/anim.gif`)
 
-run(`ffmpeg -y -i $(folderloc2)/lstOver%d.png -threads 8 -vcodec libx264 -s 1920x1080 -b:v 2M /home/dehann/Videos/slamedonutLastPose_$(N).mp4`)
+# run(`ffmpeg -y -i $(folderloc2)/lstOver%d.png -threads 8 -vcodec libx264 -s 1920x1080 -b:v 2M /home/dehann/Videos/slamedonutLastPose_$(N).mp4`)
 # run(`ffmpeg -y -i $(folderloc2)/lm3Over%d.png -vcodec libx264 -s 1920x1080 -b:v 2M /home/dehann/Videos/slamedonutLm3_$(N).mp4`)
 # run(`ffmpeg -y -i $(folderloc2)/lm4Over%d.png -vcodec libx264 -s 1920x1080 -b:v 2M /home/dehann/Videos/slamedonutLm4_$(N).mp4`)
 

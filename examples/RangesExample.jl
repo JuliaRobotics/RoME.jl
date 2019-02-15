@@ -48,17 +48,17 @@ addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], Matrix{Float64}(LinearAlge
 
 # first range measurement
 rhoZ1 = norm(GTl[:l1]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ1], 2.0, [1.0])
+ppr = Point2Point2Range(Normal(rhoZ1, 2.0))
 addFactor!(fg, [:l100;:l1], ppr)
 
 # second range measurement
 rhoZ2 = norm(GTl[:l2]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ2], 3.0, [1.0])
+ppr = Point2Point2Range(Normal(rhoZ2, 3.0))
 addFactor!(fg, [:l100; :l2], ppr)
 
 # second range measurement
 rhoZ3 = norm(GTl[:l3]-GTp[:l100])
-ppr = Point2DPoint2DRange([rhoZ3], 3.0, [1.0])
+ppr = Point2Point2Range(Normal(rhoZ3, 3.0))
 addFactor!(fg, [:l100; :l3], ppr)
 
 
@@ -100,7 +100,7 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
     println("Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.")
     addVariable!(fgl, pos_sym, Point2)
     @show rho = norm(GTp[prev_sym] - GTp[pos_sym])
-    ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+    ppr = Point2Point2Range(Normal(rho, 3.0))
     addFactor!(fgl, [prev_sym;pos_sym], ppr)
   else
     @warn "Variable node $pos_sym already in the factor graph."
@@ -110,7 +110,7 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
     rho = norm(GTl[ll] - GTp[pos_sym])
     # Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks
     if rho < measurelimit
-      ppr = Point2DPoint2DRange([rho], 3.0, [1.0])
+      ppr = Point2Point2Range(Normal(rho, 3.0))
       if !(ll in currvar)
         println("Adding variable vertex $ll, not yet in fgl::FactorGraph.")
         addVariable!(fgl, ll, Point2)

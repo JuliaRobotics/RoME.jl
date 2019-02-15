@@ -2,29 +2,29 @@
 
 # old type interfaces
 
-function Point2DPoint2DRange(mu,stdev,w)
-  @warn "Point2DPoint2DRange deprecated in favor of Point2Point2Range{<:IIF.SamplableBelief}."
-  Point2Point2Range{Normal}(Normal(mu,stdev))
-end
-function Point2DPoint2D(d::D) where {D <: IIF.SamplableBelief}
-  @warn "Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}."
-  Point2Point2{D}(d)
-end
-function Point2DPoint2D(mu::Array{Float64}, cov::Array{Float64,2}, W::Array{Float64,1})
-  @warn "Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}."
-
-  Point2Point2{MvNormal}(MvNormal(mu[:], cov))
-end
-
-function Pose2DPoint2DBearing(x1::B) where {B <: Distributions.Distribution}
-  @warn "Pose2DPoint2DBearing deprecated in favor of Pose2Point2Bearing."
-  Pose2Point2Bearing(B)
-end
-
-function Pose2DPoint2DRange(x1::T,x2::Vector{T},x3) where {T <: Real}
-  @warn "Pose2Point2Range(mu,cov,w) is being deprecated in favor of Pose2Point2Range(T(...)), such as Pose2Point2Range(MvNormal(mu, cov))"
-  Pose2Point2Range(Normal(x1, x2))
-end
+# function Point2DPoint2DRange(mu,stdev,w)
+#   @warn "Point2DPoint2DRange deprecated in favor of Point2Point2Range{<:IIF.SamplableBelief}."
+#   Point2Point2Range{Normal}(Normal(mu,stdev))
+# end
+# function Point2DPoint2D(d::D) where {D <: IIF.SamplableBelief}
+#   @warn "Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}."
+#   Point2Point2{D}(d)
+# end
+# function Point2DPoint2D(mu::Array{Float64}, cov::Array{Float64,2}, W::Array{Float64,1})
+#   @warn "Point2DPoint2D deprecated in favor of Point2Point2{<:Distribution}."
+#
+#   Point2Point2{MvNormal}(MvNormal(mu[:], cov))
+# end
+#
+# function Pose2DPoint2DBearing(x1::B) where {B <: Distributions.Distribution}
+#   @warn "Pose2DPoint2DBearing deprecated in favor of Pose2Point2Bearing."
+#   Pose2Point2Bearing(B)
+# end
+#
+# function Pose2DPoint2DRange(x1::T,x2::Vector{T},x3) where {T <: Real}
+#   @warn "Pose2Point2Range(mu,cov,w) is being deprecated in favor of Pose2Point2Range(T(...)), such as Pose2Point2Range(MvNormal(mu, cov))"
+#   Pose2Point2Range(Normal(x1, x2))
+# end
 
 
 

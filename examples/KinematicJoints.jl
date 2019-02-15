@@ -66,14 +66,14 @@ fg = RoME.initfg()
 addVariable!(fg, :x1, dims=6)
 pos = PriorPose3(MvNormal(zeros(6),1e-6*Matrix{Float64}(LinearAlgebra.I, 6,6)))
 addFactor!(fg, [:x1], pos) # base
-initializeNode!(fg, :x1)
+initVariable!(fg, :x1)
 
 
 # torso
 addVariable!(fg, :x2, dims=6)
 hip = ZJoint(Normal(pi/3,0.1))
 addFactor!(fg, [:x1, :x2], hip) # hio
-initializeNode!(fg, :x2)
+initVariable!(fg, :x2)
 
 
 
@@ -114,7 +114,7 @@ plotPose3Pairs(fg, :x2)
 addVariable!(fg, :x3, dims=6)
 should = XJoint(Normal(pi/4,0.1))
 addFactor!(fg, [:x2, :x3], should) # hio
-initializeNode!(fg, :x3)
+initVariable!(fg, :x3)
 
 
 
@@ -132,7 +132,7 @@ solveandvisualize(fg, vis)
 addVariable!(fg, :x4, dims=6)
 should = XJoint(Normal(pi/4,0.1))
 addFactor!(fg, [:x3, :x4], should) # hio
-initializeNode!(fg, :x4)
+initVariable!(fg, :x4)
 
 
 
@@ -159,19 +159,19 @@ fg = RoME.initfg()
 addVariable!(fg, :x1, dims=6)
 pos = PriorPose3(MvNormal(zeros(6),1e-6*Matrix{Float64}(LinearAlgebra.I, 6,6)))
 addFactor!(fg, [:x1], pos) # base
-initializeNode!(fg, :x1)
+initVariable!(fg, :x1)
 
 
 addVariable!(fg, :x2, dims=6)
 hip = ZJoint(Uniform(-pi/3,pi/3))
 addFactor!(fg, [:x1, :x2], hip) # hio
-initializeNode!(fg, :x2)
+initVariable!(fg, :x2)
 
 
 addVariable!(fg, :x3, dims=6)
 should = XJoint(Uniform(-pi/4,pi/4))
 addFactor!(fg, [:x2, :x3], should) # hio
-initializeNode!(fg, :x3)
+initVariable!(fg, :x3)
 
 
 visualizeallposes!(vis, fg, drawtype=:max)

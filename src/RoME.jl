@@ -26,6 +26,10 @@ import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribu
 const AMP = ApproxManifoldProducts
 
 export
+  IIF,
+  KDE,
+  TU,
+  AMP,
   initfg,  # RoME specific functions
   measureMeanDist,
   predictBodyBR,
@@ -118,33 +122,22 @@ export
   # Point2D
   Point2,
   Point2Point2,
-  Point2DPoint2D, # deprecated
   PackedPoint2DPoint2D,
   Point2Point2WorldBearing,
   PackedPoint2Point2WorldBearing,
   Point2Point2Range,
   PackedPoint2Point2Range,
-  Point2DPoint2DRange, # deprecated
-  PackedPoint2DPoint2DRange,
   PriorPoint2,
   PackedPriorPoint2,
-  PriorPoint2D, # deprecated
-  PackedPriorPoint2D,
   Pose2Point2BearingRange,
-  Pose2DPoint2DBearingRange, # begin deprecated
   Pose2Point2BearingRangeMH,
   PackedPose2Point2BearingRange,
   PackedPose2Point2BearingRangeMH,
   Pose2Point2Bearing,
   PackedPose2Point2Bearing,
-  Pose2DPoint2DBearing, # deprecated
   Pose2Point2Range,
-  Point2DPoint2DRange,
-  PackedPoint2DPoint2DRange,
   PriorPoint2,
-  PriorPoint2D, # deprecated
   PackedPriorPoint2,
-  PackedPriorPoint2D, # deprecated`
   # Point2D with null hypotheses
   PriorPoint2DensityNH,
   PackedPriorPoint2DensityNH,
@@ -169,7 +162,6 @@ export
   Pose2Point2BearingRangeDensity,
   PackedPose2Point2BearingRangeDensity,
   Pose2Point2RangeDensity,
-  Pose2DPoint2DRangeDensity, # to be deprecated
   PackedPose2Point2RangeDensity,
 
   # Pose2D
@@ -240,10 +232,6 @@ export
   # jld required Features Type
   LaserFeatures,
 
-  IIF,
-  KDE,
-  TU,
-
   # Deprecated
   PartialPriorRollPitchZ,
   PackedPartialPriorRollPitchZ,
@@ -251,6 +239,18 @@ export
   PackedPartialPose3XYYaw,
   PartialPose3XYYawNH,
   PackedPartialPose3XYYawNH
+  # Point2DPoint2DRange,
+  # PackedPoint2DPoint2DRange,
+  # PackedPoint2DPoint2DRange,
+  # PackedPriorPoint2D,
+  # Pose2DPoint2DRangeDensity, # to be deprecated
+  # Point2DPoint2D, # deprecated
+  # Point2DPoint2DRange, # deprecated
+  # PriorPoint2D, # deprecated
+  # Pose2DPoint2DBearingRange, # begin deprecated
+  # Pose2DPoint2DBearing, # deprecated
+  # PriorPoint2D, # deprecated
+  # PackedPriorPoint2D # deprecated`
 
 
 # doesnt seem to work
@@ -280,9 +280,10 @@ include("DynPoint2D.jl")
 include("Pose2D.jl")
 include("DynPose2D.jl")
 include("Pose3D.jl")
+include("factors/Bearing2D.jl")
+include("factors/Range2D.jl")
 include("factors/BearingRange2D.jl")
 
-# include("BearingRangeDensity2D.jl")
 
 include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")

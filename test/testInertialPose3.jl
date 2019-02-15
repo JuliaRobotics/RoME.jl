@@ -32,7 +32,7 @@ global inerodo = InertialPose3(noise,DATA[n][1],DATA[n][2])
 global f2  = addFactor!(fg, [v1;v2], inerodo )
 
 
-initializeNode!(fg, :x2, N=N)
+initVariable!(fg, :x2, N=N)
 
 # drawDensityMesh(fg, :x2)
 
