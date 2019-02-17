@@ -53,7 +53,7 @@ function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Flo
   Pose2Pose2(MvNormal(mean, cov))
 end
 getSample(s::Pose2Pose2{<:IIF.SamplableBelief}, N::Int=1) = (rand(s.z,N), )
-function (s::Pose2Pose2{<:IIF.SamplableBelief})(res::Array{Float64},
+function (s::Pose2Pose2{<:IIF.SamplableBelief})(res::Vector{Float64},
             userdata,
             idx::Int,
             meas::Tuple,
