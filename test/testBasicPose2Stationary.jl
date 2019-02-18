@@ -32,12 +32,12 @@ setValKDE!(fg, :x2, kde!(badval))
 N = 100
 batchSolve!(fg, N=N)
 
-pts = getVal(fg, :x2)
-
-@test 0.95*N < sum( -0.5 .< pts[1,:] .< 0.5 )
-@test 0.95*N < sum( -0.5 .< pts[2,:] .< 0.5 )
-@test 0.95*N < sum( -0.5 .< pts[3,:] .< 0.5 )
-
+for xx in [:x0; :x1; :x2]
+  pts = getVal(fg, xx)
+  @test 0.95*N < sum( -0.5 .< pts[1,:] .< 0.5 )
+  @test 0.95*N < sum( -0.5 .< pts[2,:] .< 0.5 )
+  @test 0.95*N < sum( -0.5 .< pts[3,:] .< 0.5 )
+end
 
 end
 
