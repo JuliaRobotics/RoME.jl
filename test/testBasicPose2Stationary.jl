@@ -74,7 +74,7 @@ badval[2,:] .-= 2.0
 badval[3,:] .+= 0.5
 setValKDE!(fg, :x2, kde!(badval))
 
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
 
 N = 100
 batchSolve!(fg, N=N)
