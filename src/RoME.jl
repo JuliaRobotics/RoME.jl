@@ -183,6 +183,10 @@ export
   # Will be deprecated
   addPose2Pose2,
 
+  # Polar types
+  PolarPolar,
+  PriorPolar,
+
   # MultipleFeatures2D constraint functions
   MultipleFeatures2D,
   getUvecScaleFeature2D,
@@ -287,6 +291,7 @@ include("factors/BearingRange2D.jl")
 
 include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")
+include("factors/Polar.jl")
 include("MultipleFeaturesConstraint.jl")
 
 include("InertialPose3.jl")
