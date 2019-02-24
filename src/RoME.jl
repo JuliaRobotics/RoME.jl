@@ -184,6 +184,7 @@ export
   addPose2Pose2,
 
   # Polar types
+  Polar,
   PolarPolar,
   PriorPolar,
 
