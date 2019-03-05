@@ -49,13 +49,13 @@ inferOverTree!(fg, tree, N=N)
 @test sum( 90 .< getVal(fg, :l1)[2,:] .< 110 ) > 32
 
 global voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
-@test sum( getVal(fg, :l1)[2,voidsel1] .< 80 ) < 15
+@test sum( getVal(fg, :l1)[2,voidsel1] .< 80 ) < 25
 
 global voidsel2 =  10.0 .< getVal(fg, :l1)[2,:]
-@test sum( getVal(fg, :l1)[1,voidsel2] .< 80 ) < 15
+@test sum( getVal(fg, :l1)[1,voidsel2] .< 80 ) < 25
 
-@test sum( 120 .< abs.(getVal(fg, :l1)[1,:]) ) < 15
-@test sum( 120 .< abs.(getVal(fg, :l1)[2,:]) ) < 15
+@test sum( 120 .< abs.(getVal(fg, :l1)[1,:]) ) < 25
+@test sum( 120 .< abs.(getVal(fg, :l1)[2,:]) ) < 25
 
 
 end

@@ -23,7 +23,7 @@ function getSample(pp2i::PriorPolar, N::Int=1)
 end
 
 
-mutable struct PolarPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.FunctorSingleton
+mutable struct PolarPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.FunctorPairwise
   Zrange::T1
   Zangle::T2
   PolarPolar{T1,T2}() where {T1,T2} = new{T1,T2}()
