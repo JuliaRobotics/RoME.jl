@@ -26,11 +26,12 @@ import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribu
 const AMP = ApproxManifoldProducts
 
 export
-  IIF,
+  IIF,  # Aliases for various packages
   KDE,
   TU,
   AMP,
-  initfg,  # RoME specific functions
+  # initfg,
+  # RoME specific functions
   measureMeanDist,
   predictBodyBR,
   getLastPose,
