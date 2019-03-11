@@ -1,5 +1,5 @@
 julia 0.7 1.1
-IncrementalInference 0.5.3 0.6.0
+IncrementalInference 0.5.4 0.6.0
 Graphs 0.10.2
 TransformUtils 0.2.2
 CoordinateTransformations 0.5.0
