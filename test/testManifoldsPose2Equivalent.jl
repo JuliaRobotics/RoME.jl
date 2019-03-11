@@ -8,7 +8,7 @@ using RoME, Distributions
 # using RoMEPlotting
 
 using ApproxManifoldProducts
-const AMP = ApproxManifoldProducts
+# const AMP = ApproxManifoldProducts
 
 ##
 
