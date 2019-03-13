@@ -34,18 +34,28 @@ global pts = approxConv(fg, :x0x1f1, :x1)
 # Graphs.plot(fg.g)
 # ensureAllInitialized!(fg)
 
-global tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree, N=N)
+global tree = batchSolve!(fg, N=N)
+# global tree = wipeBuildNewTree!(fg)
+# inferOverTree!(fg, tree, N=N)
 
 global X1 = getVal(fg, :x1)
 
-@test 0.9*N <= sum(abs.(X1[1,:] .- 10.0) .< 0.5)
-@test 0.9*N <= sum(abs.(X1[2,:] .- 0.0) .< 0.5)
-@show TU.wrapRad.(X1[3,:])
-@test 0.8*N <= sum(abs.(TU.wrapRad.(X1[3,:]) .- 0.0) .< 0.1)
-@warn "wrapRad issue, accepting 80% as good enough until issue JuliaRobotics/RoME.jl#90 is fixed."
+@test 0.9*N <= sum(abs.(X1[1,:] .- 10.0) .< 0.75)
+@test 0.9*N <= sum(abs.(X1[2,:] .- 0.0) .< 0.75)
+# @show TU.wrapRad.(X1[3,:])
+@test 0.8*N <= sum(abs.(TU.wrapRad.(X1[3,:]) .- 0.0) .< 0.25)
+# @warn "wrapRad issue, accepting 80% as good enough until issue JuliaRobotics/RoME.jl#90 is fixed."
 @test 0.9*N <= sum(abs.(X1[4,:] .- 10.0) .< 0.5)
 @test 0.9*N <= sum(abs.(X1[5,:] .- 0.0) .< 0.5)
+
+# using RoMEPlotting
+# # plotLocalProduct(fg, :x10, dims=[1;2])
+# # drawPoses(fg)
+# xx1 = marginal(getKDE(fg, :x1),[1;2;3])
+# plotPose(Pose2(), [xx1])
+# plotPose(fg, [:x1], levels=1, show=false)
+#
+# plotKDE(marginal(getKDE(fg, :x1),[4;5]), levels=5)
 
 
 end
