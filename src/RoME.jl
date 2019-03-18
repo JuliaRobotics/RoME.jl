@@ -197,7 +197,7 @@ export
   # Pose3, Three dimensional
   Pose3,
   Point3,
-  # Prior, # moved to IIF
+  PriorPoint3,
   PriorPose3,
   PackedPriorPose3,
   Pose3Pose3,
@@ -281,22 +281,31 @@ include("BayesTracker.jl")
 
 include("SensorModels.jl")
 include("CameraModel.jl")
-include("Point2D.jl")
-include("DynPoint2D.jl")
-include("Pose2D.jl")
-include("DynPose2D.jl")
-include("Pose3D.jl")
+
+# 2D
+include("variables/Point2D.jl")
+include("variables/Pose2D.jl")
+include("variables/DynPoint2D.jl")
+include("variables/DynPose2D.jl")
+
+# 3D
+include("variables/Point3D.jl")
+include("variables/Pose3D.jl")
+
+
+include("factors/Point2D.jl")
+include("factors/Polar.jl")
+include("factors/Pose2D.jl")
 include("factors/Bearing2D.jl")
 include("factors/Range2D.jl")
 include("factors/BearingRange2D.jl")
-
-
+include("factors/DynPoint2D.jl")
+include("factors/DynPose2D.jl")
+include("factors/Point3D.jl")
 include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")
-include("factors/Polar.jl")
-include("MultipleFeaturesConstraint.jl")
-
-include("InertialPose3.jl")
+include("factors/MultipleFeaturesConstraint.jl")
+include("factors/InertialPose3.jl")
 
 include("Slam.jl")
 

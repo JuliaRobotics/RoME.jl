@@ -15,7 +15,7 @@ fg = initfg()
 addVariable!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
-addFactor!(fg, [:x0], IIF.Prior( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2)) )))
+addFactor!(fg, [:x0], PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) ) )
 
 # Drive around in a hexagon
 for i in 0:5
@@ -26,11 +26,14 @@ for i in 0:5
     addFactor!(fg, [psym;nsym], pp )
 end
 
+
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
+ensureAllInitialized!(fg)
 batchSolve!(fg)
 
 # For Juno/Jupyter style use
-pl = drawPoses(fg)
+pl = drawPoses(fg, meanmax=:mean)
+plotPose(fg, :x6)
 # For scripting use-cases you can export the image
 Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
@@ -53,7 +56,7 @@ addFactor!(fg, [:x6; :l1], p2br2)
 batchSolve!(fg)
 
 # redraw
-pl = drawPosesLandms(fg)
+pl = drawPosesLandms(fg, meanmax=:mean)
 Gadfly.draw(Gadfly.PDF("/tmp/test3.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 

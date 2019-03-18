@@ -1,11 +1,10 @@
 # Pose3Pose3 evaluation functions
 
 
-
-
-
 """
 $(TYPEDEF)
+
+Direct observation information of `Pose3` variable type.
 """
 mutable struct PriorPose3 <: IncrementalInference.FunctorSingleton
     Zi::Distribution

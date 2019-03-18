@@ -16,25 +16,6 @@ end
 
 
 
-# Pose2 functions for Robot Motion Estimate
-
-"""
-$(TYPEDEF)
-"""
-struct Pose2 <: IncrementalInference.InferenceVariable
-  dims::Int
-  labels::Vector{String}
-  manifolds::Tuple{Symbol,Symbol,Symbol}
-  Pose2(;labels::Vector{<:AbstractString}=String[]) = new(3, labels, (:Euclid, :Euclid, :Circular))
-end
-
-# # Done - move to IncrementalInference
-# struct Prior{T} <: IncrementalInference.FunctorSingleton where {T <: Distribution}
-#   z::T
-# end
-# getSample(s::Prior, N::Int=1) = (rand(s.z,N), )
-
-
 """
 $(TYPEDEF)
 """
@@ -69,6 +50,14 @@ end
 
 """
 $(TYPEDEF)
+
+Introduce direct observations on all dimensions of a Pose2 variable:
+
+Example:
+--------
+```julia
+PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
+```
 """
 mutable struct PriorPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: Distributions.Distribution}
     Z::T

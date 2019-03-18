@@ -2,7 +2,11 @@
 #-------------------------------------------------------------------------------
 # bearing and range available
 
+"""
+    $TYPEDEF
 
+Bearing and Range constraint from a Pose2 to Point2 variable.
+"""
 mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwise
     bearing::B
     range::R

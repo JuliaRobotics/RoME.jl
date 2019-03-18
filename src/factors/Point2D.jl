@@ -1,24 +1,16 @@
 
 """
 $(TYPEDEF)
-"""
-struct Point2 <: IncrementalInference.InferenceVariable
-  dims::Int
-  labels::Vector{String}
-  manifolds::Tuple{Symbol,Symbol}
-  Point2(;labels::Vector{<:AbstractString}=String[]) = new(2, labels, (:Euclid, :Euclid))
-end
 
+Direction observation information of a `Point2` variable.
 """
-$(TYPEDEF)
-"""
-mutable struct PriorPoint2{T} <: IncrementalInference.FunctorSingleton where {T <: Distributions.Distribution}
+mutable struct PriorPoint2{T} <: IncrementalInference.FunctorSingleton where {T <: IIF.SamplableBelief}
   Z::T
   # W::Array{Float64,1} # TODO, deprecate the weight parameter
   PriorPoint2{T}() where T = new()
-  PriorPoint2{T}(dist::T) where {T <: Distributions.Distribution} = new{T}(dist)
+  PriorPoint2{T}(dist::T) where {T <: IIF.SamplableBelief} = new{T}(dist)
 end
-PriorPoint2(z::T) where {T <: Distributions.Distribution} = PriorPoint2{T}(z)
+PriorPoint2(z::T) where {T <: IIF.SamplableBelief} = PriorPoint2{T}(z)
 function PriorPoint2D(mu, cov, W)
   @warn "PriorPoint2D(mu, cov, W) is deprecated, use PriorPoint{T}(T(...)) instead -- e.g. PriorPoint2{MvNormal}(MvNormal(...) or any other Distributions.Distribution type instead."
   PriorPoint2{MvNormal{Float64}}(MvNormal(mu, cov))
@@ -31,12 +23,12 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct Point2Point2{D <: IIF.SamplableBelief} <: FunctorPairwise #BetweenPoses
+mutable struct Point2Point2{D <: IIF.SamplableBelief} <: FunctorPairwise
     Zij::D
     Point2Point2{T}() where T = new{T}()
-    Point2Point2{T}(x::T) where {T <: Sampleable} = new{T}(x)
+    Point2Point2{T}(x::T) where {T <: IIF.SamplableBelief} = new{T}(x)
 end
-Point2Point2(x::T) where {T <: Sampleable} = Point2Point2{T}(x)
+Point2Point2(x::T) where {T <: IIF.SamplableBelief} = Point2Point2{T}(x)
 function getSample(pp2::Point2Point2, N::Int=1)
   return (rand(pp2.Zij,N),  )
 end
@@ -92,6 +84,8 @@ end
 
 """
 $(TYPEDEF)
+
+Will be deprecated, use `addFactor!(.., nullhypo=)` instead (work in progress)
 """
 mutable struct PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
   belief::BallTreeDensity
@@ -103,8 +97,11 @@ end
 function getSample(p2::PriorPoint2DensityNH, N::Int=1)
   return (rand(p2.belief, N), )
 end
+
 """
 $(TYPEDEF)
+
+Will be deprecated, use `addFactor!(.., nullhypo=)` instead (work in progress)
 """
 mutable struct PackedPriorPoint2DensityNH <: IncrementalInference.PackedInferenceType
     rpts::Vector{Float64} # 0rotations, 1translation in each column
@@ -138,6 +135,8 @@ end
 
 """
 $(TYPEDEF)
+
+Serialization type for `PriorPoint2`.
 """
 mutable struct PackedPriorPoint2  <: IncrementalInference.PackedInferenceType
     str::String
@@ -163,6 +162,8 @@ end
 
 """
 $(TYPEDEF)
+
+Serialization type for `Point2Point2WorldBearing`.
 """
 mutable struct PackedPoint2Point2WorldBearing  <: IncrementalInference.PackedInferenceType
     str::String
@@ -183,6 +184,8 @@ end
 
 """
 $(TYPEDEF)
+
+Serialization type for `Point2Point2`.
 """
 mutable struct PackedPoint2Point2 <: IncrementalInference.PackedInferenceType
     # mu::Vector{Float64}
