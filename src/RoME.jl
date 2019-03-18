@@ -289,15 +289,15 @@ include("variables/Pose3D.jl")
 include("DynPoint2D.jl")
 include("DynPose2D.jl")
 
-include("Pose2D.jl")
 include("factors/Point2D.jl")
+include("factors/Polar.jl")
+include("factors/Pose2D.jl")
 include("factors/Bearing2D.jl")
 include("factors/Range2D.jl")
 include("factors/BearingRange2D.jl")
 include("factors/Point3D.jl")
 include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")
-include("factors/Polar.jl")
 
 include("MultipleFeaturesConstraint.jl")
 
