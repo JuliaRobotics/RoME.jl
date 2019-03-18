@@ -286,8 +286,10 @@ include("variables/Point2D.jl")
 include("variables/Point3D.jl")
 include("variables/Pose2D.jl")
 include("variables/Pose3D.jl")
-include("DynPoint2D.jl")
+include("variables/DynPoint2D.jl")
 include("DynPose2D.jl")
+
+include("DynPoint2D.jl")
 
 include("factors/Point2D.jl")
 include("factors/Polar.jl")
