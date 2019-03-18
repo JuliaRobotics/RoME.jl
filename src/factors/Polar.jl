@@ -7,6 +7,9 @@ struct Polar <: IIF.InferenceVariable
   Polar() = new(2,(:Euclid,:Circular),String[])
 end
 
+"""
+    $TYPEDEF
+"""
 mutable struct PriorPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.FunctorSingleton
   Zrange::T1
   Zangle::T2

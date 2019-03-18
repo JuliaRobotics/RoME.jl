@@ -69,6 +69,14 @@ end
 
 """
 $(TYPEDEF)
+
+Introduce direct observations on all dimensions of a Pose2 variable:
+
+Example:
+--------
+```julia
+PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
+```
 """
 mutable struct PriorPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: Distributions.Distribution}
     Z::T

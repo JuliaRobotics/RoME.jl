@@ -11,6 +11,8 @@ end
 
 """
 $(TYPEDEF)
+
+Direction observation information of a `Point2` variable.
 """
 mutable struct PriorPoint2{T} <: IncrementalInference.FunctorSingleton where {T <: Distributions.Distribution}
   Z::T
