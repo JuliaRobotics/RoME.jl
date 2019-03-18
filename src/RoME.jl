@@ -304,10 +304,8 @@ include("factors/DynPose2D.jl")
 include("factors/Point3D.jl")
 include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")
-
-include("MultipleFeaturesConstraint.jl")
-
-include("InertialPose3.jl")
+include("factors/MultipleFeaturesConstraint.jl")
+include("factors/InertialPose3.jl")
 
 include("Slam.jl")
 
