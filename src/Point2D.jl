@@ -1,16 +1,6 @@
 
 """
 $(TYPEDEF)
-"""
-struct Point2 <: IncrementalInference.InferenceVariable
-  dims::Int
-  labels::Vector{String}
-  manifolds::Tuple{Symbol,Symbol}
-  Point2(;labels::Vector{<:AbstractString}=String[]) = new(2, labels, (:Euclid, :Euclid))
-end
-
-"""
-$(TYPEDEF)
 
 Direction observation information of a `Point2` variable.
 """
