@@ -197,7 +197,7 @@ export
   # Pose3, Three dimensional
   Pose3,
   Point3,
-  # Prior, # moved to IIF
+  PriorPoint3,
   PriorPose3,
   PackedPriorPose3,
   Pose3Pose3,

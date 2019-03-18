@@ -32,8 +32,11 @@ end
 
 
 
+"""
+    $TYPEDEF
 
-# better to use bearingrange with [uniform bearing], numerical solving issue on 1D
+Range only measurement from Pose2 to Point2 variable.
+"""
 mutable struct Pose2Point2Range{T} <: IncrementalInference.FunctorPairwise
   Z::T
   Pose2Point2Range{T}() where T = new()

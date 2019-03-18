@@ -6,6 +6,11 @@ mutable struct P2P2BearingReuse
   P2P2BearingReuse() = new(zeros(2),zeros(2),zeros(2))
 end
 
+"""
+    $TYPEDEF
+
+Single dimension bearing constraint from Pose2 to Point2 variable.
+"""
 mutable struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
     bearing::B
     reuse::Vector{P2P2BearingReuse}
