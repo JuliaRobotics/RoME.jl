@@ -282,13 +282,17 @@ include("BayesTracker.jl")
 include("SensorModels.jl")
 include("CameraModel.jl")
 
+# 2D
 include("variables/Point2D.jl")
-include("variables/Point3D.jl")
 include("variables/Pose2D.jl")
-include("variables/Pose3D.jl")
 include("variables/DynPoint2D.jl")
-include("DynPose2D.jl")
+include("variables/DynPose2D.jl")
 
+# 3D
+include("variables/Point3D.jl")
+include("variables/Pose3D.jl")
+
+include("DynPose2D.jl")
 
 include("factors/Point2D.jl")
 include("factors/Polar.jl")
