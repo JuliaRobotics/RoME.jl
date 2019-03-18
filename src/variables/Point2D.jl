@@ -1,6 +1,8 @@
 
 """
 $(TYPEDEF)
+
+XY Euclidean manifold variable node softtype.
 """
 struct Point2 <: IncrementalInference.InferenceVariable
   dims::Int

@@ -1,7 +1,9 @@
 
-# x, y, dx/dt, dy/dt
 """
 $(TYPEDEF)
+
+Dynamic point in 2D space with velocity components: `x, y, dx/dt, dy/dt`
+
 """
 mutable struct DynPoint2 <: IncrementalInference.InferenceVariable
   ut::Int64 # microsecond time

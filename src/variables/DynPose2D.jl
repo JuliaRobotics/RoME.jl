@@ -1,7 +1,7 @@
 """
 $(TYPEDEF)
 
-`x, y, theta, dx/dt, dy/dt`
+Dynamic pose variable with velocity components: `x, y, theta, dx/dt, dy/dt`
 """
 mutable struct DynPose2 <: IncrementalInference.InferenceVariable
   ut::Int64 # microsecond time
