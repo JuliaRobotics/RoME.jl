@@ -31,14 +31,14 @@ addFactor!(fg, [:l0], Prior(Normal(l0, lm_prior_noise)))
 addVariable!(fg, Symbol("l1"), ContinuousScalar, N=n_samples)
 addFactor!(fg, [:l1], Prior(Normal(l1, lm_prior_noise)))
 
-addVariable!(fg, Symbol("l2"), ContinuousScalar, N=n_samples)
-addFactor!(fg, [:l2], Prior(Normal(l2, lm_prior_noise)))
 
 # Add first pose
 addVariable!(fg, :x0, ContinuousScalar, N=n_samples)
 
 # Make first "door" measurement
-addFactor!(fg, [:x0; :l0; :l1; :l2], LinearConditional(Normal(0, meas_noise)), multihypo=[1.0; 1.0/3.0; 1.0/3.0; 1.0/3.0])
+addFactor!(fg, [:x0; :l0], LinearConditional(Normal(0, meas_noise)))
+# addFactor!(fg, [:x0; :l0; :l1], LinearConditional(Normal(0, meas_noise)), multihypo=[1.0; 1.0/2.0; 1.0/2.0])
+
 
 # Add second pose
 addVariable!(fg, :x1, ContinuousScalar, N=n_samples)
@@ -47,7 +47,9 @@ addVariable!(fg, :x1, ContinuousScalar, N=n_samples)
 addFactor!(fg, [:x0; :x1], LinearConditional(Normal(x1-x0, odom_noise)))
 
 # Make second "door" measurement
-addFactor!(fg, [:x1; :l0; :l1; :l2], LinearConditional(Normal(0, meas_noise)), multihypo=[1.0; 1.0/3.0; 1.0/3.0; 1.0/3.0])
+# addFactor!(fg, [:x1; :l1], LinearConditional(Normal(0, meas_noise)) )
+addFactor!(fg, [:x1; :l0; :l1], LinearConditional(Normal(0, meas_noise)), multihypo=[1.0; 1.0/2.0; 1.0/2.0])
+
 
 
 
