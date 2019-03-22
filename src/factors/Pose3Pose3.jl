@@ -16,8 +16,11 @@ function getSample(p3::PriorPose3, N::Int=1)
   # mv = Distributions.MvNormal(veeEuler(p3.Zi), p3.Cov)
   return (rand(p3.Zi, N),)
 end
+
 """
 $(TYPEDEF)
+
+Serialization type for PriorPose3.
 """
 mutable struct PackedPriorPose3  <: IncrementalInference.PackedInferenceType
     vecZi::Array{Float64,1} # 0rotations, 1translation in each column
@@ -75,6 +78,8 @@ end
 
 """
 $(TYPEDEF)
+
+Rigid transform factor between two Pose3 compliant variables.
 """
 mutable struct Pose3Pose3 <: FunctorPairwise
     Zij::Distribution
@@ -99,6 +104,8 @@ end
 
 """
 $(TYPEDEF)
+
+Serialization type for `Pose3Pose3`.
 """
 mutable struct PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
   vecZij::Array{Float64,1} # 3translations, 3rotation
@@ -128,6 +135,8 @@ end
 
 """
 $(TYPEDEF)
+
+Obsolete, see issue https://github.com/JuliaRobotics/IncrementalInference.jl/issues/237.
 """
 mutable struct Pose3Pose3NH <: IncrementalInference.FunctorPairwiseNH
     Zij::Distribution
@@ -157,6 +166,8 @@ end
 
 """
 $(TYPEDEF)
+
+Obsolete, see issue https://github.com/JuliaRobotics/IncrementalInference.jl/issues/237.
 """
 mutable struct PackedPose3Pose3NH <: IncrementalInference.PackedInferenceType
   vecZij::Vector{Float64} # 3translations, 3rotation
