@@ -1,7 +1,9 @@
 # Partial Pose3 constraints
 
 """
-$(TYPEDEF)
+    $(TYPEDEF)
+
+Partial prior belief on Z, Roll, and Pitch of a `Pose3`. 
 """
 mutable struct PriorPose3ZRP{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   z::T1
@@ -17,7 +19,7 @@ end
 
 
 """
-Converter: PartialPriorRollPitchZ::Dict{String, Any} -> PartialPriorRollPitchZ
+    $SIGNATURES
 
 Deprecated in favor of PriorPose3ZRP
 """
@@ -46,7 +48,9 @@ function convert(::Type{Dict{String, Any}}, fact::RoME.PriorPose3ZRP)
 end
 
 """
-$(TYPEDEF)
+    $(TYPEDEF)
+
+Partial prior belief on Roll Pitch and Z of a `Pose3` variable.
 """
 mutable struct PartialPriorRollPitchZ{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   rp::T1
@@ -60,6 +64,11 @@ function getSample(pprz::PartialPriorRollPitchZ, N::Int=1)
   return ([rand(pprz.z,N)[:]';rand(pprz.rp,N)], )
 end
 
+"""
+    $TYPEDEF
+
+Serialization type of `PartialPriorRollPitchZ`.
+"""
 mutable struct PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInferenceType
   rpdata::String
   zdata::String
@@ -123,6 +132,13 @@ end
 
 # TODO duplicate name Pose3Pose3XYYaw
 
+"""
+    $TYPEDEF
+
+Partial factor between XY and Yaw of two Pose3 variables.
+
+To be deprecated: use Pose3Pose3XYYaw instead.
+"""
 mutable struct PartialPose3XYYaw{T1,T2} <: FunctorPairwise where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   xy::T1
   yaw::T2
@@ -148,6 +164,11 @@ function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
   nothing
 end
 
+"""
+    $TYPEDEF
+
+Partial factor between XY and Yaw of two Pose3 variables.
+"""
 mutable struct Pose3Pose3XYYaw{T1,T2} <: FunctorPairwise where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   xy::T1
   yaw::T2
@@ -173,7 +194,11 @@ function (pxyy::Pose3Pose3XYYaw)(res::Array{Float64},
   nothing
 end
 
+"""
+    $TYPEDEF
 
+Serialization type of PartialPose3XYYaw.
+"""
 mutable struct PackedPartialPose3XYYaw <: IncrementalInference.PackedInferenceType
   xydata::String
   yawdata::String
@@ -188,6 +213,8 @@ function convert(::Type{PackedPartialPose3XYYaw}, d::PartialPose3XYYaw)
 end
 
 """
+    $SIGNATURES
+
 Converter: Dict{String, Any} -> PartialPose3XYYaw
 """
 function convert(::Type{Dict{String, Any}}, fact::RoME.PartialPose3XYYaw)
@@ -202,6 +229,8 @@ function convert(::Type{Dict{String, Any}}, fact::RoME.PartialPose3XYYaw)
 end
 
 """
+    $SIGNATURES
+
 Converter: PartialPose3XYYaw -> Dict{String, Any}
 """
 function convert(::Type{RoME.PartialPose3XYYaw}, fact::Dict{String, Any})
@@ -229,7 +258,9 @@ end
 
 
 
-
+"""
+OBSOLETE: see https://github.com/JuliaRobotics/IncrementalInference.jl/issues/237
+"""
 mutable struct PartialPose3XYYawNH <: IncrementalInference.FunctorPairwiseNH
   xyy::Distributions.MvNormal
   partial::Tuple
