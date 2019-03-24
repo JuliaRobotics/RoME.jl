@@ -36,8 +36,8 @@ addFactor!(fg, [:l1], Prior(Normal(l1, lm_prior_noise)))
 addVariable!(fg, :x0, ContinuousScalar, N=n_samples)
 
 # Make first "door" measurement
-addFactor!(fg, [:x0; :l0], LinearConditional(Normal(0, meas_noise)))
-# addFactor!(fg, [:x0; :l0; :l1], LinearConditional(Normal(0, meas_noise)), multihypo=[1.0; 1.0/2.0; 1.0/2.0])
+# addFactor!(fg, [:x0; :l0], LinearConditional(Normal(0, meas_noise)))
+addFactor!(fg, [:x0; :l0; :l1], LinearConditional(Normal(0, meas_noise)), multihypo=[1.0; 1.0/2.0; 1.0/2.0])
 
 
 # Add second pose
@@ -68,8 +68,13 @@ addFactor!(fg, [:x1; :x2], LinearConditional(Normal(x2-x1, odom_noise)))
 # addFactor!(fg, [:x3; :l0; :l1; :l2], LinearConditional(Normal(0, meas_noise)), multihypo=[1.0; 1.0/3.0; 1.0/3.0; 1.0/3.0])
 
 ## Do some debugging
+ensureAllInitialized!(fg)
+
+##
 
 writeGraphPdf(fg, show=true)
+
+wipeBuildNewTree!(fg, drawpdf=true, show=true)
 
 ## Solve graph
 tree = batchSolve!(fg)
@@ -83,10 +88,12 @@ tree = batchSolve!(fg)
 using RoMEPlotting
 
 
-ensureAllInitialized!(fg)
-plotKDE(fg, [:x0;:x1])
+pl = plotKDE(fg, [:x0;:x1])
 
-plotKDE(fg, [:x0;:x1;:x2])
+pl = plotKDE(fg, [:x0;:x1;:x2])
+pl |> PNG("/tmp/test.png")
+
+pl = plotKDE(fg, [:l0; :l1])
 
 spyCliqMat(tree, :l0)
 
@@ -100,12 +107,28 @@ spyCliqMat(tree, :x2)
 plotLocalProduct(fg, :x0)
 plotLocalProduct(fg, :x1)
 
+plotLocalProduct(fg, :l1)
+
 
 ##
 
-stuff = treeProductUp(fg, tree, :x2, :x2)
+stuff = treeProductUp(fg, tree, :l0, :x1)
+plotKDE(manikde!(stuff[1], (:Euclid,)) )
 
 
+## Do one clique inference only
+
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+
+cliq = tree.cliques[1]
+
+upmsgs = doCliqInferenceUp!(fg, tree, cliq, iters=3)
+
+plotKDE(upmsgs[:x0])
+
+##
+
+getUpMsgs(tree, )
 ##
 
 ensureAllInitialized!(fg)
@@ -116,6 +139,20 @@ cliqorder = getCliqOrderUpSolve(tree)
 
 
 spyCliqMat(cliqorder[end])
+
+
+
+## Development zone
+
+# treel = deepcopy(tree)
+# fgl = deepcopy(fg)
+# cliql = deepcopy(cliq)
+
+
+
+
+##
+
 
 
 
