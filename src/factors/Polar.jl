@@ -1,5 +1,9 @@
 
+"""
+    $TYPEDEF
 
+Range and theta definition on `(:Euclid, :Circular)` manifold.
+"""
 struct Polar <: IIF.InferenceVariable
   dims::Int
   manifolds::Tuple{Symbol,Symbol}
@@ -9,6 +13,8 @@ end
 
 """
     $TYPEDEF
+
+Prior belief on any Polar related variable.
 """
 mutable struct PriorPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.FunctorSingleton
   Zrange::T1
@@ -25,7 +31,11 @@ function getSample(pp2i::PriorPolar, N::Int=1)
   return (sps, )
 end
 
+"""
+    $TYPEDEF
 
+Linear offset factor of `IIF.SamplableBelief` between two `Polar` variables.
+"""
 mutable struct PolarPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.FunctorPairwise
   Zrange::T1
   Zangle::T2

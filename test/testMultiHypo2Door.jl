@@ -74,7 +74,7 @@ ensureAllInitialized!(fg)
 
 writeGraphPdf(fg, show=true)
 
-wipeBuildNewTree!(fg, drawpdf=true, show=true)
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
 
 ## Solve graph
 tree = batchSolve!(fg)
@@ -104,32 +104,111 @@ spyCliqMat(tree, :x2)
 ## specialized debugging
 
 
-plotLocalProduct(fg, :x0)
-plotLocalProduct(fg, :x1)
-
-plotLocalProduct(fg, :l1)
-
-
-##
-
-stuff = treeProductUp(fg, tree, :l0, :x1)
+stuff = treeProductUp(fg, tree, :l0, :x0)
 plotKDE(manikde!(stuff[1], (:Euclid,)) )
 
 
 ## Do one clique inference only
 
 tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+urt = doCliqInferenceUp!(fg, tree, :l0, false, iters=1, drawpdf=true)
+upmsgs = urt.keepupmsgs
 
-cliq = tree.cliques[1]
+plotKDE([upmsgs[:x0]; upmsgs[:l1]; upmsgs[:x1]], c=["red";"green";"blue"])
 
-upmsgs = doCliqInferenceUp!(fg, tree, cliq, iters=3)
 
-plotKDE(upmsgs[:x0])
+## manually build the iteration scheme for second clique
+
+# iter order:  x0, x1, l0, l1
+
+stuff = treeProductUp(fg, tree, :l0, :x0)
+X0 = manikde!(stuff[1], (:Euclid,))
+plotKDE([X0; getKDE(fg, :x0)], c=["red";"green"])
+setValKDE!(fg, :x0, X0)
+
+
+stuff = treeProductUp(fg, tree, :l0, :x1)
+X1 = manikde!(stuff[1], (:Euclid,))
+plotKDE([X1; getKDE(fg, :x1)], c=["red";"green"])
+setValKDE!(fg, :x1, X1)
+
+
+stuff = treeProductUp(fg, tree, :l0, :l0)
+L0 = manikde!(stuff[1], (:Euclid,))
+plotKDE([L0; getKDE(fg, :l0)], c=["red";"green"])
+setValKDE!(fg, :l0, L0)
+
+
+stuff = treeProductUp(fg, tree, :l0, :l1)
+L1 = manikde!(stuff[1], (:Euclid,))
+plotKDE([L1; getKDE(fg, :l1)], c=["red";"green"])
+setValKDE!(fg, :l1, L1)
+
+
+
+## Reconstruct individual steps for broader clique factor selection
+
+# Cliq 2:
+# L0,X0,L1,X1
+# x ,  ,  ,
+# x ,x ,x ,
+# x ,  ,x ,x
+#   ,x ,  ,x
+#   ,  ,x ,
+
+# choose iteration order (priors last): :x0, :x1, :l0, :l1
+
+
+# for new initialization format
+# cliq 2: init :l0, :l1 directly from priors, them proceed with regular order
+# cliq 1: initialize :x2 from incoming message singleton and proceed with regular order
+
+
+# get factors for :x0 in clique2:
+# :x0l0l1f1, :x0x1f1
+ptsX0 = predictbelief(fg, :x0, [:x0l0l1f1; :x0x1f1])
+X0 = manikde!(ptsX0, (:Euclid,))
+plotKDE([X0; getKDE(fg, :x0)], c=["red";"green"])
+setValKDE!(fg, :x0, X0)
+
+# get factors for :x1 in clique2:
+# :x1l0l1f1, :x0x1f1
+ptsX1 = predictbelief(fg, :x1, [:x1l0l1f1, :x0x1f1])
+X1 = manikde!(ptsX1, (:Euclid,))
+plotKDE([X1; getKDE(fg, :x1)], c=["red";"green"])
+setValKDE!(fg, :x1, X1)
+
+
+# get factors for :l0
+# :x0l0l1f1, :x1l0l1f1, :l0f1
+ptsL0 = predictbelief(fg, :l0, [:x0l0l1f1, :x1l0l1f1, :l0f1])
+L0 = manikde!(ptsL0, (:Euclid,))
+plotKDE([L0; getKDE(fg, :l0)], c=["red";"green"])
+setValKDE!(fg, :l0, L0)
+
+
+# get factors for :l1
+# :x0l0l1f1, :x1l0l1f1, :l1f1
+ptsL1 = predictbelief(fg, :l1, [:x0l0l1f1, :x1l0l1f1, :l1f1])
+L1 = manikde!(ptsL1, (:Euclid,))
+plotKDE([L1; getKDE(fg, :l1)], c=["red";"green"])
+setValKDE!(fg, :l1, L1)
+
+
+
+## double check the upmessages are stored properly
+
 
 ##
 
-getUpMsgs(tree, )
+plotLocalProduct(fg, :x0)
+plotLocalProduct(fg, :x1)
+plotLocalProduct(fg, :l0)
+plotLocalProduct(fg, :l1)
+
+
 ##
+
 
 ensureAllInitialized!(fg)
 
@@ -151,7 +230,10 @@ spyCliqMat(cliqorder[end])
 
 
 
-##
+##  develop better factor selection method
+
+varlist = [:l0; :x0; :l1; :x1]
+getFactorsAmongVariablesOnly(fg, varlist)
 
 
 
