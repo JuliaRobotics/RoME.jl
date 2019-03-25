@@ -69,10 +69,11 @@ addFactor!(fg, [:x1; :x2], LinearConditional(Normal(x2-x1, odom_noise)))
 
 writeGraphPdf(fg, show=true)
 
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+
+
 ## Solve graph
 tree = batchSolve!(fg)
-
-# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
 
 
 
@@ -86,9 +87,19 @@ plotKDE(fg, [:x0;:x1])
 
 plotKDE(fg, [:x0;:x1;:x2])
 
+
 spyCliqMat(tree, :l0)
 
 spyCliqMat(tree, :x2)
+
+
+
+## swap iteration order
+
+getData(tree.cliques[2]).itervarIDs = [9;7;1;3;5]
+
+inferOverTree!(fg, tree)
+
 
 
 

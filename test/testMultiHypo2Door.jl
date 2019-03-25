@@ -117,6 +117,12 @@ upmsgs = urt.keepupmsgs
 plotKDE([upmsgs[:x0]; upmsgs[:l1]; upmsgs[:x1]], c=["red";"green";"blue"])
 
 
+## swap iteration order
+
+getData(tree.cliques[2]).itervarIDs = [5;7;3;1]
+
+inferOverTree!(fg, tree)
+
 ## manually build the iteration scheme for second clique
 
 # iter order:  x0, x1, l0, l1
