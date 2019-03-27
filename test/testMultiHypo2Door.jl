@@ -164,7 +164,6 @@ setValKDE!(fg, :l1, L1)
 
 # choose iteration order (priors last): :x0, :x1, :l0, :l1
 
-
 # for new initialization format
 # cliq 2: init :l0, :l1 directly from priors, them proceed with regular order
 # cliq 1: initialize :x2 from incoming message singleton and proceed with regular order
