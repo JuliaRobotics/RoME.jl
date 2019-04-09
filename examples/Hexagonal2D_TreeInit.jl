@@ -61,9 +61,16 @@ getCliqInitVarOrderUp(cliq)
 
 
 doCliqAutoInitUp!(fg, tree, cliq)
+areCliqVariablesInitialized(fg, cliq)
+getData(cliq).initialized
+isCliqReadyInferenceUp(fg, tree, cliq)
+
+
 
 
 ## cliq 5
+
+# should be initializing with downward marginal message on x1 and x3
 
 cliq = tree.cliques[5]
 cliq.attributes["label"]
@@ -71,6 +78,7 @@ getCliqInitVarOrderUp(cliq)
 
 
 doCliqAutoInitUp!(fg, tree, cliq)
+
 
 
 ## cliq 2
@@ -132,6 +140,11 @@ Gadfly.draw(Gadfly.PDF("/tmp/test3.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 
 
+## testing subgraph
+
+sfg = subgraphFromVerts(fg, [:x0;:x1;:l1], neighbors=2)
+
+writeGraphPdf(sfg, show=true)
 
 
 #
