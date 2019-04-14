@@ -40,7 +40,9 @@ addFactor!(fg, [:x6; :l1], p2br2, autoinit=false )
 
 ##
 
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=true)
+
+
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
 
 
 ## Manually do tree based initialization
@@ -51,21 +53,28 @@ for var in union(xx,ll)
   @show var, isInitialized(fg, var)
 end
 
-fgc = deepcopy(fg)
+# fgc = deepcopy(fg)
 
 ## cliq 6
 
 cliq = tree.cliques[6]
-cliq.attributes["label"]
-getCliqInitVarOrderUp(cliq)
+# cliq.attributes["label"]
+# getCliqInitVarOrderUp(cliq)
+syms = Symbol[getSym(fg, varid) for varid in getCliqAllVarIds(cliq)]
+
+sfg = buildSubgraphFromLabels(fg, syms)
+# writeGraphPdf(sfg, show=true)
+
+doCliqAutoInitUp!(sfg, tree, cliq)
+frsyms = Symbol[getSym(sfg, varid) for varid in getCliqFrontalVarIds(cliq)]
+transferUpdateSubGraph!(sfg, fg, frsyms)
 
 
-doCliqAutoInitUp!(fg, tree, cliq)
-areCliqVariablesInitialized(fg, cliq)
-getData(cliq).initialized
-isCliqReadyInferenceUp(fg, tree, cliq)
 
 
+pcliq = parentCliq(tree, :x0)[1]
+
+cliq2uimsgs = getCliqInitUpMsgs(pcliq)
 
 
 ## cliq 5
@@ -74,10 +83,13 @@ isCliqReadyInferenceUp(fg, tree, cliq)
 
 cliq = tree.cliques[5]
 cliq.attributes["label"]
-getCliqInitVarOrderUp(cliq)
+# getCliqInitVarOrderUp(cliq)
+syms = Symbol[getSym(fg, varid) for varid in getCliqAllVarIds(cliq)]
 
+sfg = buildSubgraphFromLabels(fg, syms)
+# writeGraphPdf(sfg, show=true)
 
-doCliqAutoInitUp!(fg, tree, cliq)
+doCliqAutoInitUp!(sfg, tree, cliq)
 
 
 
@@ -130,6 +142,31 @@ Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 
 
+##
+
+ensureAllInitialized!(fg)
+
+
+fg.isfixedlag = true
+fg.qfl = 99
+
+
+getData(fg, :x1).ismargin = true
+
+
+using RoMEPlotting, Gadfly
+
+XX1 = deepcopy(getKDE(fg, :x1))
+
+plotPose(Pose2(), [XX1;]) |> SVG("/tmp/test.svg")
+@async run(`inkscape /tmp/test.svg`)
+
+
+plotPose(Pose2(), [getKDE(fg, :x1);]) |> SVG("/tmp/test2.svg")
+@async run(`inkscape /tmp/test2.svg`)
+
+
+
 # solve
 batchSolve!(fg, drawpdf=true)
 
@@ -145,6 +182,43 @@ Gadfly.draw(Gadfly.PDF("/tmp/test3.pdf", 20cm, 10cm),pl)  # or PNG(...)
 sfg = subgraphFromVerts(fg, [:x0;:x1;:l1], neighbors=2)
 
 writeGraphPdf(sfg, show=true)
+
+
+
+
+
+fgs = deepcopy(fg)
+
+
+
+
+batchSolve!(fgs)
+
+
+
+plotPose(fg, [:x1;:x2])
+
+
+plotPose(fg, [:x1;:x2])
+
+
+
+getKDE(sfg, :x1)
+
+
+
+plotKDE([getKDE(fg, :x2); getKDE(fgs, :x2)], dims=[1;2], c=["red";"green"], levels=2)
+
+
+
+getSym(fg, getCliqAllVarIds(whichCliq(tree, :x1))[2])
+
+
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=true)
+
+treeProductUp(fg, tree, :x0, :x0)
+
+
 
 
 #
