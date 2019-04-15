@@ -40,9 +40,9 @@ addFactor!(fg, [:x6; :l1], p2br2, autoinit=false )
 
 ##
 
-writeGraphPdf(fg, show=true)
+# writeGraphPdf(fg, show=true)
 
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=true)
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
 
 
 ## Manually do tree based initialization
@@ -54,6 +54,10 @@ for var in union(xx,ll)
 end
 
 # fgc = deepcopy(fg)
+
+
+
+
 
 ## cliq 6
 
@@ -71,10 +75,9 @@ transferUpdateSubGraph!(sfg, fg, frsyms)
 
 
 
+# isready(getData(cliq).initUpChannel)
+# isCliqInitialized(cliq)
 
-pcliq = parentCliq(tree, :x0)[1]
-
-cliq2uimsgs = getCliqInitUpMsgs(pcliq)
 
 
 ## cliq 5
@@ -89,18 +92,36 @@ syms = Symbol[getSym(fg, varid) for varid in getCliqAllVarIds(cliq)]
 sfg = buildSubgraphFromLabels(fg, syms)
 # writeGraphPdf(sfg, show=true)
 
-initstatus = doCliqAutoInitUp!(sfg, tree, cliq)
 
-if initstatus == :needdownmsg
+doCliqAutoInitUp!(sfg, tree, cliq)  # initstatus =
 
+
+
+
+## first level up in tree to cliq2
+
+
+pcliq = parentCliq(tree, :x0)[1]
 # need some kind of blocking call till all siblings say the same
+stdict = blockCliqUntilChildrenHaveUpStatus(tree, pcliq)
 
-dwinmsg = prepCliqInitMsgsDown(sfg, tree, cliq)
+
+clid = 5
+clst = stdict[clid]
+for (clid, clst) in stdict
+
+if clst == :needdownmsg
+
+# could use parent sfg
+prepCliqInitMsgsDown!(fg, tree, pcliq)
+
+getCliqInitDownMsgs(pcliq)
 
 doCliqAutoInitDown!(sfg, tree, cliq, dwinmsg)
 
 end
 
+end
 
 
 
@@ -230,6 +251,17 @@ tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=true)
 treeProductUp(fg, tree, :x0, :x0)
 
 
+
+
+
+
+## Init Process summary`
+#
+# 1. trigger inits on all child cliques.
+# 2. wait for (take!) response from all initUpChannel.
+# 3. propagate initdownmsgs to any child cliq that needs down msgs.
+# 4. initialize from down init msg and determine if further downward init msgs are required
+## Note fully up-solvable only possible if all children completed up-solve
 
 
 #
