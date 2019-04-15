@@ -40,9 +40,9 @@ addFactor!(fg, [:x6; :l1], p2br2, autoinit=false )
 
 ##
 
+writeGraphPdf(fg, show=true)
 
-
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=true)
 
 
 ## Manually do tree based initialization
@@ -89,7 +89,18 @@ syms = Symbol[getSym(fg, varid) for varid in getCliqAllVarIds(cliq)]
 sfg = buildSubgraphFromLabels(fg, syms)
 # writeGraphPdf(sfg, show=true)
 
-doCliqAutoInitUp!(sfg, tree, cliq)
+initstatus = doCliqAutoInitUp!(sfg, tree, cliq)
+
+if initstatus == :needdownmsg
+
+# need some kind of blocking call till all siblings say the same
+
+dwinmsg = prepCliqInitMsgsDown(sfg, tree, cliq)
+
+doCliqAutoInitDown!(sfg, tree, cliq, dwinmsg)
+
+end
+
 
 
 
