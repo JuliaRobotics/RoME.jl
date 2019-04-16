@@ -130,31 +130,31 @@ global f1  = addFactor!(fg,[v1], ipp)
 
 @testset "test conversions of PriorPose3" begin
 
-    global dd = convert(PackedPriorPose3, ipp)
-    global upd = convert(RoME.PriorPose3, dd)
+global dd = convert(PackedPriorPose3, ipp)
+global upd = convert(RoME.PriorPose3, dd)
 
-    # @test TransformUtils.compare(ipp.Zi, upd.Zi)
-    @test norm(ipp.Zi.μ - upd.Zi.μ) < 1e-10
-    @test norm(ipp.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
+# @test TransformUtils.compare(ipp.Zi, upd.Zi)
+@test norm(ipp.Zi.μ - upd.Zi.μ) < 1e-10
+@test norm(ipp.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
 
-    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, getData(f1))
-    global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose3}}, packeddata)
+global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, getData(f1))
+global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose3}}, packeddata)
 
-    # TODO -- fix ambibuity in compare function
-    @test compareAll(getData(f1), unpackeddata, skip=[:fnc;])
-    @test compareAll(getData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!])
-    @test compareAll(getData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;])
-    @test compareAll(getData(f1).fnc.usrfnc!.Zi, unpackeddata.fnc.usrfnc!.Zi, skip=[:Σ;])
-    @test compareAll(getData(f1).fnc.usrfnc!.Zi.Σ, unpackeddata.fnc.usrfnc!.Zi.Σ)
-    @test compareAll(getData(f1).fnc.cpt, unpackeddata.fnc.cpt)
-    @test compareAll(getData(f1).fnc.params, unpackeddata.fnc.params)
-    @test compareAll(getData(f1).fnc.threadmodel, unpackeddata.fnc.threadmodel)
+# TODO -- fix ambibuity in compare function
+@test compareAll(getData(f1), unpackeddata, skip=[:fnc;])
+@test compareAll(getData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!])
+@test compareAll(getData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;])
+@test compareAll(getData(f1).fnc.usrfnc!.Zi, unpackeddata.fnc.usrfnc!.Zi, skip=[:Σ;])
+@test compareAll(getData(f1).fnc.usrfnc!.Zi.Σ, unpackeddata.fnc.usrfnc!.Zi.Σ)
+@test compareFields(getData(f1).fnc.cpt, unpackeddata.fnc.cpt)
+@test compareFields(getData(f1).fnc.params, unpackeddata.fnc.params)
+@test compareAll(getData(f1).fnc.threadmodel, unpackeddata.fnc.threadmodel)
 
-    global packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
-    global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
+global packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
+global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
-    @test compareAll(getData(v1), upv1data, skip=[:softtype;])
-    @test compareAll(getData(v1).softtype, upv1data.softtype)
+@test compareAll(getData(v1), upv1data, skip=[:softtype;])
+@test compareAll(getData(v1).softtype, upv1data.softtype)
 
 end
 
