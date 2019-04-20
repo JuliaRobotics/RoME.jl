@@ -42,7 +42,7 @@ addFactor!(fg, [:x6; :l1], p2br2, autoinit=false )
 
 # writeGraphPdf(fg, show=true)
 
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=true)
 
 
 ## Manually do tree based initialization
@@ -67,11 +67,11 @@ cliq = tree.cliques[6]
 syms = Symbol[getSym(fg, varid) for varid in getCliqAllVarIds(cliq)]
 
 sfg = buildSubgraphFromLabels(fg, syms)
-# writeGraphPdf(sfg, show=true)
+writeGraphPdf(sfg, show=true)
 
 doCliqAutoInitUp!(sfg, tree, cliq)
 frsyms = Symbol[getSym(sfg, varid) for varid in getCliqFrontalVarIds(cliq)]
-transferUpdateSubGraph!(sfg, fg, frsyms)
+transferUpdateSubGraph!(fg, sfg, frsyms)
 
 
 
@@ -84,22 +84,20 @@ transferUpdateSubGraph!(sfg, fg, frsyms)
 
 # should be initializing with downward marginal message on x1 and x3
 
+
 cliq = tree.cliques[5]
 cliq.attributes["label"]
 # getCliqInitVarOrderUp(cliq)
-syms = Symbol[getSym(fg, varid) for varid in getCliqAllVarIds(cliq)]
+syms = getCliqAllVarSyms(fg, cliq)
 
 sfg = buildSubgraphFromLabels(fg, syms)
-# writeGraphPdf(sfg, show=true)
+writeGraphPdf(sfg, show=true)
 
 
 doCliqAutoInitUp!(sfg, tree, cliq)  # initstatus =
 
 
-
-
 ## first level up in tree to cliq2
-
 
 pcliq = parentCliq(tree, :x0)[1]
 # need some kind of blocking call till all siblings say the same
@@ -112,18 +110,42 @@ for (clid, clst) in stdict
 
 if clst == :needdownmsg
 
-# could use parent sfg
-prepCliqInitMsgsDown!(fg, tree, pcliq)
+# initialize clique in downward direction
+clst = doCliqInitDown!(sfg, tree, cliq)
 
-getCliqInitDownMsgs(pcliq)
+end # :needdownmsg
 
-doCliqAutoInitDown!(sfg, tree, cliq, dwinmsg)
+
+if clst == :initialized
+
+doCliqAutoInitUp!(sfg, tree, cliq)
+
+# # check if all cliq vars have been initialized so that full inference can occur on clique
+# if areCliqVariablesAllInitialized(sfg, cliq)
+#   clst = doCliqUpSolve!(sfg, tree, cliq)
+# end
+#
+# # construct init's up msg to place in parent from initialized separator variables
+# msg = prepCliqInitMsgsUp!(sfg, tree, cliq)
+#
+# # put the init result in the parent cliq.
+# prnt = getParent(tree, cliq)
+# if length(prnt) > 0
+#   # not a root clique
+#   setCliqUpInitMsgs!(prnt[1], cliq.index, msg)
+# end
+#
+# # set flags in clique for multicore sequencing
+# notifyCliqUpInitStatus!(cliq, status)
+
+end # :initialized
 
 end
 
-end
 
+IncrementalInference.drawTree(tree, show=true)
 
+getCliqStatusUp(cliq)
 
 ## cliq 2
 
@@ -135,7 +157,7 @@ getCliqInitVarOrderUp(cliq)
 doCliqAutoInitUp!(fg, tree, cliq)
 
 
-approxCliqMarginalUp!(fg,tree, x1, true)
+approxCliqMarginalUp!(fg,tree, :x1, true)
 
 
 # cliq 3
