@@ -97,16 +97,15 @@ writeGraphPdf(sfg, show=true)
 doCliqAutoInitUp!(sfg, tree, cliq)  # initstatus =
 
 
-## first level up in tree to cliq2
-
+# level up in tree to cliq2
 pcliq = parentCliq(tree, :x0)[1]
-# need some kind of blocking call till all siblings say the same
+# blocking call till all siblings have a usable status
 stdict = blockCliqUntilChildrenHaveUpStatus(tree, pcliq)
 
 
 clid = 5
 clst = stdict[clid]
-for (clid, clst) in stdict
+
 
 if clst == :needdownmsg
 
@@ -118,56 +117,178 @@ end # :needdownmsg
 
 if clst == :initialized
 
-doCliqAutoInitUp!(sfg, tree, cliq)
+clst = doCliqAutoInitUp!(sfg, tree, cliq)
 
-# # check if all cliq vars have been initialized so that full inference can occur on clique
-# if areCliqVariablesAllInitialized(sfg, cliq)
-#   clst = doCliqUpSolve!(sfg, tree, cliq)
-# end
-#
-# # construct init's up msg to place in parent from initialized separator variables
-# msg = prepCliqInitMsgsUp!(sfg, tree, cliq)
-#
-# # put the init result in the parent cliq.
-# prnt = getParent(tree, cliq)
-# if length(prnt) > 0
-#   # not a root clique
-#   setCliqUpInitMsgs!(prnt[1], cliq.index, msg)
-# end
-#
-# # set flags in clique for multicore sequencing
-# notifyCliqUpInitStatus!(cliq, status)
+end
+
+if clst == :upsolved
+
+frsyms = Symbol[getSym(sfg, varid) for varid in getCliqFrontalVarIds(cliq)]
+transferUpdateSubGraph!(fg, sfg, frsyms)
 
 end # :initialized
 
-end
+
 
 
 IncrementalInference.drawTree(tree, show=true)
 
-getCliqStatusUp(cliq)
+
+
+
+
+
 
 ## cliq 2
 
-cliq = tree.cliques[2]
+
+
+
+clid = 2
+cliq = tree.cliques[clid]
 cliq.attributes["label"]
-getCliqInitVarOrderUp(cliq)
+syms = getCliqAllVarSyms(fg, cliq)
+
+# build a local subgraph for inference operations
+sfg = buildSubgraphFromLabels(fg, syms)
+writeGraphPdf(sfg, show=true)
 
 
-doCliqAutoInitUp!(fg, tree, cliq)
+tryonce = true
+
+# upsolve delay loop
+# while !areCliqChildrenAllUpSolved(tree, cliq) || tryonce
+
+tryonce = false
+
+# wait here until all children have a valid status
+stdict = blockCliqUntilChildrenHaveUpStatus(tree, cliq)
+
+proceed = true
+# possible send down msg for pending child status
+for (clid, clst) in stdict
+  # :needdownmsg # 'send' downward init msg direction
+  # :initialized # @warn "something might not be right with init of clid=$clid"
+  clst != :upsolved ? (proceed = false) : nothing
+end
+
+# if all children are ready, proceed with this cliq initialization
+if proceed
+proceed = false
+
+cliqst = getCliqStatus(cliq)
+
+if cliqst == :needdownmsg
+  # initialize clique in downward direction
+  cliqst = doCliqInitDown!(sfg, tree, cliq)
+end
+if cliqst in [:initialized; :null]
+  cliqst = doCliqAutoInitUp!(sfg, tree, cliq)
+end
+if cliqst == :upsolved
+  frsyms = Symbol[getSym(sfg, varid) for varid in getCliqFrontalVarIds(cliq)]
+  transferUpdateSubGraph!(fg, sfg, frsyms)
+else
+  @info "clique $(cliq.index) init waiting since it cannot fully up solve yet."
+end
+
+end
 
 
-approxCliqMarginalUp!(fg,tree, :x1, true)
+# end # while
+
+
+
+drawTree(tree, show=true)
+
+
+
+# getCliqInitVarOrderUp(cliq)
+# doCliqAutoInitUp!(fg, tree, cliq)
+# approxCliqMarginalUp!(fg,tree, :x1, true)
+
+
+
+
+
+# try package as a function
+
+
+
+function cliqInitSolveUp!(fgl::FactorGraph,
+                          tree::BayesTree,
+                          cliq::Graphs.ExVertex  )
+  #
+  syms = getCliqAllVarSyms(fgl, cliq)
+  # build a local subgraph for inference operations
+  sfg = buildSubgraphFromLabels(fgl, syms)
+  tryonce = true
+  # upsolve delay loop
+  # while tryonce || !areCliqChildrenAllUpSolved(tree, cliq)
+    tryonce = false
+    # wait here until all children have a valid status
+    @info "blocking for updates from children cliques"
+    @show stdict = blockCliqUntilChildrenHaveUpStatus(tree, cliq)
+    @info "done blocking"
+    proceed = true
+
+    #
+    for (clid, clst) in stdict
+      # :needdownmsg # 'send' downward init msg direction
+      # :initialized # @warn "something might not be right with init of clid=$clid"
+      clst != :upsolved ? (proceed = false) : nothing
+    end
+
+    cliqst = :none
+    # if all children are ready, proceed with this cliq initialization
+    if proceed
+      # evaluate according to cliq status
+      @show cliqst = getCliqStatus(cliq)
+      if cliqst == :needdownmsg
+        # initialize clique in downward direction
+        @info "this clique needs down message information and will now try do down init."
+        cliqst = doCliqInitDown!(sfg, tree, cliq)
+      end
+      if cliqst in [:initialized; :null]
+        @info "going for doCliqAutoInitUp!"
+        cliqst = doCliqAutoInitUp!(sfg, tree, cliq)
+        @info "finished doCliqAutoInitUp!"
+      end
+      if cliqst == :upsolved
+        @info "going for transferUpdateSubGraph!"
+        frsyms = Symbol[getSym(sfg, varid) for varid in getCliqFrontalVarIds(cliq)]
+        transferUpdateSubGraph!(fgl, sfg, frsyms)
+      else
+        @info "clique $(cliq.index) init waiting since it cannot fully up solve yet."
+      end
+    end
+  # end # while
+  return cliqst
+end
+
+
+
+
+
+## Pause here to figure out what is happening with up messages
+
+
+
+
+
+## continue with clique inference
+
 
 
 # cliq 3
 
 cliq = tree.cliques[3]
 cliq.attributes["label"]
-getCliqInitVarOrderUp(cliq)
 
 
-doCliqAutoInitUp!(fg, tree, cliq)
+cliqInitSolveUp!(fg, tree, cliq )
+
+
 
 
 
@@ -175,10 +296,34 @@ doCliqAutoInitUp!(fg, tree, cliq)
 
 cliq = tree.cliques[4]
 cliq.attributes["label"]
-getCliqInitVarOrderUp(cliq)
 
 
-doCliqAutoInitUp!(fg, tree, cliq)
+cliqInitSolveUp!(fg, tree, cliq )
+
+
+
+
+drawTree(tree, show=true)
+
+
+
+
+
+
+# cliq 4
+
+cliq = tree.cliques[1]
+cliq.attributes["label"]
+
+
+cliqInitSolveUp!(fg, tree, cliq )
+
+
+
+drawTree(tree, show=true)
+
+
+
 
 
 
@@ -206,6 +351,8 @@ fg.qfl = 99
 
 
 getData(fg, :x1).ismargin = true
+
+
 
 
 using RoMEPlotting, Gadfly
@@ -287,3 +434,9 @@ treeProductUp(fg, tree, :x0, :x0)
 
 
 #
+
+
+using RoMEPlotting
+
+
+plotPose(fg,:x2)
