@@ -203,72 +203,6 @@ drawTree(tree, show=true)
 
 
 
-# getCliqInitVarOrderUp(cliq)
-# doCliqAutoInitUp!(fg, tree, cliq)
-# approxCliqMarginalUp!(fg,tree, :x1, true)
-
-
-
-
-
-# try package as a function
-
-
-
-function cliqInitSolveUp!(fgl::FactorGraph,
-                          tree::BayesTree,
-                          cliq::Graphs.ExVertex  )
-  #
-  syms = getCliqAllVarSyms(fgl, cliq)
-  # build a local subgraph for inference operations
-  sfg = buildSubgraphFromLabels(fgl, syms)
-  tryonce = true
-  # upsolve delay loop
-  # while tryonce || !areCliqChildrenAllUpSolved(tree, cliq)
-    tryonce = false
-    # wait here until all children have a valid status
-    @info "blocking for updates from children cliques"
-    @show stdict = blockCliqUntilChildrenHaveUpStatus(tree, cliq)
-    @info "done blocking"
-    proceed = true
-
-    #
-    for (clid, clst) in stdict
-      # :needdownmsg # 'send' downward init msg direction
-      # :initialized # @warn "something might not be right with init of clid=$clid"
-      clst != :upsolved ? (proceed = false) : nothing
-    end
-
-    cliqst = :none
-    # if all children are ready, proceed with this cliq initialization
-    if proceed
-      # evaluate according to cliq status
-      @show cliqst = getCliqStatus(cliq)
-      if cliqst == :needdownmsg
-        # initialize clique in downward direction
-        @info "this clique needs down message information and will now try do down init."
-        cliqst = doCliqInitDown!(sfg, tree, cliq)
-      end
-      if cliqst in [:initialized; :null]
-        @info "going for doCliqAutoInitUp!"
-        cliqst = doCliqAutoInitUp!(sfg, tree, cliq)
-        @info "finished doCliqAutoInitUp!"
-      end
-      if cliqst == :upsolved
-        @info "going for transferUpdateSubGraph!"
-        frsyms = Symbol[getSym(sfg, varid) for varid in getCliqFrontalVarIds(cliq)]
-        transferUpdateSubGraph!(fgl, sfg, frsyms)
-      else
-        @info "clique $(cliq.index) init waiting since it cannot fully up solve yet."
-      end
-    end
-  # end # while
-  return cliqst
-end
-
-
-
-
 
 ## Pause here to figure out what is happening with up messages
 
@@ -323,6 +257,13 @@ cliqInitSolveUp!(fg, tree, cliq )
 drawTree(tree, show=true)
 
 
+
+
+## follow with downward inference
+
+ett = ExploreTreeType(fg, tree, cliq, nothing, NBPMessage[])
+
+IncrementalInference.downMsgPassingRecursive(ett, dbg=false, drawpdf=true);
 
 
 
