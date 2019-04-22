@@ -19,7 +19,8 @@ fg = initfg()
 addVariable!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
-addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=true )
+addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0],
+                                           Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=false )
 
 # Drive around in a hexagon
 for i in 0:5
@@ -41,27 +42,74 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x6; :l1], p2br2, autoinit=false )
 
 
-
+# writeGraphPdf(fg, show=true)
 
 ## dev version
 
 
+
 tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
+
 
 at = initInferTreeUp!(fg, tree, drawtree=true)
 
-pl = drawPosesLandms(fg, meanmax=:max)
 
-downMsgPassingIterative!(ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[]),N=100, dbg=false, drawpdf=true);
+pl = drawPosesLandms(fg, meanmax=:max)
+Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf"),pl)  # or PNG(...)
+# @async run(`evince /tmp/test2.pdf`)
+
+
+
+ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
+downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
 # downMsgPassingRecursive(..);
-0
+
 
 pl = drawPosesLandms(fg, meanmax=:max)
+Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf"),pl)  # or PNG(...)
+
+
+
+plotPose(fg,:x3 )
+
+
+## drive a little more
+
+# Drive around in a hexagon
+for i in 6:11
+    psym = Symbol("x$i")
+    nsym = Symbol("x$(i+1)")
+    addVariable!(fg, nsym, Pose2)
+    pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+    addFactor!(fg, [psym;nsym], pp, autoinit=false )
+end
+
+
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x12; :l1], p2br2, autoinit=false )
 
 
 
 
 
+
+
+## drive a little more
+
+# Drive around in a hexagon
+for i in 12:17
+    psym = Symbol("x$i")
+    nsym = Symbol("x$(i+1)")
+    addVariable!(fg, nsym, Pose2)
+    pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+    addFactor!(fg, [psym;nsym], pp, autoinit=false )
+end
+
+
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x18; :l1], p2br2, autoinit=false )
 
 
 
