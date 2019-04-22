@@ -110,7 +110,7 @@ function drive(fgl::FactorGraph, GTp, GTl, from, to; N=100)
 end
 
 function batchsolve(fgl::FactorGraph; N::Int=100)
-  @warn "Deprecated for IncrementalInference.batchSolve! instead."
+  @error "Deprecated for IncrementalInference.batchSolve! instead."
   tree = wipeBuildNewTree!(fgl, drawpdf=true)
   inferOverTree!(fgl, tree, N=N)
   nothing
