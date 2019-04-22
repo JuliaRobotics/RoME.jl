@@ -40,20 +40,46 @@ addFactor!(fg, [:x0; :l1], p2br, autoinit=false )
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x6; :l1], p2br2, autoinit=false )
 
-##
+
+
+
+##  General wrapper function solve
+
+# do up init-solve and down solve
+batchSolve!(fg, drawpdf=true, show=true, treeinit=true)
+
+
+
+drawPosesLandms(fg, meanmax=:max)
+0
+
+
+
+
+
+##  Development code below
 
 # writeGraphPdf(fg, show=true)
 
 tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
 
 
-## continuously draw tree
-# @async begin
-#   for i in 1:1000
-#     drawTree(tree, show=true)
-#     sleep(1.0)
-#   end
-# end
+@sync at = initInferTreeUp!(fg, tree, drawtree=true)
+
+
+
+downMsgPassingIterative!(ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[]),N=100, dbg=false, drawpdf=true);
+# downMsgPassingRecursive(ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[]), N=100, dbg=false, drawpdf=true);
+0
+
+
+# upMsgPassingIterative!(ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[]),N=100, dbg=false, drawpdf=true);
+
+
+
+
+
+
 
 
 ## Manually do tree based initialization
@@ -218,27 +244,15 @@ drawPosesLandms(fg, meanmax=:max)
 
 
 
-
-
 ## follow with downward inference
 
-IncrementalInference.downMsgPassingRecursive(ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[]), N=100, dbg=false, drawpdf=true);
+downMsgPassingRecursive(ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[]), N=100, dbg=false, drawpdf=true);
 
 drawTree(tree, show=true)
-
-
-
 
 ## debug upsolve
 
 upMsgPassingRecursive(ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[]), N=100, dbg=false, drawpdf=true);
-
-
-
-drawPosesLandms(fg)
-
-
-
 
 
 
@@ -247,142 +261,3 @@ drawPosesLandms(fg)
 pl = drawPosesLandms(fg, meanmax=:max)
 Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf"),pl)  # or PNG(...)
 @async run(`evince /tmp/test2.pdf`)
-
-
-
-##
-
-plotPose(fg, :x3)
-
-##
-
-stuff = treeProductUp(fg, tree, :l1, :l1)
-
-plotKDE(manikde!(stuff[1], (:Euclid, :Euclid)), levels=2)
-
-
-
-plotLocalProduct(fg, :x5)
-
-plotKDE(fg, [:x0; :x6; :l1], levels=2, dims=[1;2])
-
-
-stuff = treeProductUp(fg, tree, :x0, :l1)
-L1 = manikde!(stuff[1], (:Euclid, :Euclid))
-
-X0 = getKDE(fg, :x0)
-plotKDE([X0; L1], levels=2, dims=[1;2])
-
-
-
-stuff = treeProductUp(fg, tree, :x5, :x5)
-plotKDE(manikde!(stuff[1], Pose2().manifolds), levels=2)
-
-
-
-
-##
-
-batchSolve!(fg, drawpdf=true, recursive=true)
-
-
-##
-
-ensureAllInitialized!(fg)
-
-
-fg.isfixedlag = true
-fg.qfl = 99
-
-
-getData(fg, :x1).ismargin = true
-
-
-
-XX1 = deepcopy(getKDE(fg, :x1))
-
-plotPose(Pose2(), [XX1;]) |> SVG("/tmp/test.svg")
-@async run(`inkscape /tmp/test.svg`)
-
-
-plotPose(Pose2(), [getKDE(fg, :x1);]) |> SVG("/tmp/test2.svg")
-@async run(`inkscape /tmp/test2.svg`)
-
-
-
-# solve
-batchSolve!(fg, drawpdf=true)
-
-
-# redraw
-pl = drawPosesLandms(fg, meanmax=:mean)
-Gadfly.draw(Gadfly.PDF("/tmp/test3.pdf", 20cm, 10cm),pl)  # or PNG(...)
-
-
-
-
-## testing subgraph
-
-sfg = subgraphFromVerts(fg, [:x0;:x1;:l1], neighbors=2)
-
-writeGraphPdf(sfg, show=true)
-
-
-
-
-plotLocalProduct(fg, :x4)
-
-
-
-fgs = deepcopy(fg)
-
-
-
-
-batchSolve!(fgs)
-
-
-
-plotPose(fg, [:x1;:x2])
-
-
-plotPose(fg, [:x1;:x2])
-
-
-
-getKDE(sfg, :x1)
-
-
-
-plotKDE([getKDE(fg, :x2); getKDE(fgs, :x2)], dims=[1;2], c=["red";"green"], levels=2)
-
-
-
-getSym(fg, getCliqAllVarIds(whichCliq(tree, :x1))[2])
-
-
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=true)
-
-treeProductUp(fg, tree, :x0, :x0)
-
-
-
-
-
-
-## Init Process summary`
-#
-# 1. trigger inits on all child cliques.
-# 2. wait for (take!) response from all initUpChannel.
-# 3. propagate initdownmsgs to any child cliq that needs down msgs.
-# 4. initialize from down init msg and determine if further downward init msgs are required
-## Note fully up-solvable only possible if all children completed up-solve
-
-
-#
-
-
-using RoMEPlotting
-
-
-plotPose(fg,:x2)
