@@ -43,39 +43,6 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x6; :l1], p2br2, autoinit=false )
 
 
-# writeGraphPdf(fg, show=true)
-
-## dev version
-
-
-
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
-
-at = initInferTreeUp!(fg, tree, drawtree=true)
-
-#
-# pl = drawPosesLandms(fg, meanmax=:max)
-# Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf"),pl)  # or PNG(...)
-# @async run(`evince /tmp/test2.pdf`)
-
-
-ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-# downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
-downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
-
-
-
-# pl = drawPosesLandms(fg, meanmax=:max)
-# Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf"),pl)  # or PNG(...)
-
-
-# drawTree(tree, show=true)
-
-# plotPose(fg, :x3)
-
-
-
-## drive a little more
 
 # Drive around in a hexagon
 for i in 6:11
@@ -87,6 +54,7 @@ for i in 6:11
 end
 
 
+
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x12; :l1], p2br2, autoinit=false )
@@ -94,15 +62,13 @@ addFactor!(fg, [:x12; :l1], p2br2, autoinit=false )
 
 
 
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
-at = initInferTreeUp!(fg, tree, drawtree=true)
-
-
-ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-# downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
-downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
-
-
+# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
+# at = initInferTreeUp!(fg, tree, drawtree=true)
+#
+#
+# ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
+# # downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
+# downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
 
 
 
