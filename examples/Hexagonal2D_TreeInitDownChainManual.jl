@@ -159,12 +159,37 @@ i = docliqs[13]
 cliq = tree.cliques[i]
 clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true,  limititers=1)
 0
-# if !(clst in [:upsolved; :downsolved; :marginalized])
-#   error("Clique $(cliq.index), initInferTreeUp! -- cliqInitSolveUp! did not arrive at the desired solution statu: $clst")
-# end
 
 
-# break open the cliqInitSolveUp! loop for 13
+
+cliq = tree.cliques[6]
+cliq.attributes["label"]
+getCliqStatus(cliq)
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
+
+
+cliq = tree.cliques[5]
+cliq.attributes["label"]
+getCliqStatus(cliq)
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
+
+
+
+
+cliq = tree.cliques[2]
+cliq.attributes["label"]
+getCliqStatus(cliq)
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
+
+
+
+cliq = tree.cliques[1]
+cliq.attributes["label"]
+getCliqStatus(cliq)
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
+
+
+
 
 
 # fg_bu = deepcopy(fg)
@@ -204,31 +229,6 @@ getCliqStatus(cliq)
 clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
 
-cliq = tree.cliques[6]
-cliq.attributes["label"]
-getCliqStatus(cliq)
-clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
-
-
-cliq = tree.cliques[5]
-cliq.attributes["label"]
-getCliqStatus(cliq)
-clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
-
-
-cliq = tree.cliques[2]
-cliq.attributes["label"]
-getCliqStatus(cliq)
-# isready(getData(cliq).initDownChannel)
-clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
-
-
-
-cliq = tree.cliques[1]
-cliq.attributes["label"]
-getCliqStatus(cliq)
-# isready(getData(cliq).initDownChannel)
-clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
 
 
@@ -240,17 +240,6 @@ clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
 
 0
-
-
-
-
-
-
-
-drawTree(tree)
-
-
-
 
 
 
@@ -271,73 +260,17 @@ downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
 
 
 
+0
 
 
-
-
-# Initialize :l1 numerical values but do not rerun solver
-# ensureAllInitialized!(fg)
-# pl = drawPosesLandms(fg, meanmax=:max)
-# Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf"),pl)  # or PNG(...)
-# @async run(`evince /tmp/test2.pdf`)
-
-
-
-#
-# import IncrementalInference: prepCliqInitMsgsDown!
-#
-#
-# function prepCliqInitMsgsDown!(fgl::FactorGraph, tree::BayesTree, cliq::Graphs.ExVertex)
-#   #
-#   @info "Clique $(cliq.index), prepCliqInitMsgsDown!"
-#   # get the current messages stored in the parent
-#   currmsgs = getCliqInitUpMsgs(cliq)
-#   @info "Clique $(cliq.index), msg keys=$(collect(keys(currmsgs)))"
-#
-#   # check if any msgs should be multiplied together for the same variable
-#   msgspervar = Dict{Symbol, Vector{BallTreeDensity}}()
-#   for (cliqid, msgs) in currmsgs
-#     @show cliqid, length(msgs)
-#     for (msgsym, msg) in msgs
-#       if !haskey(msgspervar, msgsym)
-#         msgspervar[msgsym] = Vector{BallTreeDensity}()
-#       end
-#       push!(msgspervar[msgsym], msg)
-#     end
-#   end
-#
-#   @info "Clique $(cliq.index), keys with msgs=$(collect(keys(msgspervar)))"
-#
-#   # use default allocated dict
-#   products = getData(cliq).downInitMsg # Dict{Symbol, BallTreeDensity}()
-#   # multiply multiple messages together
-#   for (msgsym, msgs) in msgspervar
-#     # check if this particular down message requires msgsym
-#     if haskey(fgl.IDs, msgsym)
-#       if length(msgspervar[msgsym]) > 1
-#         products[msgsym] = manifoldProduct(msgs, getManifolds(fgl, msgsym))
-#       else
-#         products[msgsym] = msgs[1]
-#       end
-#     else
-#       # not required, therefore remove from message to avoid confusion
-#       if haskey(products, msgsym)
-#         delete!(products, msgsym)
-#       end
-#     end
-#   end
-#
-#   @info "Clique $(cliq.index), product keys=$(collect(keys(products)))"
-#   return products
-# end
 
 
 using RoMEPlotting
 
 
 pl = drawPosesLandms(fg, meanmax=:max)
-Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf"),pl)  # or PNG(...)
-@async run(`evince /tmp/test2.pdf`)
+Gadfly.draw(Gadfly.SVG("/tmp/test2.svg"),pl)  # or PNG(...)
+@async run(`eog /tmp/test2.svg`)
 
 
 
