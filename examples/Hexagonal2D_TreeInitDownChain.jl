@@ -1,4 +1,12 @@
 
+
+using Logging
+
+logger = SimpleLogger(open("/home/dehann/Downloads/out.txt", "w"))
+
+global_logger(logger)
+
+
 # using Revise
 
 ##
@@ -61,18 +69,6 @@ addFactor!(fg, [:x12; :l1], p2br2, autoinit=false )
 
 
 
-
-# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
-# at = initInferTreeUp!(fg, tree, drawtree=true)
-#
-#
-# ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-# # downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
-# downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
-
-
-
-
 ## drive a little more
 
 # Drive around in a hexagon
@@ -92,13 +88,10 @@ addFactor!(fg, [:x18; :l1], p2br2, autoinit=false )
 
 
 
+
 tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
 
-
-
 at = initInferTreeUp!(fg, tree, drawtree=true)
-
-
 
 
 ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
@@ -116,24 +109,3 @@ downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
 # pl = drawPosesLandms(fg, meanmax=:max)
 # Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf"),pl)  # or PNG(...)
 # @async run(`evince /tmp/test2.pdf`)
-
-
-
-## Manually organized a non-async initialization sequence
-
-docliqs = [
-14;
-13;
-12;
-11;
-4;
-9;
-3;
-10;
-8;
-7;
-6; # with async
-5; # with async
-2;
-1
-]

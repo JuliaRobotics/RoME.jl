@@ -1,5 +1,5 @@
 
-# using Revise
+using Revise
 
 ##
 
@@ -12,10 +12,13 @@ using RoME
 #  Do some plotting
 # using RoMEPlotting
 
+# using Logging
+# logger = SimpleLogger(open("/tmp/out.txt", "w"))
+# global_logger(logger)
+
 # mkpath("/tmp/btdots")
 
-loopbt = Bool[true;]
-
+# loopbt = Bool[true;]
 
 
 ## start with an empty factor graph object
@@ -48,30 +51,28 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x6; :l1], p2br2, autoinit=false )
 
 
+
+
+# drawTree(tree,filepath="/tmp/btdots/bt_0.png")
+
+
+# @async begin
+#
+# count = 0
+# while loopbt[1]
+# count += 1
+# drawTree(tree,filepath="/tmp/btdots/bt_$count.png")
+# sleep(1.0)
+# end
+#
+# end
+
+
 tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
-
-
-drawTree(tree,filepath="/tmp/btdots/bt_0.png")
-
-
-@async begin
-
-count = 0
-while loopbt[1]
-count += 1
-drawTree(tree,filepath="/tmp/btdots/bt_$count.png")
-sleep(1.0)
-end
-
-end
-
-
 at = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
-
 ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-# downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
-downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
-
+downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
+# downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
 
 
 
@@ -93,13 +94,13 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x12; :l1], p2br2, autoinit=false )
 
 
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+batchSolve!(fg, drawpdf=true, treeinit=true)
 
-at = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
-
-ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-# downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
-downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
+# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+# at = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
+# ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
+# # downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
+# downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
 
 
 
@@ -122,14 +123,11 @@ addFactor!(fg, [:x18; :l1], p2br2, autoinit=false )
 
 
 
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
-
-
-at = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
-
-ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-# downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
-downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
+# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+# at = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
+# ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
+# # downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
+# downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
 
 
 
@@ -150,47 +148,17 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x24; :l1], p2br2, autoinit=false )
 
 
-tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
-
-
-
-
 # tree = batchSolve!(fg, recursive=true, treeinit=true, drawpdf=true, show=true)
-
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
 at = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
-
 ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-# downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
+# # downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
 downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
 
 
-loopbt[1] = false
+drawTree(tree)
 
-
-# @async begin
-#
-# count = 0
-# while loopbt[1]
-# count += 1
-# drawTree(tree,filepath="/tmp/btdots/bt_$count.png")
-# sleep(1.0)
-# end
-#
-# end
-
-
-
-
-
-
-# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
-# #
-# at = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
-#
-# ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-# # downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
-# downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
-
+# loopbt[1] = false
 
 
 0
@@ -203,6 +171,7 @@ using RoMEPlotting
 
 pl = drawPosesLandms(fg, meanmax=:max)
 Gadfly.draw(Gadfly.SVG("/tmp/test2.svg"),pl)  # or PNG(...)
+
 @async run(`eog /tmp/test2.svg`)
 
 
