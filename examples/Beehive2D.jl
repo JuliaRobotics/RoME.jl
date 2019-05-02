@@ -215,7 +215,7 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 ## hex 8
 
-posecount = offsetHexLeg(fg, posecount, direction=:left)
+# posecount = offsetHexLeg(fg, posecount, direction=:left)
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 
