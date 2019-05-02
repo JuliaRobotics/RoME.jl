@@ -25,7 +25,7 @@ TransformUtils = "9b8138ad-1b09-5408-aa39-e87ed6d21b63"
 [compat]
 ApproxManifoldProducts = "0.0.3"
 CoordinateTransformations = "0.5.0"
-Distributions = "0.16.1"
+Distributions = "0.18.0"
 DocStringExtensions = "0.5.0"
 FileIO = "1.0.2"
 Graphs = "0.10.2"
