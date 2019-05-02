@@ -82,6 +82,8 @@ writeGraphPdf(fg, show=true)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
+# pl = drawPosesLandms(fg, meanmax=:max)
+# Gadfly.draw(Gadfly.SVG("/tmp/test2.svg"),pl)  # or PNG(...)
 
 
 
@@ -90,22 +92,33 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
+# Add landmarks with Bearing range measurements
+addVariable!(fg, :l2, Point2, labels=["LANDMARK"])
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, autoinit=false )
+
 
 posecount = driveHex(fg, posecount)
 
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
-
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 
 writeGraphPdf(fg)
+
+
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
+pl = drawPosesLandms(fg, meanmax=:max)
+Gadfly.draw(Gadfly.SVG("/tmp/test2.svg"),pl)  # or PNG(...)
+
+tree = batchSolve!(fg, drawpdf=true)
 
 
 
+ls(fg, :l2)
 
 
 ## hex 3
@@ -114,9 +127,9 @@ posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 posecount = driveHex(fg, posecount)
 
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
 writeGraphPdf(fg)
@@ -215,7 +228,27 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 ## hex 8
 
-# posecount = offsetHexLeg(fg, posecount, direction=:left)
+posecount = offsetHexLeg(fg, posecount, direction=:right)
+
+
+posecount = driveHex(fg, posecount)
+
+# # Add landmarks with Bearing range measurements
+# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+
+
+writeGraphPdf(fg)
+
+tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+
+
+
+
+
+
+## hex 9
+
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 
@@ -236,6 +269,28 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
 
+## hex 10
+
+posecount = offsetHexLeg(fg, posecount, direction=:left)
+posecount = offsetHexLeg(fg, posecount, direction=:right)
+
+
+posecount = driveHex(fg, posecount)
+
+# # Add landmarks with Bearing range measurements
+# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+
+
+writeGraphPdf(fg)
+
+tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+
+
+
+
+
+
 
 0
 
@@ -247,7 +302,7 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 using RoMEPlotting
 
 
-pl = drawPosesLandms(fg, meanmax=:mean)
+pl = drawPosesLandms(fg, meanmax=:max)
 Gadfly.draw(Gadfly.SVG("/tmp/test2.svg"),pl)  # or PNG(...)
 
 @async run(`eog /tmp/test2.svg`)
