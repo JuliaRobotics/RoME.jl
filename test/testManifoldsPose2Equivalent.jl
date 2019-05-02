@@ -174,10 +174,10 @@ addFactor!(fg, [:x1], Prior(r))
 
 stuff = IIF.localProduct(fg, :x1)
 
-@test 0.95*N < sum( -10 .< getPoints(stuff[1])[1,:] .< 15)
-@test 0.95*N < sum( -10 .< getPoints(stuff[1])[2,:] .< 15)
+@test 0.90*N < sum( -10 .< getPoints(stuff[1])[1,:] .< 15)
+@test 0.90*N < sum( -10 .< getPoints(stuff[1])[2,:] .< 15)
 
-@test 0.95*N < sum(2.7 .< abs.(getPoints(stuff[1])[3,:]) .< 1.01*pi)
+@test 0.90*N < sum(2.7 .< abs.(getPoints(stuff[1])[3,:]) .< 1.01*pi)
 
 
 ##
