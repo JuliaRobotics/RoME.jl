@@ -121,118 +121,106 @@ posecount = driveHex(fg, posecount)
 
 writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
+tree = wipeBuildNewTree!(fg, drawpdf=true)
 
 
 
 
+## Manually organized a non-async initialization sequence
 
 
-## hex 4
+## First half of tree (easy half)
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+doorder = [:x10; :x8; :x6; :x0; :x4; :x2; :x9; :l1; :x1; :x3]
+docliqs = map(x->whichCliq(tree, x).index, doorder)
 
-posecount = driveHex(fg, posecount)
 
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+for i in docliqs
+cliq = tree.cliques[i]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
+if !(clst in [:upsolved; :downsolved; :marginalized])
+  error("Clique $(cliq.index), initInferTreeUp! -- cliqInitSolveUp! did not arrive at the desired solution statu: $clst")
+end
+end
 
 
-writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
 
 
+## Second half of tree
 
+# easy branch
+doorder = [:x14; :x12; :x13]
+docliqs = map(x->whichCliq(tree, x).index, doorder)
 
+for i in docliqs
+cliq = tree.cliques[i]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
+if !(clst in [:upsolved; :downsolved; :marginalized])
+  error("Clique $(cliq.index), initInferTreeUp! -- cliqInitSolveUp! did not arrive at the desired solution statu: $clst")
+end
+end
 
-## hex 5
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
 
-posecount = driveHex(fg, posecount)
 
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+## the long down chain problem
 
 
-writeGraphPdf(fg)
+doorder = [:x18; :x16; :x19; :x17]
+docliqs = map(x->whichCliq(tree, x).index, doorder)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
+cliq = tree.cliques[docliqs[1]]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
 
+cliq = tree.cliques[docliqs[2]]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
 
+cliq = tree.cliques[docliqs[3]]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
+drawTree(tree)
 
-## hex 6
+cliq = tree.cliques[docliqs[4]]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=2 )
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+drawTree(tree)
 
-posecount = driveHex(fg, posecount)
+# blocking call
+# cliq = tree.cliques[docliqs[1]]
+# clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+cliq = tree.cliques[docliqs[2]]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
+cliq = tree.cliques[docliqs[3]]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
-writeGraphPdf(fg)
+cliq = tree.cliques[docliqs[1]]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+cliq = tree.cliques[docliqs[3]]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
+cliq = tree.cliques[docliqs[4]]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=2 )
 
 
+cliq = tree.cliques[1]
+clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=2 )
 
 
 
-## hex 7
 
-posecount = offsetHexLeg(fg, posecount, direction=:left)
-posecount = offsetHexLeg(fg, posecount, direction=:right)
 
-
-posecount = driveHex(fg, posecount)
-
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
-
-
-writeGraphPdf(fg)
-
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
-
-
-
-
-
-
-## hex 8
-
-posecount = offsetHexLeg(fg, posecount, direction=:left)
-posecount = offsetHexLeg(fg, posecount, direction=:right)
-
-
-posecount = driveHex(fg, posecount)
-
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
-
-
-writeGraphPdf(fg)
-
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
-
-
-
-
+ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
+downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
 
 
 
