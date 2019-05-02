@@ -121,7 +121,12 @@ posecount = driveHex(fg, posecount)
 
 writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+
+tree = wipeBuildNewTree!(fg, drawpdf=true)
+
+at = initInferTreeUp!(fg,tree, drawtree=true, limititers=50)
+
+# tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
 
