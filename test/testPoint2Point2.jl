@@ -22,6 +22,21 @@ inferOverTree!(fg, tree)
 
 end
 
+# using RoMEPlotting
+# writeGraphPdf(fg, show=true)
+#
+# plotKDE(fg, :l1)
+#
+# stuff = plotLocalProduct(fg, :l1, levels=3)
+#
+# drawTree(tree, show=true)
+#
+# stuff = treeProductUp(fg, tree, :x0, :l1)
+# stuff = treeProductUp(fg, tree, :l1, :l1)
+#
+# plotKDE(kde!(stuff[1]), levels=3)
+# drawLandms(fg)
+
 
 @testset "test Point2Point2Range{T}..." begin
 
