@@ -13,9 +13,9 @@ using RoME
 using RoMEPlotting
 
 
-function driveHex(fgl, posecount::Int)
+function driveHex(fgl, posecount::Int; steps::Int=5)
     # Drive around in a hexagon
-    for i in (posecount-1):(posecount-1+5)
+    for i in (posecount-1):(posecount-1+steps)
         psym = Symbol("x$i")
         posecount += 1
         nsym = Symbol("x$(i+1)")
@@ -97,7 +97,7 @@ p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, autoinit=false )
 
 
-posecount = driveHex(fg, posecount)
+posecount = driveHex(fg, posecount, steps=5)
 
 
 # Add landmarks with Bearing range measurements
@@ -115,8 +115,15 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tm
 
 
 
-# tree = batchSolve!(fg, drawpdf=true)
 
+# new sighting
+
+addVariable!(fg, :l0, Point2, labels=["LANDMARK"])
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x5; :l0], p2br, autoinit=false )
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x12; :l0], p2br2, autoinit=false )
 
 
 
@@ -139,9 +146,19 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, autoinit=false )
 
 
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x18; :l1], p2br2, autoinit=false )
+
+
+
 writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+
+
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+
+
 
 
 
@@ -153,17 +170,41 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
+
+# Add landmarks with Bearing range measurements
+addVariable!(fg, :l4, Point2, labels=["LANDMARK"])
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l4], p2br, autoinit=false )
+
+
+
 posecount = driveHex(fg, posecount)
 
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l4], p2br2, autoinit=false )
 
 
 writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
+
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+
+
+
+
+
+## Special sighting
+
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x19; :l0], p2br2, autoinit=false )
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x26; :l0], p2br2, autoinit=false )
 
 
 
@@ -174,11 +215,18 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
+# Add landmarks with Bearing range measurements
+addVariable!(fg, :l5, Point2, labels=["LANDMARK"])
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l5], p2br, autoinit=false )
+
+
 posecount = driveHex(fg, posecount)
 
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l5], p2br2, autoinit=false )
 
 
 writeGraphPdf(fg)
@@ -186,6 +234,36 @@ writeGraphPdf(fg)
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
+
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+
+
+
+
+
+
+## Add more loop closures signthings
+
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x4; :l5], p2br2, autoinit=false )
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x25; :l2], p2br2, autoinit=false )
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x32; :l3], p2br2, autoinit=false )
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x33; :l0], p2br2, autoinit=false )
+
+
+
+writeGraphPdf(fg)
+
+tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
 
 
 
@@ -195,16 +273,37 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
+# Add landmarks with Bearing range measurements
+addVariable!(fg, :l6, Point2, labels=["LANDMARK"])
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br, autoinit=false )
+
+
 posecount = driveHex(fg, posecount)
 
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br2, autoinit=false )
+
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x11; :l6], p2br2, autoinit=false )
+
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
+
 
 
 writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+
+
+
+
 
 
 
