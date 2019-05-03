@@ -1,5 +1,4 @@
 
-using Fontconfig, Cairo, Gadfly
 using RoME
 
 using Test
