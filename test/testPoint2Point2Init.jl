@@ -22,7 +22,7 @@ addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)), autoinit=false)
 addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)), autoinit=false)
 
 
-tree = wipeBuildNewTree!(fg)
+tree = wipeBuildNewTree!(fg, drawpdf=false)
 # eo = getEliminationOrder(fg, ordering=:qr)
 # eo = [1;3;5]
 # tree = buildTreeFromOrdering!(fgl,eo)
@@ -36,11 +36,11 @@ cliq = tree.cliques[1]
 clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=false, limititers=1 )
 
 
-@test 20 < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
-@test 20 < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
+@test 10 < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
+@test 10 < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
 
-@test 20 < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
-@test 20 < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
+@test 10 < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
+@test 10 < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
 
 
 
@@ -54,7 +54,7 @@ clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=false, limititers=1 )
 
 
 ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
+downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=false);
 
 
 
