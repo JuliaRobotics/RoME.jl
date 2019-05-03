@@ -25,7 +25,7 @@ addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)), autoinit=false)
 tree = wipeBuildNewTree!(fg, drawpdf=false)
 # eo = getEliminationOrder(fg, ordering=:qr)
 # eo = [1;3;5]
-# tree = buildTreeFromOrdering!(fgl,eo)
+# tree = buildTreeFromOrdering!(fg,eo)
 
 
 cliq = tree.cliques[2]
