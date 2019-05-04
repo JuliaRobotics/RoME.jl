@@ -111,7 +111,7 @@ writeGraphPdf(fg)
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 
 
 
@@ -144,6 +144,8 @@ writeGraphPdf(fg)
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
+
 
 
 
@@ -165,6 +167,8 @@ writeGraphPdf(fg)
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
+
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 
 
 
@@ -228,6 +232,27 @@ writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
+
+"""
+    $SIGNATURES
+
+Free all variables from marginalization.
+"""
+function unmarginalizeAll!(fg::FactorGraph)
+  fg.isfixedlag = false
+  fg.qfl = 9999999999
+  vsyms = union(ls(fg)...)
+  for sym in vsyms
+    getData(fg, sym).ismargin = false
+  end
+  nothing
+end
+
+
+unmarginalizeAll!(fg)
+
+
+tree = batchSolve!(fg, treeinit=false, drawpdf=true, show=true)
 
 
 
