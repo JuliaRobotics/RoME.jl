@@ -76,7 +76,7 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg, show=true)
+# writeGraphPdf(fg, show=true)
 
 
 
@@ -104,7 +104,7 @@ posecount = driveHex(fg, posecount)
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 
 
 
@@ -115,7 +115,14 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /
 
 
 
-# tree = batchSolve!(fg, drawpdf=true)
+# new sighting
+
+addVariable!(fg, :l0, Point2, labels=["LANDMARK"])
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x5; :l0], p2br, autoinit=false )
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x12; :l0], p2br2, autoinit=false )
 
 
 
@@ -139,7 +146,11 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg)
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x19; :l0], p2br2, autoinit=false )
+
+
+# writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
@@ -147,8 +158,14 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 
 
+plotLocalProduct(fg, :l0)
 
+pts = approxConv(fg, :x12l0f1, :l0)
 
+plotKDE(kde!(pts))
+plotPose(fg, :x12)
+
+plotKDE(fg, [:x12, :l0], dims=[1;2])
 
 
 ## hex 4
@@ -162,7 +179,7 @@ posecount = driveHex(fg, posecount)
 # addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
@@ -185,7 +202,7 @@ posecount = driveHex(fg, posecount)
 # addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
@@ -206,7 +223,7 @@ posecount = driveHex(fg, posecount)
 # addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
@@ -228,31 +245,19 @@ posecount = driveHex(fg, posecount)
 # addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
-"""
-    $SIGNATURES
 
-Free all variables from marginalization.
-"""
-function unmarginalizeAll!(fg::FactorGraph)
-  fg.isfixedlag = false
-  fg.qfl = 9999999999
-  vsyms = union(ls(fg)...)
-  for sym in vsyms
-    getData(fg, sym).ismargin = false
-  end
-  nothing
-end
+resetVariableAllInitializations!(fg)
 
 
-unmarginalizeAll!(fg)
+unmarginalizeVariablesAll!(fg)
 
 
-tree = batchSolve!(fg, treeinit=false, drawpdf=true, show=true)
+tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
 
@@ -270,7 +275,7 @@ posecount = driveHex(fg, posecount)
 # addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
@@ -291,7 +296,7 @@ posecount = driveHex(fg, posecount)
 # addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 

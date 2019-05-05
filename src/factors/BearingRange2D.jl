@@ -7,7 +7,7 @@
 
 Bearing and Range constraint from a Pose2 to Point2 variable.
 """
-mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwise
+mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
     bearing::B
     range::R
     Pose2Point2BearingRange{B,R}() where {B,R} = new{B,R}()
@@ -28,14 +28,17 @@ function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
         xi::Array{Float64,2},
         lm::Array{Float64,2} )
   #
-  res[1] = lm[1,idx] - (meas[1][2,idx]*cos( meas[1][1,idx]+xi[3,idx] ) + xi[1,idx])
-  res[2] = lm[2,idx] - (meas[1][2,idx]*sin( meas[1][1,idx]+xi[3,idx] ) + xi[2,idx])
+  res[1] = ( lm[1,idx] - (meas[1][2,idx]*cos( meas[1][1,idx]+xi[3,idx] ) + xi[1,idx]) )^2
+  res[2] = ( lm[2,idx] - (meas[1][2,idx]*sin( meas[1][1,idx]+xi[3,idx] ) + xi[2,idx]) )^2
+
+  res[1] += res[2]
+  res[2] = 0.0
   # quick check
   # pose = (0,0,0),  bear = 0.0,  range = 10.0   ==>  lm = (10,0)
   # pose = (0,0,0),  bear = pi/2,  range = 10.0   ==>  lm = (0,10)
   # pose = (0,0,pi/2),  bear = 0.0,  range = 10.0   ==>  lm = (0,10)
   # pose = (0,0,pi/2),  bear = pi/2,  range = 10.0   ==>  lm = (-10,0)
-  nothing
+  return res[1]
 end
 
 # import RoME: Pose2Point2BearingRange
