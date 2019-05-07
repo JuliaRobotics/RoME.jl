@@ -270,6 +270,7 @@ addFactor!(fg, [:x33; :l0], p2br2, autoinit=false )
 
 
 
+
 writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)

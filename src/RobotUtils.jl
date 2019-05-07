@@ -763,6 +763,26 @@ function addSoftEqualityPoint2D(fgl::FactorGraph, l1::Symbol, l2::Symbol;
   addFactor!(fgl, [l1,l2], pp, ready=ready)
 end
 
+"""
+    $SIGNATURES
+
+Build a basic factor graph in Pose2 with two `Pose2` and one landmark `Point2` variables,
+along with `PriorPose2` on `:x0` and `Pose2Pose2` to `:x1`.  Also a `Pose2Point2BearingRange`
+to landmark `:l1`.
+"""
+function basicFactorGraphExample(::Type{Pose2}=Pose2; addlandmark::Bool=true)
+  fg = initfg()
+
+  addVariable!(fg, :x0, Pose2)
+  addVariable!(fg, :x1, Pose2)
+  !addlandmark ? nothing : addVariable!(fg, :l1, Point2)
+
+  addFactor!(fg, [:x0], PriorPose2(MvNormal([0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))))
+  addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal([10.0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))))
+  !addlandmark ? nothing : addFactor!(fg, [:x1;:l1], Pose2Point2BearingRange(Normal(0.0,0.01), Normal(20.0, 1.0)))
+
+  return fg
+end
 
 
 #
