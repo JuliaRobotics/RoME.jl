@@ -150,7 +150,7 @@ statemachine3(csmc3, verbose=true, recordhistory=true)
 
 
 
-
+drawTree(tree)
 
 
 cliq = whichCliq(tree, :x3)

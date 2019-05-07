@@ -82,6 +82,8 @@ writeGraphPdf(fg, show=true)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
+
+
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
 
 
