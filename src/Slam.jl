@@ -68,7 +68,7 @@ function addposeFG!(slaml::SLAMWrapper,
   end
 
   # set node val from new constraints as init
-  val = predictbelief(slaml.fg, vnext, facts, N=N)
+  val, = predictbelief(slaml.fg, vnext, facts, N=N)
   setVal!(vnext, val)
   IncrementalInference.dlapi.updatevertex!(slaml.fg, vnext)
 

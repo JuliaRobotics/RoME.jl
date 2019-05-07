@@ -29,8 +29,12 @@ addVariable!(fg, :l2, Point2, labels=["LANDMARK"])
 addFactor!(fg, [:l1], Prior(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 addFactor!(fg, [:l2], Prior(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 
-setVal!(fg, :l1, predictbelief(fg, :l1, [:l1f1;]))
-setVal!(fg, :l2, predictbelief(fg, :l2, [:l2f1;]))
+val, = predictbelief(fg, :l1, [:l1f1;])
+setVal!(fg, :l1, val)
+
+val, = predictbelief(fg, :l2, [:l2f1;])
+setVal!(fg, :l2, val)
+
 
 addVariable!(fg, :x0, Pose2)
 # addFactor!(fg, [:x0], Prior(MvNormal([0.0;0.0;0], Matrix(Diagonal([1.0;1.0;0.01].^2)))) )
