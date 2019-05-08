@@ -8,7 +8,7 @@
 # using Gadfly
 
 using RoME
-import IncrementalInference: CliqStateMachineContainer
+# import IncrementalInference: CliqStateMachineContainer
 
 #  Do some plotting
 # using RoMEPlotting
@@ -51,6 +51,8 @@ tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
 
 
 
+
+
 cliq = whichCliq(tree, :x0)
 history6 = cliqInitSolveUpByStateMachine!(fg, tree, cliq,
       drawtree=true, limititers=20, recordhistory=true)
@@ -80,7 +82,8 @@ drawTree(tree)
 
 cliq = whichCliq(tree, :x4)
 
-csmc = CliqStateMachineContainer(fg, tree, cliq, initfg(), true, false, false, true, true)
+# csmc = CliqStateMachineContainer(fg, tree, cliq, initfg(), true, false, false, true, true)
+csmc = CliqStateMachineContainer(fg, initfg(), tree, cliq, getParent(tree, cliq), getChildren(tree, cliq), true, false, false, true, true)
 
 statemachine = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
 statemachine(csmc, verbose=true, recordhistory=true)
@@ -99,7 +102,9 @@ statemachine(csmc, verbose=true, recordhistory=true)
 
 
 cliq3 = whichCliq(tree, :x6)
-csmc3 = CliqStateMachineContainer(fg, tree, cliq3, initfg(), true, false, false, true, true)
+# csmc3 = CliqStateMachineContainer(fg, tree, cliq3, initfg(), true, false, false, true, true)
+csmc3 = CliqStateMachineContainer(fg, initfg(), tree, cliq3, getParent(tree, cliq3), getChildren(tree, cliq3), true, false, false, true, true)
+
 
 statemachine3 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
 statemachine3(csmc3, verbose=true, recordhistory=true)
@@ -166,7 +171,7 @@ drawTree(tree)
 using RoMEPlotting
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
 
 
 
