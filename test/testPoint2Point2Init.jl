@@ -29,27 +29,33 @@ tree = wipeBuildNewTree!(fg, drawpdf=false)
 
 
 cliq = tree.cliques[2]
-clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=false, limititers=1 )
+clst = cliqInitSolveUpByStateMachine!(fg, tree, cliq, drawtree=false, limititers=15 )
 
 
 cliq = tree.cliques[1]
-clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=false, limititers=1 )
+clst = cliqInitSolveUpByStateMachine!(fg, tree, cliq, drawtree=false, limititers=15 )
 
 
-@test 10 < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
-@test 10 < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
-
-@test 10 < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
-@test 10 < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
-
+# using RoMEPlotting
+#
+# plotKDE(fg, [:x0;:x1]) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+# plotKDE(fg, :l1) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
 
 
-@test 80 < sum( 90 .< getVal(fg, :x0)[1,:] .< 110 )
-@test 80 < sum( -10 .< getVal(fg, :x0)[2,:] .< 10 )
+@test 20 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
+@test 20 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
+
+@test 20 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
+@test 20 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
 
 
-@test 80 < sum( -10 .< getVal(fg, :x1)[1,:] .< 10 )
-@test 80 < sum( 90 .< getVal(fg, :x1)[2,:] .< 110 )
+
+@test 80 < sum( 80 .< getVal(fg, :x0)[1,:] .< 120 )
+@test 80 < sum( -20 .< getVal(fg, :x0)[2,:] .< 20 )
+
+
+@test 80 < sum( -20 .< getVal(fg, :x1)[1,:] .< 20 )
+@test 80 < sum( 80 .< getVal(fg, :x1)[2,:] .< 120 )
 
 
 
@@ -58,20 +64,20 @@ downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=false);
 
 
 
-@test 20 < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
-@test 20 < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
+@test 20 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
+@test 20 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
 
-@test 20 < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
-@test 20 < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
-
-
-
-@test 80 < sum( 90 .< getVal(fg, :x0)[1,:] .< 110 )
-@test 80 < sum( -10 .< getVal(fg, :x0)[2,:] .< 10 )
+@test 20 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
+@test 20 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
 
 
-@test 80 < sum( -10 .< getVal(fg, :x1)[1,:] .< 10 )
-@test 80 < sum( 90 .< getVal(fg, :x1)[2,:] .< 110 )
+
+@test 80 < sum( 80 .< getVal(fg, :x0)[1,:] .< 120 )
+@test 80 < sum( -20 .< getVal(fg, :x0)[2,:] .< 20 )
+
+
+@test 80 < sum( -20 .< getVal(fg, :x1)[1,:] .< 20 )
+@test 80 < sum( 80 .< getVal(fg, :x1)[2,:] .< 120 )
 
 
 end
