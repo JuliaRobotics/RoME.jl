@@ -48,7 +48,7 @@ end
 ## start with an empty factor graph object
 fg = initfg()
 fg.isfixedlag = true
-fg.qfl = 15
+fg.qfl = 25
 posecount = 0
 
 # Add the first pose :x0
@@ -84,7 +84,7 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
 
 
 
@@ -114,6 +114,8 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
+
+
 
 
 
@@ -317,7 +319,7 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /t
 
 
 
-
+drawTree(tree, imgs=true)
 
 
 

@@ -8,7 +8,6 @@
 # using Gadfly
 
 using RoME
-# import IncrementalInference: CliqStateMachineContainer
 
 #  Do some plotting
 # using RoMEPlotting
