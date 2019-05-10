@@ -76,12 +76,27 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg, show=true)
-
+# # writeGraphPdf(fg, show=true)
+# tree = wipeBuildNewTree!(fg)
+#
+# cliq = tree.cliques[4]
+# ids = IncrementalInference.getCliqFrontalVarIds(cliq)
+# @show syms = map(d->getSym(fg, d), ids)
+#
 
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
+
+tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, downsolve=false , recordcliqs=[:x12;] )
+tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, upsolve=false ) #, recordcliqs=[:x3;]
+
+
+
+# cliq = whichCliq(tree, :x3)
+# hist = getData(cliq).statehistory
+
+drawTree(tree)
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
@@ -106,11 +121,159 @@ posecount = driveHex(fg, posecount, steps=5)
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 # addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
+tree = wipeBuildNewTree!(fg, drawpdf=true)
 
 
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)  #, recordcliqs=[:x12;], limititers=30  , downsolve=false)
+
+
+# prevx12hist = deepcopy(getCliqSolveHistory(tree, :x12))
+
+
+
+# getData(whichCliq(tree, :x13)).statehistory = Vector{Tuple{Int, Function, CliqStateMachineContainer}}()
+
+
+
+
+
+initInferTreeUp!(fg, tree, drawtree=true, limititers=20, recordcliqs=[:x12;])
+
+
+
+
+
+
+
+drawTree(tree)
+
+cliq = whichCliq(tree, :x12)
+getCliqStatus(cliq)
+hist = getCliqSolveHistory(tree, :x12)
+
+
+
+
+
+
+
+
+
+
+
+
+# attempt redo of init up solve
+iter = 20
+csmc = deepcopy(hist[iter][3])
+
+
+hist[iter][2](csmc)
+
+
+
+prnt = getParent(csmc.tree, csmc.cliq)[1]
+dwinmsgs = prepCliqInitMsgsDown!(csmc.cliqSubFg, csmc.tree, prnt)
+
+
+
+
+cliq = whichCliq(tree, :x12)
+prnt = getParent(tree, cliq)[1]
+dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
+
+
+
+
+
+
+
+
+
+
+
+cliq = whichCliq(tree, :x12)
+cliqInitSolveUpByStateMachine!(fg, tree, cliq, drawtree=true, limititers=20, recordhistory=true )
+
+
+
+cliq = whichCliq(tree, :x13)
+getCliqStatus(cliq)
+cliqInitSolveUpByStateMachine!(fg, tree, cliq, drawtree=true, limititers=20, recordhistory=true )
+
+
+
+
+cliq = whichCliq(tree,:x12)
+prnt = getParent(tree, cliq)[1]
+dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
+
+
+
+
+
+
+# import IncrementalInference: attemptCliqInitUp_StateMachine, doCliqAutoInitUp!, notifyCliqUpInitStatus!, initInferTreeUp!
+
+function initInferTreeUp!(fgl::FactorGraph,
+                          treel::BayesTree;
+                          drawtree::Bool=false,
+                          N::Int=100,
+                          limititers::Int=-1,
+                          recordcliqs::Vector{Symbol}=Symbol[] )
+  #
+  # revert :downsolved status to :initialized in preparation for new upsolve
+  resetTreeCliquesForUpSolve!(treel)
+  setTreeCliquesMarginalized!(fgl, treel)
+  drawtree ? drawTree(treel, show=false) : nothing
+
+  # queue all the tasks
+  alltasks = Vector{Task}(undef, length(treel.cliques))
+  cliqHistories = Dict{Int,Vector{Tuple{Int, Function, CliqStateMachineContainer}}}()
+  @sync begin
+    if !isTreeSolved(treel, skipinitialized=true)
+      # duplicate int i into async (important for concurrency)
+      for i in 1:length(treel.cliques)
+        alltasks[i] = @async begin
+          clst = :na
+          cliq = treel.cliques[i]
+          ids = getCliqFrontalVarIds(cliq)
+          syms = map(d->getSym(fgl, d), ids)
+          recordthiscliq = length(intersect(recordcliqs,syms)) > 0
+          try
+            history = cliqInitSolveUpByStateMachine!(fgl, treel, cliq, drawtree=drawtree, limititers=limititers, recordhistory=recordthiscliq )
+            cliqHistories[i] = history
+            clst = getCliqStatus(cliq)
+            # clst = cliqInitSolveUp!(fgl, treel, cliq, drawtree=drawtree, limititers=limititers )
+          catch err
+            bt = catch_backtrace()
+            println()
+            showerror(stderr, err, bt)
+            error(err)
+          end
+          # if !(clst in [:upsolved; :downsolved; :marginalized])
+          #   error("Clique $(cliq.index), initInferTreeUp! -- cliqInitSolveUp! did not arrive at the desired solution statu: $clst")
+          # end
+        end # async
+      end # for
+    end # if
+  end # sync
+
+  # post-hoc store possible state machine history in clique (without recursively saving earlier history inside state history)
+  for i in 1:length(treel.cliques)
+    if haskey(cliqHistories, i)
+      getData(treel.cliques[i]).statehistory=cliqHistories[i]
+    end
+  end
+
+  return alltasks
+end
+
+
+
+
+
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
@@ -141,7 +304,7 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br, autoinit=false )
 posecount = driveHex(fg, posecount)
 
 
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
