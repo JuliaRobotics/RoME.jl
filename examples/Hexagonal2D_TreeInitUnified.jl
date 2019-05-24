@@ -64,7 +64,7 @@ drawPosesLandms(fg, meanmax=:max)
 tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
 
 
-@sync at = initInferTreeUp!(fg, tree, drawtree=true)
+@sync at,ch = initInferTreeUp!(fg, tree, drawtree=true)
 
 
 

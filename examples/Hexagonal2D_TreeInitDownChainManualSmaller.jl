@@ -146,7 +146,7 @@ drawTree(tree)
 
 
 
-at = initInferTreeUp!(fg, tree, drawtree=true)
+at, ch = initInferTreeUp!(fg, tree, drawtree=true)
 
 
 

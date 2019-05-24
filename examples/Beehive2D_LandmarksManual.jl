@@ -76,22 +76,53 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-# # writeGraphPdf(fg, show=true)
-# tree = wipeBuildNewTree!(fg)
+
+
+tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
+                    returntasks=true, limititers=200, recordcliqs=[:x2;:x1;:x3],
+                    downsolve=true, upsolve=true )
+
+
 #
-# cliq = tree.cliques[4]
-# ids = IncrementalInference.getCliqFrontalVarIds(cliq)
-# @show syms = map(d->getSym(fg, d), ids)
-#
 
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
+
+0
 
 
-# tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, downsolve=false ) #, recordcliqs=[:x3;] )
-# tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, upsolve=false ) #, recordcliqs=[:x3;]
+## debug
 
 
+# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+# stuff = inferOverTree!(fg,tree,downsolve=false,drawpdf=true,treeinit=true,limititers=200,recordcliqs=Symbol[]  )
+
+
+
+# tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true, downsolve=false ) #, recordcliqs=[:x3;] )
+# tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true, upsolve=false ) #, recordcliqs=[:x3;]
+
+printCliqHistorySummary(tree, :x2)
+
+
+
+# hist = getCliqSolveHistory(tree, :x2)
+# animateStateMachineHistoryByTime(hist, frames=100, folder="animatestate")
+
+
+
+animateCliqStateMachines(tree, [:x2;:x1;:x3], frames=100)
+
+# drawStateMachineHistory(hist, show=true)
+
+
+
+
+# stuff = sandboxCliqResolveStep(tree, :x2, 6)
+
+
+0
+##
 
 # cliq = whichCliq(tree, :x3)
 # hist = getData(cliq).statehistory
@@ -99,7 +130,6 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 # drawTree(tree)
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
 
 
 
@@ -116,16 +146,171 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, autoinit=false )
 
 posecount = driveHex(fg, posecount, steps=5)
 
-#
+
+## Adding here fails partial tree init issue
 # # Add landmarks with Bearing range measurements
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 # addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 
-# writeGraphPdf(fg)
+
+# drawCliqSubgraphUp(fg, tree, :x7)
+
+
+##
+
+
+tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
+                  returntasks=true, limititers=100, recordcliqs=[:x8;:x5;:x11;:x12;:x13],
+                  downsolve=false, upsolve=true )
+                  #, skipcliqids=[1;] )
+
+
+0
+
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");
+
+drawTree(tree)
 
 
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true ) #, recordcliqs=[:x12;] ) #, limititers=30  , downsolve=false)
+printCliqHistorySummary(tree,:x12)
+printCliqHistorySummary(tree,:x13)
+printCliqHistorySummary(tree,:x11)
+#
+
+
+0
+
+
+#
+#
+# tree = wipeBuildNewTree!(fg, drawpdf=true, imgs=false)
+# # drawTree(tree, imgs=false)
+#
+#
+#
+#
+# skipids = [1;2;3;4;5;6;7]
+# stuff, cliqhist = initInferTreeUp!(fg,tree;drawtree=true,limititers=200,recordcliqs=Symbol[:x8;:x5;:x11;:x12;:x13], skipcliqids=skipids )
+#
+#
+#
+# cliq7 = whichCliq(tree, :x9)
+# csmc7 = CliqStateMachineContainer(fg, initfg(), tree, cliq7, getParent(tree, cliq7), getChildren(tree, cliq7), false, true, true)
+# statemachine7 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
+# for i in 1:11
+#   statemachine7(csmc7, verbose=true, recordhistory=true)
+#   drawTree(tree)
+# end
+#
+# ts7 = @async statemachine7(csmc7, verbose=true, recordhistory=true)
+#
+# # printCliqHistorySummary(statemachine7.history)
+# # drawTree(tree)
+#
+#
+#
+#
+# cliq3 = whichCliq(tree, :x8)
+# csmc3 = CliqStateMachineContainer(fg, initfg(), tree, cliq3, getParent(tree, cliq3), getChildren(tree, cliq3), false, true, true)
+# statemachine3 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
+# for i in 1:4
+#   statemachine3(csmc3, verbose=true, recordhistory=true)
+#   drawTree(tree)
+# end
+#
+# ts3 = @async statemachine3(csmc3, verbose=true, recordhistory=true)
+# # drawTree(tree)
+#
+# printCliqHistorySummary(statemachine3.history)
+#
+#
+#
+#
+# cliq4 = whichCliq(tree, :l1)
+# csmc4 = CliqStateMachineContainer(fg, initfg(), tree, cliq4, getParent(tree, cliq4), getChildren(tree, cliq4), false, true, true)
+# statemachine4 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
+# for i in 1:10
+#   statemachine4(csmc4, verbose=true, recordhistory=true)
+#   drawTree(tree)
+# end
+#
+#
+#
+# printCliqHistorySummary(statemachine4.history)
+# # drawTree(tree)
+#
+#
+#
+# ## definitely in a loop here, while waiting for :x9 down init to complete
+# for i in 1:13
+#   statemachine3(csmc3, verbose=true, recordhistory=true)
+#   drawTree(tree)
+# end
+#
+#
+# printCliqHistorySummary(statemachine3.history)
+#
+#
+#
+#
+# cliq7 = whichCliq(tree, :x9)
+# csmc7 = CliqStateMachineContainer(fg, initfg(), tree, cliq7, getParent(tree, cliq7), getChildren(tree, cliq7), false, true, true)
+# statemachine7 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
+# for i in 1:12
+#   statemachine7(csmc7, verbose=true, recordhistory=true)
+#   drawTree(tree)
+# end
+#
+#
+# printCliqHistorySummary(statemachine7.history)
+#
+#
+#
+#
+#
+#
+# cliq2 = whichCliq(tree, :x5)
+# csmc2 = CliqStateMachineContainer(fg, initfg(), tree, cliq2, getParent(tree, cliq2), getChildren(tree, cliq2), false, true, true)
+# statemachine2 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
+# for i in 1:4
+#   statemachine2(csmc2, verbose=true, recordhistory=true)
+#   drawTree(tree)
+# end
+#
+# t2 = @async statemachine2(csmc2, verbose=true, recordhistory=true)
+#
+#
+# ts3 = @async statemachine3(csmc3, verbose=true, recordhistory=true)
+# ts3 = @async statemachine3(csmc3, verbose=true, recordhistory=true)
+# ts3 = @async statemachine3(csmc3, verbose=true, recordhistory=true)
+# ts3 = @async statemachine3(csmc3, verbose=true, recordhistory=true)
+# ts3 = @async statemachine3(csmc3, verbose=true, recordhistory=true)
+# printCliqHistorySummary(statemachine3.history)
+# drawTree(tree)
+#
+#
+# statemachine2(csmc2, verbose=true, recordhistory=true)
+# statemachine2(csmc2, verbose=true, recordhistory=true)
+# statemachine2(csmc2, verbose=true, recordhistory=true)
+# statemachine2(csmc2, verbose=true, recordhistory=true)
+# statemachine2(csmc2, verbose=true, recordhistory=true)
+#
+#
+#
+# ## what is going on with the state machine here??
+# printCliqHistorySummary(statemachine2.history)
+#
+#
+#
+#
+#
+#
+# animateCliqStateMachines(tree, [:x8;:x5;:x11;:x12;], frames=500)
+#
+#
+# getCliqStatus(whichCliq(tree, :x8))
+#
 
 
 # tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, downsolve=false , recordcliqs=[:x12;] )
@@ -133,33 +318,6 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true ) #, recordcliqs=[
 #
 # tree = wipeBuildNewTree!(fg, drawpdf=true)
 # at = initInferTreeUp!(fg, tree, drawtree=true, limititers=65, recordcliqs=[:x12;])
-
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");
-
-
-# drawTree(tree)
-
-
-0
-
-
-
-
-
-# cliq = whichCliq(tree, :x12)
-# getCliqStatus(cliq)
-#
-# histx12 = getCliqSolveHistory(tree, :x12)
-# # prev_histx12 = deepcopy(getCliqSolveHistory(tree, :x12))
-#
-# string(histx12[1][2])
-#
-# for tup in histx12
-#   println("$(tup[1]), $(getCliqStatus(tup[3].cliq)),  \t$(split(string(tup[2]),'.')[end]), \t$(tup[3].proceed)||$(tup[3].forceproceed)")
-# end
-#
-# # getData(whichCliq(tree, :x13)).statehistory = Vector{Tuple{Int, Function, CliqStateMachineContainer}}()
-
 
 
 
@@ -190,7 +348,7 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /tmp/test.svg`)
@@ -203,6 +361,7 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /t
 
 
 # Add landmarks with Bearing range measurements
+
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, autoinit=false )
 
@@ -226,38 +385,12 @@ addFactor!(fg, [:x19; :l0], p2br2, autoinit=false )
 
 
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg")  #|| @async run(`eog /tmp/test.svg`)
 
 
-
-
-
-
-
-
-## Short debuggin
-
-spyCliqMat(tree, :l3)
-ls(fg, :x13)
-
-drawTree(tree, imgs=true)
-
-
-plotTreeProductUp(fg, tree, :l3);
-plotTreeProductUp(fg, tree, :x13);
-plotTreeProductUp(fg, tree, :x14);
-
-plotLocalProduct(fg, :l3);
-
-plotLocalProduct(fg, :x13);
-
-plotKDE(fg, :x13)
-
-plotKDE(getUpMsgs(tree, :x14)[:x13])
-plotKDE(getUpMsgs(tree, :x12)[:x13])
 
 
 
@@ -283,12 +416,12 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /tmp/test.svg`)
 
-
+0
 
 
 
@@ -334,7 +467,7 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
 
 
 
@@ -343,12 +476,11 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /t
 
 
 
-ls(fg)
+# ls(fg)
+# ls(fg, :l5)
 
-ls(fg, :l5)
-
-deleteFactor!(fg, :x28l5f1)
-deleteVariable!(fg, :l5)
+# deleteFactor!(fg, :x28l5f1)
+# deleteVariable!(fg, :l5)
 
 
 # Add landmarks with Bearing range measurements
@@ -378,7 +510,9 @@ addFactor!(fg, [:x33; :l0], p2br2, autoinit=false )
 
 # writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+
+
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /tmp/test.svg`)
 
@@ -412,9 +546,10 @@ addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
 
 
 
-writeGraphPdf(fg)
+# writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /tmp/test.svg`)
 

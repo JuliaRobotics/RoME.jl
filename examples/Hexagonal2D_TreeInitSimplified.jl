@@ -51,7 +51,7 @@ addFactor!(fg, [:x6; :l1], p2br2, autoinit=false )
 
 tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
 
-at = initInferTreeUp!(fg, tree, drawtree=true)
+at,ch = initInferTreeUp!(fg, tree, drawtree=true)
 
 #
 # pl = drawPosesLandms(fg, meanmax=:max)
@@ -95,7 +95,7 @@ addFactor!(fg, [:x12; :l1], p2br2, autoinit=false )
 
 
 tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
-at = initInferTreeUp!(fg, tree, drawtree=true)
+at,ch = initInferTreeUp!(fg, tree, drawtree=true)
 
 
 ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
@@ -130,7 +130,7 @@ tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
 
 
 
-at = initInferTreeUp!(fg, tree, drawtree=true)
+at,ch = initInferTreeUp!(fg, tree, drawtree=true)
 
 
 

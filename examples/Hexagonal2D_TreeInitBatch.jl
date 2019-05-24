@@ -69,7 +69,7 @@ addFactor!(fg, [:x6; :l1], p2br2, autoinit=false )
 
 
 tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
-at = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
+at,ch = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
 ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
 downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
 # downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);
@@ -150,7 +150,7 @@ addFactor!(fg, [:x24; :l1], p2br2, autoinit=false )
 
 # tree = batchSolve!(fg, recursive=true, treeinit=true, drawpdf=true, show=true)
 tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
-at = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
+at,ch = initInferTreeUp!(fg, tree, drawtree=true) #, limititers=100
 ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
 # # downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=true);
 downMsgPassingRecursive(ett,N=100, dbg=false, drawpdf=true);

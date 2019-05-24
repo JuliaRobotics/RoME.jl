@@ -13,6 +13,7 @@ using RoME
 # using RoMEPlotting
 
 
+
 ## start with an empty factor graph object
 fg = initfg()
 
@@ -49,6 +50,7 @@ tree = wipeBuildNewTree!(fg, drawpdf=true, show=true, imgs=false)
 
 
 
+tree, tasks = batchSolve!(fg, treeinit=true, recordcliqs=union(ls(fg)...), downsolve=false, returntasks=true, drawpdf=true)
 
 
 
@@ -69,31 +71,31 @@ history5 = cliqInitSolveUpByStateMachine!(fg, tree, cliq,
 drawTree(tree)
 
 
-
-cliq = whichCliq(tree, :x1)
-history2 = cliqInitSolveUpByStateMachine!(fg, tree, cliq,
-      drawtree=true, limititers=30, recordhistory=true)
-
-drawTree(tree)
+#
+# cliq = whichCliq(tree, :x1)
+# history2 = cliqInitSolveUpByStateMachine!(fg, tree, cliq,
+#       drawtree=true, limititers=30, recordhistory=true)
+#
+# drawTree(tree)
 
 
 ## init cliq 4
 
-cliq = whichCliq(tree, :x4)
+cliq4 = whichCliq(tree, :x4)
 
-# csmc = CliqStateMachineContainer(fg, tree, cliq, initfg(), true, false, false, true, true)
-csmc = CliqStateMachineContainer(fg, initfg(), tree, cliq, getParent(tree, cliq), getChildren(tree, cliq), true, false, false, true, true)
+csmc4 = CliqStateMachineContainer(fg, initfg(), tree, cliq4, getParent(tree, cliq4), getChildren(tree, cliq4), false, true, true)
 
-statemachine = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
+statemachine4 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
 
 
 
@@ -101,8 +103,7 @@ statemachine(csmc, verbose=true, recordhistory=true)
 
 
 cliq3 = whichCliq(tree, :x6)
-# csmc3 = CliqStateMachineContainer(fg, tree, cliq3, initfg(), true, false, false, true, true)
-csmc3 = CliqStateMachineContainer(fg, initfg(), tree, cliq3, getParent(tree, cliq3), getChildren(tree, cliq3), true, false, false, true, true)
+csmc3 = CliqStateMachineContainer(fg, initfg(), tree, cliq3, getParent(tree, cliq3), getChildren(tree, cliq3), false, true, true)
 
 
 statemachine3 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
@@ -122,18 +123,89 @@ statemachine3(csmc3, verbose=true, recordhistory=true)
 
 
 
+cliq1 = whichCliq(tree, :x3)
+csmc1 = CliqStateMachineContainer(fg, initfg(), tree, cliq1, getParent(tree, cliq1), getChildren(tree, cliq1), false, true, true)
+statemachine1 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+t1 = @async statemachine1(csmc1, verbose=true, recordhistory=true)
+
+
+
+drawTree(tree)
+
+
+
+
+
+cliq2 = whichCliq(tree, :x1)
+# history2 = cliqInitSolveUpByStateMachine!(fg, tree, cliq2,
+#       drawtree=true, limititers=30, recordhistory=true)
+csmc2 = CliqStateMachineContainer(fg, initfg(), tree, cliq2, getParent(tree, cliq2), getChildren(tree, cliq2), false, true, true)
+statemachine2 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
+statemachine2(csmc2, verbose=true, recordhistory=true)
+statemachine2(csmc2, verbose=true, recordhistory=true)
+statemachine2(csmc2, verbose=true, recordhistory=true)
+statemachine2(csmc2, verbose=true, recordhistory=true)
+statemachine2(csmc2, verbose=true, recordhistory=true)
+statemachine2(csmc2, verbose=true, recordhistory=true)
+statemachine2(csmc2, verbose=true, recordhistory=true)
+statemachine2(csmc2, verbose=true, recordhistory=true)
+
+
+t1r = fetch(t1)
+
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+
+
+drawTree(tree)
+getCliqStatus(csmc1.cliq)
+# getData(csmc1.cliq).initialized === getData(cliq).initialized ## ???
+
+fieldnames(TreeNodeData)
+
+
+## See if root cliq solved prematurely
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+
+
+
+statemachine1.history
+
+
 
 
 
 # statemachine.next
 # blockCliqUntilChildrenHaveUpStatus
 
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
-statemachine(csmc, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
+statemachine4(csmc4, verbose=true, recordhistory=true)
 
 drawTree(tree)
 
@@ -141,6 +213,12 @@ drawTree(tree)
 
 
 
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+
 
 
 
@@ -148,6 +226,9 @@ drawTree(tree)
 statemachine3(csmc3, verbose=true, recordhistory=true)
 statemachine3(csmc3, verbose=true, recordhistory=true)
 statemachine3(csmc3, verbose=true, recordhistory=true)
+statemachine3(csmc3, verbose=true, recordhistory=true)
+statemachine3(csmc3, verbose=true, recordhistory=true)
+getCliqStatus(csmc.cliq)
 statemachine3(csmc3, verbose=true, recordhistory=true)
 statemachine3(csmc3, verbose=true, recordhistory=true)
 statemachine3(csmc3, verbose=true, recordhistory=true)
@@ -157,11 +238,25 @@ statemachine3(csmc3, verbose=true, recordhistory=true)
 drawTree(tree)
 
 
-cliq = whichCliq(tree, :x3)
-history1 = cliqInitSolveUpByStateMachine!(fg, tree, cliq,
-      drawtree=true, limititers=30, recordhistory=true)
+# maybe get fail because transfer has not been completed to original factor graph
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
+statemachine1(csmc1, verbose=true, recordhistory=true)
 
-drawTree(tree)
+
+
+
+
+
+
+# cliq = whichCliq(tree, :x3)
+# history1 = cliqInitSolveUpByStateMachine!(fg, tree, cliq,
+#       drawtree=true, limititers=30, recordhistory=true)
+#
+# drawTree(tree)
 
 
 

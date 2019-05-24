@@ -249,7 +249,7 @@ clst = cliqInitSolveUp!(fg, tree, cliq, drawtree=true, limititers=1 )
 
 
 
-at = initInferTreeUp!(fg, tree, drawtree=true, limititers=100)
+at, ch = initInferTreeUp!(fg, tree, drawtree=true, limititers=100)
 
 
 
