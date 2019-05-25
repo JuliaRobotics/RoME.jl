@@ -76,7 +76,7 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg, show=true)
+# writeGraphPdf(fg, show=true)
 
 tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
                     returntasks=true, limititers=200, recordcliqs=[:x2;:x1;:x3],
@@ -96,42 +96,42 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/
 
 
 # tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
-# stuff = inferOverTree!(fg,tree,downsolve=false,drawpdf=true,treeinit=true,limititers=200,recordcliqs=Symbol[]  )
+#
+#
+#
+# cliq6 = whichCliq(tree, :x0)
+# csmc6 = CliqStateMachineContainer(fg, initfg(), tree, cliq6, getParent(tree, cliq6), getChildren(tree, cliq6), false, true, true)
+# statemachine6 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
+# for i in 1:11
+#   statemachine6(csmc6, verbose=true, recordhistory=true)
+#   drawTree(tree)
+# end
+# # statemachine6.history
+#
+#
+#
+# cliq5 = whichCliq(tree, :x2)
+# csmc5 = CliqStateMachineContainer(fg, initfg(), tree, cliq5, getParent(tree, cliq5), getChildren(tree, cliq5), false, true, true)
+# statemachine5 = StateMachine{CliqStateMachineContainer}(next=isCliqUpSolved_StateMachine)
+# for i in 1:11
+#   statemachine5(csmc5, verbose=true, recordhistory=true)
+#   drawTree(tree)
+# end
+# hist5 = statemachine5.history
+#
+#
+# animateStateMachineHistoryByTime([hist5;], frames=100 )
+#
+# 0
 
-
-
-# tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true, downsolve=false ) #, recordcliqs=[:x3;] )
-# tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true, upsolve=false ) #, recordcliqs=[:x3;]
-
-printCliqHistorySummary(tree, :x2)
-
-
-
-# hist = getCliqSolveHistory(tree, :x2)
-# animateStateMachineHistoryByTime(hist, frames=100, folder="animatestate")
-
-
-
-animateCliqStateMachines(tree, [:x2;:x1;:x3], frames=100)
-
-# drawStateMachineHistory(hist, show=true)
-
-
-
-
-# stuff = sandboxCliqResolveStep(tree, :x2, 6)
-
-
-0
 ##
-
-# cliq = whichCliq(tree, :x3)
-# hist = getData(cliq).statehistory
 
 # drawTree(tree)
 
-
-
+# printCliqHistorySummary(tree, :x2)
+# cliq = whichCliq(tree, :x3)
+# hist = getData(cliq).statehistory
+# animateCliqStateMachines(tree, [:x2;:x1;:x3], frames=100)
 
 
 
@@ -180,7 +180,7 @@ printCliqHistorySummary(tree,:x11)
 
 # hist = getCliqSolveHistory(tree, :x12)
 # sandboxCliqResolveStep(tree, :x12, 1)
-# animateCliqStateMachines(tree,[:x12;:x11],frames=100)
+animateCliqStateMachines(tree,[:x12;:x11;:x8],frames=100)
 
 
 0
@@ -361,7 +361,7 @@ posecount = driveHex(fg, posecount)
 tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
 
 
 
@@ -554,7 +554,6 @@ addFactor!(fg, [:x11; :l6], p2br2, autoinit=false )
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
 
-ls(fg, :x11)
 
 
 # writeGraphPdf(fg)
