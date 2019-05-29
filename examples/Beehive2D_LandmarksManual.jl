@@ -79,57 +79,6 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
 
-# writeGraphPdf(fg, show=true)
-
-# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
-
-# allsyms = getTreeAllFrontalSyms(fg, tree);  #allsyms = Symbol[]
-#                           recordcliqs=allsyms,
-
-
-          #
-          #
-          # sm5,csmc5 = solveCliqWithStateMachine!(fg, tree, :x2, iters=10, recordhistory=true, verbose=true)
-          #
-          #
-          # sm3,csmc3 = solveCliqWithStateMachine!(fg, tree, :x6, iters=10, recordhistory=true, verbose=true)
-          #
-          # sm4,csmc4 = solveCliqWithStateMachine!(fg, tree, :x4, iters=10, recordhistory=true, verbose=true)
-          #
-          #
-          # # whichCliq(tree, :x1)
-          # t2 = @async solveCliqWithStateMachine!(fg, tree, :x1, iters=3, recordhistory=true, verbose=true)
-          # # sm2,csmc2 = fetch(t2)
-          #
-          #
-          # # whichCliq(tree, :x0)
-          # sm6,csmc6 = solveCliqWithStateMachine!(fg, tree, :x0, iters=10, recordhistory=true, verbose=true)
-          #
-          #
-          #
-          #
-          # drawTree(tree)
-          #
-          #
-          #
-          #
-          #
-          # import IncrementalInference: upGibbsCliqueDensity, upploc
-          #
-          # cliq = whichCliq(tree, :x0)
-          # childmsgs = getCliqChildMsgsUp(fg, tree, cliq, EasyMessage)
-          # ett = ExploreTreeType(fg, tree, cliq, nothing, childmsgs)
-          # urt = upGibbsCliqueDensity(ett, 100, false, 3)
-          #
-          # urtF = Vector{Future}(undef,1)
-          #
-          # @sync begin
-          # @async begin
-          # urt = remotecall_fetch(upGibbsCliqueDensity, upploc(), ett, 100, false, 3)
-          # end
-          # end
-          #
-          # urtf = fetch(urtF[1])
 
 
 tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
@@ -137,15 +86,32 @@ tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
                             upsolve=true, downsolve=true )
 0
 
-
 #
-
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
 
 
-
 ## debug
+
+
+
+# writeGraphPdf(fg, show=true)
+tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+# allsyms = getTreeAllFrontalSyms(fg, tree);  #allsyms = Symbol[]
+#                           recordcliqs=allsyms,
+
+
+solveCliqWithStateMachine!(fg,tree,:x0)
+plotPose(fg, :x0);
+solveCliqWithStateMachine!(fg,tree,:x2)
+
+drawTree(tree, imgs=true)
+
+cliq = whichCliq(tree, :x1)
+
+cliqd = getData(cliq)
+
+
 
 # fihs = filterHistAllToArray(tree, [:x0;:x1;:x2;:x3;:x4;:x6], slowCliqIfChildrenNotUpsolved_StateMachine)
 # printCliqHistorySummary(fihs)
