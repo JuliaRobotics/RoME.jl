@@ -174,8 +174,8 @@ posecount = driveHex(fg, posecount, steps=5)
 
 
 tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
-                  returntasks=true, limititers=50, recordcliqs=[:x5;:x11;:x12;:x13;:x10],
-                  upsolve=true, downsolve=true) # , skipcliqids=[1;3;8;9]  )
+                            returntasks=true, limititers=50, recordcliqs=[:x5;:x11;:x12;:x13;:x10],
+                            upsolve=true, downsolve=true) # , skipcliqids=[1;3;8;9]  )
 0
 
 
