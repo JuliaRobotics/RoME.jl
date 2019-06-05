@@ -15,6 +15,7 @@ using RoME
 #  Do some plotting
 using RoMEPlotting
 
+0
 
 function driveHex(fgl, posecount::Int; steps::Int=5)
     # Drive around in a hexagon
@@ -83,7 +84,7 @@ writeGraphPdf(fg,engine="neato")
 
 tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
                             returntasks=true, limititers=50,
-                            upsolve=true, downsolve=true )
+                            upsolve=true, downsolve=true  )
 0
 
 # tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
@@ -97,9 +98,10 @@ tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
 
 
 
+
 #
 
-# drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
 
 
 
