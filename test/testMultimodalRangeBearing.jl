@@ -29,8 +29,12 @@ addVariable!(fg, :l2, Point2, labels=["LANDMARK"])
 addFactor!(fg, [:l1], Prior(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 addFactor!(fg, [:l2], Prior(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 
-setVal!(fg, :l1, predictbelief(fg, :l1, [:l1f1;]))
-setVal!(fg, :l2, predictbelief(fg, :l2, [:l2f1;]))
+val, = predictbelief(fg, :l1, [:l1f1;])
+setVal!(fg, :l1, val)
+
+val, = predictbelief(fg, :l2, [:l2f1;])
+setVal!(fg, :l2, val)
+
 
 addVariable!(fg, :x0, Pose2)
 # addFactor!(fg, [:x0], Prior(MvNormal([0.0;0.0;0], Matrix(Diagonal([1.0;1.0;0.01].^2)))) )
@@ -57,10 +61,11 @@ end
 
 ensureAllInitialized!(fg)
 
-global tree = wipeBuildNewTree!(fg)
 
-global infv = [inferOverTreeR!(fg, tree, N=N) for i in 1:4]
-@test length(infv) == 4
+global tree = batchSolve!(fg, N=N, recursive=true)
+# global tree = wipeBuildNewTree!(fg)
+# global infv = [inferOverTreeR!(fg, tree, N=N) for i in 1:4]
+# @test length(infv) == 4
 
 
 # X0 = getVertKDE(fg, :x0)
@@ -71,10 +76,11 @@ global X0pts = getVal(fg, :x0)
 @test size(X0pts,1) == 3
 @test size(X0pts,2) == N
 
+# find at least two of the four possible modes
 @test sum([0 < sum(-20 .< X0pts[1,:] .< 0);
            0 < sum(  0 .< X0pts[1,:] .< 20);
            0 < sum( 20 .< X0pts[1,:] .< 40);
-           0 < sum( 40 .< X0pts[1,:] .< 60)]) > 2
+           0 < sum( 40 .< X0pts[1,:] .< 60)]) >= 2
 
 end
 

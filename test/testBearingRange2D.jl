@@ -86,7 +86,7 @@ addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearA
 setVal!(fg, :x0, zeros(3,1))
 
 ##----------- sanity check that predictbelief plumbing is doing the right thing
-global pts = predictbelief(fg, :x0, ls(fg, :x0), N=75)
+global pts, = predictbelief(fg, :x0, ls(fg, :x0), N=75)
 @test sum(abs.(Statistics.mean(pts,dims=2)) .< [0.1; 0.1; 0.1]) == 3
 @test sum([0.05; 0.05; 0.05] .< Statistics.std(pts,dims=2) .< [0.15; 0.15; 0.15]) == 3
 #------------
@@ -106,7 +106,7 @@ addFactor!(fg, [:x0; :l1], p2br, autoinit=false)
 # writeGraphPdf(fg)
 
 # check the forward convolution is working properly
-global pts = predictbelief(fg, :l1, ls(fg, :l1), N=75)
+global pts, = predictbelief(fg, :l1, ls(fg, :l1), N=75)
 @test sum(abs.(Statistics.mean(pts,dims=2) - [20.0; 0.0]) .< [2.0; 2.0]) == 2
 @test sum([0.1; 0.1] .< Statistics.std(pts,dims=2) .< [3.0; 3.0]) == 2
 
@@ -145,7 +145,7 @@ addFactor!(fg, [:x0; :l1], p2br, autoinit=false)
 # writeGraphPdf(fg)
 
 # check the forward convolution is working properly
-global pts = predictbelief(fg, :x0, ls(fg, :x0), N=75)
+global pts, = predictbelief(fg, :x0, ls(fg, :x0), N=75)
 
 @show abs.(Statistics.mean(pts,dims=2))
 @test sum(abs.(Statistics.mean(pts,dims=2)) .< [2.0; 2.0; 2.0]) == 3

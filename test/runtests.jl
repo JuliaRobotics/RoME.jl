@@ -28,6 +28,8 @@ println("[SUCCESS]")
 
 include("testPoint2Point2.jl")
 
+include("testPoint2Point2Init.jl")
+
 include("testBasicPose2Stationary.jl")
 
 println("[TEST] Pose2 evaluations...")

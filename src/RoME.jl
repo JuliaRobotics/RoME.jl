@@ -234,6 +234,7 @@ export
   processTreeTrackersUpdates!,
   addSoftEqualityPoint2D,
   vectoarr2,
+  basicFactorGraphExample,
 
   # jld required Features Type
   LaserFeatures,

@@ -147,7 +147,7 @@ end
 
 
 @testset "test predictbelief with two functions" begin
-  global val = predictbelief(fg, :x2, ls(fg, :x2), N=N)
+  global val, = predictbelief(fg, :x2, ls(fg, :x2), N=N)
 
   for i in 1:N
     val[6,i] = wrapRad(val[6,i])
