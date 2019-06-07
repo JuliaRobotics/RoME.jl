@@ -82,30 +82,51 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 writeGraphPdf(fg,engine="neato")
 
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
-                            returntasks=true, limititers=50,
-                            upsolve=true, downsolve=true  )
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true, downsolve=false,
+                            returntasks=true, limititers=50, recordcliqs=[:x3;:x1]  )
 0
 
-# tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
-#                             returntasks=true, limititers=20,
-#                             upsolve=false, downsolve=true )
-# 0
-
-# @info "Do recursive down inference over tree"
-# downMsgPassingRecursive(ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[]),
-#                           N=100, dbg=false, drawpdf=true);
-
-
-
-
-#
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
 
 
 
+
+
 ## debug
+
+histx3 = getCliqSolveHistory(tree, :x3)
+printCliqHistorySummary(histx3)
+
+
+@assert length(getDwnMsgs(tree.cliques[1])) == 0
+
+## mock down solve on root clique
+csmc = histx3[end][4]
+csmc.dodownsolve = true
+sm,csmc = solveCliqWithStateMachine!(fg, tree, :x3, recordhistory=true, iters=1,
+            nextfnc=IIF.determineCliqIfDownSolve_StateMachine, prevcsmc=csmc)
+@assert !sm(csmc)
+
+# look at the down msgs that were preped
+getDwnMsgs(csmc.cliq)
+
+
+getCliqDownMsgsAfterDownSolve
+
+
+# mock down solve`
+prnt = getParent(csmc.tree, csmc.cliq)
+dwnmsgs = getDwnMsgs(prnt[1])
+
+getCliqSeparatorVarIds(cscm.cliq)
+m = dwnPrepOutMsg(csmc.fg, csmc.cliq, Dict{Symbol, BallTreeDensity}(), d)
+
+
+# call down inference, TODO multiproc
+drt = downGibbsCliqueDensity(csmc.cliqSubFg, csmc.cliq, dwnmsgs, 100, 3, false)
+csmc.dodownsolve = false
+
 
 
 # writeGraphPdf(fg, show=true)
@@ -115,9 +136,7 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/
 #                           recordcliqs=allsyms,
 
 
-
-# plotPose(fg, :x0);
-
+0
 # tx6 = @async solveCliqWithStateMachine!(fg,tree,:x6, recordhistory=true, iters=50)
 # tx4 = @async solveCliqWithStateMachine!(fg,tree,:x4, recordhistory=true, iters=50)
 #
