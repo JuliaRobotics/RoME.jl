@@ -24,8 +24,8 @@ global fg = initfg() # FUTURE: (quasifixedwindow=50, autosolve=true)
 
 # Set up a quasi fixed-lag horizon of 8 nodes and enable the fixed-lag solving.
 # If the graph grows over 8 nodes, the older nodes will be frozen to limit the computational window.
-fg.qfl = 8
-fg.isfixedlag = true
+fg.solverParams.qfl = 8
+fg.solverParams.isfixedlag = true
 
 @testset "test basic fixed lag operations..." begin
 
@@ -44,7 +44,7 @@ for i in 0:5
 end
 
 # Add node linking initial pose with a bearing range measurement landmark
-addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
 global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 
@@ -71,7 +71,7 @@ addFactor!(fg, [:x6; :l1], p2br)
 
 # Back up the graph
 fgOriginal = deepcopy(fg)
-fgOriginal.isfixedlag = false
+fgOriginal.solverParams.isfixedlag = false
 
 # Back up data from these two poses so we can compare them once we solve again.
 X5 = deepcopy(getVal(fg, :x5))
@@ -80,7 +80,7 @@ X6 = deepcopy(getVal(fg, :x6))
 # Now solve again, which will freeze vertices < 5
 println("STEP 4: Solve graph when shorter than fixed length, and show time to solve")
 @time IIF.batchSolve!(fg)
-# fg.isfixedlag
+# fg.solverparams.isfixedlag
 # tofreeze = fg.fifo[1:(end-fg.qfl)]
 # @test length(tofreeze) > 0
 # IIF.setfreeze!.(fg, tofreeze)

@@ -9,82 +9,84 @@ using RoME
 @testset "test pose and point combinations..." begin
 
 
-global N = 75
-global fg = initfg()
+N = 100
+fg = initfg()
 
 
-global initCov = Matrix(Diagonal([0.03;0.03;0.001]))
-global odoCov = Matrix(Diagonal([3.0;3.0;0.01]))
+initCov = Matrix(Diagonal([0.03;0.03;0.001]))
+odoCov = Matrix(Diagonal([3.0;3.0;0.01]))
 
 # Some starting position
-global v1 = addVariable!(fg, :x0, Pose2, N=N)
-global initPosePrior = PriorPose2(MvNormal(zeros(3), initCov))
-global f1  = addFactor!(fg,[v1], initPosePrior)
+v1 = addVariable!(fg, :x0, Pose2, N=N)
+initPosePrior = PriorPose2(MvNormal(zeros(3), initCov))
+f1  = addFactor!(fg,[v1], initPosePrior)
 
 @test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) != nothing
 @test Pose2Pose2(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2)) != nothing
 @test Pose2Pose2(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2),[1.0;]) != nothing
 
 # and a second pose
-global v2 = addVariable!(fg, :x1, Pose2, N=N)
-global ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov, [1.0])
-global f2 = addFactor!(fg, [:x0;:x1], ppc)
+v2 = addVariable!(fg, :x1, Pose2, N=N)
+ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov, [1.0])
+f2 = addFactor!(fg, [:x0;:x1], ppc)
 
 # test evaluation of pose pose constraint
-global pts = approxConv(fg, :x0x1f1, :x1)
+pts = approxConv(fg, :x0x1f1, :x1)
 # pts = evalFactor2(fg, f2, v2.index)
 @test norm(Statistics.mean(pts,dims=2)[1:2] - [50.0;0.0]) < 10.0
 @test abs(Statistics.mean(pts,dims=2)[3] - pi/2) < 0.5
 
 # @show ls(fg)
-ensureAllInitialized!(fg)
-global tree = wipeBuildNewTree!(fg)
-inferOverTreeR!(fg, tree,N=N)
+tree = batchSolve!(fg, treeinit=true)
+# ensureAllInitialized!(fg)
+# tree = wipeBuildNewTree!(fg)
+# inferOverTreeR!(fg, tree,N=N)
 # inferOverTree!(fg, tree, N=N)
 
 # test post evaluation values are correct
-global pts = getVal(fg, :x0)
+pts = getVal(fg, :x0)
 @test norm(Statistics.mean(pts, dims=2)[1:2] - [0.0;0.0]) < 10.0
 @test abs(Statistics.mean(pts, dims=2)[3]) < 0.5
 
-global pts = getVal(fg, :x1)
+pts = getVal(fg, :x1)
 @test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;0.0]) < 10.0
 @test abs(Statistics.mean(pts, dims=2)[3]-pi/2) < 0.5
 
 
 # check that yaw is working
-global v3 = addVariable!(fg, :x2, Pose2, N=N)
-global ppc = Pose2Pose2([50.0;0.0;0.0], odoCov, [1.0])
-global f3 = addFactor!(fg, [v2;v3], ppc)
+v3 = addVariable!(fg, :x2, Pose2, N=N)
+ppc = Pose2Pose2([50.0;0.0;0.0], odoCov, [1.0])
+f3 = addFactor!(fg, [v2;v3], ppc)
 
-
-global tree = wipeBuildNewTree!(fg)
-[inferOverTree!(fg, tree, N=N) for i in 1:2]
+batchSolve!(fg, treeinit=true)
+batchSolve!(fg, treeinit=true)
+# tree = wipeBuildNewTree!(fg)
+# [inferOverTree!(fg, tree, N=N) for i in 1:2]
 
 # test post evaluation values are correct
-global pts = getVal(fg, :x0)
+pts = getVal(fg, :x0)
 @test norm(Statistics.mean(pts, dims=2)[1:2]-[0.0;0.0]) < 20.0
 @test abs(Statistics.mean(pts, dims=2)[3]) < 0.5
 
-global pts = getVal(fg, :x1)
+pts = getVal(fg, :x1)
 @test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;0.0]) < 20.0
 @test abs(Statistics.mean(pts, dims=2)[3] - pi/2) < 0.5
 
-global pts = getVal(fg, :x2)
+pts = getVal(fg, :x2)
 @test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;50.0]) < 20.0
 @test abs(Statistics.mean(pts, dims=2)[3]-pi/2) < 0.5
 
 println("test bearing range evaluations")
 
 # new landmark
-global l1 = addVariable!(fg, :l1, Point2, N=N)
+l1 = addVariable!(fg, :l1, Point2, N=N)
 # and pose to landmark constraint
-global rhoZ1 = norm([10.0;0.0])
-global ppr = Pose2Point2BearingRange(Uniform(-pi,pi),Normal(rhoZ1,1.0))
-global f4 = addFactor!(fg, [:x0;:l1], ppr)
+rhoZ1 = norm([10.0;0.0])
+ppr = Pose2Point2BearingRange(Uniform(-pi,pi),Normal(rhoZ1,1.0))
+f4 = addFactor!(fg, [:x0;:l1], ppr)
 
 
-global pts = approxConv(fg, :x0l1f1, :l1, N=N)
+pts = approxConv(fg, :x0l1f1, :l1, N=N)
 # pts = evalFactor2(fg, f4, l1.index, N=N)
 ## res = zeros(2)
 ## meas = getSample(ppr)
@@ -95,7 +97,7 @@ global pts = approxConv(fg, :x0l1f1, :l1, N=N)
 @test sum(sqrt.(sum(pts.^2, dims=1 )) .< 15.0) == N
 
 
-global pts = approxConv(fg, :x0l1f1, :x0)
+pts = approxConv(fg, :x0l1f1, :x0)
 # pts = evalFactor2(fg, f4, v1.index, N=200)
 # @show sum(sqrt(sum(pts.^2, 1 )) .< 5.0)
 # @test sum(sqrt(sum(pts.^2, 1 )) .< 5.0) == 0
@@ -103,10 +105,12 @@ global pts = approxConv(fg, :x0l1f1, :x0)
 
 
 # add a prior to landmark
-global pp2 = PriorPoint2(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0]))))
+pp2 = PriorPoint2(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0]))))
 
-global f5 = addFactor!(fg,[l1], pp2)
-global pts = evalFactor2(fg, f5, l1.index)
+f5 = addFactor!(fg,[l1], pp2)
+pts = approxConv(fg, f5.label, l1.label)
+# pts = evalFactor2(fg, f5, l1.label)
+
 
 @test norm(Statistics.mean(pts, dims=2)[:]-[10.0;0.0]) < 5.0
 

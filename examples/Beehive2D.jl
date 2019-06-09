@@ -47,8 +47,8 @@ end
 
 ## start with an empty factor graph object
 fg = initfg()
-fg.isfixedlag = true
-fg.qfl = 15
+fg.solverParams.isfixedlag = true
+fg.solverParams.qfl = 15
 posecount = 0
 
 # Add the first pose :x0
