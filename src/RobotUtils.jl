@@ -169,14 +169,13 @@ Create a new variable node and insert odometry constraint factor between
 which will automatically increment latest pose symbol x<k+1> for new node new node and
 constraint factor are returned as a tuple.
 """
-function addOdoFG!(
-        fg::FactorGraph,
-        n::Symbol,
-        DX::Array{Float64,1},
-        cov::Array{Float64,2};
-        N::Int=0,
-        ready::Int=1,
-        labels::Vector{<:AbstractString}=String[]  )
+function addOdoFG!(fg::G,
+                   n::Symbol,
+                   DX::Array{Float64,1},
+                   cov::Array{Float64,2};
+                   N::Int=0,
+                   ready::Int=1,
+                   labels::Vector{<:AbstractString}=String[]  ) where G <: AbstractDFG
     #
     prev, X, nextn = getLastPose2D(fg)
     r,c = size(X)
@@ -200,16 +199,12 @@ function addOdoFG!(
     return v, f
 end
 
-function addOdoFG!(
-        fgl::FactorGraph,
-        # n::T,
-        Z::Pose3Pose3;
-        N::Int=0,
-        ready::Int=1,
-        labels::Vector{<:AbstractString}=String[]  ) # where {T <: AbstractString}
+function addOdoFG!(fgl::G,
+                   Z::Pose3Pose3;
+                   N::Int=0,
+                   ready::Int=1,
+                   labels::Vector{<:AbstractString}=String[]  ) where {G <: AbstractDFG}
   #
-  # DX=Z.μ
-  # cov=Z.Σ.mat
   vprev, X, nextn = getLastPose(fgl)
   vnext = addVariable!(fgl, nextn, Pose3, ready=ready, labels=labels)
   fact = addFactor!(fgl, [vprev;vnext], Z, autoinit=true)

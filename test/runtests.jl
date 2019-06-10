@@ -59,11 +59,12 @@ println("[TEST] ensure Pose3Pose3NH evaluations...")
 include("testPose3Pose3NH.jl")
 println("[SUCCESS]")
 
-println("[TEST] saving to and loading from .jld2 file")
-savejld(fg, file="tempfg.jld2" )
-fgu = loadjld( file="tempfg.jld2" )
-Base.rm("tempfg.jld2")
-println("Success")
+@warn "Skipping JLD tests in RoME"
+# println("[TEST] saving to and loading from .jld2 file")
+# savejld(fg, file="tempfg.jld2" )
+# fgu = loadjld( file="tempfg.jld2" )
+# Base.rm("tempfg.jld2")
+# println("Success")
 
 println("[TEST] PartialPose3XYYaw evaluations...")
 include("testPartialXYH.jl")
