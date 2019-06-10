@@ -24,7 +24,7 @@ global fg = initfg() # FUTURE: (quasifixedwindow=50, autosolve=true)
 
 # Set up a quasi fixed-lag horizon of 8 nodes and enable the fixed-lag solving.
 # If the graph grows over 8 nodes, the older nodes will be frozen to limit the computational window.
-fg.solverParams.qfl = 8
+fg.solverParams.qfl = 6
 fg.solverParams.isfixedlag = true
 
 @testset "test basic fixed lag operations..." begin
@@ -50,7 +50,7 @@ addFactor!(fg, [:x0; :l1], p2br)
 
 ## 2. Solve graph when shorter than fixed length - should solve full session.
 println("STEP 2: Solve graph when shorter than fixed length")
-IIF.batchSolve!(fg)
+IIF.batchSolve!(fg, treeinit=true)
 
 # 3. Drive a couple more, longer than fixed lag window
 println("STEP 3: Drive a couple more, longer than fixed lag window")
@@ -75,11 +75,11 @@ fgOriginal.solverParams.isfixedlag = false
 
 # Back up data from these two poses so we can compare them once we solve again.
 X5 = deepcopy(getVal(fg, :x5))
-X6 = deepcopy(getVal(fg, :x6))
+X7 = deepcopy(getVal(fg, :x7))
 
 # Now solve again, which will freeze vertices < 5
 println("STEP 4: Solve graph when shorter than fixed length, and show time to solve")
-@time IIF.batchSolve!(fg)
+@time IIF.batchSolve!(fg, treeinit=true)
 # fg.solverparams.isfixedlag
 # tofreeze = fg.fifo[1:(end-fg.qfl)]
 # @test length(tofreeze) > 0
@@ -90,18 +90,18 @@ println("STEP 4: Solve graph when shorter than fixed length, and show time to so
 # inferOverTreeR!(fg, tree)
 
 # Confirm that the initial nodes (x0 - x5) are frozen.
-@test getData(fg, :x5).ismargin
-@test getData(fg, :x6).ismargin == false
+@test getData(getVariable(fg, :x5)).ismargin
+@test !getData(getVariable(fg, :x7)).ismargin
 
 # X5 should be exactly same
 # X6 should be different
 X5cmp = deepcopy(getVal(fg, :x5))
-X6cmp = deepcopy(getVal(fg, :x6))
+X7cmp = deepcopy(getVal(fg, :x7))
 @test X5 == X5cmp #Frozen
-@test X6 != X6cmp #Recalculated
+@test X7 != X7cmp #Recalculated
 
 # Solve original graph with the to get time comparison
-@time IIF.batchSolve!(fgOriginal)
+@time IIF.batchSolve!(fgOriginal, treeinit=true)
 
 end
 
