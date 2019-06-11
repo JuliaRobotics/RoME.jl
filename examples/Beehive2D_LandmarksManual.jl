@@ -79,10 +79,10 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg,engine="neato")
+# writeGraphPdf(fg,engine="neato")
 
 
-tree, smtasks = batchSolve!(fg, drawpdf=true, show=true, downsolve=false,
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true, downsolve=true,
                             returntasks=true, limititers=50, recordcliqs=[:x3;:x1]  )
 0
 
@@ -91,73 +91,76 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/
 
 
 
-
-
-## debug
-
-histx3 = getCliqSolveHistory(tree, :x3)
-printCliqHistorySummary(histx3)
-
-
-@assert length(getDwnMsgs(tree.cliques[1])) == 0
-
-## mock down solve on root clique
-csmc = histx3[end][4]
-csmc.dodownsolve = true
-sm,csmc = solveCliqWithStateMachine!(fg, tree, :x3, recordhistory=true, iters=1,
-            nextfnc=IIF.determineCliqIfDownSolve_StateMachine, prevcsmc=csmc)
-@assert !sm(csmc)
-
-# look at the down msgs that were preped
-getDwnMsgs(csmc.cliq)
-
-
-getCliqDownMsgsAfterDownSolve
-
-
-# mock down solve`
-prnt = getParent(csmc.tree, csmc.cliq)
-dwnmsgs = getDwnMsgs(prnt[1])
-
-getCliqSeparatorVarIds(cscm.cliq)
-m = dwnPrepOutMsg(csmc.fg, csmc.cliq, Dict{Symbol, BallTreeDensity}(), d)
-
-
-# call down inference, TODO multiproc
-drt = downGibbsCliqueDensity(csmc.cliqSubFg, csmc.cliq, dwnmsgs, 100, 3, false)
-csmc.dodownsolve = false
-
-
-
-# writeGraphPdf(fg, show=true)
-# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
-# drawTree(tree, show=true)
-# allsyms = getTreeAllFrontalSyms(fg, tree);  #allsyms = Symbol[]
-#                           recordcliqs=allsyms,
-
-
-0
-# tx6 = @async solveCliqWithStateMachine!(fg,tree,:x6, recordhistory=true, iters=50)
-# tx4 = @async solveCliqWithStateMachine!(fg,tree,:x4, recordhistory=true, iters=50)
+## Debug the downsolve
 #
-# tx2 = @async solveCliqWithStateMachine!(fg,tree,:x2, recordhistory=true, iters=50)
-# sm0, csmc0 = solveCliqWithStateMachine!(fg,tree,:x0, recordhistory=true, iters=50)
 #
-# # hist = getCliqSolveHistory(tree,:x2)
-# stuff = fetch(tx2)
-# hist = stuff[1].history
-# printCliqHistorySummary(hist)
-# printCliqHistorySummary(sm0.history)
-# csmc0new7 = sandboxStateMachineStep(sm0.history,7)
-# getData(csmc0new7[4].tree.cliques[2])
+# histx3 = getCliqSolveHistory(tree, :x3)
+# printCliqHistorySummary(histx3)
 #
-# using Graphs
-# drawStateMachineHistory(hist)
-# animateCliqStateMachines(tree, [:x2;:x1;:x3], frames=100)
-
-# fihs = filterHistAllToArray(tree, [:x0;:x1;:x2;:x3;:x4;:x6], slowCliqIfChildrenNotUpsolved_StateMachine)
-# printCliqHistorySummary(fihs)
-
+#
+# @assert length(getDwnMsgs(tree.cliques[1])) == 0
+#
+# ## mock down solve on root clique
+# csmc = histx3[end][4]
+# csmc.dodownsolve = true
+# sm,csmc = solveCliqWithStateMachine!(fg, tree, :x3, recordhistory=true, iters=1,
+#             nextfnc=IIF.determineCliqIfDownSolve_StateMachine, prevcsmc=csmc)
+# @assert !sm(csmc)
+#
+# csmc.dodownsolve = false
+#
+# # look at the down msgs that were preped
+# # x3dm = getDwnMsgs(csmc.cliq)
+#
+#
+# histx1 = getCliqSolveHistory(tree, :x1)
+# printCliqHistorySummary(histx1)
+# csmc = histx1[end][4]
+# csmc.dodownsolve = true
+#
+# # mock down solve`
+# prnt = getParent(csmc.tree, csmc.cliq)
+# dwnmsgs = getDwnMsgs(prnt[1])
+#
+# getCliqSeparatorVarIds(cscm.cliq)
+# m = dwnPrepOutMsg(csmc.fg, csmc.cliq, Dict{Symbol, BallTreeDensity}(), d)
+#
+#
+# # call down inference, TODO multiproc
+# drt = downGibbsCliqueDensity(csmc.cliqSubFg, csmc.cliq, dwnmsgs, 100, 3, false)
+# csmc.dodownsolve = false
+#
+#
+#
+# # writeGraphPdf(fg, show=true)
+# # tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
+# # drawTree(tree, show=true)
+# # allsyms = getTreeAllFrontalSyms(fg, tree);  #allsyms = Symbol[]
+# #                           recordcliqs=allsyms,
+#
+#
+# 0
+# # tx6 = @async solveCliqWithStateMachine!(fg,tree,:x6, recordhistory=true, iters=50)
+# # tx4 = @async solveCliqWithStateMachine!(fg,tree,:x4, recordhistory=true, iters=50)
+# #
+# # tx2 = @async solveCliqWithStateMachine!(fg,tree,:x2, recordhistory=true, iters=50)
+# # sm0, csmc0 = solveCliqWithStateMachine!(fg,tree,:x0, recordhistory=true, iters=50)
+# #
+# # # hist = getCliqSolveHistory(tree,:x2)
+# # stuff = fetch(tx2)
+# # hist = stuff[1].history
+# # printCliqHistorySummary(hist)
+# # printCliqHistorySummary(sm0.history)
+# # csmc0new7 = sandboxStateMachineStep(sm0.history,7)
+# # getData(csmc0new7[4].tree.cliques[2])
+# #
+# # using Graphs
+# # drawStateMachineHistory(hist)
+# # animateCliqStateMachines(tree, [:x2;:x1;:x3], frames=100)
+#
+# # fihs = filterHistAllToArray(tree, [:x0;:x1;:x2;:x3;:x4;:x6], slowCliqIfChildrenNotUpsolved_StateMachine)
+# # printCliqHistorySummary(fihs)
+#
 
 
 
