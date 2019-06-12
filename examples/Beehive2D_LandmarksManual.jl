@@ -1,7 +1,7 @@
 
 # using Revise
 using Distributed
-addprocs(2)
+addprocs(8)
 
 ##
 
@@ -86,6 +86,9 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 tree, smtasks = batchSolve!(fg, drawpdf=true, show=true, recordcliqs=[:x3;:x1]  )
 0
 
+
+
+drawPoses(fg, meanmax=:max)
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
 
@@ -196,9 +199,8 @@ posecount = driveHex(fg, posecount, steps=5)
 # whichCliq(tree, :x11)
 
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
-                            returntasks=true, limititers=50, recordcliqs=[:x5;:x11;:x12;:x13;:x10],
-                            upsolve=true, downsolve=true) # , skipcliqids=[1;3;8;9]  )
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true,
+							recordcliqs=[:x5;:x11;:x12;:x13;:x10]  )
 0
 
 
@@ -232,7 +234,7 @@ posecount = driveHex(fg, posecount)
 
 # solve
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true) #, recordcliqs=allsyms)
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true)
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
@@ -270,7 +272,7 @@ addFactor!(fg, [:x19; :l0], p2br2, autoinit=false )
 
 
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true)
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #; @async run(`eog /tmp/test.svg`)
@@ -301,7 +303,7 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true)
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /tmp/test.svg`)
@@ -327,7 +329,7 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x26; :l0], p2br2, autoinit=false )
 
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true)
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /tmp/test.svg`)
@@ -353,7 +355,7 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true)
 
 
 
@@ -393,7 +395,7 @@ addFactor!(fg, [:x33; :l0], p2br2, autoinit=false )
 
 # writeGraphPdf(fg)
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true)
 
 
 
@@ -429,7 +431,7 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true)
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
@@ -452,9 +454,9 @@ addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
 
 
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true)
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)|
 
 
 
