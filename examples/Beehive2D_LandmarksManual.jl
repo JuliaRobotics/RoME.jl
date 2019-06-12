@@ -438,7 +438,6 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tm
 
 
 
-
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x40; :l0], p2br2, autoinit=false )
