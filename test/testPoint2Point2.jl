@@ -40,7 +40,7 @@ end
 
 @testset "test Point2Point2Range{T}..." begin
 
-global N=200
+global N=100 # return to 200
 global fg = initfg()
 
 addVariable!(fg, :x0, Point2, N=N)
@@ -57,20 +57,20 @@ addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)))
 global tree = wipeBuildNewTree!(fg)
 inferOverTree!(fg, tree, N=N)
 
-@test sum( 90 .< getVal(fg, :l1)[1,:] .< 110 ) > 32
-@test sum( -10 .< getVal(fg, :l1)[2,:] .< 10 ) > 32
+@test 0.15*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
+@test 0.15*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
 
-@test sum( -10 .< getVal(fg, :l1)[1,:] .< 10 ) > 32
-@test sum( 90 .< getVal(fg, :l1)[2,:] .< 110 ) > 32
+@test 0.15*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
+@test 0.15*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
 
 global voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
-@test sum( getVal(fg, :l1)[2,voidsel1] .< 80 ) < 25
+@test sum( getVal(fg, :l1)[2,voidsel1] .< 80 ) < 0.15*N
 
 global voidsel2 =  10.0 .< getVal(fg, :l1)[2,:]
-@test sum( getVal(fg, :l1)[1,voidsel2] .< 80 ) < 25
+@test sum( getVal(fg, :l1)[1,voidsel2] .< 80 ) < 0.15*N
 
-@test sum( 120 .< abs.(getVal(fg, :l1)[1,:]) ) < 25
-@test sum( 120 .< abs.(getVal(fg, :l1)[2,:]) ) < 25
+@test sum( 120 .< abs.(getVal(fg, :l1)[1,:]) ) < 0.15*N
+@test sum( 120 .< abs.(getVal(fg, :l1)[2,:]) ) < 0.15*N
 
 
 end

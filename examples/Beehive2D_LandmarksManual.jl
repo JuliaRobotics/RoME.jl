@@ -82,21 +82,20 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 # writeGraphPdf(fg,engine="neato")
 
 
-tree, smtasks = batchSolve!(fg, drawpdf=true, show=true, downsolve=true,
-                            returntasks=true, limititers=50, recordcliqs=[:x3;:x1]  )
+
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true, recordcliqs=[:x3;:x1]  )
 0
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
 
-
+0
 
 ## Debug the downsolve
 #
 #
 # histx3 = getCliqSolveHistory(tree, :x3)
 # printCliqHistorySummary(histx3)
-#
 #
 # @assert length(getDwnMsgs(tree.cliques[1])) == 0
 #
