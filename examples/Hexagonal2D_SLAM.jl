@@ -1,6 +1,6 @@
 # add more julia processes
 using Distributed
-nprocs() < 3 ? addprocs(4-nprocs()) : nothing
+nprocs() < 4 ? addprocs(5-nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces
 using RoME
@@ -28,8 +28,7 @@ end
 
 
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
-ensureAllInitialized!(fg)
-batchSolve!(fg)
+batchSolve!(fg, drawpdf=true, show=true)
 
 # For Juno/Jupyter style use
 pl = drawPoses(fg, meanmax=:mean)
@@ -37,10 +36,12 @@ plotPose(fg, :x6)
 # For scripting use-cases you can export the image
 Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
+
 # Add landmarks with Bearing range measurements
 addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-addFactor!(fg, [:x0; :l1], p2br)
+addFactor!(fg, [:x0; :l1], p2br )
+
 
 # Initialize :l1 numerical values but do not rerun solver
 ensureAllInitialized!(fg)
@@ -50,17 +51,18 @@ Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-addFactor!(fg, [:x6; :l1], p2br2)
+addFactor!(fg, [:x6; :l1], p2br2 )
+
 
 # solve
-batchSolve!(fg)
+batchSolve!(fg, drawpdf=true)
+
 
 # redraw
 pl = drawPosesLandms(fg, meanmax=:mean)
 Gadfly.draw(Gadfly.PDF("/tmp/test3.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 
-# isInitialized(fg, :l1)
-# stuff = IIF.approxConv(fg, :x6l1f1, :l1)
+
 
 #
