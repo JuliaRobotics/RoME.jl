@@ -83,11 +83,9 @@ println("STEP 4: Solve graph when shorter than fixed length, and show time to so
 stuff = IIF.batchSolve!(fg, dbg=true)
 
 
-drawTree(stuff[1], show=true)
+# drawTree(stuff[1], show=true)
 st = fetch(stuff[2][11])
-
 hist = getCliqSolveHistory(stuff[1], :x2)
-
 
 
 # fg.solverparams.isfixedlag
