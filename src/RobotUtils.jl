@@ -573,22 +573,21 @@ end
 
 
 
-function get2DSamples(fg::G,
-                      sym; #::Union{Symbol, S};
+function get2DSamples(fg::G; #::Union{Symbol, S};
                       from::Int=0, to::Int=999999999,
                       minnei::Int=0,
-                      posekey::Regex=r"x") where {G <: AbstractDFG, S <: AbstractString}
+                      varkey::Regex=r"x") where {G <: AbstractDFG, S <: AbstractString}
   #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
 
   # if sym = 'l', ignore single measurement landmarks
-  allids = DFG.getVariableIds(fg, posekey)  # fg.IDs
+  allids = DFG.getVariableIds(fg, varkey)  # fg.IDs
   saids = DFG.sortVarNested(allids)
   for id in saids
     # vertlbl = string(id[1])
     vertlbl = string(id)
-    if vertlbl[1] == sym
+    # if vertlbl[1] == sym
       val = parse(Int,vertlbl[2:end])
       if from <= val && val <= to
         # if length( getOutNeighbors(fg, vertlbl[2] , needdata=true ) ) >= minnei
@@ -598,21 +597,21 @@ function get2DSamples(fg::G,
           Y=[Y; vec(getVal(fg,id)[2,:]) ]
         end
       end
-    end
+    # end
   end
   return X,Y
 end
 
-function getAll2D(fg, sym; minnei::Int=0)
-  @warn "getAll2D deprecated, use get2DSamples instead"
-  return get2DSamples(fg, sym, minnei=minnei )
-end
+# function getAll2D(fg, sym; minnei::Int=0)
+#   @warn "getAll2D deprecated, use get2DSamples instead"
+#   return get2DSamples(fg, sym, minnei=minnei )
+# end
 
-function get2DSampleMeans(fg::FactorGraph,
+function get2DSampleMeans(fg::G,
                           varkey::Regex=r"x";
                           from::Int=0, to::Int=9999999999,
                           minnei::Int=0,
-                          api::DataLayerAPI=IncrementalInference.localapi  )
+                          api::DataLayerAPI=IncrementalInference.localapi  ) where G <: AbstractDFG
   #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
@@ -627,7 +626,7 @@ function get2DSampleMeans(fg::FactorGraph,
   count = 0
   for id in saids
     count += 1
-    if length( DFG.getNeighbors(fg, id, needdata=true) ) >= minnei
+    if length( DFG.getNeighbors(fg, id) ) >= minnei
       mask[count] = true
     end
     if from != 0 || to != 9999999999
@@ -648,7 +647,7 @@ function get2DSampleMeans(fg::FactorGraph,
     if string(id)[1] == 'x'
       Th=[Th; Statistics.mean( vec( getVal(fg, id )[3,:] ) )]
     end
-    push!(LB, id)
+    push!(LB, string(id))
   end
   return X,Y,Th,LB
 end
@@ -659,11 +658,11 @@ function getAll2DMeans(fg, sym::Regex)
 end
 
 function getAll2DPoses(fg::G) where G <: AbstractDFG
-    return getAll2DSamples(fg, r"x" )
+    return getAll2DSamples(fg, varkey=r"x" )
 end
 
 function get2DPoseSamples(fg::G; from::Int=0, to::Int=999999999) where G <: AbstractDFG
-  return get2DSamples(fg, r"x"; from=from, to=to )
+  return get2DSamples(fg, varkey=r"x", from=from, to=to )
 end
 
 function get2DPoseMeans(fg::G; from::Int=0, to::Int=999999999) where G <: AbstractDFG
@@ -672,33 +671,35 @@ end
 
 
 function get2DPoseMax(fgl::G;
+					  varkey::Regex=r"x",
                       from::Int=-99999999999, to::Int=9999999999 ) where G <: AbstractDFG
   #
   # xLB,ll = ls(fgl) # TODO add: from, to, special option 'x'
-  xLB = getVariableIds(fgl, r"x")
+  xLB = DFG.getVariableIds(fgl, varkey)
+  saids = DFG.sortVarNested(xLB)
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
   LB = String[]
-  for slbl in xLB
+  for slbl in saids
     lbl = string(slbl)
     if from <= parse(Int,lbl[2:end]) <=to
       mv = getKDEMax(getVertKDE(fgl,slbl))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(Th,mv[3])
-      push!(LB, lbl)
+      push!(LB, string(lbl))
     end
   end
   return X, Y, Th, LB
 end
 
-function getAll2DLandmarks(fg::G,
-                           minnei::Int=0,
-                           api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
-  #
-  return getAll2DSamples(fg, r"l", minnei=minnei )
-end
+# function getAll2DLandmarks(fg::G,
+#                            minnei::Int=0,
+#                            api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
+#   #
+#   return getAll2DSamples(fg, varkey=r"l", minnei=minnei )
+# end
 
 function get2DLandmSamples(fg::G;
                            from::Int=0,
@@ -706,7 +707,7 @@ function get2DLandmSamples(fg::G;
                            minnei::Int=0,
                            api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
   #
-  return get2DSamples(fg, r"l", from=from, to=to, minnei=minnei )
+  return get2DSamples(fg, varkey=r"l", from=from, to=to, minnei=minnei )
 end
 
 function get2DLandmMeans(fg::G;
@@ -759,7 +760,7 @@ function get2DLandmMax(fgl::G;
       mv = getKDEMax(getVertKDE(fgl, Symbol(lb)))
       push!(X,mv[1])
       push!(Y,mv[2])
-      push!(LB, lbl)
+      push!(LB, string(lbl))
     end
   end
   return X, Y, Th, LB
