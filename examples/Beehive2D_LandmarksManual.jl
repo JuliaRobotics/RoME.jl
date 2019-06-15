@@ -83,8 +83,11 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
 
-tree, smtasks = batchSolve!(fg, drawpdf=true, show=true, recordcliqs=[:x3;:x1]  )
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true, dbg=true, recordcliqs=[:x3;:x1]  )
 0
+
+
+newcliq = attemptTreeSimilarClique(tree, getData(whichCliq(tree, :x6)))
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
