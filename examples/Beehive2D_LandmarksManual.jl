@@ -1,7 +1,7 @@
 
 # using Revise
 using Distributed
-addprocs(8)
+addprocs(6)
 
 ##
 
@@ -109,8 +109,8 @@ posecount = driveHex(fg, posecount, steps=5)
 # tree
 tree2, smtasks = batchSolve!(fg, tree, drawpdf=true, show=true, dbg=true, incremental=true,
                              downsolve=true, recordcliqs=[:x5;:x11;:x12;:x13;:x10]  )
-0
 tree = tree2
+0
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");
@@ -353,8 +353,6 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tm
 
 
 
-whichCliq(tree2, :x16)
-
 
 
 
@@ -374,7 +372,8 @@ addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
 
 
 
-tree, smtasks = batchSolve!(fg, drawpdf=true, show=true)
+tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
+tree = tree2
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)|
 
@@ -394,16 +393,17 @@ posecount = offsetHexLeg(fg, posecount, direction=:right)
 posecount = driveHex(fg, posecount)
 
 # Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
 # writeGraphPdf(fg)
 
-recordcliqs = Symbol[] #[:x29;:x44;:x38;:x47;:x49]
+recordcliqs = [:x29;:x44;:x38;:x47;:x49]
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
-                            returntasks=true, recordcliqs=recordcliqs )
+
+tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true, recordcliqs=recordcliqs)
+tree = tree2
 0
 
 
