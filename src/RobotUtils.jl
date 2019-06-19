@@ -573,47 +573,45 @@ end
 
 
 
-function get2DSamples(fg::G,
-                      sym; #::Union{Symbol, S};
+function get2DSamples(fg::G; #::Union{Symbol, S};
                       from::Int=0, to::Int=999999999,
                       minnei::Int=0,
-                      api::DataLayerAPI=IncrementalInference.localapi  ) where {G <: AbstractDFG, S <: AbstractString}
+                      varkey::Regex=r"x") where {G <: AbstractDFG, S <: AbstractString}
   #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
 
   # if sym = 'l', ignore single measurement landmarks
-
-  for id in DFG.getVariableIds(fg)  # fg.IDs
+  allids = DFG.getVariableIds(fg, varkey)  # fg.IDs
+  saids = DFG.sortVarNested(allids)
+  for id in saids
     # vertlbl = string(id[1])
     vertlbl = string(id)
-    if vertlbl[1] == sym
+    # if vertlbl[1] == sym
       val = parse(Int,vertlbl[2:end])
       if from <= val && val <= to
-        # if length( getOutNeighbors(fg, vertlbl[2], api=api, needdata=true ) ) >= minnei
-        if length( getNeighbors(fg, id ) ) >= minnei
+        # if length( getOutNeighbors(fg, vertlbl[2] , needdata=true ) ) >= minnei
+        if length( DFG.getNeighbors(fg, id ) ) >= minnei
           # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
           X=[X; vec(getVal(fg,id)[1,:]) ]
           Y=[Y; vec(getVal(fg,id)[2,:]) ]
-          # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
-          # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
         end
       end
-    end
+    # end
   end
   return X,Y
 end
 
-function getAll2D(fg, sym; minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
-  @warn "getAll2D deprecated, use get2DSamples instead"
-  return get2DSamples(fg, sym, minnei=minnei, api=api)
-end
+# function getAll2D(fg, sym; minnei::Int=0)
+#   @warn "getAll2D deprecated, use get2DSamples instead"
+#   return get2DSamples(fg, sym, minnei=minnei )
+# end
 
-function get2DSampleMeans(fg::FactorGraph,
-      sym;
-      from::Int=0, to::Int=9999999999,
-      minnei::Int=0,
-      api::DataLayerAPI=IncrementalInference.localapi  )
+function get2DSampleMeans(fg::G,
+                          varkey::Regex=r"x";
+                          from::Int=0, to::Int=9999999999,
+                          minnei::Int=0,
+                          api::DataLayerAPI=IncrementalInference.localapi  ) where G <: AbstractDFG
   #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
@@ -621,77 +619,87 @@ function get2DSampleMeans(fg::FactorGraph,
   LB = String[]
 
   # if sym = 'l', ignore single measurement landmarks
-  allIDs = Array{Int,1}()
-  for id in fg.IDs
-    vertlbl = string(id[1])
-    if vertlbl[1] == sym
-      val = parse(Int,vertlbl[2:end])
-      if from <= val && val <= to
-        if length( getOutNeighbors(fg, id[2], api=api, needdata=true) ) >= minnei
-          push!(allIDs, val)
+  allids = DFG.getVariableIds(fg, varkey)  # fg.IDs
+  saids = DFG.sortVarNested(allids)
+  mask = Array{Bool,1}(undef, length(saids))
+  fill!(mask, false)
+  count = 0
+  for id in saids
+    count += 1
+    if length( DFG.getNeighbors(fg, id) ) >= minnei
+      mask[count] = true
+    end
+    if from != 0 || to != 9999999999
+      vertlbl = string(id)
+        # TODO won't work with nested labels
+        val = parse(Int,vertlbl[2:end])
+        if !(from <= val && val <= to)
+          mask[count] = false
         end
-      end
     end
   end
-  allIDs = sort(allIDs)
+  # allIDs = sort(allIDs)
 
-  for id in allIDs
-    X=[X; Statistics.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[1,:] ) )]
-    Y=[Y; Statistics.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[2,:] ) )]
-    if sym == 'x'
-      Th=[Th; Statistics.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[3,:] ) )]
+  for id in saids[mask]
+    X=[X; Statistics.mean( vec( getVal(fg, id )[1,:] ) )]
+    Y=[Y; Statistics.mean( vec( getVal(fg, id )[2,:] ) )]
+    # crude test for pose
+    if string(id)[1] == 'x'
+      Th=[Th; Statistics.mean( vec( getVal(fg, id )[3,:] ) )]
     end
-    push!(LB, string(sym,id))
+    push!(LB, string(id))
   end
   return X,Y,Th,LB
 end
 
 #draw landmark positions
-function getAll2DMeans(fg, sym, api::DataLayerAPI=IncrementalInference.localapi)
-  return get2DSampleMeans(fg, sym, api=api)
+function getAll2DMeans(fg, sym::Regex)
+  return get2DSampleMeans(fg, sym )
 end
 
-function getAll2DPoses(fg::G, api::DataLayerAPI=IncrementalInference.localapi) where G <: AbstractDFG
-    return getAll2DSamples(fg, 'x', api=api)
+function getAll2DPoses(fg::G) where G <: AbstractDFG
+    return getAll2DSamples(fg, varkey=r"x" )
 end
 
-function get2DPoseSamples(fg::G; from::Int=0, to::Int=999999999, api::DataLayerAPI=IncrementalInference.localapi) where G <: AbstractDFG
-  return get2DSamples(fg, 'x'; from=from, to=to, api=api)
+function get2DPoseSamples(fg::G; from::Int=0, to::Int=999999999) where G <: AbstractDFG
+  return get2DSamples(fg, varkey=r"x", from=from, to=to )
 end
 
-function get2DPoseMeans(fg::G; from::Int=0, to::Int=999999999, api::DataLayerAPI=IncrementalInference.localapi) where G <: AbstractDFG
-  return get2DSampleMeans(fg, 'x', from=from, to=to, api=api)
+function get2DPoseMeans(fg::G; from::Int=0, to::Int=999999999) where G <: AbstractDFG
+  return get2DSampleMeans(fg, r"x", from=from, to=to )
 end
 
 
 function get2DPoseMax(fgl::G;
+					  varkey::Regex=r"x",
                       from::Int=-99999999999, to::Int=9999999999 ) where G <: AbstractDFG
   #
   # xLB,ll = ls(fgl) # TODO add: from, to, special option 'x'
-  xLB = getVariableIds(fgl, r"x")
+  xLB = DFG.getVariableIds(fgl, varkey)
+  saids = DFG.sortVarNested(xLB)
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
   LB = String[]
-  for slbl in xLB
+  for slbl in saids
     lbl = string(slbl)
     if from <= parse(Int,lbl[2:end]) <=to
       mv = getKDEMax(getVertKDE(fgl,slbl))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(Th,mv[3])
-      push!(LB, lbl)
+      push!(LB, string(lbl))
     end
   end
   return X, Y, Th, LB
 end
 
-function getAll2DLandmarks(fg::G,
-                           minnei::Int=0,
-                           api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
-  #
-  return getAll2DSamples(fg, 'l', minnei=minnei, api=api)
-end
+# function getAll2DLandmarks(fg::G,
+#                            minnei::Int=0,
+#                            api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
+#   #
+#   return getAll2DSamples(fg, varkey=r"l", minnei=minnei )
+# end
 
 function get2DLandmSamples(fg::G;
                            from::Int=0,
@@ -699,7 +707,7 @@ function get2DLandmSamples(fg::G;
                            minnei::Int=0,
                            api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
   #
-  return get2DSamples(fg, 'l', from=from, to=to, minnei=minnei, api=api)
+  return get2DSamples(fg, varkey=r"l", from=from, to=to, minnei=minnei )
 end
 
 function get2DLandmMeans(fg::G;
@@ -707,7 +715,7 @@ function get2DLandmMeans(fg::G;
                          minnei::Int=0,
                          api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
   #
-  return get2DSampleMeans(fg, 'l', from=from, to=to, minnei=minnei, api=api)
+  return get2DSampleMeans(fg, r"l", from=from, to=to, minnei=minnei )
 end
 
 function removeKeysFromArr(fgl::G,
@@ -752,7 +760,7 @@ function get2DLandmMax(fgl::G;
       mv = getKDEMax(getVertKDE(fgl, Symbol(lb)))
       push!(X,mv[1])
       push!(Y,mv[2])
-      push!(LB, lbl)
+      push!(LB, string(lbl))
     end
   end
   return X, Y, Th, LB
@@ -812,46 +820,3 @@ function basicFactorGraphExample(::Type{Pose2}=Pose2; addlandmark::Bool=true)
 
   return fg
 end
-
-
-#
-# function +(p1::Rigid6DOF, p2::Rigid6DOF)
-#     t = rotate(p1.rot, p2.trl) + p1.trl
-#     return Rigid6DOF(p1.rot*p2.rot,t)
-# end
-#
-# function +(p1::PoseSE3, p2::PoseSE3)
-#     return PoseSE3(p1.utime+p2.utime,
-#                    "+",
-#                    p1.mu+p2.mu,
-#                    p1.cov + p2.cov,
-#                    Dict())
-# end
-#
-# function makePose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*Matrix{Float64}(LinearAlgebra.I, 6,6))
-#     return PoseSE3(ut,
-#                    name,
-#                    Rigid6DOF( q, t ),
-#                    cov,
-#                    Dict())
-# end
-
-# function makeDynPose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*Matrix{Float64}(LinearAlgebra.I, 18,18))
-#     return DynPose3(ut,
-#                     name,
-#                     Dynamic6DOF( q, t, [0.,0,0], [0.,0,0] ),
-#                     IMUComp([0.,0,0],[0.,0,0]),
-#                     cov,
-#                     Dict())
-# end
-#
-# function wTo(p::PoseSE3)
-#     T = Matrix{Float64}(LinearAlgebra.I, 4,4)
-#     T[1:3,1:3] =  convert(SO3, p.mu.rot).R
-#     T[1:3,4] = p.mu.trl
-#     return T
-# end
-#
-# function oTw(p::PoseSE3)
-#     return wTo(p) \ Matrix{Float64}(LinearAlgebra.I, 4,4)
-# end

@@ -53,7 +53,7 @@ export
 
   # helper functions
   get2DSamples,
-  getAll2D,
+  # getAll2D,
   get2DSampleMeans,
   getAll2DMeans,
   getAll2DPoses,

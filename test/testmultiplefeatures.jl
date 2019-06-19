@@ -192,7 +192,7 @@ gg = (x,y) -> minmickey([x;y])
 
 # now build in factor graph form for further testing
 
-N=50
+N=100 # TODO return to 50
 fg = initfg()
 
 initCov = 0.05*Matrix{Float64}(LinearAlgebra.I, 3,3)

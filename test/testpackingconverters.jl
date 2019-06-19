@@ -49,26 +49,28 @@ global f2 = addFactor!(fg, [:x1;:x2], ppc)
 
 
 @testset "test conversions of PriorPose2" begin
-    global dd = convert(PackedPriorPose2, ipp)
-    global upd = convert(RoME.PriorPose2, dd)
 
-    @test RoME.compare(ipp, upd) # temp use of RoME.compare
+global dd = convert(PackedPriorPose2, ipp)
+global upd = convert(RoME.PriorPose2, dd)
 
-    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
-    global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose2}}, packeddata)
+@test RoME.compare(ipp, upd) # temp use of RoME.compare
 
-    # getData(f1)
-    # unpackeddata
+global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
+global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose2}}, packeddata)
 
-    @test RoME.compare(getData(f1), unpackeddata) # temp use of RoME.compare
+# getData(f1)
+# unpackeddata
 
-    setSerializationNamespace!("Main" => Main)
+@test RoME.compare(getData(f1), unpackeddata) # temp use of RoME.compare
 
-    global packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
-    global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
+# TODO -- what what??
+# setSerializationNamespace!("Main" => Main)
 
-    @test compareAll(getData(v1), upv1data, skip=[:softtype;])
-    @test compareFields(getData(v1).softtype, upv1data.softtype)
+global packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
+global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
+
+@test compareAll(getData(v1), upv1data, skip=[:softtype;])
+@test compareFields(getData(v1).softtype, upv1data.softtype)
 
 end
 

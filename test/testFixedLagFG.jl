@@ -20,7 +20,7 @@ end
 
 
 # start with an empty factor graph object
-global fg = initfg() # FUTURE: (quasifixedwindow=50, autosolve=true)
+global fg = initfg()
 
 # Set up a quasi fixed-lag horizon of 8 nodes and enable the fixed-lag solving.
 # If the graph grows over 8 nodes, the older nodes will be frozen to limit the computational window.
@@ -77,9 +77,17 @@ fgOriginal.solverParams.isfixedlag = false
 X5 = deepcopy(getVal(fg, :x5))
 X7 = deepcopy(getVal(fg, :x7))
 
+
 # Now solve again, which will freeze vertices < 5
 println("STEP 4: Solve graph when shorter than fixed length, and show time to solve")
-@time IIF.batchSolve!(fg, treeinit=true)
+stuff = IIF.batchSolve!(fg, dbg=true)
+
+
+# drawTree(stuff[1], show=true)
+st = fetch(stuff[2][11])
+hist = getCliqSolveHistory(stuff[1], :x2)
+
+
 # fg.solverparams.isfixedlag
 # tofreeze = fg.fifo[1:(end-fg.qfl)]
 # @test length(tofreeze) > 0

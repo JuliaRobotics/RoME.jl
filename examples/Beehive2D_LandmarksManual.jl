@@ -1,7 +1,7 @@
 
 # using Revise
 using Distributed
-addprocs(2)
+addprocs(6)
 
 ##
 
@@ -79,87 +79,15 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-writeGraphPdf(fg,engine="neato")
+# writeGraphPdf(fg,engine="neato")
 
 
-tree, smtasks = batchSolve!(fg, drawpdf=true, show=true, downsolve=false,
-                            returntasks=true, limititers=50, recordcliqs=[:x3;:x1]  )
+
+tree, smtasks = batchSolve!(fg, drawpdf=true, show=true, dbg=true, recordcliqs=[:x3;:x1]  )
 0
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
-
-
-
-
-
-## debug
-
-histx3 = getCliqSolveHistory(tree, :x3)
-printCliqHistorySummary(histx3)
-
-
-@assert length(getDwnMsgs(tree.cliques[1])) == 0
-
-## mock down solve on root clique
-csmc = histx3[end][4]
-csmc.dodownsolve = true
-sm,csmc = solveCliqWithStateMachine!(fg, tree, :x3, recordhistory=true, iters=1,
-            nextfnc=IIF.determineCliqIfDownSolve_StateMachine, prevcsmc=csmc)
-@assert !sm(csmc)
-
-# look at the down msgs that were preped
-getDwnMsgs(csmc.cliq)
-
-
-getCliqDownMsgsAfterDownSolve
-
-
-# mock down solve`
-prnt = getParent(csmc.tree, csmc.cliq)
-dwnmsgs = getDwnMsgs(prnt[1])
-
-getCliqSeparatorVarIds(cscm.cliq)
-m = dwnPrepOutMsg(csmc.fg, csmc.cliq, Dict{Symbol, BallTreeDensity}(), d)
-
-
-# call down inference, TODO multiproc
-drt = downGibbsCliqueDensity(csmc.cliqSubFg, csmc.cliq, dwnmsgs, 100, 3, false)
-csmc.dodownsolve = false
-
-
-
-# writeGraphPdf(fg, show=true)
-# tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
-# drawTree(tree, show=true)
-# allsyms = getTreeAllFrontalSyms(fg, tree);  #allsyms = Symbol[]
-#                           recordcliqs=allsyms,
-
-
-0
-# tx6 = @async solveCliqWithStateMachine!(fg,tree,:x6, recordhistory=true, iters=50)
-# tx4 = @async solveCliqWithStateMachine!(fg,tree,:x4, recordhistory=true, iters=50)
-#
-# tx2 = @async solveCliqWithStateMachine!(fg,tree,:x2, recordhistory=true, iters=50)
-# sm0, csmc0 = solveCliqWithStateMachine!(fg,tree,:x0, recordhistory=true, iters=50)
-#
-# # hist = getCliqSolveHistory(tree,:x2)
-# stuff = fetch(tx2)
-# hist = stuff[1].history
-# printCliqHistorySummary(hist)
-# printCliqHistorySummary(sm0.history)
-# csmc0new7 = sandboxStateMachineStep(sm0.history,7)
-# getData(csmc0new7[4].tree.cliques[2])
-#
-# using Graphs
-# drawStateMachineHistory(hist)
-# animateCliqStateMachines(tree, [:x2;:x1;:x3], frames=100)
-
-# fihs = filterHistAllToArray(tree, [:x0;:x1;:x2;:x3;:x4;:x6], slowCliqIfChildrenNotUpsolved_StateMachine)
-# printCliqHistorySummary(fihs)
-
-
-
 
 
 
@@ -176,29 +104,13 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, autoinit=false )
 posecount = driveHex(fg, posecount, steps=5)
 
 
-## Adding here fails partial tree init issue
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 
 
-# drawCliqSubgraphUp(fg, tree, :x7)
-
-
-##
-# tree = wipeBuildNewTree!(fg)
-# allsyms = getTreeAllFrontalSyms(fg, tree);  #allsyms = Symbol[]
-#                 recordcliqs=allsyms,
-
-# tree = wipeBuildNewTree!(fg, drawpdf=true)
-# whichCliq(tree, :x11)
-
-
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
-                            returntasks=true, limititers=50, recordcliqs=[:x5;:x11;:x12;:x13;:x10],
-                            upsolve=true, downsolve=true) # , skipcliqids=[1;3;8;9]  )
+# tree
+tree2, smtasks = batchSolve!(fg, tree, drawpdf=true, show=true, dbg=true, incremental=true,
+                             downsolve=true, recordcliqs=[:x5;:x11;:x12;:x13;:x10]  )
+tree = tree2
 0
-
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");
@@ -230,8 +142,8 @@ posecount = driveHex(fg, posecount)
 
 # solve
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true) #, recordcliqs=allsyms)
-
+tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
+tree = tree2
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
 
@@ -268,7 +180,8 @@ addFactor!(fg, [:x19; :l0], p2br2, autoinit=false )
 
 
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree2, smtasks = batchSolve!(fg, tree, dbg=true, drawpdf=true, show=true, incremental=true)
+tree=tree2
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #; @async run(`eog /tmp/test.svg`)
@@ -299,7 +212,9 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree2, smtasks = batchSolve!(fg, tree, dbg=true, drawpdf=true, show=true, incremental=true)
+tree=tree2
+
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /tmp/test.svg`)
@@ -325,7 +240,10 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x26; :l0], p2br2, autoinit=false )
 
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+
+
+tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
+tree = tree2
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") #|| @async run(`eog /tmp/test.svg`)
@@ -351,8 +269,8 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
-
+tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
+tree = tree2
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
@@ -391,8 +309,8 @@ addFactor!(fg, [:x33; :l0], p2br2, autoinit=false )
 
 # writeGraphPdf(fg)
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
-
+tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
+tree = tree2
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
@@ -427,10 +345,14 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
+tree = tree2
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+
+
+
 
 
 
@@ -450,9 +372,10 @@ addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
 
 
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true, returntasks=true)
+tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
+tree = tree2
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)|
 
 
 
@@ -469,17 +392,23 @@ posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 posecount = driveHex(fg, posecount)
 
+
 # Add landmarks with Bearing range measurements
+addVariable!(fg, :l7, Point2, labels=[:LANDMARK])
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+addFactor!(fg, [:x49; :l7], p2br2, autoinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x2; :l7], p2br2, autoinit=false )
+
 
 
 # writeGraphPdf(fg)
 
-recordcliqs = Symbol[] #[:x29;:x44;:x38;:x47;:x49]
+recordcliqs = [:x29;:x44;:x38;:x47;:x49]
 
-tree, smtasks = batchSolve!(fg, treeinit=true, drawpdf=true, show=true,
-                            returntasks=true, recordcliqs=recordcliqs )
+
+tree2, smtasks = batchSolve!(fg, tree, incremental=false, dbg=true, drawpdf=true, show=true, recordcliqs=recordcliqs)
+tree = tree2
 0
 
 
@@ -513,7 +442,8 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree2, smtasks = batchSolve!(fg, tree, treeinit=true, drawpdf=true, show=true, incremental=true)
+tree = tree2
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
 
@@ -550,6 +480,13 @@ addFactor!(fg, [:x55; :l6], p2br2, autoinit=false )
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+
+
+
+
+
+ls(fg, :x52)
+
 
 
 
