@@ -43,7 +43,7 @@ global Y = X ⊕ odo
 
 
 
-global N = 75
+global N = 100
 global fg = initfg()
 
 global initCov = Matrix{Float64}(LinearAlgebra.I, 6,6)
