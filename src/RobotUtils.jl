@@ -610,8 +610,7 @@ end
 function get2DSampleMeans(fg::G,
                           varkey::Regex=r"x";
                           from::Int=0, to::Int=9999999999,
-                          minnei::Int=0,
-                          api::DataLayerAPI=IncrementalInference.localapi  ) where G <: AbstractDFG
+                          minnei::Int=0  ) where G <: AbstractDFG
   #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
@@ -694,26 +693,18 @@ function get2DPoseMax(fgl::G;
   return X, Y, Th, LB
 end
 
-# function getAll2DLandmarks(fg::G,
-#                            minnei::Int=0,
-#                            api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
-#   #
-#   return getAll2DSamples(fg, varkey=r"l", minnei=minnei )
-# end
 
 function get2DLandmSamples(fg::G;
                            from::Int=0,
                            to::Int=999999999,
-                           minnei::Int=0,
-                           api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
+                           minnei::Int=0  ) where G <: AbstractDFG
   #
   return get2DSamples(fg, varkey=r"l", from=from, to=to, minnei=minnei )
 end
 
 function get2DLandmMeans(fg::G;
                          from::Int=0, to::Int=999999999,
-                         minnei::Int=0,
-                         api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
+                         minnei::Int=0  ) where G <: AbstractDFG
   #
   return get2DSampleMeans(fg, r"l", from=from, to=to, minnei=minnei )
 end
@@ -743,8 +734,7 @@ end
 function get2DLandmMax(fgl::G;
                        from::Int=-99999999999,
                        to::Int=9999999999,
-                       showmm=false, MM::Dict{Int,T}=Dict{Int,Int}(),
-                       api::DataLayerAPI=IncrementalInference.localapi  ) where {G <: AbstractDFG, T}
+                       showmm=false, MM::Dict{Int,T}=Dict{Int,Int}() ) where {G <: AbstractDFG, T}
   #
   # xLB,lLB = ls(fgl) # TODO add: from, to, special option 'x'
   lLB = DFG.getVariableIds(fgl, r"l")

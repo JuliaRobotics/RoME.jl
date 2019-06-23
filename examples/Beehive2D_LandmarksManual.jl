@@ -134,6 +134,8 @@ prnt = getParent(tree, cliq)[1]
 dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
 
 
+
+
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
@@ -164,7 +166,7 @@ tree, smt, hist = solveTree!(fg, tree)
 # tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
 # tree = tree2
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
 
 
 
