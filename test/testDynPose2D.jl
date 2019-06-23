@@ -179,7 +179,7 @@ addFactor!(fg, [:x10;], pp10)
 
 
 batchSolve!(fg, N=N)
-# run(`evince /tmp/bt.pdf`)
+# run(`evince /tmp/caesar/bt.pdf`)
 
 
 
