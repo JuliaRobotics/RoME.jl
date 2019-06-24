@@ -165,9 +165,9 @@ version = "0.8.2"
 
 [[IncrementalInference]]
 deps = ["ApproxManifoldProducts", "Dates", "Distributed", "DistributedFactorGraphs", "Distributions", "DocStringExtensions", "FileIO", "FunctionalStateMachine", "Graphs", "JLD2", "JSON2", "KernelDensityEstimate", "LinearAlgebra", "Logging", "NLsolve", "Optim", "ProgressMeter", "Random", "Reexport", "Requires", "SparseArrays", "Statistics", "StatsBase", "SuiteSparse"]
-git-tree-sha1 = "1dab558a54ac80288feeda1153fff6e4924cfa35"
+git-tree-sha1 = "bb5b618c6c9cc6cf1ba82d11c134568df374504d"
 uuid = "904591bb-b899-562f-9e6f-b8df64c7d480"
-version = "0.7.1"
+version = "0.7.2"
 
 [[IniFile]]
 deps = ["Test"]
