@@ -40,8 +40,8 @@ inferOverTree!(fg, tree)
 
 global pts = getVal(fg, :x1)
 
-@test 0.6*N < sum(-70 .< pts[1,:] .< -30)
-@test 0.6*N < sum(-70 .< pts[2,:] .< -30)
+@test 0.5*N < sum(-70 .< pts[1,:] .< -30)
+@test 0.5*N < sum(-70 .< pts[2,:] .< -30)
 
 
 @test 0 <= sum(0 .< pts[1,:]) < 0.1*N

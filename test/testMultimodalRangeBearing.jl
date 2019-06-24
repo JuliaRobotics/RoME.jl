@@ -23,8 +23,8 @@ global N = 100
 global fg = initfg(sessionname="MULTIMODAL_2D_TUTORIAL")
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
-addVariable!(fg, :l2, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
+addVariable!(fg, :l2, Point2, labels=[:LANDMARK;])
 
 addFactor!(fg, [:l1], Prior(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 addFactor!(fg, [:l2], Prior(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
@@ -47,9 +47,6 @@ addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
 predictbelief(fg, :x0, ls(fg, :x0))
 
 
-
-
-@test true
 # writeGraphPdf(fg)
 end
 
@@ -95,17 +92,17 @@ addVariable!(fg, :x0, Pose2)
 addFactor!(fg, [:x0], PriorPose2(MvNormal([0.0;0.0;0], Matrix(Diagonal([1.0;1.0;0.01].^2)))) ) # TODO IIF.Prior with IIF 0.3.9
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
 addFactor!(fg, [:l1], PriorPose2(MvNormal([40.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) ) # TODO IIF.Prior with IIF 0.3.9
 
-addVariable!(fg, :l2, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l2, Point2, labels=[:LANDMARK;])
 addFactor!(fg, [:l2;], NorthSouthPartial(Normal(0,1.0)))
 # addFactor!(fg, [:l2], PriorPose2(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) ) # TODO IIF.Prior with IIF 0.3.9
 
 global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
 
-@test true
+# @test true
 
 # setVal!(getVert(fg, :l2), zeros(2,N))
 # writeGraphPdf(fg)

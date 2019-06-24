@@ -46,7 +46,7 @@ function runHexagonalExample(fg::FactorGraph, totalIterations::Int, iterationsPe
         end
         if i % iterationsPerSolve == 0 && i != 0
             @info "Performing inference!"
-            if fg.isfixedlag
+            if getSolverParams(fg).isfixedlag
                 @info "Quasi fixed-lag is enabled (a feature currently in testing)!"
                 fifoFreeze!(fg)
             end
@@ -70,8 +70,8 @@ solverTimesForBatch = runHexagonalExample(fg, numVariables, solveEveryNVariables
 #############################
 
 fgFixedLag = initfg()
-fgFixedLag.isfixedlag = true
-fgFixedLag.qfl = lagLength
+fgFixedLag.solverParams.isfixedlag = true
+fgFixedLag.solverParams.qfl = lagLength
 
 solverTimesFixedLag = runHexagonalExample(fgFixedLag, numVariables, solveEveryNVariables)
 # savejld(fgFixedLag, "fixedSolve.jld2")

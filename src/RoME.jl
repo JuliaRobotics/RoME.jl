@@ -12,7 +12,7 @@ using
   Distributed,
   LinearAlgebra,
   Statistics,
-  Graphs,
+  Graphs,  # TODO determine how many parts still require Graphs still directly
   Rotations,
   CoordinateTransformations,
   JLD2,
@@ -21,9 +21,9 @@ using
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
-import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution  #, compare
+import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution, DFG
 
-const AMP = ApproxManifoldProducts
+# const AMP = ApproxManifoldProducts
 
 export
   IIF,  # Aliases for various packages
@@ -53,7 +53,7 @@ export
 
   # helper functions
   get2DSamples,
-  getAll2D,
+  # getAll2D,
   get2DSampleMeans,
   getAll2DMeans,
   getAll2DPoses,

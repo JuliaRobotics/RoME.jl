@@ -169,14 +169,13 @@ Create a new variable node and insert odometry constraint factor between
 which will automatically increment latest pose symbol x<k+1> for new node new node and
 constraint factor are returned as a tuple.
 """
-function addOdoFG!(
-        fg::FactorGraph,
-        n::Symbol,
-        DX::Array{Float64,1},
-        cov::Array{Float64,2};
-        N::Int=0,
-        ready::Int=1,
-        labels::Vector{<:AbstractString}=String[]  )
+function addOdoFG!(fg::G,
+                   n::Symbol,
+                   DX::Array{Float64,1},
+                   cov::Array{Float64,2};
+                   N::Int=0,
+                   ready::Int=1,
+                   labels::Vector{<:AbstractString}=String[]  ) where G <: AbstractDFG
     #
     prev, X, nextn = getLastPose2D(fg)
     r,c = size(X)
@@ -200,16 +199,12 @@ function addOdoFG!(
     return v, f
 end
 
-function addOdoFG!(
-        fgl::FactorGraph,
-        # n::T,
-        Z::Pose3Pose3;
-        N::Int=0,
-        ready::Int=1,
-        labels::Vector{<:AbstractString}=String[]  ) # where {T <: AbstractString}
+function addOdoFG!(fgl::G,
+                   Z::Pose3Pose3;
+                   N::Int=0,
+                   ready::Int=1,
+                   labels::Vector{<:AbstractString}=String[]  ) where {G <: AbstractDFG}
   #
-  # DX=Z.μ
-  # cov=Z.Σ.mat
   vprev, X, nextn = getLastPose(fgl)
   vnext = addVariable!(fgl, nextn, Pose3, ready=ready, labels=labels)
   fact = addFactor!(fgl, [vprev;vnext], Z, autoinit=true)
@@ -273,33 +268,33 @@ end
 
 Initialize a factor graph object as Pose2, Pose3, or neither and returns variable and factor symbols as array.
 """
-function initFactorGraph!(fg::FactorGraph;
-      P0::Union{Array{Float64,2},Nothing}=nothing,
-      init::Union{Vector{Float64},Nothing}=nothing,
-      N::Int=100,
-      lbl::Symbol=:x0,
-      ready::Int=1,
-      firstPoseType=Pose2,
-      labels::Vector{<:AbstractString}=String[])
+function initFactorGraph!(fg::G;
+                          P0::Union{Array{Float64,2},Nothing}=nothing,
+                          init::Union{Vector{Float64},Nothing}=nothing,
+                          N::Int=100,
+                          lbl::Symbol=:x0,
+                          ready::Int=1,
+                          firstPoseType=Pose2,
+                          labels::Vector{Symbol}=Symbol[]) where G <: AbstractDFG
   #
   nodesymbols = Symbol[]
   if firstPoseType == Pose2
       init = init!=nothing ? init : zeros(3)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.001]))
       # init = vectoarr2(init)
-      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
+      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
       push!(nodesymbols, lbl)
       # v1 = addVariable!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
+      fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), ready=ready, labels=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.03;0.001;0.001;0.001]))
-      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
+      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
       push!(nodesymbols, lbl)
       # v1 = addVariable!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
+      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   return nodesymbols
@@ -326,12 +321,12 @@ function updateLandmAge(vlm::Graphs.ExVertex, pose::T) where {T <: AbstractStrin
   error("still working here")
 end
 
-function addBRFG!(fg::FactorGraph,
-      pose::T,
-      lm::T,
-      br::Array{Float64,1},
-      cov::Array{Float64,2};
-      ready::Int=1  ) where {T <: AbstractString}
+function addBRFG!(fg::G,
+                  pose::T,
+                  lm::T,
+                  br::Array{Float64,1},
+                  cov::Array{Float64,2};
+                  ready::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
   #
   vps = getVert(fg,pose)
   vlm = getVert(fg,lm)
@@ -364,10 +359,10 @@ function addBRFG!(fg::FactorGraph,
   return f
 end
 
-function addMMBRFG!(fg::FactorGraph,
+function addMMBRFG!(fg::G,
                     syms::Array{Symbol,1}, br::Array{Float64,1},
                     cov::Array{Float64,2}; w::Vector{Float64}=Float64[0.5;0.5],
-                    ready::Int=1)
+                    ready::Int=1) where G <: AbstractDFG
     #
     # vps = getVert(fg,pose)
     # vlm1 = getVert(fg,lm[1])
@@ -392,7 +387,7 @@ function projNewLandmPoints(vps::Graphs.ExVertex, br::Array{Float64,1}, cov::Arr
     return lmPts
 end
 
-function projNewLandm!(fg::FactorGraph,
+function projNewLandm!(fg::G,
                        pose::T,
                        lm::T,
                        br::Array{Float64,1},
@@ -400,7 +395,7 @@ function projNewLandm!(fg::FactorGraph,
                        addfactor=true,
                        N::Int=100,
                        ready::Int=1,
-                       labels::Vector{T}=String[]  ) where {T <: AbstractString}
+                       labels::Vector{T}=String[]  ) where {G <: AbstractDFG, T <: AbstractString}
     #
     vps = getVert(fg, pose)
 
@@ -413,8 +408,8 @@ function projNewLandm!(fg::FactorGraph,
     return vlm
 end
 
-function calcIntersectVols(fgl::FactorGraph, predLm::BallTreeDensity;
-                          currage=0, maxdeltaage=Inf)
+function calcIntersectVols(fgl::G, predLm::BallTreeDensity;
+                           currage=0, maxdeltaage=Inf) where G <: AbstractDFG
     # TODO upgrade to using MMD test
     # all landmarks of interest
     xx,ll = ls(fgl)
@@ -457,7 +452,7 @@ function maxIvWithoutID(ivs::Dict{String, Float64}, l::T) where {T <: AbstractSt
 end
 
 # binary tests to distinguish how to automatically add a landmark to the existing factor graph
-function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{T, Float64}, maxl::T, lmid::Int, lmindx::Int) where {T <: AbstractString}
+function doAutoEvalTests(fgl::G, ivs::Dict{T, Float64}, maxl::T, lmid::Int, lmindx::Int) where {G <: AbstractDFG, T <: AbstractString}
   maxAnyval = maxl != String("") ? ivs[maxl] : 0.0
   # maxid = fgl.IDs[maxl]
   lmidSugg = lmid != -1 # a landmark ID has been suggested
@@ -478,9 +473,9 @@ function doAutoEvalTests(fgl::FactorGraph, ivs::Dict{T, Float64}, maxl::T, lmid:
 end
 
 
-function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
+function evalAutoCases!(fgl::G, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
                         pose::T, lmPts::Array{Float64,2}, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
-                        N::Int=100, ready::Int=1 ) where {T <: AbstractString}
+                        N::Int=100, ready::Int=1 ) where {G <: AbstractDFG, T <: AbstractString}
   lmidSugg, maxAnyExists, maxl2Exists, maxl2, lmIDExists, intgLmIDExists, lmSuggLbl, newlmindx = doAutoEvalTests(fgl,ivs,maxl,lmid, lmindx)
 
   println("evalAutoCases -- found=$(lmidSugg), $(maxAnyExists), $(maxl2Exists), $(lmIDExists), $(intgLmIDExists)")
@@ -532,18 +527,25 @@ function evalAutoCases!(fgl::FactorGraph, lmid::Int, ivs::Dict{T, Float64}, maxl
   return vlm, fbr, newlmindx
 end
 
-function addAutoLandmBR!(fgl::FactorGraph, pose::T, lmid::Int, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
-                      N::Int=100, ready::Int=1 ) where {T <: AbstractString}
-    vps = getVert(fgl, pose)
-    lmPts = projNewLandmPoints(vps, br, cov)
-    lmkde = kde!(lmPts)
-    currage = parse(Int, pose[2:end])
-    ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=10)
+function addAutoLandmBR!(fgl::G,
+                         pose::T,
+                         lmid::Int,
+                         br::Array{Float64,1},
+                         cov::Array{Float64,2},
+                         lmindx::Int;
+                         N::Int=100,
+                         ready::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
+  #
+  vps = getVert(fgl, pose)
+  lmPts = projNewLandmPoints(vps, br, cov)
+  lmkde = kde!(lmPts)
+  currage = parse(Int, pose[2:end])
+  ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=10)
 
-    # There are 8 cases of interest
-    vlm, fbr, newlmindx = evalAutoCases!(fgl, lmid, ivs, maxl,pose,lmPts, br,cov,lmindx,N=N,ready=ready)
+  # There are 8 cases of interest
+  vlm, fbr, newlmindx = evalAutoCases!(fgl, lmid, ivs, maxl,pose,lmPts, br,cov,lmindx,N=N,ready=ready)
 
-    return vlm, fbr, newlmindx
+  return vlm, fbr, newlmindx
 end
 
 function malahanobisBR(measA, preA, cov::Array{Float64,2})
@@ -571,45 +573,44 @@ end
 
 
 
-function get2DSamples(fg::FactorGraph,
-      sym;
-      from::Int=0, to::Int=999999999,
-      minnei::Int=0,
-      api::DataLayerAPI=IncrementalInference.localapi  )
+function get2DSamples(fg::G; #::Union{Symbol, S};
+                      from::Int=0, to::Int=999999999,
+                      minnei::Int=0,
+                      varkey::Regex=r"x") where {G <: AbstractDFG, S <: AbstractString}
   #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
 
   # if sym = 'l', ignore single measurement landmarks
-
-  for id in fg.IDs
-    vertlbl = string(id[1])
-    if vertlbl[1] == sym
+  allids = DFG.getVariableIds(fg, varkey)  # fg.IDs
+  saids = DFG.sortVarNested(allids)
+  for id in saids
+    # vertlbl = string(id[1])
+    vertlbl = string(id)
+    # if vertlbl[1] == sym
       val = parse(Int,vertlbl[2:end])
       if from <= val && val <= to
-        if length( getOutNeighbors(fg, id[2], api=api, needdata=true ) ) >= minnei
+        # if length( getOutNeighbors(fg, vertlbl[2] , needdata=true ) ) >= minnei
+        if length( DFG.getNeighbors(fg, id ) ) >= minnei
           # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
-          X=[X; vec(getVal(fg,id[2], api=api)[1,:]) ]
-          Y=[Y; vec(getVal(fg,id[2], api=api)[2,:]) ]
-          # X=[X;vec(fg.v[id[2]].attributes["val"][1,:])]
-          # Y=[Y;vec(fg.v[id[2]].attributes["val"][2,:])]
+          X=[X; vec(getVal(fg,id)[1,:]) ]
+          Y=[Y; vec(getVal(fg,id)[2,:]) ]
         end
       end
-    end
+    # end
   end
   return X,Y
 end
 
-function getAll2D(fg, sym; minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
-  @warn "getAll2D deprecated, use get2DSamples instead"
-  return get2DSamples(fg, sym, minnei=minnei, api=api)
-end
+# function getAll2D(fg, sym; minnei::Int=0)
+#   @warn "getAll2D deprecated, use get2DSamples instead"
+#   return get2DSamples(fg, sym, minnei=minnei )
+# end
 
-function get2DSampleMeans(fg::FactorGraph,
-      sym;
-      from::Int=0, to::Int=9999999999,
-      minnei::Int=0,
-      api::DataLayerAPI=IncrementalInference.localapi  )
+function get2DSampleMeans(fg::G,
+                          varkey::Regex=r"x";
+                          from::Int=0, to::Int=9999999999,
+                          minnei::Int=0) where G <: AbstractDFG
   #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
@@ -617,82 +618,101 @@ function get2DSampleMeans(fg::FactorGraph,
   LB = String[]
 
   # if sym = 'l', ignore single measurement landmarks
-  allIDs = Array{Int,1}()
-  for id in fg.IDs
-    vertlbl = string(id[1])
-    if vertlbl[1] == sym
-      val = parse(Int,vertlbl[2:end])
-      if from <= val && val <= to
-        if length( getOutNeighbors(fg, id[2], api=api, needdata=true) ) >= minnei
-          push!(allIDs, val)
+  allids = DFG.getVariableIds(fg, varkey)  # fg.IDs
+  saids = DFG.sortVarNested(allids)
+  mask = Array{Bool,1}(undef, length(saids))
+  fill!(mask, false)
+  count = 0
+  for id in saids
+    count += 1
+    if length( DFG.getNeighbors(fg, id) ) >= minnei
+      mask[count] = true
+    end
+    if from != 0 || to != 9999999999
+      vertlbl = string(id)
+        # TODO won't work with nested labels
+        val = parse(Int,vertlbl[2:end])
+        if !(from <= val && val <= to)
+          mask[count] = false
         end
-      end
     end
   end
-  allIDs = sort(allIDs)
+  # allIDs = sort(allIDs)
 
-  for id in allIDs
-    X=[X; Statistics.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[1,:] ) )]
-    Y=[Y; Statistics.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[2,:] ) )]
-    if sym == 'x'
-      Th=[Th; Statistics.mean( vec( getVal(fg, Symbol(string(sym,id)), api=api)[3,:] ) )]
+  for id in saids[mask]
+    X=[X; Statistics.mean( vec( getVal(fg, id )[1,:] ) )]
+    Y=[Y; Statistics.mean( vec( getVal(fg, id )[2,:] ) )]
+    # crude test for pose
+    if string(id)[1] == 'x'
+      Th=[Th; Statistics.mean( vec( getVal(fg, id )[3,:] ) )]
     end
-    push!(LB, string(sym,id))
+    push!(LB, string(id))
   end
   return X,Y,Th,LB
 end
 
 #draw landmark positions
-function getAll2DMeans(fg, sym, api::DataLayerAPI=IncrementalInference.localapi)
-  return get2DSampleMeans(fg, sym, api=api)
+function getAll2DMeans(fg, sym::Regex)
+  return get2DSampleMeans(fg, sym )
 end
 
-function getAll2DPoses(fg::FactorGraph, api::DataLayerAPI=IncrementalInference.localapi)
-    return getAll2DSamples(fg, 'x', api=api)
+function getAll2DPoses(fg::G) where G <: AbstractDFG
+    return getAll2DSamples(fg, varkey=r"x" )
 end
 
-function get2DPoseSamples(fg::FactorGraph; from::Int=0, to::Int=999999999, api::DataLayerAPI=IncrementalInference.localapi)
-  return get2DSamples(fg, 'x'; from=from, to=to, api=api)
+function get2DPoseSamples(fg::G; from::Int=0, to::Int=999999999) where G <: AbstractDFG
+  return get2DSamples(fg, varkey=r"x", from=from, to=to )
 end
 
-function get2DPoseMeans(fg::FactorGraph; from::Int=0, to::Int=999999999, api::DataLayerAPI=IncrementalInference.localapi)
-  return get2DSampleMeans(fg, 'x', from=from, to=to, api=api)
+function get2DPoseMeans(fg::G; from::Int=0, to::Int=999999999) where G <: AbstractDFG
+  return get2DSampleMeans(fg, r"x", from=from, to=to )
 end
 
 
-function get2DPoseMax(fgl::FactorGraph;
-            from::Int=-99999999999, to::Int=9999999999, api::DataLayerAPI=IncrementalInference.localapi )
-  xLB,ll = ls(fgl) # TODO add: from, to, special option 'x'
+function get2DPoseMax(fgl::G;
+					  varkey::Regex=r"x",
+                      from::Int=-99999999999, to::Int=9999999999 ) where G <: AbstractDFG
+  #
+  # xLB,ll = ls(fgl) # TODO add: from, to, special option 'x'
+  xLB = DFG.getVariableIds(fgl, varkey)
+  saids = DFG.sortVarNested(xLB)
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
   LB = String[]
-  for slbl in xLB
+  for slbl in saids
     lbl = string(slbl)
     if from <= parse(Int,lbl[2:end]) <=to
       mv = getKDEMax(getVertKDE(fgl,slbl))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(Th,mv[3])
-      push!(LB, lbl)
+      push!(LB, string(lbl))
     end
   end
   return X, Y, Th, LB
 end
 
-function getAll2DLandmarks(fg::FactorGraph, minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
-    return getAll2DSamples(fg, 'l', minnei=minnei, api=api)
+
+function get2DLandmSamples(fg::G;
+                           from::Int=0,
+                           to::Int=999999999,
+                           minnei::Int=0 ) where G <: AbstractDFG
+  #
+  return get2DSamples(fg, varkey=r"l", from=from, to=to, minnei=minnei )
 end
 
-function get2DLandmSamples(fg::FactorGraph; from::Int=0, to::Int=999999999, minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
-  return get2DSamples(fg, 'l', from=from, to=to, minnei=minnei, api=api)
+function get2DLandmMeans(fg::G;
+                         from::Int=0, to::Int=999999999,
+                         minnei::Int=0) where G <: AbstractDFG
+  #
+  return get2DSampleMeans(fg, r"l", from=from, to=to, minnei=minnei )
 end
 
-function get2DLandmMeans(fg::FactorGraph; from::Int=0, to::Int=999999999, minnei::Int=0, api::DataLayerAPI=IncrementalInference.localapi)
-  return get2DSampleMeans(fg, 'l', from=from, to=to, minnei=minnei, api=api)
-end
-
-function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{String,1})
+function removeKeysFromArr(fgl::G,
+                           torm::Array{Int,1},
+                           lbl::Array{String,1}) where G <: AbstractDFG
+  #
   retlbs = String[]
   for i in 1:length(lbl)
     id = parse(Int,lbl[i][2:end])
@@ -704,17 +724,20 @@ function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{Stri
   end
   return retlbs
 end
-function removeKeysFromArr(fgl::FactorGraph, torm::Array{Int,1}, lbl::Array{Symbol,1})
+function removeKeysFromArr(fgl::G,
+                           torm::Array{Int,1},
+                           lbl::Array{Symbol,1} ) where G
+  #
   removeKeysFromArr(fgl, torm, string.(lbl))
 end
 
-function get2DLandmMax(fgl::FactorGraph;
-                from::Int=-99999999999,
-                to::Int=9999999999,
-                showmm=false, MM::Dict{Int,T}=Dict{Int,Int}(),
-                api::DataLayerAPI=IncrementalInference.localapi  ) where {T}
+function get2DLandmMax(fgl::G;
+                       from::Int=-99999999999,
+                       to::Int=9999999999,
+                       showmm=false, MM::Dict{Int,T}=Dict{Int,Int}()) where {G <: AbstractDFG, T}
   #
-  xLB,lLB = ls(fgl) # TODO add: from, to, special option 'x'
+  # xLB,lLB = ls(fgl) # TODO add: from, to, special option 'x'
+  lLB = DFG.getVariableIds(fgl, r"l")
   if !showmm lLB = removeKeysFromArr(fgl, collect(keys(MM)), lLB); end
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
@@ -722,12 +745,12 @@ function get2DLandmMax(fgl::FactorGraph;
   LB = String[]
   for lb in lLB
     @show lb
-    @show lbl = string(lb)
+    lbl = string(lb)
     if from <= parse(Int,lbl[2:end]) <=to
-      mv = getKDEMax(getVertKDE(fgl, Symbol(lb), api=api))
+      mv = getKDEMax(getVertKDE(fgl, Symbol(lb)))
       push!(X,mv[1])
       push!(Y,mv[2])
-      push!(LB, lbl)
+      push!(LB, string(lbl))
     end
   end
   return X, Y, Th, LB
@@ -736,12 +759,12 @@ end
 
 
 # convenience function to add DIDSON sonar constraints to graph
-function addLinearArrayConstraint(fgl::FactorGraph,
-      rangebearing::Union{Tuple{Float64, Float64}, Vector{Float64}},
-      pose::Symbol,
-      landm::Symbol ;
-      rangecov::Float64=3e-4,
-      bearingcov::Float64=3e-4 )
+function addLinearArrayConstraint(fgl::G,
+                                  rangebearing::Union{Tuple{Float64, Float64}, Vector{Float64}},
+                                  pose::Symbol,
+                                  landm::Symbol ;
+                                  rangecov::Float64=3e-4,
+                                  bearingcov::Float64=3e-4 ) where G <: AbstractDFG
 
   #
 
@@ -757,8 +780,12 @@ function addLinearArrayConstraint(fgl::FactorGraph,
 end
 
 
-function addSoftEqualityPoint2D(fgl::FactorGraph, l1::Symbol, l2::Symbol;
-    dist=MvNormal([0.0;0.0],Matrix{Float64}(LinearAlgebra.I, 2,2)), ready::Int=1 )
+function addSoftEqualityPoint2D(fgl::G,
+                                l1::Symbol,
+                                l2::Symbol;
+                                dist=MvNormal([0.0;0.0],Matrix{Float64}(LinearAlgebra.I, 2,2)),
+                                ready::Int=1  )  where G <: AbstractDFG
+  #
   pp = Point2DPoint2D(dist)
   addFactor!(fgl, [l1,l2], pp, ready=ready)
 end
@@ -783,46 +810,3 @@ function basicFactorGraphExample(::Type{Pose2}=Pose2; addlandmark::Bool=true)
 
   return fg
 end
-
-
-#
-# function +(p1::Rigid6DOF, p2::Rigid6DOF)
-#     t = rotate(p1.rot, p2.trl) + p1.trl
-#     return Rigid6DOF(p1.rot*p2.rot,t)
-# end
-#
-# function +(p1::PoseSE3, p2::PoseSE3)
-#     return PoseSE3(p1.utime+p2.utime,
-#                    "+",
-#                    p1.mu+p2.mu,
-#                    p1.cov + p2.cov,
-#                    Dict())
-# end
-#
-# function makePose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*Matrix{Float64}(LinearAlgebra.I, 6,6))
-#     return PoseSE3(ut,
-#                    name,
-#                    Rigid6DOF( q, t ),
-#                    cov,
-#                    Dict())
-# end
-
-# function makeDynPose3(q::Quaternion=Quaternion(1.,zeros(3)), t::Array{Float64,1}=[0.,0,0]; ut=0, name="pose", cov=0.1*Matrix{Float64}(LinearAlgebra.I, 18,18))
-#     return DynPose3(ut,
-#                     name,
-#                     Dynamic6DOF( q, t, [0.,0,0], [0.,0,0] ),
-#                     IMUComp([0.,0,0],[0.,0,0]),
-#                     cov,
-#                     Dict())
-# end
-#
-# function wTo(p::PoseSE3)
-#     T = Matrix{Float64}(LinearAlgebra.I, 4,4)
-#     T[1:3,1:3] =  convert(SO3, p.mu.rot).R
-#     T[1:3,4] = p.mu.trl
-#     return T
-# end
-#
-# function oTw(p::PoseSE3)
-#     return wTo(p) \ Matrix{Float64}(LinearAlgebra.I, 4,4)
-# end

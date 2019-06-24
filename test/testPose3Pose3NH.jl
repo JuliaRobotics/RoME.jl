@@ -61,8 +61,15 @@ global means = Statistics.mean(priorpts,dims=2)
 @test sum(map(Int,abs.(means[1:3]) .> 0.5)) == 0
 @test sum(map(Int,abs.(means[4:6]) .> 0.05)) == 0
 
-global v2, f2 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
-global v3, f3 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
+# global v2, f2 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
+# global v3, f3 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
+
+addVariable!(fg, :x2, Pose3)
+addFactor!(fg, [:x1;:x2], Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
+
+addVariable!(fg, :x3, Pose3)
+addFactor!(fg, [:x2;:x3], Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
+
 
 println("Testing Pose3Pose3 evaluation...")
 global X1pts = getVal(fg, :x1)
@@ -76,8 +83,9 @@ global X3ptsMean = Statistics.mean(X3pts,dims=2)
 @test  sum(map(Int, abs.(X3ptsMean -  [50.0;0;0;0;0;0]) .< 5.0 )) == 6
 
 
-global tree = wipeBuildNewTree!(fg)
-inferOverTreeR!(fg,tree,N=N)
+tree = batchSolve!(fg, treeinit=true)
+# global tree = wipeBuildNewTree!(fg)
+# inferOverTreeR!(fg,tree,N=N)
 # inferOverTree!(fg,tree)
 
 println("Adding Pose3Pose3NH to graph...")
@@ -85,7 +93,7 @@ println("Adding Pose3Pose3NH to graph...")
 global odo3 = SE3([-35;0;0], Quaternion(0))
 global odoc3 = Pose3Pose3NH( MvNormal(veeEuler(odo3), odoCov), [0.5;0.5]) # define 50/50% hypothesis
 
-@test ls(fg)[1] == [:x1;:x2;:x3]
+@test length(intersect(DFG.getVariableIds(fg), [:x1;:x2;:x3])) == 3
 addFactor!(fg,[:x3;:x1],odoc3)
 
 global X1pts = approxConv(fg, :x3x1f1, :x1, N=N)

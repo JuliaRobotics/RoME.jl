@@ -22,18 +22,20 @@ addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)), autoinit=false)
 addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)), autoinit=false)
 
 
-tree = wipeBuildNewTree!(fg, drawpdf=false)
+tree = wipeBuildNewTree!(fg)
+# drawTree(tree, filepath="/tmp/caesar/bt.pdf", show=true)
+
 # eo = getEliminationOrder(fg, ordering=:qr)
 # eo = [1;3;5]
 # tree = buildTreeFromOrdering!(fg,eo)
 
+batchSolve!(fg)
 
-cliq = tree.cliques[2]
-clst = cliqInitSolveUpByStateMachine!(fg, tree, cliq, drawtree=false, limititers=15 )
+# cliq = tree.cliques[2]
+# clst = cliqInitSolveUpByStateMachine!(fg, tree, cliq, drawtree=false, limititers=15 )
 
-
-cliq = tree.cliques[1]
-clst = cliqInitSolveUpByStateMachine!(fg, tree, cliq, drawtree=false, limititers=15 )
+# cliq = tree.cliques[1]
+# clst = cliqInitSolveUpByStateMachine!(fg, tree, cliq, drawtree=false, limititers=15 )
 
 
 # using RoMEPlotting
@@ -59,8 +61,8 @@ clst = cliqInitSolveUpByStateMachine!(fg, tree, cliq, drawtree=false, limititers
 
 
 
-ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=false);
+# ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
+# downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=false);
 
 
 

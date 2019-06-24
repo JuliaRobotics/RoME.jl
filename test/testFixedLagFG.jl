@@ -20,12 +20,14 @@ end
 
 
 # start with an empty factor graph object
-global fg = initfg() # FUTURE: (quasifixedwindow=50, autosolve=true)
+fg = initfg()
+# IIF.getSolverParams(fg).drawtree = true
+# IIF.getSolverParams(fg).showtree = true
 
 # Set up a quasi fixed-lag horizon of 8 nodes and enable the fixed-lag solving.
 # If the graph grows over 8 nodes, the older nodes will be frozen to limit the computational window.
-fg.qfl = 8
-fg.isfixedlag = true
+IIF.getSolverParams(fg).qfl = 6
+IIF.getSolverParams(fg).isfixedlag = true
 
 @testset "test basic fixed lag operations..." begin
 
@@ -44,13 +46,16 @@ for i in 0:5
 end
 
 # Add node linking initial pose with a bearing range measurement landmark
-addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
-global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
+p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 
 ## 2. Solve graph when shorter than fixed length - should solve full session.
 println("STEP 2: Solve graph when shorter than fixed length")
-IIF.batchSolve!(fg)
+
+tree, smt, hist = solveTree!(fg)
+
+# IIF.batchSolve!(fg, treeinit=true)
 
 # 3. Drive a couple more, longer than fixed lag window
 println("STEP 3: Drive a couple more, longer than fixed lag window")
@@ -71,37 +76,50 @@ addFactor!(fg, [:x6; :l1], p2br)
 
 # Back up the graph
 fgOriginal = deepcopy(fg)
-fgOriginal.isfixedlag = false
+fgOriginal.solverParams.isfixedlag = false
 
 # Back up data from these two poses so we can compare them once we solve again.
 X5 = deepcopy(getVal(fg, :x5))
-X6 = deepcopy(getVal(fg, :x6))
+X7 = deepcopy(getVal(fg, :x7))
+
 
 # Now solve again, which will freeze vertices < 5
 println("STEP 4: Solve graph when shorter than fixed length, and show time to solve")
-@time IIF.batchSolve!(fg)
-# fg.isfixedlag
+tree, smt, hist = solveTree!(fg, tree)
+
+# stuff = IIF.batchSolve!(fg, dbg=true)
+
+
+# drawTree(stuff[1], show=true)
+# st = fetch(stuff[2][11])
+# hist = getCliqSolveHistory(stuff[1], :x2)
+
+
+# fg.solverparams.isfixedlag
 # tofreeze = fg.fifo[1:(end-fg.qfl)]
 # @test length(tofreeze) > 0
 # IIF.setfreeze!.(fg, tofreeze)
 #
 # fifoFreeze!(fg)
-# global tree = IIF.wipeBuildNewTree!(fg)
+# tree = IIF.wipeBuildNewTree!(fg)
 # inferOverTreeR!(fg, tree)
 
 # Confirm that the initial nodes (x0 - x5) are frozen.
-@test getData(fg, :x5).ismargin
-@test getData(fg, :x6).ismargin == false
+@test getData(getVariable(fg, :x5)).ismargin
+@test !getData(getVariable(fg, :x7)).ismargin
 
 # X5 should be exactly same
 # X6 should be different
 X5cmp = deepcopy(getVal(fg, :x5))
-X6cmp = deepcopy(getVal(fg, :x6))
+X7cmp = deepcopy(getVal(fg, :x7))
 @test X5 == X5cmp #Frozen
-@test X6 != X6cmp #Recalculated
+@test X7 != X7cmp #Recalculated
 
 # Solve original graph with the to get time comparison
-@time IIF.batchSolve!(fgOriginal)
+tree, smt, hist = solveTree!(fg, tree)
+# @time IIF.batchSolve!(fgOriginal, treeinit=true)
+
+# IIF.drawTree(tree, show=true)
 
 end
 

@@ -43,7 +43,7 @@ global Y = X ⊕ odo
 
 
 
-global N = 75
+global N = 100
 global fg = initfg()
 
 global initCov = Matrix{Float64}(LinearAlgebra.I, 6,6)
@@ -52,10 +52,12 @@ global odoCov = deepcopy(initCov)
 
 
 @testset "Adding PriorPose3 to graph..." begin
-  global v1 = addVariable!(fg, :x1, Pose3,  N=N) # 0.1*randn(6,N)
-  global initPosePrior = PriorPose3( MvNormal(zeros(6), initCov) )
-  global f1  = addFactor!(fg,[:x1;], initPosePrior)
-  @test !isInitialized(fg, :x1)
+
+global v1 = addVariable!(fg, :x1, Pose3,  N=N) # 0.1*randn(6,N)
+global initPosePrior = PriorPose3( MvNormal(zeros(6), initCov) )
+global f1  = addFactor!(fg,[:x1;], initPosePrior)
+# @test !isInitialized(fg, :x1)
+
 end
 
 
@@ -73,20 +75,24 @@ end
 
 
 @testset "Testing PriorPose3 evaluation..." begin
-  global priorpts = evalFactor2(fg, fg.g.vertices[2], 1)
-  global means = Statistics.mean(priorpts,dims=2)
-  @test sum(map(Int,abs.(means[1:3]) .> 0.5)) == 0
-  @test sum(map(Int,abs.(means[4:6]) .> 0.05)) == 0
+
+global priorpts = approxConv(fg, :x1f1, :x1) # fg.g.vertices[2], 1
+global means = Statistics.mean(priorpts,dims=2)
+@test sum(map(Int,abs.(means[1:3]) .> 0.5)) == 0
+@test sum(map(Int,abs.(means[4:6]) .> 0.05)) == 0
+
 end
 
 
 @testset "Adding Pose3Pose3 to graph..." begin
-  global odo = SE3([10;0;0], Quaternion(0))
-  global pts0X2 = projectParticles(getVal(fg,:x1), MvNormal(veeEuler(odo), odoCov) )
-  global odoconstr = Pose3Pose3( MvNormal(veeEuler(odo), odoCov) )
-  global v2 = addVariable!(fg,:x2, Pose3, N=N) # pts0X2
-  addFactor!(fg,[:x1;:x2],odoconstr)
-  @test !isInitialized(fg, :x2)
+
+global odo = SE3([10;0;0], Quaternion(0))
+global pts0X2 = projectParticles(getVal(fg,:x1), MvNormal(veeEuler(odo), odoCov) )
+global odoconstr = Pose3Pose3( MvNormal(veeEuler(odo), odoCov) )
+global v2 = addVariable!(fg,:x2, Pose3, N=N) # pts0X2
+addFactor!(fg,[:x1;:x2],odoconstr)
+# @test !isInitialized(fg, :x2)
+
 end
 
 
@@ -114,21 +120,23 @@ end
 end
 
 @testset "Ensure basic parameters on x1,x2 after inference..." begin
-  # check mean and covariances after one up and down pass over the tree
-  global muX1 = Statistics.mean(getVal(fg,:x1),dims=2)
-  global stdX1 = Statistics.std(getVal(fg,:x1),dims=2)
-  @test sum(map(Int,abs.(muX1[1:3]) .< 1.0)) == 3
-  @test sum(map(Int,abs.(muX1[4:6]) .< 0.1)) == 3
-  @test sum(map(Int, 0.4 .< stdX1[1:3] .< 1.6)) == 3 # had a 2==3 failure here
-  @test sum(map(Int, 0.025 .< stdX1[4:6] .< 0.25)) == 3
-  global muX2 = Statistics.mean(getVal(fg,:x2),dims=2)
-  global stdX2 = Statistics.std(getVal(fg,:x2),dims=2)
-  @show muX2[1:3]-[10.0;0;0]
-  @test sum(map(Int, abs.(muX2[1:3]-[10.0;0;0]) .< 1.5)) == 3
-  @test sum(map(Int, abs.(muX2[4:6]) .< 0.1)) == 3
-  @show println("previous test failure 0.75 .< $(round.(stdX2[1:3],digits=2)) .< 2.25")
-  @test sum(map(Int, 0.75 .< stdX2[1:3] .< 2.25)) == 3
-  @test sum(map(Int, 0.05 .< stdX2[4:6] .< 0.25)) == 3
+
+# check mean and covariances after one up and down pass over the tree
+global muX1 = Statistics.mean(getVal(fg,:x1),dims=2)
+global stdX1 = Statistics.std(getVal(fg,:x1),dims=2)
+@test sum(map(Int,abs.(muX1[1:3]) .< 1.0)) == 3
+@test sum(map(Int,abs.(muX1[4:6]) .< 0.1)) == 3
+@test sum(map(Int, 0.4 .< stdX1[1:3] .< 1.6)) == 3 # had a 2==3 failure here
+@test sum(map(Int, 0.025 .< stdX1[4:6] .< 0.25)) == 3
+global muX2 = Statistics.mean(getVal(fg,:x2),dims=2)
+global stdX2 = Statistics.std(getVal(fg,:x2),dims=2)
+@show muX2[1:3]-[10.0;0;0]
+@test sum(map(Int, abs.(muX2[1:3]-[10.0;0;0]) .< 1.5)) == 3
+@test sum(map(Int, abs.(muX2[4:6]) .< 0.1)) == 3
+@show println("previous test failure 0.75 .< $(round.(stdX2[1:3],digits=2)) .< 2.25")
+@test sum(map(Int, 0.75 .< stdX2[1:3] .< 2.25)) == 3
+@test sum(map(Int, 0.05 .< stdX2[4:6] .< 0.25)) == 3
+
 end
 
 # println("Plot marginals to see what is happening")

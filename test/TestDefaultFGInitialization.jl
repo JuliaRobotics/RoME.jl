@@ -22,7 +22,3 @@ end
   initFactorGraph!(fg, P0=initCov, init=zeros(6), N=N, lbl=:x0, ready=0, firstPoseType=Pose3)
   @test true
 end
-
-
-
-#
