@@ -693,12 +693,6 @@ function get2DPoseMax(fgl::G;
   return X, Y, Th, LB
 end
 
-# function getAll2DLandmarks(fg::G,
-#                            minnei::Int=0,
-#                            api::DataLayerAPI=IncrementalInference.localapi ) where G <: AbstractDFG
-#   #
-#   return getAll2DSamples(fg, varkey=r"l", minnei=minnei )
-# end
 
 function get2DLandmSamples(fg::G;
                            from::Int=0,
