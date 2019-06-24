@@ -85,9 +85,8 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 # writeGraphPdf(fg,engine="neato")
 
-fg.solverParams.drawtree = true
-fg.solverParams.showtree = true
-
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
 
 
 
@@ -117,7 +116,7 @@ posecount = driveHex(fg, posecount, steps=5)
 
 
 
-fg.solverParams.async = true
+# fg.solverParams.async = true
 
 tree, smt, chi = solveTree!(fg, tree)
 
