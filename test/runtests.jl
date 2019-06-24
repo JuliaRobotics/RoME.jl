@@ -77,5 +77,3 @@ println("[SUCCESS]")
 println("[TEST] packing converters...")
 include("testpackingconverters.jl")
 println("[SUCCESS]")
-
-include("TestDefaultFGInitialization.jl")
