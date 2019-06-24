@@ -268,33 +268,33 @@ end
 
 Initialize a factor graph object as Pose2, Pose3, or neither and returns variable and factor symbols as array.
 """
-function initFactorGraph!(fg::FactorGraph;
-      P0::Union{Array{Float64,2},Nothing}=nothing,
-      init::Union{Vector{Float64},Nothing}=nothing,
-      N::Int=100,
-      lbl::Symbol=:x0,
-      ready::Int=1,
-      firstPoseType=Pose2,
-      labels::Vector{<:AbstractString}=String[])
+function initFactorGraph!(fg::G;
+                          P0::Union{Array{Float64,2},Nothing}=nothing,
+                          init::Union{Vector{Float64},Nothing}=nothing,
+                          N::Int=100,
+                          lbl::Symbol=:x0,
+                          ready::Int=1,
+                          firstPoseType=Pose2,
+                          labels::Vector{Symbol}=Symbol[]) where G <: AbstractDFG
   #
   nodesymbols = Symbol[]
   if firstPoseType == Pose2
       init = init!=nothing ? init : zeros(3)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.001]))
       # init = vectoarr2(init)
-      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
+      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
       push!(nodesymbols, lbl)
       # v1 = addVariable!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
+      fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), ready=ready, labels=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.03;0.001;0.001;0.001]))
-      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=String["VARIABLE"; labels] )
+      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
       push!(nodesymbols, lbl)
       # v1 = addVariable!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=String["FACTOR"; labels]) #[v1],
+      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   return nodesymbols
