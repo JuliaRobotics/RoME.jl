@@ -1,11 +1,10 @@
 ## add more julia processes
+using Distributed
 nprocs() < 4 ? addprocs(4-nprocs()) : nothing
 
 # access modules/namespaces
-using RoME, Distributions
+using RoME
 using RoMEPlotting
-using KernelDensityEstimatePlotting, Gadfly
-
 
 GTp = Dict{Symbol, Vector{Float64}}()
 GTp[:l100] = [0.0;0]
@@ -29,7 +28,6 @@ GTl[:l3] = [80.0;40]
 GTl[:l4] = [120.0;-50]
 
 
-
 # create the factor graph object
 fg = initfg()
 
@@ -42,65 +40,46 @@ addVariable!(fg, :l2, Point2)
 addVariable!(fg, :l3, Point2)
 
 # and put priors on :l101 and :l102
-addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], Matrix{Float64}(LinearAlgebra.I, 2,2))))
-addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], Matrix{Float64}(LinearAlgebra.I, 2,2))))
+addFactor!(fg, [:l1;], PriorPoint2(MvNormal(GTl[:l1], Matrix{Float64}(LinearAlgebra.I,2,2))) )
+addFactor!(fg, [:l2;], PriorPoint2(MvNormal(GTl[:l2], Matrix{Float64}(LinearAlgebra.I,2,2))) )
 
 
 # first range measurement
 rhoZ1 = norm(GTl[:l1]-GTp[:l100])
-ppr = Point2Point2Range(Normal(rhoZ1, 2.0))
+ppr = Point2Point2Range( Normal(rhoZ1, 2.0) )
 addFactor!(fg, [:l100;:l1], ppr)
 
 # second range measurement
 rhoZ2 = norm(GTl[:l2]-GTp[:l100])
-ppr = Point2Point2Range(Normal(rhoZ2, 3.0))
+ppr = Point2Point2Range( Normal(rhoZ2, 3.0) )
 addFactor!(fg, [:l100; :l2], ppr)
 
 # second range measurement
 rhoZ3 = norm(GTl[:l3]-GTp[:l100])
-ppr = Point2Point2Range(Normal(rhoZ3, 3.0))
+ppr = Point2Point2Range( Normal(rhoZ3, 3.0) )
 addFactor!(fg, [:l100; :l3], ppr)
 
 
-writeGraphPdf(fg)
+## solve system
+tree, smt, hist = solveTree!(fg)
 
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+# plot the first results
+plotKDE(fg, [:l1;:l2], dims=[1;2])
+
+plotKDE(fg, :l100, dims=[1;2], levels=6)
+
+drawLandms(fg, from=1, to=101)# |> PDF("/tmp/test.pdf"); #@async run(`evince /tmp/test.pdf`)
 
 
-
-
-# drawLandms(fg, from=100)
-# drawLandms(fg, to=99)
-
-
-
-
-
-pl = plotKDE(fg, :l100, dims=[1;2])
-Gadfly.draw(PNG("/tmp/testL100.png", 20cm, 10cm),pl)
-
-pl = plotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)
-Gadfly.draw(PNG("/tmp/testL1_2.png", 20cm, 10cm),pl)
-
-
-
-
-
-
-
-
-
-
-function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {R <: Real}
-  currvar = union(ls(fgl)...)
+function vehicle_drives_to!(fgl::G, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {G <: AbstractDFG, R <: Real}
+  currvar = ls(fgl)
   prev_sym = Symbol("l$(maximum(Int[parse(Int,string(currvar[i])[2:end]) for i in 2:length(currvar)]))")
   if !(pos_sym in currvar)
     println("Adding variable vertex $pos_sym, not yet in fgl::FactorGraph.")
     addVariable!(fgl, pos_sym, Point2)
     @show rho = norm(GTp[prev_sym] - GTp[pos_sym])
-    ppr = Point2Point2Range(Normal(rho, 3.0))
+    ppr = Point2Point2Range( Normal(rho, 3.0) )
     addFactor!(fgl, [prev_sym;pos_sym], ppr)
   else
     @warn "Variable node $pos_sym already in the factor graph."
@@ -110,7 +89,7 @@ function vehicle_drives_to!(fgl::FactorGraph, pos_sym::Symbol, GTp::Dict, GTl::D
     rho = norm(GTl[ll] - GTp[pos_sym])
     # Check for feasible measurements:  vehicle within 150 units from the beacons/landmarks
     if rho < measurelimit
-      ppr = Point2Point2Range(Normal(rho, 3.0))
+      ppr = Point2Point2Range( Normal(rho, 3.0) )
       if !(ll in currvar)
         println("Adding variable vertex $ll, not yet in fgl::FactorGraph.")
         addVariable!(fgl, ll, Point2)
@@ -124,143 +103,78 @@ end
 
 
 
-
-
 vehicle_drives_to!(fg, :l101, GTp, GTl)
-
-# tree = wipeBuildNewTree!(fg)
-# inferOverTree!(fg, tree)
-
-
 vehicle_drives_to!(fg, :l102, GTp, GTl)
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+
+tree, smt, hist = solveTree!(fg)
 
 
-
-
-pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:2], dims=[1;2], levels=6)
-Gadfly.draw(PNG("/tmp/testL100_102.png", 20cm, 10cm),pl)
-
-pl = plotKDE(fg, [:l1;:l2], dims=[1;2], levels=4)
-Gadfly.draw(PNG("/tmp/testL1_2.png", 20cm, 10cm),pl)
+pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:2], dims=[1;2])
 
 pl = plotKDE(fg, [:l3;:l4], dims=[1;2], levels=4)
-Gadfly.draw(PNG("/tmp/testL3_4.png", 20cm, 10cm),pl)
-
-
-
-
 
 
 
 vehicle_drives_to!(fg, :l103, GTp, GTl)
-
-# tree = wipeBuildNewTree!(fg)
-# inferOverTree!(fg, tree)
-
-
 vehicle_drives_to!(fg, :l104, GTp, GTl)
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+
+tree, smt, hist = solveTree!(fg)
+
+pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2]) |> PDF("/tmp/test.pdf")
+@async run(`evince /tmp/test.pdf`)
 
 
-
-
-pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2])
-Gadfly.draw(PNG("/tmp/testL100_105.png", 20cm, 10cm),pl)
-
-
-
-
+# drive further
 vehicle_drives_to!(fg, :l105, GTp, GTl)
 vehicle_drives_to!(fg, :l106, GTp, GTl)
 
+tree, smt, hist = solveTree!(fg)
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
-
-
-pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:6], dims=[1;2], levels=6)
-Gadfly.draw(PNG("/tmp/testL100_106.png", 20cm, 10cm),pl)
-
+pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2]) |> PDF("/tmp/test.pdf")
+@async run(`evince /tmp/test.pdf`)
 
 
 
 vehicle_drives_to!(fg, :l107, GTp, GTl)
 
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+tree, smt, hist = solveTree!(fg)
+
 
 
 
 vehicle_drives_to!(fg, :l108, GTp, GTl)
 
-
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
-
-
+tree, smt, hist = solveTree!(fg)
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 2:8], dims=[1;2], levels=6)
-Gadfly.draw(PNG("/tmp/testL103_108.png", 20cm, 10cm),pl)
-
-
-
+pl |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
 
 
 
 vehicle_drives_to!(fg, :l109, GTp, GTl)
 vehicle_drives_to!(fg, :l110, GTp, GTl)
 
-
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
-
-
-
-pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 6:10], dims=[1;2])
-Gadfly.draw(PNG("/tmp/testL106_110.png", 20cm, 10cm),pl)
-
-
-
-
-
-
+tree, smt, hist = solveTree!(fg)
 
 
 vehicle_drives_to!(fg, :l111, GTp, GTl)
 vehicle_drives_to!(fg, :l112, GTp, GTl)
 
-
-tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
-
+tree, smt, hist = solveTree!(fg)
 
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 7:12], dims=[1;2])
-Gadfly.draw(PNG("/tmp/testL106_112.png", 20cm, 10cm),pl)
+pl |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
+
 
 pl = plotKDE(fg, [:l1;:l2;:l3;:l4], dims=[1;2], levels=4)
-Gadfly.draw(PNG("/tmp/testL1234.png", 20cm, 10cm),pl)
-
-
-
-pl = drawLandms(fg, from=100)
-Gadfly.draw(PNG("/tmp/testLocsAll.png", 20cm, 10cm),pl)
+pl |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
 
 
 pl = drawLandms(fg)
-Gadfly.draw(PNG("/tmp/testAll.png", 20cm, 10cm),pl)
+pl |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
 
 
-# for ll in [:l1;:l2;:l3;:l4; :l100;:l101;:l102;:l103; :l104;:l105;:l106;:l107; :l108;:l109;:l110;:l111; :l112]
-#   setVal!(fg, ll, 200*randn(2,1000))
-# end
-
-
-# togglePrtStbLines()
-
-#
+drawTree(tree, show=true, imgs=true)
