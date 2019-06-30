@@ -1,7 +1,7 @@
 
 # using Revise
 using Distributed
-addprocs(6)
+addprocs(4)
 
 ##
 
@@ -306,18 +306,20 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tm
 # drawTree(tree, imgs=true)
 
 
+ls(fg, :l5)
+
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l5], p2br2, autoinit=false )
+addFactor!(fg, [:x34; :l5], p2br2, autoinit=false )
 
 
 
 ## Add more loop closures signthings
 
 # THIS IS WRONG
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [:x4; :l5], p2br2, autoinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x4; :l5], p2br2, autoinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x32; :l3], p2br2, autoinit=false )
@@ -378,7 +380,7 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tm
 
 
 
-
+ls(fg, :x19)
 
 
 
@@ -397,8 +399,7 @@ addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
 
 
 
-tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
-tree = tree2
+tree, smt, hist = solveTree!(fg, tree)
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)|
 
@@ -432,8 +433,7 @@ addFactor!(fg, [:x2; :l7], p2br2, autoinit=false )
 recordcliqs = [:x29;:x44;:x38;:x47;:x49]
 
 
-tree2, smtasks = batchSolve!(fg, tree, incremental=false, dbg=true, drawpdf=true, show=true, recordcliqs=recordcliqs)
-tree = tree2
+tree, smt, hist = solveTree!(fg, tree, recordcliqs=recordcliqs)
 0
 
 
@@ -501,7 +501,8 @@ addFactor!(fg, [:x55; :l6], p2br2, autoinit=false )
 
 
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smt, hist = solveTree!(fg, tree)
+
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
 

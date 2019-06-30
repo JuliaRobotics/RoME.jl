@@ -4,6 +4,7 @@ nprocs() < 4 ? addprocs(4-nprocs()) : nothing
 
 # access modules/namespaces
 using RoME
+@everywhere using RoME
 using RoMEPlotting
 
 GTp = Dict{Symbol, Vector{Float64}}()
@@ -69,7 +70,7 @@ plotKDE(fg, [:l1;:l2], dims=[1;2])
 
 plotKDE(fg, :l100, dims=[1;2], levels=6)
 
-drawLandms(fg, from=1, to=101)# |> PDF("/tmp/test.pdf"); #@async run(`evince /tmp/test.pdf`)
+drawLandms(fg, from=1, to=101) # |> PDF("/tmp/test.pdf"); #@async run(`evince /tmp/test.pdf`)
 
 
 function vehicle_drives_to!(fgl::G, pos_sym::Symbol, GTp::Dict, GTl::Dict; measurelimit::R=150.0) where {G <: AbstractDFG, R <: Real}
@@ -115,10 +116,11 @@ pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:2], dims=[1;2])
 pl = plotKDE(fg, [:l3;:l4], dims=[1;2], levels=4)
 
 
-
 vehicle_drives_to!(fg, :l103, GTp, GTl)
 vehicle_drives_to!(fg, :l104, GTp, GTl)
 
+getSolverParams(fg).drawtree = true
+getSolverParams(fg).showtree = true
 
 tree, smt, hist = solveTree!(fg)
 
@@ -130,7 +132,8 @@ pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2]) |> PDF("/tmp/te
 vehicle_drives_to!(fg, :l105, GTp, GTl)
 vehicle_drives_to!(fg, :l106, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg)
+# allow potential for incremental updates
+tree, smt, hist = solveTree!(fg, tree)
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2]) |> PDF("/tmp/test.pdf")
 @async run(`evince /tmp/test.pdf`)
@@ -139,6 +142,7 @@ pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2]) |> PDF("/tmp/te
 
 vehicle_drives_to!(fg, :l107, GTp, GTl)
 
+# do a batch solve again
 tree, smt, hist = solveTree!(fg)
 
 
@@ -146,7 +150,8 @@ tree, smt, hist = solveTree!(fg)
 
 vehicle_drives_to!(fg, :l108, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg)
+# and incremental again
+tree, smt, hist = solveTree!(fg, tree)
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 2:8], dims=[1;2], levels=6)
 pl |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
@@ -156,13 +161,13 @@ pl |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
 vehicle_drives_to!(fg, :l109, GTp, GTl)
 vehicle_drives_to!(fg, :l110, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg)
+tree, smt, hist = solveTree!(fg, tree)
 
 
 vehicle_drives_to!(fg, :l111, GTp, GTl)
 vehicle_drives_to!(fg, :l112, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg)
+tree, smt, hist = solveTree!(fg, tree)
 
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 7:12], dims=[1;2])
