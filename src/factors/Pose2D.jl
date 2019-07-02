@@ -94,6 +94,7 @@ end
 # Project all particles (columns) Xval with Z, that is for all  SE3(Xval[:,i])*Z
 function projectParticles(Xval::Array{Float64,2}, Z::Array{Float64,2}, Cov::Array{Float64,2})
   # TODO optimize convert SE2 to a type
+  @warn "projectParticles is an old function, rather standardize on approxConv instead."
 
   r,c = size(Xval)
   RES = zeros(r,c) #*cz
