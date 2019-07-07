@@ -96,8 +96,8 @@ tree, smt, chi = solveTree!(fg, recordcliqs=[:x3;:x1])
 # hist = getCliqSolveHistory(tree, :x1)
 
 
-
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
+Gadfly.set_default_plot_size(35cm,25cm)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -120,7 +120,10 @@ posecount = driveHex(fg, posecount, steps=5)
 
 tree, smt, chi = solveTree!(fg, tree)
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
+
+
+plotTreeProductUp(fg,tree,:x13,:x13)
 
 
 
