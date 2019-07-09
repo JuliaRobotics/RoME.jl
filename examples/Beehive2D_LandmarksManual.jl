@@ -116,6 +116,12 @@ posecount = driveHex(fg, posecount, steps=5)
 
 
 
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
+
+
+
 # fg.solverParams.async = true
 
 tree, smt, chi = solveTree!(fg, tree)
@@ -127,21 +133,20 @@ plotTreeProductUp(fg,tree,:x13,:x13)
 
 
 
-
-cliq = whichCliq(tree, :x10)
-# smt[9]
-
-
-prnt = getParent(tree, cliq)[1]
-dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
-
+#
+# cliq = whichCliq(tree, :x10)
+# # smt[9]
+#
+# prnt = getParent(tree, cliq)[1]
+# dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
 
 
 
-# Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
-
+#
+# # Add landmarks with Bearing range measurements
+# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
+#
 
 ## hex 3
 
@@ -168,7 +173,7 @@ tree, smt, hist = solveTree!(fg, tree)
 # tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
 # tree = tree2
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -245,7 +250,7 @@ tree, smt, hist = solveTree!(fg, tree)
 
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
 
 
 0
@@ -273,7 +278,7 @@ tree, smt, hist = solveTree!(fg, tree)
 # tree = tree2
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -305,7 +310,7 @@ tree, smt, hist = solveTree!(fg, tree)
 # tree = tree2
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 # drawTree(tree, imgs=true)
 
 
@@ -341,7 +346,7 @@ tree, smt, hist = solveTree!(fg, tree)
 # tree = tree2
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -379,7 +384,7 @@ tree, smt, hist = solveTree!( fg, tree )
 # tree = tree2
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -404,7 +409,7 @@ addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
 
 tree, smt, hist = solveTree!(fg, tree)
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)|
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)|
 
 
 
@@ -440,7 +445,7 @@ tree, smt, hist = solveTree!(fg, tree, recordcliqs=recordcliqs)
 0
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -471,8 +476,7 @@ posecount = driveHex(fg, posecount)
 tree, smt, chi = solveTree!(fg, tree)
 
 
-
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -507,7 +511,7 @@ addFactor!(fg, [:x55; :l6], p2br2, autoinit=false )
 tree, smt, hist = solveTree!(fg, tree)
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -568,7 +572,7 @@ posecount = driveHex(fg, posecount)
 using RoMEPlotting
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf") || @async run(`evince /tmp/test.pdf`)
 
 
 
