@@ -1,20 +1,16 @@
 
 # using Revise
-using Distributed
-addprocs(4)
-
-##
-
-# for drawing Bayes tree with images (see debug tricks below)
-# using Cairo, Fontconfig
-# using Gadfly
+# using Distributed
+# addprocs(4)
 
 using RoME
-
 @everywhere using RoME
 
 #  Do some plotting
 using RoMEPlotting
+# for drawing Bayes tree with images (see debug tricks below)
+# using Cairo, Fontconfig
+# using Gadfly
 
 0
 
@@ -87,10 +83,10 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
+getSolverParams(fg).downsolve = true
 
 
-
-tree, smt, chi = solveTree!(fg, recordcliqs=[:x3;:x1])
+tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg))
 
 
 # hist = getCliqSolveHistory(tree, :x1)
@@ -98,7 +94,8 @@ tree, smt, chi = solveTree!(fg, recordcliqs=[:x3;:x1])
 
 Gadfly.set_default_plot_size(35cm,25cm)
 drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
-
+# tree = wipeBuildNewTree!(fg)
+# drawTree(tree, imgs=true)
 
 
 
