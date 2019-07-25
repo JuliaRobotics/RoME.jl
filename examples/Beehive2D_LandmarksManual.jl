@@ -4,7 +4,7 @@
 # addprocs(4)
 
 using RoME
-@everywhere using RoME
+# @everywhere using RoME
 
 #  Do some plotting
 using RoMEPlotting
@@ -83,7 +83,8 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
-getSolverParams(fg).downsolve = true
+getSolverParams(fg).downsolve = false
+getSolverParams(fg).multiproc = false
 
 
 tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg))
@@ -96,6 +97,16 @@ Gadfly.set_default_plot_size(35cm,25cm)
 drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 # tree = wipeBuildNewTree!(fg)
 # drawTree(tree, imgs=true)
+
+
+
+
+
+plotTreeUpMsgs(fg, tree, :x1, levels=1)
+plotTreeUpMsgs(fg, tree, :x3, levels=1)
+plotTreeUpMsgs(fg, tree, :x5, levels=1)
+plotTreeUpMsgs(fg, tree, :l1, levels=1)
+
 
 
 

@@ -1,18 +1,10 @@
 
-# using Revise
-# using Distributed
-# addprocs(4)
-
 using RoME
-# @everywhere using RoME
 
 #  Do some plotting
 using RoMEPlotting
-# for drawing Bayes tree with images (see debug tricks below)
-# using Cairo, Fontconfig
-# using Gadfly
 
-0
+
 
 function driveHex(fgl, posecount::Int; steps::Int=5)
     # Drive around in a hexagon
@@ -49,9 +41,6 @@ end
 ## start with an empty factor graph object
 fg = initfg()
 
-# fg.solverParams
-# fg.solverParams.isfixedlag = true
-# fg.solverParams.qfl = 20
 posecount = 0
 
 # Add the first pose :x0
@@ -79,39 +68,30 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-
-## hex 2
-
-posecount = offsetHexLeg(fg, posecount, direction=:right)
-
-# Add landmarks with Bearing range measurements
-addVariable!(fg, :l2, Point2, labels=[:LANDMARK])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, autoinit=false )
-
-
-posecount = driveHex(fg, posecount, steps=5)
-
-
-
-# Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
-
-
-
 # writeGraphPdf(fg,engine="neato")
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
-# getSolverParams(fg).downsolve = false
-fg.solverParams.async = true
+getSolverParams(fg).downsolve = false
+getSolverParams(fg).multiproc = false
+getSolverParams(fg).async = true
 
 
-tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg))
+# solve by hand, one cliq at a time
+
+tree = wipeBuildNewTree!(fg, drawpdf=true)
+
+
+
+smt, hist = solveCliq!(fg, tree, :x0)
+smt, hist = solveCliq!(fg, tree, :x2, cliqHistories=hist)
+
+
+
+
+# tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg))
 
 # hist = getCliqSolveHistory(tree, :x1)
-
 
 
 Gadfly.set_default_plot_size(35cm,25cm)
@@ -119,23 +99,11 @@ drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /
 # tree = wipeBuildNewTree!(fg)
 # drawTree(tree, imgs=true)
 
-#
-# using Dates
-#
-# dd = [true;]
-# mkpath("/tmp/caesar/anitree")
-# @async begin
-#   global dd
-#   i =0
-#   while dd[1]
-#     i += 1
-#     tt = split(string(now()), 'T')[end]
-#     drawTree(tree, filepath="/tmp/caesar/anitree/bt_$i.pdf", show=false)
-#     sleep(0.1)
-#   end
-# end
-#
-# # dd[1] = false
 
 
-#
+
+
+plotTreeUpMsgs(fg, tree, :x1, levels=1)
+plotTreeUpMsgs(fg, tree, :x3, levels=1)
+plotTreeUpMsgs(fg, tree, :x5, levels=1)
+plotTreeUpMsgs(fg, tree, :l1, levels=1)
