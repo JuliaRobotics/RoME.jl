@@ -77,14 +77,59 @@ getSolverParams(fg).multiproc = false
 getSolverParams(fg).async = true
 
 
-# solve by hand, one cliq at a time
+# direct solve would be
+# tree, smt, hist = solveTree!(fg)
 
+# solve by hand, one cliq at a time
 tree = wipeBuildNewTree!(fg, drawpdf=true)
 
 
-
+# solve the first cliq
 smt, hist = solveCliq!(fg, tree, :x0)
+# solve second clq
 smt, hist = solveCliq!(fg, tree, :x2, cliqHistories=hist)
+
+
+
+#3 First difference, up msg from (:x2) cliq is 'wrong'
+
+# Gadfly.set_default_plot_size(35cm,20cm)
+um1 = IIF.getCliqMsgsUp(tree, :x0)
+plotKDE(um1[:x1], dims=[1;2], levels=2)
+
+
+
+um2 = IIF.getCliqMsgsUp(tree, :x2)
+plotKDE(um2[:x1], dims=[1;2], levels=2)
+
+
+
+resetCliqSolve!(fg, tree, :x2)
+
+drawTree(tree)
+
+
+
+
+
+
+
+# solve third clq
+smt, hist = solveCliq!(fg, tree, :x1, cliqHistories=hist)
+
+
+# Plot to see what is going on
+Gadfly.set_default_plot_size(35cm,25cm)
+plotKDE(fg, [:x0;:x1;:x2], dims=[1;2],levels=1)
+
+
+
+# solve forth clq
+smt, hist = solveCliq!(fg, tree, :x4, cliqHistories=hist)
+# solve forth clq
+smt, hist = solveCliq!(fg, tree, :x6, cliqHistories=hist)
+# solve forth clq
+smt, hist = solveCliq!(fg, tree, :x3, cliqHistories=hist)
 
 
 
@@ -101,9 +146,80 @@ drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /
 
 
 
+#
+#
+# plotTreeUpMsgs(fg, tree, :x1, levels=1)
+# plotTreeUpMsgs(fg, tree, :x3, levels=1)
+# plotTreeUpMsgs(fg, tree, :x5, levels=1)
+# plotTreeUpMsgs(fg, tree, :l1, levels=1)
 
 
-plotTreeUpMsgs(fg, tree, :x1, levels=1)
-plotTreeUpMsgs(fg, tree, :x3, levels=1)
-plotTreeUpMsgs(fg, tree, :x5, levels=1)
-plotTreeUpMsgs(fg, tree, :l1, levels=1)
+
+
+
+
+cliq = getCliq(tree, :x2)
+
+# OLD
+dwinmsgs = IIF.prepCliqInitMsgsDown!(fg, tree, getParent(tree,cliq)[1], cliq, dbgnew=false)
+plotKDE(dwinmsgs[:x1][1], dims=[1;2], levels=2)
+
+# NEW
+dwinmsgs = IIF.prepCliqInitMsgsDown!(fg, tree, getParent(tree,cliq)[1], cliq, dbgnew=true)
+plotKDE(dwinmsgs[:x1][1], dims=[1;2], levels=2)
+
+
+
+## Check init message for x3
+
+cliq = getCliq(tree, :x1)
+
+# OLD
+dwinmsgs = IIF.prepCliqInitMsgsDown!(fg, tree, getParent(tree,cliq)[1], cliq, dbgnew=false)
+plotKDE(dwinmsgs[:x3][1], dims=[1;2], levels=2)
+
+# NEW
+dwinmsgs = IIF.prepCliqInitMsgsDown!(fg, tree, getParent(tree,cliq)[1], cliq, dbgnew=true)
+plotKDE(dwinmsgs[:x3][1], dims=[1;2], levels=2)
+
+
+
+
+
+## Check init message for x4
+
+cliq = getCliq(tree, :x4)
+
+# OLD
+dwinmsgs = IIF.prepCliqInitMsgsDown!(fg, tree, getParent(tree,cliq)[1], cliq, dbgnew=false)
+plotKDE(dwinmsgs[:x3][1], dims=[1;2], levels=2)
+
+# NEW
+dwinmsgs = IIF.prepCliqInitMsgsDown!(fg, tree, getParent(tree,cliq)[1], cliq, dbgnew=true)
+plotKDE(dwinmsgs[:x3][1], dims=[1;2], levels=2)
+
+
+
+
+
+
+
+plotKDE(fg, :x1, dims=[1;2])
+plotPose(fg, :x1)
+
+plotKDE(fg, [:x0;:x1;:x2;:x4;:x6], dims=[1;2],levels=1)
+
+
+drawTree(tree, imgs=true)
+
+
+
+
+## check contents
+
+cliq = getCliq(tree, :x1)
+
+getCliqMsgsUp(cliq)
+
+
+#
