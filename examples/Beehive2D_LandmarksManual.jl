@@ -101,15 +101,6 @@ drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /
 
 
 
-
-plotTreeUpMsgs(fg, tree, :x1, levels=1)
-plotTreeUpMsgs(fg, tree, :x3, levels=1)
-plotTreeUpMsgs(fg, tree, :x5, levels=1)
-plotTreeUpMsgs(fg, tree, :l1, levels=1)
-
-
-
-
 ## hex 2
 
 posecount = offsetHexLeg(fg, posecount, direction=:right)
