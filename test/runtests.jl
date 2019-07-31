@@ -36,6 +36,7 @@ println("[TEST] Pose2 evaluations...")
 include("TestPoseAndPoint2Constraints.jl")
 println("[SUCCESS]")
 
+include("testBeehive2D_CliqByCliq.jl")
 
 @testset "[TEST] Pose2 evaluations..." begin
   include("testDynPoint2D.jl")
