@@ -104,7 +104,7 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
-# getSolverParams(fg).downsolve = false
+getSolverParams(fg).downsolve = false
 fg.solverParams.async = true
 
 
