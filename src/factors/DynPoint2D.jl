@@ -137,7 +137,6 @@ function convert(::Type{PackedVelPoint2VelPoint2}, d::VelPoint2VelPoint2)
   return PackedVelPoint2VelPoint2(string(d.z))
 end
 function convert(::Type{VelPoint2VelPoint2}, d::PackedVelPoint2VelPoint2)
-  @show "HERE!"
   distr = extractdistribution(d.str)
   return VelPoint2VelPoint2(distr)
 end
