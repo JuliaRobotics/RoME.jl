@@ -109,9 +109,9 @@ end
 $(TYPEDEF)
 """
 mutable struct PackedDynPoint2VelocityPrior <: IncrementalInference.PackedInferenceType
-  str::AbstractString
+  str::String
   PackedDynPoint2VelocityPrior() = new()
-  PackedDynPoint2VelocityPrior(z1::AS) where {AS <: AbstractString} = new(z1)
+  PackedDynPoint2VelocityPrior(z1::String) = new(z1)
 end
 
 function convert(::Type{PackedDynPoint2VelocityPrior}, d::DynPoint2VelocityPrior)
@@ -128,15 +128,16 @@ end
 $(TYPEDEF)
 """
 mutable struct PackedVelPoint2VelPoint2 <: IncrementalInference.PackedInferenceType
-  str::AbstractString
+  str::String
   PackedVelPoint2VelPoint2() = new{T}()
-  PackedVelPoint2VelPoint2(z1::AS) where {AS <: AbstractString} = new(z1)
+  PackedVelPoint2VelPoint2(z1::String) = new(z1)
 end
 
 function convert(::Type{PackedVelPoint2VelPoint2}, d::VelPoint2VelPoint2)
   return PackedVelPoint2VelPoint2(string(d.z))
 end
 function convert(::Type{VelPoint2VelPoint2}, d::PackedVelPoint2VelPoint2)
+  @show "HERE!"
   distr = extractdistribution(d.str)
   return VelPoint2VelPoint2(distr)
 end
