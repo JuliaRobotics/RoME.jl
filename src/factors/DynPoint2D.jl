@@ -72,7 +72,7 @@ function (vp2vp2::VelPoint2VelPoint2{D})(
   ## now cross couple the change in position information, via timestamps to accompanying velocity
    # recompute integration of velocity influence
   # forward diff, "measured velocity"
-  dp_dt = dp/dt
+  dp_dt = dp./dt
   # zeroth order integration
   res[1] += sum((dp_dt - xi[3:4]).^2) # (meas - predicted) velocity error term
 
