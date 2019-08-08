@@ -28,7 +28,7 @@ TransformUtils = "9b8138ad-1b09-5408-aa39-e87ed6d21b63"
 [compat]
 ApproxManifoldProducts = "≥ 0.1"
 CoordinateTransformations = "≥ 0.5"
-DistributedFactorGraphs = "≥ 0.1"
+DistributedFactorGraphs = "≥ 0.3.1"
 Distributions = "≥ 0.18"
 DocStringExtensions = "≥ 0.7"
 FileIO = "≥ 1.0"
