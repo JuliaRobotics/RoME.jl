@@ -3,7 +3,8 @@ using Caesar
 fg = initfg()
 
 cvf = VelPoint2VelPoint2(MvNormal([0.0;0;0;0], Matrix(Diagonal([7.0;7.0;0.1;0.1].^2))))
-br = Pose2Point2BearingRange(Normal(-pi/2, 0.05), Normal(50.0, 1.0))
+# cvf = DynPoint2DynPoint2(MvNormal([0.0;0;0;0], Matrix(Diagonal([7.0;7.0;0.1;0.1].^2))))
+br = Pose2Point2BearingRange(Normal(pi/2, 0.05), Normal(50.0, 1.0))
 
 addVariable!(fg, :x1, Pose2)
 addFactor!(fg, [:x1], PriorPose2(MvNormal([0.0;0;0],Matrix(Diagonal([0.1;0.1;0.05].^2)))))
