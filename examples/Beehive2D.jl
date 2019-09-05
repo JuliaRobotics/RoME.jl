@@ -11,9 +11,10 @@ using RoME
 
 #  Do some plotting
 using RoMEPlotting
+Gadfly.set_default_plot_size(35cm,25cm)
 
 
-function driveHex(fgl, posecount::Int)
+function driveHex(fgl::G, posecount::Int) where G <: AbstractDFG
     # Drive around in a hexagon
     for i in (posecount-1):(posecount-1+5)
         psym = Symbol("x$i")
@@ -28,7 +29,7 @@ function driveHex(fgl, posecount::Int)
 end
 
 
-function offsetHexLeg(fgl::FactorGraph, posecount::Int; direction=:right)
+function offsetHexLeg(fgl::G, posecount::Int; direction=:right) where G <: AbstractDFG
     psym = Symbol("x$(posecount-1)")
     nsym = Symbol("x$(posecount)")
     posecount += 1
@@ -47,8 +48,8 @@ end
 
 ## start with an empty factor graph object
 fg = initfg()
-fg.solverParams.isfixedlag = true
-fg.solverParams.qfl = 15
+getSolverParams(fg).isfixedlag = true
+getSolverParams(fg).qfl = 15
 posecount = 0
 
 # Add the first pose :x0
@@ -61,9 +62,10 @@ addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0],
                                            Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=false )
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x0; :l1], p2br, autoinit=false )
+
 
 
 
@@ -75,20 +77,42 @@ posecount = driveHex(fg, posecount)
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
-
 # writeGraphPdf(fg, show=true)
 
 
+getSolverParams(fg).drawtree = true
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+# debugging options
+getSolverParams(fg).multiproc = false
+getSolverParams(fg).async = true
+getSolverParams(fg).dbg = true
+getSolverParams(fg).limititers = 50
+# getSolverParams(fg).downsolve = false
+
+
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+# tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+
+# fetchCliqTaskHistoryAll!(smt, hist)
+# assignTreeHistory!(tree, hist)
+# printCliqHistorySummary(hist, tree, :x1)
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
 
 
+# makeCsmMovie(fg, tree)
 
 
 
-
+# ## TEMP DEV CODE
+#
+# using Gadfly, Fontconfig, Cairo
+# eo = getEliminationOrder(fg)
+# tree = buildTreeFromOrdering!(fg, eo)
+# drawTree(tree, show=true, imgs=true)
+# writeGraphPdf(fg, show=true)
+#
+# ## TEMP END
 
 
 ## hex 2
@@ -96,7 +120,7 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l2, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l2, Point2, labels=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, autoinit=false )
 
@@ -108,25 +132,62 @@ posecount = driveHex(fg, posecount)
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 
-# writeGraphPdf(fg)
+# writeGraphPdf(fg,show=true)
 
 
+getSolverParams(fg).downsolve = false
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+
+tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 
 
 
+## debugging
+
+getCliq(tree, :x10)
+
+fetchCliqTaskHistoryAll!(smt, hist)
+assignTreeHistory!(tree, hist)
+printCliqHistorySummary(hist, tree, :x10)
+makeCsmMovie(fg, tree)
+
+
+## debugging
+
+
+
+
+
+
+
+
 # new sighting
 
-addVariable!(fg, :l0, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l0, Point2, labels=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x5; :l0], p2br, autoinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x12; :l0], p2br2, autoinit=false )
+
+
+
+notifyCSMCondition(tree,:x11)
+
+
+getCliq(tree, :x11)
+
+
+
+
+
+
+
+
 
 
 
@@ -137,7 +198,7 @@ addFactor!(fg, [:x12; :l0], p2br2, autoinit=false )
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l3, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l3, Point2, labels=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br, autoinit=false )
 
@@ -156,7 +217,8 @@ addFactor!(fg, [:x19; :l0], p2br2, autoinit=false )
 
 # writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smt, hist = solveTree!(fg, tree)
+# tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
@@ -185,7 +247,8 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smt, hist = solveTree!(fg, tree)
+# tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
 
@@ -330,20 +393,31 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
 
-
-
-
-0
-
-
-
-
-
-
-using RoMEPlotting
-
-
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+
+
+
+
+
+
+
+## additional dev code
+
+# from hex1
+
+getSolverParams(fg).upsolve = false
+getSolverParams(fg).downsolve = true
+
+stuff = solveCliq!( fg, tree, :x3 )
+stuff = solveCliq!( fg, tree, :x1 )
+stuff = solveCliq!( fg, tree, :x6 )
+stuff = solveCliq!( fg, tree, :x4 )
+stuff = solveCliq!( fg, tree, :x2 )
+stuff = solveCliq!( fg, tree, :x0 )
+
+fg2bd = loadDFG("/tmp/caesar/cliqSubFgs/cliq2/fg_beforedownsolve", Main)
+
+writeGraphPdf(fg2bd, show=true)
 
 
 
