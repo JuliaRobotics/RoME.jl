@@ -76,13 +76,6 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
-<<<<<<< Updated upstream
-# writeGraphPdf(fg, show=true)
-
-
-
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
-=======
 getSolverParams(fg).drawtree = true
 
 # debugging options
@@ -95,14 +88,11 @@ getSolverParams(fg).drawtree = true
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
->>>>>>> Stashed changes
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
 pl = plotBeehive_6(fg, meanmax=:max)
 
-<<<<<<< Updated upstream
-=======
 # drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
 
 ## fun additions
@@ -110,15 +100,11 @@ pl = plotBeehive_6(fg, meanmax=:max)
 # assignTreeHistory!(tree, hist)
 # printCliqHistorySummary(hist, tree, :x1)
 # makeCsmMovie(fg, tree)
->>>>>>> Stashed changes
 
 # drawGraphCliq(hist, )
 
 # plotTreeProductDown(fg, tree, :x4, :x4, levels=2)
 
-<<<<<<< Updated upstream
-
-=======
 # ## TEMP DEV CODE
 #
 # using Gadfly, Fontconfig, Cairo
@@ -130,7 +116,6 @@ pl = plotBeehive_6(fg, meanmax=:max)
 # dwinmsgs = prepCliqInitMsgsDown!(fg, tree, getCliq(tree, :x1), getCliq(tree,:x2), dbgnew=true)
 
 # ## TEMP END
->>>>>>> Stashed changes
 
 
 ## hex 2
@@ -150,27 +135,16 @@ posecount = driveHex(fg, posecount)
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 
-<<<<<<< Updated upstream
-# writeGraphPdf(fg)
-=======
 # writeGraphPdf(fg,show=true)
 
 
 # getSolverParams(fg).downsolve = false
->>>>>>> Stashed changes
 
 
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
-<<<<<<< Updated upstream
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
-
-
-
-# new sighting
-=======
 # drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 pl = plotBeehive_6(fg)
 
@@ -181,7 +155,6 @@ deleteVariable!(fgc,:l2)
 plotBeehive_6(fgc)
 
 # new sighting on :l0
->>>>>>> Stashed changes
 
 addVariable!(fg, :l0, Point2, labels=["LANDMARK"])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
@@ -192,12 +165,9 @@ addFactor!(fg, [:x12; :l0], p2br2, autoinit=false )
 
 
 
-<<<<<<< Updated upstream
-=======
 
 # tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
 
->>>>>>> Stashed changes
 
 
 ## hex 3
@@ -225,15 +195,11 @@ addFactor!(fg, [:x19; :l0], p2br2, autoinit=false )
 
 # writeGraphPdf(fg)
 
-<<<<<<< Updated upstream
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
-=======
 
 # getSolverParams(fg).dbg = true
 
 tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
 
->>>>>>> Stashed changes
 
 
 
@@ -273,11 +239,7 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-<<<<<<< Updated upstream
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
-=======
 tree, smt, hist = solveTree!(fg, tree)
->>>>>>> Stashed changes
 
 
 
