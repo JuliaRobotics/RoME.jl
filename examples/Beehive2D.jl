@@ -76,19 +76,61 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
+<<<<<<< Updated upstream
 # writeGraphPdf(fg, show=true)
 
 
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+=======
+getSolverParams(fg).drawtree = true
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
+# debugging options
+# getSolverParams(fg).multiproc = false
+# getSolverParams(fg).async = true
+# getSolverParams(fg).dbg = true
+# getSolverParams(fg).limititers = 50
+# getSolverParams(fg).downsolve = false
 
 
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+
+>>>>>>> Stashed changes
 
 
+pl = plotBeehive_6(fg, meanmax=:mean)
+pl = plotBeehive_6(fg, meanmax=:max)
 
+<<<<<<< Updated upstream
+=======
+# drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
 
+## fun additions
+# fetchCliqTaskHistoryAll!(smt, hist)
+# assignTreeHistory!(tree, hist)
+# printCliqHistorySummary(hist, tree, :x1)
+# makeCsmMovie(fg, tree)
+>>>>>>> Stashed changes
+
+# drawGraphCliq(hist, )
+
+# plotTreeProductDown(fg, tree, :x4, :x4, levels=2)
+
+<<<<<<< Updated upstream
+
+=======
+# ## TEMP DEV CODE
+#
+# using Gadfly, Fontconfig, Cairo
+# eo = getEliminationOrder(fg)
+# tree = buildTreeFromOrdering!(fg, eo)
+# drawTree(tree, show=true, imgs=true)
+# writeGraphPdf(fg, show=true)
+#
+# dwinmsgs = prepCliqInitMsgsDown!(fg, tree, getCliq(tree, :x1), getCliq(tree,:x2), dbgnew=true)
+
+# ## TEMP END
+>>>>>>> Stashed changes
 
 
 ## hex 2
@@ -108,18 +150,38 @@ posecount = driveHex(fg, posecount)
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 
+<<<<<<< Updated upstream
 # writeGraphPdf(fg)
+=======
+# writeGraphPdf(fg,show=true)
+
+
+# getSolverParams(fg).downsolve = false
+>>>>>>> Stashed changes
 
 
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
 
+<<<<<<< Updated upstream
 drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 
 
 
 # new sighting
+=======
+# drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
+pl = plotBeehive_6(fg)
+
+fgc = deepcopy(fg)
+
+deleteVariable!(fgc,:l2)
+
+plotBeehive_6(fgc)
+
+# new sighting on :l0
+>>>>>>> Stashed changes
 
 addVariable!(fg, :l0, Point2, labels=["LANDMARK"])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
@@ -130,6 +192,12 @@ addFactor!(fg, [:x12; :l0], p2br2, autoinit=false )
 
 
 
+<<<<<<< Updated upstream
+=======
+
+# tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+
+>>>>>>> Stashed changes
 
 
 ## hex 3
@@ -145,6 +213,8 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br, autoinit=false )
 
 posecount = driveHex(fg, posecount)
 
+
+
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, autoinit=false )
@@ -153,23 +223,41 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, autoinit=false )
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x19; :l0], p2br2, autoinit=false )
 
-
 # writeGraphPdf(fg)
 
+<<<<<<< Updated upstream
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+=======
+
+# getSolverParams(fg).dbg = true
+
+tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+
+>>>>>>> Stashed changes
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 
+pl = plotBeehive_6(fg)
+# drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 
-plotLocalProduct(fg, :l0)
+#
+plotLocalProduct(fg, :l2)
 
-pts = approxConv(fg, :x12l0f1, :l0)
+plotTreeProductUp(fg,tree,:l2)
 
-plotKDE(kde!(pts))
-plotPose(fg, :x12)
+drawTree(tree, imgs=true)
+drawTree(tree, imgs=false)
 
-plotKDE(fg, [:x12, :l0], dims=[1;2])
+plotCliqUpMsgs(fg, tree,:l2)
+
+ls(fg, :l2)
+#
+# pts = approxConv(fg, :x12l0f1, :l0)
+#
+# plotKDE(kde!(pts))
+# plotPose(fg, :x12)
+#
+# plotKDE(fg, [:x12, :l0], dims=[1;2])
 
 
 ## hex 4
@@ -185,7 +273,11 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
+<<<<<<< Updated upstream
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+=======
+tree, smt, hist = solveTree!(fg, tree)
+>>>>>>> Stashed changes
 
 
 
@@ -208,8 +300,8 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 
+tree, smt, hist = solveTree!(fg, tree)
 
 
 
@@ -281,7 +373,7 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smt, hist = solveTree!(fg, tree)
 
 
 
@@ -302,7 +394,7 @@ posecount = driveHex(fg, posecount)
 
 # writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smt, hist = solveTree!(fg, tree)
 
 
 
@@ -325,7 +417,7 @@ posecount = driveHex(fg, posecount)
 
 writeGraphPdf(fg)
 
-tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
+tree, smt, hist = solveTree!(fg, tree)
 
 
 
@@ -348,5 +440,140 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tm
 
 
 
+
+## dev auto init after hex 3
+
+
+printCliqHistorySummary(tree, :x16)
+
+cliq = getCliq(tree, :x16)
+cid = cliq.index
+ste = 15
+sfg = hist[cid][ste][4].cliqSubFg
+cliqh = hist[cid][ste][4].cliq
+
+printCliqSummary(sfg, cliq)
+
+pl = plotBeehive_6(sfg)
+
+
+stuff = sandboxCliqResolveStep(tree, :x16, 15)
+
+
+cond = getSolveCondition(cliqh)
+notify(cond)
+
+cond.waitq = Any[]
+
+isready(cond)
+
+wait(getSolveCondition(cliqh))
+
+notify(getSolveCondition(cliq))
+IIF.notifyCliqUpInitStatus!(cliq, :downsolved)
+
+getCliqStatus(cliq)
+
+writeGraphPdf(sfg, show=true)
+
+
+pl = plotBeehive_6(fg, to=15)
+
+
+
+
+# leaf cliq
+
+printCliqHistorySummary(tree, :l0)
+
+cliq = getCliq(tree, :l0)
+cid = cliq.index
+ste = 9
+sfg = hist[cid][ste][4].cliqSubFg
+cliqh = hist[cid][ste][4].cliq
+
+
+printCliqSummary(sfg, cliqh)
+
+writeGraphPdf(sfg, show=true)
+
+plotBeehive_6(sfg)
+
+
+ls(sfg, :x19)
+
+pts = approxConv(sfg, :x19l0f1, :x19)
+
+X19 = manikde!(pts, Pose2().manifolds)
+
+plotPose(Pose2(), X19)
+
+
+pts[3,:] = 2*pi*rand(100).-pi
+setValKDE!(getVariable(sfg, :x19), X19)
+
+
+plotTreeProductDown(fg,tree,:l2, :l2)
+
+
+## debug down on hex1, x4
+
+drawTree(tree)
+
+
+
+printCliqHistorySummary(tree,:x4)
+
+
+
+csmcStep19 = getCliqSolveHistory(tree,:x4)[19][4]
+
+drawGraph(csmcStep19.cliqSubFg, show=true)
+
+getSolverParams(csmcStep19.dfg).dbg = true
+
+stuff = sandboxCliqResolveStep(tree,:x4,19)
+
+
+plotKDE(map(x->getKDE(x, :x4),[fg; csmcStep19.cliqSubFg; stuff[4].dfg]), levels=2 )
+
+drawPosesLandms(fg,meanmax=:mean)
+
+
+
+plotKDE([getKDE(csmcStep19.cliqSubFg, :x3);getKDE(csmcStep19.cliqSubFg, :x4); getKDE(csmcStep19.cliqSubFg, :x5)], levels=1)
+
+
+plotLocalProduct(csmcStep19.cliqSubFg)
+
+
+# what are down messages into (:x4|)
+
+plotCliqDownMsgs(tree,:x3, existing=pl, dims=[1;2]);
+
+
+plotTreeProductDown(csmcStep19.cliqSubFg, csmcStep19.tree,:x4,:x5)
+
+
+
+
+## what is going on with x3 and x5 in root
+
+
+printCliqHistorySummary(tree, :x3)
+csmc = getCliqSolveHistory(tree, :x3)[9][4]
+
+
+getSolverParams(csmc.dfg).dbg = true
+
+stuff = sandboxCliqResolveStep(tree,:x3,9)
+
+
+plotTreeUpMsgs(fg, tree, :x5) #plotCliqUpMsgs
+
+plotCliqDownMsgs(tree,:x3, existing=pl, dims=[1;2]);
+
+
+plotTreeProductUp(fg, tree, :x5)
 
 #
