@@ -59,7 +59,8 @@ end
 ensureAllInitialized!(fg)
 
 
-global tree = batchSolve!(fg, N=N, recursive=true)
+tree, smt, hist = solveTree!(fg)
+# global tree = batchSolve!(fg, N=N, recursive=true)
 # global tree = wipeBuildNewTree!(fg)
 # global infv = [inferOverTreeR!(fg, tree, N=N) for i in 1:4]
 # @test length(infv) == 4
@@ -104,12 +105,12 @@ addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
 
 # @test true
 
+tree, smt, hist = solveTree!(fg)
 # setVal!(getVert(fg, :l2), zeros(2,N))
 # writeGraphPdf(fg)
-global tree = wipeBuildNewTree!(fg)
-
-global infv = [inferOverTreeR!(fg, tree, N=N) for i in 1:4]
-@test length(infv) == 4
+# global tree = wipeBuildNewTree!(fg)
+# global infv = [inferOverTreeR!(fg, tree, N=N) for i in 1:4]
+# @test length(infv) == 4
 
 
 # L1 = getVertKDE(fg, :l1)
