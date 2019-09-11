@@ -38,6 +38,8 @@ println("[SUCCESS]")
 
 include("testBeehive2D_CliqByCliq.jl")
 
+# include("HexagonalLightGraphs.jl")
+
 @testset "[TEST] Pose2 evaluations..." begin
   include("testDynPoint2D.jl")
 end
