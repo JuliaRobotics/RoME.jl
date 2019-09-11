@@ -142,6 +142,5 @@ global X1pts = approxConv(fg, :x1l1f1, :x1)
 # getVal(fg, :l1)
 
 ensureAllInitialized!(fg)
-global tree = wipeBuildNewTree!(fg)
-inferOverTreeR!(fg, tree, N=N)
-# inferOverTree!(fg, tree, N=N)
+
+tree, smt, hist = solveTree!(fg)

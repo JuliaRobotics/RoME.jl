@@ -27,17 +27,19 @@ badval = 0.01.*randn(3,100)
 badval[1,:] .-= 5.0
 badval[2,:] .-= 2.0
 badval[3,:] .+= 0.5
-setValKDE!(fg, :x2, kde!(badval))
+setValKDE!(fg, :x2, manikde!(badval, Pose2().manifolds))
 
 N = 100
-batchSolve!(fg, N=N)
+# batchSolve!(fg, N=N)
+tree, smt, hist = solveTree!(fg)
 
 for xx in [:x0; :x1; :x2]
   pts = getVal(fg, xx)
-  @test 0.95*N < sum( -0.5 .< pts[1,:] .< 0.5 )
-  @test 0.95*N < sum( -0.5 .< pts[2,:] .< 0.5 )
+  @test 0.95*N < sum( -1.0 .< pts[1,:] .< 1.0 )
+  @test 0.95*N < sum( -1.0 .< pts[2,:] .< 1.0 )
   @test 0.95*N < sum( -0.5 .< pts[3,:] .< 0.5 )
 end
+
 
 end
 
@@ -84,8 +86,8 @@ batchSolve!(fg, N=N)
 for xx in [:x0; :x1; :x2]
   pts = getVal(fg, xx)
   @test 0.95*N < sum( -0.5 .< pts[1,:] .< 0.5 )
-  @test 0.95*N < sum( -0.5 .< pts[2,:] .< 0.5 )
-  @test 0.95*N < sum( -0.5 .< pts[3,:] .< 0.5 )
+  @test 0.95*N < sum( -1.0 .< pts[2,:] .< 1.0 )
+  @test 0.95*N < sum( -1.0 .< pts[3,:] .< 1.0 )
 end
 
 end
