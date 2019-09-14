@@ -518,7 +518,7 @@ drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince 
 
 
 
-# unmarginalizeVariablesAll!(fg)
+# dontMarginalizeVariablesAll!(fg)
 
 plotPose(fg, :x22);
 

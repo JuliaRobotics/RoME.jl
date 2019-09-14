@@ -1,4 +1,7 @@
 
+using Distributed
+addprocs(4)
+
 # using Revise
 
 ##
@@ -7,14 +10,19 @@
 # using Cairo, Fontconfig
 # using Gadfly
 
+using Dates
 using RoME
+@everywhere using RoME
 
 #  Do some plotting
 using RoMEPlotting
 Gadfly.set_default_plot_size(35cm,25cm)
 
 
-function driveHex(fgl::G, posecount::Int) where G <: AbstractDFG
+function driveHex(fgl::G,
+                  posecount::Int;
+                  graphinit::Bool=false ) where G <: AbstractDFG
+    #
     # Drive around in a hexagon
     for i in (posecount-1):(posecount-1+5)
         psym = Symbol("x$i")
@@ -22,14 +30,17 @@ function driveHex(fgl::G, posecount::Int) where G <: AbstractDFG
         nsym = Symbol("x$(i+1)")
         addVariable!(fgl, nsym, Pose2)
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-        addFactor!(fgl, [psym;nsym], pp, autoinit=false )
+        addFactor!(fgl, [psym;nsym], pp, autoinit=graphinit )
     end
 
     return posecount
 end
 
 
-function offsetHexLeg(fgl::G, posecount::Int; direction=:right) where G <: AbstractDFG
+function offsetHexLeg(fgl::G,
+                      posecount::Int; direction=:right,
+                      graphinit::Bool=false ) where G <: AbstractDFG
+    #
     psym = Symbol("x$(posecount-1)")
     nsym = Symbol("x$(posecount)")
     posecount += 1
@@ -40,7 +51,7 @@ function offsetHexLeg(fgl::G, posecount::Int; direction=:right) where G <: Abstr
     elseif direction == :left
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
     end
-    addFactor!(fgl, [psym; nsym], pp, autoinit=false )
+    addFactor!(fgl, [psym; nsym], pp, autoinit=graphinit )
     return posecount
 end
 
@@ -78,46 +89,43 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 
+printGraphSummary(fg)
+
+# draw figures for debugging
 getSolverParams(fg).drawtree = true
+# getSolverParams(fg).showtree = false
+
+# burn out USB drive instead of solid storage
+# getSolverParams(fg).logpath="/media/dehann/temp/caesar/$(now())"
 
 # debugging options
-# getSolverParams(fg).multiproc = false
+getSolverParams(fg).multiproc = true
 # getSolverParams(fg).async = true
-# getSolverParams(fg).dbg = true
+getSolverParams(fg).dbg = true
 # getSolverParams(fg).limititers = 50
 # getSolverParams(fg).downsolve = false
 
 
+
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
+printGraphSummary(fg)
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
-pl = plotBeehive_6(fg, meanmax=:max)
-
+# pl = plotBeehive_6(fg, meanmax=:max)
 # drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
+
+
+
+
 
 ## fun additions
 # fetchCliqTaskHistoryAll!(smt, hist)
 # assignTreeHistory!(tree, hist)
-# printCliqHistorySummary(hist, tree, :x1)
+# printCliqHistorySummary(hist, tree, :l0)
 # makeCsmMovie(fg, tree)
 
-# makeCsmMovie(fg, tree)
-
-# plotTreeProductDown(fg, tree, :x4, :x4, levels=2)
-
-# ## TEMP DEV CODE
-#
-# using Gadfly, Fontconfig, Cairo
-# eo = getEliminationOrder(fg)
-# tree = buildTreeFromOrdering!(fg, eo)
-# drawTree(tree, show=true, imgs=true)
-# writeGraphPdf(fg, show=true)
-#
-# dwinmsgs = prepCliqInitMsgsDown!(fg, tree, getCliq(tree, :x1), getCliq(tree,:x2), dbgnew=true)
-
-# ## TEMP END
 
 
 ## hex 2
@@ -140,21 +148,17 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 # writeGraphPdf(fg,show=true)
 
 
-getSolverParams(fg).downsolve = false
+# getSolverParams(fg).downsolve = false
 
 
-tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+tree, smt, hist = solveTree!(fg, tree) #, recordcliqs=ls(fg))
 
 
 
 # drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
-pl = plotBeehive_6(fg)
+pl = plotBeehive_6(fg, meanmax=:mean)
 
-fgc = deepcopy(fg)
 
-deleteVariable!(fgc,:l2)
-
-plotBeehive_6(fgc)
 
 # new sighting on :l0
 
@@ -167,80 +171,66 @@ addFactor!(fg, [:x12; :l0], p2br2, autoinit=false )
 
 
 
-notifyCSMCondition(tree,:x11)
+# and here it goes totally wacko
+
+# getSolverParams(fg).dbg = true
+
+tree, smt, hist = solveTree!(fg, tree) #, recordcliqs=ls(fg))
 
 
-getCliq(tree, :x11)
+pl = plotBeehive_6(fg, meanmax=:mean)
 
-
-
-
-
-
-
-
-
-
-
-
-# tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+# getSolverParams(fg).dbg = false
 
 
 
 ## hex 3
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
-
-# Add landmarks with Bearing range measurements
-addVariable!(fg, :l3, Point2, labels=[:LANDMARK;])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br, autoinit=false )
+posecount = offsetHexLeg(fg, posecount, direction=:right, graphinit=true)
 
 
-
-posecount = driveHex(fg, posecount)
-
+posecount = driveHex(fg, posecount, graphinit=true)
 
 
-# Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, autoinit=false )
+# getSolverParams(fg).downsolve=false
+
+tree, smt, hist = solveTree!(fg, tree) #, recordcliqs=ls(fg))
+
+
+pl = plotBeehive_6(fg, meanmax=:mean)
+
+
 
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x19; :l0], p2br2, autoinit=false )
 
-# writeGraphPdf(fg)
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x18; :l1], p2br2, autoinit=false )
+
+
+# Add landmarks with Bearing range measurements
+addVariable!(fg, :l3, Point2, labels=[:LANDMARK;])
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x14; :l3], p2br, autoinit=false )
+
+
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x20; :l3], p2br, autoinit=false )
+
 
 
 # getSolverParams(fg).dbg = true
 
-tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+tree, smt, hist = solveTree!(fg, tree)
 
 
-
-
-pl = plotBeehive_6(fg)
+pl = plotBeehive_6(fg, meanmax=:mean)
 # drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 
-#
-plotLocalProduct(fg, :l2)
 
-plotTreeProductUp(fg,tree,:l2)
 
-drawTree(tree, imgs=true)
-drawTree(tree, imgs=false)
-
-plotCliqUpMsgs(fg, tree,:l2)
-
-ls(fg, :l2)
-#
-# pts = approxConv(fg, :x12l0f1, :l0)
-#
-# plotKDE(kde!(pts))
-# plotPose(fg, :x12)
-#
-# plotKDE(fg, [:x12, :l0], dims=[1;2])
 
 
 ## hex 4
@@ -249,9 +239,16 @@ posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 posecount = driveHex(fg, posecount)
 
-# # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+
+
+# Add landmarks with Bearing range measurements
+addVariable!(fg, :l4, Point2, labels=[:LANDMARK;])
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x21; :l4], p2br, autoinit=false )
+
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x27; :l4], p2br, autoinit=false )
+
 
 
 # writeGraphPdf(fg)
@@ -259,9 +256,26 @@ posecount = driveHex(fg, posecount)
 tree, smt, hist = solveTree!(fg, tree)
 
 
+pl = plotBeehive_6(fg, meanmax=:mean)
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 
+
+
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x26; :l0], p2br2, autoinit=false )
+
+# Add landmarks with Bearing range measurements
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x25; :l2], p2br2, autoinit=false )
+
+
+tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+
+
+
+pl = plotBeehive_6(fg, meanmax=:mean)
+# drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /tmp/test.svg`)
 
 
 
@@ -270,11 +284,36 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") # || @async run(`eog /
 
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
-posecount = driveHex(fg, posecount)
+# Add landmarks with Bearing range measurements
+addVariable!(fg, :l5, Point2, labels=[:LANDMARK;])
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x28; :l5], p2br, autoinit=false )
+
+
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x4; :l5], p2br, autoinit=false )
+
+
+tree, smt, hist = solveTree!(fg, tree)
+
+pl = plotBeehive_6(fg, meanmax=:mean)
+
+
+## Weird initialization issues happen here
+
+
+posecount = driveHex(fg, posecount, graphinit=true)
 
 # # Add landmarks with Bearing range measurements
-# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x34; :l5], p2br2, autoinit=false )
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x32; :l3], p2br2, autoinit=false )
+
+p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x33; :l0], p2br2, autoinit=false )
+
 
 
 # writeGraphPdf(fg)
@@ -282,7 +321,49 @@ posecount = driveHex(fg, posecount)
 
 tree, smt, hist = solveTree!(fg, tree)
 
+pl = plotBeehive_6(fg, meanmax=:mean)
 
+
+## DEBUG weird hex5
+
+dontMarginalizeVariablesAll!(fg)
+# getSolverParams(fg).isfixedlag = false
+# getSolverParams(fg).qfl = 99999999
+
+getSolverParams(fg).dbg = true
+# getSolverParams(fg).multiproc = false
+
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+
+pl = plotBeehive_6(fg, meanmax=:mean)
+
+
+plotLocalProduct(fg, :l5)
+
+stuff = localProduct(fg,:l5)
+
+setValKDE!(fg, :l5, stuff[1], false, stuff[5])
+
+ls(fg, :x33)
+
+
+saveDFG(fg, "/home/dehann/Documents/beehive_hex5_fail_9_13")
+
+
+printCliqHistorySummary(tree,:l0)
+
+l0bdfg = getCliqSolveHistory(tree,:l0)[11][4].dfg
+l0adfg = getCliqSolveHistory(tree,:l0)[12][4].dfg
+
+plotKDE(l0bdfg, :l0, levels=3)
+plotKDE(l0adfg, :l0, levels=3)
+
+getPoints(getKDE(l0bdfg, :l0))
+
+
+getPoints(getKDE(l0adfg, :l0))
+
+## DEBUG END
 
 
 
@@ -329,7 +410,7 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 resetVariableAllInitializations!(fg)
 
 
-unmarginalizeVariablesAll!(fg)
+dontMarginalizeVariablesAll!(fg)
 
 
 tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
@@ -565,5 +646,42 @@ plotCliqDownMsgs(tree,:x3, existing=pl, dims=[1;2]);
 
 
 plotTreeProductUp(fg, tree, :x5)
+
+
+
+hist = getCliqSolveHistory(tree, :x6)
+
+dfg = hist[11][4].dfg
+subfg = hist[11][4].cliqSubFg
+cliq = hist[11][4].cliq
+
+printCliqHistorySummary(hist)
+
+
+
+
+## DEBUG x19
+
+plotKDE(fg, :x19, levels=3)
+
+getCliq(tree, :x19)
+
+printCliqHistorySummary(tree, :x19)
+
+sfg_ad = hist[4][12][4].cliqSubFg
+
+drawGraph(sfg_ad, show=true)
+
+plotLocalProduct(sfg_ad, :x19)
+
+getVariableInferredDim(fg, :x19)
+getVariableInferredDim(fg, :l0)
+
+
+## END DEBUG
+
+
+
+
 
 #
