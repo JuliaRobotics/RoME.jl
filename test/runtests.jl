@@ -4,79 +4,91 @@
 using RoME
 using Test
 
-# might be unnecessary
-using JLD2  #, HDF5
-
-println("[TEST] numeric root...")
+@testset "Numeric Root" begin
 include("testhigherdimroots.jl")
-println("[SUCCESS]")
+end
 
+@testset "Manifolds" begin
 include("testManifoldsPose2Equivalent.jl")
+end
 
 # Requires standardized testing strategy
 # println("[TEST] Camera function evaluations...")
 # include("testCameraFunctions.jl")
-# println("[SUCCESS]")
+# end
 
-println("[TEST] MultipleFeatures constraints")
+@testset "MultipleFeatures constraints" begin
 include("testmultiplefeatures.jl")
-println("[SUCCESS]")
-
-println("[TEST] Linear array function evaluations...")
-include("testDidsonFunctions.jl")
-println("[SUCCESS]")
-
-include("testPoint2Point2.jl")
-
-include("testPoint2Point2Init.jl")
-
-include("testBasicPose2Stationary.jl")
-
-println("[TEST] Pose2 evaluations...")
-include("TestPoseAndPoint2Constraints.jl")
-println("[SUCCESS]")
-
-include("HexagonalLightGraphs.jl")
-
-@testset "[TEST] Pose2 evaluations..." begin
-  include("testDynPoint2D.jl")
 end
 
+@testset "Linear array function evaluations" begin
+include("testDidsonFunctions.jl")
+end
+
+@testset "Point2Point2 Tests" begin
+include("testPoint2Point2.jl")
+end
+
+@testset "Point2Point2 Init Tests" begin
+include("testPoint2Point2Init.jl")
+end
+
+@testset "BasicPose2Stationary Tests" begin
+include("testBasicPose2Stationary.jl")
+end
+
+@testset "Pose2 Tvaluations" begin
+include("TestPoseAndPoint2Constraints.jl")
+end
+
+@testset "DFG End-to-End Tests" begin
+include("dfg/FileDFG.jl")
+include("dfg/HexagonalLightGraphs.jl")
+# Don't run the cloud tests yet
+end
+
+@testset "Pose2 evaluations..." begin
+include("testDynPoint2D.jl")
+end
+
+@testset "Point2Point2WorldBearing Tests" begin
 include("testPoint2Point2WorldBearing.jl")
 
+@testset "BearingRange2D Tests" begin
 include("testBearingRange2D.jl")
+end
 
+@testset "FixedLag Tests" begin
 include("testFixedLagFG.jl")
+end
 
+@testset "MultimodalRangeBearing Tests" begin
 include("testMultimodalRangeBearing.jl")
-
+end
+@testset "DynPose2D Tests" begin
 include("testDynPose2D.jl")
+end
 
-println("[TEST] Pose3 evaluations...")
+@testset "Pose3 evaluations" begin
 include("threeDimLinearProductTest.jl")
-println("[SUCCESS]")
+end
 
-println("[TEST] ensure Pose3Pose3NH evaluations...")
+@testset "Ensure Pose3Pose3NH evaluations" begin
 include("testPose3Pose3NH.jl")
-println("[SUCCESS]")
+end
 
-@warn "Skipping JLD tests in RoME"
-# println("[TEST] saving to and loading from .jld2 file")
-# savejld(fg, file="tempfg.jld2" )
-# fgu = loadjld( file="tempfg.jld2" )
-# Base.rm("tempfg.jld2")
-# println("Success")
-
-println("[TEST] PartialPose3XYYaw evaluations...")
+@testset "PartialPose3XYYaw evaluations" begin
 include("testPartialXYH.jl")
-println("[SUCCESS]")
+end
 
-println("[TEST] partial pose3 evaluations...")
+@testset "Partial pose3 evaluations" begin
 include("testpartialpose3.jl")
-println("[SUCCESS]")
+end
 
-println("[TEST] packing converters...")
+@testset "Packing converters" begin
 include("testpackingconverters.jl")
-println("[SUCCESS]")
+end
 
+@testset "Default FG Initialization" begin
 include("TestDefaultFGInitialization.jl")
+end
