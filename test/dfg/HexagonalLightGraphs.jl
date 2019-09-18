@@ -27,7 +27,16 @@ end
 # Can do with graph too!
 tree, smt, hist = solveTree!(fg)
 
-
+# Checking estimates exist for all variables.
+for variable in getVariables(fg)
+    @info "Testing if $(variable.label) has estimates... = $(haskey(variable.estimateDict, :default))"
+    @test haskey(variable.estimateDict, :default)
+    if haskey(variable.estimateDict, :default)
+        @test haskey(variable.estimateDict[:default], :max)
+        @test haskey(variable.estimateDict[:default], :mean)
+        @test haskey(variable.estimateDict[:default], :ppe)
+    end
+end
 
 @test 80 < sum(-3.0 .< getPoints(getKDE(fg, :x0))[1,:] .< 3.0)
 @test 80 < sum(-3.0 .< getPoints(getKDE(fg, :x0))[2,:] .< 3.0)

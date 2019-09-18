@@ -2,7 +2,7 @@ using RoME
 using DistributedFactorGraphs
 using Test
 
-@testset "Test Hexagonal with GraphsDFG..." begin
+# @testset "Test Hexagonal with GraphsDFG..." begin
 
 # start with an empty factor graph object
 fg = GraphsDFG{SolverParams}(params=SolverParams())
@@ -25,11 +25,15 @@ end
 # Alrighty! At this point, we should be able to solve locally...
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
 # Can do with graph too!
-tree, smt, hist = solveTree!(fg)
+# getSolverParams(fg).dbg = true
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+printCliqHistorySummary(tree, :x3)
+# printCliqHistorySummary(tree, :x4)
+# drawTree(tree, show=true)
 
 # Checking estimates exist for all variables.
 for variable in getVariables(fg)
-    @info "Testing if $(variable.label) has estimates..."
+    @info "Testing if $(variable.label) has estimates... = $(haskey(variable.estimateDict, :default))"
     @test haskey(variable.estimateDict, :default)
     if haskey(variable.estimateDict, :default)
         @test haskey(variable.estimateDict[:default], :max)

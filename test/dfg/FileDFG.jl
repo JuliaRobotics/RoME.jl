@@ -23,8 +23,38 @@ saveDFG(dfg, saveFolder)
 @test readdir("$saveFolder/variables") == ["x0.json", "x1.json", "x2.json", "x3.json", "x4.json", "x5.json", "x6.json"]
 @test readdir("$saveFolder/factors") == ["x0f1.json", "x0x1f1.json", "x1x2f1.json", "x2x3f1.json", "x3x4f1.json", "x4x5f1.json", "x5x6f1.json"]
 
-retDFG = loadDFG(saveFolder, IncrementalInference)
+retDFG = GraphsDFG{SolverParams}(params=SolverParams())
+retDFG = loadDFG(saveFolder, IncrementalInference, retDFG)
 @test symdiff(ls(dfg), ls(dfg)) == []
 @test symdiff(lsf(dfg), lsf(retDFG)) == []
+
+# Solve it
+tree, smt, hist = solveTree!(retDFG)
+
+# Checking estimates exist for all variables.
+for variable in getVariables(retDFG)
+    @info "Testing if $(variable.label) has estimates... = $(haskey(variable.estimateDict, :default))"
+    @test haskey(variable.estimateDict, :default)
+    if haskey(variable.estimateDict, :default)
+        @test haskey(variable.estimateDict[:default], :max)
+        @test haskey(variable.estimateDict[:default], :mean)
+        @test haskey(variable.estimateDict[:default], :ppe)
+    end
+end
+
+# Save it and load it again
+saveDFG(retDFG, saveFolder)
+retDFG = GraphsDFG{SolverParams}(params=SolverParams())
+retDFG = loadDFG(saveFolder, IncrementalInference, retDFG)
+
+for variable in getVariables(retDFG)
+    @info "Testing if $(variable.label) has estimates... = $(haskey(variable.estimateDict, :default))"
+    @test haskey(variable.estimateDict, :default)
+    if haskey(variable.estimateDict, :default)
+        @test haskey(variable.estimateDict[:default], :max)
+        @test haskey(variable.estimateDict[:default], :mean)
+        @test haskey(variable.estimateDict[:default], :ppe)
+    end
+end
 
 # Success!

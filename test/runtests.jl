@@ -42,6 +42,7 @@ include("TestPoseAndPoint2Constraints.jl")
 end
 
 @testset "DFG End-to-End Tests" begin
+include("dfg/HexagonalGraphs.jl")
 include("dfg/FileDFG.jl")
 include("dfg/HexagonalLightGraphs.jl")
 # Don't run the cloud tests yet
