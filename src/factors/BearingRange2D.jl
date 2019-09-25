@@ -28,16 +28,12 @@ end
 function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
                                           userdata::FactorMetadata,
                                           idx::Int,
-                                          meas::Tuple{Array{Float64,2},Vector{Float64}},
+                                          meas::Tuple{Array{Float64,2}},
                                           xi::Array{Float64,2},
                                           lm::Array{Float64,2} )
   #
 
   rot = meas[1][1,idx]+xi[3,idx]
-  # fully random direction when solving in backwards direction
-  if userdata.solvefor == userdata.variablelist[1]
-    rot = meas[2][idx]
-  end
   res[1] = ( lm[1,idx] - (meas[1][2,idx]*cos( rot ) + xi[1,idx]) )^2
   res[2] = ( lm[2,idx] - (meas[1][2,idx]*sin( rot ) + xi[2,idx]) )^2
 

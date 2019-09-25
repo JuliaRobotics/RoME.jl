@@ -54,7 +54,7 @@ getSolverParams(fg).async = false
 
 
 # direct solve would be
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree, smt, hist = solveTree!(fg) #, recordcliqs=ls(fg))
 
 
 @test 80 < sum(-3.0 .< getPoints(getKDE(fg, :x0))[1,:] .< 3.0)
@@ -73,9 +73,9 @@ tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 @test 80 < sum(15.0 .< getPoints(getKDE(fg, :x3))[2,:] .< 20.0)
 # @test 80 < sum(-0.3 .< getPoints(getKDE(fg, :x3))[3,:] .< 0.3)
 
-@test 80 < sum(-4.0 .< getPoints(getKDE(fg, :x4))[1,:] .< 4.0)
-@test 80 < sum(15.0 .< getPoints(getKDE(fg, :x4))[2,:] .< 20.0)
-@test 80 < sum(-2.4 .< getPoints(getKDE(fg, :x4))[3,:] .< -1.8)
+@test 80 < sum(-5.0 .< getPoints(getKDE(fg, :x4))[1,:] .< 5.0)
+@test 80 < sum(13.0 .< getPoints(getKDE(fg, :x4))[2,:] .< 22.0)
+@test 80 < sum(-2.5 .< getPoints(getKDE(fg, :x4))[3,:] .< -1.7)
 
 @test 80 < sum(-8.0 .< getPoints(getKDE(fg, :x5))[1,:] .< -2.0)
 @test 80 < sum(6.0 .< getPoints(getKDE(fg, :x5))[2,:] .< 11.0)
@@ -94,7 +94,7 @@ tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 # using RoMEPlotting
 #
 # Gadfly.set_default_plot_size(35cm,20cm)
-# drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
+# drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/caesar/test.pdf");  @async run(`evince /tmp/caesar/test.pdf`)
 # 0
 # # drawTree(tree, imgs=true)
 
