@@ -129,7 +129,7 @@ $(TYPEDEF)
 """
 mutable struct PackedVelPoint2VelPoint2 <: IncrementalInference.PackedInferenceType
   str::String
-  PackedVelPoint2VelPoint2() = new{T}()
+  PackedVelPoint2VelPoint2() = new()
   PackedVelPoint2VelPoint2(z1::String) = new(z1)
 end
 
