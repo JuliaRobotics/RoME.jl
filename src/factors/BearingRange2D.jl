@@ -19,10 +19,7 @@ function getSample(pp2br::Pose2Point2BearingRange, N::Int=1)
   smpls[1,:] = rand(pp2br.bearing, N)[:]
   smpls[2,:] = rand(pp2br.range, N)[:]
 
-  # random rotation offset for rotation dispersion
-  # aziNoise = 2*pi*rand(N) .- pi
-  aziNoise = collect(range(-pi,pi,length=N))
-  return (smpls,aziNoise)
+  return (smpls,)
 end
 # define the conditional probability constraint
 function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
