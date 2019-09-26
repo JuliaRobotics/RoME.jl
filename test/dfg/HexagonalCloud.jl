@@ -60,16 +60,6 @@ toDotFile(localFg, "/tmp/localfg.dot")
 # Can do with graph too!
 tree, smt, hist = solveTree!(localFg)
 
-wipeBuildNewTree!(localFg)
-tree, smt, hist = solveTree!(localFg, tree) # Recycle
-# batchSolve!(localFg, drawpdf=true, show=true)
-# Erm, whut? Error = mcmcIterationIDs -- unaccounted variables
-
-# Trying new method.
-tree, smtasks = batchSolve!(localFg, treeinit=true, drawpdf=true, show=true,
-                            returntasks=true, limititers=50,
-                            upsolve=true, downsolve=true  )
-
 #### WIP and general debugging
 
 # Testing with GenericMarginal

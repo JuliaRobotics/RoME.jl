@@ -37,7 +37,7 @@ end
 include("testBasicPose2Stationary.jl")
 end
 
-@testset "Pose2 Tvaluations" begin
+@testset "Pose2 Evaluations" begin
 include("TestPoseAndPoint2Constraints.jl")
 end
 
@@ -54,6 +54,7 @@ end
 
 @testset "Point2Point2WorldBearing Tests" begin
 include("testPoint2Point2WorldBearing.jl")
+end
 
 @testset "BearingRange2D Tests" begin
 include("testBearingRange2D.jl")
