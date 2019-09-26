@@ -75,7 +75,7 @@ tree, smt, hist = solveTree!(fg) #, recordcliqs=ls(fg))
 
 @test 80 < sum(-5.0 .< getPoints(getKDE(fg, :x4))[1,:] .< 5.0)
 @test 80 < sum(13.0 .< getPoints(getKDE(fg, :x4))[2,:] .< 22.0)
-@test 80 < sum(-2.5 .< getPoints(getKDE(fg, :x4))[3,:] .< -1.7)
+@test 80 < sum(-2.8 .< getPoints(getKDE(fg, :x4))[3,:] .< -1.5)
 
 @test 80 < sum(-8.0 .< getPoints(getKDE(fg, :x5))[1,:] .< -2.0)
 @test 80 < sum(6.0 .< getPoints(getKDE(fg, :x5))[2,:] .< 11.0)
