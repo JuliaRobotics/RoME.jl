@@ -129,17 +129,17 @@ pts = getPoints(getKDE(fg, :x0))
 
 N = size(pts,2)
 
-@test 0.8*N < sum(abs.(pts[1,:]) .< 0.1)
-@test 0.8*N < sum(abs.(pts[2,:]) .< 0.1)
-@test 0.8*N < sum(abs.(pts[3,:]) .< 2.0)
+@test 0.7*N < sum(abs.(pts[1,:]) .< 0.1)
+@test 0.7*N < sum(abs.(pts[2,:]) .< 0.1)
+@test 0.7*N < sum(abs.(pts[3,:]) .< 2.0)
 
 
 
 pts = getPoints(getKDE(fg, :x1))
 
-@test 0.8*N < sum(0.0 .< pts[1,:])
-@test 0.8*N < sum( 0.5 .< sqrt.(sum(pts[1:2,:].^2, dims=1)) .< 1.5)
-@test 0.8*N < sum(abs.(pts[3,:]) .< 2.0)
+@test 0.7*N < sum(0.0 .< pts[1,:])
+@test 0.7*N < sum( 0.5 .< sqrt.(sum(pts[1:2,:].^2, dims=1)) .< 1.5)
+@test 0.7*N < sum(abs.(pts[3,:]) .< 2.0)
 
 
 
