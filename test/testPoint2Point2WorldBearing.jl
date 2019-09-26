@@ -34,8 +34,9 @@ global pp2 = Point2Point2WorldBearing(Normal(3pi/4,0.1))
 addFactor!(fg, [:x2;:x1], pp2)
 
 
-global tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
+tree, smt, hist = solveTree!(fg)
+# global tree = wipeBuildNewTree!(fg)
+# inferOverTree!(fg, tree)
 
 
 global pts = getVal(fg, :x1)

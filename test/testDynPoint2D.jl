@@ -29,9 +29,9 @@ global f1 = addFactor!(fg, [:x0;:x1], dp2dp2)
 ensureAllInitialized!(fg)
 
 
-global tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
-
+# global tree = wipeBuildNewTree!(fg)
+# inferOverTree!(fg, tree)
+tree, smt, hist = solveTree!(fg)
 
 
 # X1 = getVal(fg, :x1)
@@ -83,9 +83,9 @@ ensureAllInitialized!(fg)
 @test isInitialized(fg, :x2)
 
 
-global tree = wipeBuildNewTree!(fg)
-inferOverTree!(fg, tree)
-
+# global tree = wipeBuildNewTree!(fg)
+# inferOverTree!(fg, tree)
+tree, smt, hist = solveTree!(fg)
 
 
 # X1 = getVal(fg, :x1)

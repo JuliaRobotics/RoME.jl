@@ -22,14 +22,14 @@ addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)), autoinit=false)
 addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)), autoinit=false)
 
 
-tree = wipeBuildNewTree!(fg)
+# tree = wipeBuildNewTree!(fg)
 # drawTree(tree, filepath="/tmp/caesar/bt.pdf", show=true)
 
 # eo = getEliminationOrder(fg, ordering=:qr)
 # eo = [1;3;5]
 # tree = buildTreeFromOrdering!(fg,eo)
 
-batchSolve!(fg)
+tree, smt, hist = solveTree!(fg)
 
 # cliq = tree.cliques[2]
 # clst = cliqInitSolveUpByStateMachine!(fg, tree, cliq, drawtree=false, limititers=15 )
@@ -44,11 +44,11 @@ batchSolve!(fg)
 # plotKDE(fg, :l1) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
 
 
-@test 20 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
-@test 20 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
+@test 15 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
+@test 15 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
 
-@test 20 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
-@test 20 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
+@test 15 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
+@test 15 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
 
 
 
@@ -66,11 +66,11 @@ batchSolve!(fg)
 
 
 
-@test 20 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
-@test 20 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
+@test 15 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
+@test 15 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
 
-@test 20 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
-@test 20 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
+@test 15 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
+@test 15 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
 
 
 
