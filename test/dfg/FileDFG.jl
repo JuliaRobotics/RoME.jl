@@ -25,7 +25,7 @@ saveDFG(dfg, saveFolder)
 
 retDFG = GraphsDFG{SolverParams}(params=SolverParams())
 retDFG = loadDFG(saveFolder, IncrementalInference, retDFG)
-@test symdiff(ls(dfg), ls(dfg)) == []
+@test symdiff(ls(dfg), ls(retDFG)) == []
 @test symdiff(lsf(dfg), lsf(retDFG)) == []
 
 # Solve it
