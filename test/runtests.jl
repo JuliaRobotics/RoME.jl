@@ -48,6 +48,10 @@ include("dfg/HexagonalLightGraphs.jl")
 # Don't run the cloud tests yet
 end
 
+@testset "Beehive Tests" begin
+include("testBeehive2D_CliqByCliq.jl")
+end
+
 @testset "Pose2 evaluations..." begin
 include("testDynPoint2D.jl")
 end

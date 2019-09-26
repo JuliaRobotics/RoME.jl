@@ -34,7 +34,8 @@ global pts = approxConv(fg, :x0x1f1, :x1)
 # Graphs.plot(fg.g)
 # ensureAllInitialized!(fg)
 
-global tree = batchSolve!(fg, N=N)
+tree, smt, hist = solveTree!(fg)
+# global tree = batchSolve!(fg, N=N)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
@@ -148,9 +149,10 @@ global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 # drawPoses(fg)
 # plotPose(fg, [:x10])
 
+tree, smt, hist = solveTree!(fg)
 # batchSolveR!(fg, N=N)
-tree = wipeBuildNewTree!(fg)
-inferOverTreeR!(fg, tree, N=N)
+# tree = wipeBuildNewTree!(fg)
+# inferOverTreeR!(fg, tree, N=N)
 
 
 global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))

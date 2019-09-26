@@ -1,20 +1,16 @@
 
 # using Revise
-using Distributed
-addprocs(4)
-
-##
-
-# for drawing Bayes tree with images (see debug tricks below)
-# using Cairo, Fontconfig
-# using Gadfly
+# using Distributed
+# addprocs(4)
 
 using RoME
-
-@everywhere using RoME
+# @everywhere using RoME
 
 #  Do some plotting
 using RoMEPlotting
+# for drawing Bayes tree with images (see debug tricks below)
+# using Cairo, Fontconfig
+# using Gadfly
 
 0
 
@@ -87,17 +83,20 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
+getSolverParams(fg).downsolve = false
+getSolverParams(fg).multiproc = false
 
 
-
-tree, smt, chi = solveTree!(fg, recordcliqs=[:x3;:x1])
+tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg))
 
 
 # hist = getCliqSolveHistory(tree, :x1)
 
 
-
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
+Gadfly.set_default_plot_size(35cm,25cm)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
+# tree = wipeBuildNewTree!(fg)
+# drawTree(tree, imgs=true)
 
 
 
@@ -116,29 +115,37 @@ posecount = driveHex(fg, posecount, steps=5)
 
 
 
-# fg.solverParams.async = true
-
-tree, smt, chi = solveTree!(fg, tree)
-
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
-
-
-
-
-cliq = whichCliq(tree, :x10)
-# smt[9]
-
-
-prnt = getParent(tree, cliq)[1]
-dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
-
-
-
-
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
 
+
+
+# fg.solverParams.async = true
+
+tree, smt, chi = solveTree!(fg, tree)
+
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
+
+
+plotTreeProductUp(fg,tree,:x13,:x13)
+
+
+
+#
+# cliq = whichCliq(tree, :x10)
+# # smt[9]
+#
+# prnt = getParent(tree, cliq)[1]
+# dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
+
+
+
+#
+# # Add landmarks with Bearing range measurements
+# p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
+#
 
 ## hex 3
 
@@ -165,7 +172,7 @@ tree, smt, hist = solveTree!(fg, tree)
 # tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
 # tree = tree2
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -242,7 +249,7 @@ tree, smt, hist = solveTree!(fg, tree)
 
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
 
 
 0
@@ -270,7 +277,7 @@ tree, smt, hist = solveTree!(fg, tree)
 # tree = tree2
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -302,7 +309,7 @@ tree, smt, hist = solveTree!(fg, tree)
 # tree = tree2
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 # drawTree(tree, imgs=true)
 
 
@@ -338,7 +345,7 @@ tree, smt, hist = solveTree!(fg, tree)
 # tree = tree2
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg");  @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -376,7 +383,7 @@ tree, smt, hist = solveTree!( fg, tree )
 # tree = tree2
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -401,7 +408,7 @@ addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
 
 tree, smt, hist = solveTree!(fg, tree)
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)|
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)|
 
 
 
@@ -437,7 +444,7 @@ tree, smt, hist = solveTree!(fg, tree, recordcliqs=recordcliqs)
 0
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -468,8 +475,7 @@ posecount = driveHex(fg, posecount)
 tree, smt, chi = solveTree!(fg, tree)
 
 
-
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -504,7 +510,7 @@ addFactor!(fg, [:x55; :l6], p2br2, autoinit=false )
 tree, smt, hist = solveTree!(fg, tree)
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 
 
@@ -512,7 +518,7 @@ drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg"); # @async run(`eog /tm
 
 
 
-# unmarginalizeVariablesAll!(fg)
+# dontMarginalizeVariablesAll!(fg)
 
 plotPose(fg, :x22);
 
@@ -565,7 +571,7 @@ posecount = driveHex(fg, posecount)
 using RoMEPlotting
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf") || @async run(`evince /tmp/test.pdf`)
 
 
 
