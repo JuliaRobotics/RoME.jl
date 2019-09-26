@@ -19,6 +19,11 @@ function driveSomeMore!(fg::FactorGraph, idx)
 end
 
 
+
+
+@testset "test basic fixed lag operations..." begin
+
+
 # start with an empty factor graph object
 fg = initfg()
 # IIF.getSolverParams(fg).drawtree = true
@@ -28,8 +33,8 @@ fg = initfg()
 # If the graph grows over 8 nodes, the older nodes will be frozen to limit the computational window.
 IIF.getSolverParams(fg).qfl = 6
 IIF.getSolverParams(fg).isfixedlag = true
+IIF.getSolverParams(fg).limitfixeddown = true
 
-@testset "test basic fixed lag operations..." begin
 
 ## 1. Drive around in a hexagon
 # Add the first pose :x0
@@ -76,18 +81,23 @@ addFactor!(fg, [:x6; :l1], p2br)
 
 # Back up the graph
 fgOriginal = deepcopy(fg)
-fgOriginal.solverParams.isfixedlag = false
+getSolverParams(fgOriginal).isfixedlag = false
 
 # Back up data from these two poses so we can compare them once we solve again.
 X5 = deepcopy(getVal(fg, :x5))
 X7 = deepcopy(getVal(fg, :x7))
 
+@test isInitialized(fg, :x5)
+
+fifoFreeze!(fg)
+@test getData(getVariable(fg, :x5)).ismargin
+
+getSolverParams(fg).drawtree=true
+getSolverParams(fg).dbg=true
 
 # Now solve again, which will freeze vertices < 5
 println("STEP 4: Solve graph when shorter than fixed length, and show time to solve")
-tree, smt, hist = solveTree!(fg, tree)
-
-# stuff = IIF.batchSolve!(fg, dbg=true)
+tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
 
 
 # drawTree(stuff[1], show=true)
@@ -115,8 +125,9 @@ X7cmp = deepcopy(getVal(fg, :x7))
 @test X5 == X5cmp #Frozen
 @test X7 != X7cmp #Recalculated
 
+
 # Solve original graph with the to get time comparison
-tree, smt, hist = solveTree!(fg, tree)
+# tree, smt, hist = solveTree!(fg, tree)
 # @time IIF.batchSolve!(fgOriginal, treeinit=true)
 
 # IIF.drawTree(tree, show=true)

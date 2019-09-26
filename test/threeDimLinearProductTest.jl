@@ -114,8 +114,9 @@ global X1ptsMean = Statistics.mean(X1pts,dims=2)
 end
 
 @testset "Construct Bayes tree and perform inference..." begin
-  global tree = wipeBuildNewTree!(fg);
-  inferOverTree!(fg, tree, N=N)
+  tree, smt, hist = solveTree!(fg)
+  # global tree = wipeBuildNewTree!(fg);
+  # inferOverTree!(fg, tree, N=N)
   @test true
 end
 

@@ -59,12 +59,12 @@ Example:
 PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
-mutable struct PriorPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: Distributions.Distribution}
+mutable struct PriorPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: IncrementalInference.SamplableBelief}
     Z::T
     PriorPose2{T}() where T = new{T}()
-    PriorPose2{T}(x::T) where {T <: Distributions.Distribution}  = new{T}(x)
+    PriorPose2{T}(x::T) where {T <: IncrementalInference.SamplableBelief}  = new{T}(x)
 end
-PriorPose2(x::T) where {T <: Distributions.Distribution} = PriorPose2{T}(x)
+PriorPose2(x::T) where {T <: IncrementalInference.SamplableBelief} = PriorPose2{T}(x)
 function PriorPose2(mu::Array{Float64}, cov::Array{Float64,2}, W::Vector{Float64})
   @warn "PriorPose2(mu,cov,W) is deprecated in favor of PriorPose2(T(...)) -- use for example PriorPose2(MvNormal(mu, cov))"
   PriorPose2(MvNormal(mu[:], cov))

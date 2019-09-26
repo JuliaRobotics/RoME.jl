@@ -123,7 +123,7 @@ export
   # Point2D
   Point2,
   Point2Point2,
-  PackedPoint2DPoint2D,
+  PackedPoint2Point2,
   Point2Point2WorldBearing,
   PackedPoint2Point2WorldBearing,
   Point2Point2Range,

@@ -18,18 +18,21 @@ function getSample(pp2br::Pose2Point2BearingRange, N::Int=1)
   smpls = zeros(2, N)
   smpls[1,:] = rand(pp2br.bearing, N)[:]
   smpls[2,:] = rand(pp2br.range, N)[:]
+
   return (smpls,)
 end
 # define the conditional probability constraint
 function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
-        userdata::FactorMetadata,
-        idx::Int,
-        meas::Tuple{Array{Float64,2}},
-        xi::Array{Float64,2},
-        lm::Array{Float64,2} )
+                                          userdata::FactorMetadata,
+                                          idx::Int,
+                                          meas::Tuple{Array{Float64,2}},
+                                          xi::Array{Float64,2},
+                                          lm::Array{Float64,2} )
   #
-  res[1] = ( lm[1,idx] - (meas[1][2,idx]*cos( meas[1][1,idx]+xi[3,idx] ) + xi[1,idx]) )^2
-  res[2] = ( lm[2,idx] - (meas[1][2,idx]*sin( meas[1][1,idx]+xi[3,idx] ) + xi[2,idx]) )^2
+
+  rot = meas[1][1,idx]+xi[3,idx]
+  res[1] = ( lm[1,idx] - (meas[1][2,idx]*cos( rot ) + xi[1,idx]) )^2
+  res[2] = ( lm[2,idx] - (meas[1][2,idx]*sin( rot ) + xi[2,idx]) )^2
 
   res[1] += res[2]
   res[2] = 0.0
