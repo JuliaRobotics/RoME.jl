@@ -102,7 +102,7 @@ end
 
 
 
-@testset "test basic banana (split)..."
+@testset "test basic banana (split)..." begin
 
 
 fg = initfg()
