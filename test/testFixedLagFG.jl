@@ -32,8 +32,8 @@ fg = initfg()
 # Set up a quasi fixed-lag horizon of 8 nodes and enable the fixed-lag solving.
 # If the graph grows over 8 nodes, the older nodes will be frozen to limit the computational window.
 IIF.getSolverParams(fg).qfl = 6
-IIF.getSolverParams(fg).isfixedlag = true
-IIF.getSolverParams(fg).limitfixeddown = true
+IIF.getSolverParams(fg).isfixedlag = true # limit up solve
+IIF.getSolverParams(fg).limitfixeddown = true # also limit down solve
 
 
 ## 1. Drive around in a hexagon

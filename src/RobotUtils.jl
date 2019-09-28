@@ -576,13 +576,13 @@ end
 function get2DSamples(fg::G; #::Union{Symbol, S};
                       from::Int=0, to::Int=999999999,
                       minnei::Int=0,
-                      varkey::Regex=r"x") where {G <: AbstractDFG, S <: AbstractString}
+                      regexKey::Regex=r"x") where {G <: AbstractDFG, S <: AbstractString}
   #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
 
   # if sym = 'l', ignore single measurement landmarks
-  allids = DFG.getVariableIds(fg, varkey)  # fg.IDs
+  allids = DFG.getVariableIds(fg, regexKey)  # fg.IDs
   saids = DFG.sortVarNested(allids)
   for id in saids
     # vertlbl = string(id[1])
@@ -608,7 +608,7 @@ end
 # end
 
 function get2DSampleMeans(fg::G,
-                          varkey::Regex=r"x";
+                          regexKey::Regex=r"x";
                           from::Int=0, to::Int=9999999999,
                           minnei::Int=0) where G <: AbstractDFG
   #
@@ -618,7 +618,7 @@ function get2DSampleMeans(fg::G,
   LB = String[]
 
   # if sym = 'l', ignore single measurement landmarks
-  allids = DFG.getVariableIds(fg, varkey)  # fg.IDs
+  allids = DFG.getVariableIds(fg, regexKey)  # fg.IDs
   saids = DFG.sortVarNested(allids)
   mask = Array{Bool,1}(undef, length(saids))
   fill!(mask, false)
@@ -642,7 +642,7 @@ function get2DSampleMeans(fg::G,
   for id in saids[mask]
     X=[X; Statistics.mean( vec( getVal(fg, id )[1,:] ) )]
     Y=[Y; Statistics.mean( vec( getVal(fg, id )[2,:] ) )]
-    # crude test for pose
+    # crude test for pose TODO probably not going to always work right
     if string(id)[1] == 'x'
       Th=[Th; Statistics.mean( vec( getVal(fg, id )[3,:] ) )]
     end
@@ -656,25 +656,25 @@ function getAll2DMeans(fg, sym::Regex)
   return get2DSampleMeans(fg, sym )
 end
 
-function getAll2DPoses(fg::G) where G <: AbstractDFG
-    return getAll2DSamples(fg, varkey=r"x" )
+function getAll2DPoses(fg::G; regexKey=r"x") where G <: AbstractDFG
+    return getAll2DSamples(fg, regexKey=regexKey )
 end
 
-function get2DPoseSamples(fg::G; from::Int=0, to::Int=999999999) where G <: AbstractDFG
-  return get2DSamples(fg, varkey=r"x", from=from, to=to )
+function get2DPoseSamples(fg::G; from::Int=0, to::Int=999999999, regexKey=r"x") where G <: AbstractDFG
+  return get2DSamples(fg, regexKey=regexKey, from=from, to=to )
 end
 
-function get2DPoseMeans(fg::G; from::Int=0, to::Int=999999999) where G <: AbstractDFG
-  return get2DSampleMeans(fg, r"x", from=from, to=to )
+function get2DPoseMeans(fg::G; from::Int=0, to::Int=999999999, regexKey=r"x") where G <: AbstractDFG
+  return get2DSampleMeans(fg, regexKey, from=from, to=to )
 end
 
 
 function get2DPoseMax(fgl::G;
-					  varkey::Regex=r"x",
+					  regexKey::Regex=r"x",
                       from::Int=-99999999999, to::Int=9999999999 ) where G <: AbstractDFG
   #
   # xLB,ll = ls(fgl) # TODO add: from, to, special option 'x'
-  xLB = DFG.getVariableIds(fgl, varkey)
+  xLB = DFG.getVariableIds(fgl, regexKey)
   saids = DFG.sortVarNested(xLB)
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
@@ -699,14 +699,15 @@ function get2DLandmSamples(fg::G;
                            to::Int=999999999,
                            minnei::Int=0 ) where G <: AbstractDFG
   #
-  return get2DSamples(fg, varkey=r"l", from=from, to=to, minnei=minnei )
+  return get2DSamples(fg, regexKey=r"l", from=from, to=to, minnei=minnei )
 end
 
 function get2DLandmMeans(fg::G;
                          from::Int=0, to::Int=999999999,
-                         minnei::Int=0) where G <: AbstractDFG
+                         minnei::Int=0,
+                         landmarkRegex::Regex=r"l" ) where G <: AbstractDFG
   #
-  return get2DSampleMeans(fg, r"l", from=from, to=to, minnei=minnei )
+  return get2DSampleMeans(fg, landmarkRegex, from=from, to=to, minnei=minnei )
 end
 
 function removeKeysFromArr(fgl::G,
@@ -734,10 +735,11 @@ end
 function get2DLandmMax(fgl::G;
                        from::Int=-99999999999,
                        to::Int=9999999999,
-                       showmm=false, MM::Dict{Int,T}=Dict{Int,Int}()) where {G <: AbstractDFG, T}
+                       showmm=false, MM::Dict{Int,T}=Dict{Int,Int}(),
+                       regexLandmark::Regex=r"l"  ) where {G <: AbstractDFG, T}
   #
   # xLB,lLB = ls(fgl) # TODO add: from, to, special option 'x'
-  lLB = DFG.getVariableIds(fgl, r"l")
+  lLB = DFG.getVariableIds(fgl, regexLandmark)
   if !showmm lLB = removeKeysFromArr(fgl, collect(keys(MM)), lLB); end
   X = Array{Float64,1}()
   Y = Array{Float64,1}()

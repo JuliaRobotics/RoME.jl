@@ -1,5 +1,5 @@
 
-# TODO -- temporary overwriting of this function, and should be removed from here when IIF 4.0.0 is tagged.
+# TODO -- temporary overwriting of this function, and should be removed from here when IIF 0.4.0 is tagged.
 import IncrementalInference: compare
 
 function compare(a::IncrementalInference.GenericFunctionNodeData{T1,S},b::IncrementalInference.GenericFunctionNodeData{T2,S}) where {T1, T2, S}
