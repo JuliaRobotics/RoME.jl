@@ -1,7 +1,5 @@
 # Graph analysis tools
 
-export approxConvCircular
-
 
 function rangeErrMaxPoint2(fgl1::FactorGraph, id1, fgl2::FactorGraph ,id2)
   mv1 = getKDEMax(getVertKDE(fgl1,id1))
@@ -31,27 +29,4 @@ function rangeCompAllPoses(
     push!(ranges, norm(mv1[1:2]-mv2[1:2]))
   end
   return ranges
-end
-
-
-"""
-    $SIGNATURES
-
-Build an approximate density `[Y|X,DX,.]=[X|Y,DX][DX|.]` as proposed by the conditional convolution.
-
-Notes
-- Assume both are on circular manifold, `manikde!(pts, (:Circular,))`
-"""
-function approxConvCircular(pX::BallTreeDensity, pDX::BallTreeDensity)
-  #
-
-  # building basic factor graph
-  tfg = initfg()
-  addVariable!(tfg, :s1, Sphere1)
-  addVariable!(tfg, :s2, Sphere1)
-  addFactor!(tfg, [:s1;:s2], Sphere1Sphere1(pDX), autoinit=false)
-  manualinit!(tfg,:s1, pX)
-
-  # solve for outgoing proposal value
-  approxConv(tfg,:s1s2f1,:s2)
 end
