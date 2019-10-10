@@ -23,12 +23,10 @@ tree, smt, hist = solveTree!(fg)
 
 end
 
-# using RoMEPlotting
-# writeGraphPdf(fg, show=true)
+
+# drawGraph(fg, show=true)
 #
-# plotKDE(fg, :l1)
-#
-# stuff = plotLocalProduct(fg, :l1, levels=3)
+# using RoMEPlotting, Gadfly, Fontconfig, Cairo
 #
 # drawTree(tree, show=true)
 #
@@ -36,7 +34,8 @@ end
 # stuff = treeProductUp(fg, tree, :l1, :l1)
 #
 # plotKDE(kde!(stuff[1]), levels=3)
-# drawLandms(fg)
+# # drawLandms(fg) #, regexLandmark=r"x") |> PDF("/tmp/test.pdf")
+# plotKDE(fg, ls(fg))
 
 
 @testset "test Point2Point2Range{T}..." begin
