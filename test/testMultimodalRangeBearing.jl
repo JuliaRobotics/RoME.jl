@@ -6,7 +6,7 @@ import IncrementalInference: getSample
 
 mutable struct NorthSouthPartial{T} <: FunctorSingleton
   Z::T
-  partial::Tuple
+  partial::Tuple{Int}
   NorthSouthPartial{D}() where D = new{D}()
   NorthSouthPartial{D}(Z::D) where {D <: IIF.SamplableBelief} = new{D}(Z, (2,))
 end

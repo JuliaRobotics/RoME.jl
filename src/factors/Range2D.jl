@@ -31,42 +31,6 @@ end
 # import RoME: Point2Point2Range
 
 
-
-"""
-    $TYPEDEF
-
-Range only measurement from Pose2 to Point2 variable.
-"""
-mutable struct Pose2Point2Range{T} <: IncrementalInference.FunctorPairwise
-  Z::T
-  Pose2Point2Range{T}() where T = new()
-  Pose2Point2Range{T}(Z::T) where {T <: IIF.SamplableBelief} = new{T}(Z)
-end
-Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range{T}(Z)
-
-function getSample(pp2::Pose2Point2Range, N::Int=1)
-  return (reshape(rand(pp2.Z,N),1,N) ,  2*pi*rand(N))
-end
-function (pp2r::Pose2Point2Range)(res::Array{Float64},
-                                    userdata,
-                                    idx::Int,
-                                    meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
-                                    xi::Array{Float64,2},
-                                    lm::Array{Float64,2}  )
-  #
-  # DONE in IIF -- still need to add multi-hypotheses support here
-  # this is the noisy range
-  z = meas[1][1,idx]
-  XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
-  YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
-  res[1] = XX^2 + YY^2
-  nothing
-end
-
-
-
-
-
 passTypeThrough(d::FunctionNodeData{Point2Point2Range}) = d
 
 """
@@ -82,4 +46,52 @@ function convert(::Type{PackedPoint2Point2Range}, d::Point2Point2Range)
 end
 function convert(::Type{Point2Point2Range}, d::PackedPoint2Point2Range)
   return Point2Point2Range(extractdistribution(d.str))
+end
+
+
+
+"""
+    $TYPEDEF
+
+Range only measurement from Pose2 to Point2 variable.
+"""
+mutable struct Pose2Point2Range{T} <: IncrementalInference.FunctorPairwiseMinimize
+  Z::T
+  partial::Tuple{Int,Int}
+  Pose2Point2Range{T}() where T = new()
+  Pose2Point2Range{T}(Z::T) where {T <: IIF.SamplableBelief} = new{T}(Z, (1,2))
+end
+Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range{T}(Z)
+
+function getSample(pp2::Pose2Point2Range, N::Int=1)
+  return (reshape(rand(pp2.Z,N),1,N) ,  2*pi*rand(N))
+end
+function (pp2r::Pose2Point2Range)(res::Array{Float64},
+                                  userdata,
+                                  idx::Int,
+                                  meas::Tuple{Array{Float64,2}, Array{Float64,1}}, # from getSample
+                                  xi::Array{Float64,2},
+                                  lm::Array{Float64,2}  )
+  #
+  # DONE in IIF -- still need to add multi-hypotheses support here
+  # this is the noisy range
+  z = meas[1][1,idx]
+  XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
+  YY = lm[2,idx] - (z*sin(meas[2][idx]) + xi[2,idx])
+  res[1] = XX^2 + YY^2
+  return res[1]
+end
+
+
+
+mutable struct PackedPose2Point2Range  <: IncrementalInference.PackedInferenceType
+  str::String
+  PackedPose2Point2Range() = new()
+  PackedPose2Point2Range(s::AS) where {AS <: AbstractString} = new(s)
+end
+function convert(::Type{PackedPose2Point2Range}, d::Pose2Point2Range)
+  return PackedPose2Point2Range(string(d.Z))
+end
+function convert(::Type{Pose2Point2Range}, d::PackedPose2Point2Range)
+  return Pose2Point2Range(extractdistribution(d.str))
 end
