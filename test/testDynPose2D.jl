@@ -19,7 +19,7 @@ global pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.0
 addFactor!(fg, [:x0;], pp0)
 
 # initialize the first pose
-IncrementalInference.doautoinit!(fg, [getVert(fg,:x0);])
+IncrementalInference.doautoinit!(fg, [getVariable(fg,:x0);])
 
 addVariable!(fg, :x1, DynPose2(ut=1000_000))
 
@@ -126,7 +126,7 @@ global sym =sy
 end
 
 
-global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
+global x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
 
 @test abs(x5[1]) < 1.25
 @test abs(x5[2]) < 1.25
@@ -137,7 +137,7 @@ global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 
 ensureAllInitialized!(fg)
 
-global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
+global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 @test abs(x10[1]) < 1.25
 @test abs(x10[2]) < 1.25
@@ -155,7 +155,7 @@ tree, smt, hist = solveTree!(fg)
 # inferOverTreeR!(fg, tree, N=N)
 
 
-global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
+global x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
 
 @test abs(x5[1]) < 1.5
 @test abs(x5[2]) < 1.5
@@ -163,7 +163,7 @@ global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
-global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
+global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 @test abs(x10[1]) < 2.75
 @test abs(x10[2]) < 2.75
@@ -185,7 +185,7 @@ batchSolve!(fg, N=N)
 
 
 
-global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
+global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 @test 5.0 < x10[1]
 @test abs(x10[2]) < 1.0
@@ -196,7 +196,7 @@ global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 for sym in [Symbol("x$i") for i in 2:9]
 
-global XX = KDE.getKDEMean(getVertKDE(fg, sym))
+global XX = KDE.getKDEMean(getKDE(getVariable(fg, sym)))
 
 @show sym, round.(XX,digits=5)
 @test -1.5 < XX[1] < 10.0
@@ -251,7 +251,7 @@ batchSolve!(fg,N=N)
 
 
 # test for velocity in the body frame
-global x0 = KDE.getKDEMean(getVertKDE(fg, :x0))
+global x0 = KDE.getKDEMean(getKDE(getVariable(fg, :x0)))
 
 @test -0.4 < x0[1] < 2.0
 @test abs(x0[2]) < 0.5
@@ -260,7 +260,7 @@ global x0 = KDE.getKDEMean(getVertKDE(fg, :x0))
 @test -1.5 < x0[5] < -0.5
 
 
-global x1 = KDE.getKDEMean(getVertKDE(fg, :x1))
+global x1 = KDE.getKDEMean(getKDE(getVariable(fg, :x1)))
 
 @test -0.1 < x1[1] < 2.0
 @test abs(x1[2]) < 0.5
