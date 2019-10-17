@@ -124,7 +124,7 @@ $(TYPEDEF)
 """
 mutable struct PartialPriorYawPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: IIF.SamplableBelief}
     Z::T
-    partial::Tuple
+    partial::Tuple{Int}
     PartialPriorYawPose2{T}() where T = new{T}()
     PartialPriorYawPose2{T}(x::T) where {T <: IIF.SamplableBelief}  = new{T}(x, (3,))
 end

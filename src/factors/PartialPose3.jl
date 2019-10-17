@@ -3,12 +3,12 @@
 """
     $(TYPEDEF)
 
-Partial prior belief on Z, Roll, and Pitch of a `Pose3`. 
+Partial prior belief on Z, Roll, and Pitch of a `Pose3`.
 """
 mutable struct PriorPose3ZRP{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   z::T1
   rp::T2
-  partial::Tuple
+  partial::Tuple{Int,Int,Int}
   PriorPose3ZRP{T1,T2}() where {T1, T2} = new{T1,T2}()
   PriorPose3ZRP{T1,T2}(z::T1,rp::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}(z, rp, (3,4,5))
 end
@@ -55,7 +55,7 @@ Partial prior belief on Roll Pitch and Z of a `Pose3` variable.
 mutable struct PartialPriorRollPitchZ{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   rp::T1
   z::T2
-  partial::Tuple
+  partial::Tuple{Int,Int,Int}
   PartialPriorRollPitchZ{T1,T2}() where {T1, T2} = new{T1,T2}()
   PartialPriorRollPitchZ{T1,T2}(rp::T1,z::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}(rp, z, (3,4,5))
 end
@@ -142,7 +142,7 @@ To be deprecated: use Pose3Pose3XYYaw instead.
 mutable struct PartialPose3XYYaw{T1,T2} <: FunctorPairwise where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   xy::T1
   yaw::T2
-  partial::Tuple
+  partial::Tuple{Int,Int,Int}
   PartialPose3XYYaw{T1,T2}() where {T1, T2} = new()
   PartialPose3XYYaw{T1,T2}(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new(xy, yaw, (1,2,6))
 end
@@ -172,7 +172,7 @@ Partial factor between XY and Yaw of two Pose3 variables.
 mutable struct Pose3Pose3XYYaw{T1,T2} <: FunctorPairwise where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   xy::T1
   yaw::T2
-  partial::Tuple
+  partial::Tuple{Int,Int,Int}
   Pose3Pose3XYYaw{T1,T2}() where {T1, T2} = new()
   Pose3Pose3XYYaw{T1,T2}(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new(xy, yaw, (1,2,6))
 end
@@ -263,7 +263,7 @@ OBSOLETE: see https://github.com/JuliaRobotics/IncrementalInference.jl/issues/23
 """
 mutable struct PartialPose3XYYawNH <: IncrementalInference.FunctorPairwiseNH
   xyy::Distributions.MvNormal
-  partial::Tuple
+  partial::Tuple{Int, Int, Int}
   nullhypothesis::Distributions.Categorical
   PartialPose3XYYawNH() = new()
   PartialPose3XYYawNH(xyy::MvNormal, vh::Vector{Float64}) = new(xyy, (1,2,6),  Distributions.Categorical(vh))
