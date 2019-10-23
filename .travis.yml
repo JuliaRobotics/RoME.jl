@@ -15,6 +15,9 @@ matrix:
   allow_failures:
     - julia: nightly
 
+jobs:
+  fast_finish: true
+
 addons:
   apt:
     packages:
