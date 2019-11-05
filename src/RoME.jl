@@ -236,6 +236,7 @@ export
   addSoftEqualityPoint2D,
   vectoarr2,
   basicFactorGraphExample,
+  predictVariableByFactor,
 
   # jld required Features Type
   LaserFeatures,
