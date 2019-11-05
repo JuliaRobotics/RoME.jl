@@ -64,6 +64,53 @@ end
 
 
 
+"""
+    $SIGNATURES
+
+Method to compare current and predicted estimate on a variable, developed for testing a new factor before adding to the factor graph.
+
+Notes
+- `fct` does not have to be in the factor graph -- likely used to test beforehand.
+- function is useful for detecting if `multihypo` should be used.
+
+Example
+
+```julia
+# fg already exists containing :x7 and :l3
+pp = Pose2Point2BearingRange(Normal(0,0.1),Normal(10,1.0))
+# possible new measurement from :x7 to :l3
+curr, pred = predictVariableByFactor(fg, :l3, pp, [:x7; :l3])
+# example of naive user defined test on fit score
+fitscore = minkld(curr, pred)
+# `multihypo` can be used as option between existing or new variables
+```
+"""
+function predictVariableByFactor(dfg::AbstractDFG,
+                                 targetsym::Symbol,
+                                 fct::Pose2Point2BearingRange,
+                                 prevars::Vector{Symbol}  )
+  #
+  @assert targetsym in prevars
+  curr = getKDE(dfg, targetsym)
+  tfg = initfg()
+  for var in prevars
+    varnode = getVariable(dfg, var)
+    addVariable!(tfg, var, getSofttype(varnode))
+    if var != targetsym
+      @assert isInitialized(varnode)
+      manualinit!(tfg,var,getKDE(varnode))
+    end
+  end
+  addFactor!(tfg, prevars, fct, autoinit=false)
+  fctsym = ls(tfg, targetsym)
+
+  pts, infd = predictbelief(tfg, targetsym, fctsym)
+  pred = manikde!(pts, getSofttype(getVariable(dfg, targetsym)))
+  # return current and predicted beliefs
+  return curr, pred
+end
+
+
 
 """
     $(SIGNATURES)
@@ -588,7 +635,7 @@ function get2DSamples(fg::G; #::Union{Symbol, S};
     # vertlbl = string(id[1])
     vertlbl = string(id)
     # if vertlbl[1] == sym
-      val = parse(Int,vertlbl[2:end])
+      val = parse(Int,split(vertlbl[2:end],'_')[1])
       if from <= val && val <= to
         # if length( getOutNeighbors(fg, vertlbl[2] , needdata=true ) ) >= minnei
         if length( DFG.getNeighbors(fg, id ) ) >= minnei
@@ -631,7 +678,7 @@ function get2DSampleMeans(fg::G,
     if from != 0 || to != 9999999999
       vertlbl = string(id)
         # TODO won't work with nested labels
-        val = parse(Int,vertlbl[2:end])
+        val = parse(Int,split(vertlbl[2:end],'_')[1])
         if !(from <= val && val <= to)
           mask[count] = false
         end
@@ -682,7 +729,7 @@ function get2DPoseMax(fgl::G;
   LB = String[]
   for slbl in saids
     lbl = string(slbl)
-    if from <= parse(Int,lbl[2:end]) <=to
+    if from <= parse(Int,split(lbl[2:end],'_')[1]) <=to
       mv = getKDEMax(getVertKDE(fgl,slbl))
       push!(X,mv[1])
       push!(Y,mv[2])
@@ -748,7 +795,7 @@ function get2DLandmMax(fgl::G;
   for lb in lLB
     @show lb
     lbl = string(lb)
-    if from <= parse(Int,lbl[2:end]) <=to
+    if from <= parse(Int,split(lbl[2:end],'_')[1]) <=to
       mv = getKDEMax(getVertKDE(fgl, Symbol(lb)))
       push!(X,mv[1])
       push!(Y,mv[2])
