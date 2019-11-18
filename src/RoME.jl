@@ -34,6 +34,7 @@ export
   # RoME specific functions
   measureMeanDist,
   predictBodyBR,
+  calcPosePointBearingRange,
   getLastPose,
   getLastPose2D,
   odomKDE,
