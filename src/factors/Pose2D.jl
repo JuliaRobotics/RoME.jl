@@ -53,11 +53,7 @@ end
 
 
 ## Deprecated
-# function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2})
-#   @warn "Pose2Pose2(mu,cov) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))"
-#   Pose2Pose2(MvNormal(mean, cov))
-# end
-# function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Float64})
-#   @warn "Pose2Pose2(mu,cov,w) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))"
-#   Pose2Pose2(MvNormal(mean, cov))
-# end
+function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Float64})
+  @warn "Pose2Pose2(mu,cov,w) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))"
+  Pose2Pose2(MvNormal(mean, cov))
+end
