@@ -117,13 +117,13 @@ end
 
 Calculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.
 """
-function getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)
+function getRangeKDEMax2D(fgl::AbstractDFG, vsym1::Symbol, vsym2::Symbol)
   x1 = getKDEMax(getVertKDE(fgl, vsym1))
   x2 = getKDEMax(getVertKDE(fgl, vsym2))
   norm(x1[1:2]-x2[1:2])
 end
 
-function measureMeanDist(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
+function measureMeanDist(fg::AbstractDFG, a::AbstractString, b::AbstractString)
     #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
     res = zeros(2)
     A = getVal(fg,a)
@@ -139,15 +139,15 @@ function measureMeanDist(fg::FactorGraph, a::T, b::T) where {T <: AbstractString
     return r, b
 end
 
-function predictBodyBR(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
+function predictBodyBR(fg::AbstractDFG, a::Symbol, b::Symbol)
   res = zeros(2)
-  A = getVal(fg,a)
-  B = getVal(fg,b)
-  Ax = Statistics.mean(vec(A[1,:]))
-  Ay = Statistics.mean(vec(A[2,:]))
-  Ath = Statistics.mean(vec(A[3,:]))
-  Bx = Statistics.mean(vec(B[1,:]))
-  By = Statistics.mean(vec(B[2,:]))
+  A = getKDEMean(getKDE(getVariable(fg,a)))
+  B = getKDEMean(getKDE(getVariable(fg,b)))
+  Ax = A[1] # Statistics.mean(vec(A[1,:]))
+  Ay = A[2] # Statistics.mean(vec(A[2,:]))
+  Ath = getKDEMax(getKDE(getVariable(fg,a)))[3]
+  Bx = B[1]
+  By = B[2]
   wL = SE2([Bx;By;0.0])
   wBb = SE2([Ax;Ay;Ath])
   bL = se2vee((wBb \ Matrix{Float64}(LinearAlgebra.I, 3,3)) * wL)
@@ -158,7 +158,7 @@ function predictBodyBR(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
   return b, r
 end
 
-function getNextLbl(fgl::FactorGraph, chr)
+function getNextLbl(fgl::AbstractDFG, chr)
   # TODO convert this to use a double lookup
   max = -1
   maxid = -1
@@ -763,7 +763,7 @@ function removeKeysFromArr(fgl::G,
   #
   retlbs = String[]
   for i in 1:length(lbl)
-    id = parse(Int,lbl[i][2:end])
+    id = parse(Int,split(lbl[i][2:end],'_')[1])
     if something(findfirst(isequal(id), torm), 0) == 0 #findfirst(torm,id) == 0
       push!(retlbs, lbl[i])
     else

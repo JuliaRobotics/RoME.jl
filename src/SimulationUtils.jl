@@ -34,6 +34,33 @@ function truePredBR(fgGT::FactorGraph, fg::FactorGraph, ps::String, lm::String)
     return truA, preA
 end
 
+"""
+    $SIGNATURES
+
+Calculate a bearing and range parameter between Pose2 and Point2 `::Vector`s.
+
+Example
+```julia
+b,r = calcPosePointBearingRange([0;0;0], [10;10])
+```
+"""
+function calcPosePointBearingRange(pose::Vector{<:Real},
+                                   poin::Vector{<:Real}  )
+  #
+  @assert length(pose) == 3
+  @assert length(poin) == 2
+
+  #
+  DD = poin-pose[1:2]
+  ran = norm(DD)
+  phi = atan(DD[2], DD[1])
+  the = TU.wrapRad(phi - pose[3])
+
+  #
+  return the, ran
+end
+
+
 function showTruePredBR(fgGT::FactorGraph, fg::FactorGraph, ps::String, lm::String, cov::Array{Float64,2})
     truA, preA = truePredBR(fgGT, fg, ps, lm)
     measA = truA + [cov[1,1]*randn();cov[2,2]*randn()]
