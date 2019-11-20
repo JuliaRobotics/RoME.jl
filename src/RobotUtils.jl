@@ -72,6 +72,7 @@ Method to compare current and predicted estimate on a variable, developed for te
 Notes
 - `fct` does not have to be in the factor graph -- likely used to test beforehand.
 - function is useful for detecting if `multihypo` should be used.
+- `approxConv` will project the full belief estimate through some factor but must already be in factor graph.
 
 Example
 
@@ -84,6 +85,10 @@ curr, pred = predictVariableByFactor(fg, :l3, pp, [:x7; :l3])
 fitscore = minkld(curr, pred)
 # `multihypo` can be used as option between existing or new variables
 ```
+
+Related
+
+approxConv
 """
 function predictVariableByFactor(dfg::AbstractDFG,
                                  targetsym::Symbol,
@@ -197,17 +202,7 @@ function getLastLandm2D(fgl::FactorGraph)
   return getNextLbl(fgl, 'l')
 end
 
-function odomKDE(p1,dx,cov)
-  X = getPoints(p1)
-  sig = diag(cov)
-  RES = zeros(size(X))
-  # increases the number of particles based on the number of modes in the measurement Z
-  for i in 1:size(X,2)
-      ent = [randn()*sig[1]; randn()*sig[2]; randn()*sig[3]]
-      RES[:,i] = addPose2Pose2(X[:,i], dx + ent)
-  end
-  return kde!(RES, "lcv")
-end
+
 
 """
     $(SIGNATURES)
