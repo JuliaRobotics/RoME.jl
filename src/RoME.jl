@@ -22,6 +22,7 @@ using
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
 import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution, DFG
+import DistributedFactorGraphs: compare
 
 # const AMP = ApproxManifoldProducts
 
@@ -30,7 +31,6 @@ export
   KDE,
   TU,
   AMP,
-  # initfg,
   # RoME specific functions
   measureMeanDist,
   predictBodyBR,
@@ -54,7 +54,6 @@ export
 
   # helper functions
   get2DSamples,
-  # getAll2D,
   get2DSampleMeans,
   getAll2DMeans,
   getAll2DPoses,
@@ -299,7 +298,10 @@ include("variables/Pose3D.jl")
 
 include("factors/Point2D.jl")
 include("factors/Polar.jl")
+include("factors/PriorPose2.jl")
+include("factors/PartialPriorPose2.jl")
 include("factors/Pose2D.jl")
+include("factors/MutablePose2Pose2.jl")
 include("factors/Bearing2D.jl")
 include("factors/Range2D.jl")
 include("factors/BearingRange2D.jl")
