@@ -52,8 +52,16 @@ function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
 end
 
 
-## Deprecated
-function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Float64})
-  @warn "Pose2Pose2(mu,cov,w) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))"
-  Pose2Pose2(MvNormal(mean, cov))
+
+function compare(a::Pose2Pose2,b::Pose2Pose2; tol::Float64=1e-10)
+    TP = true
+    TP = TP && norm(a.z.μ-b.z.μ) < (tol + 1e-5)
+    TP = TP && norm(a.z.Σ.mat-b.z.Σ.mat) < tol
+    return TP
 end
+
+## Deprecated
+# function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Float64})
+#   @warn "Pose2Pose2(mu,cov,w) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))"
+#   Pose2Pose2(MvNormal(mean, cov))
+# end

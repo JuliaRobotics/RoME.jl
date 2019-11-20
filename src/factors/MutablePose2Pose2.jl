@@ -12,7 +12,7 @@ mutable struct MutablePose2Pose2Gaussian  <: IIF.FunctorPairwise
   Zij::MvNormal
 end
 function getSample(fct::MutablePose2Pose2Gaussian, N::Int=100)
-  return (rand(fct.Z), )
+  return (rand(fct.Z, N), )
 end
 
 """
