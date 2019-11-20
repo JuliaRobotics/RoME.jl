@@ -22,12 +22,12 @@ initPosePrior = PriorPose2(MvNormal(zeros(3), initCov))
 f1  = addFactor!(fg,[v1], initPosePrior)
 
 @test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) != nothing
-@test Pose2Pose2(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2)) != nothing
-@test Pose2Pose2(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2),[1.0;]) != nothing
+@test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) != nothing
+@test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) != nothing
 
 # and a second pose
 v2 = addVariable!(fg, :x1, Pose2, N=N)
-ppc = Pose2Pose2([50.0;0.0;pi/2], odoCov, [1.0])
+ppc = Pose2Pose2(MvNormal([50.0;0.0;pi/2], odoCov))
 f2 = addFactor!(fg, [:x0;:x1], ppc)
 
 # test evaluation of pose pose constraint
@@ -37,7 +37,7 @@ pts = approxConv(fg, :x0x1f1, :x1)
 @test abs(Statistics.mean(pts,dims=2)[3] - pi/2) < 0.5
 
 # @show ls(fg)
-tree = batchSolve!(fg, treeinit=true)
+tree, smt, hist = solveTree!(fg)
 # ensureAllInitialized!(fg)
 # tree = wipeBuildNewTree!(fg)
 # inferOverTreeR!(fg, tree,N=N)
@@ -55,13 +55,11 @@ pts = getVal(fg, :x1)
 
 # check that yaw is working
 v3 = addVariable!(fg, :x2, Pose2, N=N)
-ppc = Pose2Pose2([50.0;0.0;0.0], odoCov, [1.0])
+ppc = Pose2Pose2(MvNormal([50.0;0.0;0.0], odoCov))
 f3 = addFactor!(fg, [v2;v3], ppc)
 
-batchSolve!(fg, treeinit=true)
-batchSolve!(fg, treeinit=true)
-# tree = wipeBuildNewTree!(fg)
-# [inferOverTree!(fg, tree, N=N) for i in 1:2]
+solveTree!(fg)
+solveTree!(fg)
 
 # test post evaluation values are correct
 pts = getVal(fg, :x0)
