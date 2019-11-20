@@ -8,7 +8,7 @@ using RoME
 using Test
 using DistributedFactorGraphs
 import DistributedFactorGraphs: pack, unpack
-
+import RoME: compare
 
 
 @testset "test PriorPoint2" begin
@@ -63,7 +63,7 @@ unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapp
 # getData(f1)
 # unpackeddata
 
-@test compare(getData(f1), unpackeddata)
+@test DFG.compare(getData(f1), unpackeddata)
 # TODO -- what what??
 # setSerializationNamespace!("Main" => Main)
 # TODO: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/44
@@ -89,7 +89,7 @@ end
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Pose2}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test IncrementalInference.compare(getData(f2), unpackeddata)
+    @test DFG.compare(getData(f2), unpackeddata)
 end
 
 
@@ -186,7 +186,7 @@ f2 = addFactor!(fg, [:x1, :x2], pp3)
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose3Pose3}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test IncrementalInference.compare(getData(f2), unpackeddata)
+    @test DFG.compare(getData(f2), unpackeddata)
 end
 
 
@@ -210,7 +210,7 @@ global f3 = addFactor!(fg,[:x1;:x2],odoc)
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose3Pose3NH}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test IncrementalInference.compare(getData(f3), unpackeddata)
+    @test DFG.compare(getData(f3), unpackeddata)
 end
 
 
