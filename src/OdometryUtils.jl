@@ -169,7 +169,15 @@ function odomKDE(p1,dx,cov)
 end
 
 
+"""
+    $SIGNATURES
 
+Recover the mean (Gaussian) or estimate stochastic mean (non-Gaussian) value stored in a factor measurement.
+
+Related
+
+accumulateFactorMeans, solveBinaryFactorParameteric
+"""
 function getFactorMean(fct::FunctorInferenceType)
   fctt = typeof(getFactorType(fct))
   error("no getFactorMean defined for $(fctt.name), has fields $(fieldnames(fctt))")
