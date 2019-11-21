@@ -2,7 +2,7 @@
 
 export accumulateDiscreteLocalFrame!
 export rebaseFactorVariable!, duplicateToStandardFactorVariable
-
+export solveBinaryFactorParameteric, getFactorMean, accumulateFactorMeans
 
 
 function cont2disc(F::Matrix{Float64},
@@ -166,4 +166,106 @@ function odomKDE(p1,dx,cov)
       RES[:,i] = addPose2Pose2(X[:,i], dx + ent)
   end
   return manikde!(RES, Pose2)
+end
+
+
+
+function getFactorMean(fct::FunctorInferenceType)
+  fctt = typeof(getFactorType(fct))
+  error("no getFactorMean defined for $(fctt.name), has fields $(fieldnames(fctt))")
+end
+
+getFactorMean(fct::MvNormal) = fct.μ
+getFactorMean(fct::BallTreeDensity) = getKDEMean(fct)
+getFactorMean(fct::AliasingScalarSampler) = Statistics.mean(rand(fct,1000))
+
+getFactorMean(fct::PriorPose2) = getFactorMean(fct.Z)
+getFactorMean(fct::Pose2Pose2) = getFactorMean(fct.z)
+getFactorMean(fct::MutablePose2Pose2Gaussian) = getFactorMean(fct.Zij)
+
+
+getFactorMean(fct::DFGFactor) = getFactorMean(getFactorType(fct))
+
+getFactorMean(dfg::AbstractDFG, fctsym::Symbol) = getFactorMean(getFactor(dfg, fctsym))
+
+"""
+    $SIGNATURES
+
+Helper function to propagate a parametric estimate along a factor chain.
+
+Notes
+- Not used during mmisam inference.
+- Expected uses are for user analysis of factors and estimates.
+- real-time dead reckoning chain prediction.
+
+Related:
+
+approxConv, accumulateFactorMeans, MutablePose2Pose2Gaussian
+"""
+function solveBinaryFactorParameteric(dfg::AbstractDFG,
+                                      fct::DFGFactor,
+                                      currval::Vector{Float64},
+                                      srcsym::Symbol,
+                                      trgsym::Symbol  )::Vector{Float64}
+  #
+  outdims = getVariableDim(getVariable(dfg, trgsym))
+  meas = getFactorType(fct)
+  mea = getFactorMean(fct)
+  measT = (reshape(mea,:,1),)
+
+  # calculate the projection
+  varmask = (1:2)[getVariableOrder(fct) .== trgsym][1]
+  pts = approxConvBinary( reshape(currval,:,1), meas, outdims, measT, varidx=varmask )
+
+  # return the result
+  @assert length(pts) == outdims
+  return pts[:]
+end
+
+"""
+    $SIGNATURES
+
+Accumulate chains of binary factors---potentially starting from a prior---as a parameteric mean value only.
+
+Notes
+- Not used during mmisam inference.
+- Expected uses are for user analysis of factors and estimates.
+- real-time dead reckoning chain prediction.
+
+Related:
+
+approxConv, solveBinaryFactorParameteric, MutablePose2Pose2Gaussian
+"""
+function accumulateFactorMeans(dfg::AbstractDFG, fctsyms::Vector{Symbol})
+
+  ## get the starting estimate
+  val = zeros(0)
+  nextidx = 1
+  onePrior = false
+  currsym = :null
+  if isPrior(dfg, fctsyms[nextidx])
+    # if first factor is prior
+    @assert !onePrior
+    onePrior = true
+    val = getFactorMean(dfg, fctsyms[nextidx])
+    currsym = ls(dfg, fctsyms[nextidx])
+    nextidx += 1
+  else
+    # get first value from current variable estimate
+    vars = getVariableOrder(dfg, fctsyms[nextidx])
+    val = calcVariablePPE(dfg, vars[nextidx]).suggested
+    currsym = setdiff(vars, intersect(vars, ls(dfg, fctsyms[nextidx+1])))[1]
+  end
+
+  # Propagate the parametric value along the factor chain
+  for fct in map(x->getFactor(dfg, x), fctsyms[nextidx:end])
+    # first find direction of solve
+    vars = getVariableOrder(fct)
+    srcsym = currsym
+    trgsym = setdiff(vars, [srcsym])[1]
+    varmask = (1:2)[getVariableOrder(fct) .== trgsym][1]
+    val = solveBinaryFactorParameteric(dfg,fct,val,:x0,:x1)
+  end
+
+  return val
 end
