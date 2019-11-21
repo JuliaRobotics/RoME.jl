@@ -49,6 +49,8 @@ include("testPoint2Point2WorldBearing.jl")
 
 include("testBearingRange2D.jl")
 
+include("testDeltaOdo.jl")
+
 include("testFixedLagFG.jl")
 
 include("testMultimodalRangeBearing.jl")

@@ -318,6 +318,7 @@ include("Slam.jl")
 include("RobotUtils.jl")
 
 include("SimulationUtils.jl")
+include("OdometryUtils.jl")
 
 include("FactorGraphAnalysisTools.jl")
 

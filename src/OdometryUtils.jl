@@ -22,7 +22,7 @@ function cont2disc(F::Matrix{Float64},
     M1[1:gr,(fc+1):end] = G #1:gr,(fc+1):(fc+gc)
 
     # must convert to propagateLinSystem call, use trapezoidal
-    Md1 = expm(M1*dt) # heavy lifting here
+    Md1 = exp(M1*dt) # heavy lifting here
     Phi = size(Phik,1) == 0 ? Md1[1:fr,1:fc] : Phik
     Gamma = Md1[1:fr,(fc+1):end]
 
@@ -33,7 +33,7 @@ function cont2disc(F::Matrix{Float64},
     M2[1:fr,(fc+1):end] = GQG
     M2[(fr+1):end,(fc+1):end] = F'
 
-    Md2 = expm(M2*dt) # heavy lifting here
+    Md2 = exp(M2*dt) # heavy lifting here
     Qd = Phi * Md2[1:fr,(fc+1):end] #Qd = Phi*(Md2[1:fr,(fc+1):end])
 
     # Qd = GQG*dt;
@@ -71,7 +71,12 @@ function accumulateDiscreteLocalFrame!(mpp::MutablePose2Pose2Gaussian,
   #
   kXk1 = SE2(mpp.Zij.μ)*Phik
   phi, gamma, Qd = cont2disc(Fk, Gk, Qc, dt, Phik)
-  Covk1 = Phik*(mmp.Σ.mat)*(Phik') + Qd
+  Covk1 = Phik*(mpp.Zij.Σ.mat)*(Phik') + Qd
+  check = norm(Covk1 - Covk1')
+  1e-4 < check ? @warn("Covk1 is getting dangerously non-Hermitian, still forcing symmetric covariance matrix.") : nothing
+  @assert check < 1.0
+  Covk1 .+= Covk1'
+  Covk1 ./= 2
   mpp.Zij = MvNormal(se2vee(kXk1), Covk1)
   nothing
 end
@@ -113,7 +118,7 @@ Notes
 """
 function rebaseFactorVariable!(dfg::AbstractDFG,
                                fctsym::Symbol,
-                               newvars::Vector{Symbols};
+                               newvars::Vector{Symbol};
                                rmDisconnected::Bool=true,
                                autoinit::Bool=false  )::Nothing
   #
