@@ -17,7 +17,8 @@ using
   CoordinateTransformations,
   JLD2,
   ProgressMeter,
-  DocStringExtensions
+  DocStringExtensions,
+  DistributedFactorGraphs
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion

@@ -85,3 +85,5 @@ include("testpackingconverters.jl")
 println("[SUCCESS]")
 
 include("TestDefaultFGInitialization.jl")
+
+include("testAccumulateFactors.jl")
