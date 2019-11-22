@@ -123,7 +123,7 @@ function rebaseFactorVariable!(dfg::AbstractDFG,
                                autoinit::Bool=false  )::Nothing
   #
   # check that all new variables are available
-  @assert sum(map(x->hasVariable(dfg, x), newvars)) == length(newvars)
+  @assert sum(map(x->exists(dfg, x), newvars)) == length(newvars)
 
   # get existing factor details
   fct = getFactor(dfg, fctsym)
