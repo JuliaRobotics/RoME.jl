@@ -17,7 +17,8 @@ using
   CoordinateTransformations,
   JLD2,
   ProgressMeter,
-  DocStringExtensions
+  DocStringExtensions,
+  DistributedFactorGraphs
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
@@ -318,6 +319,7 @@ include("Slam.jl")
 include("RobotUtils.jl")
 
 include("SimulationUtils.jl")
+include("OdometryUtils.jl")
 
 include("FactorGraphAnalysisTools.jl")
 

@@ -12,7 +12,6 @@ using RoMEPlotting
 # using Cairo, Fontconfig
 # using Gadfly
 
-0
 
 function driveHex(fgl, posecount::Int; steps::Int=5)
     # Drive around in a hexagon
