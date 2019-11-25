@@ -18,7 +18,7 @@ data[1:2,:] .*= 0.1
 data[3,:] .*= 0.01
 cumdata = cumsum(data, dims=2)
 dcs = deepcopy(cumdata[1:2,:])
-cumdata[3,:] .= wrapRad.(cumdata[3,:])
+cumdata[3,:] .= TransformUtils.wrapRad.(cumdata[3,:])
 cumdata[1:2,:] .= cumsum(cumdata[1:2,:], dims=2)
 
 # Gadfly.plot(x=cumdata[1,:],y=cumdata[2,:], Geom.path)
@@ -31,9 +31,9 @@ ddcd[1:2,1] = ddcd[1:2,2]
 # Gadfly.plot(y=ddcd[1,:], Geom.path)
 # Gadfly.plot(y=ddcd[2,:], Geom.path)
 course = atan.(ddcd[2,:],ddcd[1,:])
-course .= wrapRad.(course)
+course .= TransformUtils.wrapRad.(course)
 yaw = course# + cumdata[3,:]
-yaw .= wrapRad.(yaw)
+yaw .= TransformUtils.wrapRad.(yaw)
 # Gadfly.plot(y=course, Geom.path)
 
 XX = cumdata[1,:]
@@ -46,22 +46,7 @@ TH = yaw
 
 
 ## Draw the deltas to reintegrate later
-
-
-dt = 1.0
-DX = zeros(3,length(XX))
-nXYT__ = zeros(3,size(DX,2))
-nXYT__[:,1] = [XX[1];YY[1];TH[1]]
-for i in 2:length(XX)
-  wTbk = SE2([XX[i-1];YY[i-1];TH[i-1]])
-  wTbk1 = SE2([XX[i];YY[i];TH[i]])
-  bkTbk1 = wTbk\wTbk1
-  DX[:,i] = se2vee(bkTbk1)
-
-  # test
-  nXYT__[:,i] .= se2vee(SE2(nXYT__[:,i-1])*SE2(DX[:,i]))
-  # nXYT__[:,i] .= se2vee(SE2(nXYT__[:,i-1])*bkTbk1)
-end
+DX = extractDeltaOdo(XX, YY, TH)
 
 # Gadfly.plot(y=DX[1,:], Geom.path)
 # Gadfly.plot(y=DX[2,:], Geom.path)
@@ -76,7 +61,7 @@ end
 
 
 mpp = MutablePose2Pose2Gaussian(MvNormal([XX[1];YY[1];TH[1]], 1e-3*Matrix(LinearAlgebra.I, 3,3)))
-
+dt = 1.0
 nXYT = zeros(3,size(DX,2))
 Qc = 1e-6*Matrix(LinearAlgebra.I, 3,3)
 for i in 1:size(DX,2)

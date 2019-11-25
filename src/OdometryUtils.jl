@@ -3,8 +3,8 @@
 import IncrementalInference: getFactorMean
 
 export getFactorMean
-export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, odomKDE
-
+export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extractDeltaOdo
+export odomKDE
 
 getFactorMean(fct::PriorPose2) = getFactorMean(fct.Z)
 getFactorMean(fct::Pose2Pose2) = getFactorMean(fct.z)
@@ -74,6 +74,38 @@ function duplicateToStandardFactorVariable(::Pose2Pose2,
   addFactor!(dfg, [prevsym; newsym], posepose)
   nothing
 end
+
+
+
+
+"""
+    $SIGNATURES
+
+Extract deltas from existing dead reckoning data so that odometry calculations can be repeated later.
+
+Notes
+- Useful for reverse engineering data or simulation tools.
+"""
+function extractDeltaOdo(XX, YY, TH)
+  dt = 1.0
+  DX = zeros(3,length(XX))
+  nXYT__ = zeros(3,size(DX,2))
+  nXYT__[:,1] = [XX[1];YY[1];TH[1]]
+  for i in 2:length(XX)
+    wTbk = SE2([XX[i-1];YY[i-1];TH[i-1]])
+    wTbk1 = SE2([XX[i];YY[i];TH[i]])
+    bkTbk1 = wTbk\wTbk1
+    DX[:,i] = se2vee(bkTbk1)
+
+    # test
+    nXYT__[:,i] .= se2vee(SE2(nXYT__[:,i-1])*SE2(DX[:,i]))
+    # nXYT__[:,i] .= se2vee(SE2(nXYT__[:,i-1])*bkTbk1)
+  end
+
+  return DX
+end
+
+
 
 
 ## Previous methods
