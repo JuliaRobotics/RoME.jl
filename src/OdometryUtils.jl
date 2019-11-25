@@ -261,18 +261,20 @@ function accumulateFactorMeans(dfg::AbstractDFG, fctsyms::Vector{Symbol})
   else
     # get first value from current variable estimate
     vars = getVariableOrder(dfg, fctsyms[nextidx])
-    val = calcVariablePPE(dfg, vars[nextidx]).suggested
-    currsym = setdiff(vars, intersect(vars, ls(dfg, fctsyms[nextidx+1])))[1]
+    nextsym = 1 < length(fctsyms) ? intersect( vars, ls(dfg, fctsyms[nextidx+1]) ) : vars[end]
+    currsym = 1 < length(fctsyms) ? setdiff(vars, nextsym)[1] : vars[1]
+    val = calcVariablePPE(dfg, currsym).suggested
   end
 
+  srcsym = currsym
   # Propagate the parametric value along the factor chain
   for fct in map(x->getFactor(dfg, x), fctsyms[nextidx:end])
     # first find direction of solve
     vars = getVariableOrder(fct)
-    srcsym = currsym
     trgsym = setdiff(vars, [srcsym])[1]
-    varmask = (1:2)[getVariableOrder(fct) .== trgsym][1]
-    val = solveBinaryFactorParameteric(dfg,fct,val,:x0,:x1)
+    # varmask = (1:2)[getVariableOrder(fct) .== trgsym][1]
+    val = solveBinaryFactorParameteric(dfg,fct,val,srcsym,trgsym)
+    srcsym = trgsym
   end
 
   return val

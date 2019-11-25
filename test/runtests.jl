@@ -87,3 +87,5 @@ println("[SUCCESS]")
 include("TestDefaultFGInitialization.jl")
 
 include("testAccumulateFactors.jl")
+
+include("testDeadReckoningTether.jl")
