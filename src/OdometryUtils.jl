@@ -3,7 +3,7 @@
 import IncrementalInference: getFactorMean
 
 export getFactorMean
-export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extractDeltaOdo
+export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extractDeltaOdo, resetFactor!
 export odomKDE
 
 getFactorMean(fct::PriorPose2) = getFactorMean(fct.Z)
@@ -75,7 +75,15 @@ function duplicateToStandardFactorVariable(::Pose2Pose2,
   nothing
 end
 
+"""
+    $SIGNATURES
 
+Reset the transform value stored in a `::MutablePose2Pose2Gaussian` to zero.
+"""
+function resetFactor!(mpp::MutablePose2Pose2Gaussian)::Nothing
+  mpp.Zij = MvNormal(zeros(3), 1e-6*Matrix{Float64}(LinearAlgebra.I, 3,3) )
+  nothing
+end
 
 
 """
