@@ -1,6 +1,6 @@
 # example for dead-reckoning branch on factor graph
 
-using Revise
+# using Revise
 
 using DistributedFactorGraphs
 using IncrementalInference
