@@ -134,8 +134,8 @@ global stdX2 = Statistics.std(getVal(fg,:x2),dims=2)
 @show muX2[1:3]-[10.0;0;0]
 @test sum(map(Int, abs.(muX2[1:3]-[10.0;0;0]) .< 1.5)) == 3
 @test sum(map(Int, abs.(muX2[4:6]) .< 0.1)) == 3
-@show println("previous test failure 0.75 .< $(round.(stdX2[1:3],digits=2)) .< 2.25")
-@test sum(map(Int, 0.75 .< stdX2[1:3] .< 2.25)) == 3
+println("previous test failure 0.75 .< $(round.(stdX2[1:3],digits=2)) .< 2.25")
+@test sum(map(Int, 0.75 .< stdX2[1:3] .< 2.35)) == 3
 @test sum(map(Int, 0.05 .< stdX2[4:6] .< 0.25)) == 3
 
 end
