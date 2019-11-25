@@ -64,7 +64,7 @@ tree = buildTreeFromOrdering!(fg,vo)
 # union(map(x->getCliqAllVarIds(x), map(n->getCliq(tree, n), syms))...)
 
 
-getSolverParams(fg).dbg = true
+# getSolverParams(fg).dbg = true
 # getSolverParams(fg).drawtree = true
 # getSolverParams(fg).showtree = true
 
