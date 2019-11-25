@@ -216,7 +216,7 @@ function addOdoFG!(fg::G,
                    DX::Array{Float64,1},
                    cov::Array{Float64,2};
                    N::Int=0,
-                   ready::Int=1,
+                   solvable::Int=1,
                    labels::Vector{<:AbstractString}=String[]  ) where G <: AbstractDFG
     #
     prev, X, nextn = getLastPose2D(fg)
@@ -232,10 +232,10 @@ function addOdoFG!(fg::G,
         XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addVariable!(fg, n, Pose2, N=N, ready=ready, labels=[labels;"POSE"])
-    # v = addVariable!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
+    v = addVariable!(fg, n, Pose2, N=N, solvable=solvable, labels=[labels;"POSE"])
+    # v = addVariable!(fg, n, XnextInit, cov, N=N, solvable=solvable, labels=labels)
     pp = Pose2Pose2(MvNormal(DX, cov)) #[prev;v],
-    f = addFactor!(fg, [prev;v], pp, ready=ready, autoinit=true )
+    f = addFactor!(fg, [prev;v], pp, solvable=solvable, autoinit=true )
     infor = inv(cov^2)
     # addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
     return v, f
@@ -244,17 +244,17 @@ end
 function addOdoFG!(fgl::G,
                    Z::Pose3Pose3;
                    N::Int=0,
-                   ready::Int=1,
+                   solvable::Int=1,
                    labels::Vector{<:AbstractString}=String[]  ) where {G <: AbstractDFG}
   #
   vprev, X, nextn = getLastPose(fgl)
-  vnext = addVariable!(fgl, nextn, Pose3, ready=ready, labels=labels)
+  vnext = addVariable!(fgl, nextn, Pose3, solvable=solvable, labels=labels)
   fact = addFactor!(fgl, [vprev;vnext], Z, autoinit=true)
 
   return vnext, fact
 
   # error("addOdoFG!( , ::Pose3Pose3, ) not currently usable, there were breaking changes. Work in Progress")
-  # addOdoFG(fg, n, DX, cov, N=N, ready=ready, labels=labels)
+  # addOdoFG(fg, n, DX, cov, N=N, solvable=solvable, labels=labels)
 end
 
 """
@@ -269,15 +269,15 @@ function addOdoFG!(
         fgl::FactorGraph,
         odo::Pose2Pose2;
         N::Int=0,
-        ready::Int=1,
+        solvable::Int=1,
         labels::Vector{<:AbstractString}=String[] ) # where {PP <: RoME.BetweenPoses}
     #
     vprev, X, nextn = getLastPose(fgl)
     if N==0
       N = size(X,2)
     end
-    # vnext = addVariable!(fgl, nextn, X⊕odo, ones(1,1), N=N, ready=ready, labels=labels)
-    vnext = addVariable!(fgl, nextn, Pose2, N=N, ready=ready, labels=labels)
+    # vnext = addVariable!(fgl, nextn, X⊕odo, ones(1,1), N=N, solvable=solvable, labels=labels)
+    vnext = addVariable!(fgl, nextn, Pose2, N=N, solvable=solvable, labels=labels)
     fact = addFactor!(fgl, [vprev;vnext], odo, autoinit=true)
 
     return vnext, fact
@@ -315,7 +315,7 @@ function initFactorGraph!(fg::G;
                           init::Union{Vector{Float64},Nothing}=nothing,
                           N::Int=100,
                           lbl::Symbol=:x0,
-                          ready::Int=1,
+                          solvable::Int=1,
                           firstPoseType=Pose2,
                           labels::Vector{Symbol}=Symbol[]) where G <: AbstractDFG
   #
@@ -324,19 +324,19 @@ function initFactorGraph!(fg::G;
       init = init!=nothing ? init : zeros(3)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.001]))
       # init = vectoarr2(init)
-      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
+      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,solvable=solvable,labels=labels )
       push!(nodesymbols, lbl)
-      # v1 = addVariable!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), ready=ready, labels=labels) #[v1],
+      # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, labels=labels)
+      fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), solvable=solvable, labels=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.03;0.001;0.001;0.001]))
-      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
+      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,solvable=solvable,labels=labels )
       push!(nodesymbols, lbl)
-      # v1 = addVariable!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=labels) #[v1],
+      # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, labels=labels)
+      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), solvable=solvable, labels=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   return nodesymbols
@@ -344,11 +344,11 @@ end
 
 
 function newLandm!(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
-                  N::Int=100, ready::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
+                  N::Int=100, solvable::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
 
-    vert=addVariable!(fg, Symbol(lm), Point2, N=N, ready=ready, labels=union(["LANDMARK";], labels))
+    vert=addVariable!(fg, Symbol(lm), Point2, N=N, solvable=solvable, labels=union(["LANDMARK";], labels))
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
-    # vert=addVariable!(fg, Symbol(lm), wPos, sig, N=N, ready=ready, labels=labels)
+    # vert=addVariable!(fg, Symbol(lm), wPos, sig, N=N, solvable=solvable, labels=labels)
 
     vert.attributes["age"] = 0
     vert.attributes["maxage"] = 0
@@ -368,7 +368,7 @@ function addBRFG!(fg::G,
                   lm::T,
                   br::Array{Float64,1},
                   cov::Array{Float64,2};
-                  ready::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
+                  solvable::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
   #
   vps = getVert(fg,pose)
   vlm = getVert(fg,lm)
@@ -392,7 +392,7 @@ function addBRFG!(fg::G,
 
   pbr = Pose2Point2BearingRange(Normal(br[1], cov[1,1]), Normal(br[2],  cov[2,2]))  #{Normal, Normal}
   @show vps, vlm
-  f = addFactor!(fg, [vps;vlm], pbr, ready=ready, autoinit=true ) #[vps;vlm],
+  f = addFactor!(fg, [vps;vlm], pbr, solvable=solvable, autoinit=true ) #[vps;vlm],
 
   # only used for max likelihood unimodal tests.
   u, P = pol2cart(br[[2;1]], diag(cov))
@@ -404,7 +404,7 @@ end
 function addMMBRFG!(fg::G,
                     syms::Array{Symbol,1}, br::Array{Float64,1},
                     cov::Array{Float64,2}; w::Vector{Float64}=Float64[0.5;0.5],
-                    ready::Int=1) where G <: AbstractDFG
+                    solvable::Int=1) where G <: AbstractDFG
     #
     # vps = getVert(fg,pose)
     # vlm1 = getVert(fg,lm[1])
@@ -412,7 +412,7 @@ function addMMBRFG!(fg::G,
 
     pbr = Pose2Point2BearingRange(Normal(br[1],cov[1,1]),  Normal(br[2],cov[2,2]))
     syms = Symbol.([pose;lm...])
-    f = addFactor!(fg, syms, pbr, multihypo=[1.0; w...], ready=ready, autoinit=true )
+    f = addFactor!(fg, syms, pbr, multihypo=[1.0; w...], solvable=solvable, autoinit=true )
     return f
 end
 
@@ -436,15 +436,15 @@ function projNewLandm!(fg::G,
                        cov::Array{Float64,2};
                        addfactor=true,
                        N::Int=100,
-                       ready::Int=1,
+                       solvable::Int=1,
                        labels::Vector{T}=String[]  ) where {G <: AbstractDFG, T <: AbstractString}
     #
     vps = getVert(fg, pose)
 
     lmPts = projNewLandmPoints(vps, br, cov)
-    vlm = newLandm!(fg, lm, lmPts, cov, N=N, ready=ready, labels=labels) # cov should not be required here
+    vlm = newLandm!(fg, lm, lmPts, cov, N=N, solvable=solvable, labels=labels) # cov should not be required here
     if addfactor
-      fbr = addBRFG!(fg, pose, lm, br, cov, ready=ready)
+      fbr = addBRFG!(fg, pose, lm, br, cov, solvable=solvable)
       return vlm, fbr
     end
     return vlm
@@ -517,7 +517,7 @@ end
 
 function evalAutoCases!(fgl::G, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
                         pose::T, lmPts::Array{Float64,2}, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
-                        N::Int=100, ready::Int=1 ) where {G <: AbstractDFG, T <: AbstractString}
+                        N::Int=100, solvable::Int=1 ) where {G <: AbstractDFG, T <: AbstractString}
   lmidSugg, maxAnyExists, maxl2Exists, maxl2, lmIDExists, intgLmIDExists, lmSuggLbl, newlmindx = doAutoEvalTests(fgl,ivs,maxl,lmid, lmindx)
 
   println("evalAutoCases -- found=$(lmidSugg), $(maxAnyExists), $(maxl2Exists), $(lmIDExists), $(intgLmIDExists)")
@@ -526,42 +526,42 @@ function evalAutoCases!(fgl::G, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
   if (!lmidSugg && !maxAnyExists)
     #new landmark and UniBR constraint
     v,L,lm = getLastLandm2D(fgl)
-    vlm = newLandm!(fgl, lm, lmPts, cov, N=N,ready=ready)
-    fbr = addBRFG!(fgl, pose, lm, br, cov, ready=ready)
+    vlm = newLandm!(fgl, lm, lmPts, cov, N=N,solvable=solvable)
+    fbr = addBRFG!(fgl, pose, lm, br, cov, solvable=solvable)
   elseif !lmidSugg && maxAnyExists
     # add UniBR to best match maxl
     vlm = getVert(fgl,maxl)
-    fbr = addBRFG!(fgl, pose, maxl, br, cov, ready=ready)
+    fbr = addBRFG!(fgl, pose, maxl, br, cov, solvable=solvable)
   elseif lmidSugg && !maxl2Exists && !lmIDExists
     #add new landmark and add UniBR to suggested lmid
-    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N, ready=ready)
-    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, ready=ready)
+    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N, solvable=solvable)
+    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, solvable=solvable)
   elseif lmidSugg && !maxl2Exists && lmIDExists && intgLmIDExists
     # doesn't self intesect with existing lmid, add UniBR to lmid
     vlm = getVert(fgl, lmid)
-    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, ready=ready)
+    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, solvable=solvable)
   elseif lmidSugg && maxl2Exists && !lmIDExists
     # add new landmark and add MMBR to both maxl and lmid
-    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N, ready=ready)
-    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, ready=ready)
+    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N, solvable=solvable)
+    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, solvable=solvable)
   elseif lmidSugg && maxl2Exists && lmIDExists && intgLmIDExists
     # obvious case, add MMBR to both maxl and lmid. Double intersect might be the same thing
     println("evalAutoCases! -- obvious case is happening")
-    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, ready=ready)
+    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, solvable=solvable)
     vlm = getVert(fgl,lmSuggLbl)
   elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
     # odd case, does not intersect with suggestion, but does with some previous landm
     # add MMBR
     @warn "evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected"
-    addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov, ready=ready)
+    addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov, solvable=solvable)
     vlm = getVert(fgl,lmSuggLbl)
   elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
   #   # landm exists but no intersection with existing or suggested lmid
   #   # may suggest some error
     @warn "evalAutoCases! -- no intersect with suggested $(lmSuggLbl) or map detected, adding  new landmark MM constraint incase"
     v,L,lm = getLastLandm2D(fgl)
-    vlm = newLandm!(fgl, lm, lmPts, cov, N=N, ready=ready)
-    addMMBRFG!(fgl, pose, [lm; lmSuggLbl], br, cov, ready=ready)
+    vlm = newLandm!(fgl, lm, lmPts, cov, N=N, solvable=solvable)
+    addMMBRFG!(fgl, pose, [lm; lmSuggLbl], br, cov, solvable=solvable)
   else
     error("evalAutoCases! -- unknown case encountered, can reduce to this error to a warning and ignore user request")
   end
@@ -576,7 +576,7 @@ function addAutoLandmBR!(fgl::G,
                          cov::Array{Float64,2},
                          lmindx::Int;
                          N::Int=100,
-                         ready::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
+                         solvable::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
   #
   vps = getVert(fgl, pose)
   lmPts = projNewLandmPoints(vps, br, cov)
@@ -585,7 +585,7 @@ function addAutoLandmBR!(fgl::G,
   ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=10)
 
   # There are 8 cases of interest
-  vlm, fbr, newlmindx = evalAutoCases!(fgl, lmid, ivs, maxl,pose,lmPts, br,cov,lmindx,N=N,ready=ready)
+  vlm, fbr, newlmindx = evalAutoCases!(fgl, lmid, ivs, maxl,pose,lmPts, br,cov,lmindx,N=N,solvable=solvable)
 
   return vlm, fbr, newlmindx
 end
@@ -828,10 +828,10 @@ function addSoftEqualityPoint2D(fgl::G,
                                 l1::Symbol,
                                 l2::Symbol;
                                 dist=MvNormal([0.0;0.0],Matrix{Float64}(LinearAlgebra.I, 2,2)),
-                                ready::Int=1  )  where G <: AbstractDFG
+                                solvable::Int=1  )  where G <: AbstractDFG
   #
   pp = Point2DPoint2D(dist)
-  addFactor!(fgl, [l1,l2], pp, ready=ready)
+  addFactor!(fgl, [l1,l2], pp, solvable=solvable)
 end
 
 """

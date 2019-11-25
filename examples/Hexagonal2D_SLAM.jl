@@ -28,17 +28,20 @@ end
 
 
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
-batchSolve!(fg, drawpdf=true, show=true)
+getSolverParams(fg).drawtree=true
+getSolverParams(fg).showtree=true
+tree, smt, hist = solveTree!(fg)
 
-# For Juno/Jupyter style use
-pl = drawPoses(fg, meanmax=:mean)
-plotPose(fg, :x6)
+
+pl = drawPoses(fg) #, meanmax=:mean)
 # For scripting use-cases you can export the image
-Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
+pl |> Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm)  # or PNG(...)
 
+# another type of plot
+plotPose(fg, :x6)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, labels=[:LANDMARK])
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br )
 

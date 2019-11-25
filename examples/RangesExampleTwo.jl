@@ -62,11 +62,11 @@ function landmsInRange(GTl::Dict{String, Vector{Float64}}, cur::Vector{Float64};
 	return inrange
 end
 
-function isInFG!(fgl::FactorGraph, lbl::Symbol; N=100, ready=0)
+function isInFG!(fgl::FactorGraph, lbl::Symbol; N=100, solvable=0)
 	v = nothing
 	if !haskey(fgl.IDs, lbl)
 		init = 300*randn(2,N)
-		v = addVariable!(fgl, lbl, Point2, N=N, ready=ready)
+		v = addVariable!(fgl, lbl, Point2, N=N, solvable=solvable)
 	else
 		v = getVert(fgl, lbl)
 	end
@@ -74,13 +74,13 @@ function isInFG!(fgl::FactorGraph, lbl::Symbol; N=100, ready=0)
 end
 
 function addLandmsOnPose!(fgl::FactorGraph, pose::Graphs.ExVertex, GTl::Dict{String, Float64};
-			ready=0,N=100)
+			solvable=0,N=100)
 	for gtl in GTl
 		println("addLandmsOnPose! -- adding $(gtl[1])")
-		v = isInFG!(fgl, Symbol(gtl[1]), N=N,ready=ready)
+		v = isInFG!(fgl, Symbol(gtl[1]), N=N,solvable=solvable)
 		# add the constraint
 		ppr = Point2Point2Range( Normal(gtl[2], 2.0) ) # [gtl[2]], 2.0, [1.0])
-		addFactor!(fgl, [pose;v], ppr, ready=ready)
+		addFactor!(fgl, [pose;v], ppr, solvable=solvable)
 	end
 	nothing
 end
@@ -89,14 +89,14 @@ function addNewPose!(fgl::FactorGraph,
                      from::Symbol,
                      lbl::Symbol,
                      GTp;
-                     ready=0,
+                     solvable=0,
                      N=N  )
   #
   init = 300*randn(2,N)
-  v = addVariable!(fgl, lbl, Point2, N=N, ready=ready)
+  v = addVariable!(fgl, lbl, Point2, N=N, solvable=solvable)
   rhoZ = norm(GTp[string(lbl)]-GTp[string(from)])
   ppr = Point2Point2Range( Normal(rhoZ, 3.0) )
-  f = addFactor!(fgl, [from,lbl], ppr, ready=ready)
+  f = addFactor!(fgl, [from,lbl], ppr, solvable=solvable)
   initVariable!(fgl,lbl)
   getVert(fgl, lbl)
 end
@@ -445,7 +445,7 @@ f = addFactor!(fg, [:l2], pp2, autoinit=true)
 # setValKDE!(getVert(fg, :l2), deepcopy(pp))
 
 
-v1 = addVariable!(fg, :l100, Point2, N=N, ready=0)
+v1 = addVariable!(fg, :l100, Point2, N=N, solvable=0)
 lmv1 = landmsInRange(GTl, GTp["l100"])
 addLandmsOnPose!(fg, v1, lmv1, N=N )
 
