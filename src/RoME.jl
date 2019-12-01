@@ -326,6 +326,7 @@ include("FactorGraphAnalysisTools.jl")
 include("RobotDataTypes.jl") #WheeledRobotUtils
 include("NavigationSystem.jl")
 
+include("CanonicalGraphs.jl")
 
 include("Deprecated.jl")
 

@@ -6,6 +6,13 @@ export getFactorMean
 export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extractDeltaOdo, resetFactor!
 export odomKDE
 
+"""
+    $SIGNATURES
+
+Return a number increment on symbol.  Example :x2 -> :x3.
+"""
+nextPose(sym::Symbol, identifier::Union{String, Char}=string(sym)[1]) = Symbol(string(identifier,parse(Int,string(sym)[2:end])+1))
+
 getFactorMean(fct::PriorPose2) = getFactorMean(fct.Z)
 getFactorMean(fct::Pose2Pose2) = getFactorMean(fct.z)
 getFactorMean(fct::MutablePose2Pose2Gaussian) = getFactorMean(fct.Zij)
@@ -33,7 +40,7 @@ accumulateContinuousLocalFrame!, accumulateDiscreteReferenceFrame!
 function accumulateDiscreteLocalFrame!(mpp::MutablePose2Pose2Gaussian,
                                        DX::Vector{Float64},
                                        Qc::Matrix{Float64},
-                                       dt::Float64;
+                                       dt::Float64=1.0;
                                        Fk = SE2([0;0;-DX[3]]),
                                        Gk = Matrix{Float64}(LinearAlgebra.I, 3,3),
                                        Phik = SE2(DX) )
@@ -54,25 +61,27 @@ end
 """
     $SIGNATURES
 
-Helper function to duplicate values from a special factor variable into standard factor and variable.
+Helper function to duplicate values from a special factor variable into standard factor and variable.  Returns the name of the new factor.
 
 Notes:
 - Developed for accumulating odometry in a `MutablePosePose` and then cloning out a standard PosePose and new variable.
 - Does not change the original MutablePosePose source factor or variable in any way.
 """
-function duplicateToStandardFactorVariable(::Pose2Pose2,
+function duplicateToStandardFactorVariable(::Type{Pose2Pose2},
                                            mpp::MutablePose2Pose2Gaussian,
                                            dfg::AbstractDFG,
                                            prevsym::Symbol,
-                                           newsym::Symbol )::Nothing
+                                           newsym::Symbol;
+                                           solvable::Int=1,
+                                           autoinit::Bool=true  )::Symbol
   #
   # extract factor values and create PosePose object
   posepose = Pose2Pose2(deepcopy(mpp.Zij))
 
   # modify the factor graph
-  addVariable!(dfg, newsym, Pose2)
-  addFactor!(dfg, [prevsym; newsym], posepose)
-  nothing
+  addVariable!(dfg, newsym, Pose2, solvable=solvable)
+  addFactor!(dfg, [prevsym; newsym], posepose, solvable=solvable, autoinit=autoinit)
+  return ls(dfg, newsym)[1]
 end
 
 """
