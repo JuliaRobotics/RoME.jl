@@ -89,6 +89,7 @@ Load and solve a canonical or user factor graph to warm up---precompile---severa
 function warmUpSolverJIT(;drawtree::Bool=true)::Nothing
   #
   fg=loadCanonicalFG_Hexagonal()
+  fcts = ls(fg, :x0)
   getSolverParams(fg).drawtree = drawtree
   tree, smt, hist = solveTree!(fg)
   nothing
