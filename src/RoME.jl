@@ -76,6 +76,7 @@ export
   # RobotUtils
   getRangeKDEMax2D,
   nextPose,
+  getLastPoses,
 
   # some transform functions
   cart2pol,
