@@ -75,6 +75,8 @@ export
 
   # RobotUtils
   getRangeKDEMax2D,
+  nextPose,
+  getLastPoses,
 
   # some transform functions
   cart2pol,
@@ -326,6 +328,7 @@ include("FactorGraphAnalysisTools.jl")
 include("RobotDataTypes.jl") #WheeledRobotUtils
 include("NavigationSystem.jl")
 
+include("CanonicalGraphs.jl")
 
 include("Deprecated.jl")
 

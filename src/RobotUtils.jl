@@ -163,45 +163,27 @@ function predictBodyBR(fg::AbstractDFG, a::Symbol, b::Symbol)
   return b, r
 end
 
-function getNextLbl(fgl::AbstractDFG, chr)
-  # TODO convert this to use a double lookup
-  max = -1
-  maxid = -1
-  for vid in fgl.IDs
-  # for v in fgl.v #fgl.g.vertices # fgl.v
-      v = (vid[2], fgl.g.vertices[vid[2]])
-      if v[2].attributes["label"][1] == chr
-        # TODO test for allnums first, ex. :x1_2
-        val = parse(Int,v[2].attributes["label"][2:end])
-        if max < val
-          max = val
-          maxid = v[1]
-        end
-      end
-  end
-  if maxid != -1
-    v = getVert(fgl,maxid)
-    X = getVal(v)
-    return v, X, Symbol(string(chr,max+1))
-  else
-    return nothing, nothing, Symbol(string(chr,max+1)) # Union{}
-  end
+
+"""
+    $SIGNATURES
+
+Return the last `number::Int` of poses according to `filterLabel::Regex`.
+
+Notes
+- Uses FIFO add history of variables to the distribued factor graph object as search index.
+"""
+function getLastPoses(dfg::AbstractDFG;
+                      filterLabel::Regex=r"x\d",
+                      number::Int=5)::Vector{Symbol}
+  #
+  # filter according to pose label
+  syms = filter(l->occursin(filterLabel, string(l)), dfg.addHistory)
+
+  # return the last segment of syms
+  len = length(syms)
+  st = number < len ? len-number+1 : 1
+  return syms[st:end]
 end
-
-function getLastPose(fgl::FactorGraph)
-  return getNextLbl(fgl, 'x')
-end
-getLastPose2D(fgl::FactorGraph) = getLastPose(fgl)
-
-function getlastpose(slam::SLAMWrapper)
-  error("getlastpose -- Not implemented yet")
-end
-
-
-function getLastLandm2D(fgl::FactorGraph)
-  return getNextLbl(fgl, 'l')
-end
-
 
 
 """
@@ -833,52 +815,3 @@ function addSoftEqualityPoint2D(fgl::G,
   pp = Point2DPoint2D(dist)
   addFactor!(fgl, [l1,l2], pp, solvable=solvable)
 end
-
-"""
-    $SIGNATURES
-
-Build a basic factor graph in Pose2 with two `Pose2` and one landmark `Point2` variables,
-along with `PriorPose2` on `:x0` and `Pose2Pose2` to `:x1`.  Also a `Pose2Point2BearingRange`
-to landmark `:l1`.
-"""
-function basicFactorGraphExample(::Type{Pose2}=Pose2; addlandmark::Bool=true)
-  fg = initfg()
-
-  addVariable!(fg, :x0, Pose2)
-  addVariable!(fg, :x1, Pose2)
-  !addlandmark ? nothing : addVariable!(fg, :l1, Point2)
-
-  addFactor!(fg, [:x0], PriorPose2(MvNormal([0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))))
-  addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal([10.0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))))
-  !addlandmark ? nothing : addFactor!(fg, [:x1;:l1], Pose2Point2BearingRange(Normal(0.0,0.01), Normal(20.0, 1.0)))
-
-  return fg
-end
-
-
-
-
-# Project all particles (columns) Xval with Z, that is for all  SE3(Xval[:,i])*Z
-function projectParticles(Xval::Array{Float64,2}, Z::Array{Float64,2}, Cov::Array{Float64,2})
-  # TODO optimize convert SE2 to a type
-  @warn "projectParticles is an old function, rather standardize on approxConv instead."
-
-  r,c = size(Xval)
-  RES = zeros(r,c) #*cz
-
-  # ent, x = SE3(0), SE3(0)
-  j=1
-  # for j in 1:cz
-  ENT = rand( MvNormal(Z[:,1], Cov), c )
-    for i in 1:c
-      x = SE2(Xval[1:3,i])
-      dx = SE2(ENT[1:3,i])
-      RES[1:r,i*j] = se2vee(x*dx)
-    end
-  # end
-  #
-  return RES
-end
-
-⊕(Xpts::Array{Float64,2}, z::Pose2Pose2) = projectParticles(Xpts, z.Zij, z.Cov)
-⊕(Xvert::Graphs.ExVertex, z::Pose2Pose2) = ⊕(getVal(Xvert), z)
