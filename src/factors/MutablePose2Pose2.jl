@@ -56,5 +56,5 @@ function convert(::Type{MutablePose2Pose2Gaussian}, d::PackedMutablePose2Pose2Ga
   return MutablePose2Pose2Gaussian(extractdistribution(d.datastr))
 end
 function convert(::Type{PackedMutablePose2Pose2Gaussian}, d::MutablePose2Pose2Gaussian)
-  return PackedMutablePose2Pose2Gaussian(string(d.z))
+  return PackedMutablePose2Pose2Gaussian(string(d.Zij))
 end
