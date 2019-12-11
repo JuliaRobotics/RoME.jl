@@ -77,6 +77,7 @@ export
   getRangeKDEMax2D,
   nextPose,
   getLastPoses,
+  setSolvableOldPoses!,
 
   # some transform functions
   cart2pol,

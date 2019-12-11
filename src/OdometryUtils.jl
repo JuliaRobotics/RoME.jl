@@ -73,10 +73,11 @@ function duplicateToStandardFactorVariable(::Type{Pose2Pose2},
                                            prevsym::Symbol,
                                            newsym::Symbol;
                                            solvable::Int=1,
-                                           autoinit::Bool=true  )::Symbol
+                                           autoinit::Bool=true,
+                                           cov::Union{Nothing, Matrix{Float64}}=nothing  )::Symbol
   #
   # extract factor values and create PosePose object
-  posepose = Pose2Pose2(deepcopy(mpp.Zij))
+  posepose = Pose2Pose2(MvNormal(mpp.Zij.μ, cov==nothing ? mpp.Zij.Σ.mat : cov))
 
   # modify the factor graph
   addVariable!(dfg, newsym, Pose2, solvable=solvable)

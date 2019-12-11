@@ -177,7 +177,7 @@ function getLastPoses(dfg::AbstractDFG;
                       number::Int=5)::Vector{Symbol}
   #
   # filter according to pose label
-  syms = filter(l->occursin(filterLabel, string(l)), dfg.addHistory)
+  syms = filter(l->occursin(filterLabel, string(l)), getAddHistory(dfg))
 
   # return the last segment of syms
   len = length(syms)
@@ -185,6 +185,43 @@ function getLastPoses(dfg::AbstractDFG;
   return syms[st:end]
 end
 
+"""
+    $SIGNATURES
+
+Set old poses and adjacent factors to `solvable::Int=0` (default).
+
+Notes
+- `youngest::Int` and `oldest::Int` set the limits of search by count,
+  - `oldest` set large enough for solver loop defintely disengage old parts in re-occuring cycle.
+- `filterLabel::Regex` sets the template to search for each pose label.
+- Poses are assumed to be a thread through time that connects the local exploration variables.
+- Initially developed to remove old variables and factors from a solution, in combination with fix-lag marginalization.
+  - `getSolverParams(fg).isfixedlag=true`
+
+Related:
+
+getLastPoses
+"""
+function setSolvableOldPoses!(dfg::AbstractDFG;
+                              youngest::Int=50,
+                              oldest::Int=200,
+                              solvable=0,
+                              filterLabel::Regex=r"x\d")
+  #
+  # collect old variables and factors to disable from next solve
+  newPoses = getLastPoses(dfg,filterLabel=filterLabel, number=youngest)
+  oldPoses = setdiff(getLastPoses(dfg,filterLabel=filterLabel, number=oldest), newPoses)
+  allFcts = (oldPoses .|> x->ls(dfg,x))
+  fctAdj = 0 < length(allFcts) ? union(allFcts...) : Symbol[]
+
+  # all together
+  fullList = [oldPoses; fctAdj]
+
+  # use solvable=0 to disable variables and factors in the next solve
+  map(x->setSolvable!(dfg, x, solvable), fullList)
+
+  return fullList
+end
 
 """
     $(SIGNATURES)
