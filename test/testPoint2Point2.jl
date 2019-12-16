@@ -18,8 +18,8 @@ tree, smt, hist = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree)
 
-@test sum( abs.(Statistics.mean(getVal(fg, :x0),dims=2) .- [0.0;0]) .< [0.5;0.5]) == 2
-@test sum( abs.(Statistics.mean(getVal(fg, :x1),dims=2) .- [10.0;0]) .< [0.5;0.5]) == 2
+@test sum( abs.(Statistics.mean(getVal(fg, :x0),dims=2) .- [0.0;0]) .< [1.0;1.0]) == 2
+@test sum( abs.(Statistics.mean(getVal(fg, :x1),dims=2) .- [10.0;0]) .< [1.0;1.0]) == 2
 
 end
 
