@@ -59,15 +59,28 @@ function (vp2vp2::VelPoint2VelPoint2{D})(
   #
   z = meas[1][:,idx]
   xi, xj = Xi[:,idx], Xj[:,idx]
+  # change in time from microseconds with DynPoint2(ut=1_000_000) to seconds
   dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata
+  # change in psoition Xi \ Xj
   dp = (xj[1:2]-xi[1:2])
+  # change in velocity Xi \ Xj
   dv = (xj[3:4]-xi[3:4])
   res[1] = 0.0
-  res[1] += sum((z[1:2] - dp).^2)
-  res[1] += sum((z[3:4] - dv).^2)
-  # res[1] += sum((dp/dt - xi[3:4]).^2) # zeroth order integration
-  res[1] += sum((dp/dt - 0.5*(xj[3:4]+xi[3:4])).^2)  # first order integration
-  res[1]
+  res[1] += sum((z[1:2] - dp).^2) # (meas - predicted) change in position error term
+  res[1] += sum((z[3:4] - dv).^2) # (meas - predicted) change in velocity error term
+
+  ## now cross couple the change in position information, via timestamps to accompanying velocity
+   # recompute integration of velocity influence
+  # forward diff, "measured velocity"
+  dp_dt = dp./dt
+  # zeroth order integration
+  res[1] += sum((dp_dt - xi[3:4]).^2) # (meas - predicted) velocity error term
+
+    # first order integration
+    # res[1] += sum((dp/dt - 0.5*(xj[3:4]+xi[3:4])).^2)
+
+  # return objective cost
+  return res[1]
 end
 
 

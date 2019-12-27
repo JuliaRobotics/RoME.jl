@@ -18,17 +18,15 @@ tree, smt, hist = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree)
 
-@test sum( abs.(Statistics.mean(getVal(fg, :x0),dims=2) .- [0.0;0]) .< [0.5;0.5]) == 2
-@test sum( abs.(Statistics.mean(getVal(fg, :x1),dims=2) .- [10.0;0]) .< [0.5;0.5]) == 2
+@test sum( abs.(Statistics.mean(getVal(fg, :x0),dims=2) .- [0.0;0]) .< [1.0;1.0]) == 2
+@test sum( abs.(Statistics.mean(getVal(fg, :x1),dims=2) .- [10.0;0]) .< [1.0;1.0]) == 2
 
 end
 
-# using RoMEPlotting
-# writeGraphPdf(fg, show=true)
+
+# drawGraph(fg, show=true)
 #
-# plotKDE(fg, :l1)
-#
-# stuff = plotLocalProduct(fg, :l1, levels=3)
+# using RoMEPlotting, Gadfly, Fontconfig, Cairo
 #
 # drawTree(tree, show=true)
 #
@@ -36,7 +34,8 @@ end
 # stuff = treeProductUp(fg, tree, :l1, :l1)
 #
 # plotKDE(kde!(stuff[1]), levels=3)
-# drawLandms(fg)
+# # drawLandms(fg) #, regexLandmark=r"x") |> PDF("/tmp/test.pdf")
+# plotKDE(fg, ls(fg))
 
 
 @testset "test Point2Point2Range{T}..." begin
@@ -60,20 +59,20 @@ tree, smt, hist = solveTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
 
-@test 0.15*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
-@test 0.15*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
+@test 0.1*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
+@test 0.1*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
 
-@test 0.15*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
-@test 0.15*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
+@test 0.1*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
+@test 0.1*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
 
 global voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
-@test sum( getVal(fg, :l1)[2,voidsel1] .< 70 ) < 0.2*N
+@test sum( getVal(fg, :l1)[2,voidsel1] .< 70 ) < 0.3*N
 
 global voidsel2 =  10.0 .< getVal(fg, :l1)[2,:]
-@test sum( getVal(fg, :l1)[1,voidsel2] .< 70 ) < 0.2*N
+@test sum( getVal(fg, :l1)[1,voidsel2] .< 70 ) < 0.3*N
 
-@test sum( 120 .< abs.(getVal(fg, :l1)[1,:]) ) < 0.2*N
-@test sum( 120 .< abs.(getVal(fg, :l1)[2,:]) ) < 0.2*N
+@test sum( 120 .< abs.(getVal(fg, :l1)[1,:]) ) < 0.3*N
+@test sum( 120 .< abs.(getVal(fg, :l1)[2,:]) ) < 0.3*N
 
 
 end

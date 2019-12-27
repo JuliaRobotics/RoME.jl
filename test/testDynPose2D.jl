@@ -19,7 +19,7 @@ global pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.0
 addFactor!(fg, [:x0;], pp0)
 
 # initialize the first pose
-IncrementalInference.doautoinit!(fg, [getVert(fg,:x0);])
+IncrementalInference.doautoinit!(fg, [getVariable(fg,:x0);])
 
 addVariable!(fg, :x1, DynPose2(ut=1000_000))
 
@@ -123,10 +123,10 @@ global dp2dp2 = VelPose2VelPose2(MvNormal([0.0;0;0], Matrix(Diagonal([1.0;0.1;0.
 addFactor!(fg, [sym;sy], dp2dp2)
 global sym =sy
 
-end
+end # for
 
 
-global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
+global x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
 
 @test abs(x5[1]) < 1.25
 @test abs(x5[2]) < 1.25
@@ -137,7 +137,7 @@ global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 
 ensureAllInitialized!(fg)
 
-global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
+global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 @test abs(x10[1]) < 1.25
 @test abs(x10[2]) < 1.25
@@ -145,17 +145,22 @@ global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
 
+
+# drawGraph(fg, show=true)
+# tree = wipeBuildNewTree!(fg)
+# drawTree(tree, show=true)
+
 # using RoMEPlotting
+# Gadfly.set_default_plot_size(35cm, 25cm)
 # drawPoses(fg)
 # plotPose(fg, [:x10])
 
+# solve after being (graph) initialized
 tree, smt, hist = solveTree!(fg)
-# batchSolveR!(fg, N=N)
-# tree = wipeBuildNewTree!(fg)
-# inferOverTreeR!(fg, tree, N=N)
 
 
-global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
+
+global x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
 
 @test abs(x5[1]) < 1.5
 @test abs(x5[2]) < 1.5
@@ -163,7 +168,7 @@ global x5 = KDE.getKDEMean(getVertKDE(fg, :x5))
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
-global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
+global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 @test abs(x10[1]) < 2.75
 @test abs(x10[2]) < 2.75
@@ -179,13 +184,12 @@ global pp10 = DynPose2VelocityPrior(MvNormal([10.0;0;0], Matrix(Diagonal([0.01; 
 addFactor!(fg, [:x10;], pp10)
 
 
+fg2 = deepcopy(fg)
 
-batchSolve!(fg, N=N)
-# run(`evince /tmp/caesar/bt.pdf`)
+tree, mst, hist = solveTree!(fg) # N=N
 
 
-
-global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
+global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 @test 5.0 < x10[1]
 @test abs(x10[2]) < 1.0
@@ -196,7 +200,7 @@ global x10 = KDE.getKDEMean(getVertKDE(fg, :x10))
 
 for sym in [Symbol("x$i") for i in 2:9]
 
-global XX = KDE.getKDEMean(getVertKDE(fg, sym))
+global XX = KDE.getKDEMean(getKDE(getVariable(fg, sym)))
 
 @show sym, round.(XX,digits=5)
 @test -1.5 < XX[1] < 10.0
@@ -251,7 +255,7 @@ batchSolve!(fg,N=N)
 
 
 # test for velocity in the body frame
-global x0 = KDE.getKDEMean(getVertKDE(fg, :x0))
+global x0 = KDE.getKDEMean(getKDE(getVariable(fg, :x0)))
 
 @test -0.4 < x0[1] < 2.0
 @test abs(x0[2]) < 0.5
@@ -260,7 +264,7 @@ global x0 = KDE.getKDEMean(getVertKDE(fg, :x0))
 @test -1.5 < x0[5] < -0.5
 
 
-global x1 = KDE.getKDEMean(getVertKDE(fg, :x1))
+global x1 = KDE.getKDEMean(getKDE(getVariable(fg, :x1)))
 
 @test -0.1 < x1[1] < 2.0
 @test abs(x1[2]) < 0.5
@@ -271,14 +275,58 @@ global x1 = KDE.getKDEMean(getVertKDE(fg, :x1))
 
 end
 
-# using RoMEPlotting
+
+
+
+## debugging 458============================
+
+# using RoMEPlotting, Gadfly
+# Gadfly.set_default_plot_size(35cm,25cm)
+# plotPose(fg, :x10)
 #
-# drawPoses(fg)
+# drawGraph(fg2, show=true)
+# drawTree(tree, show=true, imgs=true)
 #
-# plotPose(fg, [:x0;:x1]);
-
-
-
+#
+# sfg = buildCliqSubgraph(fg, tree, :x9)
+# sfg = buildCliqSubgraph(fg, tree, :x10)
+# drawGraph(sfg)
+#
+# # fg = deepcopy(fg2)
+#
+# getSolverParams(fg).dbg = true
+# getSolverParams(fg).showtree = true
+# getSolverParams(fg).drawtree = true
+# getSolverParams(fg).multiproc = false
+#
+# ##============================================================================
+#
+# getLogPath(fg)
+# tree, mst, hist = solveTree!(fg, recordcliqs=ls(fg))
+#
+#
+#
+# printCliqHistorySummary(tree,:x10)
+#
+# getCliq(tree, :x10)
+#
+# csmc1 = hist[1][6][4]
+# csfg = csmc1.cliqSubFg
+# drawGraph(csfg)
+#
+# stuff = sandboxCliqResolveStep(tree, :x10, 6)
+#
+#
+# getKDE(hist[1][6][4].cliqSubFg, :x10) |> getPoints
+# getKDE(hist[1][7][4].cliqSubFg, :x10) |> getPoints
+# getKDE(stuff[4].cliqSubFg, :x10) |> getPoints
+#
+# getKDE(fg, :x10) |> getPoints
+#
+# tree = wipeBuildNewTree!(fg)
+#
+# getData(getCliq(tree, :x9 ))
+# getData(getCliq(tree, :x10))
 
 
 

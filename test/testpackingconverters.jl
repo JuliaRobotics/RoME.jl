@@ -8,7 +8,7 @@ using RoME
 using Test
 using DistributedFactorGraphs
 import DistributedFactorGraphs: pack, unpack
-
+import RoME: compare
 
 
 @testset "test PriorPoint2" begin
@@ -55,7 +55,7 @@ global fg
 dd = convert(PackedPriorPose2, ipp)
 upd = convert(RoME.PriorPose2, dd)
 
-@test RoME.compare(ipp, upd) # temp use of RoME.compare
+@test compare(ipp, upd)
 
 packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
 unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose2}}, packeddata)
@@ -63,7 +63,7 @@ unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapp
 # getData(f1)
 # unpackeddata
 
-@test RoME.compare(getData(f1), unpackeddata) # temp use of RoME.compare
+@test DFG.compare(getData(f1), unpackeddata)
 # TODO -- what what??
 # setSerializationNamespace!("Main" => Main)
 # TODO: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/44
@@ -83,13 +83,13 @@ end
     global upd = convert(RoME.Pose2Pose2, dd)
 
     # TODO -- fix ambiguity in compare function
-    @test RoME.compare(ppc, upd)
+    @test compare(ppc, upd)
 
     global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Pose2}, getData(f2))
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Pose2}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test IncrementalInference.compare(getData(f2), unpackeddata)
+    @test DFG.compare(getData(f2), unpackeddata)
 end
 
 
@@ -186,7 +186,7 @@ f2 = addFactor!(fg, [:x1, :x2], pp3)
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose3Pose3}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test IncrementalInference.compare(getData(f2), unpackeddata)
+    @test DFG.compare(getData(f2), unpackeddata)
 end
 
 
@@ -210,7 +210,7 @@ global f3 = addFactor!(fg,[:x1;:x2],odoc)
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose3Pose3NH}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test IncrementalInference.compare(getData(f3), unpackeddata)
+    @test DFG.compare(getData(f3), unpackeddata)
 end
 
 
@@ -222,7 +222,7 @@ end
     global pprpz = convert(PackedPartialPriorRollPitchZ, prpz)
     global unp = convert(PartialPriorRollPitchZ, pprpz)
 
-    @test RoME.compare(prpz, unp)
+    @test compare(prpz, unp)
 
 end
 
@@ -237,7 +237,7 @@ end
     global pxyy = convert(PackedPartialPose3XYYaw, xyy)
     global unp = convert(PartialPose3XYYaw, pxyy)
 
-    @test RoME.compare(xyy, unp)
+    @test compare(xyy, unp)
 end
 
 
@@ -249,7 +249,7 @@ end
     global pxyy = convert(PackedPartialPose3XYYawNH, xyy)
     global unp = convert(PartialPose3XYYawNH, pxyy)
 
-    @test RoME.compare(xyy, unp)
+    @test compare(xyy, unp)
 end
 
 

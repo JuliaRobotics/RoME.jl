@@ -17,9 +17,10 @@ end
 # include("testCameraFunctions.jl")
 # end
 
-@testset "MultipleFeatures constraints" begin
-include("testmultiplefeatures.jl")
-end
+@warn "Skipping multiple feature constraint test for the time being"
+# println("[TEST] MultipleFeatures constraints")
+# include("testmultiplefeatures.jl")
+# println("[SUCCESS]")
 
 @testset "Linear array function evaluations" begin
 include("testDidsonFunctions.jl")
@@ -64,6 +65,8 @@ end
 include("testBearingRange2D.jl")
 end
 
+include("testDeltaOdo.jl")
+
 @testset "FixedLag Tests" begin
 include("testFixedLagFG.jl")
 end
@@ -71,6 +74,7 @@ end
 @testset "MultimodalRangeBearing Tests" begin
 include("testMultimodalRangeBearing.jl")
 end
+
 @testset "DynPose2D Tests" begin
 include("testDynPose2D.jl")
 end
@@ -98,3 +102,7 @@ end
 @testset "Default FG Initialization" begin
 include("TestDefaultFGInitialization.jl")
 end
+
+include("testAccumulateFactors.jl")
+
+include("testDeadReckoningTether.jl")

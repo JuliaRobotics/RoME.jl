@@ -5,7 +5,7 @@ import IncrementalInference: getSample
 
 mutable struct NorthSouthPartial{T} <: FunctorSingleton
   Z::T
-  partial::Tuple
+  partial::Tuple{Int}
   NorthSouthPartial() = new()
   NorthSouthPartial(Z::D) where {D <: Distribution} = new{D}(Z, (2,))
 end
