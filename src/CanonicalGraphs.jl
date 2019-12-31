@@ -81,6 +81,7 @@ function loadCanonicalFG_TwoPoseOdo(;type::Type{Pose2}=Pose2,
 end
 
 
+
 """
     $SIGNATURES
 
@@ -90,6 +91,9 @@ function warmUpSolverJIT(;drawtree::Bool=true)::Nothing
   #
   fg=loadCanonicalFG_Hexagonal()
   fcts = ls(fg, :x0)
+  fcts = ls(fg)
+  fcts = lsf(fg, :x0f1)
+  fcts = lsf(fg)
   getSolverParams(fg).drawtree = drawtree
   tree, smt, hist = solveTree!(fg)
   nothing

@@ -123,7 +123,7 @@ global dp2dp2 = VelPose2VelPose2(MvNormal([0.0;0;0], Matrix(Diagonal([1.0;0.1;0.
 addFactor!(fg, [sym;sy], dp2dp2)
 global sym =sy
 
-end
+end # for
 
 
 global x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
@@ -145,14 +145,19 @@ global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 @test abs(x10[4]) < 0.5
 @test abs(x10[5]) < 0.5
 
+
+# drawGraph(fg, show=true)
+# tree = wipeBuildNewTree!(fg)
+# drawTree(tree, show=true)
+
 # using RoMEPlotting
+# Gadfly.set_default_plot_size(35cm, 25cm)
 # drawPoses(fg)
 # plotPose(fg, [:x10])
 
+# solve after being (graph) initialized
 tree, smt, hist = solveTree!(fg)
-# batchSolveR!(fg, N=N)
-# tree = wipeBuildNewTree!(fg)
-# inferOverTreeR!(fg, tree, N=N)
+
 
 
 global x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
@@ -179,10 +184,9 @@ global pp10 = DynPose2VelocityPrior(MvNormal([10.0;0;0], Matrix(Diagonal([0.01; 
 addFactor!(fg, [:x10;], pp10)
 
 
+fg2 = deepcopy(fg)
 
-batchSolve!(fg, N=N)
-# run(`evince /tmp/caesar/bt.pdf`)
-
+tree, mst, hist = solveTree!(fg) # N=N
 
 
 global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
@@ -271,14 +275,58 @@ global x1 = KDE.getKDEMean(getKDE(getVariable(fg, :x1)))
 
 end
 
-# using RoMEPlotting
+
+
+
+## debugging 458============================
+
+# using RoMEPlotting, Gadfly
+# Gadfly.set_default_plot_size(35cm,25cm)
+# plotPose(fg, :x10)
 #
-# drawPoses(fg)
+# drawGraph(fg2, show=true)
+# drawTree(tree, show=true, imgs=true)
 #
-# plotPose(fg, [:x0;:x1]);
-
-
-
+#
+# sfg = buildCliqSubgraph(fg, tree, :x9)
+# sfg = buildCliqSubgraph(fg, tree, :x10)
+# drawGraph(sfg)
+#
+# # fg = deepcopy(fg2)
+#
+# getSolverParams(fg).dbg = true
+# getSolverParams(fg).showtree = true
+# getSolverParams(fg).drawtree = true
+# getSolverParams(fg).multiproc = false
+#
+# ##============================================================================
+#
+# getLogPath(fg)
+# tree, mst, hist = solveTree!(fg, recordcliqs=ls(fg))
+#
+#
+#
+# printCliqHistorySummary(tree,:x10)
+#
+# getCliq(tree, :x10)
+#
+# csmc1 = hist[1][6][4]
+# csfg = csmc1.cliqSubFg
+# drawGraph(csfg)
+#
+# stuff = sandboxCliqResolveStep(tree, :x10, 6)
+#
+#
+# getKDE(hist[1][6][4].cliqSubFg, :x10) |> getPoints
+# getKDE(hist[1][7][4].cliqSubFg, :x10) |> getPoints
+# getKDE(stuff[4].cliqSubFg, :x10) |> getPoints
+#
+# getKDE(fg, :x10) |> getPoints
+#
+# tree = wipeBuildNewTree!(fg)
+#
+# getData(getCliq(tree, :x9 ))
+# getData(getCliq(tree, :x10))
 
 
 

@@ -18,8 +18,8 @@ tree, smt, hist = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree)
 
-@test sum( abs.(Statistics.mean(getVal(fg, :x0),dims=2) .- [0.0;0]) .< [0.5;0.5]) == 2
-@test sum( abs.(Statistics.mean(getVal(fg, :x1),dims=2) .- [10.0;0]) .< [0.5;0.5]) == 2
+@test sum( abs.(Statistics.mean(getVal(fg, :x0),dims=2) .- [0.0;0]) .< [1.0;1.0]) == 2
+@test sum( abs.(Statistics.mean(getVal(fg, :x1),dims=2) .- [10.0;0]) .< [1.0;1.0]) == 2
 
 end
 
@@ -59,11 +59,11 @@ tree, smt, hist = solveTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
 
-@test 0.15*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
-@test 0.15*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
+@test 0.1*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
+@test 0.1*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
 
-@test 0.15*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
-@test 0.15*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
+@test 0.1*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
+@test 0.1*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
 
 global voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
 @test sum( getVal(fg, :l1)[2,voidsel1] .< 70 ) < 0.3*N
