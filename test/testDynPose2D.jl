@@ -203,10 +203,10 @@ for sym in [Symbol("x$i") for i in 2:9]
 global XX = KDE.getKDEMean(getKDE(getVariable(fg, sym)))
 
 @show sym, round.(XX,digits=5)
-@test -1.5 < XX[1] < 10.0
+@test -2.0 < XX[1] < 10.0
 @test abs(XX[2]) < 1.0
 @test abs(TU.wrapRad(XX[3])) < 1.3
-@test -0.3 < XX[4] < 2.0
+@test -0.5 < XX[4] < 2.0
 @test abs(XX[5]) < 0.5
 
 end
