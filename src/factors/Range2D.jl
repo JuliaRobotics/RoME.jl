@@ -73,7 +73,6 @@ function (pp2r::Pose2Point2Range)(res::Array{Float64},
                                   xi::Array{Float64,2},
                                   lm::Array{Float64,2}  )
   #
-  # DONE in IIF -- still need to add multi-hypotheses support here
   # this is the noisy range
   z = meas[1][1,idx]
   XX = lm[1,idx] - (z*cos(meas[2][idx]) + xi[1,idx])
@@ -94,4 +93,55 @@ function convert(::Type{PackedPose2Point2Range}, d::Pose2Point2Range)
 end
 function convert(::Type{Pose2Point2Range}, d::PackedPose2Point2Range)
   return Pose2Point2Range(extractdistribution(d.str))
+end
+
+
+"""
+    $TYPEDEF
+
+Range only measurement from Pose2 to Point2 variable.
+"""
+mutable struct Pose2Point2RangeNeighborhood{T} <: IncrementalInference.FunctorPairwiseMinimize
+  Z::T
+  partial::Tuple{Int,Int}
+  Pose2Point2RangeNeighborhood{T}() where T = new()
+  Pose2Point2RangeNeighborhood{T}(Z::T) where {T <: IIF.SamplableBelief} = new{T}(Z, (1,2))
+end
+Pose2Point2RangeNeighborhood(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2RangeNeighborhood{T}(Z)
+
+function getSample(pp2::Pose2Point2RangeNeighborhood, N::Int=1)
+  return (reshape(rand(pp2.Z,N),1,N) ,  pi*randn(N).-(pi/2))
+end
+function (pp2r::Pose2Point2RangeNeighborhood)(res::Array{Float64},
+                                  userdata,
+                                  idx::Int,
+                                  meas::Tuple{BeliefArray{<:Real}, Array{Float64,1}}, # from getSample
+                                  xi::BeliefArray{<:Real},
+                                  lm::BeliefArray{<:Real}  )
+  #
+  # this is the noisy range
+  gg = x->round(x, digits=2)
+  z = meas[1][1,idx]
+  @show dx = lm[1,idx]-xi[1,idx]
+  @show dy = lm[2,idx]-xi[2,idx]
+  @show phi = atan(dy, dx)
+  @show XX = lm[1,idx] - (z*cos(phi + meas[2][idx]) + xi[1,idx])
+  @show YY = lm[2,idx] - (z*sin(phi + meas[2][idx]) + xi[2,idx])
+  res[1] = XX^2 + YY^2
+  @show idx, gg(meas[1][1,idx]), gg.(xi[:,idx]), gg.(lm[:,idx]), gg.(res)
+  return res[1]
+end
+
+
+
+mutable struct PackedPose2Point2RangeNeighborhood  <: IncrementalInference.PackedInferenceType
+  str::String
+  PackedPose2Point2RangeNeighborhood() = new()
+  PackedPose2Point2RangeNeighborhood(s::AS) where {AS <: AbstractString} = new(s)
+end
+function convert(::Type{PackedPose2Point2RangeNeighborhood}, d::Pose2Point2RangeNeighborhood)
+  return PackedPose2Point2RangeNeighborhood(string(d.Z))
+end
+function convert(::Type{Pose2Point2RangeNeighborhood}, d::PackedPose2Point2RangeNeighborhood)
+  return Pose2Point2RangeNeighborhood(extractdistribution(d.str))
 end

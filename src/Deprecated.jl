@@ -420,8 +420,8 @@ end
 
 
 function basicFactorGraphExample(::Type{Pose2}=Pose2; addlandmark::Bool=true)
-  @warn "basicFactorGraphExample is deprecated, use loadCanonicalFG_TwoPoseOdo instead"
-  loadCanonicalFG_TwoPoseOdo(addlandmark=addlandmark)
+  @warn "basicFactorGraphExample is deprecated, use generateCanonicalFG_TwoPoseOdo instead"
+  generateCanonicalFG_TwoPoseOdo(addlandmark=addlandmark)
 end
 
 

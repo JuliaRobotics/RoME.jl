@@ -142,6 +142,8 @@ export
   PackedPose2Point2Bearing,
   Pose2Point2Range,
   PackedPose2Point2Range,
+  Pose2Point2RangeNeighborhood,
+  PackedPose2Point2RangeNeighborhood,
   PriorPoint2,
   PackedPriorPoint2,
   # Point2D with null hypotheses
