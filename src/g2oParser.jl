@@ -53,7 +53,9 @@ function exportG2o(dfg::AbstractDFG; poseRegex::Regex=r"x\d", solvable::Int=0)
     vfcs = ls(fg, vs, solvable=solvable)
     kvfcs = intersect(vfcs, fcts)
     for fc in kvfcs
-      isPrior(dfg, fc) ? filter!(x->x!=fc, fcts)
+      # remove if is prior
+      isPrior(dfg, fc) ? filter!(x->x!=fc, fcts) : nothing
+
     end
   end
 
