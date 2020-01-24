@@ -7,7 +7,19 @@
 
 
 ## Import g2o functions
-
+function importG2o(input_file::String)
+    instructions = []
+    # Read input file line by line.
+    open(input_file) do file
+        for ln in eachline(file)
+            println("$(length(ln)), $(ln)")
+            pieces = split(ln, ' ', keepempty=false)
+            @show pieces
+            push!(instructions, pieces)
+        end
+    end
+    return instructions
+end
 
 
 
