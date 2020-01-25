@@ -336,6 +336,7 @@ include("Deprecated.jl")
 
 # include("dev/ISAMRemoteSolve.jl")
 
+include("g2oParser.jl")
 
 
 end

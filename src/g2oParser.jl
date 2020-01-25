@@ -1,4 +1,5 @@
-# this file is for g2o integration
+# This file is for g2o integration. For more information on the actual file
+# formats, refer to: https://github.com/RainerKuemmerle/g2o/wiki/File-Format
 
 export importG2o, exportG2o
 
@@ -24,7 +25,9 @@ function importG2o(input_file::String)
     return instructions
 end
 
-
+function parseG2oInstruction(instruction::Array{SubString{String},1})
+    #
+end
 
 
 
