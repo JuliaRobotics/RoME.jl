@@ -18,6 +18,32 @@ using RoME
 
 
   # generate g2o from factor graph and should match orginal file
+end
 
-  
+
+@testset "Test g2o file parsing." begin
+
+  reflines = ["LANDMARK 0 1 0.0 20.0 3.162277660168379 0.0 1.0";
+              "EDGE_SE2 0 2 10.0 0.0 1.0471975511965976 10.0 10.0 0.0 0.0 10.0 0.0 0.0 0.0";
+              "EDGE_SE2 2 3 10.0 0.0 1.0471975511965976 10.0 10.0 0.0 0.0 10.0 0.0 0.0 0.0";
+              "EDGE_SE2 3 4 10.0 0.0 1.0471975511965976 10.0 10.0 0.0 0.0 10.0 0.0 0.0 0.0";
+              "EDGE_SE2 4 5 10.0 0.0 1.0471975511965976 10.0 10.0 0.0 0.0 10.0 0.0 0.0 0.0";
+              "EDGE_SE2 5 6 10.0 0.0 1.0471975511965976 10.0 10.0 0.0 0.0 10.0 0.0 0.0 0.0";
+              "EDGE_SE2 6 7 10.0 0.0 1.0471975511965976 10.0 10.0 0.0 0.0 10.0 0.0 0.0 0.0";
+              "LANDMARK 7 1 0.0 20.0 3.162277660168379 0.0 1.0"]
+
+
+  # test file generation
+  fg = generateCanonicalFG_Hexagonal(autoinit=false)
+
+  filepath = exportG2o(fg)
+
+  fid = open(filepath, "r")
+  count = 0
+  for line in eachline(fid)
+    count += 1
+    @test reflines[count] == line
+  end
+  close(fid)
+
 end
