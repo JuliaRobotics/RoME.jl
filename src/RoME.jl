@@ -330,13 +330,11 @@ include("RobotDataTypes.jl") #WheeledRobotUtils
 include("NavigationSystem.jl")
 
 include("CanonicalGraphs.jl")
+
 include("g2oParser.jl")
-
-include("Deprecated.jl")
-
 # include("dev/ISAMRemoteSolve.jl")
 
-include("g2oParser.jl")
+include("Deprecated.jl")
 
 
 end
