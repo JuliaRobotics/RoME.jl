@@ -5,7 +5,8 @@ export importG2o, exportG2o
 ## Common functions for g2o parsing
 
 
-
+global commands = Dict(Pose2Pose2 => :EDGE_SE2,
+                       Pose2Point2BearingRange => :LANDMARK)
 
 
 ## Import g2o functions
@@ -29,41 +30,61 @@ end
 
 ## Export g2o functions
 
-function stringG2o!(dfg::AbstractDFG,
-                    fc::Symbol,
-                    fnc::Pose2Pose2,
-                    varIntLabel::Dict,
-                    uniqVarInt::Vector{Int})::String
-  #
-  INF = 1 ./ sqrt(fnc.z.Σ.mat)
-  INF[INF .== Inf] .= 0
+function getVariableListInts!(fct, uniqVarInt, varIntLabel)
   varlist = Int[]
-  # get variable numbers
-  for vari in solverData(getFactor(dfg,fc)).fncargvID
+  for vari in solverData(fct).fncargvID
     if !haskey(varIntLabel, vari)
       uniqVarInt[1] += 1
       varIntLabel[vari] = uniqVarInt[1]
     end
     push!(varlist, varIntLabel[vari])
   end
-  return "EDGE_SE2 $(varlist[1]) $(varlist[2]) $(fnc.z.μ[1]) $(fnc.z.μ[2]) $(fnc.z.μ[3]) $(INF[1,1]) $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[2,2]) $(INF[2,3]) $(INF[2,3]) $(INF[2,3])"
+  varlist
+end
+
+function stringG2o!(dfg::AbstractDFG,
+                    fc::Symbol,
+                    fnc::Pose2Pose2,
+                    varIntLabel::Dict,
+                    uniqVarInt::Vector{Int};
+                    overwriteMapping::Dict=Dict())::String
+  #
+  global commands
+  # get variable numbers
+  varlist = getVariableListInts!(getFactor(dfg,fc), uniqVarInt, varIntLabel)
+  # get information matrix
+  INF = 1 ./ sqrt(fnc.z.Σ.mat)
+  INF[INF .== Inf] .= 0
+  # get command
+  comm = !haskey(overwriteMapping, Pose2Pose2) ? commands[Pose2Pose2] : overwriteMapping[Pose2Pose2]
+  return "$comm $(varlist[1]) $(varlist[2]) $(fnc.z.μ[1]) $(fnc.z.μ[2]) $(fnc.z.μ[3]) $(INF[1,1]) $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[2,2]) $(INF[2,3]) $(INF[2,3]) $(INF[2,3])"
 end
 
 function stringG2o!(dfg::AbstractDFG,
                     fc::Symbol,
                     fnc::Pose2Point2BearingRange,
                     varIntLabel::Dict,
-                    uniqVarInt::Vector{Int})::String
+                    uniqVarInt::Vector{Int};
+                    overwriteMapping::Dict=Dict{Symbol,Symbol}())::String
   #
-  return "BEARRANGE not implemented"
+  global commands
+  # get variable numbers
+  varlist = getVariableListInts!(getFactor(dfg,fc), uniqVarInt, varIntLabel)
+  # get information matrix
+  INF = [1/sqrt(fnc.bearing.σ); 0; 1/sqrt(fnc.range.σ)]
+  # get command
+  comm = !haskey(overwriteMapping, Pose2Point2BearingRange) ? commands[Pose2Point2BearingRange] : overwriteMapping[Pose2Point2BearingRange]
+  return "$comm $(varlist[1]) $(varlist[2]) $(fnc.bearing.μ) $(fnc.range.μ) $(INF[1]) $(INF[2]) $(INF[3])"
 end
 
 function stringG2o!(dfg::AbstractDFG,
                     fc::Symbol,
                     fnc,
                     varIntLabel::Dict,
-                    uniqVarInt::Vector{Int})
+                    uniqVarInt::Vector{Int};
+                    overwriteMapping::Dict=Dict{Symbol,Symbol}())
   #
+  global commands
   error("unknown factor type $fnc")
 end
 
@@ -79,7 +100,8 @@ function exportG2o(dfg::AbstractDFG;
                    poseRegex::Regex=r"x\d",
                    solvable::Int=0,
                    ignorePriors::Bool=true,
-                   filename::AbstractString="/tmp/test.txt" )
+                   filename::AbstractString="/tmp/test.txt",
+                   overwriteMapping::Dict=Dict{Symbol, Symbol}())
   #
   uniqVarInt = Int[-1;]
   varIntLabel = Dict{Symbol, Int}()
@@ -101,22 +123,8 @@ function exportG2o(dfg::AbstractDFG;
       !(fc in fcts) ? continue : filter!(x->x!=fc, fcts)
       # actually add the factor to the file
       fnc = getFactorType(dfg, fc)
-      # if fnc isa Pose2Pose2
-        pstr = stringG2o!(dfg, fc, fnc, varIntLabel, uniqVarInt)
-        println(io, pstr)
-        # INF = 1 ./ sqrt(fnc.z.Σ.mat)
-        # INF[INF .== Inf] .= 0
-        # varlist = Int[]
-        # # get variable numbers
-        # for vari in solverData(getFactor(dfg,fc)).fncargvID
-        #   if !haskey(varIntLabel, vari)
-        #     uniqVarInt += 1
-        #     varIntLabel[vari] = uniqVarInt
-        #   end
-        #   push!(varlist, varIntLabel[vari])
-        # end
-        # println(io, "EDGE_SE2 $(varlist[1]) $(varlist[2]) $(fnc.z.μ[1]) $(fnc.z.μ[2]) $(fnc.z.μ[3]) $(INF[1,1]) $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[2,2]) $(INF[2,3]) $(INF[2,3]) $(INF[2,3])" )
-      # end
+      pstr = stringG2o!(dfg, fc, fnc, varIntLabel, uniqVarInt, overwriteMapping=overwriteMapping)
+      println(io, pstr)
     end
   end
   close(io)
