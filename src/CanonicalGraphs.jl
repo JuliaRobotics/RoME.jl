@@ -1,6 +1,6 @@
 # canonical factor graph examples useful for development and learning.
 
-export loadCanonicalFG_Hexagonal, loadCanonicalFG_TwoPoseOdo
+export generateCanonicalFG_Hexagonal, generateCanonicalFG_TwoPoseOdo
 export warmUpSolverJIT
 
 """
@@ -18,11 +18,11 @@ Example
 ```julia
 using RoME
 
-fg = loadCanonicalFG_Hexagonal()
+fg = generateCanonicalFG_Hexagonal()
 drawGraph(fg, show=true)
 ```
 """
-function loadCanonicalFG_Hexagonal(;autoinit::Bool=true)
+function generateCanonicalFG_Hexagonal(;autoinit::Bool=true)
   # start with an empty factor graph object
   fg = initfg()
   # IIF.getSolverParams(fg).drawtree = true
@@ -63,7 +63,7 @@ Build a basic factor graph in Pose2 with two `Pose2` and one landmark `Point2` v
 along with `PriorPose2` on `:x0` and `Pose2Pose2` to `:x1`.  Also a `Pose2Point2BearingRange`
 to landmark `:l1`.
 """
-function loadCanonicalFG_TwoPoseOdo(;type::Type{Pose2}=Pose2,
+function generateCanonicalFG_TwoPoseOdo(;type::Type{Pose2}=Pose2,
                                     addlandmark::Bool=true,
                                     autoinit::Bool=true)
   #
@@ -89,7 +89,7 @@ Load and solve a canonical or user factor graph to warm up---precompile---severa
 """
 function warmUpSolverJIT(;drawtree::Bool=true)::Nothing
   #
-  fg=loadCanonicalFG_Hexagonal()
+  fg=generateCanonicalFG_Hexagonal()
   fcts = ls(fg, :x0)
   fcts = ls(fg)
   fcts = lsf(fg, :x0f1)
