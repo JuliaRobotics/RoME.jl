@@ -89,3 +89,5 @@ include("TestDefaultFGInitialization.jl")
 include("testAccumulateFactors.jl")
 
 include("testDeadReckoningTether.jl")
+
+include("testG2oParser.jl")

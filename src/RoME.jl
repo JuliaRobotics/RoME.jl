@@ -331,10 +331,10 @@ include("NavigationSystem.jl")
 
 include("CanonicalGraphs.jl")
 
-include("Deprecated.jl")
-
+include("g2oParser.jl")
 # include("dev/ISAMRemoteSolve.jl")
 
+include("Deprecated.jl")
 
 
 end
