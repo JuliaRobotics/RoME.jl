@@ -1,13 +1,33 @@
 # This file is for g2o integration. For more information on the actual file
 # formats, refer to: https://github.com/RainerKuemmerle/g2o/wiki/File-Format
 
-export importG2o, exportG2o
+export importG2o, exportG2o, findCommand
 
 ## Common functions for g2o parsing
 
 
 global commands = Dict(Pose2Pose2 => :EDGE_SE2,
                        Pose2Point2BearingRange => :LANDMARK)
+#
+
+"""
+    $SIGNATURES
+
+Hackish reverse lookup for dict[val] <= key.
+
+Notes
+- See DFG BiDictMap as better future solution (TODO)
+"""
+function findCommand(comm::Symbol)
+  global commands
+  for (key, val) in commands
+    if val == comm
+      return key
+    end
+  end
+  error("$comm not found in known g2o commands, $(collect(values(commands)))")
+  return nothing
+end
 
 
 ## Import g2o functions
