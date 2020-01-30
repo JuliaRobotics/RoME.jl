@@ -22,13 +22,14 @@ defaultFixedLagOnTree!(fg, 10)
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
+# getSolverParams(fg).N = 200
 
 tree, smt, hist = solveTree!(fg)
 
-# drawPosesLandms(fg, spscale=1.0)
+drawPosesLandms(fg, spscale=1.0)
 
 
-generateCanonicalFG_Circle(20, fg=fg, biasTurn=-0.05, loopClosure=false)
+generateCanonicalFG_Circle(20, fg=fg, biasTurn=-0.05, loopClosure=true)
 # drawGraph(fg, show=true)
 
 
@@ -53,6 +54,9 @@ tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 # fetchAssignTaskHistoryAll!(tree, smt) # if async
 
 
+pl = drawPosesLandms(fg, spscale=1.0)
+pl |> PDF(joinpath(ENV["HOME"], "Downloads", "circ20.pdf"))
+
 
 ### SHOW Recycling--------------------------------------------------------
 
@@ -71,7 +75,7 @@ tree, smt, hist = solveTree!(fg)
 
 
 
-generateCanonicalFG_Circle(20, fg=fg, biasTurn=-0.05, loopClosure=false)
+generateCanonicalFG_Circle(20, fg=fg, biasTurn=-0.05, loopClosure=true)
 # drawGraph(fg, show=true)
 
 
@@ -85,7 +89,7 @@ fg_ = deepcopy(fg)
 tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
 
 
-
+drawPosesLandms(fg, spscale=1.0)
 
 
 ## debugging solves
