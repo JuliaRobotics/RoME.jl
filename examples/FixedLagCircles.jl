@@ -11,61 +11,80 @@ using RoME, RoMEPlotting
 Gadfly.set_default_plot_size(35cm,25cm)
 
 
+SIZE = 10
 
 ### SHOW marginalization--------------------------------------------------------
 
 
 # drive first half
-fg = generateCanonicalFG_Circle(20, stopEarly=10, biasTurn=-0.05)
+fg = generateCanonicalFG_Circle(SIZE, stopEarly=round(Int, SIZE/2), biasTurn=-0.05)
 
-defaultFixedLagOnTree!(fg, 10)
+defaultFixedLagOnTree!(fg, round(Int, SIZE/2))
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 # getSolverParams(fg).N = 200
-
-tree, smt, hist = solveTree!(fg)
-
-drawPosesLandms(fg, spscale=1.0)
+# tree = wipeBuildNewTree!(fg)
+# drawTree(tree, filepath=joinLogPath(fg, "bt5.pdf"))
 
 
-generateCanonicalFG_Circle(20, fg=fg, biasTurn=-0.05, loopClosure=true)
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+
+plfl1 = drawPosesLandms(fg, spscale=1.0)
+
+
+generateCanonicalFG_Circle(SIZE, fg=fg, biasTurn=-0.05, loopClosure=true)
 # drawGraph(fg, show=true)
 
 
 ensureAllInitialized!(fg)
 
 
-drawPosesLandms(fg, spscale=1.0)
+plfl2 = drawPosesLandms(fg, spscale=1.0)
+
+# isMarginalized(fg, :x10)
+# isSolved(fg, :x10)
+# isSolved(fg, :x11)
 
 
-isMarginalized(fg, :x10)
-isSolved(fg, :x10)
-isSolved(fg, :x11)
-
-0
-
-
-
+fg_ = deepcopy(fg)
 
 ##
-fg_ = deepcopy(fg)
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
-# fetchAssignTaskHistoryAll!(tree, smt) # if async
+
+vo = getEliminationOrder(fg)
+filter!(x->!(x in [:x5;:x4]), vo)
+push!(vo, :x4)
+push!(vo, :x5)
+
+tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg), variableOrder=vo)
 
 
-pl = drawPosesLandms(fg, spscale=1.0)
-pl |> PDF(joinpath(ENV["HOME"], "Downloads", "circ20.pdf"))
+plfl3 = drawPosesLandms(fg, spscale=1.0)
 
 
-### SHOW Recycling--------------------------------------------------------
+## draw compound image
+
+plfl4 = drawPosesLandms(fg, spscale=1.0, manualColor="gray30", point_size=4pt)
+
+plfl2
 
 
+
+## export plots
+plfl1 |> PDF(joinLogPath(fg, "circ$(SIZE)_fl1.pdf") )
+plfl2 |> PDF(joinLogPath(fg, "circ$(SIZE)_fl2.pdf") )
+plfl3 |> PDF(joinLogPath(fg, "circ$(SIZE)_fl3.pdf") )
+
+saveDFG(fg_, joinLogPath(fg,"fg_before_2nd"))
+saveDFG(fg, joinLogPath(fg,"fg_after_2nd"))
+
+
+### SHOW Incremental Recycling--------------------------------------------------------
 
 
 
 # drive first half
-fg = generateCanonicalFG_Circle(20, stopEarly=10, biasTurn=-0.05)
+fg = generateCanonicalFG_Circle(SIZE, stopEarly=round(Int, SIZE/2)+1, biasTurn=-0.05)
 
 
 getSolverParams(fg).drawtree = true
@@ -74,22 +93,40 @@ getSolverParams(fg).showtree = true
 tree, smt, hist = solveTree!(fg)
 
 
+plinc1 = drawPosesLandms(fg, spscale=1.0)
 
-generateCanonicalFG_Circle(20, fg=fg, biasTurn=-0.05, loopClosure=true)
+
+## drive second part
+generateCanonicalFG_Circle(SIZE, fg=fg, biasTurn=-0.05, loopClosure=true)
 # drawGraph(fg, show=true)
 
 
 ensureAllInitialized!(fg)
 
-drawPosesLandms(fg, spscale=1.0)
+plinc2 = drawPosesLandms(fg, spscale=1.0)
 
 
 
 fg_ = deepcopy(fg)
+
 tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
 
 
-drawPosesLandms(fg, spscale=1.0)
+plinc3 = drawPosesLandms(fg, spscale=1.0)
+
+
+
+
+
+## export plots
+plinc1 |> PDF(joinLogPath(fg, "circ$(SIZE)_inc1.pdf") )
+plinc2 |> PDF(joinLogPath(fg, "circ$(SIZE)_inc2.pdf") )
+plinc3 |> PDF(joinLogPath(fg, "circ$(SIZE)_inc3.pdf") )
+
+saveDFG(fg_, joinLogPath(fg,"fg_before_2nd"))
+saveDFG(fg, joinLogPath(fg,"fg_after_2nd"))
+
+
 
 
 ## debugging solves
