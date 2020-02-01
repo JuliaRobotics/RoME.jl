@@ -3,7 +3,7 @@
 using Distributed
 addprocs(4)
 
-using RoME, RoMEPlotting, DistributedFactorGraphs
+using RoME, RoMEPlotting, DistributedFactorGraphs, KernelDensityEstimatePlotting
 @everywhere using RoME
 
 Gadfly.set_default_plot_size(35cm,25cm)
@@ -31,6 +31,10 @@ tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 fg5a = deepcopy(fg)
 tree5 = deepcopy(tree)
 
+plotCirc10BA(fg5a, fg5a, filepath=joinLogPath(fg, "circ5A.pdf"), pointsList_=[:l1])
+pl5blue = plotCirc10BA(fg5a, fg5a, filepath=joinLogPath(fg, "circ5A_blue.pdf"), lineColor="deepskyblue")
+
+saveDFG(fg5a, joinLogPath(fg5a,"fg_5A"))
 
 # drive second half
 
@@ -41,61 +45,80 @@ ensureAllInitialized!(fg)
 # keep copy for later
 fg_ = deepcopy(fg)
 
+saveDFG(fg_, joinLogPath(fg_,"fg_10B"))
+
 
 
 ### SHOW Incremental Recycling--------------------------------------------------------
 
+fgI = deepcopy(fg_)
 
-tree, smt, hist = solveTree!(fg, tree5, recordcliqs=ls(fg))
-
-
-
-plotCirc10BA(fg_, fg, filepath=joinLogPath(fg, "circ$(SIZE)IncrBA.pdf"))
+tree, smt, hist = solveTree!(fgI, deepcopy(tree5), recordcliqs=ls(fgI))
 
 
-saveDFG(fg_, joinLogPath(fg,"fg_before_2nd"))
-saveDFG(fg, joinLogPath(fg,"fg_after_2nd"))
+plotCirc10BA(fg_, fgI, filepath=joinLogPath(fg, "circ$(SIZE)IncrBA.pdf"), pointsList_=[:x8])
+
+
+saveDFG(fgI, joinLogPath(fgI,"fg_IncrA"))
 
 
 
 
 ## SHOW MARGINALIZATION---------------------------------------------------------
 
+fgM = deepcopy(fg_)
 
-fg = deepcopy(fg_)
-
-defaultFixedLagOnTree!(fg, round(Int, SIZE/2))
+defaultFixedLagOnTree!(fgM, round(Int, SIZE/2))
 
 # use slightly special variable ordering
-vo = getEliminationOrder(fg)
+vo = getEliminationOrder(fgM)
 filter!(x->!(x in [:x5;:x4]), vo)
 push!(vo, :x4)
 push!(vo, :x5)
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg), variableOrder=vo)
+tree, smt, hist = solveTree!(fgM, recordcliqs=ls(fgM), variableOrder=vo)
 
 ## Plot ellipses to illustrate covariance fit
 
-plotCirc10BA(fg_, fg, filepath=joinLogPath(fg, "circ$(SIZE)MargBA.pdf"))
+pl10marg = plotCirc10BA(fg_, fgM, filepath=joinLogPath(fgM, "circ$(SIZE)MargBA.pdf"), pointsList=[:x5])
+
+for ll in pl10marg.layers
+  push!(pl5blue.layers, ll)
+end
+pl5blue |> PDF(joinLogPath(fgM, "circ$(SIZE)MargBA_blue.pdf"), 10cm, 8cm)
 
 
-saveDFG(fg_, joinLogPath(fg,"fg_before_2nd"))
-saveDFG(fg, joinLogPath(fg,"fg_after_2nd"))
+
+saveDFG(fgM, joinLogPath(fgM,"fg_MargA"))
 
 
 
 
 ## SHOW BOTH MARG AND INCR TOGETHER---------------------------------------------
 
+fgR = deepcopy(fg_)
 
-fg = deepcopy(fg_)
-defaultFixedLagOnTree!(fg, round(Int, SIZE/2))
-
-
-tree, smt, hist = solveTree!(fg, tree5, recordcliqs=ls(fg))
+defaultFixedLagOnTree!(fgR, round(Int, SIZE/2), limitfixeddown=false)
 
 
-plotCirc10BA(fg_, fg, filepath=joinLogPath(fg, "circ$(SIZE)ReclBA.pdf"))
+tree, smt, hist = solveTree!(fgR, deepcopy(tree5), recordcliqs=ls(fgR))
+
+
+pl10recl = plotCirc10BA(fg_, fgR, filepath=joinLogPath(fg, "circ$(SIZE)ReclBA.pdf"), levels=3, drawEllipse=true, ellipseList_=[:x9])
+#, contourList_=[:x8], width=11cm, ellipseColor="gray20"
+
+
+pl5recl = drawPosesLandms(fgR, spscale=1.5, manualColor="cyan4", point_size=4pt, drawhist=false, contour=false, levels=2, lbls=false, to=5, line_width=2pt)
+
+for ll in pl10recl.layers
+  push!(pl5recl.layers, ll)
+end
+pl5recl |> PDF(joinLogPath(fg, "circ10Recl_cyan4.pdf"), 10cm, 8cm)
+
+
+
+saveDFG(fgR, joinLogPath(fgR,"fg_ReclA"))
+
 
 
 
