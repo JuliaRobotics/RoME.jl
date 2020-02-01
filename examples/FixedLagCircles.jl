@@ -3,23 +3,20 @@
 using Distributed
 addprocs(4)
 
-# using Revise
-
-using RoME, RoMEPlotting
+using RoME, RoMEPlotting, DistributedFactorGraphs
 @everywhere using RoME
 
 Gadfly.set_default_plot_size(35cm,25cm)
 
+include(joinpath(@__DIR__, "FixedLagCirclePlotting.jl"))
+
 
 SIZE = 10
 
-### SHOW marginalization--------------------------------------------------------
-
+### SETUP first half of circle----------------------------------------------
 
 # drive first half
 fg = generateCanonicalFG_Circle(SIZE, stopEarly=round(Int, SIZE/2), biasTurn=-0.05)
-
-defaultFixedLagOnTree!(fg, round(Int, SIZE/2))
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
@@ -30,27 +27,46 @@ getSolverParams(fg).showtree = true
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
 
-plfl1 = drawPosesLandms(fg, spscale=1.0)
+# plfl1 = drawPosesLandms(fg, spscale=1.0)
+fg5a = deepcopy(fg)
+tree5 = deepcopy(tree)
 
 
-generateCanonicalFG_Circle(SIZE, fg=fg, biasTurn=-0.05, loopClosure=true)
-# drawGraph(fg, show=true)
+# drive second half
 
+generateCanonicalFG_Circle(SIZE, fg=fg, biasTurn=-0.05, loopClosure=true, kappaOdo=3)
 
 ensureAllInitialized!(fg)
 
-
-plfl2 = drawPosesLandms(fg, spscale=1.0)
-
-# isMarginalized(fg, :x10)
-# isSolved(fg, :x10)
-# isSolved(fg, :x11)
-
-
+# keep copy for later
 fg_ = deepcopy(fg)
 
-##
 
+
+### SHOW Incremental Recycling--------------------------------------------------------
+
+
+tree, smt, hist = solveTree!(fg, tree5, recordcliqs=ls(fg))
+
+
+
+plotCirc10BA(fg_, fg, filepath=joinLogPath(fg, "circ$(SIZE)IncrBA.pdf"))
+
+
+saveDFG(fg_, joinLogPath(fg,"fg_before_2nd"))
+saveDFG(fg, joinLogPath(fg,"fg_after_2nd"))
+
+
+
+
+## SHOW MARGINALIZATION---------------------------------------------------------
+
+
+fg = deepcopy(fg_)
+
+defaultFixedLagOnTree!(fg, round(Int, SIZE/2))
+
+# use slightly special variable ordering
 vo = getEliminationOrder(fg)
 filter!(x->!(x in [:x5;:x4]), vo)
 push!(vo, :x4)
@@ -58,73 +74,65 @@ push!(vo, :x5)
 
 tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg), variableOrder=vo)
 
+## Plot ellipses to illustrate covariance fit
 
-plfl3 = drawPosesLandms(fg, spscale=1.0)
+plotCirc10BA(fg_, fg, filepath=joinLogPath(fg, "circ$(SIZE)MargBA.pdf"))
 
-
-## draw compound image
-
-plfl4 = drawPosesLandms(fg, spscale=1.0, manualColor="gray30", point_size=4pt)
-
-plfl2
-
-
-
-## export plots
-plfl1 |> PDF(joinLogPath(fg, "circ$(SIZE)_fl1.pdf") )
-plfl2 |> PDF(joinLogPath(fg, "circ$(SIZE)_fl2.pdf") )
-plfl3 |> PDF(joinLogPath(fg, "circ$(SIZE)_fl3.pdf") )
 
 saveDFG(fg_, joinLogPath(fg,"fg_before_2nd"))
 saveDFG(fg, joinLogPath(fg,"fg_after_2nd"))
 
 
-### SHOW Incremental Recycling--------------------------------------------------------
 
 
-
-# drive first half
-fg = generateCanonicalFG_Circle(SIZE, stopEarly=round(Int, SIZE/2)+1, biasTurn=-0.05)
+## SHOW BOTH MARG AND INCR TOGETHER---------------------------------------------
 
 
-getSolverParams(fg).drawtree = true
-getSolverParams(fg).showtree = true
-
-tree, smt, hist = solveTree!(fg)
+fg = deepcopy(fg_)
+defaultFixedLagOnTree!(fg, round(Int, SIZE/2))
 
 
-plinc1 = drawPosesLandms(fg, spscale=1.0)
+tree, smt, hist = solveTree!(fg, tree5, recordcliqs=ls(fg))
 
 
-## drive second part
-generateCanonicalFG_Circle(SIZE, fg=fg, biasTurn=-0.05, loopClosure=true)
-# drawGraph(fg, show=true)
-
-
-ensureAllInitialized!(fg)
-
-plinc2 = drawPosesLandms(fg, spscale=1.0)
-
-
-
-fg_ = deepcopy(fg)
-
-tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
-
-
-plinc3 = drawPosesLandms(fg, spscale=1.0)
+plotCirc10BA(fg_, fg, filepath=joinLogPath(fg, "circ$(SIZE)ReclBA.pdf"))
 
 
 
 
 
-## export plots
-plinc1 |> PDF(joinLogPath(fg, "circ$(SIZE)_inc1.pdf") )
-plinc2 |> PDF(joinLogPath(fg, "circ$(SIZE)_inc2.pdf") )
-plinc3 |> PDF(joinLogPath(fg, "circ$(SIZE)_inc3.pdf") )
 
-saveDFG(fg_, joinLogPath(fg,"fg_before_2nd"))
-saveDFG(fg, joinLogPath(fg,"fg_after_2nd"))
+
+
+## draw arcs
+
+plotCirc10BA(fg5a, fg5a, filepath=joinLogPath(fg, "circ5A.pdf"))
+
+
+
+tfg = initfg()
+
+# add a starting point (skipping prior for brevity)
+addVariable!(tfg, :a, Pose2)
+manualinit!(tfg, :a, 0.01*randn(3,100))
+
+addVariable!(tfg, :a_drt, Pose2)
+
+drt = MutablePose2Pose2Gaussian(MvNormal(zeros(3),Matrix{Float64}(LinearAlgebra.I,3,3)))
+addFactor!(tfg, [:a; :a_drt], drt)
+
+Qc = 0.001*Matrix{Float64}(LinearAlgebra.I,3,3)
+
+N = 10
+XYT = zeros(N,3)
+
+for i in 1:N
+  accumulateDiscreteLocalFrame!(drt,[0.1;0;0.05],Qc)
+  drval = accumulateFactorMeans(tfg, [:aa_drtf1;])
+  XYT[i,:] = drval
+end
+
+XYT
 
 
 

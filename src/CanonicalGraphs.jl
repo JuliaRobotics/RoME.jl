@@ -33,7 +33,8 @@ function generateCanonicalFG_Circle(poses::Int=6;
                                     landmark::Bool=true,
                                     loopClosure::Bool=true,
                                     stopEarly::Int=9999999,
-                                    biasTurn::Float64=0.0 )
+                                    biasTurn::Real=0.0,
+                                    kappaOdo::Real=1.0  )
   # assume empty factor graph object fg
   @assert offsetPoses < poses "`offsetPoses` must be smaller than total number of `poses`"
   # IIF.getSolverParams(fg).drawtree = true
@@ -55,7 +56,7 @@ function generateCanonicalFG_Circle(poses::Int=6;
     @show psym = Symbol("x$i")
     @show nsym = Symbol("x$(i+1)")
     addVariable!(fg, nsym, Pose2)
-    pp = Pose2Pose2(MvNormal([10.0;0;2pi/(poses)+biasTurn], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+    pp = Pose2Pose2(MvNormal([10.0;0;2pi/(poses)+biasTurn], Matrix(Diagonal((kappaOdo*[0.1;0.1;0.1]).^2))))
     addFactor!(fg, [psym;nsym], pp , autoinit=autoinit)
   end
 
@@ -134,7 +135,7 @@ function generateCanonicalFG_Hexagonal(;fg::AbstractDFG=initfg(),
     # addFactor!(fg, [:x6; :l1], p2br, autoinit=autoinit)
     #
     # # return the new factor graph object
-  return generateCanonicalFG_Circular(6, autoinit=autoinit, landmark=true, loopClosure=true)
+  return generateCanonicalFG_Circle(6, autoinit=autoinit, landmark=true, loopClosure=true)
 end
 
 
