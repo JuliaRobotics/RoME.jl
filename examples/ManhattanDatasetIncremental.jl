@@ -4,7 +4,7 @@ using Dates
 using RoME
 using RoMEPlotting
 using Gadfly
-@everywhere using RoME
+@everywhere using RoME, RoMEPlotting, Gadfly
 
 # Parse the arguments.
 initial_offset = parse(Int, ARGS[1])
@@ -87,9 +87,12 @@ function go(initial_offset::Integer, final_timestep::Integer)
         # store each graph
         saveDFG(fg, "$(getLogPath(fg))/fg-before-solve$(padded_step)")
 
-        # Just store some quick plots.
-        pl1 = drawPoses(fg, spscale=0.6)
-        pl1 |> PDF("$(getLogPath(fg))/poses$(padded_step).pdf", 20cm, 10cm)
+        # Just store some quick plots, on another process
+        remotecall((fgl, padded_stepl) -> begin
+          @info "drawPoses, $(padded_stepl), for fg num variables=$(length(ls(fgl)))."
+          pl1 = drawPoses(fgl, spscale=0.6)
+          pl1 |> PDF("$(getLogPath(fgl))/poses$(padded_stepl).pdf", 20cm, 10cm)
+        end, rand(Categorical(nprocs()-1))+1, fg, padded_step)
 
         # only solve every 10th instruction
         solveStride += 1
@@ -113,6 +116,9 @@ function go(initial_offset::Integer, final_timestep::Integer)
 
         # plkde = plotKDE(fg, ls(fg), dims=[1;2], levels=3)
         # Gadfly.draw(PDF("$(getLogPath(fg))/kde$(padded_step).pdf", 20cm, 10cm), plkde)
+
+        # force garbage collection to reduce memory footprint
+        GC.gc()
     end
     # final plot
     padded_step = lpad(final_timestep+1, 4, "0")
