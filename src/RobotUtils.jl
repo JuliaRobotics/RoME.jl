@@ -1,4 +1,5 @@
 
+export getVariablesLabelsWithinRange
 
 mutable struct RangeAzimuthElevation
   range::Float64
@@ -668,15 +669,11 @@ end
 #   return get2DSamples(fg, sym, minnei=minnei )
 # end
 
-function get2DSampleMeans(fg::G,
-                          regexKey::Regex=r"x";
-                          from::Int=0, to::Int=9999999999,
-                          minnei::Int=0) where G <: AbstractDFG
+function getVariablesLabelsWithinRange(fg::AbstractDFG,
+                                       regexKey::Regex=r"x";
+                                       from::Int=0, to::Int=9999999999,
+                                       minnei::Int=0)
   #
-  X = Array{Float64,1}()
-  Y = Array{Float64,1}()
-  Th = Array{Float64,1}()
-  LB = String[]
 
   # if sym = 'l', ignore single measurement landmarks
   allids = DFG.getVariableIds(fg, regexKey)  # fg.IDs
@@ -698,9 +695,24 @@ function get2DSampleMeans(fg::G,
         end
     end
   end
-  # allIDs = sort(allIDs)
 
-  for id in saids[mask]
+  saids[mask]
+end
+
+
+function get2DSampleMeans(fg::AbstractDFG,
+                          regexKey::Regex=r"x";
+                          from::Int=0, to::Int=9999999999,
+                          minnei::Int=0)
+  #
+  X = Array{Float64,1}()
+  Y = Array{Float64,1}()
+  Th = Array{Float64,1}()
+  LB = String[]
+
+  vsyms = getVariablesLabelsWithinRange(rf, regexKey, from=from, to=to, minnei=minnei)
+
+  for id in vsyms
     X=[X; Statistics.mean( vec( getVal(fg, id )[1,:] ) )]
     Y=[Y; Statistics.mean( vec( getVal(fg, id )[2,:] ) )]
     # crude test for pose TODO probably not going to always work right
