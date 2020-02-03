@@ -1,6 +1,6 @@
 using Distributed
 using Dates
-addprocs(18)
+# addprocs(18) # call instead with:  julia -O3 -p18
 using RoME
 using RoMEPlotting
 using Gadfly
@@ -93,7 +93,7 @@ function go(initial_offset::Integer, final_timestep::Integer)
         # only solve every 10th instruction
         solveStride += 1
         if solveStride % 10 != 0
-          @info "poseStride=$poseStride"
+          @info "solveStride=$solveStride"
           continue
         end
         @info "Going for solve"
