@@ -90,7 +90,7 @@ function go(initial_offset::Integer, final_timestep::Integer)
         # Just store some quick plots, on another process
         remotecall((fgl, padded_stepl) -> begin
           @info "drawPoses, $(padded_stepl), for fg num variables=$(length(ls(fgl)))."
-          pl1 = drawPoses(fgl, spscale=0.6)
+          pl1 = drawPoses(fgl, spscale=0.6, lbls=false)
           pl1 |> PDF("$(getLogPath(fgl))/poses$(padded_stepl).pdf", 20cm, 10cm)
         end, rand(Categorical(nprocs()-1))+1, fg, padded_step)
 
