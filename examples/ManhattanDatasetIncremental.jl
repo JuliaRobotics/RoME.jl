@@ -37,7 +37,7 @@ function go(initial_offset::Integer, final_timestep::Integer)
 
     # Add the next---or initial offset of---measurements to the graph.
     padded_step = lpad(1, 4, "0")
-    if initial_timestep == 1
+    if initial_offset == 1
         parseG2oInstruction!(fg, instructions[1])
     else
         for j in 1:initial_offset
