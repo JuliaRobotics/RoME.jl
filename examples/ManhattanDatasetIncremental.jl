@@ -27,6 +27,9 @@ function go(initial_offset::Integer, final_timestep::Integer)
     # Create initial factor graph with specified logging path.
     fg = LightDFG{SolverParams}(params=SolverParams(logpath=data_logpath))
 
+    # adding debug
+    getSolverParams(fg).dbg = true # store cliqSubFg at critical points during solve.
+
     # Add initial variable with a prior measurement to anchor the graph.
     addVariable!(fg, :x0, Pose2)
     initial_pose = MvNormal([0.0; 0.0; 0.0], Matrix(Diagonal([0.1;0.1;0.05].^2)))
@@ -54,6 +57,12 @@ function go(initial_offset::Integer, final_timestep::Integer)
     saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
     drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")
 
+    # analyze cliques recycle
+    fid = open("$(getLogPath(fg))/clique-counts.txt", "w")
+    nMarg, nReused = calcCliquesRecycled(tree)
+    println(fid, "$(padded_step), $(nMarg), $(nReused)")
+    # close fid at end
+
     # Just store some quick plots.
     pl1 = drawPoses(fg, spscale=0.6)
     Gadfly.draw(PDF("$(getLogPath(fg))/poses$(padded_step).pdf", 20cm, 10cm), pl1)
@@ -61,31 +70,50 @@ function go(initial_offset::Integer, final_timestep::Integer)
     # plkde = plotKDE(fg, ls(fg), dims=[1;2], levels=3)
     # Gadfly.draw(PDF("$(getLogPath(fg))/kde$(padded_step).pdf", 20cm, 10cm), plkde)
 
+    # solve stride
+    solveStride = 0
     # Run the loop for the remaining time steps.
     for i in (initial_offset + 1):final_timestep
         # Add the next measurement to the graph.
         parseG2oInstruction!(fg, instructions[i])
 
-        # And store a picture of the hitherto graph.
+
         padded_step = lpad(i, 4, "0")
-        drawGraph(fg, show=false, engine="sfdp",
-                  filepath="$(getLogPath(fg))/graph$(padded_step).pdf")
+        # And store a picture of the hitherto graph.
+        # drawGraph(fg, show=false, engine="sfdp",
+        #           filepath="$(getLogPath(fg))/graph$(padded_step).pdf")
+
+        # store each graph
+        saveDFG(fg, "$(getLogPath(fg))/fg-before-solve$(padded_step)")
+
+        # Just store some quick plots.
+        pl1 = drawPoses(fg, spscale=0.6)
+        pl1 |> PDF("$(getLogPath(fg))/poses$(padded_step).pdf", 20cm, 10cm)
+
+        # only solve every 10th instruction
+        solveStride += 1
+        solveStride % 10 == 0 ? continue : nothing
 
         # Solve the graph, and save a copy of the tree.
-        saveDFG(fg, "$(getLogPath(fg))/fg-before-solve$(padded_step)")
         tree, smt, hist = solveTree!(fg, tree)
         saveDFG(fg, "$(getLogPath(fg))/fg-after-solve$(padded_step)")
         saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
         drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")
 
-        # Just store some quick plots.
-        pl1 = drawPoses(fg, spscale=0.6)
-        Gadfly.draw(PDF("$(getLogPath(fg))/poses$(padded_step).pdf", 20cm, 10cm), pl1)
+        # Analyze clique number.
+        nMarg, nReused = calcCliquesRecycled(tree)
+        println(fid, "$(padded_step), $(nMarg), $(nReused)")
 
-        plkde = plotKDE(fg, ls(fg), dims=[1;2], levels=3)
-        Gadfly.draw(PDF("$(getLogPath(fg))/kde$(padded_step).pdf", 20cm, 10cm), plkde)
+        # plkde = plotKDE(fg, ls(fg), dims=[1;2], levels=3)
+        # Gadfly.draw(PDF("$(getLogPath(fg))/kde$(padded_step).pdf", 20cm, 10cm), plkde)
     end
+    # final plot
+    padded_step = lpad(final_timestep+1, 4, "0")
+    pl1 = drawPoses(fg, spscale=0.6)
+    pl1 |> PDF("$(getLogPath(fg))/poses$(padded_step).pdf", 20cm, 10cm)
+
+    close(fid)
 end
 
-# Run within a function to avoid undefined variable errors.
+# Run within a function to avoid undefined variable errors, and faster.
 go(initial_offset, final_timestep)
