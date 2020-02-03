@@ -60,7 +60,8 @@ function go(initial_offset::Integer, final_timestep::Integer)
     # analyze cliques recycle
     fid = open("$(getLogPath(fg))/clique-counts.txt", "w")
     nMarg, nReused = calcCliquesRecycled(tree)
-    println(fid, "$(padded_step), $(nMarg), $(nReused)")
+    nCliqs = length(tree.cliques)
+    println(fid, "$(padded_step), $(nCliqs), $(nMarg), $(nReused)")
     # close fid at end
 
     # Just store some quick plots.
@@ -106,7 +107,8 @@ function go(initial_offset::Integer, final_timestep::Integer)
 
         # Analyze clique number.
         nMarg, nReused = calcCliquesRecycled(tree)
-        println(fid, "$(padded_step), $(nMarg), $(nReused)")
+        nCliqs = length(tree.cliques)
+        println(fid, "$(padded_step), $(nCliqs), $(nMarg), $(nReused)")
         flush(fid)
 
         # plkde = plotKDE(fg, ls(fg), dims=[1;2], levels=3)
