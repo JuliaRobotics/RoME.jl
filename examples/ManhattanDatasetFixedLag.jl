@@ -25,7 +25,7 @@ Gadfly.push_theme(latex_fonts)
 function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_length_arg::Integer)
     # Choose where to save the step's data.
     qfl_length = qfl_length_arg # Fixed lag window size.
-    data_logpath = "/media/data2/tonio_results/manhattan-qfl$(qfl_length)-$(now())"
+    data_logpath = "/media/data2/tonio_results/manhattan-comb-qfl$(qfl_length)-$(now())"
 
     # Create initial factor graph with specified logging path.
     fg = LightDFG{SolverParams}(params=SolverParams(logpath=data_logpath))
@@ -55,7 +55,7 @@ function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_lengt
 
     # Solve the graph, and save a copy of the tree.
     saveDFG(fg, "$(getLogPath(fg))/fg-before-solve$(padded_step)")
-    tree, smt, hist = solveTree!(fg)
+    tree, smt, hist = solveTree!(fg, maxparallel=1000)
     saveDFG(fg, "$(getLogPath(fg))/fg-after-solve$(padded_step)")
     saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
     drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")
@@ -97,7 +97,7 @@ function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_lengt
         @info "Going for solve"
 
         # Solve the graph, and save a copy of the tree.
-        tree, smt, hist = solveTree!(fg, tree)
+        tree, smt, hist = solveTree!(fg, tree, maxparallel=1000)
         saveDFG(fg, "$(getLogPath(fg))/fg-after-solve$(padded_step)")
         saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
         drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")
