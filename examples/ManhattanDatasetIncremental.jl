@@ -92,7 +92,11 @@ function go(initial_offset::Integer, final_timestep::Integer)
 
         # only solve every 10th instruction
         solveStride += 1
-        solveStride % 10 == 0 ? continue : nothing
+        if solveStride % 10 != 0
+          @info "poseStride=$poseStride"
+          continue
+        end
+        @info "Going for solve"
 
         # Solve the graph, and save a copy of the tree.
         tree, smt, hist = solveTree!(fg, tree)
@@ -103,6 +107,7 @@ function go(initial_offset::Integer, final_timestep::Integer)
         # Analyze clique number.
         nMarg, nReused = calcCliquesRecycled(tree)
         println(fid, "$(padded_step), $(nMarg), $(nReused)")
+        flush(fid)
 
         # plkde = plotKDE(fg, ls(fg), dims=[1;2], levels=3)
         # Gadfly.draw(PDF("$(getLogPath(fg))/kde$(padded_step).pdf", 20cm, 10cm), plkde)
