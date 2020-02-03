@@ -710,7 +710,7 @@ function get2DSampleMeans(fg::AbstractDFG,
   Th = Array{Float64,1}()
   LB = String[]
 
-  vsyms = getVariablesLabelsWithinRange(rf, regexKey, from=from, to=to, minnei=minnei)
+  vsyms = getVariablesLabelsWithinRange(fg, regexKey, from=from, to=to, minnei=minnei)
 
   for id in vsyms
     X=[X; Statistics.mean( vec( getVal(fg, id )[1,:] ) )]

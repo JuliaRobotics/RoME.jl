@@ -62,6 +62,8 @@ plotCirc10BA(fg_, fgI, filepath=joinLogPath(fg, "circ$(SIZE)IncrBA.pdf"), points
 saveDFG(fgI, joinLogPath(fgI,"fg_IncrA"))
 
 
+calcCliquesRecycled(tree5)
+calcCliquesRecycled(tree)
 
 
 ## SHOW MARGINALIZATION---------------------------------------------------------
@@ -92,6 +94,14 @@ pl5blue |> PDF(joinLogPath(fgM, "circ$(SIZE)MargBA_blue.pdf"), 10cm, 8cm)
 saveDFG(fgM, joinLogPath(fgM,"fg_MargA"))
 
 
+# need a fix
+calcCliquesRecycled(tree)
+
+
+### DEBUGGING
+
+cliq = getCliq(tree, :x1)
+data = getData(cliq).allmarginalized
 
 
 ## SHOW BOTH MARG AND INCR TOGETHER---------------------------------------------
