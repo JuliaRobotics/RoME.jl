@@ -62,9 +62,8 @@ function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_lengt
 
     # Analyze clique counts.
     fid = open("$(getLogPath(fg))/clique-counts.txt", "w")
-    nMarg, nReused = calcCliquesRecycled(tree)
-    nCliqs = length(tree.cliques)
-    println(fid, "$(padded_step), $(nCliqs), $(nMarg), $(nReused)")
+    nCliqs, nMarg, nReused, nBoth = calcCliquesRecycled(tree)
+    println(fid, "$(padded_step), $(nCliqs), $(nMarg), $(nReused), $(nBoth)")
 
     # Just store some quick plots.
     pl1 = drawPoses(fg, spscale=0.6)
@@ -103,9 +102,8 @@ function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_lengt
         drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")
 
         # Analyze clique number.
-        nMarg, nReused = calcCliquesRecycled(tree)
-        nCliqs = length(tree.cliques)
-        println(fid, "$(padded_step), $(nCliqs), $(nMarg), $(nReused)")
+        nCliqs, nMarg, nReused, nBoth = calcCliquesRecycled(tree)
+        println(fid, "$(padded_step), $(nCliqs), $(nMarg), $(nReused), $(nBoth)")
         flush(fid)
 
         # Run the garbage collector.
