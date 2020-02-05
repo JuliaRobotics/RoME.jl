@@ -21,7 +21,7 @@ Gadfly.push_theme(latex_fonts)
 function solve_batch(total_meas::Integer)
     # Choose where to save the data.
     manhattan_total_meas = total_meas
-    data_logpath = "/home/mrg/Documents/wafr/manhattan-batch-$(total_meas)-$(now())"
+    data_logpath = ENV["HOME"]*"/Documents/wafr/manhattan-batch-$(total_meas)-$(now())"
 
     # Create initial factor graph with specified logging path.
     fg = LightDFG{SolverParams}(params=SolverParams(logpath=data_logpath))
