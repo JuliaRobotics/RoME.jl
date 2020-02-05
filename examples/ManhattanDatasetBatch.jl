@@ -5,6 +5,8 @@ using RoMEPlotting
 using Gadfly
 @everywhere using RoME, RoMEPlotting, Gadfly
 
+total_meas = parse(Int, ARGS[1])
+
 # Let's load the Manhattan scenario using the g2o file.
 file = (normpath(Base.find_package("RoME"), "../..", "examples", "manhattan_incremental.g2o"))
 global instructions = importG2o(file)
@@ -16,9 +18,10 @@ latex_fonts = Theme(major_label_font="CMU Serif", major_label_font_size=16pt,
                     key_label_font="CMU Serif", key_label_font_size=10pt)
 Gadfly.push_theme(latex_fonts)
 
-function solve_batch()
+function solve_batch(total_meas::Integer)
     # Choose where to save the data.
-    data_logpath = "/media/data2/tonio_results/manhattan-batch-$(now())"
+    manhattan_total_meas = total_meas
+    data_logpath = "/home/mrg/Documents/wafr/manhattan-batch-$(total_meas)-$(now())"
 
     # Create initial factor graph with specified logging path.
     fg = LightDFG{SolverParams}(params=SolverParams(logpath=data_logpath))
@@ -29,7 +32,7 @@ function solve_batch()
     addFactor!(fg, [:x0], PriorPose2(initial_pose))
 
     # Add all variables and measurements.
-    manhattan_total_meas = 5453
+    # manhattan_total_meas = 5453
     for i in 1:manhattan_total_meas
         parseG2oInstruction!(fg, instructions[i])
     end
@@ -49,4 +52,4 @@ function solve_batch()
     GC.gc()
 end
 
-solve_batch()
+solve_batch(total_meas)
