@@ -41,12 +41,12 @@ function solve_batch(total_meas::Integer)
     saveDFG(fg, "$(getLogPath(fg))/fg-before-solve")
     tree, smt, hist = solveTree!(fg, maxparallel=1000)
     saveDFG(fg, "$(getLogPath(fg))/fg-after-solve")
-    saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
+    saveTree(tree, "$(getLogPath(fg))/tree$(manhattan_total_meas).jld2")
     drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt.pdf")
 
     # Just store some quick plots.
     pl1 = drawPoses(fg, spscale=0.6, lbls=false)
-    Gadfly.draw(PDF("$(getLogPath(fg))/poses$(padded_step).pdf", 20cm, 10cm), pl1)
+    Gadfly.draw(PDF("$(getLogPath(fg))/poses$(manhattan_total_meas).pdf", 20cm, 10cm), pl1)
 
     # Run the garbage collector.
     GC.gc()
