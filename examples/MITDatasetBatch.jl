@@ -8,7 +8,7 @@ using Gadfly
 total_meas = parse(Int, ARGS[1])
 # Max number is 827.
 
-# Let's load the Manhattan scenario using the g2o file.
+# Let's load the MIT scenario using the g2o file.
 file = (normpath(Base.find_package("RoME"), "../..", "examples", "MIT_incremental.g2o"))
 global instructions = importG2o(file)
 
