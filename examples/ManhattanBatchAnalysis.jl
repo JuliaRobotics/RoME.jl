@@ -4,7 +4,7 @@ using IncrementalInference
 using DistributedFactorGraphs
 
 # Find the filezzzzz.
-fg_dir = "/home/tonio/repos/bayes-garden/data/batch-liljon-1500"
+fg_dir = "/home/tonio/repos/bayes-garden/data/manhattan/batch-liljon-1500"
 fg_name = "fg-after-solve.tar.gz"
 fg_file = joinpath(fg_dir, fg_name)
 
