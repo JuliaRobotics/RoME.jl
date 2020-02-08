@@ -87,17 +87,20 @@ function exportTrajEstimatesToFile(fg_path::String, lexsort)
 end
 
 # Now run this for all of our runs:
-b100_new_liljon_1411 = "/home/tonio/repos/bayes-garden/data/b100-new-liljon-1411/fg-after-solve1411.tar.gz"
+b100_new_liljon_1411 = "/home/tonio/repos/bayes-garden/data/manhattan/b100-new-liljon-1411/fg-after-solve1411.tar.gz"
 exportTrajEstimatesToFile(b100_new_liljon_1411, natural)
 
-b10_old_augustus_1571 = "/home/tonio/repos/bayes-garden/data/b10-old-augustus-1571/fg-after-solve1571.tar.gz"
+b10_old_augustus_1571 = "/home/tonio/repos/bayes-garden/data/manhattan/b10-old-augustus-1571/fg-after-solve1571.tar.gz"
 exportTrajEstimatesToFile(b10_old_augustus_1571, natural)
 
-b30_old_liljon_1451 = "/home/tonio/repos/bayes-garden/data/b30-old-liljon-1451/fg-after-solve1451.tar.gz"
+b30_old_liljon_1451 = "/home/tonio/repos/bayes-garden/data/manhattan/b30-old-liljon-1451/fg-after-solve1451.tar.gz"
 exportTrajEstimatesToFile(b30_old_liljon_1451, natural)
 
-incremental_liljon_1101 = "/home/tonio/repos/bayes-garden/data/incremental-liljon-1101/fg-after-solve1101.tar.gz"
+incremental_liljon_1101 = "/home/tonio/repos/bayes-garden/data/manhattan/incremental-liljon-1101/fg-after-solve1101.tar.gz"
 exportTrajEstimatesToFile(incremental_liljon_1101, natural)
 
-batch_liljon_1500 = "/home/tonio/repos/bayes-garden/data/batch-liljon-1500/fg-after-solve.tar.gz"
+batch_liljon_1500 = "/home/tonio/repos/bayes-garden/data/manhattan/batch-liljon-1500/fg-after-solve.tar.gz"
 exportTrajEstimatesToFile(batch_liljon_1500, natural)
+
+batch_liljon_1800 = "/home/tonio/repos/bayes-garden/data/manhattan/batch-liljon-1800/fg-after-solve.tar.gz"
+exportTrajEstimatesToFile(batch_liljon_1800, natural)
