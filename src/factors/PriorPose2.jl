@@ -22,7 +22,7 @@ function getSample(p2::PriorPose2, N::Int=1)
 end
 
 #TODO wrapper
-function (s::PriorPose2{<:MvNormal})(wXi::Vector{T}; kwargs...) where T <: Real
+function (s::PriorPose2{<:MvNormal})(wXi::AbstractVector{T}; kwargs...) where T <: Real
 
 
   meas = mean(s.Z)

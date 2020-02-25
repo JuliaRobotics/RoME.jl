@@ -20,7 +20,7 @@ function getSample(p2::PriorPoint2, N::Int=1)
 end
 
 #TODO wrapper
-function (s::PriorPoint2{<:MvNormal})(X1::Vector{T}; kwargs...) where T <: Real
+function (s::PriorPoint2{<:MvNormal})(X1::AbstractVector{T}; kwargs...) where T <: Real
 
   meas = mean(s.Z)
   iΣ = invcov(s.Z)
@@ -55,7 +55,7 @@ function (pp2r::Point2Point2{T})(
 end
 
 #TODO wrapper
-function (s::Point2Point2{<:MvNormal})(X1::Vector{T}, X2::Vector{T}; kwargs...) where T <: Real
+function (s::Point2Point2{<:MvNormal})(X1::AbstractVector{T}, X2::AbstractVector{T}; kwargs...) where T <: Real
 
   meas = mean(s.Zij)
   iΣ = invcov(s.Zij)
