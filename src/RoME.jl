@@ -23,6 +23,7 @@ using
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
 import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution, DFG
+# not sure why this is gives import error
 import DistributedFactorGraphs: compare
 
 # const AMP = ApproxManifoldProducts

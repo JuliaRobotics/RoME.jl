@@ -79,7 +79,8 @@ setValKDE!(fg, :x2, kde!(badval))
 # tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
 
 N = 100
-batchSolve!(fg, N=N)
+getSolverParams(fg).N = N
+solveTree!(fg)
 
 
 

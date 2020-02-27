@@ -35,8 +35,6 @@ addFactor!(fg, [:x2;:x1], pp2)
 
 
 tree, smt, hist = solveTree!(fg)
-# global tree = wipeBuildNewTree!(fg)
-# inferOverTree!(fg, tree)
 
 
 global pts = getVal(fg, :x1)
@@ -56,10 +54,11 @@ global pts = getVal(fg, :x1)
 end
 
 
-# writeGraphPdf(fg)
+# drawGraph(fg, show = true)
 
 #
 # using RoMEPlotting, Gadfly
+# Gadfly.set_default_plot_size(35cm, 25cm)
 # xmin=-150
 # xmax=50
 # ymin=-150
@@ -74,9 +73,9 @@ end
 # pl = plotKDE(fg, [:x0, :x1, :x2], dims=[1;2]);
 # pl.coord = Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
 # pl
-
-
-
+#
+#
+# drawGraph(fg)
 
 
 #
