@@ -1,6 +1,5 @@
 using Distributed
 using Dates
-# addprocs(18) # call instead with:  julia -O3 -p18
 using RoME
 using RoMEPlotting
 using Gadfly
@@ -9,9 +8,10 @@ using Gadfly
 # Parse the arguments.
 initial_offset = parse(Int, ARGS[1])
 final_timestep = parse(Int, ARGS[2])
+solve_stride = parse(Int, ARGS[3])
 
-# Let's load the Manhattan scenario using the g2o file.
-file = (normpath(Base.find_package("RoME"), "../..", "examples", "manhattan_incremental.g2o"))
+# Let's load the MIT scenario using the g2o file.
+file = (normpath(Base.find_package("RoME"), "../..", "examples", "MIT_incremental.g2o"))
 global instructions = importG2o(file)
 
 # Make sure plots look a bit nicer.
@@ -21,9 +21,9 @@ latex_fonts = Theme(major_label_font="CMU Serif", major_label_font_size=16pt,
                     key_label_font="CMU Serif", key_label_font_size=10pt)
 Gadfly.push_theme(latex_fonts)
 
-function go(initial_offset::Integer, final_timestep::Integer)
+function go(initial_offset::Integer, final_timestep::Integer, solve_stride::Integer)
     # Choose where to save the step's data.
-    data_logpath = "/media/data2/tonio_results/manhattan-$(now())"
+    data_logpath = ENV["HOME"]*"/Documents/wafr/mit-incremental-$(final_timestep)-$(now())"
     # Create initial factor graph with specified logging path.
     fg = LightDFG{SolverParams}(params=SolverParams(logpath=data_logpath))
 
@@ -46,10 +46,6 @@ function go(initial_offset::Integer, final_timestep::Integer)
         padded_step = lpad(initial_offset, 4, "0")
     end
 
-    # And store a picture of the hitherto graph.
-    # drawGraph(fg, show=false, engine="sfdp",
-    #           filepath="$(getLogPath(fg))/graph$(padded_step).pdf")
-
     # Solve the graph, and save a copy of the tree.
     saveDFG(fg, "$(getLogPath(fg))/fg-before-solve$(padded_step)")
     tree, smt, hist = solveTree!(fg)
@@ -59,17 +55,12 @@ function go(initial_offset::Integer, final_timestep::Integer)
 
     # analyze cliques recycle
     fid = open("$(getLogPath(fg))/clique-counts.txt", "w")
-    nMarg, nReused = calcCliquesRecycled(tree)
-    nCliqs = length(tree.cliques)
-    println(fid, "$(padded_step), $(nCliqs), $(nMarg), $(nReused)")
-    # close fid at end
+    nCliqs, nMarg, nReused, nBoth = calcCliquesRecycled(tree)
+    println(fid, "$(padded_step), $(nCliqs), $(nMarg), $(nReused), $(nBoth)")
 
     # Just store some quick plots.
     pl1 = drawPoses(fg, spscale=0.6)
     Gadfly.draw(PDF("$(getLogPath(fg))/poses$(padded_step).pdf", 20cm, 10cm), pl1)
-
-    # plkde = plotKDE(fg, ls(fg), dims=[1;2], levels=3)
-    # Gadfly.draw(PDF("$(getLogPath(fg))/kde$(padded_step).pdf", 20cm, 10cm), plkde)
 
     # solve stride
     solveStride = 0
@@ -77,12 +68,7 @@ function go(initial_offset::Integer, final_timestep::Integer)
     for i in (initial_offset + 1):final_timestep
         # Add the next measurement to the graph.
         parseG2oInstruction!(fg, instructions[i])
-
-
         padded_step = lpad(i, 4, "0")
-        # And store a picture of the hitherto graph.
-        # drawGraph(fg, show=false, engine="sfdp",
-        #           filepath="$(getLogPath(fg))/graph$(padded_step).pdf")
 
         # store each graph
         saveDFG(fg, "$(getLogPath(fg))/fg-before-solve$(padded_step)")
@@ -96,7 +82,7 @@ function go(initial_offset::Integer, final_timestep::Integer)
 
         # only solve every 10th instruction
         solveStride += 1
-        if solveStride % 10 != 0
+        if solveStride % solve_stride != 0
           @info "solveStride=$solveStride"
           continue
         end
@@ -109,13 +95,9 @@ function go(initial_offset::Integer, final_timestep::Integer)
         drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")
 
         # Analyze clique number.
-        nMarg, nReused = calcCliquesRecycled(tree)
-        nCliqs = length(tree.cliques)
-        println(fid, "$(padded_step), $(nCliqs), $(nMarg), $(nReused)")
+        nCliqs, nMarg, nReused, nBoth = calcCliquesRecycled(tree)
+        println(fid, "$(padded_step), $(nCliqs), $(nMarg), $(nReused), $(nBoth)")
         flush(fid)
-
-        # plkde = plotKDE(fg, ls(fg), dims=[1;2], levels=3)
-        # Gadfly.draw(PDF("$(getLogPath(fg))/kde$(padded_step).pdf", 20cm, 10cm), plkde)
 
         # force garbage collection to reduce memory footprint
         GC.gc()
@@ -129,4 +111,4 @@ function go(initial_offset::Integer, final_timestep::Integer)
 end
 
 # Run within a function to avoid undefined variable errors, and faster.
-go(initial_offset, final_timestep)
+go(initial_offset, final_timestep, solve_stride)
