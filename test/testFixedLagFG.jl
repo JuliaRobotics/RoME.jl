@@ -116,8 +116,8 @@ tree, smt, hist = solveTree!(fg, tree) #, recordcliqs=ls(fg))
 # inferOverTreeR!(fg, tree)
 
 # Confirm that the initial nodes (x0 - x5) are frozen.
-@test getData(getVariable(fg, :x5)).ismargin
-@test !getData(getVariable(fg, :x7)).ismargin
+@test getSolverData(getVariable(fg, :x5)).ismargin
+@test !getSolverData(getVariable(fg, :x7)).ismargin
 
 # X5 should be exactly same
 # X6 should be different
