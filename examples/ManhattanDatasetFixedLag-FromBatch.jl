@@ -6,15 +6,6 @@ using RoMEPlotting
 using Gadfly
 @everywhere using RoME, RoMEPlotting, Gadfly
 
-# Parse the arguments.
-initial_offset = parse(Int, ARGS[1])
-final_timestep = parse(Int, ARGS[2])
-qfl_length = parse(Int, ARGS[3])
-
-# Let's load the Manhattan scenario using the g2o file.
-file = (normpath(Base.find_package("RoME"), "../..", "examples", "manhattan_incremental.g2o"))
-global instructions = importG2o(file)
-
 # Make sure plots look a bit nicer.
 latex_fonts = Theme(major_label_font="CMU Serif", major_label_font_size=16pt,
                     minor_label_font="CMU Serif", minor_label_font_size=14pt,
@@ -22,36 +13,56 @@ latex_fonts = Theme(major_label_font="CMU Serif", major_label_font_size=16pt,
                     key_label_font="CMU Serif", key_label_font_size=10pt)
 Gadfly.push_theme(latex_fonts)
 
-function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_length_arg::Integer)
+# Parse the arguments.
+qfl_length = parse(Int, ARGS[1])
+
+# Let's load the Manhattan scenario using the g2o file.
+file = (normpath(Base.find_package("RoME"), "../..", "examples", "manhattan_incremental.g2o"))
+global instructions = importG2o(file)
+
+# Let's also get the file for batch factor graph at step 500.
+fg_name = "fg-after-solve.tar.gz"
+global fg_file = (normpath(Base.find_package("RoME"), "../..", "examples", fg_name))
+
+function go_fixedlag_frombatch(qfl_length_arg::Integer)
     # Choose where to save the step's data.
     qfl_length = qfl_length_arg # Fixed lag window size.
-    data_logpath = "/media/data2/tonio_results/manhattan-comb-qfl$(qfl_length)-$(now())"
+    data_logpath = ENV["HOME"]*"/Documents/wafr/manhattan-frombatch-b$(qfl_length)-$(now())"
 
-    # Create initial factor graph with specified logging path.
+    # Instead of creating new graph, load the batch one.
     fg = LightDFG{SolverParams}(params=SolverParams(logpath=data_logpath))
+    loadDFG(fg_file, Main, fg)
     tree = emptyBayesTree()
 
     # Set up the fixed lag smoothing.
+    getSolverParams(fg).logpath = data_logpath
     getSolverParams(fg).isfixedlag = true
     getSolverParams(fg).qfl = qfl_length
     getSolverParams(fg).limitfixeddown = true
     getSolverParams(fg).dbg = true
-
-    # Add initial variable with a prior measurement to anchor the graph.
-    addVariable!(fg, :x0, Pose2)
-    initial_pose = MvNormal([0.0; 0.0; 0.0], Matrix(Diagonal([0.1;0.1;0.05].^2)))
-    addFactor!(fg, [:x0], PriorPose2(initial_pose))
+    # CHECK I think we need to manually set all variables to not solvable.
+    for vsym in ls(fg)
+        getVariable(fg, vsym).solvable = 0
+    end
+    # But release the last 10 poses.
+    activevars = []
+    for i in 350:360
+        push!(activevars, Symbol("x", i))
+        getVariable(fg, Symbol("x", i)).solvable = 1
+    end
+    # CHECK As well as all of the factors.
+    for fsym in lsf(fg)
+        getFactor(fg, fsym).solvable = 0
+    end
+    # And activate the factors corresponding to the active variables.
+    sym_act_vars = Array{Symbol, 1}(activevars)
+    for fsym in getFactorsAmongVariablesOnly(fg, sym_act_vars)
+        getFactor(fg, fsym).solvable = 1
+    end
 
     # Add the next---or initial offset of---measurements to the graph.
-    padded_step = lpad(1, 4, "0")
-    if initial_offset == 1
-        parseG2oInstruction!(fg, instructions[1])
-    else
-        for j in 1:initial_offset
-            parseG2oInstruction!(fg, instructions[j])
-        end
-        padded_step = lpad(initial_offset, 4, "0")
-    end
+    padded_step = lpad(501, 4, "0")
+    parseG2oInstruction!(fg, instructions[501])
 
     # Solve the graph, and save a copy of the tree.
     saveDFG(fg, "$(getLogPath(fg))/fg-before-solve$(padded_step)")
@@ -72,7 +83,7 @@ function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_lengt
     # Solver stride.
     solveStride = 0
     # Run the loop for the remaining time steps.
-    for i in (initial_offset + 1):final_timestep
+    for i in 502:5453
         # Add the next measurement to the graph.
         parseG2oInstruction!(fg, instructions[i])
         padded_step = lpad(i, 4, "0")
@@ -118,4 +129,4 @@ function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_lengt
 end
 
 # Run within a function to avoid undefined variable errors.
-go_fixedlag(initial_offset, final_timestep, qfl_length)
+go_fixedlag_frombatch(qfl_length)
