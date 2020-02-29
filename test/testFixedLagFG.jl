@@ -91,7 +91,7 @@ X7 = deepcopy(getVal(fg, :x7))
 @test isInitialized(fg, :x5)
 
 fifoFreeze!(fg)
-@test getData(getVariable(fg, :x5)).ismargin
+@test isMarginalized(fg, :x5)
 
 # getSolverParams(fg).drawtree=true
 # getSolverParams(fg).dbg=true
@@ -101,23 +101,9 @@ println("STEP 4: Solve graph when shorter than fixed length, and show time to so
 tree, smt, hist = solveTree!(fg, tree) #, recordcliqs=ls(fg))
 
 
-# drawTree(stuff[1], show=true)
-# st = fetch(stuff[2][11])
-# hist = getCliqSolveHistory(stuff[1], :x2)
-
-
-# fg.solverparams.isfixedlag
-# tofreeze = fg.fifo[1:(end-fg.qfl)]
-# @test length(tofreeze) > 0
-# IIF.setfreeze!.(fg, tofreeze)
-#
-# fifoFreeze!(fg)
-# tree = IIF.wipeBuildNewTree!(fg)
-# inferOverTreeR!(fg, tree)
-
 # Confirm that the initial nodes (x0 - x5) are frozen.
-@test getSolverData(getVariable(fg, :x5)).ismargin
-@test !getSolverData(getVariable(fg, :x7)).ismargin
+@test isMarginalized(fg, :x5)
+@test !isMarginalized(fg, :x7)
 
 # X5 should be exactly same
 # X6 should be different
@@ -126,12 +112,6 @@ X7cmp = deepcopy(getVal(fg, :x7))
 @test X5 == X5cmp #Frozen
 @test X7 != X7cmp #Recalculated
 
-
-# Solve original graph with the to get time comparison
-# tree, smt, hist = solveTree!(fg, tree)
-# @time IIF.batchSolve!(fgOriginal, treeinit=true)
-
-# IIF.drawTree(tree, show=true)
 
 end
 

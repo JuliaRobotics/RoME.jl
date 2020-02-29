@@ -53,18 +53,26 @@ global pts = getVal(fg, :x1)
 
 end
 
-
-# drawGraph(fg, show = true)
-
 #
+# drawGraph(fg, show = true)
+# drawTree(tree, show = true)
+#
+#
+#
+#
+# #
 # using RoMEPlotting, Gadfly
-# Gadfly.set_default_plot_size(35cm, 25cm)
+# Gadfly.set_default_plot_size(35cm, 20cm)
 # xmin=-150
 # xmax=50
 # ymin=-150
 # ymax=50
 #
 #
+#
+# pl = plotKDE(fg, [:x1], dims=[1;2]);
+# pl.coord = Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
+# pl
 #
 # pl = plotKDE(fg, [:x0, :x1], dims=[1;2]);
 # pl.coord = Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
@@ -73,10 +81,27 @@ end
 # pl = plotKDE(fg, [:x0, :x1, :x2], dims=[1;2]);
 # pl.coord = Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
 # pl
+# #
+# #
+# # drawGraph(fg)
+#
+# pl = plotLocalProduct(fg, :x1)
+# pl.coord = Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
+# pl
 #
 #
-# drawGraph(fg)
+# pl = plotKDE(upMsg(tree,:x0)[:x1][1], levels=1)
+# pl.coord = Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
+# pl
+#
+#
+# pts = treeProductUp(fg, tree, :x1, :x1)[1]
+# pl = plotKDE(manikde!(pts, Point2), levels=1)
+# pl.coord = Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax)
+# pl
 
+#
+# 0
 
 #
 # gg = (x) -> pdf(Beta(2.0,6.0), x)
@@ -88,6 +113,9 @@ end
 #
 # plot(g2, -5.0,250.0)
 #
+
+
+
 
 
 
