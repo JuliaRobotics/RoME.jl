@@ -12,7 +12,6 @@ p3 = Point3()
 """
 struct Point3 <: IncrementalInference.InferenceVariable
   dims::Int
-  labels::Vector{String}
   manifolds::Tuple{Symbol, Symbol, Symbol}
-  Point3() = new(3, String[], (:Euclid,:Euclid,:Euclid))
+  Point3() = new(3, (:Euclid,:Euclid,:Euclid))
 end

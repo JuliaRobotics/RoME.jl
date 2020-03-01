@@ -132,10 +132,6 @@ global f2 = addFactor!(fg, [:x1;:l1], meas) #, threadmodel=MultiThreaded)
 global L1pts = approxConv(fg, :x1l1f1, :l1)
 
 
-global data = getData(f2)
-# data
-
-
 global X1pts = approxConv(fg, :x1l1f1, :x1)
 
 # isInitialized(fg, :l1)

@@ -6,101 +6,76 @@ using Test
 using RoME
 
 
-include(joinpath(@__DIR__,"BeehiveTestUtils.jl"))
-
 
 @testset "sanity check on Hex example" begin
 
-## start with an empty factor graph object
-fg = initfg()
+# autoinit=false, regression since DFG v0.6.0 IIF v0.9.0 -- on tree init, issue IIF#602
+fg = generateCanonicalFG_Hexagonal(autoinit=false)
 
-posecount = 0
-
-# Add the first pose :x0
-addVariable!(fg, :x0, Pose2)
-posecount += 1
-
-
-# Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
-addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0],
-                                           Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=false )
-
-# Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x0; :l1], p2br, autoinit=false )
-
-
-
-## hex 1
-
-posecount = driveHex(fg, posecount)
-
-# Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
-
-
-# writeGraphPdf(fg,engine="neato")
 
 getSolverParams(fg).drawtree = false
 getSolverParams(fg).showtree = false
-getSolverParams(fg).downsolve = false
+@error "Note tree init test has been reduced as part of v0.9.0 upgrade and will be restored as a dedidicated effort later."
+getSolverParams(fg).downsolve = true
 getSolverParams(fg).multiproc = false
 getSolverParams(fg).async = false
 # to disable parent factor sharing
 # getSolverParams(fg).devParams[:dontUseParentFactorsInitDown] = ""
 
 
-
 # direct solve would be
+# getSolverParams(fg).async = true ## MANUAL TEMP ONLY
+tree, smt, hist = solveTree!(fg) #, recordcliqs=ls(fg))
 tree, smt, hist = solveTree!(fg) #, recordcliqs=ls(fg))
 
+# tree.cliques[3]
+# drawTree(tree, show=true)
+# smt[3]
 
-@test 45 < sum(-3.0 .< getPoints(getKDE(fg, :x0))[1,:] .< 3.0)
-@test 45 < sum(-3.0 .< getPoints(getKDE(fg, :x0))[2,:] .< 3.0)
-@test 45 < sum(-0.3 .< getPoints(getKDE(fg, :x0))[3,:] .< 0.3)
+@test 55 < sum(-3.0 .< getPoints(getKDE(fg, :x0))[1,:] .< 3.0)
+@test 55 < sum(-3.0 .< getPoints(getKDE(fg, :x0))[2,:] .< 3.0)
+@test 55 < sum(-0.3 .< getPoints(getKDE(fg, :x0))[3,:] .< 0.3)
 
-@test 45 < sum(7.0 .< getPoints(getKDE(fg, :x1))[1,:] .< 13.0)
-@test 45 < sum(-3.0 .< getPoints(getKDE(fg, :x1))[2,:] .< 3.0)
-@test 45 < sum(0.7 .< getPoints(getKDE(fg, :x1))[3,:] .< 1.3)
+@test 55 < sum(7.0 .< getPoints(getKDE(fg, :x1))[1,:] .< 13.0)
+@test 55 < sum(-3.0 .< getPoints(getKDE(fg, :x1))[2,:] .< 3.0)
+@test 55 < sum(0.7 .< getPoints(getKDE(fg, :x1))[3,:] .< 1.3)
 
-@test 45 < sum(12.0 .< getPoints(getKDE(fg, :x2))[1,:] .< 18.0)
-@test 45 < sum(6.0 .< getPoints(getKDE(fg, :x2))[2,:] .< 11.0)
-@test 45 < sum(1.8 .< getPoints(getKDE(fg, :x2))[3,:] .< 2.4)
+@test 55 < sum(12.0 .< getPoints(getKDE(fg, :x2))[1,:] .< 18.0)
+@test 55 < sum(6.0 .< getPoints(getKDE(fg, :x2))[2,:] .< 11.0)
+@test 55 < sum(1.8 .< getPoints(getKDE(fg, :x2))[3,:] .< 2.4)
 
-@test 45 < sum(7.0 .< getPoints(getKDE(fg, :x3))[1,:] .< 13.0)
-@test 45 < sum(15.0 .< getPoints(getKDE(fg, :x3))[2,:] .< 20.0)
-# @test 45 < sum(-0.3 .< getPoints(getKDE(fg, :x3))[3,:] .< 0.3)
+@test 55 < sum(7.0 .< getPoints(getKDE(fg, :x3))[1,:] .< 13.0)
+@test 55 < sum(15.0 .< getPoints(getKDE(fg, :x3))[2,:] .< 20.0)
+# @test 55 < sum(-0.3 .< getPoints(getKDE(fg, :x3))[3,:] .< 0.3)
 
-@test 45 < sum(-5.0 .< getPoints(getKDE(fg, :x4))[1,:] .< 5.0)
-@test 45 < sum(13.0 .< getPoints(getKDE(fg, :x4))[2,:] .< 22.0)
-@test 45 < sum(-2.8 .< getPoints(getKDE(fg, :x4))[3,:] .< -1.5)
+@test 55 < sum(-5.0 .< getPoints(getKDE(fg, :x4))[1,:] .< 5.0)
+@test 55 < sum(13.0 .< getPoints(getKDE(fg, :x4))[2,:] .< 22.0)
+@test 55 < sum(-2.8 .< getPoints(getKDE(fg, :x4))[3,:] .< -1.5)
 
-@test 45 < sum(-8.0 .< getPoints(getKDE(fg, :x5))[1,:] .< -2.0)
-@test 45 < sum(6.0 .< getPoints(getKDE(fg, :x5))[2,:] .< 11.0)
-@test 45 < sum(-1.3 .< getPoints(getKDE(fg, :x5))[3,:] .< -0.7)
+@test 55 < sum(-8.0 .< getPoints(getKDE(fg, :x5))[1,:] .< -2.0)
+@test 55 < sum(6.0 .< getPoints(getKDE(fg, :x5))[2,:] .< 11.0)
+@test 55 < sum(-1.3 .< getPoints(getKDE(fg, :x5))[3,:] .< -0.7)
 
-@test 45 < sum(-3.0 .< getPoints(getKDE(fg, :x6))[1,:] .< 3.0)
-@test 45 < sum(-3.0 .< getPoints(getKDE(fg, :x6))[2,:] .< 3.0)
-@test 45 < sum(-0.3 .< getPoints(getKDE(fg, :x6))[3,:] .< 0.3)
+@test 55 < sum(-3.0 .< getPoints(getKDE(fg, :x6))[1,:] .< 3.0)
+@test 55 < sum(-3.0 .< getPoints(getKDE(fg, :x6))[2,:] .< 3.0)
+@test 55 < sum(-0.3 .< getPoints(getKDE(fg, :x6))[3,:] .< 0.3)
 
-@test 45 < sum(17.0 .< getPoints(getKDE(fg, :l1))[1,:] .< 23.0)
-@test 45 < sum(-5.0 .< getPoints(getKDE(fg, :l1))[2,:] .< 5.0)
+@test 55 < sum(17.0 .< getPoints(getKDE(fg, :l1))[1,:] .< 23.0)
+@test 55 < sum(-5.0 .< getPoints(getKDE(fg, :l1))[2,:] .< 5.0)
 
 
 
+
+0
+end # testset
+
+
+#
 # #  Do some plotting
 # using RoMEPlotting
-#
+# #
 # Gadfly.set_default_plot_size(35cm,20cm)
-# pl = drawPosesLandms(fg, meanmax=:max, drawhist=true)
-# pl |> PDF("/tmp/caesar/test.pdf");  @async run(`evince /tmp/caesar/test.pdf`)
-# pl |> PNG("/tmp/caesar/test.png");
-# drawTree(tree, imgs=true)
-
-
-end # testset
+# pl = drawPosesLandms(fg, drawhist=true)
 
 
 

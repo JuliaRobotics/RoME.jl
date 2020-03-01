@@ -29,8 +29,8 @@ function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
                                           xi::Array{Float64,2},
                                           lm::Array{Float64,2} )
   #
-
   rot = meas[1][1,idx]+xi[3,idx]
+
   res[1] = ( lm[1,idx] - (meas[1][2,idx]*cos( rot ) + xi[1,idx]) )^2
   res[2] = ( lm[2,idx] - (meas[1][2,idx]*sin( rot ) + xi[2,idx]) )^2
 
