@@ -83,10 +83,8 @@ global X3ptsMean = Statistics.mean(X3pts,dims=2)
 @test  sum(map(Int, abs.(X3ptsMean -  [50.0;0;0;0;0;0]) .< 5.0 )) == 6
 
 
-tree = batchSolve!(fg, treeinit=true)
-# global tree = wipeBuildNewTree!(fg)
-# inferOverTreeR!(fg,tree,N=N)
-# inferOverTree!(fg,tree)
+tree,smt,hist = solveTree!(fg)
+# tree = batchSolve!(fg, treeinit=true)
 
 println("Adding Pose3Pose3NH to graph...")
 

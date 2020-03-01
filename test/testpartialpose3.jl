@@ -62,7 +62,8 @@ global X2pts = getVal(fg, :x2)
 # check that only partial states are updated
 global pts = IIF.approxConv(fg, :x2f1, :x2, N=N)
 
-global newdims = collect(getData(f1).fnc.usrfnc!.partial)
+global newdims = collect(DFG.getSolverData(f1).fnc.usrfnc!.partial)
+
 global olddims = setdiff(collect(1:6), newdims)
 
 @test size(pts, 1) == 6
@@ -112,11 +113,11 @@ end
 @testset "test PartialPose3XYYaw evaluations" begin
 
 # get existing and predict new
-global X2pts = getVal(fg, :x2)
+global X2pts = getKDE(fg, :x2) |> getPoints
 global pts = approxConv(fg, :x1x2f1, :x2, N=N)
 
 # find which dimensions are and and are not updated by XYYaw partial
-global newdims = collect(getData(f2).fnc.usrfnc!.partial)
+global newdims = collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
 global olddims = setdiff(collect(1:6), newdims)
 
 # check the number of points are correct
@@ -147,23 +148,26 @@ end
 
 
 @testset "test predictbelief with two functions" begin
-  global val, = predictbelief(fg, :x2, ls(fg, :x2), N=N)
 
-  for i in 1:N
-    val[6,i] = wrapRad(val[6,i])
-  end
+global val, = predictbelief(fg, :x2, ls(fg, :x2), N=N)
 
-  @test size(val, 1) == 6
-  @test size(val, 2) == N
+for i in 1:N
+  val[6,i] = wrapRad(val[6,i])
+end
 
-  global estmu1mean = Statistics.mean(val[collect(getData(f1).fnc.usrfnc!.partial),:],dims=2)
-  global estmu2mean = Statistics.mean(val[collect(getData(f2).fnc.usrfnc!.partial),:],dims=2)
+@test size(val, 1) == 6
+@test size(val, 2) == N
 
-  @test sum(abs.(estmu1mean - mu1[[3;1;2]]) .< [0.7; 0.1; 0.1]) == 3
-  @test sum(abs.(estmu2mean - mu2) .< [0.7; 0.7; 0.15] ) == 3
+global estmu1mean = Statistics.mean(val[collect(DFG.getSolverData(f1).fnc.usrfnc!.partial),:],dims=2)
+global estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.partial),:],dims=2)
 
-  global memcheck = getVal(v2)
-  @test 1e-10 < norm(val - memcheck)
+@test sum(abs.(estmu1mean - mu1[[3;1;2]]) .< [0.7; 0.1; 0.1]) == 3
+@test sum(abs.(estmu2mean - mu2) .< [0.7; 0.7; 0.15] ) == 3
+
+global memcheck = getVal(v2)
+@test 1e-10 < norm(val - memcheck)
+
+
 end
 
 

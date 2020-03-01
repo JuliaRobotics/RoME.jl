@@ -35,9 +35,6 @@ global pts = approxConv(fg, :x0x1f1, :x1)
 # ensureAllInitialized!(fg)
 
 tree, smt, hist = solveTree!(fg)
-# global tree = batchSolve!(fg, N=N)
-# global tree = wipeBuildNewTree!(fg)
-# inferOverTree!(fg, tree, N=N)
 
 global X1 = getVal(fg, :x1)
 
@@ -250,8 +247,8 @@ global dp2dp2 = VelPose2VelPose2(MvNormal([0.0;-1.0;0], Matrix(Diagonal([0.01;0.
                           MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [:x0;:x1], dp2dp2)
 
-
-batchSolve!(fg,N=N)
+getSolverParams(fg).N = N
+solveTree!(fg)
 
 
 # test for velocity in the body frame
