@@ -645,7 +645,7 @@ function get2DSamples(fg::G; #::Union{Symbol, S};
 
   # if sym = 'l', ignore single measurement landmarks
   allids = DFG.getVariableIds(fg, regexKey)  # fg.IDs
-  saids = DFG.sortVarNested(allids)
+  saids = DFG.sortDFG(allids)
   for id in saids
     # vertlbl = string(id[1])
     vertlbl = string(id)
@@ -677,7 +677,7 @@ function getVariablesLabelsWithinRange(fg::AbstractDFG,
 
   # if sym = 'l', ignore single measurement landmarks
   allids = DFG.getVariableIds(fg, regexKey)  # fg.IDs
-  saids = DFG.sortVarNested(allids)
+  saids = DFG.sortDFG(allids)
   mask = Array{Bool,1}(undef, length(saids))
   fill!(mask, false)
   count = 0
@@ -748,7 +748,7 @@ function get2DPoseMax(fgl::G;
   #
   # xLB,ll = ls(fgl) # TODO add: from, to, special option 'x'
   xLB = DFG.getVariableIds(fgl, regexKey)
-  saids = DFG.sortVarNested(xLB)
+  saids = DFG.sortDFG(xLB)
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
