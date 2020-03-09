@@ -769,10 +769,10 @@ plotLocalProduct(fg, :l0)
 
 drawGraph(sfg31_ad)
 
-plotKDE(sfg31_ad, sortVarNested(ls(sfg31_ad)), levels=1)
+plotKDE(sfg31_ad, sortDFG(ls(sfg31_ad)), levels=1)
 
-plotKDE(fg31_11, sortVarNested(ls(sfg31_ad)), levels=1)
-plotKDE(fg31_12, sortVarNested(ls(sfg31_ad)), levels=1)
+plotKDE(fg31_11, sortDFG(ls(sfg31_ad)), levels=1)
+plotKDE(fg31_12, sortDFG(ls(sfg31_ad)), levels=1)
 
 plotCliqUpMsgs(fg, tree, :x5)
 

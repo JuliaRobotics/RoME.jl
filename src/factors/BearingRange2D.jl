@@ -44,6 +44,34 @@ function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
   return res[1]
 end
 
+#TODO wrapper
+function (s::Pose2Point2BearingRange{<:Normal})(xi::AbstractVector{T}, lm::AbstractVector{T}; kwargs...) where T <: Real
+
+
+  meas = [mean(s.bearing), mean(s.range)]
+  iΣ = [var(s.bearing)         0.0;
+                   0.0 var(s.range)]
+
+  # 1-bearing
+  # 2-range
+
+  # world frame
+  θ = meas[1] + xi[3]
+  mx = meas[2]*cos(θ)
+  my = meas[2]*sin(θ)
+
+  ex = lm[1] - (mx + xi[1])
+  ey = lm[2] - (my + xi[2])
+  er = sqrt.(ex.^2 + ey.^2)
+
+  eθ = atan((my + xi[2]), (mx + xi[1])) - atan(lm[2], lm[1])
+
+  res = [eθ, er]
+
+  return res' * iΣ * res
+
+end
+
 # import RoME: Pose2Point2BearingRange
 
 

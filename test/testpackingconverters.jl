@@ -7,7 +7,7 @@
 using RoME
 using Test
 using DistributedFactorGraphs
-import DistributedFactorGraphs: pack, unpack
+import DistributedFactorGraphs: packVariableNodeData, unpackVariableNodeData
 import RoME: compare
 
 
@@ -67,8 +67,8 @@ unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapp
 # TODO -- what what??
 # setSerializationNamespace!("Main" => Main)
 # TODO: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/44
-packedv1data = pack(fg, DFG.getSolverData(v1))
-upv1data = unpack(fg, packedv1data)
+packedv1data = packVariableNodeData(fg, DFG.getSolverData(v1))
+upv1data = unpackVariableNodeData(fg, packedv1data)
 # packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
 # upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
@@ -157,8 +157,8 @@ global f1  = addFactor!(fg,[v1], ipp)
     # @test compareAll(DFG.getSolverData(f1).fnc.threadmodel, unpackeddata.fnc.threadmodel)
 
     # TODO: Ref above
-    packedv1data = pack(fg, DFG.getSolverData(v1))
-    upv1data = unpack(fg, packedv1data)
+    packedv1data = packVariableNodeData(fg, DFG.getSolverData(v1))
+    upv1data = unpackVariableNodeData(fg, packedv1data)
     # global packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
     # global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
