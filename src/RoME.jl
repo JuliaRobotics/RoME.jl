@@ -9,6 +9,7 @@ using Reexport
 @reexport using ApproxManifoldProducts
 
 using
+  Dates,
   Distributed,
   LinearAlgebra,
   Statistics,

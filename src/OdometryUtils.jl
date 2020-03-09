@@ -66,6 +66,7 @@ Helper function to duplicate values from a special factor variable into standard
 Notes:
 - Developed for accumulating odometry in a `MutablePosePose` and then cloning out a standard PosePose and new variable.
 - Does not change the original MutablePosePose source factor or variable in any way.
+- Assumes timestampe from mpp object.
 """
 function duplicateToStandardFactorVariable(::Type{Pose2Pose2},
                                            mpp::MutablePose2Pose2Gaussian,
@@ -73,15 +74,18 @@ function duplicateToStandardFactorVariable(::Type{Pose2Pose2},
                                            prevsym::Symbol,
                                            newsym::Symbol;
                                            solvable::Int=1,
-                                           autoinit::Bool=true,
+                                           autoinit::Union{Nothing, Bool}=nothing,
+                                           graphinit::Bool=true,
                                            cov::Union{Nothing, Matrix{Float64}}=nothing  )::Symbol
   #
+  graphinit = autoinit != nothing ? (@warn "autoinit deprecated, use graphinit instead."; autoinit) : graphinit
+
   # extract factor values and create PosePose object
   posepose = Pose2Pose2(MvNormal(mpp.Zij.μ, cov==nothing ? mpp.Zij.Σ.mat : cov))
 
   # modify the factor graph
-  addVariable!(dfg, newsym, Pose2, solvable=solvable)
-  addFactor!(dfg, [prevsym; newsym], posepose, solvable=solvable, autoinit=autoinit)
+  addVariable!(dfg, newsym, Pose2, solvable=solvable, timestamp=mpp.timestamp)
+  addFactor!(dfg, [prevsym; newsym], posepose, solvable=solvable, graphinit=graphinit, timestamp=mpp.timestamp)
   return ls(dfg, newsym)[1]
 end
 
