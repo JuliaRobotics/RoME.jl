@@ -11,7 +11,7 @@ Specialized Pose2Pose2 factor type (Gaussian), which allows for rapid accumulati
 mutable struct MutablePose2Pose2Gaussian  <: IIF.FunctorPairwise
   Zij::MvNormal
   timestamp::DateTime
-  MutablePose2Pose2Gaussian(;Zij::MvNormal=MvNormal(zeros(3),Matrix(Diagonal([0.01; 0.01; 0.001].^2))), timestamp::DateTime=now()) = new(Zij, timestamp)
+  MutablePose2Pose2Gaussian(zdir=nothing;Zij::MvNormal=MvNormal(zeros(3),Matrix(Diagonal([0.01; 0.01; 0.001].^2))), timestamp::DateTime=now()) = new(zdir == nothing ? Zij : zdir, timestamp)
 end
 function getSample(fct::MutablePose2Pose2Gaussian, N::Int=100)
   return (rand(fct.Zij, N), )
