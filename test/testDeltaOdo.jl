@@ -60,7 +60,7 @@ DX = extractDeltaOdo(XX, YY, TH)
 ## Test accumulation function from OdometryUtils.jl
 
 
-mpp = MutablePose2Pose2Gaussian(Zij=MvNormal([XX[1];YY[1];TH[1]], 1e-3*Matrix(LinearAlgebra.I, 3,3)))
+mpp = MutablePose2Pose2Gaussian(MvNormal([XX[1];YY[1];TH[1]], 1e-3*Matrix(LinearAlgebra.I, 3,3)))
 dt = 1.0
 nXYT = zeros(3,size(DX,2))
 Qc = 1e-6*Matrix(LinearAlgebra.I, 3,3)
