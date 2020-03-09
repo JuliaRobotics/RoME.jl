@@ -39,7 +39,7 @@ addFactor!(fg, [:x0; :l1], p2br )
 
 addVariable!(fg, :deadreckon_x0, Pose2, solvable=0)
 
-drec = MutablePose2Pose2Gaussian(Zij=MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
+drec = MutablePose2Pose2Gaussian(MvNormal(zeros(3), Matrix{Float64}(LinearAlgebra.I, 3,3)))
 
 addFactor!(fg, [:x0; :deadreckon_x0], drec, solvable=0)
 
