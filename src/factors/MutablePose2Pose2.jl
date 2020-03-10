@@ -10,6 +10,8 @@ Specialized Pose2Pose2 factor type (Gaussian), which allows for rapid accumulati
 """
 mutable struct MutablePose2Pose2Gaussian  <: IIF.FunctorPairwise
   Zij::MvNormal
+  timestamp::DateTime
+  MutablePose2Pose2Gaussian(Zij::MvNormal=MvNormal(zeros(3),Matrix(Diagonal([0.01; 0.01; 0.001].^2))), timestamp::DateTime=now()) = new(Zij, timestamp)
 end
 function getSample(fct::MutablePose2Pose2Gaussian, N::Int=100)
   return (rand(fct.Zij, N), )
@@ -49,12 +51,13 @@ $(TYPEDEF)
 """
 mutable struct PackedMutablePose2Pose2Gaussian  <: IIF.PackedInferenceType
   datastr::String
+  timestamp::Int64 # serialized in millisecond
   PackedMutablePose2Pose2Gaussian() = new()
-  PackedMutablePose2Pose2Gaussian(x::String) = new(x)
+  PackedMutablePose2Pose2Gaussian(x::String, ts::Int=datetime2unix(now())*1e3 |> Int) = new(x, ts)
 end
 function convert(::Type{MutablePose2Pose2Gaussian}, d::PackedMutablePose2Pose2Gaussian)
-  return MutablePose2Pose2Gaussian(extractdistribution(d.datastr))
+  return MutablePose2Pose2Gaussian(extractdistribution(d.datastr), timestamp=unix2datetime(d.timestamp*1e-3))
 end
 function convert(::Type{PackedMutablePose2Pose2Gaussian}, d::MutablePose2Pose2Gaussian)
-  return PackedMutablePose2Pose2Gaussian(string(d.Zij))
+  return PackedMutablePose2Pose2Gaussian(string(d.Zij), datetime2unix(d.timestamp)*1e3 |> Int)
 end
