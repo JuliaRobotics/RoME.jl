@@ -32,17 +32,17 @@ end
 
 
 #TODO wrapper
-function (s::Pose2Pose2_Parametric{<:MvNormal})(wXi::AbstractVector{T}, wXj::AbstractVector{T}; kwargs...) where T <: Real
-
-  meas = mean(s.z)
-  iΣ = invcov(s.z)
-  wXjhat = SE2(wXi[1:3])*SE2(meas[1:3])
-  jXjhat = SE2(wXj[1:3]) \ wXjhat
-
-  res = se2vee(jXjhat)
-  return res' * iΣ * res
-
-end
+# function (s::Pose2Pose2{<:MvNormal})(wXi::AbstractVector{T}, wXj::AbstractVector{T}; kwargs...) where T <: Real
+#
+#   meas = mean(s.z)
+#   iΣ = invcov(s.z)
+#   wXjhat = SE2(wXi[1:3])*SE2(meas[1:3])
+#   jXjhat = SE2(wXj[1:3]) \ wXjhat
+#
+#   res = se2vee(jXjhat)
+#   return res' * iΣ * res
+#
+# end
 
 
 

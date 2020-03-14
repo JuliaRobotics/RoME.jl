@@ -22,18 +22,18 @@ function getSample(p2::PriorPose2, N::Int=1)
 end
 
 #TODO wrapper
-function (s::PriorPose2_Parametric{<:MvNormal})(wXi::AbstractVector{T}; kwargs...) where T <: Real
-
-
-  meas = mean(s.Z)
-  iΣ = invcov(s.Z)
-
-  # res = meas .- X1
-  iXihat = SE2(meas[1:3]) \ SE2(wXi[1:3])
-  res = se2vee(iXihat)
-
-  return res' * iΣ * res
-end
+# function (s::PriorPose2{<:MvNormal})(wXi::AbstractVector{T}; kwargs...) where T <: Real
+#
+#
+#   meas = mean(s.Z)
+#   iΣ = invcov(s.Z)
+#
+#   # res = meas .- X1
+#   iXihat = SE2(meas[1:3]) \ SE2(wXi[1:3])
+#   res = se2vee(iXihat)
+#
+#   return res' * iΣ * res
+# end
 
 
 

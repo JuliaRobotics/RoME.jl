@@ -20,14 +20,14 @@ function getSample(p2::PriorPoint2, N::Int=1)
 end
 
 #TODO wrapper
-function (s::PriorPoint2_Parametric{<:MvNormal})(X1::AbstractVector{T}; kwargs...) where T <: Real
-
-  meas = mean(s.Z)
-  iΣ = invcov(s.Z)
-  res = meas[1:2] .- X1[1:2]
-  return res' * iΣ * res
-
-end
+# function (s::PriorPoint2{<:MvNormal})(X1::AbstractVector{T}; kwargs...) where T <: Real
+#
+#   meas = mean(s.Z)
+#   iΣ = invcov(s.Z)
+#   res = meas[1:2] .- X1[1:2]
+#   return res' * iΣ * res
+#
+# end
 
 """
 $(TYPEDEF)
@@ -55,13 +55,13 @@ function (pp2r::Point2Point2{T})(
 end
 
 #TODO wrapper
-function (s::Point2Point2_Parametric{<:MvNormal})(X1::AbstractVector{T}, X2::AbstractVector{T}; kwargs...) where T <: Real
-
-  meas = mean(s.Zij)
-  iΣ = invcov(s.Zij)
-  res = meas[1:2] .- (X2[1:2] .- X1[1:2])
-  return res' * iΣ * res
-end
+# function (s::Point2Point2{<:MvNormal})(X1::AbstractVector{T}, X2::AbstractVector{T}; kwargs...) where T <: Real
+#
+#   meas = mean(s.Zij)
+#   iΣ = invcov(s.Zij)
+#   res = meas[1:2] .- (X2[1:2] .- X1[1:2])
+#   return res' * iΣ * res
+# end
 
 
 
