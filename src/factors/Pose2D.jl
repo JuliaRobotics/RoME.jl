@@ -32,7 +32,7 @@ end
 
 
 #TODO wrapper
-function (s::Pose2Pose2{<:MvNormal})(wXi::AbstractVector{T}, wXj::AbstractVector{T}; kwargs...) where T <: Real
+function (s::Pose2Pose2_Parametric{<:MvNormal})(wXi::AbstractVector{T}, wXj::AbstractVector{T}; kwargs...) where T <: Real
 
   meas = mean(s.z)
   iΣ = invcov(s.z)

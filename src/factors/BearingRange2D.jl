@@ -45,7 +45,7 @@ function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
 end
 
 #TODO wrapper
-function (s::Pose2Point2BearingRange{<:Normal})(xi::AbstractVector{T}, lm::AbstractVector{T}; kwargs...) where T <: Real
+function (s::Pose2Point2BearingRange_Parametric{<:Normal})(xi::AbstractVector{T}, lm::AbstractVector{T}; kwargs...) where T <: Real
 
 
   meas = [mean(s.bearing), mean(s.range)]
