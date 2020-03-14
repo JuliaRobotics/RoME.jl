@@ -238,7 +238,7 @@ ef2pts = approxConv(fg, :x1x2l1l2l3f1, :l2)
 
 # getSolverParams(fg).dbg = true
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree, smt, hist = solveTree!(fg)
 # ensureAllInitialized!(fg)
 # tree = wipeBuildNewTree!(fg)
 # # spyCliqMat(tree.cliques[1])
