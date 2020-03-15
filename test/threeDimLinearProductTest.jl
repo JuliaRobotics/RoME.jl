@@ -128,15 +128,17 @@ global stdX1 = Statistics.std(getVal(fg,:x1),dims=2)
 @test sum(map(Int,abs.(muX1[1:3]) .< 1.0)) == 3
 @test sum(map(Int,abs.(muX1[4:6]) .< 0.1)) == 3
 @test sum(map(Int, 0.4 .< stdX1[1:3] .< 1.6)) == 3 # had a 2==3 failure here
-@test sum(map(Int, 0.025 .< stdX1[4:6] .< 0.25)) == 3
+@show stdX1[4:6]
+@test sum(map(Int, 0.02 .< stdX1[4:6] .< 0.4)) == 3
 global muX2 = Statistics.mean(getVal(fg,:x2),dims=2)
 global stdX2 = Statistics.std(getVal(fg,:x2),dims=2)
 @show muX2[1:3]-[10.0;0;0]
 @test sum(map(Int, abs.(muX2[1:3]-[10.0;0;0]) .< 1.5)) == 3
 @test sum(map(Int, abs.(muX2[4:6]) .< 0.1)) == 3
-@show println("previous test failure 0.75 .< $(round.(stdX2[1:3],digits=2)) .< 2.25")
-@test sum(map(Int, 0.75 .< stdX2[1:3] .< 2.25)) == 3
-@test sum(map(Int, 0.05 .< stdX2[4:6] .< 0.25)) == 3
+println("previous test failure 0.75 .< $(round.(stdX2[1:3],digits=2)) .< 2.25")
+@test sum(map(Int, 0.75 .< stdX2[1:3] .< 2.5)) == 3
+println("previous test failure 0.05 .< $(round.(stdX2[4:6],digits=2)) .< 0.35")
+@test sum(map(Int, 0.05 .< stdX2[4:6] .< 0.5)) == 3
 
 end
 

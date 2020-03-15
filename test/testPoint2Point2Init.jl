@@ -44,11 +44,11 @@ tree, smt, hist = solveTree!(fg)
 # plotKDE(fg, :l1) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
 
 
-@test 15 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
-@test 15 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
+@test 10 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
+@test 10 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
 
-@test 15 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
-@test 15 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
+@test 10 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
+@test 10 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
 
 
 
@@ -66,11 +66,11 @@ tree, smt, hist = solveTree!(fg)
 
 
 
-@test 15 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
-@test 15 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
+@test 10 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
+@test 10 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
 
-@test 15 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
-@test 15 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
+@test 10 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
+@test 10 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
 
 
 

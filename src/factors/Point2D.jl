@@ -19,6 +19,15 @@ function getSample(p2::PriorPoint2, N::Int=1)
   return (rand(p2.Z, N),)
 end
 
+#TODO wrapper
+function (s::PriorPoint2{<:MvNormal})(X1::AbstractVector{T}; kwargs...) where T <: Real
+
+  meas = mean(s.Z)
+  iΣ = invcov(s.Z)
+  res = meas[1:2] .- X1[1:2]
+  return res' * iΣ * res
+
+end
 
 """
 $(TYPEDEF)
@@ -43,6 +52,15 @@ function (pp2r::Point2Point2{T})(
   res[1]  = meas[1][1,idx] - (xj[1,idx] - xi[1,idx])
   res[2]  = meas[1][2,idx] - (xj[2,idx] - xi[2,idx])
   nothing
+end
+
+#TODO wrapper
+function (s::Point2Point2{<:MvNormal})(X1::AbstractVector{T}, X2::AbstractVector{T}; kwargs...) where T <: Real
+
+  meas = mean(s.Zij)
+  iΣ = invcov(s.Zij)
+  res = meas[1:2] .- (X2[1:2] .- X1[1:2])
+  return res' * iΣ * res
 end
 
 

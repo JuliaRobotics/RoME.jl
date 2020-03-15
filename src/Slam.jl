@@ -17,15 +17,15 @@ end
 
 
 function addOdoFG!(slaml::SLAMWrapper, odo::Pose3Pose3;
-                  N::Int=100, ready::Int=1,
+                  N::Int=100, solvable::Int=1,
                   saveusrid::Int=-1)
   #
   vprev = getVert(slaml.fg, slaml.lastposesym)
   # vprev, X, nextn = getLastPose(fgl)
   npnum = parse(Int,string(slaml.lastposesym)[2:end]) + 1
   nextn = Symbol("x$(npnum)")
-  vnext = addVariable!(slaml.fg, nextn, Pose2(labels=["POSE";]), N=N, ready=ready)
-  # vnext = addVariable!(slaml.fg, nextn, getVal(vprev) ⊕ odo, N=N, ready=ready, labels=["POSE"])
+  vnext = addVariable!(slaml.fg, nextn, Pose2(labels=["POSE";]), N=N, solvable=solvable)
+  # vnext = addVariable!(slaml.fg, nextn, getVal(vprev) ⊕ odo, N=N, solvable=solvable, labels=["POSE"])
   slaml.lastposesym = nextn
   fact = addFactor!(slaml.fg, [vprev;vnext], odo)
 
@@ -40,7 +40,7 @@ end
 function addposeFG!(slaml::SLAMWrapper,
       constrs::Vector{IncrementalInference.FunctorInferenceType};
       N::Int=100,
-      ready::Int=1,
+      solvable::Int=1,
       saveusrid::Int=-1   )
   #
   vprev = getVert(slaml.fg, slaml.lastposesym)
@@ -50,8 +50,8 @@ function addposeFG!(slaml::SLAMWrapper,
   # preinit
   vnext = nothing
   if !haskey(slaml.fg.IDs, nextn)
-    vnext = addVariable!(slaml.fg, nextn, Pose2, N=N, ready=ready)
-    # vnext = addVariable!(slaml.fg, nextn, getVal(vprev), N=N, ready=ready, labels=["POSE"])
+    vnext = addVariable!(slaml.fg, nextn, Pose2, N=N, solvable=solvable)
+    # vnext = addVariable!(slaml.fg, nextn, getVal(vprev), N=N, solvable=solvable, labels=["POSE"])
   else
     vnext = getVert(slaml.fg, nextn) #, api=localapi # as optimization, assuming we already have latest vnest in slaml.fg
   end

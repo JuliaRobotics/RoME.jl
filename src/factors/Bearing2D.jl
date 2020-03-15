@@ -1,5 +1,5 @@
 
-mutable struct P2P2BearingReuse
+struct P2P2BearingReuse
   measvec::Vector{Float64}
   predvec::Vector{Float64}
   resid::Vector{Float64}
@@ -11,7 +11,7 @@ end
 
 Single dimension bearing constraint from Pose2 to Point2 variable.
 """
-mutable struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
+struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
     bearing::B
     reuse::Vector{P2P2BearingReuse}
     Pose2Point2Bearing{B}() where B = new{B}()
@@ -32,10 +32,15 @@ function (pp2br::Pose2Point2Bearing)(res::Array{Float64},
   reuse = pp2br.reuse[Threads.threadid()]
   reuse.measvec[1] = cos(meas[1][idx] + xi[3,idx])
   reuse.measvec[2] = sin(meas[1][idx] + xi[3,idx])
-  reuse.predvec[1] = lm[1,idx]-xi[1,idx]
-  reuse.predvec[2] = lm[2,idx]-xi[2,idx]
-  reuse.resid[1:2] = reuse.measvec - reuse.predvec
-  res[1] = reuse.resid'*reuse.resid
+
+  @simd for i in 1:2
+    reuse.predvec[i] = lm[i,idx]-xi[i,idx]
+  end
+  reuse.resid .= reuse.measvec
+  reuse.resid .-= reuse.predvec
+  reuse.resid .^= 2
+  res[1] = reuse.resid[1]
+  res[1] += reuse.resid[2]
   return res[1]
 end
 

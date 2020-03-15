@@ -7,8 +7,7 @@ Range and theta definition on `(:Euclid, :Circular)` manifold.
 struct Polar <: IIF.InferenceVariable
   dims::Int
   manifolds::Tuple{Symbol,Symbol}
-  labels::Vector{String}
-  Polar() = new(2,(:Euclid,:Circular),String[])
+  Polar() = new(2,(:Euclid,:Circular))
 end
 
 """

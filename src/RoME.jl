@@ -9,6 +9,7 @@ using Reexport
 @reexport using ApproxManifoldProducts
 
 using
+  Dates,
   Distributed,
   LinearAlgebra,
   Statistics,
@@ -17,11 +18,14 @@ using
   CoordinateTransformations,
   JLD2,
   ProgressMeter,
-  DocStringExtensions
+  DocStringExtensions,
+  DistributedFactorGraphs
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
 import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution, DFG
+# not sure why this is gives import error
+import DistributedFactorGraphs: compare
 
 # const AMP = ApproxManifoldProducts
 
@@ -30,10 +34,10 @@ export
   KDE,
   TU,
   AMP,
-  # initfg,
   # RoME specific functions
   measureMeanDist,
   predictBodyBR,
+  calcPosePointBearingRange,
   getLastPose,
   getLastPose2D,
   odomKDE,
@@ -53,7 +57,6 @@ export
 
   # helper functions
   get2DSamples,
-  # getAll2D,
   get2DSampleMeans,
   getAll2DMeans,
   getAll2DPoses,
@@ -74,6 +77,9 @@ export
 
   # RobotUtils
   getRangeKDEMax2D,
+  nextPose,
+  getLastPoses,
+  setSolvableOldPoses!,
 
   # some transform functions
   cart2pol,
@@ -137,6 +143,7 @@ export
   Pose2Point2Bearing,
   PackedPose2Point2Bearing,
   Pose2Point2Range,
+  PackedPose2Point2Range,
   PriorPoint2,
   PackedPriorPoint2,
   # Point2D with null hypotheses
@@ -235,6 +242,7 @@ export
   addSoftEqualityPoint2D,
   vectoarr2,
   basicFactorGraphExample,
+  predictVariableByFactor,
 
   # jld required Features Type
   LaserFeatures,
@@ -296,7 +304,10 @@ include("variables/Pose3D.jl")
 
 include("factors/Point2D.jl")
 include("factors/Polar.jl")
+include("factors/PriorPose2.jl")
+include("factors/PartialPriorPose2.jl")
 include("factors/Pose2D.jl")
+include("factors/MutablePose2Pose2.jl")
 include("factors/Bearing2D.jl")
 include("factors/Range2D.jl")
 include("factors/BearingRange2D.jl")
@@ -313,17 +324,19 @@ include("Slam.jl")
 include("RobotUtils.jl")
 
 include("SimulationUtils.jl")
+include("OdometryUtils.jl")
 
 include("FactorGraphAnalysisTools.jl")
 
 include("RobotDataTypes.jl") #WheeledRobotUtils
 include("NavigationSystem.jl")
 
+include("CanonicalGraphs.jl")
 
-include("Deprecated.jl")
-
+include("g2oParser.jl")
 # include("dev/ISAMRemoteSolve.jl")
 
+include("Deprecated.jl")
 
 
 end

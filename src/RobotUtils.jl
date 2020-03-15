@@ -1,4 +1,5 @@
 
+export getVariablesLabelsWithinRange
 
 mutable struct RangeAzimuthElevation
   range::Float64
@@ -64,19 +65,71 @@ end
 
 
 
+"""
+    $SIGNATURES
+
+Method to compare current and predicted estimate on a variable, developed for testing a new factor before adding to the factor graph.
+
+Notes
+- `fct` does not have to be in the factor graph -- likely used to test beforehand.
+- function is useful for detecting if `multihypo` should be used.
+- `approxConv` will project the full belief estimate through some factor but must already be in factor graph.
+
+Example
+
+```julia
+# fg already exists containing :x7 and :l3
+pp = Pose2Point2BearingRange(Normal(0,0.1),Normal(10,1.0))
+# possible new measurement from :x7 to :l3
+curr, pred = predictVariableByFactor(fg, :l3, pp, [:x7; :l3])
+# example of naive user defined test on fit score
+fitscore = minkld(curr, pred)
+# `multihypo` can be used as option between existing or new variables
+```
+
+Related
+
+approxConv
+"""
+function predictVariableByFactor(dfg::AbstractDFG,
+                                 targetsym::Symbol,
+                                 fct::Pose2Point2BearingRange,
+                                 prevars::Vector{Symbol}  )
+  #
+  @assert targetsym in prevars
+  curr = getKDE(dfg, targetsym)
+  tfg = initfg()
+  for var in prevars
+    varnode = getVariable(dfg, var)
+    addVariable!(tfg, var, getSofttype(varnode))
+    if var != targetsym
+      @assert isInitialized(varnode)
+      manualinit!(tfg,var,getKDE(varnode))
+    end
+  end
+  addFactor!(tfg, prevars, fct, autoinit=false)
+  fctsym = ls(tfg, targetsym)
+
+  pts, infd = predictbelief(tfg, targetsym, fctsym)
+  pred = manikde!(pts, getSofttype(getVariable(dfg, targetsym)))
+  # return current and predicted beliefs
+  return curr, pred
+end
+
+
 
 """
     $(SIGNATURES)
 
 Calculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.
 """
-function getRangeKDEMax2D(fgl::FactorGraph, vsym1::Symbol, vsym2::Symbol)
+function getRangeKDEMax2D(fgl::AbstractDFG, vsym1::Symbol, vsym2::Symbol)
   x1 = getKDEMax(getVertKDE(fgl, vsym1))
   x2 = getKDEMax(getVertKDE(fgl, vsym2))
   norm(x1[1:2]-x2[1:2])
 end
 
-function measureMeanDist(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
+function measureMeanDist(fg::AbstractDFG, a::AbstractString, b::AbstractString)
     #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
     res = zeros(2)
     A = getVal(fg,a)
@@ -92,15 +145,15 @@ function measureMeanDist(fg::FactorGraph, a::T, b::T) where {T <: AbstractString
     return r, b
 end
 
-function predictBodyBR(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
+function predictBodyBR(fg::AbstractDFG, a::Symbol, b::Symbol)
   res = zeros(2)
-  A = getVal(fg,a)
-  B = getVal(fg,b)
-  Ax = Statistics.mean(vec(A[1,:]))
-  Ay = Statistics.mean(vec(A[2,:]))
-  Ath = Statistics.mean(vec(A[3,:]))
-  Bx = Statistics.mean(vec(B[1,:]))
-  By = Statistics.mean(vec(B[2,:]))
+  A = getKDEMean(getKDE(getVariable(fg,a)))
+  B = getKDEMean(getKDE(getVariable(fg,b)))
+  Ax = A[1] # Statistics.mean(vec(A[1,:]))
+  Ay = A[2] # Statistics.mean(vec(A[2,:]))
+  Ath = getKDEMax(getKDE(getVariable(fg,a)))[3]
+  Bx = B[1]
+  By = B[2]
   wL = SE2([Bx;By;0.0])
   wBb = SE2([Ax;Ay;Ath])
   bL = se2vee((wBb \ Matrix{Float64}(LinearAlgebra.I, 3,3)) * wL)
@@ -111,55 +164,64 @@ function predictBodyBR(fg::FactorGraph, a::T, b::T) where {T <: AbstractString}
   return b, r
 end
 
-function getNextLbl(fgl::FactorGraph, chr)
-  # TODO convert this to use a double lookup
-  max = -1
-  maxid = -1
-  for vid in fgl.IDs
-  # for v in fgl.v #fgl.g.vertices # fgl.v
-      v = (vid[2], fgl.g.vertices[vid[2]])
-      if v[2].attributes["label"][1] == chr
-        # TODO test for allnums first, ex. :x1_2
-        val = parse(Int,v[2].attributes["label"][2:end])
-        if max < val
-          max = val
-          maxid = v[1]
-        end
-      end
-  end
-  if maxid != -1
-    v = getVert(fgl,maxid)
-    X = getVal(v)
-    return v, X, Symbol(string(chr,max+1))
-  else
-    return nothing, nothing, Symbol(string(chr,max+1)) # Union{}
-  end
+
+"""
+    $SIGNATURES
+
+Return the last `number::Int` of poses according to `filterLabel::Regex`.
+
+Notes
+- Uses FIFO add history of variables to the distribued factor graph object as search index.
+"""
+function getLastPoses(dfg::AbstractDFG;
+                      filterLabel::Regex=r"x\d",
+                      number::Int=5)::Vector{Symbol}
+  #
+  # filter according to pose label
+  syms = filter(l->occursin(filterLabel, string(l)), getAddHistory(dfg))
+
+  # return the last segment of syms
+  len = length(syms)
+  st = number < len ? len-number+1 : 1
+  return syms[st:end]
 end
 
-function getLastPose(fgl::FactorGraph)
-  return getNextLbl(fgl, 'x')
-end
-getLastPose2D(fgl::FactorGraph) = getLastPose(fgl)
+"""
+    $SIGNATURES
 
-function getlastpose(slam::SLAMWrapper)
-  error("getlastpose -- Not implemented yet")
-end
+Set old poses and adjacent factors to `solvable::Int=0` (default).
 
+Notes
+- `youngest::Int` and `oldest::Int` set the limits of search by count,
+  - `oldest` set large enough for solver loop defintely disengage old parts in re-occuring cycle.
+- `filterLabel::Regex` sets the template to search for each pose label.
+- Poses are assumed to be a thread through time that connects the local exploration variables.
+- Initially developed to remove old variables and factors from a solution, in combination with fix-lag marginalization.
+  - `getSolverParams(fg).isfixedlag=true`
 
-function getLastLandm2D(fgl::FactorGraph)
-  return getNextLbl(fgl, 'l')
-end
+Related:
 
-function odomKDE(p1,dx,cov)
-  X = getPoints(p1)
-  sig = diag(cov)
-  RES = zeros(size(X))
-  # increases the number of particles based on the number of modes in the measurement Z
-  for i in 1:size(X,2)
-      ent = [randn()*sig[1]; randn()*sig[2]; randn()*sig[3]]
-      RES[:,i] = addPose2Pose2(X[:,i], dx + ent)
-  end
-  return kde!(RES, "lcv")
+getLastPoses
+"""
+function setSolvableOldPoses!(dfg::AbstractDFG;
+                              youngest::Int=50,
+                              oldest::Int=200,
+                              solvable=0,
+                              filterLabel::Regex=r"x\d")
+  #
+  # collect old variables and factors to disable from next solve
+  newPoses = getLastPoses(dfg,filterLabel=filterLabel, number=youngest)
+  oldPoses = setdiff(getLastPoses(dfg,filterLabel=filterLabel, number=oldest), newPoses)
+  allFcts = (oldPoses .|> x->ls(dfg,x))
+  fctAdj = 0 < length(allFcts) ? union(allFcts...) : Symbol[]
+
+  # all together
+  fullList = [oldPoses; fctAdj]
+
+  # use solvable=0 to disable variables and factors in the next solve
+  map(x->setSolvable!(dfg, x, solvable), fullList)
+
+  return fullList
 end
 
 """
@@ -174,7 +236,7 @@ function addOdoFG!(fg::G,
                    DX::Array{Float64,1},
                    cov::Array{Float64,2};
                    N::Int=0,
-                   ready::Int=1,
+                   solvable::Int=1,
                    labels::Vector{<:AbstractString}=String[]  ) where G <: AbstractDFG
     #
     prev, X, nextn = getLastPose2D(fg)
@@ -190,10 +252,10 @@ function addOdoFG!(fg::G,
         XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addVariable!(fg, n, Pose2, N=N, ready=ready, labels=[labels;"POSE"])
-    # v = addVariable!(fg, n, XnextInit, cov, N=N, ready=ready, labels=labels)
+    v = addVariable!(fg, n, Pose2, N=N, solvable=solvable, labels=[labels;"POSE"])
+    # v = addVariable!(fg, n, XnextInit, cov, N=N, solvable=solvable, labels=labels)
     pp = Pose2Pose2(MvNormal(DX, cov)) #[prev;v],
-    f = addFactor!(fg, [prev;v], pp, ready=ready, autoinit=true )
+    f = addFactor!(fg, [prev;v], pp, solvable=solvable, autoinit=true )
     infor = inv(cov^2)
     # addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
     return v, f
@@ -202,17 +264,17 @@ end
 function addOdoFG!(fgl::G,
                    Z::Pose3Pose3;
                    N::Int=0,
-                   ready::Int=1,
+                   solvable::Int=1,
                    labels::Vector{<:AbstractString}=String[]  ) where {G <: AbstractDFG}
   #
   vprev, X, nextn = getLastPose(fgl)
-  vnext = addVariable!(fgl, nextn, Pose3, ready=ready, labels=labels)
+  vnext = addVariable!(fgl, nextn, Pose3, solvable=solvable, labels=labels)
   fact = addFactor!(fgl, [vprev;vnext], Z, autoinit=true)
 
   return vnext, fact
 
   # error("addOdoFG!( , ::Pose3Pose3, ) not currently usable, there were breaking changes. Work in Progress")
-  # addOdoFG(fg, n, DX, cov, N=N, ready=ready, labels=labels)
+  # addOdoFG(fg, n, DX, cov, N=N, solvable=solvable, labels=labels)
 end
 
 """
@@ -227,15 +289,15 @@ function addOdoFG!(
         fgl::FactorGraph,
         odo::Pose2Pose2;
         N::Int=0,
-        ready::Int=1,
+        solvable::Int=1,
         labels::Vector{<:AbstractString}=String[] ) # where {PP <: RoME.BetweenPoses}
     #
     vprev, X, nextn = getLastPose(fgl)
     if N==0
       N = size(X,2)
     end
-    # vnext = addVariable!(fgl, nextn, X⊕odo, ones(1,1), N=N, ready=ready, labels=labels)
-    vnext = addVariable!(fgl, nextn, Pose2, N=N, ready=ready, labels=labels)
+    # vnext = addVariable!(fgl, nextn, X⊕odo, ones(1,1), N=N, solvable=solvable, labels=labels)
+    vnext = addVariable!(fgl, nextn, Pose2, N=N, solvable=solvable, labels=labels)
     fact = addFactor!(fgl, [vprev;vnext], odo, autoinit=true)
 
     return vnext, fact
@@ -273,7 +335,7 @@ function initFactorGraph!(fg::G;
                           init::Union{Vector{Float64},Nothing}=nothing,
                           N::Int=100,
                           lbl::Symbol=:x0,
-                          ready::Int=1,
+                          solvable::Int=1,
                           firstPoseType=Pose2,
                           labels::Vector{Symbol}=Symbol[]) where G <: AbstractDFG
   #
@@ -282,19 +344,19 @@ function initFactorGraph!(fg::G;
       init = init!=nothing ? init : zeros(3)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.001]))
       # init = vectoarr2(init)
-      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
+      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,solvable=solvable,labels=labels )
       push!(nodesymbols, lbl)
-      # v1 = addVariable!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), ready=ready, labels=labels) #[v1],
+      # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, labels=labels)
+      fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), solvable=solvable, labels=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.03;0.001;0.001;0.001]))
-      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,ready=ready,labels=labels )
+      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,solvable=solvable,labels=labels )
       push!(nodesymbols, lbl)
-      # v1 = addVariable!(fg, lbl, init, P0, N=N, ready=ready, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), ready=ready, labels=labels) #[v1],
+      # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, labels=labels)
+      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), solvable=solvable, labels=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   return nodesymbols
@@ -302,11 +364,11 @@ end
 
 
 function newLandm!(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
-                  N::Int=100, ready::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
+                  N::Int=100, solvable::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
 
-    vert=addVariable!(fg, Symbol(lm), Point2, N=N, ready=ready, labels=union(["LANDMARK";], labels))
+    vert=addVariable!(fg, Symbol(lm), Point2, N=N, solvable=solvable, labels=union(["LANDMARK";], labels))
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
-    # vert=addVariable!(fg, Symbol(lm), wPos, sig, N=N, ready=ready, labels=labels)
+    # vert=addVariable!(fg, Symbol(lm), wPos, sig, N=N, solvable=solvable, labels=labels)
 
     vert.attributes["age"] = 0
     vert.attributes["maxage"] = 0
@@ -326,7 +388,7 @@ function addBRFG!(fg::G,
                   lm::T,
                   br::Array{Float64,1},
                   cov::Array{Float64,2};
-                  ready::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
+                  solvable::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
   #
   vps = getVert(fg,pose)
   vlm = getVert(fg,lm)
@@ -350,7 +412,7 @@ function addBRFG!(fg::G,
 
   pbr = Pose2Point2BearingRange(Normal(br[1], cov[1,1]), Normal(br[2],  cov[2,2]))  #{Normal, Normal}
   @show vps, vlm
-  f = addFactor!(fg, [vps;vlm], pbr, ready=ready, autoinit=true ) #[vps;vlm],
+  f = addFactor!(fg, [vps;vlm], pbr, solvable=solvable, autoinit=true ) #[vps;vlm],
 
   # only used for max likelihood unimodal tests.
   u, P = pol2cart(br[[2;1]], diag(cov))
@@ -362,7 +424,7 @@ end
 function addMMBRFG!(fg::G,
                     syms::Array{Symbol,1}, br::Array{Float64,1},
                     cov::Array{Float64,2}; w::Vector{Float64}=Float64[0.5;0.5],
-                    ready::Int=1) where G <: AbstractDFG
+                    solvable::Int=1) where G <: AbstractDFG
     #
     # vps = getVert(fg,pose)
     # vlm1 = getVert(fg,lm[1])
@@ -370,7 +432,7 @@ function addMMBRFG!(fg::G,
 
     pbr = Pose2Point2BearingRange(Normal(br[1],cov[1,1]),  Normal(br[2],cov[2,2]))
     syms = Symbol.([pose;lm...])
-    f = addFactor!(fg, syms, pbr, multihypo=[1.0; w...], ready=ready, autoinit=true )
+    f = addFactor!(fg, syms, pbr, multihypo=[1.0; w...], solvable=solvable, autoinit=true )
     return f
 end
 
@@ -394,15 +456,15 @@ function projNewLandm!(fg::G,
                        cov::Array{Float64,2};
                        addfactor=true,
                        N::Int=100,
-                       ready::Int=1,
+                       solvable::Int=1,
                        labels::Vector{T}=String[]  ) where {G <: AbstractDFG, T <: AbstractString}
     #
     vps = getVert(fg, pose)
 
     lmPts = projNewLandmPoints(vps, br, cov)
-    vlm = newLandm!(fg, lm, lmPts, cov, N=N, ready=ready, labels=labels) # cov should not be required here
+    vlm = newLandm!(fg, lm, lmPts, cov, N=N, solvable=solvable, labels=labels) # cov should not be required here
     if addfactor
-      fbr = addBRFG!(fg, pose, lm, br, cov, ready=ready)
+      fbr = addBRFG!(fg, pose, lm, br, cov, solvable=solvable)
       return vlm, fbr
     end
     return vlm
@@ -475,7 +537,7 @@ end
 
 function evalAutoCases!(fgl::G, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
                         pose::T, lmPts::Array{Float64,2}, br::Array{Float64,1}, cov::Array{Float64,2}, lmindx::Int;
-                        N::Int=100, ready::Int=1 ) where {G <: AbstractDFG, T <: AbstractString}
+                        N::Int=100, solvable::Int=1 ) where {G <: AbstractDFG, T <: AbstractString}
   lmidSugg, maxAnyExists, maxl2Exists, maxl2, lmIDExists, intgLmIDExists, lmSuggLbl, newlmindx = doAutoEvalTests(fgl,ivs,maxl,lmid, lmindx)
 
   println("evalAutoCases -- found=$(lmidSugg), $(maxAnyExists), $(maxl2Exists), $(lmIDExists), $(intgLmIDExists)")
@@ -484,42 +546,42 @@ function evalAutoCases!(fgl::G, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
   if (!lmidSugg && !maxAnyExists)
     #new landmark and UniBR constraint
     v,L,lm = getLastLandm2D(fgl)
-    vlm = newLandm!(fgl, lm, lmPts, cov, N=N,ready=ready)
-    fbr = addBRFG!(fgl, pose, lm, br, cov, ready=ready)
+    vlm = newLandm!(fgl, lm, lmPts, cov, N=N,solvable=solvable)
+    fbr = addBRFG!(fgl, pose, lm, br, cov, solvable=solvable)
   elseif !lmidSugg && maxAnyExists
     # add UniBR to best match maxl
     vlm = getVert(fgl,maxl)
-    fbr = addBRFG!(fgl, pose, maxl, br, cov, ready=ready)
+    fbr = addBRFG!(fgl, pose, maxl, br, cov, solvable=solvable)
   elseif lmidSugg && !maxl2Exists && !lmIDExists
     #add new landmark and add UniBR to suggested lmid
-    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N, ready=ready)
-    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, ready=ready)
+    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N, solvable=solvable)
+    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, solvable=solvable)
   elseif lmidSugg && !maxl2Exists && lmIDExists && intgLmIDExists
     # doesn't self intesect with existing lmid, add UniBR to lmid
     vlm = getVert(fgl, lmid)
-    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, ready=ready)
+    fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, solvable=solvable)
   elseif lmidSugg && maxl2Exists && !lmIDExists
     # add new landmark and add MMBR to both maxl and lmid
-    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N, ready=ready)
-    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, ready=ready)
+    vlm = newLandm!(fgl, lmSuggLbl, lmPts, cov, N=N, solvable=solvable)
+    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, solvable=solvable)
   elseif lmidSugg && maxl2Exists && lmIDExists && intgLmIDExists
     # obvious case, add MMBR to both maxl and lmid. Double intersect might be the same thing
     println("evalAutoCases! -- obvious case is happening")
-    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, ready=ready)
+    addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, solvable=solvable)
     vlm = getVert(fgl,lmSuggLbl)
   elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
     # odd case, does not intersect with suggestion, but does with some previous landm
     # add MMBR
     @warn "evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected"
-    addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov, ready=ready)
+    addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov, solvable=solvable)
     vlm = getVert(fgl,lmSuggLbl)
   elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
   #   # landm exists but no intersection with existing or suggested lmid
   #   # may suggest some error
     @warn "evalAutoCases! -- no intersect with suggested $(lmSuggLbl) or map detected, adding  new landmark MM constraint incase"
     v,L,lm = getLastLandm2D(fgl)
-    vlm = newLandm!(fgl, lm, lmPts, cov, N=N, ready=ready)
-    addMMBRFG!(fgl, pose, [lm; lmSuggLbl], br, cov, ready=ready)
+    vlm = newLandm!(fgl, lm, lmPts, cov, N=N, solvable=solvable)
+    addMMBRFG!(fgl, pose, [lm; lmSuggLbl], br, cov, solvable=solvable)
   else
     error("evalAutoCases! -- unknown case encountered, can reduce to this error to a warning and ignore user request")
   end
@@ -534,7 +596,7 @@ function addAutoLandmBR!(fgl::G,
                          cov::Array{Float64,2},
                          lmindx::Int;
                          N::Int=100,
-                         ready::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
+                         solvable::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
   #
   vps = getVert(fgl, pose)
   lmPts = projNewLandmPoints(vps, br, cov)
@@ -543,7 +605,7 @@ function addAutoLandmBR!(fgl::G,
   ivs, maxl = calcIntersectVols(fgl, lmkde, currage=currage,maxdeltaage=10)
 
   # There are 8 cases of interest
-  vlm, fbr, newlmindx = evalAutoCases!(fgl, lmid, ivs, maxl,pose,lmPts, br,cov,lmindx,N=N,ready=ready)
+  vlm, fbr, newlmindx = evalAutoCases!(fgl, lmid, ivs, maxl,pose,lmPts, br,cov,lmindx,N=N,solvable=solvable)
 
   return vlm, fbr, newlmindx
 end
@@ -576,19 +638,19 @@ end
 function get2DSamples(fg::G; #::Union{Symbol, S};
                       from::Int=0, to::Int=999999999,
                       minnei::Int=0,
-                      varkey::Regex=r"x") where {G <: AbstractDFG, S <: AbstractString}
+                      regexKey::Regex=r"x") where {G <: AbstractDFG, S <: AbstractString}
   #
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
 
   # if sym = 'l', ignore single measurement landmarks
-  allids = DFG.getVariableIds(fg, varkey)  # fg.IDs
-  saids = DFG.sortVarNested(allids)
+  allids = DFG.getVariableIds(fg, regexKey)  # fg.IDs
+  saids = DFG.sortDFG(allids)
   for id in saids
     # vertlbl = string(id[1])
     vertlbl = string(id)
     # if vertlbl[1] == sym
-      val = parse(Int,vertlbl[2:end])
+      val = parse(Int,split(vertlbl[2:end],'_')[1])
       if from <= val && val <= to
         # if length( getOutNeighbors(fg, vertlbl[2] , needdata=true ) ) >= minnei
         if length( DFG.getNeighbors(fg, id ) ) >= minnei
@@ -607,19 +669,15 @@ end
 #   return get2DSamples(fg, sym, minnei=minnei )
 # end
 
-function get2DSampleMeans(fg::G,
-                          varkey::Regex=r"x";
-                          from::Int=0, to::Int=9999999999,
-                          minnei::Int=0) where G <: AbstractDFG
+function getVariablesLabelsWithinRange(fg::AbstractDFG,
+                                       regexKey::Regex=r"x";
+                                       from::Int=0, to::Int=9999999999,
+                                       minnei::Int=0)
   #
-  X = Array{Float64,1}()
-  Y = Array{Float64,1}()
-  Th = Array{Float64,1}()
-  LB = String[]
 
   # if sym = 'l', ignore single measurement landmarks
-  allids = DFG.getVariableIds(fg, varkey)  # fg.IDs
-  saids = DFG.sortVarNested(allids)
+  allids = DFG.getVariableIds(fg, regexKey)  # fg.IDs
+  saids = DFG.sortDFG(allids)
   mask = Array{Bool,1}(undef, length(saids))
   fill!(mask, false)
   count = 0
@@ -631,18 +689,33 @@ function get2DSampleMeans(fg::G,
     if from != 0 || to != 9999999999
       vertlbl = string(id)
         # TODO won't work with nested labels
-        val = parse(Int,vertlbl[2:end])
+        val = parse(Int,split(vertlbl[2:end],'_')[1])
         if !(from <= val && val <= to)
           mask[count] = false
         end
     end
   end
-  # allIDs = sort(allIDs)
 
-  for id in saids[mask]
+  saids[mask]
+end
+
+
+function get2DSampleMeans(fg::AbstractDFG,
+                          regexKey::Regex=r"x";
+                          from::Int=0, to::Int=9999999999,
+                          minnei::Int=0)
+  #
+  X = Array{Float64,1}()
+  Y = Array{Float64,1}()
+  Th = Array{Float64,1}()
+  LB = String[]
+
+  vsyms = getVariablesLabelsWithinRange(fg, regexKey, from=from, to=to, minnei=minnei)
+
+  for id in vsyms
     X=[X; Statistics.mean( vec( getVal(fg, id )[1,:] ) )]
     Y=[Y; Statistics.mean( vec( getVal(fg, id )[2,:] ) )]
-    # crude test for pose
+    # crude test for pose TODO probably not going to always work right
     if string(id)[1] == 'x'
       Th=[Th; Statistics.mean( vec( getVal(fg, id )[3,:] ) )]
     end
@@ -656,33 +729,33 @@ function getAll2DMeans(fg, sym::Regex)
   return get2DSampleMeans(fg, sym )
 end
 
-function getAll2DPoses(fg::G) where G <: AbstractDFG
-    return getAll2DSamples(fg, varkey=r"x" )
+function getAll2DPoses(fg::G; regexKey=r"x") where G <: AbstractDFG
+    return getAll2DSamples(fg, regexKey=regexKey )
 end
 
-function get2DPoseSamples(fg::G; from::Int=0, to::Int=999999999) where G <: AbstractDFG
-  return get2DSamples(fg, varkey=r"x", from=from, to=to )
+function get2DPoseSamples(fg::G; from::Int=0, to::Int=999999999, regexKey=r"x") where G <: AbstractDFG
+  return get2DSamples(fg, regexKey=regexKey, from=from, to=to )
 end
 
-function get2DPoseMeans(fg::G; from::Int=0, to::Int=999999999) where G <: AbstractDFG
-  return get2DSampleMeans(fg, r"x", from=from, to=to )
+function get2DPoseMeans(fg::G; from::Int=0, to::Int=999999999, regexKey=r"x") where G <: AbstractDFG
+  return get2DSampleMeans(fg, regexKey, from=from, to=to )
 end
 
 
 function get2DPoseMax(fgl::G;
-					  varkey::Regex=r"x",
+					  regexKey::Regex=r"x",
                       from::Int=-99999999999, to::Int=9999999999 ) where G <: AbstractDFG
   #
   # xLB,ll = ls(fgl) # TODO add: from, to, special option 'x'
-  xLB = DFG.getVariableIds(fgl, varkey)
-  saids = DFG.sortVarNested(xLB)
+  xLB = DFG.getVariableIds(fgl, regexKey)
+  saids = DFG.sortDFG(xLB)
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
   Th = Array{Float64,1}()
   LB = String[]
   for slbl in saids
     lbl = string(slbl)
-    if from <= parse(Int,lbl[2:end]) <=to
+    if from <= parse(Int,split(lbl[2:end],'_')[1]) <=to
       mv = getKDEMax(getVertKDE(fgl,slbl))
       push!(X,mv[1])
       push!(Y,mv[2])
@@ -699,14 +772,15 @@ function get2DLandmSamples(fg::G;
                            to::Int=999999999,
                            minnei::Int=0 ) where G <: AbstractDFG
   #
-  return get2DSamples(fg, varkey=r"l", from=from, to=to, minnei=minnei )
+  return get2DSamples(fg, regexKey=r"l", from=from, to=to, minnei=minnei )
 end
 
 function get2DLandmMeans(fg::G;
                          from::Int=0, to::Int=999999999,
-                         minnei::Int=0) where G <: AbstractDFG
+                         minnei::Int=0,
+                         landmarkRegex::Regex=r"l" ) where G <: AbstractDFG
   #
-  return get2DSampleMeans(fg, r"l", from=from, to=to, minnei=minnei )
+  return get2DSampleMeans(fg, landmarkRegex, from=from, to=to, minnei=minnei )
 end
 
 function removeKeysFromArr(fgl::G,
@@ -715,7 +789,7 @@ function removeKeysFromArr(fgl::G,
   #
   retlbs = String[]
   for i in 1:length(lbl)
-    id = parse(Int,lbl[i][2:end])
+    id = parse(Int,split(lbl[i][2:end],'_')[1])
     if something(findfirst(isequal(id), torm), 0) == 0 #findfirst(torm,id) == 0
       push!(retlbs, lbl[i])
     else
@@ -734,10 +808,11 @@ end
 function get2DLandmMax(fgl::G;
                        from::Int=-99999999999,
                        to::Int=9999999999,
-                       showmm=false, MM::Dict{Int,T}=Dict{Int,Int}()) where {G <: AbstractDFG, T}
+                       showmm=false, MM::Dict{Int,T}=Dict{Int,Int}(),
+                       regexLandmark::Regex=r"l"  ) where {G <: AbstractDFG, T}
   #
   # xLB,lLB = ls(fgl) # TODO add: from, to, special option 'x'
-  lLB = DFG.getVariableIds(fgl, r"l")
+  lLB = DFG.getVariableIds(fgl, regexLandmark)
   if !showmm lLB = removeKeysFromArr(fgl, collect(keys(MM)), lLB); end
   X = Array{Float64,1}()
   Y = Array{Float64,1}()
@@ -746,7 +821,7 @@ function get2DLandmMax(fgl::G;
   for lb in lLB
     @show lb
     lbl = string(lb)
-    if from <= parse(Int,lbl[2:end]) <=to
+    if from <= parse(Int,split(lbl[2:end],'_')[1]) <=to
       mv = getKDEMax(getVertKDE(fgl, Symbol(lb)))
       push!(X,mv[1])
       push!(Y,mv[2])
@@ -784,29 +859,8 @@ function addSoftEqualityPoint2D(fgl::G,
                                 l1::Symbol,
                                 l2::Symbol;
                                 dist=MvNormal([0.0;0.0],Matrix{Float64}(LinearAlgebra.I, 2,2)),
-                                ready::Int=1  )  where G <: AbstractDFG
+                                solvable::Int=1  )  where G <: AbstractDFG
   #
   pp = Point2DPoint2D(dist)
-  addFactor!(fgl, [l1,l2], pp, ready=ready)
-end
-
-"""
-    $SIGNATURES
-
-Build a basic factor graph in Pose2 with two `Pose2` and one landmark `Point2` variables,
-along with `PriorPose2` on `:x0` and `Pose2Pose2` to `:x1`.  Also a `Pose2Point2BearingRange`
-to landmark `:l1`.
-"""
-function basicFactorGraphExample(::Type{Pose2}=Pose2; addlandmark::Bool=true)
-  fg = initfg()
-
-  addVariable!(fg, :x0, Pose2)
-  addVariable!(fg, :x1, Pose2)
-  !addlandmark ? nothing : addVariable!(fg, :l1, Point2)
-
-  addFactor!(fg, [:x0], PriorPose2(MvNormal([0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))))
-  addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal([10.0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))))
-  !addlandmark ? nothing : addFactor!(fg, [:x1;:l1], Pose2Point2BearingRange(Normal(0.0,0.01), Normal(20.0, 1.0)))
-
-  return fg
+  addFactor!(fgl, [l1,l2], pp, solvable=solvable)
 end

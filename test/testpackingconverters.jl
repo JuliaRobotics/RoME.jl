@@ -7,8 +7,8 @@
 using RoME
 using Test
 using DistributedFactorGraphs
-import DistributedFactorGraphs: pack, unpack
-
+import DistributedFactorGraphs: packVariableNodeData, unpackVariableNodeData
+import RoME: compare
 
 
 @testset "test PriorPoint2" begin
@@ -55,25 +55,25 @@ global fg
 dd = convert(PackedPriorPose2, ipp)
 upd = convert(RoME.PriorPose2, dd)
 
-@test RoME.compare(ipp, upd) # temp use of RoME.compare
+@test compare(ipp, upd)
 
-packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, getData(f1))
+packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, DFG.getSolverData(f1))
 unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose2}}, packeddata)
 
-# getData(f1)
+# DFG.getSolverData(f1)
 # unpackeddata
 
-@test RoME.compare(getData(f1), unpackeddata) # temp use of RoME.compare
+@test DFG.compare(DFG.getSolverData(f1), unpackeddata)
 # TODO -- what what??
 # setSerializationNamespace!("Main" => Main)
 # TODO: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/44
-packedv1data = pack(fg, getData(v1))
-upv1data = unpack(fg, packedv1data)
-# packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
+packedv1data = packVariableNodeData(fg, DFG.getSolverData(v1))
+upv1data = unpackVariableNodeData(fg, packedv1data)
+# packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
 # upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
-@test compareAll(getData(v1), upv1data, skip=[:softtype;])
-@test compareFields(getData(v1).softtype, upv1data.softtype)
+@test compareAll(DFG.getSolverData(v1), upv1data, skip=[:softtype;])
+@test compareFields(DFG.getSolverData(v1).softtype, upv1data.softtype)
 
 end
 
@@ -83,13 +83,13 @@ end
     global upd = convert(RoME.Pose2Pose2, dd)
 
     # TODO -- fix ambiguity in compare function
-    @test RoME.compare(ppc, upd)
+    @test compare(ppc, upd)
 
-    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Pose2}, getData(f2))
+    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Pose2}, DFG.getSolverData(f2))
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Pose2}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test IncrementalInference.compare(getData(f2), unpackeddata)
+    @test DFG.compare(DFG.getSolverData(f2), unpackeddata)
 end
 
 
@@ -109,7 +109,7 @@ end
           )
 
 
-    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Point2BearingRange}, getData(f3))
+    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Point2BearingRange}, DFG.getSolverData(f3))
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Point2BearingRange}}, packeddata) # IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Point2BearingRange{Normal{Float64},Normal{Float64}}}}
 
     @test ppbr.bearing.μ == unpackeddata.fnc.usrfnc!.bearing.μ
@@ -142,28 +142,28 @@ global f1  = addFactor!(fg,[v1], ipp)
     @test norm(ipp.Zi.μ - upd.Zi.μ) < 1e-10
     @test norm(ipp.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
 
-    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, getData(f1))
+    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, DFG.getSolverData(f1))
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose3}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test compareAll(getData(f1), unpackeddata, skip=[:fnc;])
-    @test compareAll(getData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!])
-    @test compareAll(getData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;])
-    @test compareAll(getData(f1).fnc.usrfnc!.Zi, unpackeddata.fnc.usrfnc!.Zi, skip=[:Σ;])
-    @test compareAll(getData(f1).fnc.usrfnc!.Zi.Σ, unpackeddata.fnc.usrfnc!.Zi.Σ)
-    @test compareAll(getData(f1).fnc.cpt[1], unpackeddata.fnc.cpt[1], skip=[:factormetadata;:activehypo])
-    # @test compareAll(getData(f1).fnc.params, unpackeddata.fnc.params)
+    @test compareAll(DFG.getSolverData(f1), unpackeddata, skip=[:fnc;])
+    @test compareAll(DFG.getSolverData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!])
+    @test compareAll(DFG.getSolverData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;])
+    @test compareAll(DFG.getSolverData(f1).fnc.usrfnc!.Zi, unpackeddata.fnc.usrfnc!.Zi, skip=[:Σ;])
+    @test compareAll(DFG.getSolverData(f1).fnc.usrfnc!.Zi.Σ, unpackeddata.fnc.usrfnc!.Zi.Σ)
+    @test compareAll(DFG.getSolverData(f1).fnc.cpt[1], unpackeddata.fnc.cpt[1], skip=[:factormetadata;:activehypo])
+    # @test compareAll(DFG.getSolverData(f1).fnc.params, unpackeddata.fnc.params)
     @warn "threadmodel is not defined, fix with DFG"
-    # @test compareAll(getData(f1).fnc.threadmodel, unpackeddata.fnc.threadmodel)
+    # @test compareAll(DFG.getSolverData(f1).fnc.threadmodel, unpackeddata.fnc.threadmodel)
 
     # TODO: Ref above
-    packedv1data = pack(fg, getData(v1))
-    upv1data = unpack(fg, packedv1data)
-    # global packedv1data = convert(IncrementalInference.PackedVariableNodeData, getData(v1))
+    packedv1data = packVariableNodeData(fg, DFG.getSolverData(v1))
+    upv1data = unpackVariableNodeData(fg, packedv1data)
+    # global packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
     # global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
-    @test compareAll(getData(v1), upv1data, skip=[:softtype;])
-    @test compareAll(getData(v1).softtype, upv1data.softtype)
+    @test compareAll(DFG.getSolverData(v1), upv1data, skip=[:softtype;])
+    @test compareAll(DFG.getSolverData(v1).softtype, upv1data.softtype)
 
 end
 
@@ -182,11 +182,11 @@ f2 = addFactor!(fg, [:x1, :x2], pp3)
     @test norm(pp3.Zij.μ - upd.Zij.μ) < 1e-10
     @test norm(pp3.Zij.Σ.mat - upd.Zij.Σ.mat) < 1e-8
 
-    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3}, getData(f2))
+    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3}, DFG.getSolverData(f2))
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose3Pose3}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test IncrementalInference.compare(getData(f2), unpackeddata)
+    @test DFG.compare(DFG.getSolverData(f2), unpackeddata)
 end
 
 
@@ -206,11 +206,11 @@ global f3 = addFactor!(fg,[:x1;:x2],odoc)
     @test norm(odoc.nullhypothesis.p - upd.nullhypothesis.p) < 1e-8
 
 
-    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3NH}, getData(f3))
+    global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3NH}, DFG.getSolverData(f3))
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose3Pose3NH}}, packeddata)
 
     # TODO -- fix ambibuity in compare function
-    @test IncrementalInference.compare(getData(f3), unpackeddata)
+    @test DFG.compare(DFG.getSolverData(f3), unpackeddata)
 end
 
 
@@ -222,7 +222,7 @@ end
     global pprpz = convert(PackedPartialPriorRollPitchZ, prpz)
     global unp = convert(PartialPriorRollPitchZ, pprpz)
 
-    @test RoME.compare(prpz, unp)
+    @test compare(prpz, unp)
 
 end
 
@@ -237,7 +237,7 @@ end
     global pxyy = convert(PackedPartialPose3XYYaw, xyy)
     global unp = convert(PartialPose3XYYaw, pxyy)
 
-    @test RoME.compare(xyy, unp)
+    @test compare(xyy, unp)
 end
 
 
@@ -249,7 +249,7 @@ end
     global pxyy = convert(PackedPartialPose3XYYawNH, xyy)
     global unp = convert(PartialPose3XYYawNH, pxyy)
 
-    @test RoME.compare(xyy, unp)
+    @test compare(xyy, unp)
 end
 
 

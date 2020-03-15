@@ -65,7 +65,7 @@ $(TYPEDEF)
 mutable struct DynPose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: IIF.SamplableBelief}
   Zpose::Pose2Pose2{T} #Zpose::T1
   # reuseres::Vector{Float64}
-  partial::Tuple
+  partial::Tuple{Int,Int,Int}
   DynPose2Pose2{T}() where {T <: IIF.SamplableBelief} = new{T}()
   DynPose2Pose2{T}(z1::T) where {T <: IIF.SamplableBelief} = new{T}(Pose2Pose2(z1), (1,2,3))
 end
