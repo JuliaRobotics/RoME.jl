@@ -234,6 +234,9 @@ data = getData(f2)
 ef2pts = approxConv(fg, :x1x2l1l2l3f1, :l2)
 # evalFactor2(fg, f2, fg.IDs[:l2])
 
+# drawGraph(fg)
+
+# getSolverParams(fg).dbg = true
 
 tree, smt, hist = solveTree!(fg)
 # ensureAllInitialized!(fg)
