@@ -6,6 +6,7 @@ using Test
 
 
 testfiles = [
+"testmultiplefeatures.jl";
 "testPoint2Point2WorldBearing.jl";
 "testBeehive2D_CliqByCliq.jl"; # special case debugging
 "testhigherdimroots.jl";
@@ -35,7 +36,7 @@ testfiles = [
 ## Tests not ready yet
 # "HexagonalLightGraphs.jl"
 # "testCameraFunctions.jl"
-# "testmultiplefeatures.jl"
+
 
 
 for testf in testfiles
