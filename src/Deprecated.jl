@@ -359,24 +359,6 @@ end
 
 
 
-# mutable struct PackedPose2Point2BearingRangeDensity <: IncrementalInference.PackedInferenceType
-#     bpts::Vector{Float64} # 0rotations, 1translation in each column
-#     bbw::Vector{Float64}
-#     rpts::Vector{Float64}
-#     rbw::Vector{Float64}
-#     PackedPose2Point2BearingRangeDensity() = new()
-#     PackedPose2Point2BearingRangeDensity(x...) = new(x[1], x[2], x[3], x[4])
-# end
-# function convert(::Type{Pose2Point2BearingRangeDensity}, d::PackedPose2Point2BearingRangeDensity)
-#   return Pose2Point2BearingRangeDensity(
-#     kde!( EasyMessage(d.bpts',d.bbw)), kde!(EasyMessage(d.rpts', d.rbw) )
-#   )
-# end
-# function convert(::Type{PackedPose2Point2BearingRangeDensity}, d::Pose2Point2BearingRangeDensity)
-#   return PackedPose2Point2BearingRangeDensity(getPoints(d.bearing)[1,:], getBW(d.bearing)[:,1],
-#                                                 getPoints(d.range)[1,:], getBW(d.range)[:,1] )
-# end
-
 function getNextLbl(fgl::AbstractDFG, chr)
   @warn "getNextLbl is deprecated, use nextPose, nextLabel, or getLastPoses instead."
   # TODO convert this to use a double lookup
