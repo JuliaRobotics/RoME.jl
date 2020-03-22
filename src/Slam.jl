@@ -1,5 +1,12 @@
+## Exports
+
+
+export AbstractSLAM
+export ManageSolveSettings, HandlerStateMachine, SolverStateMachine
+
 
 ## types
+
 
 abstract type AbstractSLAM end
 
@@ -22,6 +29,16 @@ mutable struct SLAMWrapper <: AbstractSLAM
   SLAMWrapper(a,b,c) = new(a,b,c,:x1, SE3(0), Dict{Symbol,Int}(), Dict{Int,Symbol}()) # TODO to be deprecated
 end
 
+
+mutable struct ManageSolveSettings
+  solveStride
+  loopSolver
+  solvables
+  solveInProgress
+  poseSolveToken
+  canTakePoses
+  drtCurrent
+end
 
 
 
@@ -89,19 +106,18 @@ function addposeFG!(slaml::SLAMWrapper,
 end
 
 
-
 # Requires
 #  dashboard: SOLVESTRIDE, loopSolver, solvables, loopSolver, solveInProgress, poseSolveToken, canTakePoses, drtCurrent
 #
 function manageSolveTree!(dfg::AbstractDFG,
-                          dashboard::Dict;
+                          dashboard::ManageSolveSettings;
                           dbg::Bool=false,
                           timinglog=Base.stdout,
                           limitfixeddown::Bool=true  )
   #
   @info "logpath=$(getLogPath(dfg))"
   getSolverParams(dfg).drawtree = true
-  getSolverParams(dfg).qfl = dashboard[:SOLVESTRIDE]
+  getSolverParams(dfg).qfl = dashboard.solveStride
   getSolverParams(dfg).isfixedlag = true
   getSolverParams(dfg).limitfixeddown = limitfixeddown
 
@@ -119,19 +135,19 @@ function manageSolveTree!(dfg::AbstractDFG,
     end
     solvecycle = 0
     # keep solving
-    while dashboard[:loopSolver]
+    while dashboard.loopSolver
       t0 = time_ns()
       solvecycle += 1
       # add any newly solvables (atomic)
-      while !isready(dashboard[:solvables]) && dashboard[:loopSolver]
+      while !isready(dashboard.solvables) && dashboard.loopSolver
         sleep(0.2)
       end
       dt_wait = (time_ns()-t0)/1e9
 
       #add any new solvables
-      while isready(dashboard[:solvables]) && dashboard[:loopSolver]
-        dashboard[:solveInProgress] = SSMConsumingSolvables
-        @show tosolv = take!(dashboard[:solvables])
+      while isready(dashboard.solvables) && dashboard.loopSolver
+        dashboard.solveInProgress = SSMConsumingSolvables
+        @show tosolv = take!(dashboard.solvables)
         for sy in tosolv
           # setSolvable!(dfg, sy, 1) # see DFG #221
           # TODO temporary workaround
@@ -148,17 +164,17 @@ function manageSolveTree!(dfg::AbstractDFG,
       dt_save1 = 0.0
       dt_solve = 0.0
 
-      dashboard[:solveInProgress] = SSMReady
+      dashboard.solveInProgress = SSMReady
 
       # solve only every 10th pose
-      if 0 < length(dashboard[:poseSolveToken].data)
+      if 0 < length(dashboard.poseSolveToken.data)
       # if 10 <= dashboard[:poseStride]
         @info "reduce problem size by disengaging older parts of factor graph"
-        setSolvableOldPoses!(dfg, youngest=getSolverParams(dfg).qfl+round(Int,dashboard[:SOLVESTRIDE]/2), oldest=100, solvable=0)
+        setSolvableOldPoses!(dfg, youngest=getSolverParams(dfg).qfl+round(Int,dashboard.solveStride/2), oldest=100, solvable=0)
         dt_disengage = (time_ns()-t0)/1e9
 
         # set up state machine flags to allow overlapping or block
-        dashboard[:solveInProgress] = SSMSolving
+        dashboard.solveInProgress = SSMSolving
         # dashboard[:poseStride] = 0
 
         # do the actual solve (with debug saving)
@@ -172,19 +188,19 @@ function manageSolveTree!(dfg::AbstractDFG,
         !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(lasp)"))
 
         # unblock LCMLog reader for next STRIDE segment
-        dashboard[:solveInProgress] = SSMReady
+        dashboard.solveInProgress = SSMReady
         # de-escalate handler state machine
-        dashboard[:canTakePoses] = HSMHandling
+        dashboard.canTakePoses = HSMHandling
 
         # adjust latest RTT after solve, latest solved -- hard coded pose stride 10
         lastList = sortDFG(ls(dfg, r"x\d+9\b|x9\b", solvable=1))
         if 0 < length(lastList)
           lastSolved = lastList[end]
-          dashboard[:drtCurrent] = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
+          dashboard.drtCurrent = (lastSolved, Symbol("drt_"*string(lastSolved)[2:end]))
         end
 
         # remove a token to allow progress to continue
-        gotToken = take!(dashboard[:poseSolveToken])
+        gotToken = take!(dashboard.poseSolveToken)
         "end of solve cycle, token=$gotToken" |> println
       else
         "sleep a solve cycle" |> println
@@ -198,8 +214,6 @@ function manageSolveTree!(dfg::AbstractDFG,
   end
   return ST
 end
-
-
 
 
 
