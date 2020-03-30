@@ -2,7 +2,36 @@
 
 # using Revise
 
+using ArgParse
+
+
+
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table! s begin
+        "--altmode"
+            help = "fraction for alternative mode"
+            arg_type = Float64
+            default = 0.7
+        "--resolve"
+            help = "should a repeat solve be performed in the loop"
+            action = :store_true
+        "--CYCLES"
+            help = "How many cycles to drive"
+            arg_type = Int
+            default = 10
+    end
+
+    return parse_args(s)
+end
+
+pargs = parse_commandline()
+
+
 using Distributed
+# addprocs(8) # use -p8 instead
+
 using Random
 
 using RoME, DistributedFactorGraphs
@@ -45,9 +74,10 @@ L = [0.0 20.0;      # L1
 # @load string(joinpath(@__DIR__, "LassoBearingRange.jld2")) BR
 
 SIZE = 10
-CYCLES = 10
+CYCLES = pargs["CYCLES"]
 LANDMARKS = 10
-
+altFrac = pargs["altmode"]
+mainFrac = 1-pargs["altmode"]
 
 ## divise landmark rotation schedule
 
@@ -178,7 +208,7 @@ tree, smt, hist = solveTree!(fg)
 plfl1 = drawPosesLandms(fg, spscale=1.0)
 
 
-
+# lookup
 ##  change to alternate location, one at a time
 
 
@@ -188,14 +218,29 @@ for l in 1:10
   setSolvable!(fg, lmid_0, 1)
 end
 
-# Drive CYCLES-1 more loops
 POSEOFFSET=0
-i = 2
-# for i in 2:2 #CYCLES-1
 
+## store
+
+@save joinLogPath(fg, "lookup.jld2") lookup
+
+plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max, contour=true) #, posesPPE=:max)
+plfl1 |> PDF(joinLogPath(fg, "plot_x20_before.pdf"), 20cm, 17cm)
+
+##
+
+# Drive CYCLES-1 more loops
+i = 2
+for i in 2:CYCLES-1
+
+global fg
+global lookup
+global SIZE
+global BRdistr
+global pargs
 global POSEOFFSET += 10
 # drive the new loop without landmark detections (dont solve yet)
-fg = generateCanonicalFG_Circle(2*SIZE, fg=fg, kappaOdo=0.1, loopClosure=false, landmark=false, cyclePoses=10)
+fg = generateCanonicalFG_Circle(i*SIZE, fg=fg, kappaOdo=0.1, loopClosure=false, landmark=false, cyclePoses=10)
 
 # add modified landmark sighting measurements
 for l in 1:LANDMARKS
@@ -207,92 +252,40 @@ for l in 1:LANDMARKS
     psnum = parse(Int, string(psid)[2:end]) + POSEOFFSET
     opsid = Symbol("x$psnum")
     # add the few BR factors from this lmid accordingly
-    addFactor!(fg, [opsid;lmid;lmid_0], Pose2Point2BearingRange(ppbr...), multihypo=[1;0.3;0.7])
+    addFactor!(fg, [opsid;lmid;lmid_0], Pose2Point2BearingRange(ppbr...), multihypo=[1;mainFrac;altFrac])
   end
+end
+
+getSolverParams(fg).dbg = true
+saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)before"))
+tree, smt, hist = solveTree!(fg, maxparallel=1000, recordcliqs=ls(fg))
+saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_solve"))
+
+plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max, contour=true)
+plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_solve.pdf"), 20cm, 17cm)
+
+if pargs["resolve"]
+  tree, smt, hist = solveTree!(fg, maxparallel=1000, recordcliqs=ls(fg))
+  saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_resolve"))
+  plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max, contour=true)
+  plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_resolve.pdf"), 20cm, 17cm)
+end
+
 end
 
 
 
-# end
-
-
-# drawGraph(fg)
-
-## dev testing
-
-fg = generateCanonicalFG_Circle(2*SIZE, fg=fg, kappaOdo=0.1, loopClosure=false, landmark=false, cyclePoses=10)
-
-
-ensureAllInitialized!(fg)
-plfl1 = drawPosesLandms(fg, spscale=1.0)
+## test solve
 
 getSolverParams(fg).dbg = true
-tree, smt, hist = solveTree!(fg)
+tree, smt, hist = solveTree!(fg, maxparallel=1000, recordcliqs=ls(fg)) #[:l9_0;:x14])
+saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_final"))
 
 
-BRdistr[:l7]
-BRdistr[:l7_0]
+##
 
+plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max)
+plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_final.pdf"), 20cm, 17cm)
 
-plotLocalProduct(fg, :l7_0, levels=8)
-
-plotLocalProduct(fg, :l7, levels=8)
-
-
-
-keep_l7_0 = getKDE(fg, :l7_0) |> deepcopy
-initManual!(fg, :l7_0, deepcopy(getKDE(fg, :l7)))
-
-
-ls(fg, :l7_0)
-
-getSolverData(getFactor(fg, :x16l7l7_0f1))
-
-
-getFactorType(fg, :x0l7f1).bearing
-getFactorType(fg, :x10l7l7_0f1)
-
-
-ls(fg, :x0)
-ls(fg, :l7_0)
-
-pts = approxConv(fg, :x16l7l7_0f1, :l7_0)
-pts = approxConv(fg, :x16l7l7_0f1, :l7)
-pts = approxConv(fg, :x0l7f1, :l7)
-
-
-plotKDE(manikde!(pts, Point2))
-
-
-## Something is wrong with :l3
-
-# Juno.@enter approxConv(fg, :x16l7l7_0f1, :l7)
-
-plotLocalProduct(fg, :l3, levels=8)
-plotLocalProduct(fg, :l3_0, levels=8)
-
-pts = approxConv(fg, :x16l3l3_0f1, :l3)
-pts = approxConv(fg, :x16l3l3_0f1, :l3_0)
-
-
-drawTree(tree, show=true)
-spyCliqMat(tree, :l3)
-
-plotUpMsgsAtCliq(tree, :x5, :l3)
-plotUpMsgsAtCliq(tree, :l7, :l3) # problem is in here perhaps
-
-
-sfg_x7 = buildCliqSubgraph(fg, tree, :x7)
-
-
-um1 = getUpMsgs(tree,:x2)
-um2 = getUpMsgs(tree,:l6)
-
-addMsgFactors!(sfg_x7,um1)
-addMsgFactors!(sfg_x7,um2)
-
-drawGraph(sfg_x7)
-
-plotLocalProduct(sfg_x7,:l3)
 
 #
