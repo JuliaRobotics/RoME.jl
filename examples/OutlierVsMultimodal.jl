@@ -21,13 +21,16 @@ function parse_commandline()
             help = "How many cycles to drive"
             arg_type = Int
             default = 10
+        "--spreadNH"
+            help = "Scale adjustment for spreading nullhypo (entropy)"
+            arg_type = Float64
+            default = 3.0
     end
 
     return parse_args(s)
 end
 
 pargs = parse_commandline()
-
 
 using Distributed
 # addprocs(8) # use -p8 instead
@@ -94,7 +97,9 @@ for n in 1:length(movePerCycle)
   push!(sequence, order[total:total+movePerCycle[n]-1] )
   total += movePerCycle[n]
 end
-@assert sum(union(sequence...)) == 55
+if pargs["CYCLES"] == 10
+  @assert sum(union(sequence...)) == 55
+end
 
 sequence
 
@@ -128,6 +133,7 @@ lookup
 # drive first circle
 fg = generateCanonicalFG_Circle(SIZE, kappaOdo=0.1, loopClosure=false, landmark=false, cyclePoses=10)
 
+getSolverParams(fg).spreadNH = pargs["spreadNH"]
 
 ensureAllInitialized!(fg)
 
@@ -170,8 +176,8 @@ plfl1 = drawPosesLandms(fg, spscale=1.0)
 ## prepare factors to use
 
 BRdistr = Dict{Symbol,Dict{Symbol,Tuple}}()
-for i in 1:2*CYCLES
-  lmid = Symbol(i <= CYCLES ? "l$i" : "l$(i-CYCLES)_0")
+for i in 1:2*SIZE
+  lmid = Symbol(i <= SIZE ? "l$i" : "l$(i-SIZE)_0")
   BRdistr[lmid] = Dict{Symbol,Tuple}()
   for (vsym, br) in BR[lmid]
     @show bear, rang = br
@@ -253,6 +259,12 @@ for l in 1:LANDMARKS
     opsid = Symbol("x$psnum")
     # add the few BR factors from this lmid accordingly
     addFactor!(fg, [opsid;lmid;lmid_0], Pose2Point2BearingRange(ppbr...), multihypo=[1;mainFrac;altFrac])
+  end
+
+  # reinit all lm_0 with the latest factor
+  if 0 < length(ls(fg, lmid_0))
+    pts = approxConv(fg, ls(fg, lmid_0)[1], lmid_0  )
+    initManual!(fg,lmid_0,pts)
   end
 end
 
