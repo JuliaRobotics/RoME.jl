@@ -185,7 +185,7 @@ end
 
 ## see what is going on
 
-plfl1 = drawPosesLandms(fg, spscale=1.0)
+plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg))
 
 ## prepare factors to use
 
@@ -225,7 +225,7 @@ getSolverParams(fg).drawtree = true
 tree, smt, hist = solveTree!(fg)
 
 
-plfl1 = drawPosesLandms(fg, spscale=1.0)
+plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg))
 
 
 # lookup
@@ -244,7 +244,7 @@ POSEOFFSET=0
 
 @save joinLogPath(fg, "lookup.jld2") lookup
 
-plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max, contour=true) #, posesPPE=:max)
+plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg), landmsPPE=:max, contour=true) #, posesPPE=:max)
 plfl1 |> PDF(joinLogPath(fg, "plot_x20_before.pdf"), 20cm, 17cm)
 
 ##
@@ -287,13 +287,13 @@ saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)before"))
 tree, smt, hist = solveTree!(fg, maxparallel=1000, recordcliqs=ls(fg))
 saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_solve"))
 
-plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max, contour=true)
+plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg), landmsPPE=:max, contour=true)
 plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_solve.pdf"), 20cm, 17cm)
 
 if pargs["resolve"]
   tree, smt, hist = solveTree!(fg, maxparallel=1000, recordcliqs=ls(fg))
   saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_resolve"))
-  plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max, contour=true)
+  plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg), landmsPPE=:max, contour=true)
   plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_resolve.pdf"), 20cm, 17cm)
 end
 
@@ -310,7 +310,7 @@ saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_final"))
 
 ##
 
-plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max)
+plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg), landmsPPE=:max)
 plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_final.pdf"), 20cm, 17cm)
 
 
