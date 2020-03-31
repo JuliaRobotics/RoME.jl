@@ -44,6 +44,7 @@ using KernelDensityEstimatePlotting
 
 using FileIO
 using JLD2
+using JSON2
 using Gadfly
 Gadfly.set_default_plot_size(35cm,25cm)
 
@@ -136,6 +137,19 @@ fg = generateCanonicalFG_Circle(SIZE, kappaOdo=0.1, loopClosure=false, landmark=
 getSolverParams(fg).spreadNH = pargs["spreadNH"]
 
 ensureAllInitialized!(fg)
+
+## store arguments in results log
+
+Base.mkpath(getLogPath(fg))
+fid = open(joinLogPath(fg, "args.json"), "w")
+JSON2.write(fid, pargs)
+close(fid)
+fid = open(joinLogPath(fg, "..", "results.log"), "a")
+Base.write(fid, "$(getLogPath(fg)), RoME/examples/OutlierVsMultimodal.jl, ")
+JSON2.write(fid, pargs)
+Base.write(fid, "\n")
+close(fid)
+
 
 ## add initial landmarks
 
