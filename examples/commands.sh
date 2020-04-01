@@ -33,18 +33,18 @@ mmLassoMC5_alt9() {
 }
 
 mmLassoMC5AnalysisNH() {
-  mmLassoMC5_alt5 --spreadNH 1.0 $* &
-  mmLassoMC5_alt7 --spreadNH 1.0 $* &
-  mmLassoMC5_alt9 --spreadNH 1.0 $* &
-  mmLassoMC5_alt5 --spreadNH 5.0 $* &
-  mmLassoMC5_alt7 --spreadNH 5.0 $* &
-  mmLassoMC5_alt9 --spreadNH 5.0 $*
-  mmLassoMC5_alt5 --spreadNH 10.0 $* &
-  mmLassoMC5_alt7 --spreadNH 10.0 $* &
-  mmLassoMC5_alt9 --spreadNH 10.0 $* &
-  mmLassoMC5_alt5 --spreadNH 25.0 $* &
-  mmLassoMC5_alt7 --spreadNH 25.0 $* &
-  mmLassoMC5_alt9 --spreadNH 25.0 $*
+  sleep 000; mmLassoMC5_alt5 --spreadNH 1.0 $* &
+  sleep 150; mmLassoMC5_alt7 --spreadNH 1.0 $* &
+  sleep 300; mmLassoMC5_alt9 --spreadNH 1.0 $* &
+  sleep 450; mmLassoMC5_alt5 --spreadNH 5.0 $* &
+  sleep 600; mmLassoMC5_alt7 --spreadNH 5.0 $* &
+  sleep 750; mmLassoMC5_alt9 --spreadNH 5.0 $*
+  sleep 000; mmLassoMC5_alt5 --spreadNH 10.0 $* &
+  sleep 150; mmLassoMC5_alt7 --spreadNH 10.0 $* &
+  sleep 300; mmLassoMC5_alt9 --spreadNH 10.0 $* &
+  sleep 450; mmLassoMC5_alt5 --spreadNH 25.0 $* &
+  sleep 600; mmLassoMC5_alt7 --spreadNH 25.0 $* &
+  sleep 750; mmLassoMC5_alt9 --spreadNH 25.0 $*
 }
 
 
