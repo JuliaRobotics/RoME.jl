@@ -34,13 +34,13 @@ mmLassoMC4_alt9() {
 mmLassoMC4AnalysisNH() {
   sleep 000; mmLassoMC4_alt5 --spreadNH 1.0 $* &
   sleep 150; mmLassoMC4_alt7 --spreadNH 1.0 $* &
-  sleep 300; mmLassoMC4_alt9 --spreadNH 1.0 $* &
+  sleep 300; mmLassoMC4_alt9 --spreadNH 1.0 $*
   sleep 450; mmLassoMC4_alt5 --spreadNH 5.0 $* &
   sleep 600; mmLassoMC4_alt7 --spreadNH 5.0 $* &
   sleep 750; mmLassoMC4_alt9 --spreadNH 5.0 $*
   sleep 000; mmLassoMC4_alt5 --spreadNH 10.0 $* &
   sleep 150; mmLassoMC4_alt7 --spreadNH 10.0 $* &
-  sleep 300; mmLassoMC4_alt9 --spreadNH 10.0 $* &
+  sleep 300; mmLassoMC4_alt9 --spreadNH 10.0 $*
   sleep 450; mmLassoMC4_alt5 --spreadNH 25.0 $* &
   sleep 600; mmLassoMC4_alt7 --spreadNH 25.0 $* &
   sleep 750; mmLassoMC4_alt9 --spreadNH 25.0 $*
