@@ -7,7 +7,7 @@ using LinearAlgebra
 
 
 # TODO -- use this for cleanup
-function driveSomeMore!(fg::FactorGraph, idx)
+function driveSomeMore!(fg::AbstractDFG, idx)
     for i in idx:(idx+5)
       psym = Symbol("x$i")
       nsym = Symbol("x$(i+1)")
