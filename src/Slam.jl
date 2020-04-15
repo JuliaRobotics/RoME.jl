@@ -3,7 +3,9 @@
 
 export AbstractSLAM
 export ManageSolveSettings, HandlerStateMachine, SolverStateMachine
-export manageSolveTree!
+export manageSolveTree!, stopManageSolveTree!
+export SLAMCommonHelper, SLAMWrapperLocal
+export checkSolveStrideTrigger!, checkSolveStride, triggerSolve!, blockProgress
 
 
 ## types
@@ -17,6 +19,9 @@ abstract type AbstractSLAM end
 
 """
 $(TYPEDEF)
+
+DevNotes
+- TODO consolidate with SLAMWrapperLocal
 """
 mutable struct SLAMWrapper <: AbstractSLAM
   fg::IncrementalInference.FactorGraph
@@ -37,18 +42,122 @@ mutable struct ManageSolveSettings
   solvables
   solveInProgress
   poseSolveToken
-  canTakePoses
+  canTakePoses::Condition
   drtCurrent
   # constructor
   ManageSolveSettings(;solveStride=10,
                        loopSolver=true,
                        solvables=Channel{Vector{Symbol}}(100),
                        solveInProgress=SSMReady,
-                       poseSolveToken=Channel{Symbol}(3),
-                       canTakePoses=HSMReady,
+                       poseSolveToken=Channel{Int}(2), #  ensure only one solve can occur at a time (see blockProgress)
+                       canTakePoses::Condition=Condition(),
                        drtCurrent=(:null,:null)) = new(solveStride, loopSolver, solvables, solveInProgress, poseSolveToken, canTakePoses, drtCurrent)
 end
 
+
+mutable struct SLAMCommonHelper
+  lastPoseOdomBuffer::SE3 # common helper
+  SLAMCommonHelper(lpo::SE3=SE3(0)) = new(lpo)
+end
+
+
+mutable struct SLAMWrapperLocal{G <: AbstractDFG} <: AbstractSLAM
+  dfg::G
+  poseCount::Int
+  frameCounter::Int
+  poseStride::Int # pose every frameStride (naive pose trigger)
+  helpers::SLAMCommonHelper
+  solveSettings::ManageSolveSettings
+end
+
+
+SLAMWrapperLocal(;dfg::G=initfg(),
+                  poseCount::Int=0,
+                  frameCounter::Int=0,
+                  poseStride::Int=10,
+                  helpers::SLAMCommonHelper=SLAMCommonHelper(),
+                  solveSettings::ManageSolveSettings=ManageSolveSettings() ) where {G <: AbstractDFG}= SLAMWrapperLocal{G}(dfg,
+                      poseCount, frameCounter, poseStride, helpers, solveSettings)
+#
+
+"""
+    $SIGNATURES
+
+Trigger a factor graph `solveTree!(slam.dfg,...)` after clearing the solvable buffer `slam.??` (assuming the `manageSolveTree!` task is already running).
+
+Notes
+- Used in combination with `manageSolveTree!`
+"""
+triggerSolve!(slam::SLAMWrapperLocal) = put!(slam.solveSettings.poseSolveToken, slam.poseCount)
+
+function checkSolveStride(slam::SLAMWrapperLocal)
+  slam.poseCount % slam.solveSettings.solveStride == 0
+end
+
+"""
+    $SIGNATURES
+
+Check and trigger a solve if `slam.poseCount` reached the solve stride `slam.solveSettings.solveStride`.
+
+Notes
+- Used in combination with `manageSolveTree!`
+
+Related
+
+triggerSolve!
+"""
+function checkSolveStrideTrigger!(slam::SLAMWrapperLocal)
+  if checkSolveStride(slam)
+    @info "trigger a solve, $(length(slam.solveSettings.poseSolveToken.data)) ====================================="
+    triggerSolve!(slam)
+    @info "after slam solve trigger"
+    # also update DRT containers
+
+    return true
+  end
+  return false
+end
+
+
+"""
+    $SIGNATURES
+
+Block progress on current task until SLAMWrapper is ready to continue taking on more data.
+
+Notes:
+- Use to block addition of more data into slam.dfg object, usually used for preventing duplicate solutions being invoked concurrently.
+  - Consider dfg segments: 1. already busy solving, 2. recently added; and now attempting to launch solve on 1&2 before solve on 1. finishes.
+- Also see dead reckon tether (DRT).
+- Assumes unsolved poses are always added and never removed before being solved.
+
+Related
+
+manageSolveTree!, SLAMWrapperLocal
+"""
+function blockProgress(slam::SLAMWrapperLocal)
+  mss = slam.solveSettings
+  # determine if solve is in progress
+  # mss.solveInProgress
+
+  # isready means solve is in progress
+  if 1 < length(mss.poseSolveToken.data) && checkSolveStride(slam)
+    @warn "blockProgress called and forced to wait on previous slam solve not having completed."
+    wait(mss.canTakePoses)
+  end
+end
+
+"""
+    $SIGNATURES
+
+Stops a `manageSolveTree!` session.  Usually up to the user to do so as a SLAM process comes to completion.
+
+Related
+
+manageSolveTree!
+"""
+function stopManageSolveTree!(slam::SLAMWrapperLocal)
+  slam.solveSettings.loopSolver = false
+end
 
 #
 function manageSolveTree!(dfg::AbstractDFG,
@@ -77,7 +186,8 @@ function manageSolveTree!(dfg::AbstractDFG,
       t0 = time_ns()
       solvecycle += 1
       # add any newly solvables (atomic)
-      while !isready(mss.solvables) && mss.loopSolver
+      while !isready(mss.solvables) && mss.loopSolver && !isready(mss.poseSolveToken)
+        @info "waiting on !isready(mss.solvables)=$(!isready(mss.solvables)) and mss.loopSolver=$(mss.loopSolver)"
         sleep(0.2)
       end
       dt_wait = (time_ns()-t0)/1e9
@@ -102,9 +212,10 @@ function manageSolveTree!(dfg::AbstractDFG,
       dt_save1 = 0.0
       dt_solve = 0.0
 
-      mss.solveInProgress = SSMReady
+      mss.solveInProgress = SSMReady # obsolete
 
       # solve only every 10th pose
+      @show length(mss.poseSolveToken.data)
       if 0 < length(mss.poseSolveToken.data)
       # if 10 <= mss[:poseStride]
         @info "reduce problem size by disengaging older parts of factor graph"
@@ -112,7 +223,7 @@ function manageSolveTree!(dfg::AbstractDFG,
         dt_disengage = (time_ns()-t0)/1e9
 
         # set up state machine flags to allow overlapping or block
-        mss.solveInProgress = SSMSolving
+        mss.solveInProgress = SSMSolving # obsolete
         # mss[:poseStride] = 0
 
         # do the actual solve (with debug saving)
@@ -126,9 +237,7 @@ function manageSolveTree!(dfg::AbstractDFG,
         !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(lasp)"))
 
         # unblock LCMLog reader for next STRIDE segment
-        mss.solveInProgress = SSMReady
-        # de-escalate handler state machine
-        mss.canTakePoses = HSMHandling
+        mss.solveInProgress = SSMReady # obsolete
 
         # adjust latest RTT after solve, latest solved -- hard coded pose stride 10
         lastList = sortDFG(ls(dfg, r"x\d+9\b|x9\b", solvable=1))
@@ -139,6 +248,12 @@ function manageSolveTree!(dfg::AbstractDFG,
 
         # remove a token to allow progress to continue
         gotToken = take!(mss.poseSolveToken)
+
+        # notify any processes that might be waiting on current solve to complete
+        # lock(mss.canTakePoses)  # uncomment when upgrading to Threads.Condition
+        notify(mss.canTakePoses) # = HSMHandling
+        # unlock(mss.canTakePoses)
+
         "end of solve cycle, token=$gotToken" |> println
       else
         "sleep a solve cycle" |> println
@@ -156,73 +271,6 @@ end
 
 
 
-
-
-
-function addOdoFG!(slaml::SLAMWrapper, odo::Pose3Pose3;
-                  N::Int=100, solvable::Int=1,
-                  saveusrid::Int=-1)
-  #
-  @error("addOdoFG! is currently not usable (legacy code).")
-  vprev = getVert(slaml.fg, slaml.lastposesym)
-  # vprev, X, nextn = getLastPose(fgl)
-  npnum = parse(Int,string(slaml.lastposesym)[2:end]) + 1
-  nextn = Symbol("x$(npnum)")
-  vnext = addVariable!(slaml.fg, nextn, Pose2(labels=["POSE";]), N=N, solvable=solvable)
-  # vnext = addVariable!(slaml.fg, nextn, getVal(vprev) ⊕ odo, N=N, solvable=solvable, labels=["POSE"])
-  slaml.lastposesym = nextn
-  fact = addFactor!(slaml.fg, [vprev;vnext], odo)
-
-  if saveusrid > -1
-    slaml.lbl2usrid[nextn] = saveusrid
-    slaml.usrid2lbl[saveusrid] = nextn
-  end
-  return vnext, fact
-end
-
-
-function addposeFG!(slaml::SLAMWrapper,
-      constrs::Vector{IncrementalInference.FunctorInferenceType};
-      N::Int=100,
-      solvable::Int=1,
-      saveusrid::Int=-1   )
-  #
-  @error("addposeFG! is currently not usable (legacy code).")
-  vprev = getVert(slaml.fg, slaml.lastposesym)
-
-  npnum = parse(Int,string(slaml.lastposesym)[2:end]) + 1
-  nextn = Symbol("x$(npnum)")
-  # preinit
-  vnext = nothing
-  if !haskey(slaml.fg.IDs, nextn)
-    vnext = addVariable!(slaml.fg, nextn, Pose2, N=N, solvable=solvable)
-    # vnext = addVariable!(slaml.fg, nextn, getVal(vprev), N=N, solvable=solvable, labels=["POSE"])
-  else
-    vnext = getVert(slaml.fg, nextn) #, api=localapi # as optimization, assuming we already have latest vnest in slaml.fg
-  end
-  slaml.lastposesym = nextn
-
-  addsubtype(fgl::FactorGraph, vprev, vnext, cc::IncrementalInference.FunctorPairwise) = addFactor!(fgl, [vprev;vnext], cc)
-  addsubtype(fgl::FactorGraph, vprev, vnext, cc::IncrementalInference.FunctorSingleton) = addFactor!(fgl, [vnext], cc)
-
-  facts = Graphs.ExVertex[]
-  PP = BallTreeDensity[]
-  for cns in constrs
-    fa = addsubtype(slaml.fg, vprev, vnext, cns)
-    push!(facts, fa)
-  end
-
-  # set node val from new constraints as init
-  val, = predictbelief(slaml.fg, vnext, facts, N=N)
-  setVal!(vnext, val)
-  IncrementalInference.dlapi.updatevertex!(slaml.fg, vnext)
-
-  if saveusrid > -1
-    slaml.lbl2usrid[nextn] = saveusrid
-    slaml.usrid2lbl[saveusrid] = nextn
-  end
-  return vnext, facts
-end
 
 
 

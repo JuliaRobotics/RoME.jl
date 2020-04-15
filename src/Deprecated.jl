@@ -1,5 +1,72 @@
 
 
+
+function addOdoFG!(slaml::SLAMWrapper, odo::Pose3Pose3;
+                  N::Int=100, solvable::Int=1,
+                  saveusrid::Int=-1)
+  #
+  @error("addOdoFG! is currently not usable (legacy code).")
+  vprev = getVert(slaml.fg, slaml.lastposesym)
+  # vprev, X, nextn = getLastPose(fgl)
+  npnum = parse(Int,string(slaml.lastposesym)[2:end]) + 1
+  nextn = Symbol("x$(npnum)")
+  vnext = addVariable!(slaml.fg, nextn, Pose2(labels=["POSE";]), N=N, solvable=solvable)
+  # vnext = addVariable!(slaml.fg, nextn, getVal(vprev) ⊕ odo, N=N, solvable=solvable, labels=["POSE"])
+  slaml.lastposesym = nextn
+  fact = addFactor!(slaml.fg, [vprev;vnext], odo)
+
+  if saveusrid > -1
+    slaml.lbl2usrid[nextn] = saveusrid
+    slaml.usrid2lbl[saveusrid] = nextn
+  end
+  return vnext, fact
+end
+
+
+function addposeFG!(slaml::SLAMWrapper,
+      constrs::Vector{IncrementalInference.FunctorInferenceType};
+      N::Int=100,
+      solvable::Int=1,
+      saveusrid::Int=-1   )
+  #
+  @error("addposeFG! is currently not usable (legacy code).")
+  vprev = getVert(slaml.fg, slaml.lastposesym)
+
+  npnum = parse(Int,string(slaml.lastposesym)[2:end]) + 1
+  nextn = Symbol("x$(npnum)")
+  # preinit
+  vnext = nothing
+  if !haskey(slaml.fg.IDs, nextn)
+    vnext = addVariable!(slaml.fg, nextn, Pose2, N=N, solvable=solvable, tags=[:POSE])
+    # vnext = addVariable!(slaml.fg, nextn, getVal(vprev), N=N, solvable=solvable, labels=["POSE"])
+  else
+    vnext = getVariable(slaml.fg, nextn) # as optimization, assuming we already have latest vnest in slaml.fg
+  end
+  slaml.lastposesym = nextn
+
+  addsubtype(fgl::FactorGraph, vprev, vnext, cc::IncrementalInference.FunctorPairwise) = addFactor!(fgl, [vprev;vnext], cc)
+  addsubtype(fgl::FactorGraph, vprev, vnext, cc::IncrementalInference.FunctorSingleton) = addFactor!(fgl, [vnext], cc)
+
+  facts = Graphs.ExVertex[]
+  PP = BallTreeDensity[]
+  for cns in constrs
+    fa = addsubtype(slaml.fg, vprev, vnext, cns)
+    push!(facts, fa)
+  end
+
+  # set node val from new constraints as init
+  val, = predictbelief(slaml.fg, vnext, facts, N=N)
+  setVal!(vnext, val)
+  # IncrementalInference.dlapi.updatevertex!(slaml.fg, vnext)
+
+  if saveusrid > -1
+    slaml.lbl2usrid[nextn] = saveusrid
+    slaml.usrid2lbl[saveusrid] = nextn
+  end
+  return vnext, facts
+end
+
+
 # old type interfaces
 
 # function Point2DPoint2DRange(mu,stdev,w)
