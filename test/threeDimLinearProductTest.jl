@@ -129,7 +129,7 @@ global stdX1 = Statistics.std(getVal(fg,:x1),dims=2)
 @test sum(map(Int,abs.(muX1[4:6]) .< 0.1)) == 3
 @test sum(map(Int, 0.4 .< stdX1[1:3] .< 1.6)) == 3 # had a 2==3 failure here
 @show stdX1[4:6]
-@test sum(map(Int, 0.02 .< stdX1[4:6] .< 0.4)) == 3
+@test sum(map(Int, 0.02 .< stdX1[4:6] .< 0.5)) == 3
 global muX2 = Statistics.mean(getVal(fg,:x2),dims=2)
 global stdX2 = Statistics.std(getVal(fg,:x2),dims=2)
 @show muX2[1:3]-[10.0;0;0]

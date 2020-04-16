@@ -5,6 +5,9 @@ using RoME
 using Test
 
 
+@error("must restore testG2oParser.jl")
+# "testG2oParser.jl";  ]
+
 testfiles = [
 "testPoint2Point2WorldBearing.jl";
 "testBeehive2D_CliqByCliq.jl"; # special case debugging
@@ -29,8 +32,6 @@ testfiles = [
 "TestDefaultFGInitialization.jl";
 "testAccumulateFactors.jl";
 "testDeadReckoningTether.jl"; ]
-@warn "must restore g2o parser test"
-# "testG2oParser.jl";  ]
 
 ## Tests not ready yet
 # "HexagonalLightGraphs.jl"

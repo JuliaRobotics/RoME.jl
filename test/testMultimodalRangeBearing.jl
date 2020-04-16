@@ -66,9 +66,9 @@ tree, smt, hist = solveTree!(fg)
 # @test length(infv) == 4
 
 
-# X0 = getVertKDE(fg, :x0)
+# X0 = getKDE(getVariable(fg, :x0))
 # X0pts = getPoints(X0)
-global X0pts = getVal(fg, :x0)
+global X0pts = getKDE(getVariable(fg, :x0)) |> getPoints
 
 
 @test size(X0pts,1) == 3
@@ -113,9 +113,9 @@ tree, smt, hist = solveTree!(fg)
 # @test length(infv) == 4
 
 
-# L1 = getVertKDE(fg, :l1)
-global L2 = getVertKDE(fg, :l2)
-# X0 = getVertKDE(fg, :x0)
+# L1 = getKDE(getVariable(fg, :l1))
+global L2 = getKDE(getVariable(fg, :l2))
+# X0 = getKDE(getVariable(fg, :x0))
 
 global L2pts = getPoints(L2)
 
@@ -124,11 +124,20 @@ global L2pts = getPoints(L2)
 
 # plot(L2, dims=[1;2])
 
-global numM1 = sum(10 .< L2pts[1,:] .< 30)
-global numM2 = sum(30 .< L2pts[1,:] .< 50)
+numM1 = sum(10 .< L2pts[1,:] .< 30)
+numM2 = sum(30 .< L2pts[1,:] .< 50)
 
-@test 30 < numM1 < 70
-@test 30 < numM2 < 70
-@test 0.97*N <= numM1 + numM2
+@test 20 < numM1 < 70
+@test 20 < numM2 < 70
+@test 0.6*N <= numM1 + numM2
 
 end
+
+
+# using RoMEPlotting
+# Gadfly.set_default_plot_size(35cm,20cm)
+#
+# drawPosesLandms(fg, spscale = 1.0)
+#
+# plotLocalProduct(fg, :l1, levels=10)
+# plotLocalProduct(fg, :l2, levels=10)

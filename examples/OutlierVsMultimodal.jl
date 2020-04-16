@@ -21,13 +21,16 @@ function parse_commandline()
             help = "How many cycles to drive"
             arg_type = Int
             default = 10
+        "--spreadNH"
+            help = "Scale adjustment for spreading nullhypo (entropy)"
+            arg_type = Float64
+            default = 3.0
     end
 
     return parse_args(s)
 end
 
 pargs = parse_commandline()
-
 
 using Distributed
 # addprocs(8) # use -p8 instead
@@ -41,6 +44,7 @@ using KernelDensityEstimatePlotting
 
 using FileIO
 using JLD2
+using JSON2
 using Gadfly
 Gadfly.set_default_plot_size(35cm,25cm)
 
@@ -94,7 +98,9 @@ for n in 1:length(movePerCycle)
   push!(sequence, order[total:total+movePerCycle[n]-1] )
   total += movePerCycle[n]
 end
-@assert sum(union(sequence...)) == 55
+if pargs["CYCLES"] == 10
+  @assert sum(union(sequence...)) == 55
+end
 
 sequence
 
@@ -128,8 +134,24 @@ lookup
 # drive first circle
 fg = generateCanonicalFG_Circle(SIZE, kappaOdo=0.1, loopClosure=false, landmark=false, cyclePoses=10)
 
+getSolverParams(fg).spreadNH = pargs["spreadNH"]
 
 ensureAllInitialized!(fg)
+
+## store arguments in results log
+
+argstr = JSON2.write(pargs)
+
+Base.mkpath(getLogPath(fg))
+fid = open(joinLogPath(fg, "args.json"), "w")
+JSON2.write(fid, pargs)
+close(fid)
+fid = open(joinLogPath(fg, "..", "results.log"), "a")
+Base.write(fid, "$(getLogPath(fg)), RoME/examples/OutlierVsMultimodal.jl, ")
+JSON2.write(fid, pargs)
+Base.write(fid, "\n")
+close(fid)
+
 
 ## add initial landmarks
 
@@ -165,13 +187,13 @@ end
 
 ## see what is going on
 
-plfl1 = drawPosesLandms(fg, spscale=1.0)
+plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg)*"\n$argstr")
 
 ## prepare factors to use
 
 BRdistr = Dict{Symbol,Dict{Symbol,Tuple}}()
-for i in 1:2*CYCLES
-  lmid = Symbol(i <= CYCLES ? "l$i" : "l$(i-CYCLES)_0")
+for i in 1:2*SIZE
+  lmid = Symbol(i <= SIZE ? "l$i" : "l$(i-SIZE)_0")
   BRdistr[lmid] = Dict{Symbol,Tuple}()
   for (vsym, br) in BR[lmid]
     @show bear, rang = br
@@ -205,7 +227,7 @@ getSolverParams(fg).drawtree = true
 tree, smt, hist = solveTree!(fg)
 
 
-plfl1 = drawPosesLandms(fg, spscale=1.0)
+plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg)*"\n$argstr")
 
 
 # lookup
@@ -224,7 +246,7 @@ POSEOFFSET=0
 
 @save joinLogPath(fg, "lookup.jld2") lookup
 
-plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max, contour=true) #, posesPPE=:max)
+plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg)*"\n$argstr", landmsPPE=:max, contour=true) #, posesPPE=:max)
 plfl1 |> PDF(joinLogPath(fg, "plot_x20_before.pdf"), 20cm, 17cm)
 
 ##
@@ -254,6 +276,12 @@ for l in 1:LANDMARKS
     # add the few BR factors from this lmid accordingly
     addFactor!(fg, [opsid;lmid;lmid_0], Pose2Point2BearingRange(ppbr...), multihypo=[1;mainFrac;altFrac])
   end
+
+  # reinit all lm_0 with the latest factor
+  if 0 < length(ls(fg, lmid_0))
+    pts = approxConv(fg, ls(fg, lmid_0)[1], lmid_0  )
+    initManual!(fg,lmid_0,pts)
+  end
 end
 
 getSolverParams(fg).dbg = true
@@ -261,13 +289,13 @@ saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)before"))
 tree, smt, hist = solveTree!(fg, maxparallel=1000, recordcliqs=ls(fg))
 saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_solve"))
 
-plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max, contour=true)
+plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg)*"\n$argstr", landmsPPE=:max, contour=true)
 plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_solve.pdf"), 20cm, 17cm)
 
 if pargs["resolve"]
   tree, smt, hist = solveTree!(fg, maxparallel=1000, recordcliqs=ls(fg))
   saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_resolve"))
-  plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max, contour=true)
+  plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg)*"\n$argstr", landmsPPE=:max, contour=true)
   plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_resolve.pdf"), 20cm, 17cm)
 end
 
@@ -284,7 +312,7 @@ saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_final"))
 
 ##
 
-plfl1 = drawPosesLandms(fg, spscale=1.0, landmsPPE=:max)
+plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg)*"\n$argstr", landmsPPE=:max)
 plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_final.pdf"), 20cm, 17cm)
 
 
