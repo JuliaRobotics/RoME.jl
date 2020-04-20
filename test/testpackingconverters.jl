@@ -8,7 +8,7 @@ using RoME
 using Test
 using DistributedFactorGraphs
 import DistributedFactorGraphs: packVariableNodeData, unpackVariableNodeData
-import RoME: compare
+# import RoME: compare
 
 
 @testset "test PriorPoint2" begin
@@ -55,7 +55,7 @@ global fg
 dd = convert(PackedPriorPose2, ipp)
 upd = convert(RoME.PriorPose2, dd)
 
-@test compare(ipp, upd)
+@test RoME.compare(ipp, upd)
 
 packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, DFG.getSolverData(f1))
 unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose2}}, packeddata)
@@ -83,7 +83,7 @@ end
     global upd = convert(RoME.Pose2Pose2, dd)
 
     # TODO -- fix ambiguity in compare function
-    @test compare(ppc, upd)
+    @test RoME.compare(ppc, upd)
 
     global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Pose2}, DFG.getSolverData(f2))
     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Pose2}}, packeddata)
@@ -222,7 +222,7 @@ end
     global pprpz = convert(PackedPartialPriorRollPitchZ, prpz)
     global unp = convert(PartialPriorRollPitchZ, pprpz)
 
-    @test compare(prpz, unp)
+    @test RoME.compare(prpz, unp)
 
 end
 
@@ -237,7 +237,7 @@ end
     global pxyy = convert(PackedPartialPose3XYYaw, xyy)
     global unp = convert(PartialPose3XYYaw, pxyy)
 
-    @test compare(xyy, unp)
+    @test RoME.compare(xyy, unp)
 end
 
 
@@ -249,7 +249,7 @@ end
     global pxyy = convert(PackedPartialPose3XYYawNH, xyy)
     global unp = convert(PartialPose3XYYawNH, pxyy)
 
-    @test compare(xyy, unp)
+    @test RoME.compare(xyy, unp)
 end
 
 
