@@ -8,7 +8,7 @@ using RoME
 using Test
 using DistributedFactorGraphs
 import DistributedFactorGraphs: packVariableNodeData, unpackVariableNodeData
-import RoME: compare
+# import RoME: compare
 
 
 @testset "test PriorPoint2" begin
