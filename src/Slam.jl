@@ -3,7 +3,7 @@
 
 export AbstractSLAM
 export ManageSolveSettings, HandlerStateMachine, SolverStateMachine
-export manageSolveTree!, stopManageSolveTree!
+export manageSolveTree!, stopManageSolveTree!, blockSolvingInProgress
 export SLAMCommonHelper, SLAMWrapperLocal
 export checkSolveStrideTrigger!, checkSolveStride, triggerSolve!, blockProgress
 
@@ -106,8 +106,8 @@ Related
 
 triggerSolve!
 """
-function checkSolveStrideTrigger!(slam::SLAMWrapperLocal)
-  if checkSolveStride(slam)
+function checkSolveStrideTrigger!(slam::SLAMWrapperLocal; force::Bool=false)
+  if force || checkSolveStride(slam)
     @info "trigger a solve, $(length(slam.solveSettings.poseSolveToken.data)) ====================================="
     triggerSolve!(slam)
     @info "after slam solve trigger"
@@ -157,6 +157,19 @@ manageSolveTree!
 """
 function stopManageSolveTree!(slam::SLAMWrapperLocal)
   slam.solveSettings.loopSolver = false
+end
+
+"""
+    $SIGNATURES
+
+Block the progression of calling task if `::SLAMWrapperLocal` is being solved by a presumed `manageSolveTree!` task.
+"""
+function blockSolvingInProgress(slam::SLAMWrapperLocal)
+  if slam.solveSettings.solveInProgress != SSMReady
+    @info "blockSolvingInProgress on ::SLAMWrapperLocal"
+    wait(slam.solveSettings.canTakePoses)
+    @info "blockSolvingInProgress notified of completion."
+  end
 end
 
 #
@@ -212,7 +225,7 @@ function manageSolveTree!(dfg::AbstractDFG,
       dt_save1 = 0.0
       dt_solve = 0.0
 
-      mss.solveInProgress = SSMReady # obsolete
+      # mss.solveInProgress = SSMReady
 
       # solve only every 10th pose
       @show length(mss.poseSolveToken.data)
@@ -237,7 +250,7 @@ function manageSolveTree!(dfg::AbstractDFG,
         !dbg ? nothing : saveDFG(dfg, joinpath(getLogPath(dfg), "fg_after_$(lasp)"))
 
         # unblock LCMLog reader for next STRIDE segment
-        mss.solveInProgress = SSMReady # obsolete
+        mss.solveInProgress = SSMReady
 
         # adjust latest RTT after solve, latest solved -- hard coded pose stride 10
         lastList = sortDFG(ls(dfg, r"x\d+9\b|x9\b", solvable=1))
@@ -257,8 +270,10 @@ function manageSolveTree!(dfg::AbstractDFG,
         "end of solve cycle, token=$gotToken" |> println
       else
         "sleep a solve cycle" |> println
+        mss.solveInProgress = SSMReady
         sleep(0.2)
       end
+
       dt_finish = (time_ns() - t0)/1e9
 
       # store timing results
