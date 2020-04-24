@@ -1,7 +1,26 @@
 # canonical factor graph examples useful for development and learning.
 
-export generateCanonicalFG_Hexagonal, generateCanonicalFG_TwoPoseOdo, generateCanonicalFG_Circle
+export generateCanonicalFG_ZeroPose2, generateCanonicalFG_Hexagonal, generateCanonicalFG_TwoPoseOdo, generateCanonicalFG_Circle
 export warmUpSolverJIT
+
+"""
+    $SIGNATURES
+
+Generate a canonical factor graph with a Pose2 `:x0` and MvNormal with covariance `P0`
+"""
+function generateCanonicalFG_ZeroPose2(;fg::AbstractDFG=initfg(),
+                                       graphinit::Bool=true,
+                                       Σ0::AbstractMatrix{<:Real}= 0.01*Matrix{Float64}(LinearAlgebra.I,3,3),
+                                       μ0::AbstractVector{<:Real}=zeros(3),
+                                       label::Symbol=:x0 )
+  #
+  if !exists(fg, label)
+    addVariable!(fg, label, Pose2)
+    prpo = PriorPose2(MvNormal(μ0, Σ0))
+    addFactor!(fg, [label], prpo, graphinit=graphinit)
+  end
+  return fg
+end
 
 """
     $SIGNATURES
@@ -29,7 +48,8 @@ generateCanonicalFG_Circle, generateCanonicalFG_Kaess, generateCanonicalFG_TwoPo
 function generateCanonicalFG_Circle(poses::Int=6;
                                     fg::AbstractDFG=initfg(),
                                     offsetPoses::Int=maximum([length(ls(fg, r"x\d"))-1;0]),
-                                    autoinit::Bool=true,
+                                    autoinit::Union{Bool, Nothing}=nothing,
+                                    graphinit::Bool=true,
                                     landmark::Bool=true,
                                     loopClosure::Bool=true,
                                     stopEarly::Int=9999999,
@@ -40,12 +60,19 @@ function generateCanonicalFG_Circle(poses::Int=6;
   @assert offsetPoses < poses "`offsetPoses` must be smaller than total number of `poses`"
   # IIF.getSolverParams(fg).drawtree = true
 
+  graphinit = if autoinit == nothing
+    graphinit
+  else
+    @warn "autoinit is deprecated, use graphinit instead"
+    autoinit
+  end
+
   ## 1. Drive around in a hexagon
   # Add the first pose :x0
   if !exists(fg, :x0)
     addVariable!(fg, :x0, Pose2)
     prpo = PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I,3,3)))
-    addFactor!(fg, [:x0], prpo, autoinit=autoinit)
+    addFactor!(fg, [:x0], prpo, graphinit=graphinit)
   end
 
   println("STEP 1: Driving around a bit")
@@ -58,7 +85,7 @@ function generateCanonicalFG_Circle(poses::Int=6;
     @show nsym = Symbol("x$(i+1)")
     addVariable!(fg, nsym, Pose2)
     pp = Pose2Pose2(MvNormal([10.0;0;2pi/(cyclePoses)+biasTurn], Matrix(Diagonal((kappaOdo*[0.1;0.1;0.1]).^2))))
-    addFactor!(fg, [psym;nsym], pp , autoinit=autoinit)
+    addFactor!(fg, [psym;nsym], pp , graphinit=graphinit)
   end
 
   if !landmark
@@ -68,7 +95,7 @@ function generateCanonicalFG_Circle(poses::Int=6;
     # Add node linking initial pose with a bearing range measurement landmark
     addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
     p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-    addFactor!(fg, [:x0; :l1], p2br, autoinit=autoinit)
+    addFactor!(fg, [:x0; :l1], p2br, graphinit=graphinit)
   end
 
   if !loopClosure || !exists(fg, :x*"$poses")
@@ -76,7 +103,7 @@ function generateCanonicalFG_Circle(poses::Int=6;
   end
   # add loop closure sighting
   p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-  addFactor!(fg, [:x*"$poses"; :l1], p2br, autoinit=autoinit)
+  addFactor!(fg, [:x*"$poses"; :l1], p2br, graphinit=graphinit)
 
   # return the new factor graph object
   return fg
@@ -138,37 +165,16 @@ Related
 generateCanonicalFG_Circle, generateCanonicalFG_Kaess, generateCanonicalFG_TwoPoseOdo
 """
 function generateCanonicalFG_Hexagonal(;fg::AbstractDFG=initfg(),
-                                       autoinit::Bool=true)
-    # # start with an empty factor graph object
-    # fg = initfg()
-    # # IIF.getSolverParams(fg).drawtree = true
-    #
-    # ## 1. Drive around in a hexagon
-    # # Add the first pose :x0
-    # println("STEP 1: Driving around a bit")
-    # addVariable!(fg, :x0, Pose2)
-    # # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-    # prpo = PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I,3,3)))
-    # addFactor!(fg, [:x0], prpo, autoinit=autoinit)
-    # for i in 0:5
-    #   psym = Symbol("x$i")
-    #   nsym = Symbol("x$(i+1)")
-    #   addVariable!(fg, nsym, Pose2)
-    #   pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-    #   addFactor!(fg, [psym;nsym], pp , autoinit=autoinit)
-    # end
-    #
-    # # Add node linking initial pose with a bearing range measurement landmark
-    # addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
-    # p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-    # addFactor!(fg, [:x0; :l1], p2br, autoinit=autoinit)
-    #
-    # # add loop closure sighting
-    # p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-    # addFactor!(fg, [:x6; :l1], p2br, autoinit=autoinit)
-    #
-    # # return the new factor graph object
-  return generateCanonicalFG_Circle(6, autoinit=autoinit, landmark=true, loopClosure=true)
+                                       autoinit::Union{Bool, Nothing}=nothing,
+                                       graphinit::Bool=true  )
+  #
+  graphinit = if autoinit == nothing
+    graphinit
+  else
+    @warn "autoinit is deprecated, use graphinit instead"
+    autoinit
+  end
+  return generateCanonicalFG_Circle(6, graphinit=graphinit, landmark=true, loopClosure=true)
 end
 
 
@@ -182,16 +188,24 @@ to landmark `:l1`.
 function generateCanonicalFG_TwoPoseOdo(;fg::AbstractDFG=initfg(),
                                         type::Type{Pose2}=Pose2,
                                         addlandmark::Bool=true,
-                                        autoinit::Bool=true)
+                                        autoinit::Union{Bool,Nothing}=nothing,
+                                        graphinit::Bool=true )
   #
+
+  graphinit = if autoinit == nothing
+    graphinit
+  else
+    @warn "autoinit is deprecated, use graphinit instead"
+    autoinit
+  end
 
   addVariable!(fg, :x0, Pose2)
   addVariable!(fg, :x1, Pose2)
   !addlandmark ? nothing : addVariable!(fg, :l1, Point2)
 
-  addFactor!(fg, [:x0], PriorPose2(MvNormal([0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))), autoinit=autoinit)
-  addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal([10.0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))), autoinit=autoinit)
-  !addlandmark ? nothing : addFactor!(fg, [:x1;:l1], Pose2Point2BearingRange(Normal(0.0,0.01), Normal(20.0, 1.0)), autoinit=autoinit)
+  addFactor!(fg, [:x0], PriorPose2(MvNormal([0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))), graphinit=graphinit)
+  addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal([10.0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))), graphinit=graphinit)
+  !addlandmark ? nothing : addFactor!(fg, [:x1;:l1], Pose2Point2BearingRange(Normal(0.0,0.01), Normal(20.0, 1.0)), graphinit=graphinit)
 
   return fg
 end
