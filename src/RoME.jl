@@ -338,5 +338,13 @@ include("g2oParser.jl")
 
 include("Deprecated.jl")
 
+using Requires
+
+function __init__()
+  @require Flux="587475ba-b771-5e3f-ad9e-33799f191a9c" begin
+    @info "RoME is adding Flux related functionality."
+    include("flux/FluxModelsPose2Pose2.jl")
+  end
+end
 
 end
