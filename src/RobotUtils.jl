@@ -1,5 +1,24 @@
 
-export getVariablesLabelsWithinRange
+export getVariablesLabelsWithinRange, enableSolveAllNotDRT!
+
+"""
+    $SIGNATURES
+
+Remove all marginalization and make solvable (=1) all variables and factors that don't contain `drt` in their label.
+
+Notes
+- Dead Reckon Tether (DRT)
+
+Related
+
+dontMarginalizeVariablesAll!, setSolvable!, defaultFixedLagOnTree!
+"""
+function enableSolveAllNotDRT!(dfg::AbstractDFG; solvable::Int=1)
+  dontMarginalizeVariablesAll!(dfg)
+  foreach(x->setSolvable!(dfg, x, solvable), ls(dfg))
+  foreach(x->setSolvable!(dfg, x, solvable), lsf(dfg))
+  nothing
+end
 
 mutable struct RangeAzimuthElevation
   range::Float64

@@ -9,7 +9,7 @@ using Random, Statistics
 using DistributedFactorGraphs, TransformUtils
 
 import Base: convert
-import IncrementalInference: getSample
+import IncrementalInference: getSample, calcZDim
 
 
 struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: FunctorPairwise
@@ -168,18 +168,76 @@ end
 ## packing converters
 
 struct PackedFluxModelsPose2Pose2 <: IncrementalInference.PackedInferenceType
-  joyVelData::Matrix{Float64}
+  joyVelData::Vector{Vector{Float64}}
   naiveModel::String
   naiveFrac::Float64
+  modelWeightsAll::Vector{Dict{Symbol,Vector}}
 end
-
+    # W1::Matrix{Float64}
+    # b1::Vector{Float64}
+    # W2::Matrix{Float64}
+    # b2::Vector{Float64}
+    # W3::Matrix{Float64}
+    # b3::Vector{Float64}
+  # allPredModels::Vector{P}
+  # joyVelData::D
+  # naiveModel::M
+  # naiveFrac::Ref{Float64}
+  # Zij::Pose2Pose2
+  # specialSampler::Function # special keyword field name used to invoke 'specialSampler' logic
+  # DT::Ref{Float64}
 
 function convert(::Type{FluxModelsPose2Pose2}, d::PackedFluxModelsPose2Pose2)
-  FluxModelsPose2Pose2(PyTFOdoPredictorPoint2,d.joyVelData,extractdistribution(d.naiveModel),d.naiveFrac)
+  MDS = []
+  for mdw in d.modelWeightsAll
+    # @show keys(mdw) |> collect
+    mW1 = mdw[:W1]
+    @cast W1c[row,col] := mW1[row][col]
+    W1 = W1c |> Matrix{Float32}
+    @assert W1[1,1] - mdw[:W1][1][1] |> abs < 1e-6 "Something about matrix vector order in FluxModelsPose2Pose2 converter broke."
+    @assert W1[1,2] - mdw[:W1][1][2] |> abs < 1e-6 "Something about matrix vector order in FluxModelsPose2Pose2 converter broke."
+    @assert W1[2,1] - mdw[:W1][2][1] |> abs < 1e-6 "Something about matrix vector order in FluxModelsPose2Pose2 converter broke."
+    b1 = mdw[:b1] |> Vector{Float32}
+    mW2 = (mdw[:W2])
+    @cast W2c[row,col] := mW2[row][col]
+    W2 = W2c |> Matrix{Float32}
+    b2 = mdw[:b2] |> Vector{Float32}
+    mW3 = (mdw[:W3])
+    @cast W3c[row,col] := mW3[row][col]
+    W3 = W3c |> Matrix{Float32}
+    b3 = mdw[:b3] |> Vector{Float32}
+    md = buildPose2OdoNN_01_FromElements(W1,b1,W2,b2,W3,b3)
+    push!(MDS, md)
+  end
+  @cast joyVel[row,col] := d.joyVelData[row][col]
+  joyVelM = joyVel |> Matrix{Float64}
+  FluxModelsPose2Pose2(MDS, joyVelM, extractdistribution(d.naiveModel), d.naiveFrac )
+end
+
+# need to overwrite for specialSampler
+function calcZDim(usrfnc::FluxModelsPose2Pose2, Xi::Vector{<:DFGVariable})
+  return 3
 end
 
 function convert(::Type{PackedFluxModelsPose2Pose2}, d::FluxModelsPose2Pose2)
-  PackedFluxModelsPose2Pose2(d.joyVelData, string(d.naiveModel), d.naiveFrac)
+  MDS = []
+  for md in d.allPredModels
+    mddict =Dict{Symbol, AbstractArray}()
+    @cast W1c[row][col] := md[1].W1[row,col]
+    @cast W2c[row][col] := md[5].W[row,col]
+    @cast W3c[row][col] := md[6].W[row,col]
+    mddict[:W1] = Vector{Float32}[vec(W1c[i]) for i in 1:length(W1c)]
+    mddict[:b1] = md[1].b1
+    mddict[:W2] = Vector{Float32}[vec(W2c[i]) for i in 1:length(W2c)]
+    # mddict[:W2] = Vector{Vector{Float32}}(Vector{Float32}(W2c))
+    mddict[:b2] = md[5].b
+    mddict[:W3] = Vector{Float32}[vec(W3c[i]) for i in 1:length(W3c)]
+    # mddict[:W3] = Vector{Vector{Float32}}(Vector{Float32}(W3c))
+    mddict[:b3] = md[6].b
+    push!(MDS, mddict)
+  end
+  joyVel = Vector{Float64}[d.joyVelData[i,:] for i in 1:size(d.joyVelData,1)]
+  PackedFluxModelsPose2Pose2(joyVel, string(d.naiveModel), d.naiveFrac[], MDS)
 end
 
 
