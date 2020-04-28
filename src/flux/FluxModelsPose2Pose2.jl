@@ -20,6 +20,7 @@ struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: FunctorPai
   Zij::Pose2Pose2
   specialSampler::Function # special keyword field name used to invoke 'specialSampler' logic
   DT::Ref{Float64}
+  shuffle::Ref{Bool}
 end
 
 
@@ -117,7 +118,8 @@ function sampleFluxModelsPose2Pose2(nfb::FluxModelsPose2Pose2,
     allPreds = allPreds[1:N]
   end
   # samples for the order in which to use models, dont shuffle if N models
-  1 < numModels && N != numModels ? shuffle!(allPreds) : nothing
+  # can suppress shuffle for NN training purposes
+  1 < numModels && nfb.shuffle[] ? shuffle!(allPreds) : nothing
 
   # cache the time difference estimate
   nfb.DT[] = (getTimestamp(Xj) - getTimestamp(Xi)).value * 1e-3
@@ -131,14 +133,16 @@ FluxModelsPose2Pose2(allModels::Vector{P},
                      naiveModel::M,
                      naiveFrac::Real=0.5,
                      ss::Function=sampleFluxModelsPose2Pose2,
-                     DT::Real=0.0  ) where {P, M <: SamplableBelief, D <: AbstractMatrix} = FluxModelsPose2Pose2{P,D,M}(
+                     DT::Real=0.0,
+                     shuffle::Bool=true  ) where {P, M <: SamplableBelief, D <: AbstractMatrix} = FluxModelsPose2Pose2{P,D,M}(
                                         allModels,
                                         jvd,
                                         naiveModel,
                                         naiveFrac,
                                         Pose2Pose2(MvNormal(zeros(3),diagm(ones(3)))), # this dummy distribution does not get used
                                         ss,
-                                        DT  )
+                                        DT,
+                                        shuffle )
 #
 
 
