@@ -1,8 +1,12 @@
 # FluxModelsPose2Pose2
 
+# the factor definitions
 export FluxModelsPose2Pose2, sampleFluxModelsPose2Pose2, PackedFluxModelsPose2Pose2
+# some utilities
+export setShuffleAll!, setNaiveFracAll!
 
 
+# Required packages
 using .Flux
 
 using Random, Statistics
@@ -244,6 +248,22 @@ function convert(::Type{PackedFluxModelsPose2Pose2}, d::FluxModelsPose2Pose2)
   PackedFluxModelsPose2Pose2(joyVel, string(d.naiveModel), d.naiveFrac[], MDS)
 end
 
+
+
+
+## Utilities
+
+function setShuffleAll!(dfg::AbstractDFG, shuf::Bool)
+  fs = lsf(dfg, FluxModelsPose2Pose2)
+  (x->getFactorType(dfg, x).shuffle[] = shuf).(fs)
+  nothing
+end
+
+function setNaiveFracAll!(dfg::AbstractDFG, frac::Real)
+  fs = lsf(dfg, FluxModelsPose2Pose2)
+  (x->getFactorType(dfg, x).naiveFrac[] = frac).(fs)
+  nothing
+end
 
 
 #
