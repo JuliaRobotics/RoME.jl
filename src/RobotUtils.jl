@@ -569,7 +569,7 @@ function evalAutoCases!(fgl::G, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
     fbr = addBRFG!(fgl, pose, lm, br, cov, solvable=solvable)
   elseif !lmidSugg && maxAnyExists
     # add UniBR to best match maxl
-    vlm = getVert(fgl,maxl)
+    vlm = getVariable(fgl,maxl)
     fbr = addBRFG!(fgl, pose, maxl, br, cov, solvable=solvable)
   elseif lmidSugg && !maxl2Exists && !lmIDExists
     #add new landmark and add UniBR to suggested lmid
@@ -577,7 +577,7 @@ function evalAutoCases!(fgl::G, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
     fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, solvable=solvable)
   elseif lmidSugg && !maxl2Exists && lmIDExists && intgLmIDExists
     # doesn't self intesect with existing lmid, add UniBR to lmid
-    vlm = getVert(fgl, lmid)
+    vlm = getVariable(fgl, lmid)
     fbr = addBRFG!(fgl, pose, lmSuggLbl, br, cov, solvable=solvable)
   elseif lmidSugg && maxl2Exists && !lmIDExists
     # add new landmark and add MMBR to both maxl and lmid
@@ -587,13 +587,13 @@ function evalAutoCases!(fgl::G, lmid::Int, ivs::Dict{T, Float64}, maxl::T,
     # obvious case, add MMBR to both maxl and lmid. Double intersect might be the same thing
     println("evalAutoCases! -- obvious case is happening")
     addMMBRFG!(fgl, pose, [maxl2;lmSuggLbl], br, cov, solvable=solvable)
-    vlm = getVert(fgl,lmSuggLbl)
+    vlm = getVariable(fgl,lmSuggLbl)
   elseif lmidSugg && maxl2Exists && lmIDExists && !intgLmIDExists
     # odd case, does not intersect with suggestion, but does with some previous landm
     # add MMBR
     @warn "evalAutoCases! -- no self intersect with suggested $(lmSuggLbl) detected"
     addMMBRFG!(fgl, pose, [maxl;lmSuggLbl], br, cov, solvable=solvable)
-    vlm = getVert(fgl,lmSuggLbl)
+    vlm = getVariable(fgl,lmSuggLbl)
   elseif lmidSugg && !maxl2Exists && lmIDExists && !intgLmIDExists
   #   # landm exists but no intersection with existing or suggested lmid
   #   # may suggest some error
@@ -617,7 +617,7 @@ function addAutoLandmBR!(fgl::G,
                          N::Int=100,
                          solvable::Int=1  ) where {G <: AbstractDFG, T <: AbstractString}
   #
-  vps = getVert(fgl, pose)
+  vps = getVariable(fgl, pose)
   lmPts = projNewLandmPoints(vps, br, cov)
   lmkde = kde!(lmPts)
   currage = parse(Int, pose[2:end])
@@ -663,7 +663,7 @@ function get2DSamples(fg::G; #::Union{Symbol, S};
   Y = Array{Float64,1}()
 
   # if sym = 'l', ignore single measurement landmarks
-  allids = DFG.getVariableIds(fg, regexKey)  # fg.IDs
+  allids = listVariables(fg, regexKey)  # fg.IDs
   saids = DFG.sortDFG(allids)
   for id in saids
     # vertlbl = string(id[1])
@@ -683,10 +683,6 @@ function get2DSamples(fg::G; #::Union{Symbol, S};
   return X,Y
 end
 
-# function getAll2D(fg, sym; minnei::Int=0)
-#   @warn "getAll2D deprecated, use get2DSamples instead"
-#   return get2DSamples(fg, sym, minnei=minnei )
-# end
 
 function getVariablesLabelsWithinRange(fg::AbstractDFG,
                                        regexKey::Regex=r"x";
@@ -695,7 +691,7 @@ function getVariablesLabelsWithinRange(fg::AbstractDFG,
   #
 
   # if sym = 'l', ignore single measurement landmarks
-  allids = DFG.getVariableIds(fg, regexKey)  # fg.IDs
+  allids = listVariables(fg, regexKey)  # fg.IDs
   saids = DFG.sortDFG(allids)
   mask = Array{Bool,1}(undef, length(saids))
   fill!(mask, false)
