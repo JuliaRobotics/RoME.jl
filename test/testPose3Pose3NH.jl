@@ -91,7 +91,7 @@ println("Adding Pose3Pose3NH to graph...")
 global odo3 = SE3([-35;0;0], Quaternion(0))
 global odoc3 = Pose3Pose3NH( MvNormal(veeEuler(odo3), odoCov), [0.5;0.5]) # define 50/50% hypothesis
 
-@test length(intersect(DFG.getVariableIds(fg), [:x1;:x2;:x3])) == 3
+@test length(intersect(DFG.listVariables(fg), [:x1;:x2;:x3])) == 3
 addFactor!(fg,[:x3;:x1],odoc3)
 
 global X1pts = approxConv(fg, :x3x1f1, :x1, N=N)
