@@ -37,7 +37,9 @@ function buildPose2OdoNN_01_FromWeights(pywe)
   buildPose2OdoNN_01_FromElements(pywe[1], pywe[2][:], pywe[3]', pywe[4][:], pywe[5]', pywe[6][:])
 end
 
-
+# function buildPose2OdoNN_01_FromWeightsGPU(pywe)
+#   buildPose2OdoNN_01_FromElements(collect(pywe[1]) |> gpu, collect(pywe[2][:]) |> gpu, collect(pywe[3]') |> gpu, collect(pywe[4][:]) |> gpu, collect(pywe[5]') |> gpu, collect(pywe[6][:]) |> gpu) |> gpu
+# end
 
 @deprecate buildPyNNModel_01_FromElements(args...) buildPose2OdoNN_01_FromElements(args...)
 @deprecate buildPyNNModel_01_FromWeights(args...) buildPose2OdoNN_01_FromWeights(args...)
