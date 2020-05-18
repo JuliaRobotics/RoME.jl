@@ -3,7 +3,6 @@
 # the factor definitions
 export FluxModelsPose2Pose2, sampleFluxModelsPose2Pose2, PackedFluxModelsPose2Pose2
 # some utilities
-export flattenFactorModel
 export setShuffleAll!, setNaiveFracAll!
 
 
@@ -254,16 +253,6 @@ end
 
 ## Utilities
 
-# return dict that can be stored as JSON
-function flattenFactorModel(d::FluxModelsPose2Pose2)
-  packed = convert(PackedFluxModelsPose2Pose2, d)
-  retdict = Dict{Symbol, Any}()
-  retdict[:joyVelData] = packed.joyVelData
-  retdict[:naiveModel] = packed.naiveModel
-  retdict[:naiveFrac] = packed.naiveFrac
-  retdict[:modelWeightsAll] = packed.modelWeightsAll
-  return retdict
-end
 
 function setShuffleAll!(dfg::AbstractDFG, shuf::Bool)
   fs = lsf(dfg, FluxModelsPose2Pose2)
@@ -276,6 +265,7 @@ function setNaiveFracAll!(dfg::AbstractDFG, frac::Real)
   (x->getFactorType(dfg, x).naiveFrac[] = frac).(fs)
   nothing
 end
+
 
 
 #
