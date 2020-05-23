@@ -24,7 +24,7 @@ function solve_batch(total_meas::Integer)
     data_logpath = ENV["HOME"]*"/Documents/wafr/manhattan-batch-$(total_meas)-$(now())"
 
     # Create initial factor graph with specified logging path.
-    fg = LightDFG{SolverParams}(params=SolverParams(logpath=data_logpath))
+    fg = LightDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
 
     # Add initial variable with a prior measurement to anchor the graph.
     addVariable!(fg, :x0, Pose2)
