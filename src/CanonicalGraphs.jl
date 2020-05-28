@@ -98,12 +98,12 @@ function generateCanonicalFG_Circle(poses::Int=6;
     addFactor!(fg, [:x0; :l1], p2br, graphinit=graphinit)
   end
 
-  if !loopClosure || !exists(fg, :x*"$poses")
+  if !loopClosure || !exists(fg, Symbol("x$poses"))
     return fg
   end
   # add loop closure sighting
   p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-  addFactor!(fg, [:x*"$poses"; :l1], p2br, graphinit=graphinit)
+  addFactor!(fg, [Symbol("x$poses"); :l1], p2br, graphinit=graphinit)
 
   # return the new factor graph object
   return fg
