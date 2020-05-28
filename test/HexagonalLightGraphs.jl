@@ -5,7 +5,7 @@ using Test
 @testset "Test Hexagonal specifically with LightGraphsDFG..." begin
 
 # start with an empty factor graph object
-fg = LightDFG{SolverParams}(params=SolverParams())
+fg = LightDFG{SolverParams}(solverParams=SolverParams())
 
 # Add the first pose :x0
 x0 = addVariable!(fg, :x0, Pose2)

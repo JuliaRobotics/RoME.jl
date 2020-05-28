@@ -62,13 +62,30 @@ function (s::Pose2Point2BearingRange{<:Normal})(xi::AbstractVector{T}, lm::Abstr
 
   ex = lm[1] - (mx + xi[1])
   ey = lm[2] - (my + xi[2])
-  er = sqrt.(ex.^2 + ey.^2)
+  er = sqrt(ex^2 + ey^2)
 
   eθ = atan((my + xi[2]), (mx + xi[1])) - atan(lm[2], lm[1])
 
   res = [eθ, er]
 
   return res' * iΣ * res
+
+  # add to test
+  # f = Pose2Point2BearingRange(Normal(0.0,1), Normal(10.0,1))
+  # @test isapprox(f([0.,0,0], [10.,0]), 0, atol = 1e-9)
+  # @test isapprox(f([0,0,pi/2], [0.,10]), 0, atol = 1e-9)
+  #
+  # f = Pose2Point2BearingRange(Normal(pi/2,1), Normal(10.0,1))
+  # @test isapprox(f([0.,0,0], [0.,10]), 0, atol = 1e-9)
+  # @test isapprox(f([0,0,pi/2], [-10.,0]), 0, atol = 1e-9)
+  #
+  # f = Pose2Point2BearingRange(Normal(pi,1), Normal(10.0,1))
+  # @test isapprox(f([0.,0,0], [-10.,0]), 0, atol = 1e-9)
+  # @test isapprox(f([0,0,pi/2], [0.,-10]), 0, atol = 1e-9)
+  #
+  # f = Pose2Point2BearingRange(Normal(-pi/2,1), Normal(10.0,1))
+  # @test isapprox(f([0.,0,0], [0.,-10]), 0, atol = 1e-9)
+  # @test isapprox(f([0,0,pi/2], [10.,0]), 0, atol = 1e-9)
 
 end
 
