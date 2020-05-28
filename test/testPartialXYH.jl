@@ -1,7 +1,7 @@
 # test PartialPose3XYYaw
 
 using RoME
-using CoordinateTransformations
+using CoordinateTransformations, Rotations
 # Distributions, TransformUtils
 using Test
 
