@@ -194,7 +194,7 @@ end
 
 global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
-global qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
+global qq = convert(Rotations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
 wTx[2] = Translation(10.0, 0, 0) ∘ LinearMap(qq)
 
@@ -241,7 +241,7 @@ end
 
 global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
-global qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
+global qq = convert(Rotations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
 wTx[2] = Translation(0, 10.0, 0) ∘ LinearMap(qq)
 
@@ -290,7 +290,7 @@ end
 
 global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
-global qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
+global qq = convert(Rotations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
 wTx[2] = Translation(0, 0, 10.0) ∘ LinearMap(qq)
 
@@ -340,7 +340,7 @@ end
 
 global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
-global qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
+global qq = convert(Rotations.Quat, CoordinateTransformations.AngleAxis(pi/4,0,1.0,0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
 wTx[2] = Translation(0, 15.0, 10.0) ∘ LinearMap(qq)
 
@@ -394,7 +394,7 @@ end
 
 global wTx = Vector{AffineMap}(undef, 2)
 # different orientation, yaw
-global qq = convert(CoordinateTransformations.Quat, CoordinateTransformations.AngleAxis(pi/2,0,0,1.0))
+global qq = convert(Rotations.Quat, CoordinateTransformations.AngleAxis(pi/2,0,0,1.0))
 wTx[1] = Translation(0.0,0,0) ∘ LinearMap(qq)
 wTx[2] = Translation(10.0, 0, 0) ∘ LinearMap(qq)
 
