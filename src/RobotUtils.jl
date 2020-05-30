@@ -683,8 +683,16 @@ function get2DSamples(fg::G; #::Union{Symbol, S};
   return X,Y
 end
 
+"""
+    $SIGNATURES
 
-function getVariablesLabelsWithinRange(fg::AbstractDFG,
+List all variables that fall in numerical range `from`, `to`, and with prefix key as specified.
+
+Related
+
+DFG.getVariableLabelNumber, DFT.findFactorsBetweenNaive
+"""
+function listVariablesLabelsWithinRange(fg::AbstractDFG,
                                        regexKey::Regex=r"x";
                                        from::Int=0, to::Int=9999999999,
                                        minnei::Int=0)
@@ -714,6 +722,7 @@ function getVariablesLabelsWithinRange(fg::AbstractDFG,
   saids[mask]
 end
 
+@deprecate getVariablesLabelsWithinRange(fg::AbstractDFG,regexKey::Regex=r"x";from::Int=0, to::Int=9999999999,minnei::Int=0) listVariablesLabelsWithinRange(fg,regexKey,from=from,to=to,minnei=minnei)
 
 function get2DSampleMeans(fg::AbstractDFG,
                           regexKey::Regex=r"x";

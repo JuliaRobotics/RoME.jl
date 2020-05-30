@@ -1,4 +1,17 @@
 
+## Delete at end v0.6.x
+
+export nextPose
+
+# """
+#     $SIGNATURES
+#
+# Return a number increment on symbol.  Example :x2 -> :x3.
+# """
+# nextPose(sym::Symbol, identifier::Union{String, Char}=string(sym)[1]) = Symbol(string(identifier,parse(Int,string(sym)[2:end])+1))
+
+@deprecate nextPose(sym::Symbol, identifier::Union{String, Char}=string(sym)[1]) Symbol(string(sym)[1],DFG.getVariableLabelNumber(sym)+1)
+
 
 
 function addOdoFG!(slaml::SLAMWrapper, odo::Pose3Pose3;
