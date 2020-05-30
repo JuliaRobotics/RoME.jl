@@ -6,12 +6,6 @@ export getFactorMean
 export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extractDeltaOdo, resetFactor!
 export odomKDE
 
-"""
-    $SIGNATURES
-
-Return a number increment on symbol.  Example :x2 -> :x3.
-"""
-nextPose(sym::Symbol, identifier::Union{String, Char}=string(sym)[1]) = Symbol(string(identifier,parse(Int,string(sym)[2:end])+1))
 
 getFactorMean(fct::PriorPose2) = getFactorMean(fct.Z)
 getFactorMean(fct::Pose2Pose2) = getFactorMean(fct.z)

@@ -78,7 +78,6 @@ export
 
   # RobotUtils
   getRangeKDEMax2D,
-  nextPose,
   getLastPoses,
   setSolvableOldPoses!,
 
