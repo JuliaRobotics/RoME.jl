@@ -5,6 +5,7 @@ import IncrementalInference: getFactorMean
 export getFactorMean
 export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extractDeltaOdo, resetFactor!
 export odomKDE
+export assembleChordsDict
 
 
 getFactorMean(fct::PriorPose2) = getFactorMean(fct.Z)
@@ -138,3 +139,41 @@ function odomKDE(p1,dx,cov)
   end
   return manikde!(RES, Pose2)
 end
+
+"""
+    $SIGNATURES
+
+Calculate the relative chords between consecutive poses in the factor graph.
+Data structure is Dict{Symbol,Dict{Symbol,Tuple{Matrix,Matrix}}}.
+The two Matrix values are 3x100, with the first as shown in the attached screen capture.
+These values should be the relative transform from dict[:x0][:x1], or dict[:x0][:x2], or dict[:x0][:x2] etc for all poses up to some reasonable chord length.
+There are also two matrix values: the first is the relative transform based on measurements only, the second matrix is the same relative transform but according to the SLAM solution of any and all data being used.
+"""
+function assembleChordsDict(dfg::AbstractDFG,
+                            vsyms = ls(dfg, r"x\d") |> sortDFG;
+                            MAXADI = 10,
+                            lastPoseNum = getVariableLabelNumber(vsyms[end]),
+                            chords = Dict{Symbol,Dict{Symbol,Tuple}}()  )
+  #
+  # fsyms = [:x0x1f1; :x1x2f1]
+
+
+  @sync for from in vsyms[1:end-1]
+    SRT = getVariableLabelNumber(from)
+    chords[from] = Dict{Symbol,Tuple}()
+    maxadi = lastPoseNum - getVariableLabelNumber(from)
+    maxadi = MAXADI < maxadi ? MAXADI : maxadi
+    for adi in 1:maxadi
+      to = Symbol("x",getVariableLabelNumber(from)+adi)
+      tt = Threads.@spawn accumulateFactorChain(dfg, $from, $to)
+      @async begin
+        chords[$from][$to] = fetch(tt)
+      end
+    end
+  end
+
+  chords
+end
+
+
+#
