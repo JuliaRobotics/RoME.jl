@@ -22,14 +22,13 @@ jobs:
   allow_failures:
     - julia: nightly
     - arch: arm64
-    - name: "ALL MASTERS"
   include:
     - name: "ALL MASTERS"
       julia: 1.5
       script:
         - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
         - julia -e 'using Pkg; pkg"add DistributedFactorGraphs#master"; pkg"add IncrementalInference#master";'
-        - julia --check-bounds=yes -e 'using Pkg; Pkg.test("Caesar"; coverage=false)'
+        - julia --check-bounds=yes -e 'using Pkg; Pkg.test("RoME"; coverage=false)'
       after_success: skip
     - name: "ARM64"
       arch: arm64
