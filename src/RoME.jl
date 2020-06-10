@@ -35,6 +35,12 @@ export
   KDE,
   TU,
   AMP,
+  DFG,
+
+  # from DFG
+  loadDFG,
+  saveDFG,
+
   # RoME specific functions
   measureMeanDist,
   predictBodyBR,
