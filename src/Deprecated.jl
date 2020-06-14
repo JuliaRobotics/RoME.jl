@@ -57,8 +57,8 @@ function addposeFG!(slaml::SLAMWrapper,
   end
   slaml.lastposesym = nextn
 
-  addsubtype(fgl::FactorGraph, vprev, vnext, cc::IncrementalInference.FunctorPairwise) = addFactor!(fgl, [vprev;vnext], cc)
-  addsubtype(fgl::FactorGraph, vprev, vnext, cc::IncrementalInference.FunctorSingleton) = addFactor!(fgl, [vnext], cc)
+  addsubtype(fgl::AbstractDFG, vprev, vnext, cc::IncrementalInference.FunctorPairwise) = addFactor!(fgl, [vprev;vnext], cc)
+  addsubtype(fgl::AbstractDFG, vprev, vnext, cc::IncrementalInference.FunctorSingleton) = addFactor!(fgl, [vnext], cc)
 
   facts = Graphs.ExVertex[]
   PP = BallTreeDensity[]
@@ -466,17 +466,17 @@ function getNextLbl(fgl::AbstractDFG, chr)
 end
 
 
-function getLastPose(fgl::FactorGraph)
+function getLastPose(fgl::AbstractDFG)
   return getNextLbl(fgl, 'x')
 end
-getLastPose2D(fgl::FactorGraph) = getLastPose(fgl)
+getLastPose2D(fgl::AbstractDFG) = getLastPose(fgl)
 
 function getlastpose(slam::SLAMWrapper)
   error("getlastpose -- Not implemented yet")
 end
 
 
-function getLastLandm2D(fgl::FactorGraph)
+function getLastLandm2D(fgl::AbstractDFG)
   return getNextLbl(fgl, 'l')
 end
 

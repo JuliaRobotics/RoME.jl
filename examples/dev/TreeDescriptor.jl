@@ -12,7 +12,7 @@ end
 treelms = Dict{Int,TreeDescriptor}()
 
 # get the mean trajector index from sighing to this landmark
-function getLandmTrajIndxs(fgl::FactorGraph, lmlbl::String)
+function getLandmTrajIndxs(fgl::AbstractDFG, lmlbl::String)
   vlm = getVert(fgl,lmlbl)
   psoi = String[]
 
@@ -28,7 +28,7 @@ function getLandmTrajIndxs(fgl::FactorGraph, lmlbl::String)
 end
 
 # take mean of poses connected to this landmark's index numbers
-function getLandmMeanTrajIndx(fgl::FactorGraph, lmlbl::String)
+function getLandmMeanTrajIndx(fgl::AbstractDFG, lmlbl::String)
   psoi = getLandmTrajIndxs(fgl, lmlbl)
   idxs = Float64[]
   for ps in psoi
@@ -37,7 +37,7 @@ function getLandmMeanTrajIndx(fgl::FactorGraph, lmlbl::String)
   return Base.mean(idxs)
 end
 
-function getAllLandmMeanTrajIndx(fgl::FactorGraph, LBS::Array{String,1})
+function getAllLandmMeanTrajIndx(fgl::AbstractDFG, LBS::Array{String,1})
   MIDX = Float64[]
   for i in 1:length(LBS)
     push!(MIDX, getLandmMeanTrajIndx(fgl, LBS[i]) )
@@ -66,11 +66,11 @@ function getAllLandmNearByIndx(LB, X, Y, MIDX, nearidx;
   return nnh
 end
 
-function calcFeatDesc(fgl::FactorGraph, flbl::String, midx::Float64)
+function calcFeatDesc(fgl::AbstractDFG, flbl::String, midx::Float64)
   lm = getVert(fgl,flbl)
 end
 
-function calcLandmDescriptions!(fgl::FactorGraph, lmd::Dict{Int,TreeDescriptor})
+function calcLandmDescriptions!(fgl::AbstractDFG, lmd::Dict{Int,TreeDescriptor})
   X,Y,th,LB = get2DLandmMeans(fgl)
   getAllLandmNearByIndx(LB,X,Y)
   MIDX = getAllLandmMeanTrajIndx(fgl, LB)
