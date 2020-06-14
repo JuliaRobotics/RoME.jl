@@ -305,7 +305,7 @@ constraint factor are returned as a tuple.
 
 """
 function addOdoFG!(
-        fgl::FactorGraph,
+        fgl::AbstractDFG,
         odo::Pose2Pose2;
         N::Int=0,
         solvable::Int=1,
@@ -322,41 +322,20 @@ function addOdoFG!(
     return vnext, fact
 end
 
-# """
-#     $SIGNATURES
-#
-# Initialize an empty `::FactorGraph` object while initializing `sessionname`, `robotname`, and `cloudgraph`.
-# """
-# function initfg(;sessionname="NA",robotname="",username="",cloudgraph=nothing)
-#   # fgl = RoME.initfg(sessionname=sessionname)
-#   fgl = IIF.FactorGraph()
-#   fgl.sessionname = sessionname
-#   fgl.robotname = robotname
-#   fgl.username = username
-#   fgl.cg = cloudgraph
-#   return fgl
-# end
-# function initfg(;sessionname="NA")
-#   fgl = IIF.FactorGraph()
-#   fgl.sessionname=sessionname
-#   # fgl.robotname = ?
-#   # registerCallback!(fgl, RoME.getSample) # RoME.evalPotention
-#   return fgl
-# end
 
 """
     $(SIGNATURES)
 
 Initialize a factor graph object as Pose2, Pose3, or neither and returns variable and factor symbols as array.
 """
-function initFactorGraph!(fg::G;
+function initFactorGraph!(fg::AbstractDFG;
                           P0::Union{Array{Float64,2},Nothing}=nothing,
                           init::Union{Vector{Float64},Nothing}=nothing,
                           N::Int=100,
                           lbl::Symbol=:x0,
                           solvable::Int=1,
                           firstPoseType=Pose2,
-                          labels::Vector{Symbol}=Symbol[]) where G <: AbstractDFG
+                          labels::Vector{Symbol}=Symbol[])
   #
   nodesymbols = Symbol[]
   if firstPoseType == Pose2
@@ -382,7 +361,7 @@ function initFactorGraph!(fg::G;
 end
 
 
-function newLandm!(fg::FactorGraph, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
+function newLandm!(fg::AbstractDFG, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100, solvable::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
 
     vert=addVariable!(fg, Symbol(lm), Point2, N=N, solvable=solvable, labels=union(["LANDMARK";], labels))

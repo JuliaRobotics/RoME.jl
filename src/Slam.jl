@@ -24,7 +24,7 @@ DevNotes
 - TODO consolidate with SLAMWrapperLocal
 """
 mutable struct SLAMWrapper <: AbstractSLAM
-  fg::IncrementalInference.FactorGraph
+  fg::AbstractDFG
   tree::NothingUnion{IncrementalInference.BayesTree}
   lndmidx::Int
   lastposesym::Symbol
