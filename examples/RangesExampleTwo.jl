@@ -62,7 +62,7 @@ function landmsInRange(GTl::Dict{String, Vector{Float64}}, cur::Vector{Float64};
 	return inrange
 end
 
-function isInFG!(fgl::FactorGraph, lbl::Symbol; N=100, solvable=0)
+function isInFG!(fgl::AbstractDFG, lbl::Symbol; N=100, solvable=0)
 	v = nothing
 	if !haskey(fgl.IDs, lbl)
 		init = 300*randn(2,N)
@@ -73,7 +73,7 @@ function isInFG!(fgl::FactorGraph, lbl::Symbol; N=100, solvable=0)
 	v
 end
 
-function addLandmsOnPose!(fgl::FactorGraph, pose::Graphs.ExVertex, GTl::Dict{String, Float64};
+function addLandmsOnPose!(fgl::AbstractDFG, pose::Graphs.ExVertex, GTl::Dict{String, Float64};
 			solvable=0,N=100)
 	for gtl in GTl
 		println("addLandmsOnPose! -- adding $(gtl[1])")
@@ -85,7 +85,7 @@ function addLandmsOnPose!(fgl::FactorGraph, pose::Graphs.ExVertex, GTl::Dict{Str
 	nothing
 end
 
-function addNewPose!(fgl::FactorGraph,
+function addNewPose!(fgl::AbstractDFG,
                      from::Symbol,
                      lbl::Symbol,
                      GTp;
@@ -101,7 +101,7 @@ function addNewPose!(fgl::FactorGraph,
   getVert(fgl, lbl)
 end
 
-function drive(fgl::FactorGraph, GTp, GTl, from, to; N=100)
+function drive(fgl::AbstractDFG, GTp, GTl, from, to; N=100)
   v = addNewPose!(fgl, from, to, GTp, N=N)
   addLandmsOnPose!(fgl, v, landmsInRange(GTl, GTp[string(to)], lim=120.0), N=N )
   println("added landmark")
@@ -129,7 +129,7 @@ function drawQuadLandms(fgl;
 end
 
 
-function drawLandmMargOver(fgl::FactorGraph, lbl::String,
+function drawLandmMargOver(fgl::AbstractDFG, lbl::String,
 		file,
 		gtlayers;
 		w=30cm, h=20cm)
@@ -373,7 +373,7 @@ function drawIllustrations(GTl, GTp, folderloc)
 end
 
 
-function evaluateAccuracy(fgl::FactorGraph, GTp)
+function evaluateAccuracy(fgl::AbstractDFG, GTp)
   # get last pose
   xx,ll = ls(fg)
   maxPosition = 0
@@ -390,7 +390,7 @@ function evaluateAccuracy(fgl::FactorGraph, GTp)
   return postlikeli, norm(MaxPointError)
 end
 
-function evaluateAllAccuracy(fgl::FactorGraph, GTp, GTl)
+function evaluateAllAccuracy(fgl::AbstractDFG, GTp, GTl)
   xx,ll = ls(fg)
   LK = Float64[]
   PE = Float64[]

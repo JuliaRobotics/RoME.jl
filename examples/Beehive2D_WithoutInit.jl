@@ -28,7 +28,7 @@ function driveHex(fgl, posecount::Int)
 end
 
 
-function offsetHexLeg(fgl::FactorGraph, posecount::Int; direction=:right)
+function offsetHexLeg(fgl::AbstractDFG, posecount::Int; direction=:right)
     psym = Symbol("x$(posecount-1)")
     nsym = Symbol("x$(posecount)")
     posecount += 1
