@@ -174,7 +174,7 @@ function generateCanonicalFG_Hexagonal(;fg::AbstractDFG=initfg(),
     @warn "autoinit is deprecated, use graphinit instead"
     autoinit
   end
-  return generateCanonicalFG_Circle(6, graphinit=graphinit, landmark=true, loopClosure=true)
+  return generateCanonicalFG_Circle(6, graphinit=graphinit, landmark=true, loopClosure=true; fg=fg)
 end
 
 
