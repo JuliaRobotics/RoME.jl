@@ -37,7 +37,7 @@ end
 
 
 
-function selectFactorType(T1::Type{<:InferenceType}, T2::Type{<:InferenceType})
+function selectFactorType(T1::Type{<:FunctorInferenceType}, T2::Type{<:FunctorInferenceType})
   # initial hacky version
   if T1 == Pose2 && T2 == Pose2
     return Pose2Pose2
