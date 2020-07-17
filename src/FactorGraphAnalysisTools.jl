@@ -35,9 +35,16 @@ end
 
 
 
+## =============================================================================
+## Needs a home
+## =============================================================================
+
+getManifolds(vartype::Type{Pose2Pose2}) = getManifolds(Pose2)
+getManifolds(vartype::Type{Point2Point2}) = getManifolds(Point2)
+getManifolds(vartype::Type{Pose2Point2BearingRange}) = (:Circular, :Euclid)
 
 
-function selectFactorType(T1::Type{<:FunctorInferenceType}, T2::Type{<:FunctorInferenceType})
+function selectFactorType(T1::Type{<:InferenceVariable}, T2::Type{<:InferenceVariable})
   # initial hacky version
   if T1 == Pose2 && T2 == Pose2
     return Pose2Pose2
