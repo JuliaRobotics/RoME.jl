@@ -260,43 +260,11 @@ export
   PackedPartialPose3XYYaw,
   PartialPose3XYYawNH,
   PackedPartialPose3XYYawNH
-  # Point2DPoint2DRange,
-  # PackedPoint2DPoint2DRange,
-  # PackedPoint2DPoint2DRange,
-  # PackedPriorPoint2D,
-  # Pose2DPoint2DRangeDensity, # to be deprecated
-  # Point2DPoint2D, # deprecated
-  # Point2DPoint2DRange, # deprecated
-  # PriorPoint2D, # deprecated
-  # Pose2DPoint2DBearingRange, # begin deprecated
-  # Pose2DPoint2DBearing, # deprecated
-  # PriorPoint2D, # deprecated
-  # PackedPriorPoint2D # deprecated`
 
-
-# doesnt seem to work
-# @info "Setting IncrementalInference de-serialization namespace RoME"
-# setSerializationNamespace!("RoME" => RoME)
-# @info "done..."
-
-
-  # # solve with isam in pytslam
-  # doISAMSolve,
-  # drawCompPosesLandm,
-  #
-  # # Victoria Park data specific
-  # addLandmarksFactoGraph!,
-  # appendFactorGraph!,
-  # doBatchRun,
-  # rotateFeatsToWorld
 
 include("SpecialDefinitions.jl")
 
-include("BayesTracker.jl")
-
-include("SensorModels.jl")
-include("CameraModel.jl")
-
+## More variable types
 # 2D
 include("variables/Point2D.jl")
 include("variables/Pose2D.jl")
@@ -308,15 +276,18 @@ include("variables/Point3D.jl")
 include("variables/Pose3D.jl")
 
 
+## More factor types
+# RoME internal factors (FYI outside factors are easy, see Caesar documentation)
 include("factors/Point2D.jl")
+include("factors/Range2D.jl")
+include("factors/Bearing2D.jl")
+include("factors/BearingRange2D.jl")
 include("factors/Polar.jl")
 include("factors/PriorPose2.jl")
 include("factors/PartialPriorPose2.jl")
 include("factors/Pose2D.jl")
+include("factors/Pose2Point2.jl")
 include("factors/MutablePose2Pose2.jl")
-include("factors/Bearing2D.jl")
-include("factors/Range2D.jl")
-include("factors/BearingRange2D.jl")
 include("factors/DynPoint2D.jl")
 include("factors/DynPose2D.jl")
 include("factors/Point3D.jl")
@@ -325,28 +296,34 @@ include("factors/PartialPose3.jl")
 include("factors/MultipleFeaturesConstraint.jl")
 include("factors/InertialPose3.jl")
 
-include("Slam.jl")
+# tools that come and go
+include("TemporaryFunctionality.jl")
 
-include("RobotUtils.jl")
-
-include("SimulationUtils.jl")
-include("OdometryUtils.jl")
-
+# additional tools
 include("FactorGraphAnalysisTools.jl")
 
-include("RobotDataTypes.jl") #WheeledRobotUtils
+# tools related to robotics
+include("BayesTracker.jl")
+include("SensorModels.jl")
+include("CameraModel.jl")
+include("Slam.jl")
+include("RobotUtils.jl")
+include("SimulationUtils.jl")
+include("OdometryUtils.jl")
+include("RobotDataTypes.jl")
 include("NavigationSystem.jl")
-
 include("CanonicalGraphs.jl")
-
 include("g2oParser.jl")
-# include("dev/ISAMRemoteSolve.jl")
 
+
+# things on their way out
 include("Deprecated.jl")
 
+# optional tools
 using Requires
 
 function __init__()
+  # combining neural networks natively into the non-Gaussian  factor graph object
   @require Flux="587475ba-b771-5e3f-ad9e-33799f191a9c" begin
     @info "RoME is adding Flux related functionality."
     include("factors/flux/models/Pose2OdoNN_01.jl") # until a better way is found to deserialize

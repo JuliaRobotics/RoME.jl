@@ -26,14 +26,14 @@ function (pp2br::Pose2Point2)(res::Array{Float64},
                               userdata::FactorMetadata,
                               idx::Int,
                               meas::Tuple{Array{Float64,2}},
-                              xi::Array{Float64,2},
-                              lm::Array{Float64,2} )
+                              wXi::Array{Float64,2},
+                              wLj::Array{Float64,2} )
   #
 
-  wLi = SE2(xi[:,idx])*SE2([meas[1][:,idx];0.0])
-  res[1:2] .= lm[:,idx] .- se2vee(wLi)[1:2]
+  wLj_pred = SE2(wXi[:,idx])*SE2([meas[1][:,idx];0.0])
+  res[1:2] .= wLj[:,idx] .- se2vee(wLj_pred)[1:2]
 
-  res .*= res
+  res .^= 2
   res[1] += res[2]
   res[2] = 0.0
   return res[1]
