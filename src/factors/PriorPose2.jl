@@ -11,10 +11,13 @@ PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
 mutable struct PriorPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: IncrementalInference.SamplableBelief}
-    Z::T
-    PriorPose2{T}() where T = new{T}()
-    PriorPose2{T}(x::T) where {T <: IncrementalInference.SamplableBelief}  = new{T}(x)
+  Z::T
+  # empty constructor
+  PriorPose2{T}() where T = new{T}()
+  # regular constructor
+  PriorPose2{T}(x::T) where {T <: IncrementalInference.SamplableBelief}  = new{T}(x)
 end
+# convencience and default object helper
 PriorPose2(x::T) where {T <: IncrementalInference.SamplableBelief} = PriorPose2{T}(x)
 
 function getSample(p2::PriorPose2, N::Int=1)

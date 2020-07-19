@@ -1,7 +1,5 @@
 # Graph analysis tools and support calculation tools
 
-import IncrementalInference: selectFactorType, buildFactorDefault
-
 
 function rangeErrMaxPoint2(fgl1::AbstractDFG, id1, fgl2::AbstractDFG ,id2)
   mv1 = getKDEMax(getVertKDE(fgl1,id1))

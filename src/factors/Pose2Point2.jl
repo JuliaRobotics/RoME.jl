@@ -9,12 +9,17 @@ export Pose2Point2, PackedPose2Point2
 
 Bearing and Range constraint from a Pose2 to Point2 variable.
 """
-mutable struct Pose2Point2{T <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
+struct Pose2Point2{T <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
     Zij::T
+    # empty constructor
     Pose2Point2{T}() where {T} = new{T}()
+    # regular constructor
     Pose2Point2{T}(x1::T) where {T <: IIF.SamplableBelief} = new{T}(x1)
 end
-Pose2Point2(x1::T) where {T <: IIF.SamplableBelief} = Pose2Point2{T}(x1)
+# convenience and default constructor
+Pose2Point2(x1::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))) where {T <: IIF.SamplableBelief} = Pose2Point2{T}(x1)
+
+# prescribed sampling function
 function getSample(pp2br::Pose2Point2, N::Int=1)
   smpls = zeros(2, N)
   smpls[1:2,:] .= rand(pp2br.Zij, N)

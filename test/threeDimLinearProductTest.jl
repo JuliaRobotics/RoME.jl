@@ -87,7 +87,7 @@ end
 @testset "Adding Pose3Pose3 to graph..." begin
 
 global odo = SE3([10;0;0], Quaternion(0))
-global pts0X2 = projectParticles(getVal(fg,:x1), MvNormal(veeEuler(odo), odoCov) )
+# global pts0X2 = projectParticles(getVal(fg,:x1), MvNormal(veeEuler(odo), odoCov) )
 global odoconstr = Pose3Pose3( MvNormal(veeEuler(odo), odoCov) )
 global v2 = addVariable!(fg,:x2, Pose3, N=N) # pts0X2
 addFactor!(fg,[:x1;:x2],odoconstr)

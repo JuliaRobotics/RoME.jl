@@ -136,8 +136,6 @@ export
   Point2,
   Point2Point2,
   PackedPoint2Point2,
-  Point2Point2WorldBearing,
-  PackedPoint2Point2WorldBearing,
   Point2Point2Range,
   PackedPoint2Point2Range,
   PriorPoint2,
@@ -211,14 +209,6 @@ export
   Pose3,
   Point3,
   PriorPoint3,
-  PriorPose3,
-  PackedPriorPose3,
-  Pose3Pose3,
-  PackedPose3Pose3,
-  projectParticles,
-  ⊕,
-  Pose3Pose3NH,
-  PackedPose3Pose3NH,
 
   # partial Pose3
   PriorPose3ZRP,
@@ -291,6 +281,7 @@ include("factors/MutablePose2Pose2.jl")
 include("factors/DynPoint2D.jl")
 include("factors/DynPose2D.jl")
 include("factors/Point3D.jl")
+include("factors/Pose3D.jl")
 include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")
 include("factors/MultipleFeaturesConstraint.jl")
