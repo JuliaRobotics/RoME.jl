@@ -127,6 +127,9 @@ export
   # keep
   cameraResidual!,
 
+  # Projection
+  projectCartesian,
+
   # Point2D
   Point2,
   Point2Point2,
