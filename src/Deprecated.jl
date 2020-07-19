@@ -1,4 +1,192 @@
 
+##==============================================================================
+## Delete at end v0.7.x
+
+import IncrementalInference: buildFactorDefault
+
+buildFactorDefault(::Type{Pose2Pose2}) = Pose2Pose2()
+buildFactorDefault(::Type{Pose2Point2}) = Pose2Point2()
+buildFactorDefault(::Type{Pose2Point2BearingRange}) = Pose2Point2BearingRange()
+buildFactorDefault(::Type{Point2Point2}) = Point2Point2()
+
+
+export Pose3Pose3NH, PackedPose3Pose3NH
+
+# -----------------------
+
+"""
+$(TYPEDEF)
+
+Obsolete, see issue https://github.com/JuliaRobotics/IncrementalInference.jl/issues/237.
+"""
+mutable struct Pose3Pose3NH <: IncrementalInference.FunctorPairwiseNH
+    Zij::Distribution
+    nullhypothesis::Distributions.Categorical
+    reuse::Vector{PP3REUSE}
+    Pose3Pose3NH() = new()
+    Pose3Pose3NH(s::Distribution, vh::Vector{Float64}) = new(s, Distributions.Categorical(vh), fill(PP3REUSE(), Threads.nthreads() )  )
+    # Pose3Pose3NH(s::SE3, c::Array{Float64,2}, vh::Float64) = new(s,c, Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
+    # Pose3Pose3NH(st::FloatInt, sr::Float64;vh::Float64=1.0) = new(SE3(0), [[st*Matrix{Float64}(LinearAlgebra.I, 3,3);zeros(3,3)];[zeros(3);sr*Matrix{Float64}(LinearAlgebra.I, 3,3)]], Distributions.Categorical([(1.0-vh);vh]),SE3(0),SE3(0),SE3(0))
+end
+function getSample(pp3::Pose3Pose3NH, N::Int=1)
+  return (rand(pp3.Zij, N), )
+end
+function (pp3::Pose3Pose3NH)(res::Array{Float64},
+            userdata,
+            idx::Int,
+            meas::Tuple,
+            wXi::Array{Float64,2},
+            wXj::Array{Float64,2}  )
+  #
+  reusethrid = pp3.reuse[Threads.threadid()]
+  fastpose3pose3residual!(reusethrid, res, idx, meas, wXi, wXj)
+  nothing
+end
+
+
+
+"""
+$(TYPEDEF)
+
+Obsolete, see issue https://github.com/JuliaRobotics/IncrementalInference.jl/issues/237.
+"""
+mutable struct PackedPose3Pose3NH <: IncrementalInference.PackedInferenceType
+  vecZij::Vector{Float64} # 3translations, 3rotation
+  vecCov::Vector{Float64}
+  dimc::Int
+  nullhypothesis::Vector{Float64}
+  PackedPose3Pose3NH() = new()
+  PackedPose3Pose3NH(x1::Vector{Float64},x2::Vector{Float64},x3::Int,x4::Vector{Float64}) = new(x1, x2, x3, x4)
+end
+
+function convert(::Type{Pose3Pose3NH}, d::PackedPose3Pose3NH)
+  qu = Quaternion(d.vecZij[4], d.vecZij[5:7])
+  se3val = SE3(d.vecZij[1:3], qu)
+  cov = reshapeVec2Mat(d.vecCov, d.dimc)
+  return Pose3Pose3NH( MvNormal(veeEuler(se3val), cov), d.nullhypothesis )
+end
+function convert(::Type{PackedPose3Pose3NH}, d::Pose3Pose3NH)
+  val = d.Zij.μ
+  se3val = SE3(val[1:3], Euler(val[4:6]...))
+  v1 = veeQuaternion(se3val)
+  v2 = d.Zij.Σ.mat
+  return PackedPose3Pose3NH(v1[:], v2[:], size(v2,1), d.nullhypothesis.p )
+end
+
+
+
+
+export Point2Point2WorldBearing, PackedPoint2Point2WorldBearing
+export PriorPoint2DensityNH, PackedPriorPoint2DensityNH
+
+
+"""
+$(TYPEDEF)
+
+TODO DEPRECATE
+"""
+mutable struct Point2Point2WorldBearing{T} <: IncrementalInference.FunctorPairwise where {T <: IIF.SamplableBelief}
+    Z::T
+    rangemodel::Rayleigh
+    # zDim::Tuple{Int, Int}
+    Point2Point2WorldBearing{T}() where T = new{T}()
+    Point2Point2WorldBearing{T}(x::T) where {T <: IIF.SamplableBelief} = new{T}(x, Rayleigh(100))
+end
+function Point2Point2WorldBearing(x::T) where {T <: IIF.SamplableBelief}
+  @warn "Point2Point2WorldBearing is being deprecated, use Point2, Point2Polar or Point2BearingRange instead."
+  Point2Point2WorldBearing{T}(x)
+end
+
+function getSample(pp2::Point2Point2WorldBearing, N::Int=1)
+  sp = Array{Float64,2}(undef, 2,N)
+  sp[1,:] = rand(pp2.Z,N)
+  sp[2,:] = rand(pp2.rangemodel,N)
+  return (sp, )
+end
+function (pp2r::Point2Point2WorldBearing)(
+          res::Array{Float64},
+          userdata::FactorMetadata,
+          idx::Int,
+          meas::Tuple,
+          pi::Array{Float64,2},
+          pj::Array{Float64,2} )
+  #
+  # noisy bearing measurement
+  z, r = meas[1][1,idx], meas[1][2,idx]
+  dx, dy = pj[1,idx]-pi[1,idx], pj[2,idx]-pi[2,idx]
+  res[1] = z - atan(dy,dx)
+  res[2] = r - norm([dx; dy])
+  nothing
+end
+
+
+
+
+"""
+$(TYPEDEF)
+
+Serialization type for `Point2Point2WorldBearing`.
+"""
+mutable struct PackedPoint2Point2WorldBearing  <: IncrementalInference.PackedInferenceType
+    str::String
+    # NOTE Not storing rangemodel which may cause inconsistencies if the implementation parameters change
+    PackedPoint2Point2WorldBearing() = new()
+    PackedPoint2Point2WorldBearing(x::String) = new(x)
+end
+function convert(::Type{PackedPoint2Point2WorldBearing}, d::Point2Point2WorldBearing)
+  return PackedPoint2Point2WorldBearing( string(d.Z) )
+end
+function convert(::Type{Point2Point2WorldBearing}, d::PackedPoint2Point2WorldBearing)
+  return Point2Point2WorldBearing( extractdistribution(d.str) )
+end
+
+"""
+$(TYPEDEF)
+
+Will be deprecated, use `addFactor!(.., nullhypo=)` instead (work in progress)
+"""
+mutable struct PriorPoint2DensityNH <: IncrementalInference.FunctorSingletonNH
+  belief::BallTreeDensity
+  nullhypothesis::Distributions.Categorical
+  PriorPoint2DensityNH() = new()
+  PriorPoint2DensityNH(belief, p::Distributions.Categorical) = new(belief, p)
+  PriorPoint2DensityNH(belief, p::Vector{Float64}) = new(belief, Distributions.Categorical(p))
+end
+function getSample(p2::PriorPoint2DensityNH, N::Int=1)
+  return (rand(p2.belief, N), )
+end
+
+"""
+$(TYPEDEF)
+
+Will be deprecated, use `addFactor!(.., nullhypo=)` instead (work in progress)
+"""
+mutable struct PackedPriorPoint2DensityNH <: IncrementalInference.PackedInferenceType
+    rpts::Vector{Float64} # 0rotations, 1translation in each column
+    rbw::Vector{Float64}
+    dims::Int
+    nh::Vector{Float64}
+    PackedPriorPoint2DensityNH() = new()
+    PackedPriorPoint2DensityNH(x1,x2,x3, x4) = new(x1, x2, x3, x4)
+end
+function convert(::Type{PriorPoint2DensityNH}, d::PackedPriorPoint2DensityNH)
+  return PriorPoint2DensityNH(
+            manikde!(reshapeVec2Mat(d.rpts, d.dims), d.rbw, (:Euclid, :Euclid)),
+            Distributions.Categorical(d.nh)  )
+end
+function convert(::Type{PackedPriorPoint2DensityNH}, d::PriorPoint2DensityNH)
+  return PackedPriorPoint2DensityNH( getPoints(d.belief)[:], getBW(d.belief)[:,1], Ndim(d.belief), d.nullhypothesis.p )
+end
+
+
+
+function PriorPoint2D(mu, cov, W)
+  @warn "PriorPoint2D(mu, cov, W) is deprecated, use PriorPoint{T}(T(...)) instead -- e.g. PriorPoint2{MvNormal}(MvNormal(...) or any other Distributions.Distribution type instead."
+  PriorPoint2{MvNormal{Float64}}(MvNormal(mu, cov))
+end
+
+
+##==============================================================================
 ## Delete at end v0.6.x
 
 export nextPose
@@ -482,9 +670,51 @@ end
 
 
 function basicFactorGraphExample(::Type{Pose2}=Pose2; addlandmark::Bool=true)
-  @warn "basicFactorGraphExample is deprecated, use loadCanonicalFG_TwoPoseOdo instead"
-  loadCanonicalFG_TwoPoseOdo(addlandmark=addlandmark)
+  @warn "basicFactorGraphExample is deprecated, use generateCanonicalFG_TwoPoseOdo instead"
+  generateCanonicalFG_TwoPoseOdo(addlandmark=addlandmark)
 end
+
+
+export projectParticles, ⊕
+
+
+
+
+# TODO -- stronger type safety required here
+# Project all particles (columns) Xval with Z, that is for all  SE3(Xval[:,i])*Z
+function projectParticles(Xval::Array{Float64,2}, Z::Distribution)
+  # TODO optimize for more speed with threads and better memory management
+  r,c = size(Xval)
+  RES = zeros(r,c) #*cz
+
+  ent, x = SE3(0), SE3(0)
+  ENT = rand( Z, c )
+  # ENT = rand( MvNormal(zeros(6), Cov), c )
+  j=1
+  # for j in 1:cz
+  for i in 1:c
+    x.R = TransformUtils.convert(SO3,Euler(Xval[4,i],Xval[5,i],Xval[6,i]))
+    x.t = Xval[1:3,i]
+    ent.R =  TransformUtils.convert(SO3, Euler(ENT[4:6,i]...)) # so3
+    ent.t = ENT[1:3,i]
+    # newval = Z*ent
+    # res = x*newval
+    res = x*ent
+    RES[1:r,i*j] = veeEuler(res)
+  end
+  # end
+  #
+  return RES
+end
+
+function ⊕(Xpts::Array{Float64,2}, z::Pose3Pose3)
+  @warn "⊕ use together with projectParticles is being replaced by approxConv.  The use of ⊕ will be revived in the future."
+  projectParticles(Xpts, z.Zij)
+end
+function ⊕(Xvert::Graphs.ExVertex, z::Pose3Pose3)
+  ⊕(getVal(Xvert), z)
+end
+
 
 
 # Project all particles (columns) Xval with Z, that is for all  SE3(Xval[:,i])*Z

@@ -18,10 +18,13 @@ Prior belief on any Polar related variable.
 mutable struct PriorPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.FunctorSingleton
   Zrange::T1
   Zangle::T2
+  # empty constructor
   PriorPolar{T1,T2}() where {T1,T2} = new{T1,T2}()
+  # regular constructor
   PriorPolar{T1,T2}(zr::T1, za::T2) where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = new{T1,T2}(zr,za)
 end
-PriorPolar(zr::T1, za::T2) where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = PriorPolar{T1,T2}(zr,za)
+# convenience and default object helper
+PriorPolar(zr::T1=Normal(1,1), za::T2=Normal(0,0.1)) where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = PriorPolar{T1,T2}(zr,za)
 
 function getSample(pp2i::PriorPolar, N::Int=1)
   sps = zeros(2,N)
@@ -38,10 +41,13 @@ Linear offset factor of `IIF.SamplableBelief` between two `Polar` variables.
 mutable struct PolarPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.FunctorPairwise
   Zrange::T1
   Zangle::T2
+  # empty constructor
   PolarPolar{T1,T2}() where {T1,T2} = new{T1,T2}()
+  # regular constructor
   PolarPolar{T1,T2}(zr::T1, za::T2) where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = new{T1,T2}(zr,za)
 end
-PolarPolar(zr::T1, za::T2) where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = PolarPolar{T1,T2}(zr,za)
+# convenience and default object helper
+PolarPolar(zr::T1=Normal(1,1), za::T2=Normal(0,0.1)) where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = PolarPolar{T1,T2}(zr,za)
 
 function getSample(pp2i::PolarPolar, N::Int=1)
   sps = zeros(2,N)

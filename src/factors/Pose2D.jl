@@ -10,10 +10,13 @@ Pose3Pose3, Point2Point2, MutablePose2Pose2Gaussian, DynPose2, InertialPose3
 """
 struct Pose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: IIF.SamplableBelief}
   z::T
+  # empty constructor
   Pose2Pose2{T}() where {T <: IIF.SamplableBelief} = new{T}()
+  # regular constructor
   Pose2Pose2{T}(z1::T) where {T <: IIF.SamplableBelief} = new{T}(z1)
 end
-Pose2Pose2(z::T) where {T <: IIF.SamplableBelief} = Pose2Pose2{T}(z)
+# convenience and default constructor
+Pose2Pose2(z::T=MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.0001]))) where {T <: IIF.SamplableBelief} = Pose2Pose2{T}(z)
 
 getSample(s::Pose2Pose2{<:IIF.SamplableBelief}, N::Int=1) = (rand(s.z,N), )
 function (s::Pose2Pose2{<:IIF.SamplableBelief})(
