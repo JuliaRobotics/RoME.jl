@@ -163,7 +163,7 @@ plotKDE(fg, sort(ls(fg,r"l")), dims=[3;4], title="velocities")
 #
 # Partial prior belief on Z, Roll, and Pitch of a `Pose3`.
 # """
-# mutable struct PriorPose3ZRP{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+# mutable struct PriorPose3ZRP{T1,T2} <: IncrementalInference.AbstractPrior where {T1 <: SamplableBelief, T2 <: SamplableBelief}
 #   z::T1
 #   rp::T2
 #   partial::Tuple

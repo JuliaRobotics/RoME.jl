@@ -14,7 +14,7 @@ global N = 100
 global fg = initfg()
 
 addVariable!(fg, :x0, Point2)
-addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), Matrix{Float64}(LinearAlgebra.I, 2,2))))
+addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), diagm([1.0;1]))) )
 
 ensureAllInitialized!(fg)
 
@@ -27,7 +27,7 @@ addFactor!(fg, [:x0;:x1], pp2)
 
 
 addVariable!(fg, :x2, Point2)
-addFactor!(fg, [:x2], PriorPoint2(MvNormal([0.0;-100.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
+addFactor!(fg, [:x2], PriorPoint2(MvNormal([0.0;-100.0], diagm([1.0;1]) ) ))
 
 
 global pp2 = Point2Point2WorldBearing(Normal(3pi/4,0.1))

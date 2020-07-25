@@ -34,7 +34,7 @@ $(TYPEDEF)
 
 two sets of three feature sightings and a body to camera lever arm transform
 """
-mutable struct MultipleFeatures2D <: IncrementalInference.FunctorPairwiseMinimize
+mutable struct MultipleFeatures2D <: IncrementalInference.AbstractRelativeFactorMinimize
   # treat these as angles positive X->Y, X forward, Y left and Z up
   xir1::Normal
   xir2::Normal

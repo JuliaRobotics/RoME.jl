@@ -4,7 +4,7 @@ $(TYPEDEF)
 
 Constrain only the yaw angle of a Pose2, generally used for Gyrocompass, Magnetometer, Dual-GNSS heading type measurements, or any other similar construct.
 """
-mutable struct PartialPriorYawPose2{T} <: IIF.FunctorSingleton  where {T <: IIF.SamplableBelief}
+mutable struct PartialPriorYawPose2{T} <: IIF.AbstractPrior  where {T <: IIF.SamplableBelief}
     Z::T
     partial::Tuple{Int}
     PartialPriorYawPose2{T}() where T = new{T}()

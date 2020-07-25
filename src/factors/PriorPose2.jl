@@ -10,7 +10,7 @@ Example:
 PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
-mutable struct PriorPose2{T} <: IncrementalInference.FunctorSingleton  where {T <: IncrementalInference.SamplableBelief}
+mutable struct PriorPose2{T} <: IncrementalInference.AbstractPrior  where {T <: IncrementalInference.SamplableBelief}
   Z::T
   # empty constructor
   PriorPose2{T}() where T = new{T}()

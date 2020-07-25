@@ -10,7 +10,7 @@ using Test
 
 testfiles = [
 "testPoint2Point2WorldBearing.jl";  # FIXME, deprecate and replace
-"testBeehive2D_CliqByCliq.jl"; # special case debugging
+"testBeehive2D_CliqByCliq.jl";      # special case debugging
 "testhigherdimroots.jl";
 "testManifoldsPose2Equivalent.jl";
 "testDidsonFunctions.jl";

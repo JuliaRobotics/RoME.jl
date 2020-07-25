@@ -146,7 +146,7 @@ $(TYPEDEF)
 
 Inertial Odometry version of preintegration procedure and used as a factor between InertialPose3 types for inertial navigation in factor graphs.
 """
-mutable struct InertialPose3 <: FunctorPairwise #RoME.BetweenPoses
+mutable struct InertialPose3 <: AbstractRelativeFactor #RoME.BetweenPoses
   # Zij is entropy of veeLie15, pioc is preintegral measurements, pido is compensation gradients.
   Zij::Distribution
   pioc::InertialPose3Container
@@ -297,7 +297,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PriorInertialPose3 <: IncrementalInference.FunctorSingleton
+mutable struct PriorInertialPose3 <: IncrementalInference.AbstractPrior
   Zi::Distribution
 end
 function getSample(prip3::PriorInertialPose3, N::Int=1)

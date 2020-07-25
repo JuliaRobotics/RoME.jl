@@ -4,7 +4,7 @@ using Test
 
 import IncrementalInference: getSample
 
-mutable struct NorthSouthPartial{T} <: FunctorSingleton
+mutable struct NorthSouthPartial{T} <: AbstractPrior
   Z::T
   partial::Tuple{Int}
   NorthSouthPartial{D}() where D = new{D}()

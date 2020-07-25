@@ -8,7 +8,7 @@ export MutablePose2Pose2Gaussian, PackedMutablePose2Pose2Gaussian
 
 Specialized Pose2Pose2 factor type (Gaussian), which allows for rapid accumulation of odometry information as a branch on the factor graph.
 """
-mutable struct MutablePose2Pose2Gaussian  <: IIF.FunctorPairwise
+mutable struct MutablePose2Pose2Gaussian  <: IIF.AbstractRelativeFactor
   Zij::MvNormal
   timestamp::DateTime
   MutablePose2Pose2Gaussian(Zij::MvNormal=MvNormal(zeros(3),Matrix(Diagonal([0.01; 0.01; 0.001].^2))), timestamp::DateTime=now()) = new(Zij, timestamp)

@@ -5,7 +5,7 @@ $(TYPEDEF)
 
 Direction observation information of a `Point3` variable.
 """
-mutable struct PriorPoint3{T} <: IncrementalInference.FunctorSingleton where {T <: IIF.SamplableBelief}
+mutable struct PriorPoint3{T} <: IncrementalInference.AbstractPrior where {T <: IIF.SamplableBelief}
   Z::T
   # W::Array{Float64,1} # TODO, deprecate the weight parameter
   PriorPoint3{T}() where T = new()

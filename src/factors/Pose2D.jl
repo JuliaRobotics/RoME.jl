@@ -8,7 +8,7 @@ Related
 
 Pose3Pose3, Point2Point2, MutablePose2Pose2Gaussian, DynPose2, InertialPose3
 """
-struct Pose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: IIF.SamplableBelief}
+struct Pose2Pose2{T} <: IncrementalInference.AbstractRelativeFactor where {T <: IIF.SamplableBelief}
   z::T
   # empty constructor
   Pose2Pose2{T}() where {T <: IIF.SamplableBelief} = new{T}()
