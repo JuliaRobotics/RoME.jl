@@ -41,7 +41,7 @@ end
 
 global v1 = addVariable!(fg, :x1, Pose3, N=N)
 global initPosePrior = PriorPose3( MvNormal( zeros(6), initCov) )
-global f1  = addFactor!(fg,[v1], initPosePrior, autoinit=true)
+global f1  = addFactor!(fg,[v1], initPosePrior, graphinit=true)
 
 # ls(fg, :x1)
 

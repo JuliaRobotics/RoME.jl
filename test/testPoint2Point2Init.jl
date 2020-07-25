@@ -12,14 +12,14 @@ N=100
 fg = initfg()
 
 addVariable!(fg, :x0, Point2, N=N)
-addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], Matrix{Float64}(LinearAlgebra.I, 2,2))), autoinit=false)
+addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], Matrix{Float64}(LinearAlgebra.I, 2,2))), graphinit=false)
 
 addVariable!(fg, :x1, Point2, N=N)
-addFactor!(fg, [:x1], PriorPoint2(MvNormal([0.0;100.0], Matrix{Float64}(LinearAlgebra.I, 2,2))), autoinit=false)
+addFactor!(fg, [:x1], PriorPoint2(MvNormal([0.0;100.0], Matrix{Float64}(LinearAlgebra.I, 2,2))), graphinit=false)
 
 addVariable!(fg, :l1, Point2, N=N)
-addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)), autoinit=false)
-addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)), autoinit=false)
+addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)), graphinit=false)
+addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)), graphinit=false)
 
 
 # tree = wipeBuildNewTree!(fg)

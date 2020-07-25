@@ -9,8 +9,8 @@ using RoME
 
 @testset "sanity check on Hex example" begin
 
-# autoinit=false, regression since DFG v0.6.0 IIF v0.9.0 -- on tree init, issue IIF#602
-fg = generateCanonicalFG_Hexagonal(autoinit=false)
+# graphinit=false, regression since DFG v0.6.0 IIF v0.9.0 -- on tree init, issue IIF#602
+fg = generateCanonicalFG_Hexagonal(graphinit=false)
 
 
 getSolverParams(fg).drawtree = false

@@ -120,7 +120,7 @@ global fg = initfg();
 
 addVariable!(fg, :x1, DynPoint2(ut=0))
 global pp = DynPoint2VelocityPrior(MvNormal(pμ,pσ))
-addFactor!(fg, [:x1;], pp, autoinit=false)
+addFactor!(fg, [:x1;], pp, graphinit=false)
 
 ensureAllInitialized!(fg)
 
@@ -128,7 +128,7 @@ addVariable!(fg, :x2, DynPoint2(ut=1_000_000))
 global dpμ = [10.0;0;0;0];
 global dpσ = Matrix(Diagonal([1.0;1;0.5;0.01].^2))
 global vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
-addFactor!(fg, [:x1,:x2], vp, autoinit=false)
+addFactor!(fg, [:x1,:x2], vp, graphinit=false)
 
 # writeGraphPdf(fg)
 

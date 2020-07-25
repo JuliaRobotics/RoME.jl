@@ -29,12 +29,12 @@ posecount += 1
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
 addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0],
-                                           Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=false )
+                                           Matrix(Diagonal([0.1;0.1;0.05].^2))) ), graphinit=false )
 
 # Add landmarks with Bearing range measurements
 addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x0; :l1], p2br, autoinit=false )
+addFactor!(fg, [:x0; :l1], p2br, graphinit=false )
 
 
 
@@ -44,7 +44,7 @@ posecount = driveHex(fg, posecount)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
 
 
 
@@ -55,7 +55,7 @@ posecount = offsetHexLeg(fg, posecount, direction=:right)
 # Add landmarks with Bearing range measurements
 addVariable!(fg, :l2, Point2, labels=[:LANDMARK])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, graphinit=false )
 
 
 posecount = driveHex(fg, posecount, steps=5)
@@ -63,7 +63,7 @@ posecount = driveHex(fg, posecount, steps=5)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, graphinit=false )
 
 
 

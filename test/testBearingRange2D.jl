@@ -81,7 +81,7 @@ global fg = initfg()
 
 #add pose with partial constraint
 addVariable!(fg, :x0, Pose2)
-addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))), autoinit=false)
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))), graphinit=false)
 # force particular initialization
 setVal!(fg, :x0, zeros(3,1))
 
@@ -99,7 +99,7 @@ setVal!(fg, :l1, li)
 
 # Add bearing range measurement between pose and landmark
 global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-addFactor!(fg, [:x0; :l1], p2br, autoinit=false)
+addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 
 # there should be just one (the bearingrange) factor connected to :l1
 @test length(ls(fg, :l1)) == 1
@@ -127,7 +127,7 @@ global fg = initfg()
 
 # Add landmark
 addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
-addFactor!(fg, [:l1], PriorPoint2(MvNormal([20.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))),  autoinit=false ) # could be IIF.Prior
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([20.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))),  graphinit=false ) # could be IIF.Prior
 global li = zeros(2,1); li[1,1] = 20.0;
 setVal!(fg, :l1, li)
 
@@ -138,7 +138,7 @@ setVal!(fg, :x0, zeros(3,1))
 
 # Add bearing range measurement between pose and landmark
 global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-addFactor!(fg, [:x0; :l1], p2br, autoinit=false)
+addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 
 # there should be just one (the bearingrange) factor connected to :l1
 @test length(ls(fg, :x0)) == 1

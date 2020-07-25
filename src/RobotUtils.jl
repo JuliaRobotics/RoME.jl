@@ -126,7 +126,7 @@ function predictVariableByFactor(dfg::AbstractDFG,
       manualinit!(tfg,var,getKDE(varnode))
     end
   end
-  addFactor!(tfg, prevars, fct, autoinit=false)
+  addFactor!(tfg, prevars, fct, graphinit=false)
   fctsym = ls(tfg, targetsym)
 
   pts, infd = predictbelief(tfg, targetsym, fctsym)
@@ -274,7 +274,7 @@ function addOdoFG!(fg::G,
     v = addVariable!(fg, n, Pose2, N=N, solvable=solvable, labels=[labels;"POSE"])
     # v = addVariable!(fg, n, XnextInit, cov, N=N, solvable=solvable, labels=labels)
     pp = Pose2Pose2(MvNormal(DX, cov)) #[prev;v],
-    f = addFactor!(fg, [prev;v], pp, solvable=solvable, autoinit=true )
+    f = addFactor!(fg, [prev;v], pp, solvable=solvable, graphinit=true )
     infor = inv(cov^2)
     # addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
     return v, f
@@ -288,7 +288,7 @@ function addOdoFG!(fgl::G,
   #
   vprev, X, nextn = getLastPose(fgl)
   vnext = addVariable!(fgl, nextn, Pose3, solvable=solvable, labels=labels)
-  fact = addFactor!(fgl, [vprev;vnext], Z, autoinit=true)
+  fact = addFactor!(fgl, [vprev;vnext], Z, graphinit=true)
 
   return vnext, fact
 
@@ -317,7 +317,7 @@ function addOdoFG!(
     end
     # vnext = addVariable!(fgl, nextn, X⊕odo, ones(1,1), N=N, solvable=solvable, labels=labels)
     vnext = addVariable!(fgl, nextn, Pose2, N=N, solvable=solvable, labels=labels)
-    fact = addFactor!(fgl, [vprev;vnext], odo, autoinit=true)
+    fact = addFactor!(fgl, [vprev;vnext], odo, graphinit=true)
 
     return vnext, fact
 end
@@ -342,7 +342,7 @@ function initFactorGraph!(fg::AbstractDFG;
       init = init!=nothing ? init : zeros(3)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.001]))
       # init = vectoarr2(init)
-      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,solvable=solvable,labels=labels )
+      addVariable!(fg,lbl,Pose2,N=N,graphinit=true,solvable=solvable,labels=labels )
       push!(nodesymbols, lbl)
       # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, labels=labels)
       fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), solvable=solvable, labels=labels) #[v1],
@@ -351,7 +351,7 @@ function initFactorGraph!(fg::AbstractDFG;
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.03;0.001;0.001;0.001]))
-      addVariable!(fg,lbl,Pose2,N=N,autoinit=true,solvable=solvable,labels=labels )
+      addVariable!(fg,lbl,Pose2,N=N,graphinit=true,solvable=solvable,labels=labels )
       push!(nodesymbols, lbl)
       # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, labels=labels)
       fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), solvable=solvable, labels=labels) #[v1],
@@ -410,7 +410,7 @@ function addBRFG!(fg::G,
 
   pbr = Pose2Point2BearingRange(Normal(br[1], cov[1,1]), Normal(br[2],  cov[2,2]))  #{Normal, Normal}
   @show vps, vlm
-  f = addFactor!(fg, [vps;vlm], pbr, solvable=solvable, autoinit=true ) #[vps;vlm],
+  f = addFactor!(fg, [vps;vlm], pbr, solvable=solvable, graphinit=true ) #[vps;vlm],
 
   # only used for max likelihood unimodal tests.
   u, P = pol2cart(br[[2;1]], diag(cov))
@@ -430,7 +430,7 @@ function addMMBRFG!(fg::G,
 
     pbr = Pose2Point2BearingRange(Normal(br[1],cov[1,1]),  Normal(br[2],cov[2,2]))
     syms = Symbol.([pose;lm...])
-    f = addFactor!(fg, syms, pbr, multihypo=[1.0; w...], solvable=solvable, autoinit=true )
+    f = addFactor!(fg, syms, pbr, multihypo=[1.0; w...], solvable=solvable, graphinit=true )
     return f
 end
 

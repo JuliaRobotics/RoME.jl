@@ -118,7 +118,7 @@ function driveHex(fgl, posecount::Int; steps::Int=5)
         nsym = Symbol("x$(i+1)")
         addVariable!(fgl, nsym, Pose2)
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-        addFactor!(fgl, [psym;nsym], pp, autoinit=false )
+        addFactor!(fgl, [psym;nsym], pp, graphinit=false )
     end
 
     return posecount
@@ -136,7 +136,7 @@ function offsetHexLeg(dfg::G, posecount::Int; direction=:right) where G <: Abstr
     elseif direction == :left
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
     end
-    addFactor!(dfg, [psym; nsym], pp, autoinit=false )
+    addFactor!(dfg, [psym; nsym], pp, graphinit=false )
     return posecount
 end
 

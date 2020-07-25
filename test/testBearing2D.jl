@@ -16,15 +16,15 @@ addVariable!(fg, :l1, Point2)
 addVariable!(fg, :l2, Point2)
 addVariable!(fg, :l3, Point2)
 
-addFactor!(fg, [:l1], PriorPoint2(MvNormal([10.0;1.0],lmp_noise)), autoinit=false)
-addFactor!(fg, [:l2], PriorPoint2(MvNormal([10.0+sqrt(3)/2;-0.5],lmp_noise)), autoinit=false)
-addFactor!(fg, [:l3], PriorPoint2(MvNormal([10.0-sqrt(3)/2;-0.5],lmp_noise)), autoinit=false)
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([10.0;1.0],lmp_noise)), graphinit=false)
+addFactor!(fg, [:l2], PriorPoint2(MvNormal([10.0+sqrt(3)/2;-0.5],lmp_noise)), graphinit=false)
+addFactor!(fg, [:l3], PriorPoint2(MvNormal([10.0-sqrt(3)/2;-0.5],lmp_noise)), graphinit=false)
 
 # pose
 addVariable!(fg, :x1, Pose2)
-addFactor!(fg, [:x1;:l1], Pose2Point2Bearing(Normal(pi/2,0.05)), autoinit=false)
-addFactor!(fg, [:x1;:l2], Pose2Point2Bearing(Normal(-pi/6,0.05)), autoinit=false)
-addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(-pi+pi/6,0.05)), autoinit=false)
+addFactor!(fg, [:x1;:l1], Pose2Point2Bearing(Normal(pi/2,0.05)), graphinit=false)
+addFactor!(fg, [:x1;:l2], Pose2Point2Bearing(Normal(-pi/6,0.05)), graphinit=false)
+addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(-pi+pi/6,0.05)), graphinit=false)
 
 
 # manualinit!(fg, :x1, [30.0*randn(2,100);randn(1,100)])
@@ -90,15 +90,15 @@ addVariable!(fg, :l1, Point2)
 addVariable!(fg, :l2, Point2)
 addVariable!(fg, :l3, Point2)
 
-addFactor!(fg, [:l1], PriorPoint2(MvNormal([-10.0;1.0-10.0],lmp_noise)), autoinit=false)
-addFactor!(fg, [:l2], PriorPoint2(MvNormal([-10.0+sqrt(3)/2;-0.5-10.0],lmp_noise)), autoinit=false)
-addFactor!(fg, [:l3], PriorPoint2(MvNormal([-10.0-sqrt(3)/2;-0.5-10.0],lmp_noise)), autoinit=false)
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([-10.0;1.0-10.0],lmp_noise)), graphinit=false)
+addFactor!(fg, [:l2], PriorPoint2(MvNormal([-10.0+sqrt(3)/2;-0.5-10.0],lmp_noise)), graphinit=false)
+addFactor!(fg, [:l3], PriorPoint2(MvNormal([-10.0-sqrt(3)/2;-0.5-10.0],lmp_noise)), graphinit=false)
 
 # pose
 addVariable!(fg, :x1, Pose2)
-addFactor!(fg, [:x1;:l1], Pose2Point2Bearing(Normal(pi/2,0.05)), autoinit=false)
-addFactor!(fg, [:x1;:l2], Pose2Point2Bearing(Normal(-pi/6,0.05)), autoinit=false)
-addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(-pi+pi/6,0.05)), autoinit=false)
+addFactor!(fg, [:x1;:l1], Pose2Point2Bearing(Normal(pi/2,0.05)), graphinit=false)
+addFactor!(fg, [:x1;:l2], Pose2Point2Bearing(Normal(-pi/6,0.05)), graphinit=false)
+addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(-pi+pi/6,0.05)), graphinit=false)
 
 
 manualinit!(fg, :x1, [0.01*randn(2,100);-randn(1,100)])
