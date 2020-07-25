@@ -112,8 +112,8 @@ addFactor!(fg,[:x3;:x1],odoc3, nullhypo=0.5)
 global X1pts = approxConv(fg, :x3x1f1, :x1, N=N)
 global X2pts = approxConv(fg, :x3x1f1, :x3, N=N)
 
-global p1 = kde!(X1pts)
-global p2 = kde!(X2pts)
+global p1 = manikde!(X1pts, Pose3)
+global p2 = manikde!(X2pts, Pose3)
 
 end
 
@@ -124,17 +124,20 @@ global tstdtdir = dirname(@__FILE__)
 global X1ptst = readdlm(joinpath(tstdtdir, "X1ptst.csv"),',')
 global X2ptst = readdlm(joinpath(tstdtdir, "X2ptst.csv"),',')
 
-global p1t = kde!(X1ptst)
-global p2t = kde!(X2ptst)
+global p1t = manikde!(X1ptst, Pose3)
+global p2t = manikde!(X2ptst, Pose3)
 
 # plotKDE([p2t;p2],c=["red";"blue"],dims=[1;2],levels=3)
 # kld(marginal(p1,[2]), marginal(p1t,[2]), method=:unscented)
 
-global t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
-global t2 = minimum([abs(kld(p2, p2t)[1]) ; abs(kld(p2t, p2)[1])])
+global t1 = mmd(X1ptst, X1pts, AMP.SE3_Manifold, size(X1ptst,2), size(X1pts,2), bw=[0.001;])
+global t2 = mmd(X2ptst, X2pts, AMP.SE3_Manifold, size(X1ptst,2), size(X1pts,2), bw=[0.001;])
+# TODO Change to mmd
+# global t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
+# global t2 = minimum([abs(kld(p2, p2t)[1]) ; abs(kld(p2t, p2)[1])])
 
-@test t1 < 80.0
-@test t2 < 80.0
+@test t1 < 0.5
+@test t2 < 0.5
 
 end
 
