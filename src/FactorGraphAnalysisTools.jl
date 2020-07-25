@@ -1,4 +1,4 @@
-# Graph analysis tools
+# Graph analysis tools and support calculation tools
 
 
 function rangeErrMaxPoint2(fgl1::AbstractDFG, id1, fgl2::AbstractDFG ,id2)
@@ -30,3 +30,9 @@ function rangeCompAllPoses(
   end
   return ranges
 end
+
+
+
+
+
+#

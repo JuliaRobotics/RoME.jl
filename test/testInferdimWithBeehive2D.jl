@@ -351,13 +351,6 @@ getVariableInferredDim(sfg,:x7)
 
 
 
-cliq = hist[11][8][4].cliq
-put!(getData(cliq).initUpChannel, :upsolved)
-
-take!(getData(cliq).initUpChannel)
-
-stuff = sandboxCliqResolveStep(tree,:x6,8)
-
 
 
 
