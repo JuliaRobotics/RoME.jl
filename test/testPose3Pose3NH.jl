@@ -49,7 +49,7 @@ ensureAllInitialized!(fg)
 
 end
 
-@testset "Ensure vertex initialized properly" begin
+@testset "Ensure variables initialized properly" begin
 
 # start with to tight an initialization
 global muX1 = Statistics.mean(getVal(fg,:x1),dims=2)
@@ -96,7 +96,6 @@ global X3ptsMean = Statistics.mean(X3pts,dims=2)
 
 
 tree,smt,hist = solveTree!(fg)
-# tree = batchSolve!(fg, treeinit=true)
 
 end
 
