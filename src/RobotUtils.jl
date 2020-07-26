@@ -342,19 +342,19 @@ function initFactorGraph!(fg::AbstractDFG;
       init = init!=nothing ? init : zeros(3)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.001]))
       # init = vectoarr2(init)
-      addVariable!(fg,lbl,Pose2,N=N,graphinit=true,solvable=solvable,labels=labels )
+      addVariable!(fg,lbl,Pose2,N=N, solvable=solvable, tags=labels )
       push!(nodesymbols, lbl)
       # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), solvable=solvable, labels=labels) #[v1],
+      fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), solvable=solvable, tags=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   if firstPoseType == Pose3
       init = init!=nothing ? init : zeros(6)
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.03;0.001;0.001;0.001]))
-      addVariable!(fg,lbl,Pose2,N=N,graphinit=true,solvable=solvable,labels=labels )
+      addVariable!(fg,lbl,Pose2,N=N,solvable=solvable,tags=labels )
       push!(nodesymbols, lbl)
       # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, labels=labels)
-      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), solvable=solvable, labels=labels) #[v1],
+      fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), solvable=solvable, tags=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
   return nodesymbols
