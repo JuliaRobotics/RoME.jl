@@ -267,8 +267,8 @@ function addOdoFG!(slaml::SLAMWrapper, odo::Pose3Pose3;
   # vprev, X, nextn = getLastPose(fgl)
   npnum = parse(Int,string(slaml.lastposesym)[2:end]) + 1
   nextn = Symbol("x$(npnum)")
-  vnext = addVariable!(slaml.fg, nextn, Pose2(labels=["POSE";]), N=N, solvable=solvable)
-  # vnext = addVariable!(slaml.fg, nextn, getVal(vprev) ⊕ odo, N=N, solvable=solvable, labels=["POSE"])
+  vnext = addVariable!(slaml.fg, nextn, Pose2(tags=["POSE";]), N=N, solvable=solvable)
+  # vnext = addVariable!(slaml.fg, nextn, getVal(vprev) ⊕ odo, N=N, solvable=solvable, tags=["POSE"])
   slaml.lastposesym = nextn
   fact = addFactor!(slaml.fg, [vprev;vnext], odo)
 
@@ -295,7 +295,7 @@ function addposeFG!(slaml::SLAMWrapper,
   vnext = nothing
   if !haskey(slaml.fg.IDs, nextn)
     vnext = addVariable!(slaml.fg, nextn, Pose2, N=N, solvable=solvable, tags=[:POSE])
-    # vnext = addVariable!(slaml.fg, nextn, getVal(vprev), N=N, solvable=solvable, labels=["POSE"])
+    # vnext = addVariable!(slaml.fg, nextn, getVal(vprev), N=N, solvable=solvable, tags=["POSE"])
   else
     vnext = getVariable(slaml.fg, nextn) # as optimization, assuming we already have latest vnest in slaml.fg
   end

@@ -58,7 +58,7 @@ addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0],
                                            Matrix(Diagonal([0.1;0.1;0.05].^2))) ), graphinit=false )
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
+addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x0; :l1], p2br, graphinit=false )
 
@@ -286,7 +286,7 @@ getVariableInferredDim(fg, :l1)
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l2, Point2, labels=[:LANDMARK;])
+addVariable!(fg, :l2, Point2, tags=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, graphinit=false )
 

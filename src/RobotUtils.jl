@@ -271,8 +271,8 @@ function addOdoFG!(fg::G,
         XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
     end
 
-    v = addVariable!(fg, n, Pose2, N=N, solvable=solvable, labels=[labels;"POSE"])
-    # v = addVariable!(fg, n, XnextInit, cov, N=N, solvable=solvable, labels=labels)
+    v = addVariable!(fg, n, Pose2, N=N, solvable=solvable, tags=[labels;"POSE"])
+    # v = addVariable!(fg, n, XnextInit, cov, N=N, solvable=solvable, tags=labels)
     pp = Pose2Pose2(MvNormal(DX, cov)) #[prev;v],
     f = addFactor!(fg, [prev;v], pp, solvable=solvable, graphinit=true )
     infor = inv(cov^2)
@@ -287,13 +287,13 @@ function addOdoFG!(fgl::G,
                    labels::Vector{<:AbstractString}=String[]  ) where {G <: AbstractDFG}
   #
   vprev, X, nextn = getLastPose(fgl)
-  vnext = addVariable!(fgl, nextn, Pose3, solvable=solvable, labels=labels)
+  vnext = addVariable!(fgl, nextn, Pose3, solvable=solvable, tags=labels)
   fact = addFactor!(fgl, [vprev;vnext], Z, graphinit=true)
 
   return vnext, fact
 
   # error("addOdoFG!( , ::Pose3Pose3, ) not currently usable, there were breaking changes. Work in Progress")
-  # addOdoFG(fg, n, DX, cov, N=N, solvable=solvable, labels=labels)
+  # addOdoFG(fg, n, DX, cov, N=N, solvable=solvable, tags=labels)
 end
 
 """
@@ -315,8 +315,8 @@ function addOdoFG!(
     if N==0
       N = size(X,2)
     end
-    # vnext = addVariable!(fgl, nextn, X⊕odo, ones(1,1), N=N, solvable=solvable, labels=labels)
-    vnext = addVariable!(fgl, nextn, Pose2, N=N, solvable=solvable, labels=labels)
+    # vnext = addVariable!(fgl, nextn, X⊕odo, ones(1,1), N=N, solvable=solvable, tags=labels)
+    vnext = addVariable!(fgl, nextn, Pose2, N=N, solvable=solvable, tags=labels)
     fact = addFactor!(fgl, [vprev;vnext], odo, graphinit=true)
 
     return vnext, fact
@@ -344,7 +344,7 @@ function initFactorGraph!(fg::AbstractDFG;
       # init = vectoarr2(init)
       addVariable!(fg,lbl,Pose2,N=N, solvable=solvable, tags=labels )
       push!(nodesymbols, lbl)
-      # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, labels=labels)
+      # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, tags=labels)
       fctVert = addFactor!(fg, [lbl;], PriorPose2(MvNormal(init, P0)), solvable=solvable, tags=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
@@ -353,7 +353,7 @@ function initFactorGraph!(fg::AbstractDFG;
       P0 = P0!=nothing ? P0 : Matrix(Diagonal([0.03;0.03;0.03;0.001;0.001;0.001]))
       addVariable!(fg,lbl,Pose2,N=N,solvable=solvable,tags=labels )
       push!(nodesymbols, lbl)
-      # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, labels=labels)
+      # v1 = addVariable!(fg, lbl, init, P0, N=N, solvable=solvable, tags=labels)
       fctVert = addFactor!(fg, [lbl;], PriorPose3(MvNormal(init, P0)), solvable=solvable, tags=labels) #[v1],
       push!(nodesymbols, Symbol(fctVert.label))
   end
@@ -364,9 +364,9 @@ end
 function newLandm!(fg::AbstractDFG, lm::T, wPos::Array{Float64,2}, sig::Array{Float64,2};
                   N::Int=100, solvable::Int=1, labels::Vector{T}=String[]) where {T <: AbstractString}
 
-    vert=addVariable!(fg, Symbol(lm), Point2, N=N, solvable=solvable, labels=union(["LANDMARK";], labels))
+    vert=addVariable!(fg, Symbol(lm), Point2, N=N, solvable=solvable, tags=union(["LANDMARK";], labels))
     # TODO -- need to confirm this function is updating the correct memory location. v should be pointing into graph
-    # vert=addVariable!(fg, Symbol(lm), wPos, sig, N=N, solvable=solvable, labels=labels)
+    # vert=addVariable!(fg, Symbol(lm), wPos, sig, N=N, solvable=solvable, tags=labels)
 
     vert.attributes["age"] = 0
     vert.attributes["maxage"] = 0
@@ -460,7 +460,7 @@ function projNewLandm!(fg::G,
     vps = getVert(fg, pose)
 
     lmPts = projNewLandmPoints(vps, br, cov)
-    vlm = newLandm!(fg, lm, lmPts, cov, N=N, solvable=solvable, labels=labels) # cov should not be required here
+    vlm = newLandm!(fg, lm, lmPts, cov, N=N, solvable=solvable, tags=labels) # cov should not be required here
     if addfactor
       fbr = addBRFG!(fg, pose, lm, br, cov, solvable=solvable)
       return vlm, fbr
