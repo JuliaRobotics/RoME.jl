@@ -6,7 +6,7 @@ using Test
 # import  IncrementalInference: getSample
 
 
-mutable struct RotationTest <: IncrementalInference.FunctorPairwise
+mutable struct RotationTest <: IncrementalInference.AbstractRelativeFactor
   z::MvNormal
 end
 

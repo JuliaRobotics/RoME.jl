@@ -19,7 +19,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct LinearRangeBearingElevation <: FunctorPairwiseMinimize
+mutable struct LinearRangeBearingElevation <: AbstractRelativeFactorMinimize
   range::Normal
   bearing::Normal
   elev::Uniform

@@ -51,7 +51,7 @@ for i in 0:5
 end
 
 # Add node linking initial pose with a bearing range measurement landmark
-addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
+addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1], p2br)
 

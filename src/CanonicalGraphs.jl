@@ -93,7 +93,7 @@ function generateCanonicalFG_Circle(poses::Int=6;
   end
   if !exists(fg, :l1)
     # Add node linking initial pose with a bearing range measurement landmark
-    addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
+    addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
     p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
     addFactor!(fg, [:x0; :l1], p2br, graphinit=graphinit)
   end
@@ -118,7 +118,7 @@ function driveHex(fgl, posecount::Int; steps::Int=5)
         nsym = Symbol("x$(i+1)")
         addVariable!(fgl, nsym, Pose2)
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-        addFactor!(fgl, [psym;nsym], pp, autoinit=false )
+        addFactor!(fgl, [psym;nsym], pp, graphinit=false )
     end
 
     return posecount
@@ -136,7 +136,7 @@ function offsetHexLeg(dfg::G, posecount::Int; direction=:right) where G <: Abstr
     elseif direction == :left
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
     end
-    addFactor!(dfg, [psym; nsym], pp, autoinit=false )
+    addFactor!(dfg, [psym; nsym], pp, graphinit=false )
     return posecount
 end
 

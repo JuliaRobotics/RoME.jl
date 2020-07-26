@@ -21,7 +21,7 @@ function driveHex(fgl, posecount::Int)
         nsym = Symbol("x$(i+1)")
         addVariable!(fgl, nsym, Pose2)
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-        addFactor!(fgl, [psym;nsym], pp, autoinit=true )
+        addFactor!(fgl, [psym;nsym], pp, graphinit=true )
     end
 
     return posecount
@@ -39,7 +39,7 @@ function offsetHexLeg(fgl::AbstractDFG, posecount::Int; direction=:right)
     elseif direction == :left
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
     end
-    addFactor!(fgl, [psym; nsym], pp, autoinit=true )
+    addFactor!(fgl, [psym; nsym], pp, graphinit=true )
     return posecount
 end
 
@@ -59,12 +59,12 @@ posecount += 1
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
 addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0],
-                                           Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=true )
+                                           Matrix(Diagonal([0.1;0.1;0.05].^2))) ), graphinit=true )
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, tags=["LANDMARK"])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x0; :l1], p2br, autoinit=true )
+addFactor!(fg, [:x0; :l1], p2br, graphinit=true )
 
 
 
@@ -74,7 +74,7 @@ posecount = driveHex(fg, posecount)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=true )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=true )
 
 
 writeGraphPdf(fg, show=true)
@@ -100,16 +100,16 @@ tree = batchSolve!(fg, treeinit=true, drawpdf=true, show=true)
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l2, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l2, Point2, tags=["LANDMARK"])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, graphinit=false )
 
 
 posecount = driveHex(fg, posecount)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, graphinit=false )
 
 writeGraphPdf(fg)
 
@@ -133,16 +133,16 @@ Gadfly.draw(Gadfly.SVG("/tmp/test2.svg"),pl)  # or PNG(...)
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l3, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l3, Point2, tags=["LANDMARK"])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br, graphinit=false )
 
 
 posecount = driveHex(fg, posecount)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, autoinit=true )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, graphinit=true )
 
 
 writeGraphPdf(fg)

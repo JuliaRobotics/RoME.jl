@@ -5,7 +5,7 @@
 """
 $(TYPEDEF)
 """
-mutable struct DynPose2VelocityPrior{T1,T2} <: IncrementalInference.FunctorSingleton where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief}
+mutable struct DynPose2VelocityPrior{T1,T2} <: IncrementalInference.AbstractPrior where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief}
   Zpose::T1
   Zvel::T2
   DynPose2VelocityPrior{T1,T2}() where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = new{T1,T2}()
@@ -19,7 +19,7 @@ getSample(dp2v::DynPose2VelocityPrior{T1,T2}, N::Int=1) where {T1 <: IIF.Samplab
 """
 $(TYPEDEF)
 """
-mutable struct VelPose2VelPose2{T1,T2} <: IncrementalInference.FunctorPairwiseMinimize where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief}
+mutable struct VelPose2VelPose2{T1,T2} <: IncrementalInference.AbstractRelativeFactorMinimize where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief}
   Zpose::Pose2Pose2{T1} #Zpose::T1
   Zvel::T2
   reuseres::Vector{Vector{Float64}}
@@ -62,7 +62,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct DynPose2Pose2{T} <: IncrementalInference.FunctorPairwise where {T <: IIF.SamplableBelief}
+mutable struct DynPose2Pose2{T} <: IncrementalInference.AbstractRelativeFactor where {T <: IIF.SamplableBelief}
   Zpose::Pose2Pose2{T} #Zpose::T1
   # reuseres::Vector{Float64}
   partial::Tuple{Int,Int,Int}

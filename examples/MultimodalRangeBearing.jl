@@ -3,7 +3,7 @@ using RoME, Distributions
 
 import IncrementalInference: getSample
 
-mutable struct NorthSouthPartial{T} <: FunctorSingleton
+mutable struct NorthSouthPartial{T} <: AbstractPrior
   Z::T
   partial::Tuple{Int}
   NorthSouthPartial() = new()
@@ -17,8 +17,8 @@ fg = initfg(sessionname="MULTIMODAL_2D_TUTORIAL")
 
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
-addVariable!(fg, :l2, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, tags=["LANDMARK"])
+addVariable!(fg, :l2, Point2, tags=["LANDMARK"])
 
 addFactor!(fg, [:l1], Prior(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 addFactor!(fg, [:l2], Prior(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
@@ -66,6 +66,6 @@ X0pts = getPoints(X0)
 # for i in 0:5
 #   psym = Symbol("x$i")
 #   nsym = Symbol("x$(i+1)")
-#   addVariable!(fg, nsym, Pose2, labels=["POSE"])
+#   addVariable!(fg, nsym, Pose2, tags=["POSE"])
 #   addFactor!(fg, [psym;nsym], Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2)))))
 # end

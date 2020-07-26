@@ -114,13 +114,13 @@ addVariable!(fg, :x1, Pose2())
 addFactor!(fg,
            [:x0],
            PriorPose2(MvNormal(zeros(3), Matrix(Diagonal([0.01;0.01;1.0].^2)))),
-           autoinit=false )
+           graphinit=false )
 #
 
 addFactor!(fg,
            [:x0;:x1],
            Pose2Pose2(MvNormal([1.0;0;0], Matrix(Diagonal([0.01;0.01;0.01].^2)))),
-           autoinit=false )
+           graphinit=false )
 #
 
 solveTree!(fg)

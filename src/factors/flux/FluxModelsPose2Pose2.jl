@@ -16,7 +16,7 @@ import Base: convert
 import IncrementalInference: getSample, calcZDim
 
 
-struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: FunctorPairwise
+struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: AbstractRelativeFactor
   allPredModels::Vector{P}
   joyVelData::D
   naiveModel::M

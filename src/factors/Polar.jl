@@ -15,7 +15,7 @@ end
 
 Prior belief on any Polar related variable.
 """
-mutable struct PriorPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.FunctorSingleton
+mutable struct PriorPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.AbstractPrior
   Zrange::T1
   Zangle::T2
   # empty constructor
@@ -38,7 +38,7 @@ end
 
 Linear offset factor of `IIF.SamplableBelief` between two `Polar` variables.
 """
-mutable struct PolarPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.FunctorPairwise
+mutable struct PolarPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.AbstractRelativeFactor
   Zrange::T1
   Zangle::T2
   # empty constructor

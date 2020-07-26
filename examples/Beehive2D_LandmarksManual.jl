@@ -21,7 +21,7 @@ function driveHex(fgl, posecount::Int; steps::Int=5)
         nsym = Symbol("x$(i+1)")
         addVariable!(fgl, nsym, Pose2)
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-        addFactor!(fgl, [psym;nsym], pp, autoinit=false )
+        addFactor!(fgl, [psym;nsym], pp, graphinit=false )
     end
 
     return posecount
@@ -39,7 +39,7 @@ function offsetHexLeg(dfg::G, posecount::Int; direction=:right) where G <: Abstr
     elseif direction == :left
         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
     end
-    addFactor!(dfg, [psym; nsym], pp, autoinit=false )
+    addFactor!(dfg, [psym; nsym], pp, graphinit=false )
     return posecount
 end
 
@@ -60,12 +60,12 @@ posecount += 1
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
 addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0],
-                                           Matrix(Diagonal([0.1;0.1;0.05].^2))) ), autoinit=false )
+                                           Matrix(Diagonal([0.1;0.1;0.05].^2))) ), graphinit=false )
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, labels=[:LANDMARK;])
+addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x0; :l1], p2br, autoinit=false )
+addFactor!(fg, [:x0; :l1], p2br, graphinit=false )
 
 
 
@@ -75,7 +75,7 @@ posecount = driveHex(fg, posecount)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
 
 
 # writeGraphPdf(fg,engine="neato")
@@ -105,9 +105,9 @@ drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l2, Point2, labels=[:LANDMARK])
+addVariable!(fg, :l2, Point2, tags=[:LANDMARK])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, graphinit=false )
 
 
 posecount = driveHex(fg, posecount, steps=5)
@@ -116,7 +116,7 @@ posecount = driveHex(fg, posecount, steps=5)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, graphinit=false )
 
 
 
@@ -143,7 +143,7 @@ plotTreeProductUp(fg,tree,:x13,:x13)
 #
 # # Add landmarks with Bearing range measurements
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, autoinit=false )
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, graphinit=false )
 #
 
 ## hex 3
@@ -151,9 +151,9 @@ plotTreeProductUp(fg,tree,:x13,:x13)
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l3, Point2, labels=[:LANDMARK])
+addVariable!(fg, :l3, Point2, tags=[:LANDMARK])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br, graphinit=false )
 
 
 posecount = driveHex(fg, posecount)
@@ -184,25 +184,25 @@ drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /
 # Add landmarks with Bearing range measurements
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, graphinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x18; :l1], p2br2, autoinit=false )
+addFactor!(fg, [:x18; :l1], p2br2, graphinit=false )
 
 
 
 
 # new sighting
 
-addVariable!(fg, :l0, Point2, labels=[:LANDMARK])
+addVariable!(fg, :l0, Point2, tags=[:LANDMARK])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x5; :l0], p2br, autoinit=false )
+addFactor!(fg, [:x5; :l0], p2br, graphinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x12; :l0], p2br2, autoinit=false )
+addFactor!(fg, [:x12; :l0], p2br2, graphinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x19; :l0], p2br2, autoinit=false )
+addFactor!(fg, [:x19; :l0], p2br2, graphinit=false )
 
 
 
@@ -228,9 +228,9 @@ posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l4, Point2, labels=[:LANDMARK])
+addVariable!(fg, :l4, Point2, tags=[:LANDMARK])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l4], p2br, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l4], p2br, graphinit=false )
 
 
 
@@ -257,13 +257,13 @@ drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); @async run(`evince /t
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x27; :l4], p2br2, autoinit=false )
+addFactor!(fg, [:x27; :l4], p2br2, graphinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x25; :l2], p2br2, autoinit=false )
+addFactor!(fg, [:x25; :l2], p2br2, graphinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x26; :l0], p2br2, autoinit=false )
+addFactor!(fg, [:x26; :l0], p2br2, graphinit=false )
 
 
 
@@ -289,9 +289,9 @@ ls(fg, :l4)
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l5, Point2, labels=[:LANDMARK])
+addVariable!(fg, :l5, Point2, tags=[:LANDMARK])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l5], p2br, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l5], p2br, graphinit=false )
 
 
 posecount = driveHex(fg, posecount)
@@ -317,7 +317,7 @@ ls(fg, :l5)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x34; :l5], p2br2, autoinit=false )
+addFactor!(fg, [:x34; :l5], p2br2, graphinit=false )
 
 
 
@@ -325,13 +325,13 @@ addFactor!(fg, [:x34; :l5], p2br2, autoinit=false )
 
 # THIS IS WRONG
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x4; :l5], p2br2, autoinit=false )
+addFactor!(fg, [:x4; :l5], p2br2, graphinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x32; :l3], p2br2, autoinit=false )
+addFactor!(fg, [:x32; :l3], p2br2, graphinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x33; :l0], p2br2, autoinit=false )
+addFactor!(fg, [:x33; :l0], p2br2, graphinit=false )
 
 
 
@@ -355,22 +355,22 @@ drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /
 posecount = offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l6, Point2, labels=[:LANDMARK])
+addVariable!(fg, :l6, Point2, tags=[:LANDMARK])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br, graphinit=false )
 
 
 posecount = driveHex(fg, posecount)
 
 # # Add landmarks with Bearing range measurements
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br2, autoinit=false )
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br2, graphinit=false )
 #
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [:x11; :l6], p2br2, autoinit=false )
+# addFactor!(fg, [:x11; :l6], p2br2, graphinit=false )
 #
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
+# addFactor!(fg, [:x39; :l4], p2br2, graphinit=false )
 
 
 
@@ -392,16 +392,16 @@ ls(fg, :x19)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x40; :l0], p2br2, autoinit=false )
+addFactor!(fg, [:x40; :l0], p2br2, graphinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br2, autoinit=false )
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br2, graphinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x11; :l6], p2br2, autoinit=false )
+addFactor!(fg, [:x11; :l6], p2br2, graphinit=false )
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x39; :l4], p2br2, autoinit=false )
+addFactor!(fg, [:x39; :l4], p2br2, graphinit=false )
 
 
 
@@ -426,11 +426,11 @@ posecount = driveHex(fg, posecount)
 
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l7, Point2, labels=[:LANDMARK])
+addVariable!(fg, :l7, Point2, tags=[:LANDMARK])
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x49; :l7], p2br2, autoinit=false )
+addFactor!(fg, [:x49; :l7], p2br2, graphinit=false )
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x2; :l7], p2br2, autoinit=false )
+addFactor!(fg, [:x2; :l7], p2br2, graphinit=false )
 
 
 
@@ -480,28 +480,28 @@ drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince 
 
 
 ## add sightings
-addVariable!(fg, :l8, Point2, labels=[:LANDMARK])
+addVariable!(fg, :l8, Point2, tags=[:LANDMARK])
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x2; :l8], p2br2, autoinit=false )
+addFactor!(fg, [:x2; :l8], p2br2, graphinit=false )
 
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x49; :l8], p2br2, autoinit=false )
+addFactor!(fg, [:x49; :l8], p2br2, graphinit=false )
 
 
 
 ## more resightings
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x47; :l5], p2br2, autoinit=false )
+addFactor!(fg, [:x47; :l5], p2br2, graphinit=false )
 
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x48; :l6], p2br2, autoinit=false )
+addFactor!(fg, [:x48; :l6], p2br2, graphinit=false )
 
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x55; :l6], p2br2, autoinit=false )
+addFactor!(fg, [:x55; :l6], p2br2, graphinit=false )
 
 
 
@@ -530,7 +530,7 @@ posecount = driveHex(fg, posecount)
 
 # # Add landmarks with Bearing range measurements
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
 
 
 
@@ -551,7 +551,7 @@ posecount = driveHex(fg, posecount)
 
 # # Add landmarks with Bearing range measurements
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, autoinit=false )
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
 
 
 

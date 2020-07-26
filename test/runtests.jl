@@ -9,8 +9,9 @@ using Test
 # "testG2oParser.jl";  ]
 
 testfiles = [
+"testPose3Pose3NH.jl";
 "testPoint2Point2WorldBearing.jl";  # FIXME, deprecate and replace
-"testBeehive2D_CliqByCliq.jl"; # special case debugging
+"testBeehive2D_CliqByCliq.jl";      # special case debugging
 "testhigherdimroots.jl";
 "testManifoldsPose2Equivalent.jl";
 "testDidsonFunctions.jl";
@@ -25,7 +26,6 @@ testfiles = [
 "testMultimodalRangeBearing.jl";
 "testDynPose2D.jl";
 "threeDimLinearProductTest.jl";
-"testPose3Pose3NH.jl";
 "testPartialXYH.jl";
 "testpartialpose3.jl";
 "testpackingconverters.jl";

@@ -11,7 +11,7 @@ end
 
 Single dimension bearing constraint from Pose2 to Point2 variable.
 """
-struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IncrementalInference.FunctorPairwiseMinimize
+struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IncrementalInference.AbstractRelativeFactorMinimize
     bearing::B
     reuse::Vector{P2P2BearingReuse}
     Pose2Point2Bearing{B}() where B = new{B}()

@@ -8,7 +8,7 @@ $(TYPEDEF)
 
 Direct observation information of `Pose3` variable type.
 """
-mutable struct PriorPose3{T <: IIF.SamplableBelief} <: IncrementalInference.FunctorSingleton
+mutable struct PriorPose3{T <: IIF.SamplableBelief} <: IncrementalInference.AbstractPrior
   Zi::T
   # empty constructor
   PriorPose3{T}() where T = new{T}()

@@ -37,7 +37,7 @@ Gadfly.push_theme(:default) # light background, where Juno uses dark background
 Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
 
 # Add a landmark l1
-addVariable!(fg, :l1, Point2, labels=["LANDMARK"])
+addVariable!(fg, :l1, Point2, tags=["LANDMARK"])
 
 bear1 = atan(10,20)
 bear2 = atan(10,10) - pi/3
