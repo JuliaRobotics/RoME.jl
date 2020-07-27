@@ -135,7 +135,7 @@ end
 @show mu2 # mu2 is used for XYYaw
 # trying to compare world and body frame values -- not right!
 @show Statistics.mean(pts[newdims,:],dims=2)
-@test sum(abs.(Statistics.mean(pts[newdims,:],dims=2)-mu2) .< [1.0;1.0;0.3]) == 3
+@test sum(abs.(Statistics.mean(pts[newdims,:],dims=2)-mu2) .< [1.5;1.5;0.3]) == 3
 
 # ensure a re-evaluation of the partial factor updates the partial variable dimensions correclty
 @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
