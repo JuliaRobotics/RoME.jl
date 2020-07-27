@@ -23,8 +23,9 @@ jobs:
     - julia: nightly
     - arch: arm64
   include:
-    - name: "ALL MASTERS"
+    - name: "DEV MASTERS"
       julia: 1.5
+      if: NOT branch =~ ^release.*$
       script:
         - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
         - julia -e 'using Pkg; pkg"add DistributedFactorGraphs#master"; pkg"add IncrementalInference#master";'
