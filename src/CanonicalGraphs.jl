@@ -81,8 +81,8 @@ function generateCanonicalFG_Circle(poses::Int=6;
     if stopEarly <= i
       break
     end
-    @show psym = Symbol("x$i")
-    @show nsym = Symbol("x$(i+1)")
+    psym = Symbol("x$i")
+    nsym = Symbol("x$(i+1)")
     addVariable!(fg, nsym, Pose2)
     pp = Pose2Pose2(MvNormal([10.0;0;2pi/(cyclePoses)+biasTurn], Matrix(Diagonal((kappaOdo*[0.1;0.1;0.1]).^2))))
     addFactor!(fg, [psym;nsym], pp , graphinit=graphinit)
