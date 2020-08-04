@@ -8,7 +8,7 @@
 # plotTreeUpMsgs(fg, tree, :x1, levels=1)
 #
 #
-# cliq = getCliq(tree, :x2)
+# cliq = getClique(tree, :x2)
 #
 # # OLD
 # dwinmsgs = IIF.prepCliqInitMsgsDown!(fg, tree, getParent(tree,cliq)[1], cliq, dbgnew=false)
@@ -22,7 +22,7 @@
 #
 # ## Check init message for x3
 #
-# cliq = getCliq(tree, :x1)
+# cliq = getClique(tree, :x1)
 #
 # # OLD
 # dwinmsgs = IIF.prepCliqInitMsgsDown!(fg, tree, getParent(tree,cliq)[1], cliq, dbgnew=false)
@@ -36,7 +36,7 @@
 #
 # ## Check init message for x4
 #
-# cliq = getCliq(tree, :x4)
+# cliq = getClique(tree, :x4)
 #
 # # OLD
 # dwinmsgs = IIF.prepCliqInitMsgsDown!(fg, tree, getParent(tree,cliq)[1], cliq, dbgnew=false)
@@ -61,7 +61,7 @@
 #
 # ## check contents
 #
-# cliq = getCliq(tree, :x1)
+# cliq = getClique(tree, :x1)
 #
 # getCliqMsgsUp(cliq)
 #
@@ -85,7 +85,7 @@
 #
 # ## DEBUG where is down message :x3
 #
-# prnt = getCliq(tree, :x3)
+# prnt = getClique(tree, :x3)
 # getCliqInitUpMsgs(prnt)
 #
 #
@@ -105,17 +105,17 @@
 #
 # # Just before the mistake
 # drawTree(csmc_8_test.tree, show=true)
-# prnt_8_test = getCliq(csmc_8_test.tree, :x3)
+# prnt_8_test = getClique(csmc_8_test.tree, :x3)
 # getCliqInitUpMsgs(prnt_8_test)
 #
 # # just after the mistake
-# prnt_9_test = getCliq(csmc_9_test.tree, :x3)
+# prnt_9_test = getClique(csmc_9_test.tree, :x3)
 # getCliqInitUpMsgs(prnt_9_test)
 #
 #
 # # so develop  based on sandbox step 8
 # stuff = sandboxCliqResolveStep(tree,:x1,8)
-# getCliqInitUpMsgs(getCliq(stuff[4].tree,:x3))
+# getCliqInitUpMsgs(getClique(stuff[4].tree,:x3))
 #
 #
 #

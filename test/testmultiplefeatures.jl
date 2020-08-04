@@ -265,14 +265,14 @@ end
 
 # pl = plotKDE([kde!(randn(2,100));kde!(2+randn(2,100))],levels=1,c=["red";"green"],legend=["1";"2"])
 
-# arrp = [getVertKDE(fg, :l1);getVertKDE(fg, :l2);getVertKDE(fg, :l3)]
+# arrp = [getBelief(fg, :l1);getBelief(fg, :l2);getBelief(fg, :l3)]
 # arrp1 = deepcopy(arrp)
 # plotKDE([arrp;arrp1],levels=1,c=["red";"red";"red";"blue";"blue";"blue"])
 
-# arrp=[marginal(getVertKDE(fg, :x1),[1;2]);marginal(getVertKDE(fg, :x2),[1;2]) ]
+# arrp=[marginal(getBelief(fg, :x1),[1;2]);marginal(getBelief(fg, :x2),[1;2]) ]
 # plotKDE(arrp,levels=1)
 
-# plotKDE(marginal(getVertKDE(fg,:x1),[3]))
+# plotKDE(marginal(getBelief(fg,:x1),[3]))
 
 # pp,arr,parts = localProduct(fg,:x2)
 # cc = plotKDE([pp;arr],c=["red";"black";"blue"],levels=1);

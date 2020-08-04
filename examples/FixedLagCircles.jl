@@ -100,7 +100,7 @@ calcCliquesRecycled(tree)
 
 ### DEBUGGING
 
-cliq = getCliq(tree, :x1)
+cliq = getClique(tree, :x1)
 data = getData(cliq).allmarginalized
 
 
@@ -147,7 +147,7 @@ tfg = initfg()
 
 # add a starting point (skipping prior for brevity)
 addVariable!(tfg, :a, Pose2)
-manualinit!(tfg, :a, 0.01*randn(3,100))
+initManual!(tfg, :a, 0.01*randn(3,100))
 
 addVariable!(tfg, :a_drt, Pose2)
 

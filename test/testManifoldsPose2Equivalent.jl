@@ -181,7 +181,7 @@ stuff = IIF.localProduct(fg, :x1)
 
 
 ##
-# plotPose(Pose2(), [getVertKDE(fg, :x1)])
+# plotPose(Pose2(), [getBelief(fg, :x1)])
 #
 # plotPose(Pose2(), [stuff[2];stuff[1]], levels=2, c=["cyan";"cyan";"red"])
 

@@ -61,7 +61,7 @@ tree = buildTreeFromOrdering!(fg,vo)
 
 # syms = map( x->x.label, getVariables(fg, solvable=1))
 
-# union(map(x->getCliqAllVarIds(x), map(n->getCliq(tree, n), syms))...)
+# union(map(x->getCliqAllVarIds(x), map(n->getClique(tree, n), syms))...)
 
 
 getSolverParams(fg).dbg = true

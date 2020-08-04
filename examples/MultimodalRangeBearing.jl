@@ -47,7 +47,7 @@ tree = wipeBuildNewTree!(fg)
 
 # L1 = getVal(fg, :l1)
 # L2 = getVal(fg, :l2)
-X0 = getVertKDE(fg, :x0)
+X0 = getBelief(fg, :x0)
 
 # plot(X0, dims=[1;2])
 

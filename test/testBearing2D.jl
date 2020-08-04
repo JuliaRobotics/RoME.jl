@@ -27,7 +27,7 @@ addFactor!(fg, [:x1;:l2], Pose2Point2Bearing(Normal(-pi/6,0.05)), graphinit=fals
 addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(-pi+pi/6,0.05)), graphinit=false)
 
 
-# manualinit!(fg, :x1, [30.0*randn(2,100);randn(1,100)])
+# initManual!(fg, :x1, [30.0*randn(2,100);randn(1,100)])
 
 ## Look at graph
 
@@ -101,8 +101,8 @@ addFactor!(fg, [:x1;:l2], Pose2Point2Bearing(Normal(-pi/6,0.05)), graphinit=fals
 addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(-pi+pi/6,0.05)), graphinit=false)
 
 
-manualinit!(fg, :x1, [0.01*randn(2,100);-randn(1,100)])
-# manualinit!(fg, :x1, [30.0*randn(2,100);randn(1,100)])
+initManual!(fg, :x1, [0.01*randn(2,100);-randn(1,100)])
+# initManual!(fg, :x1, [30.0*randn(2,100);randn(1,100)])
 
 # drawGraph(fg)
 
