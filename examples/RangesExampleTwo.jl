@@ -433,7 +433,7 @@ addVariable!(fg, :l1,Point2)
 pp2 = PriorPoint2(MvNormal(GTl["l1"], Matrix(Diagonal([1.0;1.0]))))
 f = addFactor!(fg,[:l1], pp2, graphinit=true)
 # pts = approxConv(fg, :l1f1, :l1)
-# pp = AMP.manikde!(pts, Point2().manifolds)
+# pp = AMP.manikde!(pts, getManifolds(Point2()))
 # setValKDE!(getVert(fg, :l1), deepcopy(pp))
 
 # f = addFactor!(fg,[getVert(fg,:l1)], pp2)
@@ -441,7 +441,7 @@ addVariable!(fg, :l2, Point2)
 pp2 = PriorPoint2(MvNormal(GTl["l2"], Matrix(Diagonal([1.0;1.0]))))
 f = addFactor!(fg, [:l2], pp2, graphinit=true)
 # pts = approxConv(fg, :l2f1, :l2)
-# pp = AMP.manikde!(pts, Point2().manifolds)
+# pp = AMP.manikde!(pts, getManifolds(Point2()))
 # setValKDE!(getVert(fg, :l2), deepcopy(pp))
 
 
@@ -457,7 +457,7 @@ doautoinit!(fg, :l100)
 
 # ls(fg,  :l100)
 # pts = approxConv(fg, :l100l3f1, :l3)
-# pp = AMP.manikde!(pts, Point2().manifolds)
+# pp = AMP.manikde!(pts, getManifolds(Point2()))
 # setValKDE!(getVert(fg, :l3), deepcopy(pp))
 
 

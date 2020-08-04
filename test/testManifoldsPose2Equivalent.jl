@@ -27,7 +27,7 @@ pt = Pose2()
 pts1a = 0.1*randn(1,100)
 pts1b = 0.1*randn(1,100)
 pts1c = TransformUtils.wrapRad.( 0.1*randn(1,100) )
-p = manikde!([pts1a;pts1b;pts1c], Pose2().manifolds )
+p = manikde!([pts1a;pts1b;pts1c], getManifolds(Pose2()) )
 
 
 #
@@ -35,7 +35,7 @@ p = manikde!([pts1a;pts1b;pts1c], Pose2().manifolds )
 pts2a = 3.0*randn(1,100).+4.0
 pts2b = 3.0*randn(1,100)
 pts2c = TransformUtils.wrapRad.(0.15*randn(1,100).+0.7pi)
-q = manikde!([pts2a;pts2b;pts2c], Pose2().manifolds  )
+q = manikde!([pts2a;pts2b;pts2c], getManifolds(Pose2())  )
 
 
 
@@ -43,14 +43,14 @@ q = manikde!([pts2a;pts2b;pts2c], Pose2().manifolds  )
 pts3a = 3.0*randn(1,100).-4.0
 pts3b = 3.0*randn(1,100)
 pts3c = TransformUtils.wrapRad.(0.15*randn(1,100).-0.7pi)
-r = manikde!([pts3a;pts3b;pts3c], Pose2().manifolds  )
+r = manikde!([pts3a;pts3b;pts3c], getManifolds(Pose2())  )
 
 
 
 
 # pl = plotPose(pt, [q; r], levels=1)
 
-qr = manifoldProduct([q;r], pt.manifolds, Niter=3)
+qr = manifoldProduct([q;r], getManifolds(pt), Niter=3)
 
 # pl = plotPose(pt, [q; r; qr], levels=2, c=["cyan";"cyan";"red"])
 
@@ -64,7 +64,7 @@ qr = manifoldProduct([q;r], pt.manifolds, Niter=3)
 # pts1a = 0.1*randn(1,100)
 # pts1b = 0.1*randn(1,100)
 # pts1c = TransformUtils.wrapRad.( 0.1*randn(1,100) )
-# p = manikde!([pts1a;pts1b;pts1c], Pose2().manifolds )
+# p = manikde!([pts1a;pts1b;pts1c], getManifolds(Pose2()) )
 
 
 R = [1 1; -1 1]./sqrt(2)
@@ -76,7 +76,7 @@ pts1 = rand(mvn, 100)
 pts2a = pts1[1:1,:].+5.0
 pts2b = pts1[2:2,:].+5.0
 pts2c = TransformUtils.wrapRad.(0.25*randn(1,100).+pi/2)
-q = manikde!([pts2a;pts2b;pts2c], Pose2().manifolds  )
+q = manikde!([pts2a;pts2b;pts2c], getManifolds(Pose2())  )
 
 
 R = [1 -1; 1 1]./sqrt(2)
@@ -88,12 +88,12 @@ pts2 = rand(mvn, 100)
 pts3a = pts2[1:1,:]
 pts3b = pts2[2:2,:]
 pts3c = TransformUtils.wrapRad.(0.25*randn(1,100).-pi/2)
-r = manikde!([pts3a;pts3b;pts3c], Pose2().manifolds  )
+r = manikde!([pts3a;pts3b;pts3c], getManifolds(Pose2())  )
 
 
 ##
 
-qr = manifoldProduct([q;r], pt.manifolds, Niter=8)
+qr = manifoldProduct([q;r], getManifolds(pt), Niter=8)
 
 # pl = plotPose(pt, [q; r; qr], levels=3, c=["cyan";"cyan";"red"])
 
@@ -105,23 +105,23 @@ qr = manifoldProduct([q;r], pt.manifolds, Niter=8)
 pts1a = 0.5*randn(1,100)
 pts1b = 0.5*randn(1,100)
 pts1c = TransformUtils.wrapRad.( 0.1*randn(1,100) )
-p = manikde!([pts1a;pts1b;pts1c], Pose2().manifolds )
+p = manikde!([pts1a;pts1b;pts1c], getManifolds(Pose2()) )
 
 
 pts2a = 0.5*randn(1,100)
 pts2b = 1.0*randn(1,100)
 pts2c = TransformUtils.wrapRad.(0.15*randn(1,100).+2pi/3)
-q = manikde!([pts2a;pts2b;pts2c], Pose2().manifolds  )
+q = manikde!([pts2a;pts2b;pts2c], getManifolds(Pose2())  )
 
 
 pts3a = 1.0*randn(1,100)
 pts3b = 0.5*randn(1,100)
 pts3c = TransformUtils.wrapRad.(0.15*randn(1,100).-2pi/3)
-r = manikde!([pts3a;pts3b;pts3c], Pose2().manifolds  )
+r = manikde!([pts3a;pts3b;pts3c], getManifolds(Pose2())  )
 
 
 
-pqr = manifoldProduct([p;q;r], pt.manifolds)
+pqr = manifoldProduct([p;q;r], getManifolds(pt))
 
 # pl = plotPose(pt, [p; q; r; pqr], levels=1, c=["cyan";"cyan";"cyan";"red"])
 
@@ -153,13 +153,13 @@ N = 100
 pts2a = 3.0*randn(1,N)
 pts2b = 3.0*randn(1,N)
 pts2c = TransformUtils.wrapRad.(0.15*randn(1,N).+0.9pi)
-q = manikde!([pts2a;pts2b;pts2c], Pose2().manifolds  )
+q = manikde!([pts2a;pts2b;pts2c], getManifolds(Pose2())  )
 
 
 pts3a = 3.0*randn(1,N).+4.0
 pts3b = 3.0*randn(1,N).+4.0
 pts3c = TransformUtils.wrapRad.(0.15*randn(1,N).-0.9pi)
-r = manikde!([pts3a;pts3b;pts3c], Pose2().manifolds  )
+r = manikde!([pts3a;pts3b;pts3c], getManifolds(Pose2())  )
 
 
 fg = initfg()

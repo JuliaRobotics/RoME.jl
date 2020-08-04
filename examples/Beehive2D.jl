@@ -407,7 +407,7 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 # ## manual
 # pts = predictbelief(fg, :x49, [:x48x49f1;])
-# setValKDE!(fg, :x49, manikde!(pts[1], Pose2().manifolds), false, pts[2])
+# setValKDE!(fg, :x49, manikde!(pts[1], getManifolds(Pose2())), false, pts[2])
 
 
 ## hex 8
@@ -566,7 +566,7 @@ ls(sfg, :x19)
 
 pts = approxConv(sfg, :x19l0f1, :x19)
 
-X19 = manikde!(pts, Pose2().manifolds)
+X19 = manikde!(pts, getManifolds(Pose2()))
 
 plotPose(Pose2(), X19)
 
