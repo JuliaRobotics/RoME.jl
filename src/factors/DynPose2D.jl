@@ -59,10 +59,15 @@ end
 
 
 ## Compare functions
-
+function compareDensity(a::MvNormal, b::MvNormal; tol::Float64=1e-10)::Bool
+  TP = true
+  TP = TP && norm(a.μ - b.μ)<tol
+  TP = TP && sum(norm.(a.Σ.mat - b.Σ.mat))<tol
+  return TP
+end
 
 function compare(a::DynPose2VelocityPrior, b::DynPose2VelocityPrior)::Bool
-  RoME.compare(a.Zpose, b.Zpose) && RoME.compare(a.Zvel, b.Zvel)
+  RoME.compareDensity(a.Zpose, b.Zpose) && RoME.compareDensity(a.Zvel, b.Zvel)
 end
 
 
@@ -157,7 +162,7 @@ end
 
 function compare(a::DynPose2DynPose2, b::DynPose2DynPose2; tol::Float64=1e-10)::Bool
   TP = true
-  TP = TP && RoME.compare(a.Z, b.Z)
+  TP = TP && RoME.compareDensity(a.Z, b.Z)
   TP = TP && norm(a.reuseres - b.reuseres) < tol
   return TP
 end
