@@ -35,13 +35,13 @@ tree, smt, hist = solveTree!(fg)
 
 
 # X1 = getVal(fg, :x1)
-@show global x0 = getKDEMax(getVertKDE(fg, :x0))
+@show global x0 = getKDEMax(getBelief(fg, :x0))
 
 @test norm(x0[1:2] - [0.0;0.0]) < 1.0
 @test norm(x0[3:4] - [10.0;10.0]) < 1.0
 
 
-@show global x1 = getKDEMax(getVertKDE(fg, :x1))
+@show global x1 = getKDEMax(getBelief(fg, :x1))
 
 @test norm(x1[1:2] - [20.0;20.0]) < 1.0
 @test norm(x1[3:4] - [10.0;10.0]) < 1.0
@@ -89,15 +89,15 @@ tree, smt, hist = solveTree!(fg)
 
 
 # X1 = getVal(fg, :x1)
-@show global x0 = getKDEMax(getVertKDE(fg, :x0))
+@show global x0 = getKDEMax(getBelief(fg, :x0))
 @test norm(x0[1:2] - [0.0;0.0]) < 1.0
 @test norm(x0[3:4] - [10.0;10.0]) < 1.0
 
-@show global x1 = getKDEMax(getVertKDE(fg, :x1))
+@show global x1 = getKDEMax(getBelief(fg, :x1))
 @test norm(x1[1:2] - [10.0;10.0]) < 1.0
 @test norm(x1[3:4] - [10.0;10.0]) < 1.0
 
-@show global x2 = getKDEMax(getVertKDE(fg, :x2))
+@show global x2 = getKDEMax(getBelief(fg, :x2))
 @test norm(x2[1:2] - [20.0;20.0]) < 1.0
 @test norm(x2[3:4] - [10.0;10.0]) < 1.0
 

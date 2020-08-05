@@ -132,7 +132,7 @@ plotTreeProductUp(fg,tree,:x13,:x13)
 
 
 #
-# cliq = whichCliq(tree, :x10)
+# cliq = getClique(tree, :x10)
 # # smt[9]
 #
 # prnt = getParent(tree, cliq)[1]

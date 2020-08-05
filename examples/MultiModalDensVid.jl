@@ -21,7 +21,7 @@ initCov = Matrix(Diagonal([0.03;0.03;0.001].^2))
 odoCov = Matrix(Diagonal([3.0;3.0;0.4].^2))
 
 x1 = initFactorGraph!(fg, solvable=0, N=N)
-println("Starting $(fg.sessionname) at $(x1), at $(getKDEMax(getVertKDE(fg,x1)))")
+println("Starting $(fg.sessionname) at $(x1), at $(getKDEMax(getBelief(fg,x1)))")
 
 r = 3.0/12.0*pi
 cDX = [10.0;0;r]

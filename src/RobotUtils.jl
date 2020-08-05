@@ -123,7 +123,7 @@ function predictVariableByFactor(dfg::AbstractDFG,
     addVariable!(tfg, var, getSofttype(varnode))
     if var != targetsym
       @assert isInitialized(varnode)
-      manualinit!(tfg,var,getKDE(varnode))
+      initManual!(tfg,var,getKDE(varnode))
     end
   end
   addFactor!(tfg, prevars, fct, graphinit=false)
@@ -143,8 +143,8 @@ end
 Calculate the cartesian distance between two vertices in the graph using their symbol name, and by maximum belief point.
 """
 function getRangeKDEMax2D(fgl::AbstractDFG, vsym1::Symbol, vsym2::Symbol)
-  x1 = getKDEMax(getVertKDE(fgl, vsym1))
-  x2 = getKDEMax(getVertKDE(fgl, vsym2))
+  x1 = getKDEMax(getBelief(fgl, vsym1))
+  x2 = getKDEMax(getBelief(fgl, vsym2))
   norm(x1[1:2]-x2[1:2])
 end
 
@@ -481,7 +481,7 @@ function calcIntersectVols(fgl::G, predLm::BallTreeDensity;
       pvlm = getVert(fgl,l)
       # TODO -- can be improved via query in DB case
       if currage - pvlm.attributes["maxage"] < maxdeltaage
-        p = getVertKDE(fgl, l)
+        p = getBelief(fgl, l)
         rr[l] = remotecall(uppA(), intersIntgAppxIS, p,predLm)
         push!(fetchlist, l)
       else
@@ -492,7 +492,7 @@ function calcIntersectVols(fgl::G, predLm::BallTreeDensity;
     max = 0
     maxl = String("")
     for l in fetchlist #ll
-      # p = getVertKDE(fgl, l)
+      # p = getBelief(fgl, l)
       # tv = intersIntgAppxIS(p,predLm)
       # iv[l] = tv
       tv = fetch(rr[l])
@@ -759,7 +759,7 @@ function get2DPoseMax(fgl::G;
   for slbl in saids
     lbl = string(slbl)
     if from <= parse(Int,split(lbl[2:end],'_')[1]) <=to
-      mv = getKDEMax(getVertKDE(fgl,slbl))
+      mv = getKDEMax(getBelief(fgl,slbl))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(Th,mv[3])
@@ -825,7 +825,7 @@ function get2DLandmMax(fgl::G;
     @show lb
     lbl = string(lb)
     if from <= parse(Int,split(lbl[2:end],'_')[1]) <=to
-      mv = getKDEMax(getVertKDE(fgl, Symbol(lb)))
+      mv = getKDEMax(getBelief(fgl, Symbol(lb)))
       push!(X,mv[1])
       push!(Y,mv[2])
       push!(LB, string(lbl))

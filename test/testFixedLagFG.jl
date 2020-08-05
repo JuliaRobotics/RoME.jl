@@ -2,7 +2,7 @@
 
 using Test
 using RoME
-using LinearAlgebra
+# using LinearAlgebra
 # , Distributions
 
 
@@ -94,11 +94,13 @@ fifoFreeze!(fg)
 @test isMarginalized(fg, :x5)
 
 # getSolverParams(fg).drawtree=true
+# getSolverParams(fg).showtree=true
 # getSolverParams(fg).dbg=true
+# getSolverParams(fg).async=true
 
 # Now solve again, which will freeze vertices < 5
 println("STEP 4: Solve graph when shorter than fixed length, and show time to solve")
-tree, smt, hist = solveTree!(fg, tree) #, recordcliqs=ls(fg))
+tree, smt, hist = solveTree!(fg, tree, verbose=true); # , recordcliqs=ls(fg));
 
 
 # Confirm that the initial nodes (x0 - x5) are frozen.

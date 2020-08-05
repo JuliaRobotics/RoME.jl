@@ -2,8 +2,8 @@
 
 
 function rangeErrMaxPoint2(fgl1::AbstractDFG, id1, fgl2::AbstractDFG ,id2)
-  mv1 = getKDEMax(getVertKDE(fgl1,id1))
-  mv2 = getKDEMax(getVertKDE(fgl2,id2))
+  mv1 = getKDEMax(getBelief(fgl1,id1))
+  mv2 = getKDEMax(getBelief(fgl2,id2))
   return norm(mv1[1:2]-mv2[1:2])
 end
 
@@ -25,7 +25,7 @@ function rangeCompAllPoses(
   xx,ll = ls(fgltest)
   for x in xx
     mv1 = valsbaseline[fglbaseline.IDs[x]]
-    mv2 = getKDEMax(getVertKDE(fgltest,x))
+    mv2 = getKDEMax(getBelief(fgltest,x))
     push!(ranges, norm(mv1[1:2]-mv2[1:2]))
   end
   return ranges

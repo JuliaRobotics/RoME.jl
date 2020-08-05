@@ -305,7 +305,7 @@ end
 #
 # printCliqHistorySummary(tree,:x10)
 #
-# getCliq(tree, :x10)
+# getClique(tree, :x10)
 #
 # csmc1 = hist[1][6][4]
 # csfg = csmc1.cliqSubFg
@@ -322,8 +322,8 @@ end
 #
 # tree = wipeBuildNewTree!(fg)
 #
-# getData(getCliq(tree, :x9 ))
-# getData(getCliq(tree, :x10))
+# getData(getClique(tree, :x9 ))
+# getData(getClique(tree, :x10))
 
 
 
