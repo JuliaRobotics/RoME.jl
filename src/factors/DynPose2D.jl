@@ -143,9 +143,7 @@ function (vp2vp2::DynPose2DynPose2{T})(
     # se2vee!(res, jXjhat)
   z = meas[1][:,idx]
   wxi, wxj = wXi[:,idx], wXj[:,idx]
-  #FIXME
-  dt = 1.0 - 0
-  # dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6
+  dt = Dates.value(userdata.fullvariables[2].nstime - userdata.fullvariables[1].nstime)*1e-9  
   wpj = ( wxi[1:2]+dt*wxi[4:5] + z[1:2] )
   thetaj = se2vee(SE2([0;0;wxi[3]])*SE2([0;0;z[3]]))[3]
   res[1:3] = se2vee( SE2(wxj[1:3])\SE2([wpj;thetaj]) )

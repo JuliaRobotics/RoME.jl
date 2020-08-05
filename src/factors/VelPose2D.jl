@@ -25,7 +25,7 @@ function (vp2vp2::VelPose2VelPose2{T1,T2})(
   z = meas[1][:,idx]
   wxi, wxj = Xi[:,idx], Xj[:,idx]
   # @show z, wxi, wxj
-  dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata
+  dt = Dates.value(userdata.fullvariables[2].nstime - userdata.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
   # fill!(vp2vp2.reuseres[Threads.threadid()], 0.0)
   vp2vp2.Zpose(vp2vp2.reuseres[Threads.threadid()], userdata, idx, meas, Xi, Xj)
   wDXij = (wxj[4:5]-wxi[4:5])

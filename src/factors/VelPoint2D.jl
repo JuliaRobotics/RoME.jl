@@ -24,7 +24,7 @@ function (vp2vp2::VelPoint2VelPoint2{D})(
   z = meas[1][:,idx]
   xi, xj = Xi[:,idx], Xj[:,idx]
   # change in time from microseconds with DynPoint2(ut=1_000_000) to seconds
-  dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata
+  dt = Dates.value(userdata.fullvariables[2].nstime - userdata.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
   # change in psoition Xi \ Xj
   dp = (xj[1:2]-xi[1:2])
   # change in velocity Xi \ Xj

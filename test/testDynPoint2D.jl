@@ -14,9 +14,9 @@ using Test
 global fg = initfg()
 
 # add two point locations
-global v0 = addVariable!(fg, :x0, DynPoint2(ut=0))
+global v0 = addVariable!(fg, :x0, DynPoint2(); nanosecondtime=0)
 
-global v1 = addVariable!(fg, :x1, DynPoint2(ut=1000_000))
+global v1 = addVariable!(fg, :x1, DynPoint2(ut=1000_000); nanosecondtime=10^9)
 
 # Prior factor as boundary condition
 global pp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*Matrix{Float64}(LinearAlgebra.I, 4,4)))
