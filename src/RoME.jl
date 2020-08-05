@@ -37,10 +37,6 @@ export
   AMP,
   DFG,
 
-  # from DFG
-  loadDFG,
-  saveDFG,
-
   # RoME specific functions
   measureMeanDist,
   predictBodyBR,
@@ -69,10 +65,7 @@ export
   getAll2DPoses,
   get2DPoseSamples,
   get2DPoseMeans,
-  getKDE,
-  getVertKDE,
   get2DPoseMax,
-  getAll2DLandmarks,
   get2DLandmSamples,
   get2DLandmMeans,
   get2DLandmMax,
@@ -115,9 +108,6 @@ export
   evalPotential,
   getSample!,
   getSample,
-  # obsolete
-  WrapParam,
-  WrapParamArray,
 
   # Didson convenience function
   addLinearArrayConstraint,
@@ -128,7 +118,6 @@ export
   CameraModelFull,
   project!,
   project,
-  backprojectRandomized!,
   # keep
   cameraResidual!,
 
@@ -150,9 +139,6 @@ export
   PackedPose2Point2Range,
   PriorPoint2,
   PackedPriorPoint2,
-  # Point2D with null hypotheses
-  PriorPoint2DensityNH,
-  PackedPriorPoint2DensityNH,
 
   # Velocity in Point2 types
   DynPoint2,
@@ -168,13 +154,7 @@ export
   solvePose2,
   solveSetSeps,
   addPose2Pose2!,
-
-
-  # acoustics
-  Pose2Point2BearingRangeDensity,
-  PackedPose2Point2BearingRangeDensity,
-  Pose2Point2RangeDensity,
-  PackedPose2Point2RangeDensity,
+  compareDensity,
 
   # Pose2D
   Pose2,
@@ -184,14 +164,6 @@ export
   PackedPartialPriorYawPose2,
   Pose2Pose2,
   PackedPose2Pose2,
-  # velocity in Pose2
-  DynPose2,
-  DynPose2VelocityPrior,
-  PackedDynPose2VelocityPrior,
-  VelPose2VelPose2,
-  PackedVelPose2VelPose2,
-  DynPose2Pose2,
-  PackedDynPose2Pose2,
   # Will be deprecated
   addPose2Pose2,
 
@@ -247,9 +219,7 @@ export
   PartialPriorRollPitchZ,
   PackedPartialPriorRollPitchZ,
   PartialPose3XYYaw,
-  PackedPartialPose3XYYaw,
-  PartialPose3XYYawNH,
-  PackedPartialPose3XYYawNH
+  PackedPartialPose3XYYaw
 
 
 include("SpecialDefinitions.jl")
@@ -279,7 +249,9 @@ include("factors/Pose2D.jl")
 include("factors/Pose2Point2.jl")
 include("factors/MutablePose2Pose2.jl")
 include("factors/DynPoint2D.jl")
+include("factors/VelPoint2D.jl")
 include("factors/DynPose2D.jl")
+include("factors/VelPose2D.jl")
 include("factors/Point3D.jl")
 include("factors/Pose3D.jl")
 include("factors/Pose3Pose3.jl")

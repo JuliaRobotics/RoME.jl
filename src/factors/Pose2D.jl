@@ -69,11 +69,13 @@ end
 
 
 
+# FIXME, rather have separate compareDensity functions
 function compare(a::Pose2Pose2,b::Pose2Pose2; tol::Float64=1e-10)
-    TP = true
-    TP = TP && norm(a.z.μ-b.z.μ) < (tol + 1e-5)
-    TP = TP && norm(a.z.Σ.mat-b.z.Σ.mat) < tol
-    return TP
+  return compareDensity(a.z, b.z)
+  # TP = true
+  # TP = TP && norm(a.z.μ-b.z.μ) < (tol + 1e-5)
+  # TP = TP && norm(a.z.Σ.mat-b.z.Σ.mat) < tol
+  # return TP
 end
 
 ## Deprecated

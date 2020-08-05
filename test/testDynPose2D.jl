@@ -1,8 +1,6 @@
 using RoME
-# , IncrementalInference, Distributions
 using Test
 
-# const TU = TransformUtils
 
 
 @testset "test DynPose2 and velocity..." begin
@@ -65,9 +63,9 @@ global mu = randn(6)
 global mv1 = MvNormal(deepcopy(mu), Matrix{Float64}(LinearAlgebra.I, 6,6))
 global mv2 = MvNormal(deepcopy(mu), Matrix{Float64}(LinearAlgebra.I, 6,6))
 global mv3 = MvNormal(randn(6), Matrix{Float64}(LinearAlgebra.I, 6,6))
-@test RoME.compare(mv1, mv2)
-@test !RoME.compare(mv1, mv3)
-@test !RoME.compare(mv2, mv3)
+@test RoME.compareDensity(mv1, mv2)
+@test !RoME.compareDensity(mv1, mv3)
+@test !RoME.compareDensity(mv2, mv3)
 
 end
 
@@ -305,7 +303,7 @@ end
 #
 # printCliqHistorySummary(tree,:x10)
 #
-# getCliq(tree, :x10)
+# getClique(tree, :x10)
 #
 # csmc1 = hist[1][6][4]
 # csfg = csmc1.cliqSubFg
@@ -322,8 +320,8 @@ end
 #
 # tree = wipeBuildNewTree!(fg)
 #
-# getData(getCliq(tree, :x9 ))
-# getData(getCliq(tree, :x10))
+# getData(getClique(tree, :x9 ))
+# getData(getClique(tree, :x10))
 
 
 

@@ -143,8 +143,8 @@ println("previous test failure 0.05 .< $(round.(stdX2[4:6],digits=2)) .< 0.35")
 end
 
 # println("Plot marginals to see what is happening")
-# plotKDE(marginal(getVertKDE(fg,:x1),[1]))
-# plotKDE(marginal(getVertKDE(fg,:x2),[1]))
+# plotKDE(marginal(getBelief(fg,:x1),[1]))
+# plotKDE(marginal(getBelief(fg,:x2),[1]))
 
 
 

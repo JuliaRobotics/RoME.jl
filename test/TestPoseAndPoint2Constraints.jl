@@ -128,7 +128,7 @@ pts = approxConv(fg, f5.label, l1.label)
 # plotKDE( [marginal(p1c,[1;2]);marginal(p1,[1;2])] , dimLbls=["x";"y";"z"],c=["red";"black"],levels=3)
 # p1c = deepcopy(p1)
 
-# plotKDE( marginal(getVertKDE(fg, :x2),[1;2]) , dimLbls=["x";"y";"z"])
+# plotKDE( marginal(getBelief(fg, :x2),[1;2]) , dimLbls=["x";"y";"z"])
 #
 # axis = [[1.5;3.5]';[-1.25;1.25]';[-1.0;1.0]']
 # draw( PDF("/home/dehann/Desktop/test.pdf",30cm,20cm),

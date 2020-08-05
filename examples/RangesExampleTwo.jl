@@ -68,7 +68,7 @@ function isInFG!(fgl::AbstractDFG, lbl::Symbol; N=100, solvable=0)
 		init = 300*randn(2,N)
 		v = addVariable!(fgl, lbl, Point2, N=N, solvable=solvable)
 	else
-		v = getVert(fgl, lbl)
+		v = getVariable(fgl, lbl)
 	end
 	v
 end
@@ -98,14 +98,14 @@ function addNewPose!(fgl::AbstractDFG,
   ppr = Point2Point2Range( Normal(rhoZ, 3.0) )
   f = addFactor!(fgl, [from,lbl], ppr, solvable=solvable)
   initVariable!(fgl,lbl)
-  getVert(fgl, lbl)
+  getVariable(fgl, lbl)
 end
 
 function drive(fgl::AbstractDFG, GTp, GTl, from, to; N=100)
   v = addNewPose!(fgl, from, to, GTp, N=N)
   addLandmsOnPose!(fgl, v, landmsInRange(GTl, GTp[string(to)], lim=120.0), N=N )
   println("added landmark")
-  writeGraphPdf(fgl)
+  drawGraph(fgl)
   nothing
 end
 
@@ -382,7 +382,7 @@ function evaluateAccuracy(fgl::AbstractDFG, GTp)
     maxPosition = val >= 100 && val > maxPosition ? val : maxPosition
   end
   vsym = Symbol("l$(maxPosition)")
-  pX = getVertKDE(fg, vsym)
+  pX = getBelief(fg, vsym)
   truePos = GTp[string(vsym)]
 
   postlikeli = evaluateDualTree(pX, reshape(truePos,2,1))[1]
@@ -395,7 +395,7 @@ function evaluateAllAccuracy(fgl::AbstractDFG, GTp, GTl)
   LK = Float64[]
   PE = Float64[]
   for l in ll
-    pX = getVertKDE(fg, l)
+    pX = getBelief(fg, l)
     truePos = haskey(GTp, string(l)) ? GTp[string(l)] : GTl[string(l)]
     push!(LK, evaluateDualTree(pX, reshape(truePos,2,1))[1])
     MaxPointError = truePos - getKDEMax(pX, N=1000)
@@ -816,7 +816,7 @@ draw30AllFast(GTp, GTl, fg, 12, 390, 0, 29, interp=false)
 # run(`ffmpeg -y -i $(folderloc2)/lm4Over%d.png -vcodec libx264 -s 1920x1080 -b:v 2M /home/dehann/Videos/slamedonutLm4_$(N).mp4`)
 
 
-end
+# end
 
 
 

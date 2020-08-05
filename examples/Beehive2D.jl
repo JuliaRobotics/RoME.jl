@@ -508,7 +508,7 @@ writeGraphPdf(fg2bd, show=true)
 
 printCliqHistorySummary(tree, :x16)
 
-cliq = getCliq(tree, :x16)
+cliq = getClique(tree, :x16)
 cid = cliq.index
 ste = 15
 sfg = hist[cid][ste][4].cliqSubFg
@@ -548,7 +548,7 @@ pl = plotBeehive_6(fg, to=15)
 
 printCliqHistorySummary(tree, :l0)
 
-cliq = getCliq(tree, :l0)
+cliq = getClique(tree, :l0)
 cid = cliq.index
 ste = 9
 sfg = hist[cid][ste][4].cliqSubFg
@@ -655,7 +655,7 @@ printCliqHistorySummary(hist)
 
 plotKDE(fg, :x19, levels=3)
 
-getCliq(tree, :x19)
+getClique(tree, :x19)
 
 printCliqHistorySummary(tree, :x19)
 
@@ -754,7 +754,7 @@ tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg)) #, tree)
 
 pl = plotBeehive_6(fg, meanmax=:mean)
 
-cliq = getCliq(tree, :l0)
+cliq = getClique(tree, :l0)
 
 printCliqHistorySummary(tree, :l1)
 

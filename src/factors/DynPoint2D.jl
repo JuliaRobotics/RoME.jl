@@ -4,22 +4,22 @@
 """
 $(TYPEDEF)
 """
-mutable struct DynPoint2VelocityPrior{T} <: IncrementalInference.AbstractPrior where {T <: Distribution}
+mutable struct DynPoint2VelocityPrior{T <: SamplableBelief} <: AbstractPrior
   z::T
-  DynPoint2VelocityPrior{T}() where {T <: Distribution} = new{T}()
-  DynPoint2VelocityPrior{T}(z1::T) where {T <: Distribution} = new{T}(z1)
+  DynPoint2VelocityPrior{T}() where {T <: SamplableBelief} = new{T}()
+  DynPoint2VelocityPrior{T}(z1::T) where {T <: SamplableBelief} = new{T}(z1)
 end
-DynPoint2VelocityPrior(z1::T) where {T <: Distribution} = DynPoint2VelocityPrior{T}(z1)
+DynPoint2VelocityPrior(z1::T) where {T <: SamplableBelief} = DynPoint2VelocityPrior{T}(z1)
 getSample(dp2v::DynPoint2VelocityPrior, N::Int=1) = (rand(dp2v.z,N), )
 
 
 """
 $(TYPEDEF)
 """
-mutable struct DynPoint2DynPoint2{T} <: IncrementalInference.AbstractRelativeFactor where {T <: Distribution}
+mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeFactor
   z::T
-  DynPoint2DynPoint2{T}() where {T <: Distribution} = new{T}()
-  DynPoint2DynPoint2(z1::T) where {T <: Distribution} = new{T}(z1)
+  DynPoint2DynPoint2{T}() where {T <: SamplableBelief} = new{T}()
+  DynPoint2DynPoint2(z1::T) where {T <: SamplableBelief} = new{T}(z1)
 end
 getSample(dp2dp2::DynPoint2DynPoint2, N::Int=1) = (rand(dp2dp2.z,N), )
 function (dp2dp2::DynPoint2DynPoint2)(
@@ -38,50 +38,6 @@ function (dp2dp2::DynPoint2DynPoint2)(
   nothing
 end
 
-
-"""
-$(TYPEDEF)
-"""
-mutable struct VelPoint2VelPoint2{T} <: IncrementalInference.AbstractRelativeFactorMinimize where {T <: Distribution}
-  z::T
-  VelPoint2VelPoint2{T}() where {T <: Distribution} = new{T}()
-  VelPoint2VelPoint2{T}(z1::T) where {T <: Distribution} = new{T}(z1)
-end
-VelPoint2VelPoint2(z1::T) where {T <: Distribution} = VelPoint2VelPoint2{T}(z1)
-getSample(vp2vp2::VelPoint2VelPoint2, N::Int=1) = (rand(vp2vp2.z,N), )
-function (vp2vp2::VelPoint2VelPoint2{D})(
-                res::Array{Float64},
-                userdata,
-                idx::Int,
-                meas::Tuple,
-                Xi::Array{Float64,2},
-                Xj::Array{Float64,2}  ) where D
-  #
-  z = meas[1][:,idx]
-  xi, xj = Xi[:,idx], Xj[:,idx]
-  # change in time from microseconds with DynPoint2(ut=1_000_000) to seconds
-  dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata
-  # change in psoition Xi \ Xj
-  dp = (xj[1:2]-xi[1:2])
-  # change in velocity Xi \ Xj
-  dv = (xj[3:4]-xi[3:4])
-  res[1] = 0.0
-  res[1] += sum((z[1:2] - dp).^2) # (meas - predicted) change in position error term
-  res[1] += sum((z[3:4] - dv).^2) # (meas - predicted) change in velocity error term
-
-  ## now cross couple the change in position information, via timestamps to accompanying velocity
-   # recompute integration of velocity influence
-  # forward diff, "measured velocity"
-  dp_dt = dp./dt
-  # zeroth order integration
-  res[1] += sum((dp_dt - xi[3:4]).^2) # (meas - predicted) velocity error term
-
-    # first order integration
-    # res[1] += sum((dp/dt - 0.5*(xj[3:4]+xi[3:4])).^2)
-
-  # return objective cost
-  return res[1]
-end
 
 
 
@@ -114,8 +70,8 @@ function (p2p2v::Point2Point2Velocity)(
 end
 
 
-## Packing Types================================================================
 
+## Packing Types================================================================
 
 
 """
@@ -133,25 +89,6 @@ end
 function convert(::Type{DynPoint2VelocityPrior}, d::PackedDynPoint2VelocityPrior)
   distr = extractdistribution(d.str)
   return DynPoint2VelocityPrior(distr)
-end
-
-
-
-"""
-$(TYPEDEF)
-"""
-mutable struct PackedVelPoint2VelPoint2 <: IncrementalInference.PackedInferenceType
-  str::String
-  PackedVelPoint2VelPoint2() = new()
-  PackedVelPoint2VelPoint2(z1::String) = new(z1)
-end
-
-function convert(::Type{PackedVelPoint2VelPoint2}, d::VelPoint2VelPoint2)
-  return PackedVelPoint2VelPoint2(string(d.z))
-end
-function convert(::Type{VelPoint2VelPoint2}, d::PackedVelPoint2VelPoint2)
-  distr = extractdistribution(d.str)
-  return VelPoint2VelPoint2(distr)
 end
 
 
