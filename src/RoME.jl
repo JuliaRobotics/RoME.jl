@@ -37,10 +37,6 @@ export
   AMP,
   DFG,
 
-  # from DFG
-  loadDFG,
-  saveDFG,
-
   # RoME specific functions
   measureMeanDist,
   predictBodyBR,
@@ -112,9 +108,6 @@ export
   evalPotential,
   getSample!,
   getSample,
-  # obsolete
-  WrapParam,
-  WrapParamArray,
 
   # Didson convenience function
   addLinearArrayConstraint,
@@ -125,7 +118,6 @@ export
   CameraModelFull,
   project!,
   project,
-  backprojectRandomized!,
   # keep
   cameraResidual!,
 
@@ -147,9 +139,6 @@ export
   PackedPose2Point2Range,
   PriorPoint2,
   PackedPriorPoint2,
-  # Point2D with null hypotheses
-  PriorPoint2DensityNH,
-  PackedPriorPoint2DensityNH,
 
   # Velocity in Point2 types
   DynPoint2,
@@ -165,13 +154,7 @@ export
   solvePose2,
   solveSetSeps,
   addPose2Pose2!,
-
-
-  # acoustics
-  Pose2Point2BearingRangeDensity,
-  PackedPose2Point2BearingRangeDensity,
-  Pose2Point2RangeDensity,
-  PackedPose2Point2RangeDensity,
+  compareDensity,
 
   # Pose2D
   Pose2,
@@ -236,9 +219,7 @@ export
   PartialPriorRollPitchZ,
   PackedPartialPriorRollPitchZ,
   PartialPose3XYYaw,
-  PackedPartialPose3XYYaw,
-  PartialPose3XYYawNH,
-  PackedPartialPose3XYYawNH
+  PackedPartialPose3XYYaw
 
 
 include("SpecialDefinitions.jl")

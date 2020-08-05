@@ -5,12 +5,7 @@
 
 
 
-# function compare(a::MvNormal, b::MvNormal; tol::Float64=1e-10)::Bool
-#   TP = true
-#   TP = TP && norm(a.μ - b.μ)<tol
-#   TP = TP && sum(norm.(a.Σ.mat - b.Σ.mat))<tol
-#   return TP
-# end
+
 
 
 

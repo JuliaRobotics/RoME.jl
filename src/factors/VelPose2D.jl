@@ -42,7 +42,7 @@ end
 
 function compare(a::VelPose2VelPose2, b::VelPose2VelPose2; tol::Float64=1e-10)::Bool
   TP = true
-  TP = TP && RoME.compareDensity(a.Zpose, b.Zpose)
+  TP = TP && RoME.compare(a.Zpose, b.Zpose)
   TP = TP && RoME.compareDensity(a.Zvel, b.Zvel)
   TP = TP && norm(a.reuseres - b.reuseres) < tol
   return TP
