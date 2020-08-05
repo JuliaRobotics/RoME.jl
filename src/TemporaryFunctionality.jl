@@ -16,7 +16,9 @@ function selectFactorType(T1::Type{<:InferenceVariable}, T2::Type{<:InferenceVar
   if T1 == Pose2 && T2 == Pose2
     return Pose2Pose2
   elseif T1 == Pose2 && T2 == Point2
-    return Pose2Point2
+    return Pose2Point2  
+  elseif T1 == DynPose2 && T2 == DynPose2
+      return DynPose2DynPose2
   elseif T1 == Point2 && T2 == Point2
     return Point2Point2
   elseif T1 == Point3 && T2 == Point3
