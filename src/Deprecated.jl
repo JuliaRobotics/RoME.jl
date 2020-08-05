@@ -1,6 +1,24 @@
 
 ##==============================================================================
+## Delete at end v0.8.x
+##==============================================================================
+
+
+
+# function compare(a::MvNormal, b::MvNormal; tol::Float64=1e-10)::Bool
+#   TP = true
+#   TP = TP && norm(a.μ - b.μ)<tol
+#   TP = TP && sum(norm.(a.Σ.mat - b.Σ.mat))<tol
+#   return TP
+# end
+
+
+
+
+##==============================================================================
 ## Delete at end v0.7.x
+##==============================================================================
+
 
 # """
 # OBSOLETE: see https://github.com/JuliaRobotics/IncrementalInference.jl/issues/237
@@ -58,12 +76,12 @@
 
 
 
-import IncrementalInference: buildFactorDefault
+# import IncrementalInference: buildFactorDefault
 
-buildFactorDefault(::Type{Pose2Pose2}) = Pose2Pose2()
-buildFactorDefault(::Type{Pose2Point2}) = Pose2Point2()
-buildFactorDefault(::Type{Pose2Point2BearingRange}) = Pose2Point2BearingRange()
-buildFactorDefault(::Type{Point2Point2}) = Point2Point2()
+# buildFactorDefault(::Type{Pose2Pose2}) = Pose2Pose2()
+# buildFactorDefault(::Type{Pose2Point2}) = Pose2Point2()
+# buildFactorDefault(::Type{Pose2Point2BearingRange}) = Pose2Point2BearingRange()
+# buildFactorDefault(::Type{Point2Point2}) = Point2Point2()
 
 
 # export Pose3Pose3NH, PackedPose3Pose3NH
