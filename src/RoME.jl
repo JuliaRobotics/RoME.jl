@@ -27,7 +27,7 @@ import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
 import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution, DFG, getManifolds
 # not sure why this is gives import error
 import DistributedFactorGraphs: compare
-
+import DistributedFactorGraphs: getDimension, getManifolds
 # const AMP = ApproxManifoldProducts
 
 export

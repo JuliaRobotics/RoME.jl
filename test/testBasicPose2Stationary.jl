@@ -27,7 +27,7 @@ badval = 0.01.*randn(3,100)
 badval[1,:] .-= 5.0
 badval[2,:] .-= 2.0
 badval[3,:] .+= 0.5
-setValKDE!(fg, :x2, manikde!(badval, Pose2().manifolds))
+setValKDE!(fg, :x2, manikde!(badval, getManifolds(Pose2())))
 
 N = 100
 # batchSolve!(fg, N=N)

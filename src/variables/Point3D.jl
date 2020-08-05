@@ -10,8 +10,7 @@ Example
 p3 = Point3()
 ```
 """
-struct Point3 <: IncrementalInference.InferenceVariable
-  dims::Int
-  manifolds::Tuple{Symbol, Symbol, Symbol}
-  Point3() = new(3, (:Euclid,:Euclid,:Euclid))
-end
+struct Point3 <: IncrementalInference.InferenceVariable end
+getDimension(::Point3) = 3
+getManifolds(::Point3) = (:Euclid,:Euclid,:Euclid)
+

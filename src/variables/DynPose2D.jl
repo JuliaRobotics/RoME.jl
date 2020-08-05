@@ -9,3 +9,5 @@ mutable struct DynPose2 <: IncrementalInference.InferenceVariable
   manifolds::Tuple{Symbol,Symbol,Symbol,Symbol,Symbol}
   DynPose2(;ut::Int64=-9999999999) = new(ut, 5, (:Euclid,:Euclid,:Circular,:Euclid,:Euclid))
 end
+getDimension(::DynPose2) = 5
+getManifolds(::DynPose2) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
