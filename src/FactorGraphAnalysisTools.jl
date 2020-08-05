@@ -32,7 +32,21 @@ function rangeCompAllPoses(
 end
 
 
+## Compare functions
 
+function compareDensity(a::Normal, b::Normal; tol::Float64=1e-10)
+  TP = true
+  TP = TP && abs(a.μ - b.μ) < tol
+  TP = TP && abs(a.σ - b.σ) < tol
+  TP
+end
+
+function compareDensity(a::MvNormal, b::MvNormal; tol::Float64=1e-10)::Bool
+  TP = true
+  TP = TP && norm(a.μ - b.μ)<tol
+  TP = TP && sum(norm.(a.Σ.mat - b.Σ.mat))<tol
+  return TP
+end
 
 
 #

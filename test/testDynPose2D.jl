@@ -1,8 +1,6 @@
 using RoME
-# , IncrementalInference, Distributions
 using Test
 
-# const TU = TransformUtils
 
 
 @testset "test DynPose2 and velocity..." begin
@@ -65,9 +63,9 @@ global mu = randn(6)
 global mv1 = MvNormal(deepcopy(mu), Matrix{Float64}(LinearAlgebra.I, 6,6))
 global mv2 = MvNormal(deepcopy(mu), Matrix{Float64}(LinearAlgebra.I, 6,6))
 global mv3 = MvNormal(randn(6), Matrix{Float64}(LinearAlgebra.I, 6,6))
-@test RoME.compare(mv1, mv2)
-@test !RoME.compare(mv1, mv3)
-@test !RoME.compare(mv2, mv3)
+@test RoME.compareDensity(mv1, mv2)
+@test !RoME.compareDensity(mv1, mv3)
+@test !RoME.compareDensity(mv2, mv3)
 
 end
 

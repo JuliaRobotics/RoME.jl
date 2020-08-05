@@ -109,17 +109,11 @@ function convert(::Type{Dict{String, Any}}, fact::RoME.PartialPriorRollPitchZ)
 end
 
 
-function compare(a::Normal, b::Normal; tol::Float64=1e-10)
-  TP = true
-  TP = TP && abs(a.μ - b.μ) < tol
-  TP = TP && abs(a.σ - b.σ) < tol
-  TP
-end
 
 function compare(a::PartialPriorRollPitchZ, b::PartialPriorRollPitchZ; tol::Float64=1e-10)
   TP = true
-  TP = TP && compare(a.rp, b.rp)
-  TP = TP && compare(a.z, b.z)
+  TP = TP && compareDensity(a.rp, b.rp)
+  TP = TP && compareDensity(a.z, b.z)
   TP = TP && norm(collect(a.partial)-collect(b.partial)) < tol
   return TP
 end
@@ -244,8 +238,8 @@ end
 
 function compare(a::PartialPose3XYYaw, b::PartialPose3XYYaw; tol::Float64=1e-10)
   TP = true
-  TP = TP && compare(a.xy, b.xy)
-  TP = TP && compare(a.yaw, b.yaw)
+  TP = TP && compareDensity(a.xy, b.xy)
+  TP = TP && compareDensity(a.yaw, b.yaw)
   TP = TP && norm(collect(a.partial)-collect(b.partial)) < tol
   return TP
 end

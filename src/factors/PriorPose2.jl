@@ -64,8 +64,9 @@ end
 
 ## NOTE likely deprecated comparitors, see DFG compareFields, compareAll instead
 function compare(a::PriorPose2,b::PriorPose2; tol::Float64=1e-10)
-  TP = true
-  TP = TP && norm(a.Z.μ-b.Z.μ) < tol
-  TP = TP && norm(a.Z.Σ.mat-b.Z.Σ.mat) < tol
-  return TP
+  compareDensity(a.Z, b.Z)
+  # TP = true
+  # TP = TP && norm(a.Z.μ-b.Z.μ) < tol
+  # TP = TP && norm(a.Z.Σ.mat-b.Z.Σ.mat) < tol
+  # return TP
 end
