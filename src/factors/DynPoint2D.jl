@@ -32,7 +32,7 @@ function (dp2dp2::DynPoint2DynPoint2)(
   #
   z = meas[1][:,idx]
   xi, xj = Xi[:,idx], Xj[:,idx]
-  dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata
+  dt = Dates.value(userdata.fullvariables[2].nstime - userdata.fullvariables[1].nstime)*1e-9   # roughly the intended use of userdata
   res[1:2] = z[1:2] - (xj[1:2] - (xi[1:2]+dt*xi[3:4]))
   res[3:4] = z[3:4] - (xj[3:4] - xi[3:4])
   nothing
@@ -60,7 +60,7 @@ function (p2p2v::Point2Point2Velocity)(
   #
   z = meas[1][:,idx]
   xi, xj = Xi[:,idx], Xj[:,idx]
-  dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6   # roughly the intended use of userdata
+  dt = (userdata.fullvariables[2].nstime - userdata.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
   dp = (xj[1:2]-xi[1:2])
   dv = (xj[3:4]-xi[3:4])
   res[1] = 0.0
