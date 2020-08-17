@@ -16,7 +16,7 @@ struct Pose2Pose2{T} <: IncrementalInference.AbstractRelativeFactor where {T <: 
   Pose2Pose2{T}(z1::T) where {T <: IIF.SamplableBelief} = new{T}(z1)
 end
 # convenience and default constructor
-Pose2Pose2(z::T=MvNormal(zeros(3),LinearAlgebra.diagm([0.01;0.01;0.0001]))) where {T <: IIF.SamplableBelief} = Pose2Pose2{T}(z)
+Pose2Pose2(z::T=MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0]))) where {T <: IIF.SamplableBelief} = Pose2Pose2{T}(z)
 
 getSample(s::Pose2Pose2{<:IIF.SamplableBelief}, N::Int=1) = (rand(s.z,N), )
 function (s::Pose2Pose2{<:IIF.SamplableBelief})(

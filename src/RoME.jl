@@ -30,6 +30,8 @@ import DistributedFactorGraphs: compare
 import DistributedFactorGraphs: getDimension, getManifolds
 # const AMP = ApproxManifoldProducts
 
+const InstanceType{T} = Union{Type{<:T},T}
+
 export
   IIF,  # Aliases for various packages
   KDE,
@@ -98,7 +100,7 @@ export
   LinearRangeBearingElevation,
   project!,
   project,
-  backprojectRandomized!,
+  # backprojectRandomized!,
   residual!,
   residualLRBE!,
   reuseLBRA,
