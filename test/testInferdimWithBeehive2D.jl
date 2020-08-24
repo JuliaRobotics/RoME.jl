@@ -127,9 +127,10 @@ upmsg = prepCliqInitMsgsUp(sfg, getClique(tree, :x0))
 upMsg(tree, :x0)
 
 
-dwnmsg = getDwnMsgs(tree, :x3)
-dwnmsg = getDwnMsgs(tree, :x1)
-dwnmsg = getDwnMsgs(tree, :x0)
+# # FIXME these are deprecated
+# dwnmsg = getDwnMsgs(tree, :x3)
+# dwnmsg = getDwnMsgs(tree, :x1)
+# dwnmsg = getDwnMsgs(tree, :x0)
 
 printCliqHistorySummary(tree, :x1)
 
@@ -326,7 +327,7 @@ tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
 
 
 # down msg to :x10
-dwinmsgs = prepCliqInitMsgsDown!(fg, tree, getClique(tree, :x9), getClique(tree,:x11), dbgnew=true)
+dwinmsgs = prepCliqInitMsgsDown!(fg, tree, getClique(tree, :x9), getClique(tree,:x11))
 
 
 

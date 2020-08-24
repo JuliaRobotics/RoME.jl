@@ -1,3 +1,8 @@
+
+@info "RoME is adding Flux related functionality."
+include("models/Pose2OdoNN_01.jl") # until a better way is found to deserialize
+
+
 # FluxModelsPose2Pose2
 
 # the factor definitions
