@@ -237,6 +237,8 @@ include("variables/DynPose2D.jl")
 include("variables/Point3D.jl")
 include("variables/Pose3D.jl")
 
+#needs DFG v0.10.2
+# include("variables/VariableTypes.jl")
 
 ## More factor types
 # RoME internal factors (FYI outside factors are easy, see Caesar documentation)
