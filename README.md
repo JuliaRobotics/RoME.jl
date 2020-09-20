@@ -5,6 +5,7 @@ Note current installation requires the latest Gadfly to overcome a Type Piracy p
 julia> ] # to activate package manager
 (@v1.5) pkg> add Gadfly#master
 (@v1.5) pkg> add IncrementalInference RoME Caesar
+```
 
 # RoME.jl
 
