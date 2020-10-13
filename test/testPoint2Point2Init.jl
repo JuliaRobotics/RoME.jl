@@ -61,10 +61,6 @@ tree, smt, hist = solveTree!(fg)
 
 
 
-# ett = ExploreTreeType(fg, tree, tree.cliques[1], nothing, NBPMessage[])
-# downMsgPassingIterative!(ett,N=100, dbg=false, drawpdf=false);
-
-
 
 @test 10 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
 @test 10 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )

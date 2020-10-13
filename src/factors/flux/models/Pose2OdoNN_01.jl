@@ -4,12 +4,12 @@ export buildPyNNModel_01_FromElements, buildPyNNModel_01_FromWeights, loadTfMode
 export buildPose2OdoNN_01_FromElements, buildPose2OdoNN_01_FromWeights, loadPose2OdoNNModelIntoFlux
 
 
-function buildPose2OdoNN_01_FromElements(W1::AbstractMatrix{<:Real}=zeros(4,8),
-                                         b1::AbstractVector{<:Real}=zeros(8),
-                                         W2::AbstractMatrix{<:Real}=zeros(8,48),
-                                         b2::AbstractVector{<:Real}=zeros(8),
-                                         W3::AbstractMatrix{<:Real}=zeros(2,8),
-                                         b3::AbstractVector{<:Real}=zeros(2))
+function buildPose2OdoNN_01_FromElements( W1::AbstractMatrix{<:Real}=zeros(4,8),
+                                          b1::AbstractVector{<:Real}=zeros(8),
+                                          W2::AbstractMatrix{<:Real}=zeros(8,48),
+                                          b2::AbstractVector{<:Real}=zeros(8),
+                                          W3::AbstractMatrix{<:Real}=zeros(2,8),
+                                          b3::AbstractVector{<:Real}=zeros(2))
   #
   # W1 = randn(Float32, 4,8)
   # b1 = randn(Float32,8)
