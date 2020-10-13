@@ -9,6 +9,7 @@ using Test
 # "testG2oParser.jl";  ]
 
 testfiles = [
+"testTreeInitCommonMsg_IIF913.jl";
 "testPose3Pose3NH.jl";
 "testPoint2Point2WorldBearing.jl";  # FIXME, deprecate and replace
 "testBeehive2D_CliqByCliq.jl";      # special case debugging
