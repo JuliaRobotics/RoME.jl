@@ -34,10 +34,10 @@ end
 
 
 
-function calcVelocityInterPose2!(nfb::FluxModelsPose2Pose2,
-                                 iPts::AbstractMatrix{<:Real},
-                                 jPts::AbstractMatrix{<:Real},
-                                 idx::Int  )
+function calcVelocityInterPose2!( nfb::FluxModelsPose2Pose2,
+                                  iPts::AbstractMatrix{<:Real},
+                                  jPts::AbstractMatrix{<:Real},
+                                  idx::Int  )
   #
   # DXY[1:2,i] .= TransformUtils.R(iPts[3,i])'*DXY[1:2,i]
   nfb.joyVelData[1,3:4] .= jPts[1:2,idx]
@@ -54,9 +54,9 @@ function calcVelocityInterPose2!(nfb::FluxModelsPose2Pose2,
 end
 
 
-function calcVelocityInterPose2!(nfb::FluxModelsPose2Pose2,
-                                 iPts::AbstractMatrix{<:Real},
-                                 jPts::AbstractMatrix{<:Real}  )
+function calcVelocityInterPose2!( nfb::FluxModelsPose2Pose2,
+                                  iPts::AbstractMatrix{<:Real},
+                                  jPts::AbstractMatrix{<:Real}  )
   #
   @assert size(jPts,2) == size(iPts,2) "sampleFluxModelsPose2Pose2 can currently only evaluate equal population size variables"
 
@@ -74,50 +74,20 @@ function calcVelocityInterPose2!(nfb::FluxModelsPose2Pose2,
 end
 
 
-# function FMP2P2Other()
-#   calcVelocityInterPose2!(nfb, getVal(Xi), getVal(Xj) )
-#   # sample predictive fraction
-#
-#   # and predict
-#       # A = [rand(4) for i in 1:25]
-#   smplsPredAll = nfb.predictFnc(nfb.joyVelData)
-#   # add rotation dimension if not done by the prediction function
-#   if size(smplsPredAll,2) == 2
-#     smplsPredAll = hcat(smplsPredAll, zeros(size(smplsPredAll,1)))
-#   end
-#
-#
-#   Nn = sum(selectSource .== 2)
-#   # calculate desired number of predicted values
-#   Np = N - Nn
-#   # randomly select particles for prediction (with possible duplicates forwhen Np > size(iPts,2))
-#   Npp = Np < numModels ? Np : numModels
-#   Nnn = N - Npp
-#   selPreds = @view selectPredModel[1:Npp] # TODO better in-place
-#   smpls_p = smplsPredAll[selPreds,:] # sample per row??
-#   smpls_p[:,3] .= smplsNaive[3,Nnn+1:N] # use naive delta theta at this time
-#   # naive fraction
-#   smpls_n = @view smplsNaive[:, 1:Nnn] # sample per column
-#   # join and shuffle predicted odo values
-#   shfSmpl = shuffle!(1:N |> collect)
-#   smpls = hcat(smpls_n, smpls_p')[:,shfSmpl]
-# end
-
-
 function sampleFluxModelsPose2Pose2(nfb::FluxModelsPose2Pose2,
                                     N::Int,
                                     fmd::FactorMetadata,
                                     Xi::DFGVariable,
-                                    Xj::DFGVariable)::Tuple
- #
+                                    Xj::DFGVariable )
+  #
 
   # get the naive samples
   # model samples (all for theta at this time)
   smplsNaive = rand(nfb.naiveModel, N)
-
+  
   # calculate naive model and Predictive fraction of samples, respectively
   selectSource = rand(Categorical([nfb.naiveFrac[]; 1-nfb.naiveFrac[]]), N)
-
+  
   # number of predictors to choose from, and choose random subset
   numModels = length(nfb.allPredModels)
   allPreds = 1:numModels |> collect # 1:Npreds |> collect
@@ -129,21 +99,21 @@ function sampleFluxModelsPose2Pose2(nfb::FluxModelsPose2Pose2,
   # samples for the order in which to use models, dont shuffle if N models
   # can suppress shuffle for NN training purposes
   1 < numModels && nfb.shuffle[] ? shuffle!(allPreds) : nothing
-
+  
   # cache the time difference estimate
   nfb.DT[] = (getTimestamp(Xj) - getTimestamp(Xi)).value * 1e-3
-
+  
   return (smplsNaive, selectSource, allPreds)
 end
 
 # Convenience function to help call the right constuctor
-FluxModelsPose2Pose2(allModels::Vector{P},
-                     jvd::D,
-                     naiveModel::M,
-                     naiveFrac::Real=0.5,
-                     ss::Function=sampleFluxModelsPose2Pose2,
-                     DT::Real=0.0,
-                     shuffle::Bool=true  ) where {P, M <: SamplableBelief, D <: AbstractMatrix} = FluxModelsPose2Pose2{P,D,M}(
+FluxModelsPose2Pose2( allModels::Vector{P},
+                      jvd::D,
+                      naiveModel::M,
+                      naiveFrac::Real=0.5,
+                      ss::Function=sampleFluxModelsPose2Pose2,
+                      DT::Real=0.0,
+                      shuffle::Bool=true ) where {P, M <: SamplableBelief, D <: AbstractMatrix} = FluxModelsPose2Pose2{P,D,M}(
                                         allModels,
                                         jvd,
                                         naiveModel,
@@ -176,6 +146,23 @@ function (nfb::FluxModelsPose2Pose2)(
   nothing
 end
 
+"""
+    $SIGNATURES
+
+Helper function to assemble the data required for each model.
+"""
+function assembleNNFactorData(dfg::AbstractDFG, fctsym::Symbol, idx::Int)
+  #
+  f1 = getFactor(dfg, fctsym)
+  nfb = getFactorType(f1)
+  varsyms = getVariableOrder(f1)
+  Xi = getVariable(dfg, varsyms[1]) |> getBelief |> getPoints
+  Xj = getVariable(dfg, varsyms[2]) |> getBelief |> getPoints
+
+  # add the specific velocity information
+  calcVelocityInterPose2!(nfb, Xi, Xj, idx)
+  nfb.joyVelData
+end
 
 
 ## packing converters
@@ -270,6 +257,40 @@ function setNaiveFracAll!(dfg::AbstractDFG, frac::Real)
   (x->getFactorType(dfg, x).naiveFrac[] = frac).(fs)
   nothing
 end
+
+
+
+
+
+# function FMP2P2Other()
+#   calcVelocityInterPose2!(nfb, getVal(Xi), getVal(Xj) )
+#   # sample predictive fraction
+#
+#   # and predict
+#       # A = [rand(4) for i in 1:25]
+#   smplsPredAll = nfb.predictFnc(nfb.joyVelData)
+#   # add rotation dimension if not done by the prediction function
+#   if size(smplsPredAll,2) == 2
+#     smplsPredAll = hcat(smplsPredAll, zeros(size(smplsPredAll,1)))
+#   end
+#
+#
+#   Nn = sum(selectSource .== 2)
+#   # calculate desired number of predicted values
+#   Np = N - Nn
+#   # randomly select particles for prediction (with possible duplicates forwhen Np > size(iPts,2))
+#   Npp = Np < numModels ? Np : numModels
+#   Nnn = N - Npp
+#   selPreds = @view selectPredModel[1:Npp] # TODO better in-place
+#   smpls_p = smplsPredAll[selPreds,:] # sample per row??
+#   smpls_p[:,3] .= smplsNaive[3,Nnn+1:N] # use naive delta theta at this time
+#   # naive fraction
+#   smpls_n = @view smplsNaive[:, 1:Nnn] # sample per column
+#   # join and shuffle predicted odo values
+#   shfSmpl = shuffle!(1:N |> collect)
+#   smpls = hcat(smpls_n, smpls_p')[:,shfSmpl]
+# end
+
 
 
 
