@@ -291,7 +291,12 @@ using Requires
 
 function __init__()
   # combining neural networks natively into the non-Gaussian  factor graph object
-  @require Flux="587475ba-b771-5e3f-ad9e-33799f191a9c" include("factors/flux/FluxModelsPose2Pose2.jl")
+  @require Flux="587475ba-b771-5e3f-ad9e-33799f191a9c" begin
+    @info "RoME is adding Flux related functionality."
+    include("factors/flux/models/Pose2OdoNN_01.jl") # until a better way is found to deserialize
+    include("factors/flux/MixtureFluxPose2Pose2.jl")
+    # include("factors/flux/FluxModelsPose2Pose2.jl")
+  end
 end
 
 end

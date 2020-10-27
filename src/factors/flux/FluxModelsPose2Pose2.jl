@@ -1,7 +1,14 @@
 
+
 @info "RoME is adding Flux related functionality."
+
+# Required packages
+using .Flux
+
 include("models/Pose2OdoNN_01.jl") # until a better way is found to deserialize
 
+# make sure the lambdas get defined early
+buildPose2OdoNN_01_FromElements();
 
 # FluxModelsPose2Pose2
 
@@ -11,8 +18,6 @@ export FluxModelsPose2Pose2, sampleFluxModelsPose2Pose2, PackedFluxModelsPose2Po
 export setShuffleAll!, setNaiveFracAll!
 
 
-# Required packages
-using .Flux
 
 using Random, Statistics
 using DistributedFactorGraphs, TransformUtils
@@ -215,6 +220,7 @@ function convert(::Type{FluxModelsPose2Pose2}, d::PackedFluxModelsPose2Pose2)
 end
 
 # need to overwrite for specialSampler
+# TODO rather consolidate with getDimension(::Pose2Pose2)
 function calcZDim(usrfnc::FluxModelsPose2Pose2, Xi::Vector{<:DFGVariable})
   return 3
 end
