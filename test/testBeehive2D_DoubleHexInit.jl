@@ -89,10 +89,10 @@ tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg));
 
 # hist = getCliqSolveHistory(tree, :x1)
 
-#  Do some plotting
-using RoMEPlotting
-Gadfly.set_default_plot_size(35cm,25cm)
-drawPosesLandms(fg, meanmax=:mean) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
+##  Do some plotting
+# using RoMEPlotting
+# Gadfly.set_default_plot_size(35cm,25cm)
+# drawPosesLandms(fg, meanmax=:mean) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
 
 
