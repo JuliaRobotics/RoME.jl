@@ -9,7 +9,7 @@ global N = 100
 global fg = initfg()
 
 # add first pose locations
-addVariable!(fg, :x0, DynPose2(ut=0))
+addVariable!(fg, :x0, DynPose2; nanosecondtime=0)
 
 # Prior factor as boundary condition
 global pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
@@ -19,7 +19,7 @@ addFactor!(fg, [:x0;], pp0)
 # initialize the first pose
 IncrementalInference.doautoinit!(fg, [getVariable(fg,:x0);])
 
-addVariable!(fg, :x1, DynPose2(ut=1000_000))
+addVariable!(fg, :x1, DynPose2;  nanosecondtime=1000_000_000)
 
 # conditional likelihood between Dynamic Point2
 global dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], Matrix(Diagonal([0.01;0.01;0.001].^2))),
@@ -98,7 +98,7 @@ global N = 100
 global fg = initfg()
 
 # add first pose locations
-addVariable!(fg, :x0, DynPose2(ut=0))
+addVariable!(fg, :x0, DynPose2; nanosecondtime=0)
 
 # Prior factor as boundary condition
 global pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
@@ -110,7 +110,7 @@ global k = 0
 for sy in Symbol[Symbol("x$i") for i in 1:10]
 
 global k+=1
-addVariable!(fg, sy, DynPose2(ut=1000_000*k))
+addVariable!(fg, sy, DynPose2; nanosecondtime=1000_000_000*k)
 
 # conditional likelihood between Dynamic Point2
 global dp2dp2 = VelPose2VelPose2(MvNormal([0.0;0;0], Matrix(Diagonal([1.0;0.1;0.001].^2))),
@@ -226,7 +226,7 @@ global N = 100
 global fg = initfg()
 
 # add first pose locations
-addVariable!(fg, :x0, DynPose2(ut=0))
+addVariable!(fg, :x0, DynPose2; nanosecondtime=0)
 
 # Prior factor as boundary condition
 global pp0 = DynPose2VelocityPrior(MvNormal([0.0;0.0;pi/2], Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
@@ -234,7 +234,7 @@ global pp0 = DynPose2VelocityPrior(MvNormal([0.0;0.0;pi/2], Matrix(Diagonal([0.0
 addFactor!(fg, [:x0;], pp0)
 
 
-addVariable!(fg, :x1, DynPose2(ut=1000_000))
+addVariable!(fg, :x1, DynPose2; nanosecondtime=1000_000_000)
 
 global pp0 = DynPose2VelocityPrior(MvNormal([1.0;0.0;pi/2], Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
                             MvNormal([0.0;0], Matrix(Diagonal([0.5; 0.5].^2))))

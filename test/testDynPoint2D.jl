@@ -14,9 +14,9 @@ using Test
 global fg = initfg()
 
 # add two point locations
-global v0 = addVariable!(fg, :x0, DynPoint2(); nanosecondtime=0)
+global v0 = addVariable!(fg, :x0, DynPoint2; nanosecondtime=0)
 
-global v1 = addVariable!(fg, :x1, DynPoint2(ut=1000_000); nanosecondtime=10^9)
+global v1 = addVariable!(fg, :x1, DynPoint2; nanosecondtime=10^9)
 
 # Prior factor as boundary condition
 global pp0 = DynPoint2VelocityPrior(MvNormal([zeros(2);10*ones(2)], 0.1*Matrix{Float64}(LinearAlgebra.I, 4,4)))
@@ -57,9 +57,9 @@ end
 global fg = initfg()
 
 # add two point locations
-global v0 = addVariable!(fg, :x0, DynPoint2(ut=0))
-global v1 = addVariable!(fg, :x1, DynPoint2(ut=1000_000))
-global v2 = addVariable!(fg, :x2, DynPoint2(ut=2000_000))
+global v0 = addVariable!(fg, :x0, DynPoint2; nanosecondtime=0)
+global v1 = addVariable!(fg, :x1, DynPoint2; nanosecondtime=10^9)
+global v2 = addVariable!(fg, :x2, DynPoint2; nanosecondtime=2*10^9)
 
 
 # Prior factor as boundary condition
@@ -118,13 +118,13 @@ global pσ = Matrix(Diagonal([0.1;0.1;0.1;0.1].^2))
 
 global fg = initfg();
 
-addVariable!(fg, :x1, DynPoint2(ut=0))
+addVariable!(fg, :x1, DynPoint2;  nanosecondtime=0)
 global pp = DynPoint2VelocityPrior(MvNormal(pμ,pσ))
 addFactor!(fg, [:x1;], pp, graphinit=false)
 
 ensureAllInitialized!(fg)
 
-addVariable!(fg, :x2, DynPoint2(ut=1_000_000))
+addVariable!(fg, :x2, DynPoint2;  nanosecondtime=1_000_000_000)
 global dpμ = [10.0;0;0;0];
 global dpσ = Matrix(Diagonal([1.0;1;0.5;0.01].^2))
 global vp = VelPoint2VelPoint2(MvNormal(dpμ,dpσ))
