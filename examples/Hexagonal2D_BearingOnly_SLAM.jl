@@ -12,32 +12,33 @@ fg = initfg()
 addVariable!(fg, :x0, Pose2)
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))))
+addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), diagm( [0.1;0.1;0.1].^2 ))))
 
 # Drive around in a hexagon a number of times
 for i in 0:12
     psym = Symbol("x$i")
     nsym = Symbol("x$(i+1)")
     addVariable!(fg, nsym, Pose2)
-    pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal( [0.1;0.1;0.1].^2 ) )))
+    pp = Pose2Pose2(MvNormal([10.0;0;pi/3], diagm( [0.1;0.1;0.1].^2 ) ))
     addFactor!(fg, [psym;nsym], pp )
 end
 
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
-batchSolve!(fg)
+solveTree!(fg);
+
 
 ## Inter-operating visualization packages for Caesar/RoME/IncrementalInference exist
-using RoMEPlotting
-using Compose
+using Cairo, RoMEPlotting
+Gadfly.set_default_plot_size(35cm,20cm)
+
 
 # For Juno/Jupyter style use
-pl = drawPoses(fg)
+pl = plotSLAM2D(fg, contour=false)
 # For scripting use-cases you can export the image
-Gadfly.push_theme(:default) # light background, where Juno uses dark background
-Gadfly.draw(Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm),pl)  # or PNG(...)
+pl |> Gadfly.PDF("/tmp/test1.pdf", 20cm, 10cm)  # or PNG(...)
 
 # Add a landmark l1
-addVariable!(fg, :l1, Point2, tags=["LANDMARK"])
+addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
 
 bear1 = atan(10,20)
 bear2 = atan(10,10) - pi/3
@@ -57,16 +58,16 @@ end
 # plotKDE(fg, [:x0;:x6;:x12], dims=[3])
 # plotKDE(fg, [:x1;:x7;:x13], dims=[1;2])
 
-# writeGraphPdf(fg)
+# drawGraph(fg, show=true)
 
 # Initialize :l1 numerical values but do not rerun solver
 ensureAllInitialized!(fg)
-pl = drawPosesLandms(fg)
-Gadfly.draw(Gadfly.PDF("/tmp/test2.pdf", 20cm, 10cm),pl)  # or PNG(...)
+pl = plotSLAM2D(fg, contour=false)
+pl |> Gadfly.PDF("/tmp/test2.pdf", 20cm, 10cm)  # or PNG(...)
 
 # solve
-batchSolve!(fg)
+solveTree!(fg);
 
 # redraw to see that additional information aids in refining the results
-pl = drawPosesLandms(fg)
-Gadfly.draw(Gadfly.PDF("/tmp/test3.pdf", 20cm, 10cm),pl)  # or PNG(...)
+pl = plotSLAM2D(fg, contour=false)
+pl |> Gadfly.PDF("/tmp/test3.pdf", 20cm, 10cm)  # or PNG(...)
