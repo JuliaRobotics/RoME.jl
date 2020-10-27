@@ -36,6 +36,7 @@ function (pp2br::Pose2Point2Bearing)(res::Array{Float64},
   @simd for i in 1:2
     reuse.predvec[i] = lm[i,idx]-xi[i,idx]
   end
+  normalize!(reuse.predvec)
   reuse.resid .= reuse.measvec
   reuse.resid .-= reuse.predvec
   reuse.resid .^= 2
