@@ -1,3 +1,5 @@
+export projectCartesian
+
 """
 $(TYPEDEF)
 
@@ -53,3 +55,16 @@ $(TYPEDEF)
 Dynamic pose variable with velocity components: `x, y, theta, dx/dt, dy/dt`
 """
 @defVariable DynPose2 5 (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
+
+
+
+"""
+$SIGNATURES
+
+Function to project only XY data onto Cartesian plane for 2D plotting.
+"""
+projectCartesian(pose::Union{Point2,Point3, Pose2, Pose3, DynPoint2, DynPose2}, 
+                 x::Vector{Float64}) = [x[1]; x[2]; 0]
+
+
+#
