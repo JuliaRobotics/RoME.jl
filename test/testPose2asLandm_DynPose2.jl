@@ -54,7 +54,7 @@ mkdir(imgdir)
 global N=100
 global fg = initfg()
 
-addVariable!(fg, :x0, DynPose2(ut=0))
+addVariable!(fg, :x0, DynPose2; nanosecondtime=0)
 addFactor!(fg, [:x0], DynPose2VelocityPrior(MvNormal(zeros(3),Matrix(Diagonal([0.01;0.01;0.001].^2))),
                                             MvNormal(zeros(2),Matrix(Diagonal([0.05;0.05].^2)))) )
 
@@ -85,7 +85,7 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 
 # pose :x1
-addVariable!(fg, :x1, DynPose2(ut=1000_000))
+addVariable!(fg, :x1, DynPose2; nanosecondtime=1000_000_000)
 addFactor!(fg, [:x0;:x1],VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
                                           MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
@@ -122,7 +122,7 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 
 # pose :x2
-addVariable!(fg, :x2, DynPose2(ut=2000_000))
+addVariable!(fg, :x2, DynPose2; nanosecondtime=2000_000_000)
 addFactor!(fg, [:x1;:x2], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
                                            MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
@@ -150,7 +150,7 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 
 # gtp[:x3] = [2.0;0;0]
-addVariable!(fg, :x3, DynPose2(ut=3000_000))
+addVariable!(fg, :x3, DynPose2; nanosecondtime=3000_000_000)
 addFactor!(fg, [:x2;:x3], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
                                            MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
@@ -178,7 +178,7 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 # pose :x4
 # gtp[:x4] = [2.5;0;0]
-addVariable!(fg, :x4, DynPose2(ut=4000_000))
+addVariable!(fg, :x4, DynPose2; nanosecondtime=4000_000_000)
 addFactor!(fg, [:x3;:x4], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
                                            MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
@@ -214,7 +214,7 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 # pose :x5
 # gtp[:x5] = [3.0;0;0]
-addVariable!(fg, :x5, DynPose2(ut=5000_000))
+addVariable!(fg, :x5, DynPose2; nanosecondtime=5000_000_000)
 addFactor!(fg, [:x4;:x5], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
                                            MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
@@ -243,7 +243,7 @@ Gadfly.draw(PNG(joinpath(imgdir,"hist_x$(psid).png"),30cm, 25cm),pl)
 
 # pose :x6
 # gtp[:x6] = [3.0;0;0]
-addVariable!(fg, :x6, DynPose2(ut=6000_000))
+addVariable!(fg, :x6, DynPose2; nanosecondtime=6000_000_000)
 addFactor!(fg, [:x5;:x6], VelPose2VelPose2(MvNormal(zeros(3),Matrix(Diagonal([xposesig;yposesig;thetasig].^2))),
                                            MvNormal(zeros(2),Matrix(Diagonal([xvelsig;yvelsig].^2))) ))
 
