@@ -38,7 +38,7 @@ ccw.cpt[1].res = zeros(1)
 
 @time for n in 1:N
   ccw.cpt[Threads.threadid()].particleidx = n
-  numericRootGenericRandomizedFnc!( ccw ) #fr
+  numericSolutionCCW!( ccw ) #fr
 end
 
 
@@ -75,7 +75,7 @@ ccw.cpt[1].res = zeros(1)
 
 @time for n in 1:N
   ccw.cpt[Threads.nthreads()].particleidx = n
-  numericRootGenericRandomizedFnc!( ccw )
+  numericSolutionCCW!( ccw )
 end
 
 
