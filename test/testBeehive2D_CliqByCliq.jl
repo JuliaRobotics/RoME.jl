@@ -15,10 +15,12 @@ fg = generateCanonicalFG_Hexagonal(graphinit=false)
 
 getSolverParams(fg).drawtree = false
 getSolverParams(fg).showtree = false
-@error "Note tree init test has been reduced as part of v0.9.0 upgrade and will be restored as a dedidicated effort later."
+getSolverParams(fg).graphinit = false
+getSolverParams(fg).treeinit = true
 getSolverParams(fg).downsolve = true
 getSolverParams(fg).multiproc = false
 getSolverParams(fg).async = false
+getSolverParams(fg).useMsgLikelihoods=true
 # to disable parent factor sharing
 # getSolverParams(fg).devParams[:dontUseParentFactorsInitDown] = ""
 

@@ -71,12 +71,16 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, graphinit=false )
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
-getSolverParams(fg).downsolve = false
+# getSolverParams(fg).downsolve = false
 getSolverParams(fg).multiproc = false
+
+getSolverParams(fg).graphinit = false
+getSolverParams(fg).treeinit = true
+getSolverParams(fg).useMsgLikelihoods = true
 # fg.solverParams.async = true
 
 # solve
-tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg))
+tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg));
 
 
 
@@ -85,10 +89,10 @@ tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg))
 
 # hist = getCliqSolveHistory(tree, :x1)
 
-#  Do some plotting
-using RoMEPlotting
-Gadfly.set_default_plot_size(35cm,25cm)
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
+##  Do some plotting
+# using RoMEPlotting
+# Gadfly.set_default_plot_size(35cm,25cm)
+# drawPosesLandms(fg, meanmax=:mean) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
 
 
