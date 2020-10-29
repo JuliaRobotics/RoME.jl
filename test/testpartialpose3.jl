@@ -161,6 +161,8 @@ end
 global estmu1mean = Statistics.mean(val[collect(DFG.getSolverData(f1).fnc.usrfnc!.partial),:],dims=2)
 global estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.partial),:],dims=2)
 
+@show estmu1mean
+@show estmu2mean
 @test sum(abs.(estmu1mean - mu1[[3;1;2]]) .< [0.7; 0.1; 0.1]) == 3
 @test sum(abs.(estmu2mean - mu2) .< [0.7; 0.7; 0.15] ) == 3
 

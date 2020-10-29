@@ -104,7 +104,7 @@ global n = 1
 for n in 1:N
 
 ccw.cpt[Threads.threadid()].particleidx = n
-numericRootGenericRandomizedFnc!( ccw )
+numericSolutionCCW!( ccw )
 
 # test the result
 global qq = convert(Quaternion, Euler(eul[:,ccw.cpt[Threads.threadid()].particleidx]...))
