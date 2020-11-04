@@ -165,10 +165,12 @@ Related
 generateCanonicalFG_Circle, generateCanonicalFG_Kaess, generateCanonicalFG_TwoPoseOdo
 """
 function generateCanonicalFG_Hexagonal(;fg::AbstractDFG=initfg(),
-                                       autoinit::Union{Bool, Nothing}=nothing,
-                                       graphinit::Bool=true  )
+                                        N::Int=100,
+                                        autoinit::Union{Bool, Nothing}=nothing,
+                                        graphinit::Bool=true  )
   #
-  graphinit = if autoinit == nothing
+  getSolverParams(fg).N = N
+  graphinit = if autoinit === nothing
     graphinit
   else
     @warn "autoinit is deprecated, use graphinit instead"
