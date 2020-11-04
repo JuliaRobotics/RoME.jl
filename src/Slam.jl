@@ -35,7 +35,11 @@ mutable struct SLAMWrapper <: AbstractSLAM
   SLAMWrapper(a,b,c) = new(a,b,c,:x1, SE3(0), Dict{Symbol,Int}(), Dict{Int,Symbol}()) # TODO to be deprecated
 end
 
+"""
+    $TYPEDEF
 
+Container for settings and synchronization tools for use with manageSolveTree.
+"""
 mutable struct ManageSolveSettings
   solveStride
   loopSolver
