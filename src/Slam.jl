@@ -172,7 +172,11 @@ function blockSolvingInProgress(slam::SLAMWrapperLocal)
   end
 end
 
-#
+"""
+    $SIGNATURES
+
+Asynchronous solver manager that can run concurrently while other Tasks are modifying a common distributed factor graph object.
+"""
 function manageSolveTree!(dfg::AbstractDFG,
                           mss::ManageSolveSettings;
                           dbg::Bool=false,
