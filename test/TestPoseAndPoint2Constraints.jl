@@ -32,7 +32,7 @@ f2 = addFactor!(fg, [:x0;:x1], ppc)
 
 # test evaluation of pose pose constraint
 pts = approxConv(fg, :x0x1f1, :x1)
-# pts = evalFactor2(fg, f2, v2.index)
+# pts = evalFactor(fg, f2, v2.index)
 @test norm(Statistics.mean(pts,dims=2)[1:2] - [50.0;0.0]) < 10.0
 @test abs(Statistics.mean(pts,dims=2)[3] - pi/2) < 0.5
 
@@ -85,7 +85,7 @@ f4 = addFactor!(fg, [:x0;:l1], ppr)
 
 
 pts = approxConv(fg, :x0l1f1, :l1, N=N)
-# pts = evalFactor2(fg, f4, l1.index, N=N)
+# pts = evalFactor(fg, f4, l1.index, N=N)
 ## res = zeros(2)
 ## meas = getSample(ppr)
 ## ppr(res,nothing,1,meas,xi,lm )
@@ -96,7 +96,7 @@ pts = approxConv(fg, :x0l1f1, :l1, N=N)
 
 
 pts = approxConv(fg, :x0l1f1, :x0)
-# pts = evalFactor2(fg, f4, v1.index, N=200)
+# pts = evalFactor(fg, f4, v1.index, N=200)
 # @show sum(sqrt(sum(pts.^2, 1 )) .< 5.0)
 # @test sum(sqrt(sum(pts.^2, 1 )) .< 5.0) == 0
 
@@ -107,7 +107,7 @@ pp2 = PriorPoint2(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0]))))
 
 f5 = addFactor!(fg,[l1], pp2)
 pts = approxConv(fg, f5.label, l1.label)
-# pts = evalFactor2(fg, f5, l1.label)
+# pts = evalFactor(fg, f5, l1.label)
 
 
 @test norm(Statistics.mean(pts, dims=2)[:]-[10.0;0.0]) < 5.0

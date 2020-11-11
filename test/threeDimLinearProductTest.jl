@@ -102,9 +102,9 @@ end
 ensureAllInitialized!(fg)
 @test isInitialized(fg, :x2)
 global X1pts = approxConv(fg, :x1x2f1, :x1)
-# X1pts = evalFactor2(fg, fg.g.vertices[4], 1)
+# X1pts = evalFactor(fg, fg.g.vertices[4], 1)
 global X2pts = approxConv(fg, :x1x2f1, :x2)
-# X2pts = evalFactor2(fg, fg.g.vertices[4], 3)
+# X2pts = evalFactor(fg, fg.g.vertices[4], 3)
 global X2ptsMean = Statistics.mean(X2pts,dims=2)
 global X1ptsMean = Statistics.mean(X1pts,dims=2)
 @show X1ptsMean

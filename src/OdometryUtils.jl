@@ -30,15 +30,15 @@ Dev Notes
 
 Related
 
-accumulateContinuousLocalFrame!, accumulateDiscreteReferenceFrame!
+accumulateContinuousLocalFrame!, accumulateDiscreteReferenceFrame!, [`accumulateFactorMeans`](@ref)
 """
-function accumulateDiscreteLocalFrame!(mpp::MutablePose2Pose2Gaussian,
-                                       DX::Vector{Float64},
-                                       Qc::Matrix{Float64},
-                                       dt::Float64=1.0;
-                                       Fk = SE2([0;0;-DX[3]]),
-                                       Gk = Matrix{Float64}(LinearAlgebra.I, 3,3),
-                                       Phik = SE2(DX) )
+function accumulateDiscreteLocalFrame!( mpp::MutablePose2Pose2Gaussian,
+                                        DX::Vector{Float64},
+                                        Qc::Matrix{Float64},
+                                        dt::Float64=1.0;
+                                        Fk = SE2([0;0;-DX[3]]),
+                                        Gk = Matrix{Float64}(LinearAlgebra.I, 3,3),
+                                        Phik = SE2(DX) )
   #
   kXk1 = SE2(mpp.Zij.μ)*Phik
   phi, gamma, Qd = cont2disc(Fk, Gk, Qc, dt, Phik)
@@ -62,26 +62,30 @@ Notes:
 - Developed for accumulating odometry in a `MutablePosePose` and then cloning out a standard PosePose and new variable.
 - Does not change the original MutablePosePose source factor or variable in any way.
 - Assumes timestampe from mpp object.
+
+Related
+
+[`addVariable!`](@ref), [`addFactor!`](@ref)
 """
-function duplicateToStandardFactorVariable(::Type{Pose2Pose2},
-                                           mpp::MutablePose2Pose2Gaussian,
-                                           dfg::AbstractDFG,
-                                           prevsym::Symbol,
-                                           newsym::Symbol;
-                                           solvable::Int=1,
-                                           autoinit::Union{Nothing, Bool}=nothing,
-                                           graphinit::Bool=true,
-                                           cov::Union{Nothing, Matrix{Float64}}=nothing  )::Symbol
+function duplicateToStandardFactorVariable( ::Type{Pose2Pose2},
+                                            mpp::MutablePose2Pose2Gaussian,
+                                            dfg::AbstractDFG,
+                                            prevsym::Symbol,
+                                            newsym::Symbol;
+                                            solvable::Int=1,
+                                            graphinit::Bool=true,
+                                            cov::Union{Nothing, Matrix{Float64}}=nothing  )::Symbol
   #
-  graphinit = autoinit != nothing ? (@warn "autoinit deprecated, use graphinit instead."; autoinit) : graphinit
 
   # extract factor values and create PosePose object
-  posepose = Pose2Pose2(MvNormal(mpp.Zij.μ, cov==nothing ? mpp.Zij.Σ.mat : cov))
+  posepose = Pose2Pose2(MvNormal(mpp.Zij.μ, cov===nothing ? mpp.Zij.Σ.mat : cov))
 
   # modify the factor graph
   addVariable!(dfg, newsym, Pose2, solvable=solvable, timestamp=mpp.timestamp)
-  addFactor!(dfg, [prevsym; newsym], posepose, solvable=solvable, graphinit=graphinit, timestamp=mpp.timestamp)
-  return ls(dfg, newsym)[1]
+  fct = addFactor!(dfg, [prevsym; newsym], posepose, solvable=solvable, graphinit=graphinit, timestamp=mpp.timestamp)
+  # new factor name
+  # return ls(dfg, newsym)[1]
+  return DFG.getLabel(fct)
 end
 
 """
