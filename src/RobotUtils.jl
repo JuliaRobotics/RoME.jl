@@ -672,9 +672,9 @@ Related
 DFG.getVariableLabelNumber, DFT.findFactorsBetweenNaive
 """
 function listVariablesLabelsWithinRange(fg::AbstractDFG,
-                                       regexKey::Regex=r"x";
-                                       from::Int=0, to::Int=9999999999,
-                                       minnei::Int=0)
+                                        regexKey::Regex=r"x";
+                                        from::Int=0, to::Int=9999999999,
+                                        minnei::Int=0)
   #
 
   # if sym = 'l', ignore single measurement landmarks
@@ -688,10 +688,11 @@ function listVariablesLabelsWithinRange(fg::AbstractDFG,
     if length( DFG.getNeighbors(fg, id) ) >= minnei
       mask[count] = true
     end
-    if from != 0 || to != 9999999999
+    if occursin(r"l\d", string(id)) && (from != 0 || to != 9999999999)
       vertlbl = string(id)
         # TODO won't work with nested labels
-        val = parse(Int,split(vertlbl[2:end],'_')[1])
+        val_ = split(vertlbl[2:end],'_')[1]
+        val = parse(Int,val_)
         if !(from <= val && val <= to)
           mask[count] = false
         end
