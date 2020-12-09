@@ -688,7 +688,7 @@ function listVariablesLabelsWithinRange(fg::AbstractDFG,
     if length( DFG.getNeighbors(fg, id) ) >= minnei
       mask[count] = true
     end
-    if occursin(r"l\d", string(id)) && (from != 0 || to != 9999999999)
+    if occursin(regexKey, string(id)) && (from != 0 || to != 9999999999)
       vertlbl = string(id)
         # TODO won't work with nested labels
         val_ = split(vertlbl[2:end],'_')[1]
