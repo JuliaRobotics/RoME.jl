@@ -11,7 +11,6 @@ using Test
 testfiles = [
 "testTreeInitCommonMsg_IIF913.jl";
 "testPose3Pose3NH.jl";
-"testPoint2Point2WorldBearing.jl";  # FIXME, deprecate and replace
 "testBeehive2D_CliqByCliq.jl";      # special case debugging
 "testhigherdimroots.jl";
 "testManifoldsPose2Equivalent.jl";
@@ -38,6 +37,8 @@ testfiles = [
 # "HexagonalLightGraphs.jl"
 # "testCameraFunctions.jl"
 # "testmultiplefeatures.jl"
+# "testPoint2Point2WorldBearing.jl";  # deprecate
+
 
 
 for testf in testfiles
