@@ -27,12 +27,12 @@ Related
 Pose2Pose2, Pose3Pose3, InertialPose3, DynPose2Pose2, Point2Point2, VelPoint2VelPoint2
 """
 function (::MutablePose2Pose2Gaussian)(
-                 res::Vector{Float64},
-                 userdata,
-                 idx::Int,
-                 meas::Tuple,
-                 wxi::Array{Float64,2},
-                 wxj::Array{Float64,2}  )::Nothing
+                  res::Vector{Float64},
+                  userdata,
+                  idx::Int,
+                  meas::Tuple,
+                  wxi::Array{Float64,2},
+                  wxj::Array{Float64,2}  )::Nothing
   #
   wXjhat = SE2(wxi[1:3,idx])*SE2(meas[1][1:3,idx])
   jXjhat = SE2(wxj[1:3,idx]) \ wXjhat

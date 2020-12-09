@@ -80,7 +80,7 @@ initVariable!(fg, :x2)
 
 # using IncrementalInference
 #
-# pts = evalFactor2(fg, fg.g.vertices[fg.fIDs[:x1x2]], fg.IDs[:x2])
+# pts = evalFactor(fg, fg.g.vertices[fg.fIDs[:x1x2]], fg.IDs[:x2])
 #
 # @show Base.mean(pts,2)
 

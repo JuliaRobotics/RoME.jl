@@ -65,7 +65,7 @@ end
 @testset "Testing PriorPose3 evaluation..." begin
 
 global priorpts = approxConv(fg, :x1f1, :x1)
-# priorpts = evalFactor2(fg, fg.g.vertices[2], 1)
+# priorpts = evalFactor(fg, fg.g.vertices[2], 1)
 global means = Statistics.mean(priorpts,dims=2)
 @test sum(map(Int,abs.(means[1:3]) .> 0.5)) == 0
 @test sum(map(Int,abs.(means[4:6]) .> 0.05)) == 0
@@ -86,7 +86,7 @@ end
 
 global X1pts = getVal(fg, :x1)
 global X2pts = approxConv(fg, :x2x3f1, :x2, N=N)
-# X2pts = evalFactor2(fg, fg.g.vertices[6], 3, N=N)
+# X2pts = evalFactor(fg, fg.g.vertices[6], 3, N=N)
 global X3pts = approxConv(fg, :x2x3f1, :x3)
 global X2ptsMean = Statistics.mean(X2pts,dims=2)
 global X3ptsMean = Statistics.mean(X3pts,dims=2)

@@ -1,7 +1,5 @@
 #  test MultipleFeatures2D
 using RoME
-# , Distributions
-# using IncrementalInference   # for evalFactor2
 using Test
 
 using Optim
@@ -232,7 +230,7 @@ data = getData(f2)
 @test data.fnc.threadmodel == SingleThreaded
 
 ef2pts = approxConv(fg, :x1x2l1l2l3f1, :l2)
-# evalFactor2(fg, f2, fg.IDs[:l2])
+# evalFactor(fg, f2, fg.IDs[:l2])
 
 
 tree, smt, hist = solveTree!(fg)
