@@ -25,7 +25,7 @@ DevNotes
 """
 mutable struct SLAMWrapper <: AbstractSLAM
   fg::AbstractDFG
-  tree::NothingUnion{IncrementalInference.BayesTree}
+  tree::NothingUnion{IncrementalInference.AbstractBayesTree}
   lndmidx::Int
   lastposesym::Symbol
   lastpose::SE3
