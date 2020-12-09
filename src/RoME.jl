@@ -13,7 +13,6 @@ using
   Distributed,
   LinearAlgebra,
   Statistics,
-  Graphs,  # TODO determine how many parts still require Graphs still directly
   Rotations,
   CoordinateTransformations,
   JLD2,
@@ -21,6 +20,9 @@ using
   DocStringExtensions,
   DistributedFactorGraphs,
   TensorCast
+
+# using Graphs,  # TODO determine how many parts still require Graphs still directly
+
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
