@@ -26,21 +26,21 @@ mutable struct RangeAzimuthElevation
   elevation::Union{Nothing,Float64}
 end
 
-function convert(::Type{Rotations.Quat}, q::TransformUtils.Quaternion)
-  Rotations.Quat(q.s, q.v...)
+function convert(::Type{Rotations.UnitQuaternion}, q::TransformUtils.Quaternion)
+  Rotations.UnitQuaternion(q.s, q.v...)
 end
-function convert(::Type{Rotations.Quat}, x::SO3)
+function convert(::Type{Rotations.UnitQuaternion}, x::SO3)
   q = convert(TransformUtils.Quaternion, x)
-  convert(Rotations.Quat, q)
+  convert(Rotations.UnitQuaternion, q)
 end
 function convert(::Type{T}, x::SO3) where {T <: CoordinateTransformations.AffineMap}
-  LinearMap( convert(Quat, x) )
+  LinearMap( convert(Rotations.UnitQuaternion, x) )
 end
 
 function convert(::Type{T}, x::SE3) where {T <: CoordinateTransformations.AffineMap}
-  Translation(x.t...) ∘ convert(AffineMap{Rotations.Quat{Float64}}, x.R)
+  Translation(x.t...) ∘ convert(AffineMap{Rotations.UnitQuaternion{Float64}}, x.R)
 end
-function convert(::Type{SE3}, x::T) where {T <: CoordinateTransformations.AffineMap{Rotations.Quat{Float64}}}
+function convert(::Type{SE3}, x::T) where {T <: CoordinateTransformations.AffineMap{Rotations.UnitQuaternion{Float64}}}
   SE3(x.translation[1:3], TransformUtils.Quaternion(x.linear.w, [x.linear.x,x.linear.y,x.linear.z]) )
 end
 
