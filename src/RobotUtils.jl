@@ -446,9 +446,11 @@ function listVariablesLabelsWithinRange(fg::AbstractDFG,
     if occursin(regexKey, string(id)) && (from != 0 || to != 9999999999)
       vertlbl = string(id)
         # TODO won't work with nested labels
-        val_ = split(vertlbl[2:end],'_')[1]
-        val = parse(Int,val_)
-        if !(from <= val && val <= to)
+        m = match(r"\d+", string(id))
+        val = parse(Int, m.match)
+        # val_ = split(vertlbl[2:end],'_')[1]
+        # val = parse(Int,val_)
+        if !(from <= val <= to)
           mask[count] = false
         end
     end
