@@ -286,7 +286,7 @@ function addOdoFG!(fgl::G,
                    solvable::Int=1,
                    labels::Vector{<:AbstractString}=String[]  ) where {G <: AbstractDFG}
   #
-  vprev, X, nextn = getLastPose(fgl)
+  vprev, X, nextn = getLastPoses(fgl)[1]
   vnext = addVariable!(fgl, nextn, Pose3, solvable=solvable, tags=labels)
   fact = addFactor!(fgl, [vprev;vnext], Z, graphinit=true)
 
