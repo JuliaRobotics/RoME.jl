@@ -4,7 +4,7 @@
 """
 $(TYPEDEF)
 """
-mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInference.AbstractRelativeFactorMinimize
+mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInference.AbstractRelativeMinimize
   Z::D
   Point2Point2Range{D}() where {D} = new{D}()
   Point2Point2Range{D}(d::D) where {D <: IIF.SamplableBelief} = new{D}(d)
