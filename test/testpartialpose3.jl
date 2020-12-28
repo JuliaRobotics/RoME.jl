@@ -7,23 +7,23 @@ using RoME
 using Test
 
 
-global N=50
-global fg = initfg()
+N=50
+fg = initfg()
 
-global v1 = addVariable!(fg,:x1, Pose3, N=N) # 0.001*randn(6,N)
-global f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal(zeros(6),1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
+v1 = addVariable!(fg,:x1, Pose3, N=N) # 0.001*randn(6,N)
+f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal(zeros(6),1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 
-global sigx = 0.01
-global sigy = 0.01
-global sigth = 0.0281
-global mu1 = [0.0;0.0; -10.0]
-global prpz = PartialPriorRollPitchZ(
+sigx = 0.01
+sigy = 0.01
+sigth = 0.0281
+mu1 = [0.0;0.0; -10.0]
+prpz = PartialPriorRollPitchZ(
   MvNormal( mu1[1:2], [sigx 0.0; 0.0 sigy]^2 ),
   Normal( mu1[3], sigth )
 )
 
-global mu2 = [20.0,5.0,pi/2]
-global xyy = PartialPose3XYYaw(
+mu2 = [20.0,5.0,pi/2]
+xyy = PartialPose3XYYaw(
   MvNormal(
     mu2[1:2],
     [sigx 0.0; 0.0 sigy]^2
@@ -31,10 +31,10 @@ global xyy = PartialPose3XYYaw(
   Normal( mu2[3], sigth )
 )
 
-global v2 = addVariable!(fg,:x2, Pose3, N=N) # randn(6,N)
+v2 = addVariable!(fg,:x2, Pose3, N=N) # randn(6,N)
 
-global f1 = addFactor!(fg, [:x2], prpz, graphinit=false)
-global f2 = addFactor!(fg, [:x1;:x2], xyy, graphinit=false)
+f1 = addFactor!(fg, [:x2], prpz, graphinit=false)
+f2 = addFactor!(fg, [:x1;:x2], xyy, graphinit=false)
 
 
 # ls(fg, :x2)
@@ -56,15 +56,15 @@ ensureAllInitialized!(fg)
 @test isInitialized(fg, :x2)
 
 # get values and ensure that a re-evaluation produces consistent results
-global X2pts = getVal(fg, :x2)
+X2pts = getVal(fg, :x2)
 @test sum(isnan.(X2pts)) == 0
 
 # check that only partial states are updated
-global pts = IIF.approxConv(fg, :x2f1, :x2, N=N)
+pts = IIF.approxConv(fg, :x2f1, :x2, N=N)
 
-global newdims = collect(DFG.getSolverData(f1).fnc.usrfnc!.partial)
+newdims = collect(DFG.getSolverData(f1).fnc.usrfnc!.partial)
 
-global olddims = setdiff(collect(1:6), newdims)
+olddims = setdiff(collect(1:6), newdims)
 
 @test size(pts, 1) == 6
 @test size(pts, 2) == N
@@ -87,24 +87,29 @@ end
 
 @testset "test residual function of PartialPose3XYYaw" begin
 
-  global res = zeros(3)
-  global idx = 1
-  global meas = getSample(xyy)
-  global xi = zeros(6,1)
-  global xja = zeros(6,1)
-  xyy(res, nothing, idx, meas, xi, xja)
-  @test abs(res[1]-mu2[1]) < 0.3
-  @test abs(res[2]-mu2[2]) < 0.3
-  @test abs(res[3]-mu2[3]) < 0.2
+tfg = initfg()
+X0 = addVariable!(tfg, :x0, Pose3)
+X1 = addVariable!(tfg, :x1, Pose3)
+fmd = IIF._defaultFactorMetadata([X0;X1])
 
-  global xjb = zeros(6,1)
-  xjb[collect(xyy.partial),1] = mu2
-  global res = zeros(3)
-  xyy(res, nothing, idx, meas, xi, xjb)
-  @test 0.0 < norm(res) < 0.3
+res = zeros(3)
+idx = 1
+meas = getSample(xyy)
+xi = zeros(6,1)
+xja = zeros(6,1)
+xyy(res, fmd, idx, meas, xi, xja)
+@test abs(res[1]-mu2[1]) < 0.3
+@test abs(res[2]-mu2[2]) < 0.3
+@test abs(res[3]-mu2[3]) < 0.2
 
-  global meas = getSample(xyy,100)
-  @test norm(Statistics.std(meas[1],dims=2) - [0.01;0.01;0.002]) < 0.05
+xjb = zeros(6,1)
+xjb[collect(xyy.partial),1] = mu2
+res = zeros(3)
+xyy(res, fmd, idx, meas, xi, xjb)
+@test 0.0 < norm(res) < 0.3
+
+meas = getSample(xyy,100)
+@test norm(Statistics.std(meas[1],dims=2) - [0.01;0.01;0.002]) < 0.05
 
 end
 
@@ -113,12 +118,12 @@ end
 @testset "test PartialPose3XYYaw evaluations" begin
 
 # get existing and predict new
-global X2pts = getKDE(fg, :x2) |> getPoints
-global pts = approxConv(fg, :x1x2f1, :x2, N=N)
+X2pts = getBelief(fg, :x2) |> getPoints
+pts = approxConv(fg, :x1x2f1, :x2, N=N)
 
 # find which dimensions are and and are not updated by XYYaw partial
-global newdims = collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
-global olddims = setdiff(collect(1:6), newdims)
+newdims = collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
+olddims = setdiff(collect(1:6), newdims)
 
 # check the number of points are correct
 @test size(pts, 1) == 6
@@ -141,7 +146,7 @@ end
 @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
 
 # ensure that memory pointers are working correctly
-global memcheck = getVal(v2)
+memcheck = getVal(v2)
 @test norm(X2pts - memcheck) < 1e-10
 
 end
@@ -149,7 +154,7 @@ end
 
 @testset "test predictbelief with two functions" begin
 
-global val, = predictbelief(fg, :x2, ls(fg, :x2), N=N)
+val, = predictbelief(fg, :x2, ls(fg, :x2), N=N)
 
 for i in 1:N
   val[6,i] = wrapRad(val[6,i])
@@ -158,15 +163,15 @@ end
 @test size(val, 1) == 6
 @test size(val, 2) == N
 
-global estmu1mean = Statistics.mean(val[collect(DFG.getSolverData(f1).fnc.usrfnc!.partial),:],dims=2)
-global estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.partial),:],dims=2)
+estmu1mean = Statistics.mean(val[collect(DFG.getSolverData(f1).fnc.usrfnc!.partial),:],dims=2)
+estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.partial),:],dims=2)
 
 @show estmu1mean
 @show estmu2mean
 @test sum(abs.(estmu1mean - mu1[[3;1;2]]) .< [0.7; 0.1; 0.1]) == 3
 @test sum(abs.(estmu2mean - mu2) .< [0.7; 0.7; 0.15] ) == 3
 
-global memcheck = getVal(v2)
+memcheck = getVal(v2)
 @test 1e-10 < norm(val - memcheck)
 
 
