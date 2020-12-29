@@ -31,7 +31,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct Point2Point2{D <: IIF.SamplableBelief} <: AbstractRelativeFactor
+mutable struct Point2Point2{D <: IIF.SamplableBelief} <: AbstractRelativeRoots
     Zij::D
     # empty constructor
     Point2Point2{T}() where T = new{T}()

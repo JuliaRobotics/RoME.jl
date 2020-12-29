@@ -22,7 +22,7 @@ getSample(dp2v::DynPose2VelocityPrior{T1,T2}, N::Int=1) where {T1 <: IIF.Samplab
 """
 $(TYPEDEF)
 """
-mutable struct DynPose2Pose2{T} <: IncrementalInference.AbstractRelativeFactor where {T <: IIF.SamplableBelief}
+mutable struct DynPose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRoots
   Zpose::Pose2Pose2{T} #Zpose::T1
   # reuseres::Vector{Float64}
   partial::Tuple{Int,Int,Int}
@@ -32,13 +32,12 @@ end
 DynPose2Pose2(z1::T) where {T <: IIF.SamplableBelief} = DynPose2Pose2{T}(z1)
 
 getSample(vp2vp2::DynPose2Pose2, N::Int=1) = (rand(vp2vp2.Zpose.z,N), )
-function (vp2vp2::DynPose2Pose2{T})(
-                res::Array{Float64},
-                userdata::FactorMetadata,
-                idx::Int,
-                meas::Tuple,
-                wXi::Array{Float64,2},
-                wXj::Array{Float64,2}  ) where {T <: IIF.SamplableBelief}
+function (vp2vp2::DynPose2Pose2{T})(res::Array{Float64},
+                                    userdata::FactorMetadata,
+                                    idx::Int,
+                                    meas::Tuple,
+                                    wXi::Array{Float64,2},
+                                    wXj::Array{Float64,2}  ) where {T <: IIF.SamplableBelief}
   #
   vp2vp2.Zpose(res, userdata, idx, meas, wXi, wXj)
     # wXjhat = SE2(wxi[1:3,idx])*SE2(meas[1][1:3,idx])
@@ -115,7 +114,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeFactor
+mutable struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeRoots
   Z::T
   reuseres::Vector{Vector{Float64}}
   DynPose2DynPose2{T}() where {T <: IIF.SamplableBelief} = new{T}()

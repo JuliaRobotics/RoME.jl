@@ -9,7 +9,7 @@ export Pose2Point2, PackedPose2Point2
 
 Bearing and Range constraint from a Pose2 to Point2 variable.
 """
-struct Pose2Point2{T <: IIF.SamplableBelief} <: IncrementalInference.AbstractRelativeFactorMinimize
+struct Pose2Point2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
     Zij::T
     # empty constructor
     Pose2Point2{T}() where {T} = new{T}()

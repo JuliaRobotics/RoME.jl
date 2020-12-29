@@ -6,7 +6,7 @@ import IncrementalInference: getSample
 using TransformUtils
 
 
-mutable struct ZJoint <: AbstractRelativeFactor
+mutable struct ZJoint <: AbstractRelativeRoots
   Zij::Distribution
 end
 function getSample(el::ZJoint, N=1)
@@ -33,7 +33,7 @@ function (el::ZJoint)(res, userdata, idx, meas, xi, xj)
   nothing
 end
 
-mutable struct XJoint <: AbstractRelativeFactor
+mutable struct XJoint <: AbstractRelativeRoots
   Zij::Distribution
 end
 function getSample(el::XJoint, N=1)

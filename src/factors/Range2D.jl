@@ -55,7 +55,7 @@ end
 
 Range only measurement from Pose2 to Point2 variable.
 """
-mutable struct Pose2Point2Range{T} <: IncrementalInference.AbstractRelativeFactorMinimize
+mutable struct Pose2Point2Range{T} <: IIF.AbstractRelativeMinimize
   Z::T
   partial::Tuple{Int,Int}
   Pose2Point2Range{T}() where T = new()

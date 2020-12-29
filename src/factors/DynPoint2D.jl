@@ -16,7 +16,7 @@ getSample(dp2v::DynPoint2VelocityPrior, N::Int=1) = (rand(dp2v.z,N), )
 """
 $(TYPEDEF)
 """
-mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeFactor
+mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeRoots
   z::T
   DynPoint2DynPoint2{T}() where {T <: SamplableBelief} = new{T}()
   DynPoint2DynPoint2(z1::T) where {T <: SamplableBelief} = new{T}(z1)
@@ -44,7 +44,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct Point2Point2Velocity{T} <: IncrementalInference.AbstractRelativeFactorMinimize where {T <: Distribution}
+mutable struct Point2Point2Velocity{T} <: IncrementalInference.AbstractRelativeMinimize where {T <: Distribution}
   z::T
   Point2Point2Velocity{T}() where {T <: Distribution} = new{T}()
   Point2Point2Velocity(z1::T) where {T <: Distribution} = new{T}(z1)
