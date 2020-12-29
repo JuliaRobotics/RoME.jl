@@ -31,7 +31,8 @@ struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: AbstractRe
   joyVelData::D
   naiveModel::M
   naiveFrac::Ref{Float64}
-  Zij::Pose2Pose2
+  # TODO type stability likely wants parameter Pose2Pose2{<:SamplableBelief}
+  Zij::Pose2Pose2{<:SamplableBelief}
   specialSampler::Function # special keyword field name used to invoke 'specialSampler' logic
   DT::Ref{Float64}
   shuffle::Ref{Bool}

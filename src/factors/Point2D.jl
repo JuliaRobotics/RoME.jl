@@ -4,7 +4,7 @@ $(TYPEDEF)
 
 Direction observation information of a `Point2` variable.
 """
-mutable struct PriorPoint2{T} <: IncrementalInference.AbstractPrior where {T <: IIF.SamplableBelief}
+mutable struct PriorPoint2{T <: IIF.SamplableBelief} <: IncrementalInference.AbstractPrior
   Z::T
   # empty constructor
   PriorPoint2{T}() where T = new()
