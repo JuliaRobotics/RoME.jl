@@ -133,7 +133,7 @@ Partial factor between XY and Yaw of two Pose3 variables.
 
 To be deprecated: use Pose3Pose3XYYaw instead.
 """
-mutable struct PartialPose3XYYaw{T1,T2} <: AbstractRelativeFactor where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+mutable struct PartialPose3XYYaw{T1,T2} <: AbstractRelativeMinimize where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   xy::T1
   yaw::T2
   partial::Tuple{Int,Int,Int}
@@ -145,17 +145,17 @@ PartialPose3XYYaw(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.S
 function getSample(pxyy::PartialPose3XYYaw, N::Int=1)
   return ([rand(pxyy.xy,N);rand(pxyy.yaw,N)[:]'], )
 end
-function (pxyy::PartialPose3XYYaw)(res::Array{Float64},
-            userdata,
-            idx::Int,
-            meas::Tuple{Array{Float64,2}},
-            wXi::Array{Float64,2},
-            wXj::Array{Float64,2}  )
+function (pxyy::PartialPose3XYYaw)( res::Array{Float64},
+                                    userdata::FactorMetadata,
+                                    idx::Int,
+                                    meas::Tuple{Array{Float64,2}},
+                                    wXi::Array{Float64,2},
+                                    wXj::Array{Float64,2}  )
   #
   wXjhat = SE2(wXi[[1;2;6],idx]) * SE2(meas[1][1:3,idx])
   jXjhat = SE2(wXj[[1;2;6],idx]) \ wXjhat
   se2vee!(res, jXjhat)
-  nothing
+  res'*res
 end
 
 """
@@ -163,7 +163,7 @@ end
 
 Partial factor between XY and Yaw of two Pose3 variables.
 """
-mutable struct Pose3Pose3XYYaw{T1,T2} <: AbstractRelativeFactor where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+mutable struct Pose3Pose3XYYaw{T1,T2} <: AbstractRelativeMinimize where {T1 <: SamplableBelief, T2 <: SamplableBelief}
   xy::T1
   yaw::T2
   partial::Tuple{Int,Int,Int}
@@ -185,7 +185,7 @@ function (pxyy::Pose3Pose3XYYaw)(res::Array{Float64},
   wXjhat = SE2(wXi[[1;2;6],idx]) * SE2(meas[1][1:3,idx])
   jXjhat = SE2(wXj[[1;2;6],idx]) \ wXjhat
   se2vee!(res, jXjhat)
-  nothing
+  res'*res
 end
 
 """
@@ -200,10 +200,10 @@ mutable struct PackedPartialPose3XYYaw <: IncrementalInference.PackedInferenceTy
   PackedPartialPose3XYYaw(xy::String, yaw::String) = new(xy, yaw)
 end
 function convert(::Type{PartialPose3XYYaw}, d::PackedPartialPose3XYYaw)
-  return PartialPose3XYYaw( extractdistribution(d.xydata), extractdistribution(d.yawdata) )
+  return PartialPose3XYYaw( convert(SamplableBelief, d.xydata), convert(SamplableBelief, d.yawdata) )
 end
 function convert(::Type{PackedPartialPose3XYYaw}, d::PartialPose3XYYaw)
-  return PackedPartialPose3XYYaw( string(d.xy), string(d.yaw) )
+  return PackedPartialPose3XYYaw( convert(PackedSamplableBelief, d.xy), convert(PackedSamplableBelief, d.yaw) )
 end
 
 """
@@ -226,6 +226,9 @@ end
     $SIGNATURES
 
 Converter: PartialPose3XYYaw -> Dict{String, Any}
+
+DevNotes
+- FIXME stop using _evalType, see DFG #590
 """
 function convert(::Type{RoME.PartialPose3XYYaw}, fact::Dict{String, Any})
     xy = fact["measurement"][1]

@@ -8,7 +8,7 @@ Related
 
 Pose3Pose3, Point2Point2, MutablePose2Pose2Gaussian, DynPose2, InertialPose3
 """
-struct Pose2Pose2{T} <: IncrementalInference.AbstractRelativeFactor where {T <: IIF.SamplableBelief}
+struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRoots
   z::T
   # empty constructor
   Pose2Pose2{T}() where {T <: IIF.SamplableBelief} = new{T}()
@@ -57,7 +57,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedPose2Pose2  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose2Pose2  <: IIF.PackedInferenceType
   datastr::String
   PackedPose2Pose2() = new()
   PackedPose2Pose2(x::String) = new(x)

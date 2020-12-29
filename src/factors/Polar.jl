@@ -38,7 +38,7 @@ end
 
 Linear offset factor of `IIF.SamplableBelief` between two `Polar` variables.
 """
-mutable struct PolarPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.AbstractRelativeFactor
+mutable struct PolarPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.AbstractRelativeRoots
   Zrange::T1
   Zangle::T2
   # empty constructor
