@@ -4,6 +4,8 @@ using Statistics
 
 using Test
 
+##
+
 @testset "basic Point2Point2 test" begin
 
 global fg = initfg()
@@ -40,19 +42,27 @@ end
 
 @testset "test Point2Point2Range{T}..." begin
 
+##
+
 global N=100 # return to 200
 global fg = initfg()
 
 addVariable!(fg, :x0, Point2, N=N)
-addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
+addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], diagm(ones(2)) )))
 
 addVariable!(fg, :x1, Point2, N=N)
-addFactor!(fg, [:x1], PriorPoint2(MvNormal([0.0;100.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
+addFactor!(fg, [:x1], PriorPoint2(MvNormal([0.0;100.0], diagm(ones(2)) )))
 
 addVariable!(fg, :l1, Point2, N=N)
-addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)))
-addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)))
+addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)) )
+addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)) )
 
+##
+
+# using Logging
+# @enter doautoinit!(fg, :l1, logger=NullLogger())
+
+##
 
 tree, smt, hist = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
@@ -74,6 +84,7 @@ global voidsel2 =  10.0 .< getVal(fg, :l1)[2,:]
 @test sum( 120 .< abs.(getVal(fg, :l1)[1,:]) ) < 0.35*N
 @test sum( 120 .< abs.(getVal(fg, :l1)[2,:]) ) < 0.35*N
 
+##
 
 end
 
