@@ -39,7 +39,7 @@ $(TYPEDEF)
 
 Rigid transform factor between two Pose3 compliant variables.
 """
-mutable struct Pose3Pose3{T <: IIF.SamplableBelief} <: AbstractRelativeFactor
+mutable struct Pose3Pose3{T <: IIF.SamplableBelief} <: AbstractRelativeRoots
     Zij::T
     reuse::Vector{PP3REUSE}
     Pose3Pose3{T}() where T = new{T}()

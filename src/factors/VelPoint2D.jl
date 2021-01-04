@@ -6,7 +6,7 @@
 """
 $(TYPEDEF)
 """
-mutable struct VelPoint2VelPoint2{T} <: IncrementalInference.AbstractRelativeFactorMinimize where {T <: Distribution}
+mutable struct VelPoint2VelPoint2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
   z::T
   VelPoint2VelPoint2{T}() where {T <: Distribution} = new{T}()
   VelPoint2VelPoint2{T}(z1::T) where {T <: Distribution} = new{T}(z1)

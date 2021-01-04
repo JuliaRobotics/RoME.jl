@@ -66,7 +66,8 @@ function go_fixedlag_frombatch(qfl_length_arg::Integer)
 
     # Solve the graph, and save a copy of the tree.
     saveDFG(fg, "$(getLogPath(fg))/fg-before-solve$(padded_step)")
-    tree, smt, hist = solveTree!(fg, maxparallel=1000)
+    getSolverParams(fg).maxincidence = 1000
+    tree, smt, hist = solveTree!(fg)
     saveDFG(fg, "$(getLogPath(fg))/fg-after-solve$(padded_step)")
     saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
     drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")
@@ -94,7 +95,7 @@ function go_fixedlag_frombatch(qfl_length_arg::Integer)
         # Just store some quick plots, on another process
         remotecall((fgl, padded_stepl) -> begin
           @info "drawPoses, $(padded_stepl), for fg num variables=$(length(ls(fgl)))."
-          pl1 = drawPoses(fgl, spscale=0.6, lbls=false)
+          pl1 = plotSLAM2DPoses(fgl, dyadScale=0.6, lbls=false)
           pl1 |> PDF("$(getLogPath(fgl))/poses$(padded_stepl).pdf", 20cm, 10cm)
         end, rand(Categorical(nprocs()-1))+1, fg, padded_step)
 
@@ -107,7 +108,8 @@ function go_fixedlag_frombatch(qfl_length_arg::Integer)
         @info "Going for solve"
 
         # Solve the graph, and save a copy of the tree.
-        tree, smt, hist = solveTree!(fg, tree, maxparallel=1000)
+        getSolverParams(fg).maxincidence = 1000
+        tree, smt, hist = solveTree!(fg, tree)
         saveDFG(fg, "$(getLogPath(fg))/fg-after-solve$(padded_step)")
         saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
         drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")

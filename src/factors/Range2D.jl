@@ -4,7 +4,7 @@
 """
 $(TYPEDEF)
 """
-mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInference.AbstractRelativeFactorMinimize
+mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInference.AbstractRelativeMinimize
   Z::D
   Point2Point2Range{D}() where {D} = new{D}()
   Point2Point2Range{D}(d::D) where {D <: IIF.SamplableBelief} = new{D}(d)
@@ -55,7 +55,7 @@ end
 
 Range only measurement from Pose2 to Point2 variable.
 """
-mutable struct Pose2Point2Range{T} <: IncrementalInference.AbstractRelativeFactorMinimize
+mutable struct Pose2Point2Range{T} <: IIF.AbstractRelativeMinimize
   Z::T
   partial::Tuple{Int,Int}
   Pose2Point2Range{T}() where T = new()

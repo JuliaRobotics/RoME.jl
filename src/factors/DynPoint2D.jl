@@ -16,7 +16,7 @@ getSample(dp2v::DynPoint2VelocityPrior, N::Int=1) = (rand(dp2v.z,N), )
 """
 $(TYPEDEF)
 """
-mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeFactor
+mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeRoots
   z::T
   DynPoint2DynPoint2{T}() where {T <: SamplableBelief} = new{T}()
   DynPoint2DynPoint2(z1::T) where {T <: SamplableBelief} = new{T}(z1)
@@ -44,10 +44,10 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct Point2Point2Velocity{T} <: IncrementalInference.AbstractRelativeFactorMinimize where {T <: Distribution}
+mutable struct Point2Point2Velocity{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
   z::T
-  Point2Point2Velocity{T}() where {T <: Distribution} = new{T}()
-  Point2Point2Velocity(z1::T) where {T <: Distribution} = new{T}(z1)
+  Point2Point2Velocity{T}() where {T <: IIF.SamplableBelief} = new{T}()
+  Point2Point2Velocity(z1::T) where {T <: IIF.SamplableBelief} = new{T}(z1)
 end
 getSample(p2p2v::Point2Point2Velocity, N::Int=1) = (rand(p2p2v.z,N), )
 function (p2p2v::Point2Point2Velocity)(
@@ -77,7 +77,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedDynPoint2VelocityPrior <: IncrementalInference.PackedInferenceType
+mutable struct PackedDynPoint2VelocityPrior <: IIF.PackedInferenceType
   str::String
   PackedDynPoint2VelocityPrior() = new()
   PackedDynPoint2VelocityPrior(z1::String) = new(z1)

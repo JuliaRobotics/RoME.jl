@@ -55,7 +55,8 @@ function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_lengt
 
     # Solve the graph, and save a copy of the tree.
     saveDFG(fg, "$(getLogPath(fg))/fg-before-solve$(padded_step)")
-    tree, smt, hist = solveTree!(fg, maxparallel=1000)
+    getSolverParams(fg).maxincidence = 1000
+    tree, smt, hist = solveTree!(fg)
     saveDFG(fg, "$(getLogPath(fg))/fg-after-solve$(padded_step)")
     saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
     drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")
@@ -96,7 +97,8 @@ function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_lengt
         @info "Going for solve"
 
         # Solve the graph, and save a copy of the tree.
-        tree, smt, hist = solveTree!(fg, tree, maxparallel=1000)
+        getSolverParams(fg).maxincidence = 1000
+        tree, smt, hist = solveTree!(fg, tree)
         saveDFG(fg, "$(getLogPath(fg))/fg-after-solve$(padded_step)")
         saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
         drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")

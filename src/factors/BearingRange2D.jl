@@ -7,7 +7,7 @@
 
 Bearing and Range constraint from a Pose2 to Point2 variable.
 """
-mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IncrementalInference.AbstractRelativeFactorMinimize
+mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
     bearing::B
     range::R
     Pose2Point2BearingRange{B,R}() where {B,R} = new{B,R}()

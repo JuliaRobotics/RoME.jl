@@ -52,10 +52,10 @@ mutable struct PackedPriorPose2  <: IncrementalInference.PackedInferenceType
     PackedPriorPose2(x::String) = new(x)
 end
 function convert(::Type{PackedPriorPose2}, d::PriorPose2)
-  return PackedPriorPose2(string(d.Z))
+  return PackedPriorPose2(convert(PackedSamplableBelief, d.Z))
 end
 function convert(::Type{PriorPose2}, d::PackedPriorPose2)
-  distr = extractdistribution(d.str)
+  distr = convert(SamplableBelief, d.str)
   return PriorPose2{typeof(distr)}(distr)
 end
 

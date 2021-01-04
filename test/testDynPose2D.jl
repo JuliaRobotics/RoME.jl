@@ -1,18 +1,20 @@
 using RoME
 using Test
 
-
+##
 
 @testset "test DynPose2 and velocity..." begin
 
-global N = 100
-global fg = initfg()
+##
+
+N = 100
+fg = initfg()
 
 # add first pose locations
 addVariable!(fg, :x0, DynPose2; nanosecondtime=0)
 
 # Prior factor as boundary condition
-global pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
+pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
                             MvNormal([10.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [:x0;], pp0)
 
@@ -22,19 +24,17 @@ IncrementalInference.doautoinit!(fg, [getVariable(fg,:x0);])
 addVariable!(fg, :x1, DynPose2;  nanosecondtime=1000_000_000)
 
 # conditional likelihood between Dynamic Point2
-global dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], Matrix(Diagonal([0.01;0.01;0.001].^2))),
+dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], Matrix(Diagonal([0.01;0.01;0.001].^2))),
                           MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [:x0;:x1], dp2dp2)
 
-# getVal(fg,:x0)
-global pts = approxConv(fg, :x0x1f1, :x1)
+pts = approxConv(fg, :x0x1f1, :x1)
 
-# Graphs.plot(fg.g)
 # ensureAllInitialized!(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree, smt, hist = solveTree!(fg);
 
-global X1 = getVal(fg, :x1)
+X1 = getVal(fg, :x1)
 
 @test 0.9*N <= sum(abs.(X1[1,:] .- 10.0) .< 0.75)
 @test 0.9*N <= sum(abs.(X1[2,:] .- 0.0) .< 0.75)
@@ -46,7 +46,7 @@ global X1 = getVal(fg, :x1)
 
 # using RoMEPlotting
 # # plotLocalProduct(fg, :x10, dims=[1;2])
-# # drawPoses(fg)
+# # plotSLAM2DPoses(fg)
 # xx1 = marginal(getKDE(fg, :x1),[1;2;3])
 # plotPose(Pose2(), [xx1])
 # plotPose(fg, [:x1], levels=1, show=false)
@@ -54,39 +54,49 @@ global X1 = getVal(fg, :x1)
 # plotKDE(marginal(getKDE(fg, :x1),[4;5]), levels=5)
 
 
+##
+
 end
 
 
 @testset "test distribution compare functions..." begin
 
-global mu = randn(6)
-global mv1 = MvNormal(deepcopy(mu), Matrix{Float64}(LinearAlgebra.I, 6,6))
-global mv2 = MvNormal(deepcopy(mu), Matrix{Float64}(LinearAlgebra.I, 6,6))
-global mv3 = MvNormal(randn(6), Matrix{Float64}(LinearAlgebra.I, 6,6))
+##
+
+mu = randn(6)
+mv1 = MvNormal(deepcopy(mu), Matrix{Float64}(LinearAlgebra.I, 6,6))
+mv2 = MvNormal(deepcopy(mu), Matrix{Float64}(LinearAlgebra.I, 6,6))
+mv3 = MvNormal(randn(6), Matrix{Float64}(LinearAlgebra.I, 6,6))
 @test RoME.compareDensity(mv1, mv2)
 @test !RoME.compareDensity(mv1, mv3)
 @test !RoME.compareDensity(mv2, mv3)
+
+##
 
 end
 
 
 @testset "test DynPose2 packing converters..." begin
 
-global pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
+##
+
+pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
                             MvNormal([10.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 
-global pp = convert(PackedDynPose2VelocityPrior, pp0)
-global ppu = convert(DynPose2VelocityPrior, pp)
+pp = convert(PackedDynPose2VelocityPrior, pp0)
+ppu = convert(DynPose2VelocityPrior, pp)
 
 @test RoME.compare(pp0, ppu)
 
-global dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], Matrix(Diagonal([0.01;0.01;0.001].^2))),
+dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], Matrix(Diagonal([0.01;0.01;0.001].^2))),
                           MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 
-global pp = convert(PackedVelPose2VelPose2, dp2dp2)
-global ppu = convert(VelPose2VelPose2, pp)
+pp = convert(PackedVelPose2VelPose2, dp2dp2)
+ppu = convert(VelPose2VelPose2, pp)
 
 @test RoME.compare(dp2dp2, ppu)
+
+##
 
 end
 
@@ -94,34 +104,36 @@ end
 
 @testset "test many DynPose2 chain stationary and 'pulled'..." begin
 
-global N = 100
-global fg = initfg()
+##
+
+N = 100
+fg = initfg()
 
 # add first pose locations
 addVariable!(fg, :x0, DynPose2; nanosecondtime=0)
 
 # Prior factor as boundary condition
-global pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
+pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
                             MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [:x0;], pp0)
 
-global sym = :x0
-global k = 0
+sym = :x0
+k = 0
 for sy in Symbol[Symbol("x$i") for i in 1:10]
 
-global k+=1
+k+=1
 addVariable!(fg, sy, DynPose2; nanosecondtime=1000_000_000*k)
 
 # conditional likelihood between Dynamic Point2
-global dp2dp2 = VelPose2VelPose2(MvNormal([0.0;0;0], Matrix(Diagonal([1.0;0.1;0.001].^2))),
+dp2dp2 = VelPose2VelPose2(MvNormal([0.0;0;0], Matrix(Diagonal([1.0;0.1;0.001].^2))),
                           MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [sym;sy], dp2dp2)
-global sym =sy
+sym =sy
 
 end # for
 
 
-global x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
+x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
 
 @test abs(x5[1]) < 1.25
 @test abs(x5[2]) < 1.25
@@ -132,7 +144,7 @@ global x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
 
 ensureAllInitialized!(fg)
 
-global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
+x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 @test abs(x10[1]) < 1.25
 @test abs(x10[2]) < 1.25
@@ -142,20 +154,98 @@ global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 
 # drawGraph(fg, show=true)
-# tree = wipeBuildNewTree!(fg)
+# tree = buildTreeReset!(fg)
 # drawTree(tree, show=true)
 
 # using RoMEPlotting
 # Gadfly.set_default_plot_size(35cm, 25cm)
-# drawPoses(fg)
+# plotSLAM2DPoses(fg)
 # plotPose(fg, [:x10])
 
-# solve after being (graph) initialized
-tree, smt, hist = solveTree!(fg)
+##
+
+@error ".useMsgLikelihoods = false required until IIF #1010 completed."
+getSolverParams(fg).useMsgLikelihoods = false
+
+# solve
+smtasks = Task[]
+tree, smt, hist = solveTree!(fg, smtasks=smtasks); #, recordcliqs=ls(fg));
+
+##
+
+# hists = IIF.fetchCliqHistoryAll!(smtasks)
+
+# IIF.printCSMHistorySequential(hists)
+# IIF.printCSMHistorySequential(hists, 3=>1:50)
+# IIF.printCSMHistoryLogical(hists)
+
+# ##
+
+# getLogPath(fg)
+
+# using Caesar, Images, Graphs
+
+# tree = hists[1][1].csmc.tree
+
+# csmAnimateSideBySide(tree, hists, encode=true, nvenc=true, show=true)
+
+# ##
+
+# sfg = hists[3][8].csmc.cliqSubFg
+# drawGraph(sfg, show=true)
+# getSolverParams(hists[3][8].csmc.cliqSubFg).dbg = true
+# fnc_, csmc_ = IIF.repeatCSMStep!(hists, 3, 8);
+# # sfg_= csmc_.cliqSubFg
+
+# sfg = hists[3][9].csmc.cliqSubFg
+# drawGraph(sfg, show=true)
+
+# IIF.getMessageBuffer(hists[3][8].csmc.cliq).downRx.belief
+
+# getSolverParams(hists[3][9].csmc.cliqSubFg).dbg = true
+# IIF.repeatCSMStep!(hists, 3, 9);
+
+# ##
+
+# tree_ = hists[3][9].csmc.tree
+# drawTree(tree_, show=true)
+
+# ## whats up with down msgs
+
+# sfg9 = loadDFG(joinpath(getLogPath(fg), "logs/cliq3", "fg_beforedownsolve.tar.gz"))
+# drawGraph(sfg9, show=true)
+
+# ls(sfg9, :x0)
+
+# getFactor(sfg9, :x0f2)
+
+# ##
+
+# sfg = hists[7][6].csmc.cliqSubFg
+# drawGraph(sfg, show=true)
+# IIF.repeatCSMStep!(hists, 7, 6)
 
 
+# getSolverParams(hists[4][4].csmc.cliqSubFg).dbg = true
+# IIF.repeatCSMStep!(hists, 4, 4);
 
-global x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
+# IIF.getMessageBuffer(hists[4][4].csmc.cliq).upRx[7].belief
+# IIF.getMessageBuffer(hists[4][4].csmc.cliq).upRx[7]
+# IIF.getMessageBuffer(hists[4][4].csmc.cliq).upRx[7].jointmsg.priors
+
+
+# IIF.repeatCSMStep!(hists, 4, 5)
+
+
+##
+
+# tree = buildTreeReset!(fg);
+# drawTree(tree, show=true);
+
+##
+
+x5 = getPPE(getVariable(fg, :x5)).suggested
+# x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
 
 @test abs(x5[1]) < 1.5
 @test abs(x5[2]) < 1.5
@@ -163,7 +253,7 @@ global x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
-global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
+x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 @test abs(x10[1]) < 2.75
 @test abs(x10[2]) < 2.75
@@ -174,7 +264,7 @@ global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 
 # pull the tail end out with position
-global pp10 = DynPose2VelocityPrior(MvNormal([10.0;0;0], Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
+pp10 = DynPose2VelocityPrior(MvNormal([10.0;0;0], Matrix(Diagonal([0.01; 0.01; 0.001].^2))),
                             MvNormal([0.0;0], Matrix(Diagonal([0.1; 0.1].^2))))
 addFactor!(fg, [:x10;], pp10)
 
@@ -184,7 +274,7 @@ fg2 = deepcopy(fg)
 tree, mst, hist = solveTree!(fg) # N=N
 
 
-global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
+x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 @test 5.0 < x10[1]
 @test abs(x10[2]) < 1.0
@@ -195,7 +285,7 @@ global x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 for sym in [Symbol("x$i") for i in 2:9]
 
-global XX = KDE.getKDEMean(getKDE(getVariable(fg, sym)))
+XX = KDE.getKDEMean(getKDE(getVariable(fg, sym)))
 
 @show sym, round.(XX,digits=5)
 @test -2.0 < XX[1] < 10.0
@@ -205,6 +295,8 @@ global XX = KDE.getKDEMean(getKDE(getVariable(fg, sym)))
 @test abs(XX[5]) < 0.5
 
 end
+
+##
 
 end
 

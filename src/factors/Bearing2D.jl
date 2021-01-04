@@ -11,7 +11,7 @@ end
 
 Single dimension bearing constraint from Pose2 to Point2 variable.
 """
-struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IncrementalInference.AbstractRelativeFactorMinimize
+struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
     bearing::B
     reuse::Vector{P2P2BearingReuse}
     Pose2Point2Bearing{B}() where B = new{B}()
@@ -22,12 +22,12 @@ function getSample(pp2br::Pose2Point2Bearing, N::Int=1)
   return (reshape(rand(pp2br.bearing, N),1,N), )
 end
 # define the conditional probability constraint
-function (pp2br::Pose2Point2Bearing)(res::Array{Float64},
-                                     userdata::FactorMetadata,
-                                     idx::Int,
-                                     meas::Tuple,
-                                     xi::Array{Float64,2},
-                                     lm::Array{Float64,2}  )
+function (pp2br::Pose2Point2Bearing)( res::Array{Float64},
+                                      userdata::FactorMetadata,
+                                      idx::Int,
+                                      meas::Tuple,
+                                      xi::Array{Float64,2},
+                                      lm::Array{Float64,2}  )
   #
   reuse = pp2br.reuse[Threads.threadid()]
   reuse.measvec[1] = cos(meas[1][idx] + xi[3,idx])
