@@ -103,7 +103,8 @@ function go(initial_offset::Integer, final_timestep::Integer)
         @info "Going for solve"
 
         # Solve the graph, and save a copy of the tree.
-        tree, smt, hist = solveTree!(fg, tree, maxparallel=1000)
+        getSolverParams(fg).maxincidence = 1000
+        tree, smt, hist = solveTree!(fg, tree)
         saveDFG(fg, "$(getLogPath(fg))/fg-after-solve$(padded_step)")
         saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
         drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")

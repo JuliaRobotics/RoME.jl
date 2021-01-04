@@ -239,7 +239,7 @@ tree, smt, hist = solveTree!(fg, smtasks=smtasks); #, recordcliqs=ls(fg));
 
 ##
 
-# tree = resetBuildTree!(fg);
+# tree = buildTreeReset!(fg);
 # drawTree(tree, show=true);
 
 ##
