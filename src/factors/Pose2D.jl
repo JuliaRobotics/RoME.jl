@@ -20,23 +20,20 @@ Pose2Pose2(z::T=MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0]))) where {T 
 Pose2Pose2(::UniformScaling) = Pose2Pose2(MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])))
 
 
-getSample(s::Pose2Pose2{<:IIF.SamplableBelief}, N::Int=1) = (rand(s.z,N), )
-function (s::Pose2Pose2{<:IIF.SamplableBelief})(
-            res::Vector{Float64},
-            userdata,
-            idx::Int,
-            meas::Tuple,
-            wxi::Array{Float64,2},
-            wxj::Array{Float64,2}  )
+getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) = (rand(cf.factor.z,N), )
+function (cf::CalcFactor{<:Pose2Pose2})(res::AbstractVector{<:Real},
+                                        meas,
+                                        wxi,
+                                        wxj  )
   #
-  wXjhat = SE2(wxi[1:3,idx])*SE2(meas[1][1:3,idx])
-  jXjhat = SE2(wxj[1:3,idx]) \ wXjhat
+  wXjhat = SE2(wxi)*SE2(meas)
+  jXjhat = SE2(wxj) \ wXjhat
   se2vee!(res, jXjhat)
   nothing
 end
 
 
-#TODO wrapper
+#TODO wrapper -- consolidate with CalcFactor, see #467
 function (s::Pose2Pose2{<:MvNormal})(wXi::AbstractVector{T}, wXj::AbstractVector{T}; kwargs...) where T <: Real
 
   meas = mean(s.z)

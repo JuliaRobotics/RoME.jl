@@ -14,7 +14,7 @@ mutable struct DynPose2VelocityPrior{T1,T2} <: IncrementalInference.AbstractPrio
 end
 DynPose2VelocityPrior(z1::T1,z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = DynPose2VelocityPrior{T1,T2}(z1,z2)
 
-getSample(dp2v::DynPose2VelocityPrior{T1,T2}, N::Int=1) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = ([rand(dp2v.Zpose,N);rand(dp2v.Zvel,N)], )
+getSample(cf::CalcFactor{<:DynPose2VelocityPrior}, N::Int=1) = ([rand(cf.factor.Zpose,N);rand(cf.factor.Zvel,N)], )
 
 
 
@@ -31,18 +31,17 @@ mutable struct DynPose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRo
 end
 DynPose2Pose2(z1::T) where {T <: IIF.SamplableBelief} = DynPose2Pose2{T}(z1)
 
-getSample(vp2vp2::DynPose2Pose2, N::Int=1) = (rand(vp2vp2.Zpose.z,N), )
-function (vp2vp2::DynPose2Pose2{T})(res::Array{Float64},
-                                    userdata::FactorMetadata,
-                                    idx::Int,
-                                    meas::Tuple,
-                                    wXi::Array{Float64,2},
-                                    wXj::Array{Float64,2}  ) where {T <: IIF.SamplableBelief}
+getSample(cf::CalcFactor{<:DynPose2Pose2}, N::Int=1) = (rand(cf.factor.Zpose.z,N), )
+
+function (cf::CalcFactor{<:DynPose2Pose2})( res::Array{Float64},
+                                            meas,
+                                            wXi,
+                                            wXj  )
   #
-  vp2vp2.Zpose(res, userdata, idx, meas, wXi, wXj)
-    # wXjhat = SE2(wxi[1:3,idx])*SE2(meas[1][1:3,idx])
-    # jXjhat = SE2(wxj[1:3,idx]) \ wXjhat
-    # se2vee!(res, jXjhat)
+  # cf.factor.Zpose(res, meas, wXi, wXj)
+    wXjhat = SE2(wXi)*SE2(meas)
+    jXjhat = SE2(wXj) \ wXjhat
+    se2vee!(res, jXjhat)
   # z = meas[1][:,idx]
   # wxi, wxj = wXi[:,idx], wXj[:,idx]
   # dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6
@@ -126,23 +125,20 @@ getManifolds(::Type{DynPose2DynPose2}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euc
 getManifolds(::DynPose2DynPose2) = getManifolds(DynPose2DynPose2)
 
 
-getSample(vp2vp2::DynPose2DynPose2, N::Int=1) = (rand(vp2vp2.Z, N), )
+getSample(cf::CalcFactor{<:DynPose2DynPose2}, N::Int=1) = (rand(cf.factor.Z, N), )
 
-function (vp2vp2::DynPose2DynPose2{T})(
-                res::Array{Float64},
-                userdata::FactorMetadata,
-                idx::Int,
-                meas::Tuple,
-                wXi::AbstractArray{<:Real,2},
-                wXj::AbstractArray{<:Real,2}  ) where {T <: IIF.SamplableBelief}
+function (cf::CalcFactor{<:DynPose2DynPose2})(res::AbstractArray{<:Real},
+                                              meas,
+                                              wXi,
+                                              wXj  )
   #
   # vp2vp2.Zpose(res, userdata, idx, meas, Xi, Xj)
     # wXjhat = SE2(wxi[1:3,idx])*SE2(meas[1][1:3,idx])
     # jXjhat = SE2(wxj[1:3,idx]) \ wXjhat
     # se2vee!(res, jXjhat)
-  z = meas[1][:,idx]
-  wxi, wxj = wXi[:,idx], wXj[:,idx]
-  dt = Dates.value(userdata.fullvariables[2].nstime - userdata.fullvariables[1].nstime)*1e-9  
+  z = meas
+  wxi, wxj = wXi, wXj
+  dt = Dates.value(cf.metadata.fullvariables[2].nstime - cf.metadata.fullvariables[1].nstime)*1e-9  
   wpj = ( wxi[1:2]+dt*wxi[4:5] + z[1:2] )
   thetaj = se2vee(SE2([0;0;wxi[3]])*SE2([0;0;z[3]]))[3]
   res[1:3] = se2vee( SE2(wxj[1:3])\SE2([wpj;thetaj]) )
@@ -171,10 +167,10 @@ mutable struct PackedDynPose2DynPose2 <: IncrementalInference.PackedInferenceTyp
 end
 
 function convert(::Type{PackedDynPose2DynPose2}, d::DynPose2DynPose2)
-  return PackedDynPose2DynPose2(string(d.Z))
+  return PackedDynPose2DynPose2(convert(PackedSamplableBelief, d.Z))
 end
 function convert(::Type{DynPose2DynPose2}, d::PackedDynPose2DynPose2)
-  return DynPose2DynPose2(extractdistribution(d.Z))
+  return DynPose2DynPose2(convert(SamplableBelief, d.Z))
 end
 
 
