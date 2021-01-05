@@ -48,7 +48,7 @@ function (s::Pose2Point2BearingRange{<:Normal})(xi::AbstractVector{T}, lm::Abstr
 
   meas = [mean(s.bearing), mean(s.range)]
   iΣ = [var(s.bearing)         0.0;
-                   0.0 var(s.range)]
+                  0.0  var(s.range)]
 
   # 1-bearing
   # 2-range

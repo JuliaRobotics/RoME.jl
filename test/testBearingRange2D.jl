@@ -13,7 +13,16 @@ import Base: convert
 
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 
-meas = getSample(p2br, 100)
+fg = initfg()
+addVariable!(fg, :x0, Pose2)
+addVariable!(fg, :x1, Point2)
+addFactor!(fg, [:x0;:x1], p2br, graphinit=false)
+
+meas = freshSamples(IIF._getCCW(fg, :x0x1f1), 100)
+
+##
+
+# meas = getSample(p2br, 100)
 @test abs(Statistics.mean(meas[1][1,:])) < 0.1
 @test 0.05 < abs(Statistics.std(meas[1][1,:])) < 0.2
 
@@ -34,56 +43,81 @@ fg = initfg()
 X0 = addVariable!(fg, :x0, Pose2)
 X1 = addVariable!(fg, :x1, Point2)
 
-
 ##
 
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 
-xi = zeros(3,1)
-li = zeros(2,1); li[1,1] = 20.0;
-zi = (zeros(2,1),); zi[1][2,1] = 20.0
-
-# dummy fmd during refactoring and consolidation work
-fmd = IIF._defaultFactorMetadata([X0;X1])
-
-idx = 1
-res = zeros(2)
-p2br(res, fmd, idx, zi, xi, li)
-@show res
-
-@test norm(res) < 1e-14
+xi = zeros(3)
+li = zeros(2); li[1] = 20.0;
+zi = (zeros(2),); zi[1][2] = 20.0
 
 
-xi = zeros(3,1)
-li = zeros(2,1); li[2,1] = 20.0;
-zi = (zeros(2,1),); zi[1][:,1] = [pi/2;20.0]
+res = testFactorResidualBinary( p2br, 
+                                Pose2, 
+                                Point2, 
+                                xi, 
+                                li, 
+                                zi )
+#
 
-idx = 1
-res = zeros(2)
-p2br(res, fmd, idx, zi, xi, li)
 @show res
 @test norm(res) < 1e-14
 
+##
 
-xi = zeros(3,1); xi[3,1] = pi/2
-li = zeros(2,1); li[2,1] = 20.0;
-zi = (zeros(2,1),); zi[1][:,1] = [0.0;20.0]
+xi = zeros(3)
+li = zeros(2); li[2] = 20.0;
+zi = (zeros(2),); zi[1][:] = [pi/2;20.0]
 
-idx = 1
-res = zeros(2)
-p2br(res, fmd, idx, zi, xi, li)
+# idx = 1
+# res = zeros(2)
+# p2br(res, fmd, idx, zi, xi, li)
+
+res = testFactorResidualBinary( p2br, 
+                                Pose2, 
+                                Point2, 
+                                xi, 
+                                li, 
+                                zi )
+
 @show res
 @test norm(res) < 1e-14
 
 
-xi = zeros(3,2); xi[3,2] = -pi/2
-li = zeros(2,2); li[1,2] = 20.0;
+xi = zeros(3); xi[3] = pi/2
+li = zeros(2); li[2] = 20.0;
+zi = (zeros(2),); zi[1][:] = [0.0;20.0]
+
+
+res = testFactorResidualBinary( p2br, 
+                                Pose2, 
+                                Point2, 
+                                xi, 
+                                li, 
+                                zi )
+#
+@show res
+@test norm(res) < 1e-14
+
+##
+
+xi = zeros(3); xi[3] = -pi/2
+li = zeros(2); li[1] = 20.0;
 # zi = ([0.0;pi/2],[0.0;20.0],)
-zi = (zeros(2,2),); zi[1][:,2] = [pi/2;20.0]
+zi = (zeros(2),); zi[1][:] = [pi/2;20.0]
 
-idx = 2
-res = zeros(2)
-p2br(res, fmd, idx, zi, xi, li)
+# idx = 2
+# res = zeros(2)
+# p2br(res, fmd, idx, zi, xi, li)
+
+res = testFactorResidualBinary( p2br, 
+                                Pose2, 
+                                Point2, 
+                                xi, 
+                                li, 
+                                zi )
+
+
 @show res
 @test norm(res) < 1e-14
 
@@ -126,7 +160,7 @@ addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 
 # there should be just one (the bearingrange) factor connected to :l1
 @test length(ls(fg, :l1)) == 1
-# writeGraphPdf(fg)
+# drawGraph(fg, show=true)
 
 # check the forward convolution is working properly
 pts, = predictbelief(fg, :l1, ls(fg, :l1), N=75)
