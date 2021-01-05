@@ -27,15 +27,12 @@ mutable struct LinearRangeBearingElevation <: AbstractRelativeMinimize
   LinearRangeBearingElevation() = new()
   LinearRangeBearingElevation( r::Tuple{Float64,Float64}, b::Tuple{Float64,Float64}; elev=Uniform(-0.25133,0.25133)) = new(Normal(r...),Normal(b...),elev, reuseLBRA[reuseLBRA(0) for i in 1:Threads.nthreads()] )
 end
-function (p::LinearRangeBearingElevation)(
-            res::Vector{Float64},
-            userdata::FactorMetadata,
-            idx::Int,
-            meas::Tuple{Array{Float64,2}},
-            pose::Array{Float64,2},
-            landm::Array{Float64,2}  )
+function (cfo::CalcFactor{<:LinearRangeBearingElevation})(res::Vector{Float64},
+                                                          meas,
+                                                          pose,
+                                                          landm  )
   #
-  residualLRBE!(res, meas[1][:,idx], pose[:,idx], landm[:,idx], p.reuse[Threads.threadid()])
+  residualLRBE!(res, meas, pose, landm, cfo.factor.reuse[Threads.threadid()])
   return res[1]
 end
 
@@ -45,10 +42,10 @@ function getSample!(y::Array{Float64,2}, las::LinearRangeBearingElevation, idx::
   y[3,idx] = rand(las.elev)
   nothing
 end
-function getSample( las::LinearRangeBearingElevation, N::Int=1 )
+function getSample( cfo::CalcFactor{<:LinearRangeBearingElevation}, N::Int=1 )
   y = zeros(3,N)
   for i in 1:N
-    getSample!(y, las, i)
+    getSample!(y, cfo.factor, i)
   end
   return (y,)
 end
@@ -56,7 +53,9 @@ end
 
 
 # returns [Range Bearing Elevation] manifold difference between pose X ominus landmark L
-function ominus(::Type{LinearRangeBearingElevation}, X::Vector{Float64}, L::Vector{Float64})
+function ominus(::Type{LinearRangeBearingElevation}, 
+                X::AbstractVector{<:Real}, 
+                L::AbstractVector{<:Real})
   # rangeBearing3(X, L)
   wTb = SE3(X[1:3], Euler(X[4:6]...))
   bTl = matrix(wTb)\[L[1:3];1.0]
@@ -65,7 +64,9 @@ function ominus(::Type{LinearRangeBearingElevation}, X::Vector{Float64}, L::Vect
   return [norm(bTl[1:3]); b; el]
 end
 
-function ominus!(reuse::reuseLBRA, X::Vector{Float64}, L::Array{Float64})
+function ominus!( reuse::reuseLBRA, 
+                  X::AbstractVector{<:Real}, 
+                  L::AbstractVector{<:Real} )
   copyto!(reuse.wTb.t, X[1:3])
   reuse.E.R, reuse.E.P, reuse.E.Y = X[4], X[5], X[6]
   convert!(reuse.wTb.R, reuse.E)  # costly
@@ -82,12 +83,18 @@ end
 # measurement z is measurement vector with [range; bearing; elevation]
 # variables are tuple (pose X [dim6], landmark L [dim3])
 # function handle follows required parameter list
-function residualLRBE!(resid::Vector{Float64}, z::Vector{Float64}, X::Vector{Float64}, L::Array{Float64}, reuse::reuseLBRA)
+function residualLRBE!( resid::AbstractVector{<:Real}, 
+                        z::AbstractVector{<:Real}, 
+                        X::AbstractVector{<:Real}, 
+                        L::AbstractVector{<:Real}, 
+                        reuse::reuseLBRA )
+  #
   # TODO upgrade so the - sign here is used on a manifold too, ominus(z,  ominus(tt, variables...)  )
   # TODO just switch directly to parameterized function
   ominus!(reuse, X, L)
   resid[1] = norm(z - reuse.rbe)
   # resid[:] = z - ominus!(LinearRangeBearingElevation, X, L)
+
   nothing
 end
 

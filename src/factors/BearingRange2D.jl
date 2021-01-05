@@ -14,25 +14,23 @@ mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.Sampla
     Pose2Point2BearingRange{B,R}(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = new{B,R}(x1,x2)
 end
 Pose2Point2BearingRange(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = Pose2Point2BearingRange{B,R}(x1,x2)
-function getSample(pp2br::Pose2Point2BearingRange, N::Int=1)
+function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange}, N::Int=1)
   smpls = zeros(2, N)
-  smpls[1,:] = rand(pp2br.bearing, N)[:]
-  smpls[2,:] = rand(pp2br.range, N)[:]
+  smpls[1,:] = rand(cfo.factor.bearing, N)[:]
+  smpls[2,:] = rand(cfo.factor.range, N)[:]
 
   return (smpls,)
 end
 # define the conditional probability constraint
-function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
-                                          userdata::FactorMetadata,
-                                          idx::Int,
-                                          meas::Tuple{Array{Float64,2}},
-                                          xi::Array{Float64,2},
-                                          lm::Array{Float64,2} )
+function (cfo::CalcFactor{<:Pose2Point2BearingRange})(res::AbstractVector{<:Real},
+                                                      meas,
+                                                      xi,
+                                                      lm )
   #
-  rot = meas[1][1,idx]+xi[3,idx]
+  rot = meas[1]+xi[3]
 
-  res[1] = ( lm[1,idx] - (meas[1][2,idx]*cos( rot ) + xi[1,idx]) )^2
-  res[2] = ( lm[2,idx] - (meas[1][2,idx]*sin( rot ) + xi[2,idx]) )^2
+  res[1] = ( lm[1] - (meas[2]*cos( rot ) + xi[1]) )^2
+  res[2] = ( lm[2] - (meas[2]*sin( rot ) + xi[2]) )^2
 
   res[1] += res[2]
   res[2] = 0.0
@@ -44,7 +42,7 @@ function (pp2br::Pose2Point2BearingRange)(res::Array{Float64},
   return res[1]
 end
 
-#TODO wrapper
+#TODO wrapper, consolidate with CalcFactor version, see #467
 function (s::Pose2Point2BearingRange{<:Normal})(xi::AbstractVector{T}, lm::AbstractVector{T}; kwargs...) where T <: Real
 
 

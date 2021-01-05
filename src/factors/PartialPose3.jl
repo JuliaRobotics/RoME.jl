@@ -142,18 +142,16 @@ mutable struct PartialPose3XYYaw{T1,T2} <: AbstractRelativeMinimize where {T1 <:
 end
 PartialPose3XYYaw(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} =  PartialPose3XYYaw{T1,T2}(xy, yaw)
 
-function getSample(pxyy::PartialPose3XYYaw, N::Int=1)
-  return ([rand(pxyy.xy,N);rand(pxyy.yaw,N)[:]'], )
+function getSample(cfo::CalcFactor{<:PartialPose3XYYaw}, N::Int=1)
+  return ([rand(cfo.factor.xy,N);rand(cfo.factor.yaw,N)[:]'], )
 end
-function (pxyy::PartialPose3XYYaw)( res::Array{Float64},
-                                    userdata::FactorMetadata,
-                                    idx::Int,
-                                    meas::Tuple{Array{Float64,2}},
-                                    wXi::Array{Float64,2},
-                                    wXj::Array{Float64,2}  )
+function (cfo::CalcFactor{<:PartialPose3XYYaw})(res::AbstractVector{<:Real},
+                                                meas,
+                                                wXi,
+                                                wXj  )
   #
-  wXjhat = SE2(wXi[[1;2;6],idx]) * SE2(meas[1][1:3,idx])
-  jXjhat = SE2(wXj[[1;2;6],idx]) \ wXjhat
+  wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
+  jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
   se2vee!(res, jXjhat)
   res'*res
 end

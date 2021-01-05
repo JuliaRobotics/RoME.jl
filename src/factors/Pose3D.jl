@@ -19,8 +19,8 @@ end
 PriorPose3(z::T=MvNormal(zeros(6), LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)]) )) where {T <: SamplableBelief} = PriorPose3{T}(z)
 
 # Standardized sampling function
-function getSample(p3::PriorPose3, N::Int=1)
-  return (rand(p3.Zi, N),)
+function getSample(cfo::CalcFactor{<:PriorPose3}, N::Int=1)
+  return (rand(cfo.factor.Zi, N),)
 end
 
 """
