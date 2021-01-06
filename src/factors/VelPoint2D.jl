@@ -12,19 +12,15 @@ mutable struct VelPoint2VelPoint2{T <: IIF.SamplableBelief} <: IIF.AbstractRelat
   VelPoint2VelPoint2{T}(z1::T) where {T <: Distribution} = new{T}(z1)
 end
 VelPoint2VelPoint2(z1::T) where {T <: Distribution} = VelPoint2VelPoint2{T}(z1)
-getSample(vp2vp2::VelPoint2VelPoint2, N::Int=1) = (rand(vp2vp2.z,N), )
-function (vp2vp2::VelPoint2VelPoint2{D})(
-                res::Array{Float64},
-                userdata,
-                idx::Int,
-                meas::Tuple,
-                Xi::Array{Float64,2},
-                Xj::Array{Float64,2}  ) where D
+getSample(cfo::CalcFactor{<:VelPoint2VelPoint2}, N::Int=1) = (rand(cfo.factor.z,N), )
+function (cfo::CalcFactor{<:VelPoint2VelPoint2})(
+                res::AbstractVector{<:Real},
+                z,
+                xi,
+                xj  )
   #
-  z = meas[1][:,idx]
-  xi, xj = Xi[:,idx], Xj[:,idx]
   # change in time from microseconds with DynPoint2(ut=1_000_000) to seconds
-  dt = Dates.value(userdata.fullvariables[2].nstime - userdata.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
+  dt = Dates.value(cfo.metadata.fullvariables[2].nstime - cfo.metadata.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
   # change in psoition Xi \ Xj
   dp = (xj[1:2]-xi[1:2])
   # change in velocity Xi \ Xj
@@ -59,9 +55,9 @@ mutable struct PackedVelPoint2VelPoint2 <: IncrementalInference.PackedInferenceT
 end
 
 function convert(::Type{PackedVelPoint2VelPoint2}, d::VelPoint2VelPoint2)
-  return PackedVelPoint2VelPoint2(string(d.z))
+  return PackedVelPoint2VelPoint2(convert(PackedSamplableBelief, d.z))
 end
 function convert(::Type{VelPoint2VelPoint2}, d::PackedVelPoint2VelPoint2)
-  distr = extractdistribution(d.str)
+  distr = convert(SamplableBelief, d.str)
   return VelPoint2VelPoint2(distr)
 end

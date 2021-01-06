@@ -13,15 +13,15 @@ Point2Point2Range(d::D) where {D <: IIF.SamplableBelief} = Point2Point2Range{D}(
 function getSample(cfo::CalcFactor{<:Point2Point2Range}, N::Int=1)
   return (reshape(rand(cfo.factor.Z,N),1,N),  2*pi*rand(N))
 end
-function (pp2r::CalcFactor{<:Point2Point2Range})(
+function (cfo::CalcFactor{<:Point2Point2Range})(
             res::AbstractVector{<:Real},
             rho,
             theta,
             xi,
             lm )
   #
-  XX = lm[1] - (rho*cos(theta) + xi[1])
-  YY = lm[2] - (rho*sin(theta) + xi[2])
+  XX = lm[1] - (rho[1]*cos(theta[1]) + xi[1])
+  YY = lm[2] - (rho[1]*sin(theta[1]) + xi[2])
   res[1] = XX^2 + YY^2
   res[1]
 end
@@ -70,8 +70,8 @@ function (pp2r::CalcFactor{<:Pose2Point2Range})(res::AbstractVector{<:Real},
   #
   # DONE in IIF -- still need to add multi-hypotheses support here
   # this is the noisy range
-  XX = lm[1] - (rho*cos(theta) + xi[1])
-  YY = lm[2] - (rho*sin(theta) + xi[2])
+  XX = lm[1] - (rho[1]*cos(theta[1]) + xi[1])
+  YY = lm[2] - (rho[1]*sin(theta[1]) + xi[2])
   res[1] = XX^2 + YY^2
   return res[1]
 end
