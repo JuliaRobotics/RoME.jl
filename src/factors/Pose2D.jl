@@ -60,10 +60,10 @@ mutable struct PackedPose2Pose2  <: IIF.PackedInferenceType
   PackedPose2Pose2(x::String) = new(x)
 end
 function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)
-  return Pose2Pose2(extractdistribution(d.datastr))
+  return Pose2Pose2(convert(SamplableBelief, d.datastr))
 end
 function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
-  return PackedPose2Pose2(string(d.z))
+  return PackedPose2Pose2(convert(PackedSamplableBelief, d.z))
 end
 
 
