@@ -60,8 +60,9 @@ mutable struct PartialPriorRollPitchZ{T1,T2} <: IncrementalInference.AbstractPri
   PartialPriorRollPitchZ{T1,T2}(rp::T1,z::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}(rp, z, (3,4,5))
 end
 PartialPriorRollPitchZ(rp::T1,z::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = PartialPriorRollPitchZ{T1,T2}(rp, z)
-function getSample(pprz::PartialPriorRollPitchZ, N::Int=1)
-  return ([rand(pprz.z,N)[:]';rand(pprz.rp,N)], )
+
+function getSample(cfo::CalcFactor{<:PartialPriorRollPitchZ}, N::Int=1)
+  return ([rand(cfo.factor.z,N)[:]';rand(cfo.factor.rp,N)], )
 end
 
 """
@@ -69,7 +70,7 @@ end
 
 Serialization type of `PartialPriorRollPitchZ`.
 """
-mutable struct PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInferenceType
+mutable struct PackedPartialPriorRollPitchZ <: IIF.PackedInferenceType
   rpdata::String
   zdata::String
   PackedPartialPriorRollPitchZ() = new()
@@ -77,18 +78,22 @@ mutable struct PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInfere
 end
 function convert(::Type{PartialPriorRollPitchZ}, d::PackedPartialPriorRollPitchZ)
   # TODO: Change out for extractdistributionJson
-  PartialPriorRollPitchZ( extractdistribution(d.rpdata), extractdistribution(d.zdata)  )
+  PartialPriorRollPitchZ( convert(SamplableBelief, d.rpdata), convert(SamplableBelief, d.zdata)  )
 end
 function convert(::Type{PackedPartialPriorRollPitchZ}, d::PartialPriorRollPitchZ)
-  PackedPartialPriorRollPitchZ( string(d.rp), string(d.z) )
+  PackedPartialPriorRollPitchZ( convert(PackedSamplableBelief, d.rp), convert(PackedSamplableBelief, d.z) )
 end
 
 """
 Converter: PartialPriorRollPitchZ::Dict{String, Any} -> PartialPriorRollPitchZ
+
+DevNotes
+- FIXME drop _evalType approach, use convert(SamplableBelief, obj) instead?
 """
 function convert(::Type{RoME.PartialPriorRollPitchZ}, fact::Dict{String, Any})
     rp = fact["measurement"][1]
     z = fact["measurement"][2]
+    # FIXME drop _evalType
     rp = convert(_evalType(rp["distType"]), rp)
     z = convert(_evalType(z["distType"]), z)
     return PartialPriorRollPitchZ(rp, z)
@@ -142,18 +147,16 @@ mutable struct PartialPose3XYYaw{T1,T2} <: AbstractRelativeMinimize where {T1 <:
 end
 PartialPose3XYYaw(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} =  PartialPose3XYYaw{T1,T2}(xy, yaw)
 
-function getSample(pxyy::PartialPose3XYYaw, N::Int=1)
-  return ([rand(pxyy.xy,N);rand(pxyy.yaw,N)[:]'], )
+function getSample(cfo::CalcFactor{<:PartialPose3XYYaw}, N::Int=1)
+  return ([rand(cfo.factor.xy,N);rand(cfo.factor.yaw,N)[:]'], )
 end
-function (pxyy::PartialPose3XYYaw)( res::Array{Float64},
-                                    userdata::FactorMetadata,
-                                    idx::Int,
-                                    meas::Tuple{Array{Float64,2}},
-                                    wXi::Array{Float64,2},
-                                    wXj::Array{Float64,2}  )
+function (cfo::CalcFactor{<:PartialPose3XYYaw})(res::AbstractVector{<:Real},
+                                                meas,
+                                                wXi,
+                                                wXj  )
   #
-  wXjhat = SE2(wXi[[1;2;6],idx]) * SE2(meas[1][1:3,idx])
-  jXjhat = SE2(wXj[[1;2;6],idx]) \ wXjhat
+  wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
+  jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
   se2vee!(res, jXjhat)
   res'*res
 end

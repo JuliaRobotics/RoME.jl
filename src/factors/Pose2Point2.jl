@@ -20,23 +20,21 @@ end
 Pose2Point2(x1::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))) where {T <: IIF.SamplableBelief} = Pose2Point2{T}(x1)
 
 # prescribed sampling function
-function getSample(pp2br::Pose2Point2, N::Int=1)
+function getSample(cfo::CalcFactor{<:Pose2Point2}, N::Int=1)
   smpls = zeros(2, N)
-  smpls[1:2,:] .= rand(pp2br.Zij, N)
+  smpls[1:2,:] .= rand(cfo.factor.Zij, N)
 
   return (smpls,)
 end
 # define the conditional probability constraint
-function (pp2br::Pose2Point2)(res::Array{Float64},
-                              userdata::FactorMetadata,
-                              idx::Int,
-                              meas::Tuple{Array{Float64,2}},
-                              wXi::Array{Float64,2},
-                              wLj::Array{Float64,2} )
+function (cfo::CalcFactor{<:Pose2Point2})(res::AbstractVector{<:Real},
+                                          meas,
+                                          wXi,
+                                          wLj )
   #
 
-  wLj_pred = SE2(wXi[:,idx])*SE2([meas[1][:,idx];0.0])
-  res[1:2] .= wLj[:,idx] .- se2vee(wLj_pred)[1:2]
+  wLj_pred = SE2(wXi)*SE2([meas[1];0.0])
+  res[1:2] .= wLj .- se2vee(wLj_pred)[1:2]
 
   res .^= 2
   res[1] += res[2]

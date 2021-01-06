@@ -77,11 +77,11 @@ mutable struct PackedDynPose2VelocityPrior <: IncrementalInference.PackedInferen
 end
 
 function convert(::Type{PackedDynPose2VelocityPrior}, d::DynPose2VelocityPrior)
-  return PackedDynPose2VelocityPrior(string(d.Zpose),string(d.Zvel))
+  return PackedDynPose2VelocityPrior(convert(PackedSamplableBelief, d.Zpose),convert(PackedSamplableBelief, d.Zvel))
 end
 function convert(::Type{DynPose2VelocityPrior}, d::PackedDynPose2VelocityPrior)
-  posedistr = extractdistribution(d.strpose)
-  veldistr = extractdistribution(d.strvel)
+  posedistr = convert(SamplableBelief, d.strpose)
+  veldistr = convert(SamplableBelief, d.strvel)
   return DynPose2VelocityPrior(posedistr, veldistr)
 end
 

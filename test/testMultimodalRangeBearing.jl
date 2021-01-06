@@ -12,7 +12,7 @@ mutable struct NorthSouthPartial{T} <: AbstractPrior
 end
 NorthSouthPartial(Z::D) where {D <: IIF.SamplableBelief} = NorthSouthPartial{D}(Z)
 
-getSample(ns::NorthSouthPartial, N=1) = (reshape(rand(ns.Z, N),1,N),)
+getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int=1) = (reshape(rand(cfo.factor.Z, N),1,N),)
 
 
 

@@ -14,8 +14,8 @@ end
 # convenience helper and default object
 PriorPoint2(z::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))) where {T <: IIF.SamplableBelief} = PriorPoint2{T}(z)
 
-function getSample(p2::PriorPoint2, N::Int=1)
-  return (rand(p2.Z, N),)
+function getSample(cfo::CalcFactor{<:PriorPoint2}, N::Int=1)
+  return (rand(cfo.factor.Z, N),)
 end
 
 #TODO wrapper
@@ -41,23 +41,19 @@ end
 # convenience and default object helper
 Point2Point2(x::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.1;0.1]))) where {T <: IIF.SamplableBelief} = Point2Point2{T}(x)
 
-function getSample(pp2::Point2Point2, N::Int=1)
-  return (rand(pp2.Zij,N),  )
+function getSample(cfo::CalcFactor{<:Point2Point2}, N::Int=1)
+  return (rand(cfo.factor.Zij,N),  )
 end
-function (pp2r::Point2Point2{T})(
-            res::Array{Float64},
-            userdata::FactorMetadata,
-            idx::Int,
-            meas::Tuple,
-            xi::Array{Float64,2},
-            xj::Array{Float64,2} ) where T
+function (pp2r::CalcFactor{<:Point2Point2})(res::AbstractVector{<:Real},
+                                            meas,
+                                            xi,
+                                            xj )
   #
-  res[1]  = meas[1][1,idx] - (xj[1,idx] - xi[1,idx])
-  res[2]  = meas[1][2,idx] - (xj[2,idx] - xi[2,idx])
+  res[1:2] .= meas[1:2] .- (xj[1:2] .- xi[1:2])
   nothing
 end
 
-#TODO wrapper
+#TODO wrapper, consolidate see #467
 function (s::Point2Point2{<:MvNormal})(X1::AbstractVector{T}, X2::AbstractVector{T}; kwargs...) where T <: Real
 
   meas = mean(s.Zij)
@@ -88,12 +84,12 @@ end
 
 function convert(::Type{PriorPoint2}, d::PackedPriorPoint2)
   # Cov = reshapeVec2Mat(d.vecCov, d.dimc)
-  distr = extractdistribution(d.str)
+  distr = convert(SamplableBelief, d.str)
   return PriorPoint2{typeof(distr)}(distr)
 end
 function convert(::Type{PackedPriorPoint2}, d::PriorPoint2)
   # v2 = d.mv.Σ.mat[:];
-  return PackedPriorPoint2(string(d.Z))
+  return PackedPriorPoint2(convert(PackedSamplableBelief, d.Z))
 end
 
 

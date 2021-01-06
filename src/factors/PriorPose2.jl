@@ -20,11 +20,11 @@ end
 # convencience and default object helper
 PriorPose2(x::T) where {T <: IncrementalInference.SamplableBelief} = PriorPose2{T}(x)
 
-function getSample(p2::PriorPose2, N::Int=1)
-  return (rand(p2.Z,N), )
+function getSample(cfo::CalcFactor{<:PriorPose2}, N::Int=1)
+  return (rand(cfo.factor.Z,N), )
 end
 
-#TODO wrapper
+#TODO wrapper Consolidate with CalcFactor version, see #467
 function (s::PriorPose2{<:MvNormal})(wXi::AbstractVector{T}; kwargs...) where T <: Real
 
 
@@ -65,8 +65,4 @@ end
 ## NOTE likely deprecated comparitors, see DFG compareFields, compareAll instead
 function compare(a::PriorPose2,b::PriorPose2; tol::Float64=1e-10)
   compareDensity(a.Z, b.Z)
-  # TP = true
-  # TP = TP && norm(a.Z.μ-b.Z.μ) < tol
-  # TP = TP && norm(a.Z.Σ.mat-b.Z.Σ.mat) < tol
-  # return TP
 end

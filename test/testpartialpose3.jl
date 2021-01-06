@@ -2,10 +2,9 @@
 
 using Statistics
 using RoME
-# , Distributions
-# using IncrementalInference, TransformUtils
 using Test
 
+##
 
 N=50
 fg = initfg()
@@ -36,10 +35,12 @@ v2 = addVariable!(fg,:x2, Pose3, N=N) # randn(6,N)
 f1 = addFactor!(fg, [:x2], prpz, graphinit=false)
 f2 = addFactor!(fg, [:x1;:x2], xyy, graphinit=false)
 
+##
 
-# ls(fg, :x2)
 
 @testset "test PartialPriorRollPitchZ evaluations" begin
+
+##
 
 # ensure that at least the first pose is already initialized
 doautoinit!(fg, :x1)
@@ -82,40 +83,63 @@ olddims = setdiff(collect(1:6), newdims)
 # memcheck that the exact same values are used
 @test norm(X2pts - getVal(v2)) < 1e-10
 
+##
+
 end
 
 
 @testset "test residual function of PartialPose3XYYaw" begin
 
+##
+
 tfg = initfg()
 X0 = addVariable!(tfg, :x0, Pose3)
 X1 = addVariable!(tfg, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+# fmd = IIF._defaultFactorMetadata([X0;X1])
+# res = zeros(3)
+# idx = 1
+# meas = getSample(xyy)
+xi = zeros(6)
+xja = zeros(6)
+# xyy(res, fmd, idx, meas, xi, xja)
 
-res = zeros(3)
-idx = 1
-meas = getSample(xyy)
-xi = zeros(6,1)
-xja = zeros(6,1)
-xyy(res, fmd, idx, meas, xi, xja)
+res = testFactorResidualBinary(xyy, Pose3, Pose3, xi, xja)
+
+
 @test abs(res[1]-mu2[1]) < 0.3
 @test abs(res[2]-mu2[2]) < 0.3
 @test abs(res[3]-mu2[3]) < 0.2
 
+##
+
 xjb = zeros(6,1)
 xjb[collect(xyy.partial),1] = mu2
-res = zeros(3)
-xyy(res, fmd, idx, meas, xi, xjb)
+# res = zeros(3)
+# xyy(res, fmd, idx, meas, xi, xjb)
+
+res = testFactorResidualBinary(xyy, Pose3, Pose3, xi, xjb)
+
 @test 0.0 < norm(res) < 0.3
 
-meas = getSample(xyy,100)
+##
+
+addFactor!(tfg, [:x0;:x1], xyy, graphinit=false)
+
+# meas = getSample(xyy,100)
+ccw = IIF._getCCW(tfg, :x0x1f1)
+meas = freshSamples(ccw, 100)
+
 @test norm(Statistics.std(meas[1],dims=2) - [0.01;0.01;0.002]) < 0.05
+
+##
 
 end
 
 
 
 @testset "test PartialPose3XYYaw evaluations" begin
+
+##
 
 # get existing and predict new
 X2pts = getBelief(fg, :x2) |> getPoints
@@ -149,10 +173,14 @@ end
 memcheck = getVal(v2)
 @test norm(X2pts - memcheck) < 1e-10
 
+##
+
 end
 
 
 @testset "test predictbelief with two functions" begin
+
+##
 
 val, = predictbelief(fg, :x2, ls(fg, :x2), N=N)
 
@@ -174,6 +202,7 @@ estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.parti
 memcheck = getVal(v2)
 @test 1e-10 < norm(val - memcheck)
 
+##
 
 end
 
