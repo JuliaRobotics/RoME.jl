@@ -90,7 +90,7 @@ end
 tfg = initfg()
 X0 = addVariable!(tfg, :x0, Pose3)
 X1 = addVariable!(tfg, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 res = zeros(3)
 idx = 1

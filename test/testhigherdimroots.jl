@@ -97,7 +97,7 @@ X0 = addVariable!(fg,:x0,Sphere1)
 X1 = addVariable!(fg,:x1,Sphere1)
 addFactor!(fg, [:x0;:x1], rr)
 
-fmd = IIF._defaultFactorMetadata([X0;X1], arrRef=t)
+fmd = _defaultFactorMetadataRoME([X0;X1], arrRef=t)
 
 ccw = CommonConvWrapper(rr, t[1], zDim, t, fmd, measurement=(eul,)) # old bug where measurement is not patched through fixed in IIF v0.3.9
 
@@ -106,7 +106,8 @@ ccw = CommonConvWrapper(rr, t[1], zDim, t, fmd, measurement=(eul,)) # old bug wh
 # TODO remove
 ccw.measurement = (eul,)
 
-ccw(res, x0)
+# deprecated
+# ccw(res, x0)
 
 # and return complete fr/gwp
 n = 1
