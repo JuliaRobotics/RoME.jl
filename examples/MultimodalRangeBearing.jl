@@ -9,7 +9,7 @@ mutable struct NorthSouthPartial{T} <: AbstractPrior
   NorthSouthPartial() = new()
   NorthSouthPartial(Z::D) where {D <: Distribution} = new{D}(Z, (2,))
 end
-getSample(cfo::CalcFactor{<:NorthSouthPartial}, N=1) = (reshape(rand(cfo.factor.Z, N),1,N),)
+getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int=1) = (reshape(rand(cfo.factor.Z, N),1,N),)
 
 
 # Start with an empty graph
