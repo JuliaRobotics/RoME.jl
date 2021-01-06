@@ -79,7 +79,6 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-# fmd = IIF._defaultFactorMetadata([X0;X1])
 
 # z translation only
 wTx = Vector{AffineMap}(undef,2)
@@ -141,7 +140,6 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-# fmd = IIF._defaultFactorMetadata([X0;X1])
 
 # different orientation, roll
 wTx = Vector{AffineMap}(undef, 2)
@@ -209,7 +207,6 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-# fmd = IIF._defaultFactorMetadata([X0;X1])
 
 wTx = Vector{AffineMap}(undef, 2)
 # different orientation, roll
@@ -225,7 +222,7 @@ wTx2 = convert(SE3, wTx[2])
 wEx1 = convert(Euler, wTx1.R)
 wEx1.Y = 0.0
 wRlx1 = SE3(zeros(3), wEx1)
-# wRx2 = deepcopy(wTx2); wRx2.t = zeros(3);
+
 # Odometries
 x1Tx2 = (wTx1\wTx2)
 wRlx1Tx2 = wRlx1 * x1Tx2
@@ -292,7 +289,7 @@ wTx2 = convert(SE3, wTx[2])
 wEx1 = convert(Euler, wTx1.R)
 wEx1.Y = 0.0
 wRlx1 = SE3(zeros(3), wEx1)
-# wRx2 = deepcopy(wTx2); wRx2.t = zeros(3);
+
 # Odometries
 x1Tx2 = (wTx1\wTx2)
 wRlx1Tx2 = wRlx1 * x1Tx2
@@ -306,8 +303,6 @@ testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*Matrix{Float64}(LinearAlgebr
 meas = (veeEuler(x1Tx2),)
 res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
 
-# res = zeros(6)
-# testpp3(res, fmd, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -317,9 +312,7 @@ testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(Linea
 
 meas = (XYH1_2,)
 res = testFactorResidualBinary(testppxyh, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
-#
-# res = zeros(3)
-# testppxyh(res, fmd, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
+
 
 @show res
 
@@ -358,7 +351,6 @@ wTx2 = convert(SE3, wTx[2])
 wEx1 = convert(Euler, wTx1.R)
 wEx1.Y = 0.0
 wRlx1 = SE3(zeros(3), wEx1)
-# wRx2 = deepcopy(wTx2); wRx2.t = zeros(3);
 # Odometries
 x1Tx2 = (wTx1\wTx2)
 wRlx1Tx2 = wRlx1 * x1Tx2
@@ -372,10 +364,6 @@ testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*Matrix{Float64}(LinearAlgebr
 meas = (veeEuler(x1Tx2),)
 res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
 
-# res = zeros(6)
-# testpp3(res, fmd, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
-
-
 @show res
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10
@@ -385,9 +373,6 @@ testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(Linea
 
 meas = (XYH1_2,)
 res = testFactorResidualBinary(testppxyh, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
-#
-# res = zeros(3)
-# testppxyh(res, fmd, 1, (vectoarr2(XYH1_2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 
 @show res
 @test norm(res[1:2]) < 1e-10
