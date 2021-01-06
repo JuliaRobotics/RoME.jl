@@ -60,8 +60,9 @@ mutable struct PartialPriorRollPitchZ{T1,T2} <: IncrementalInference.AbstractPri
   PartialPriorRollPitchZ{T1,T2}(rp::T1,z::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}(rp, z, (3,4,5))
 end
 PartialPriorRollPitchZ(rp::T1,z::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = PartialPriorRollPitchZ{T1,T2}(rp, z)
-function getSample(pprz::PartialPriorRollPitchZ, N::Int=1)
-  return ([rand(pprz.z,N)[:]';rand(pprz.rp,N)], )
+
+function getSample(cfo::CalcFactor{<:PartialPriorRollPitchZ}, N::Int=1)
+  return ([rand(cfo.factor.z,N)[:]';rand(cfo.factor.rp,N)], )
 end
 
 """
@@ -69,7 +70,7 @@ end
 
 Serialization type of `PartialPriorRollPitchZ`.
 """
-mutable struct PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInferenceType
+mutable struct PackedPartialPriorRollPitchZ <: IIF.PackedInferenceType
   rpdata::String
   zdata::String
   PackedPartialPriorRollPitchZ() = new()
@@ -77,18 +78,22 @@ mutable struct PackedPartialPriorRollPitchZ <: IncrementalInference.PackedInfere
 end
 function convert(::Type{PartialPriorRollPitchZ}, d::PackedPartialPriorRollPitchZ)
   # TODO: Change out for extractdistributionJson
-  PartialPriorRollPitchZ( extractdistribution(d.rpdata), extractdistribution(d.zdata)  )
+  PartialPriorRollPitchZ( convert(SamplableBelief, d.rpdata), convert(SamplableBelief, d.zdata)  )
 end
 function convert(::Type{PackedPartialPriorRollPitchZ}, d::PartialPriorRollPitchZ)
-  PackedPartialPriorRollPitchZ( string(d.rp), string(d.z) )
+  PackedPartialPriorRollPitchZ( convert(PackedSamplableBelief, d.rp), convert(PackedSamplableBelief, d.z) )
 end
 
 """
 Converter: PartialPriorRollPitchZ::Dict{String, Any} -> PartialPriorRollPitchZ
+
+DevNotes
+- FIXME drop _evalType approach, use convert(SamplableBelief, obj) instead?
 """
 function convert(::Type{RoME.PartialPriorRollPitchZ}, fact::Dict{String, Any})
     rp = fact["measurement"][1]
     z = fact["measurement"][2]
+    # FIXME drop _evalType
     rp = convert(_evalType(rp["distType"]), rp)
     z = convert(_evalType(z["distType"]), z)
     return PartialPriorRollPitchZ(rp, z)

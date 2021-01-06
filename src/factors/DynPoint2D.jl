@@ -10,7 +10,8 @@ mutable struct DynPoint2VelocityPrior{T <: SamplableBelief} <: AbstractPrior
   DynPoint2VelocityPrior{T}(z1::T) where {T <: SamplableBelief} = new{T}(z1)
 end
 DynPoint2VelocityPrior(z1::T) where {T <: SamplableBelief} = DynPoint2VelocityPrior{T}(z1)
-getSample(dp2v::DynPoint2VelocityPrior, N::Int=1) = (rand(dp2v.z,N), )
+
+getSample(cfo::CalcFactor{<:DynPoint2VelocityPrior}, N::Int=1) = (rand(cfo.factor.z,N), )
 
 
 """
@@ -21,18 +22,15 @@ mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeRoots
   DynPoint2DynPoint2{T}() where {T <: SamplableBelief} = new{T}()
   DynPoint2DynPoint2(z1::T) where {T <: SamplableBelief} = new{T}(z1)
 end
-getSample(dp2dp2::DynPoint2DynPoint2, N::Int=1) = (rand(dp2dp2.z,N), )
-function (dp2dp2::DynPoint2DynPoint2)(
-            res::Array{Float64},
-            userdata,
-            idx::Int,
-            meas::Tuple,
-            Xi::Array{Float64,2},
-            Xj::Array{Float64,2}  )
+
+getSample(cfo::CalcFactor{<:DynPoint2DynPoint2}, N::Int=1) = (rand(cfo.factor.z,N), )
+function (cfo::CalcFactor{<:DynPoint2DynPoint2})(
+            res::AbstractVector{<:Real},
+            z,
+            xi,
+            xj  )
   #
-  z = meas[1][:,idx]
-  xi, xj = Xi[:,idx], Xj[:,idx]
-  dt = Dates.value(userdata.fullvariables[2].nstime - userdata.fullvariables[1].nstime)*1e-9   # roughly the intended use of userdata
+  dt = Dates.value(cfo.metadata.fullvariables[2].nstime - cfo.metadata.fullvariables[1].nstime)*1e-9   # roughly the intended use of userdata
   res[1:2] = z[1:2] - (xj[1:2] - (xi[1:2]+dt*xi[3:4]))
   res[3:4] = z[3:4] - (xj[3:4] - xi[3:4])
   nothing
@@ -49,18 +47,15 @@ mutable struct Point2Point2Velocity{T <: IIF.SamplableBelief} <: IIF.AbstractRel
   Point2Point2Velocity{T}() where {T <: IIF.SamplableBelief} = new{T}()
   Point2Point2Velocity(z1::T) where {T <: IIF.SamplableBelief} = new{T}(z1)
 end
-getSample(p2p2v::Point2Point2Velocity, N::Int=1) = (rand(p2p2v.z,N), )
-function (p2p2v::Point2Point2Velocity)(
-                res::Array{Float64},
-                userdata,
-                idx::Int,
-                meas::Tuple,
-                Xi::Array{Float64,2},
-                Xj::Array{Float64,2}  )
+
+getSample(cfo::CalcFactor{<:Point2Point2Velocity}, N::Int=1) = (rand(cfo.factor.z,N), )
+function (cfo::CalcFactor{<:Point2Point2Velocity})(
+                res::AbstractVector{<:Real},
+                z,
+                xi,
+                xj  )
   #
-  z = meas[1][:,idx]
-  xi, xj = Xi[:,idx], Xj[:,idx]
-  dt = (userdata.fullvariables[2].nstime - userdata.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
+  dt = (cfo.metadata.fullvariables[2].nstime - cfo.metadata.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
   dp = (xj[1:2]-xi[1:2])
   dv = (xj[3:4]-xi[3:4])
   res[1] = 0.0
@@ -84,10 +79,10 @@ mutable struct PackedDynPoint2VelocityPrior <: IIF.PackedInferenceType
 end
 
 function convert(::Type{PackedDynPoint2VelocityPrior}, d::DynPoint2VelocityPrior)
-  return PackedDynPoint2VelocityPrior(string(d.z))
+  return PackedDynPoint2VelocityPrior(convert(PackedSamplableBelief, d.z))
 end
 function convert(::Type{DynPoint2VelocityPrior}, d::PackedDynPoint2VelocityPrior)
-  distr = extractdistribution(d.str)
+  distr = convert(SamplableBelief, d.str)
   return DynPoint2VelocityPrior(distr)
 end
 

@@ -1,3 +1,5 @@
+# TODO integration underway with Manifolds.jl, see RoME #244, also see IIF #467 regarding consolidation effort.
+
 export projectCartesian
 
 """

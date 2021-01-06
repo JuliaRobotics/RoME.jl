@@ -102,11 +102,11 @@ mutable struct PackedPose2Point2BearingRange <: IncrementalInference.PackedInfer
 end
 
 function convert(::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange{B, R}) where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}
-  return PackedPose2Point2BearingRange(string(d.bearing), string(d.range))
+  return PackedPose2Point2BearingRange(convert(PackedSamplableBelief, d.bearing), convert(PackedSamplableBelief, d.range))
 end
 
 # TODO -- should not be resorting to string, consider specialized code for parametric distribution types and KDEs
 function convert(::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange)
  # where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}
-  Pose2Point2BearingRange(extractdistribution(d.bearstr), extractdistribution(d.rangstr))
+  Pose2Point2BearingRange(convert(SamplableBelief, d.bearstr), convert(SamplableBelief, d.rangstr))
 end

@@ -84,12 +84,12 @@ end
 
 function convert(::Type{PriorPoint2}, d::PackedPriorPoint2)
   # Cov = reshapeVec2Mat(d.vecCov, d.dimc)
-  distr = extractdistribution(d.str)
+  distr = convert(SamplableBelief, d.str)
   return PriorPoint2{typeof(distr)}(distr)
 end
 function convert(::Type{PackedPriorPoint2}, d::PriorPoint2)
   # v2 = d.mv.Σ.mat[:];
-  return PackedPriorPoint2(string(d.Z))
+  return PackedPriorPoint2(convert(PackedSamplableBelief, d.Z))
 end
 
 
