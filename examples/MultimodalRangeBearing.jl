@@ -9,7 +9,7 @@ mutable struct NorthSouthPartial{T} <: AbstractPrior
   NorthSouthPartial() = new()
   NorthSouthPartial(Z::D) where {D <: Distribution} = new{D}(Z, (2,))
 end
-getSample(ns::NorthSouthPartial, N=1) = (reshape(rand(ns.Z, N),1,N),)
+getSample(cfo::CalcFactor{<:NorthSouthPartial}, N=1) = (reshape(rand(cfo.factor.Z, N),1,N),)
 
 
 # Start with an empty graph
@@ -17,8 +17,8 @@ fg = initfg(sessionname="MULTIMODAL_2D_TUTORIAL")
 
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, tags=["LANDMARK"])
-addVariable!(fg, :l2, Point2, tags=["LANDMARK"])
+addVariable!(fg, :l1, Point2, tags=[:LANDMARK])
+addVariable!(fg, :l2, Point2, tags=[:LANDMARK])
 
 addFactor!(fg, [:l1], Prior(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 addFactor!(fg, [:l2], Prior(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
@@ -38,9 +38,8 @@ addFactor!(fg, [:x0;], NorthSouthPartial(Normal(0,1.0)))
 
 ensureAllInitialized!(fg)
 
-tree = wipeBuildNewTree!(fg)
 
-[inferOverTreeR!(fg, tree, N=100) for i in 1:4]
+[solveTree!(fg) for i in 1:4]
 
 
 
