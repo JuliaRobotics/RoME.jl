@@ -44,7 +44,7 @@ li = zeros(2,1); li[1,1] = 20.0;
 zi = (zeros(2,1),); zi[1][2,1] = 20.0
 
 # dummy fmd during refactoring and consolidation work
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 idx = 1
 res = zeros(2)

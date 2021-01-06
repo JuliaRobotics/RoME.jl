@@ -36,7 +36,7 @@ res = zeros(6)
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 testpp3(res, fmd, 1, (veeEuler(x1Tx2),), vectoarr2(veeEuler(wTx1)), vectoarr2(veeEuler(wTx2)))
 @test norm(res[1:3]) < 1e-10
@@ -66,7 +66,7 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 # z translation only
 wTx = Vector{AffineMap}(undef,2)
@@ -115,7 +115,7 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 # different orientation, roll
 wTx = Vector{AffineMap}(undef, 2)
@@ -167,7 +167,7 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 wTx = Vector{AffineMap}(undef, 2)
 # different orientation, roll
@@ -221,7 +221,7 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
@@ -274,7 +274,7 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
@@ -329,7 +329,7 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
@@ -385,7 +385,7 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 wTx = Vector{AffineMap}(undef, 2)
 # different orientation, pitch
@@ -445,7 +445,7 @@ end
 fg_ = initfg()
 X0 = addVariable!(fg_, :x0, Pose3)
 X1 = addVariable!(fg_, :x1, Pose3)
-fmd = IIF._defaultFactorMetadata([X0;X1])
+fmd = _defaultFactorMetadataRoME([X0;X1])
 
 wTx = Vector{AffineMap}(undef, 2)
 # different orientation, yaw

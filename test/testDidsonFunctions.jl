@@ -32,7 +32,7 @@ addFactor!(fg, [:x0;:x1], meas)
 
 ##
 
-fmd = IIF._defaultFactorMetadata([X0;X1], arrRef=t)
+fmd = _defaultFactorMetadataRoME([X0;X1], arrRef=t)
 
 ccw = CommonConvWrapper(meas, t[2], zDim, t, fmd, measurement=measurement, varidx=2)
 
@@ -40,8 +40,9 @@ ccw = CommonConvWrapper(meas, t[2], zDim, t, fmd, measurement=measurement, varid
 ccw.measurement = measurement
 ccw.cpt[1].res = zeros(1)
 
-@time ccw(zeros(3), zeros(3))
-@time ccw(zeros(3))
+# deprecated
+# @time ccw(zeros(3), zeros(3))
+# @time ccw(zeros(3))
 
 
 
@@ -78,7 +79,7 @@ X0 = addVariable!(fg, :x0, Pose3)
 X1 = addVariable!(fg, :x1, Pose3)
 addFactor!(fg, [:x0;:x1], meas)
 
-fmd = IIF._defaultFactorMetadata([X0;X1], arrRef=t)
+fmd = _defaultFactorMetadataRoME([X0;X1], arrRef=t)
 
 ccw = CommonConvWrapper(meas, t[1], zDim, t, fmd, varidx=1, measurement=measurement)
 
@@ -87,8 +88,8 @@ ccw.measurement = measurement
 ccw.cpt[1].res = zeros(1)
 
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
-@time ccw(zeros(3), zeros(6))
-@time ccw(zeros(6))
+# @time ccw(zeros(3), zeros(6))
+# @time ccw(zeros(6))
 
 
 @time for n in 1:N
