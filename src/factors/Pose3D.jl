@@ -34,15 +34,8 @@ mutable struct PackedPriorPose3  <: IncrementalInference.PackedInferenceType
     PackedPriorPose3(x::AbstractString) = new(x)
 end
 function convert(::Type{PriorPose3}, packed::PackedPriorPose3)
-  # Zi = SE3(d.vecZi[1:3], Quaternion(d.vecZi[4],d.vecZi[5:7]))
-  # Cov = reshapeVec2Mat(d.vecCov, d.dimc)
-  # return PriorPose3( MvNormal( veeEuler(Zi), Cov) )
-  return PriorPose3( extractdistribution(packed.Zi) )
+  return PriorPose3( convert(SamplableBelief, packed.Zi) )
 end
 function convert(::Type{PackedPriorPose3}, obj::PriorPose3)
-  # tf = SE3(d.Zi.μ[1:3], Euler(d.Zi.μ[4:6]...) )
-  # v1 = veeQuaternion(tf)
-  # v2 = d.Zi.Σ.mat[:];
-  # return PackedPriorPose3(v1, v2, size(d.Zi.Σ.mat,1))
-  return PackedPriorPose3(string(obj.Zi))
+  return PackedPriorPose3(convert(PackedSamplableBelief, obj.Zi))
 end

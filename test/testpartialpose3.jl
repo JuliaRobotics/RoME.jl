@@ -95,13 +95,9 @@ end
 tfg = initfg()
 X0 = addVariable!(tfg, :x0, Pose3)
 X1 = addVariable!(tfg, :x1, Pose3)
-# fmd = IIF._defaultFactorMetadata([X0;X1])
-# res = zeros(3)
-# idx = 1
-# meas = getSample(xyy)
+
 xi = zeros(6)
 xja = zeros(6)
-# xyy(res, fmd, idx, meas, xi, xja)
 
 res = testFactorResidualBinary(xyy, Pose3, Pose3, xi, xja)
 
