@@ -18,7 +18,7 @@ Pose2Point2BearingRange(bearing, range) = Pose2Point2BearingRange(bearing, range
 
 function Pose2Point2BearingRange(bearing::Normal, range::Normal) 
   μ = mean.([bearing, range])
-  σ = var.([bearing, range])
+  σ = std.([bearing, range])
   Pose2Point2BearingRange(bearing, range, MvNormal(μ, σ))
 end
 
