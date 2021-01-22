@@ -38,10 +38,14 @@ function (cfo::CalcFactor{<:Pose2Point2Bearing})( res::AbstractVector{<:Real},
   normalize!(reuse.predvec)
   reuse.resid .= reuse.measvec
   reuse.resid .-= reuse.predvec
-  reuse.resid .^= 2
-  res[1] = reuse.resid[1]
-  res[1] += reuse.resid[2]
-  return res[1]
+
+  # must return result of length zDim==1 in this case
+  res[1] = sum(abs.(reuse.resid))
+  # reuse.resid .^= 2
+  # res[1] = reuse.resid[1]
+  # res[1] += reuse.resid[2]
+  # return res[1]
+  nothing
 end
 
 

@@ -138,7 +138,7 @@ Partial factor between XY and Yaw of two Pose3 variables.
 
 To be deprecated: use Pose3Pose3XYYaw instead.
 """
-mutable struct PartialPose3XYYaw{T1,T2} <: AbstractRelativeMinimize where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+mutable struct PartialPose3XYYaw{T1 <: SamplableBelief,T2 <: SamplableBelief} <: IIF.AbstractRelativeMinimize
   xy::T1
   yaw::T2
   partial::Tuple{Int,Int,Int}
@@ -158,7 +158,9 @@ function (cfo::CalcFactor{<:PartialPose3XYYaw})(res::AbstractVector{<:Real},
   wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
   jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
   se2vee!(res, jXjhat)
-  res'*res
+  
+  # res'*res
+  nothing
 end
 
 """
@@ -166,7 +168,7 @@ end
 
 Partial factor between XY and Yaw of two Pose3 variables.
 """
-mutable struct Pose3Pose3XYYaw{T1,T2} <: AbstractRelativeMinimize where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+mutable struct Pose3Pose3XYYaw{T1 <: SamplableBelief,T2 <: SamplableBelief} <: IIF.AbstractRelativeMinimize
   xy::T1
   yaw::T2
   partial::Tuple{Int,Int,Int}
@@ -188,7 +190,9 @@ function (pxyy::Pose3Pose3XYYaw)(res::Array{Float64},
   wXjhat = SE2(wXi[[1;2;6],idx]) * SE2(meas[1][1:3,idx])
   jXjhat = SE2(wXj[[1;2;6],idx]) \ wXjhat
   se2vee!(res, jXjhat)
-  res'*res
+
+  # res'*res
+  nothing
 end
 
 """
