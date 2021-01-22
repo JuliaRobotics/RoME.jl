@@ -10,6 +10,16 @@ Bearing and Range constraint from a Pose2 to Point2 variable.
 mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
     bearing::B
     range::R
+    # buffer for parametric
+    Z::Union{MvNormal, Nothing}
+end
+
+Pose2Point2BearingRange(bearing, range) = Pose2Point2BearingRange(bearing, range, nothing)
+
+function Pose2Point2BearingRange(bearing::Normal, range::Normal) 
+  μ = mean.([bearing, range])
+  σ = var.([bearing, range])
+  Pose2Point2BearingRange(bearing, range, MvNormal(μ, σ))
 end
 
 function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange}, N::Int=1)
@@ -19,12 +29,6 @@ function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange}, N::Int=1)
 
   # must return at least first element in `::Tuple` as `::Matrix`
   return (smpls,)
-end
-
-function IIF.getParametricField(s::Pose2Point2BearingRange{<:Normal, <:Normal})
-  μ = mean.([s.bearing, s.range])
-  σ = var.([s.bearing, s.range])
-  return MvNormal(μ, σ)
 end
 
 # TODO consolidate with parametric constraint, follow at #467
