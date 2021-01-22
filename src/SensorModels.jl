@@ -19,7 +19,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct LinearRangeBearingElevation <: AbstractRelativeMinimize
+mutable struct LinearRangeBearingElevation <: IIF.AbstractRelativeMinimize
   range::Normal
   bearing::Normal
   elev::Uniform
@@ -33,7 +33,9 @@ function (cfo::CalcFactor{<:LinearRangeBearingElevation})(res::Vector{Float64},
                                                           landm  )
   #
   residualLRBE!(res, meas, pose, landm, cfo.factor.reuse[Threads.threadid()])
-  return res[1]
+  
+  # residual stored in res
+  nothing
 end
 
 function getSample!(y::Array{Float64,2}, las::LinearRangeBearingElevation, idx::Int )
@@ -91,9 +93,9 @@ function residualLRBE!( resid::AbstractVector{<:Real},
   #
   # TODO upgrade so the - sign here is used on a manifold too, ominus(z,  ominus(tt, variables...)  )
   # TODO just switch directly to parameterized function
+  
   ominus!(reuse, X, L)
-  resid[1] = norm(z - reuse.rbe)
-  # resid[:] = z - ominus!(LinearRangeBearingElevation, X, L)
+  resid .= z .- reuse.rbe
 
   nothing
 end

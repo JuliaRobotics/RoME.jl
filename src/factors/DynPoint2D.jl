@@ -49,19 +49,19 @@ mutable struct Point2Point2Velocity{T <: IIF.SamplableBelief} <: IIF.AbstractRel
 end
 
 getSample(cfo::CalcFactor{<:Point2Point2Velocity}, N::Int=1) = (rand(cfo.factor.z,N), )
-function (cfo::CalcFactor{<:Point2Point2Velocity})(
-                res::AbstractVector{<:Real},
-                z,
-                xi,
-                xj  )
+function (cfo::CalcFactor{<:Point2Point2Velocity})( res::AbstractVector{<:Real},
+                                                    z,
+                                                    xi,
+                                                    xj  )
   #
   dt = (cfo.metadata.fullvariables[2].nstime - cfo.metadata.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
-  dp = (xj[1:2]-xi[1:2])
-  dv = (xj[3:4]-xi[3:4])
-  res[1] = 0.0
-  res[1] += sum((z[1:2] - dp).^2)
-  res[1] += sum((dp/dt - 0.5*(xj[3:4]+xi[3:4])).^2)  # (dp/dt - 0.5*(xj[3:4]+xi[3:4])) # midpoint integration
-  res[1]
+  dp = (xj[1:2] .- xi[1:2])
+  dv = (xj[3:4] .- xi[3:4])
+
+  res[1:2] .= z[1:2] .- dp
+  res[3:4] .=  dp/dt .- 0.5*(xj[3:4] .+ xi[3:4])  # (dp/dt - 0.5*(xj[3:4]+xi[3:4])) # midpoint integration
+
+  nothing
 end
 
 

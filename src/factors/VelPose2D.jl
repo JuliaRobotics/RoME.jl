@@ -5,7 +5,7 @@ export VelPose2VelPose2, PackedVelPose2VelPose2
 """
 $(TYPEDEF)
 """
-mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: AbstractRelativeMinimize
+mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
   Zpose::Pose2Pose2{T1} #Zpose::T1
   Zvel::T2
   reuseres::Vector{Vector{Float64}}
@@ -33,12 +33,21 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(res::AbstractVector{<:Real},
 
   wDXij = (wxj[4:5]-wxi[4:5])
   bDXij = TransformUtils.R(-wxi[3])*wDXij
+  
   # calculate the residual
-  res[1] = sum((cf.factor.reuseres[Threads.threadid()]).^2)
-  res[1] += sum((z[4:5] - bDXij).^2)
   dx = se2vee(SE2(wxi[1:3]) \ SE2(wxj[1:3]))
-  res[1] += sum((dx[1:2]/dt - 0.5*(wxj[4:5]+wxi[4:5])).^2)  # first order integration
-  res[1]
+  res[1:3] .= cf.factor.reuseres[Threads.threadid()]
+  res[4:5] .= z[4:5] .- bDXij
+  res[4:5] .^= 2
+  res[4:5] .+= (dx[1:2]/dt .- 0.5*(wxj[4:5] .+ wxi[4:5])).^2
+  res[4:5] .= sqrt.(res[4:5])
+
+  # res[1] = sum((cf.factor.reuseres[Threads.threadid()]).^2)
+  # res[1] += sum((z[4:5] - bDXij).^2)
+  # res[1] += sum((dx[1:2]/dt - 0.5*(wxj[4:5]+wxi[4:5])).^2)  # first order integration
+  # res[1]
+
+  nothing
 end
 
 
