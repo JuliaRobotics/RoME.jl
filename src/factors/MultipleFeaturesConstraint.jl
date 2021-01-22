@@ -43,7 +43,7 @@ mutable struct MultipleFeatures2D <: IIF.AbstractRelativeMinimize
   xjr2::Normal
   xjr3a::Normal
   xjr3b::Normal
-  abC::Categorical
+  abC::Categorical # OBSOLETE, use addFactor!(..., multihypo=[...]...) instead, see Caesar docs
   bTc::Array{Float64,2}
   zDim::Tuple{Int,Int,Int,Int,Int}
   # Takes five
@@ -122,6 +122,7 @@ function (mm2d::MultipleFeatures2D)(res::Array{Float64},
   tempres += ( meas[1][1,idx,2] - the1 )^2
   tempres += ( meas[1][2,idx,2] - the2 )^2
 
+  # FIXME OUTDATED, multihypo= and in-place residual IIF v0.21
   if dobimodal
     if !meas[2][idx]
       # 3a case
@@ -134,6 +135,8 @@ function (mm2d::MultipleFeatures2D)(res::Array{Float64},
     tempres += ( meas[1][3,idx,2] - the3 )^2
   end
   res[1]+tempres
+
+  return nothing
 end
 
 

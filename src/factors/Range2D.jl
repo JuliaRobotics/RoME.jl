@@ -72,8 +72,9 @@ function (pp2r::CalcFactor{<:Pose2Point2Range})(res::AbstractVector{<:Real},
   # this is the noisy range
   XX = lm[1] - (rho[1]*cos(theta[1]) + xi[1])
   YY = lm[2] - (rho[1]*sin(theta[1]) + xi[2])
-  res[1] = XX^2 + YY^2
-  return res[1]
+  res[1] = sqrt(XX^2 + YY^2)
+
+  nothing
 end
 
 
