@@ -9,7 +9,7 @@ Related
 Pose3Pose3, Point2Point2, MutablePose2Pose2Gaussian, DynPose2, InertialPose3
 """
 struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRoots
-  z::T
+  Z::T
   # empty constructor
   Pose2Pose2{T}() where {T <: IIF.SamplableBelief} = new{T}()
   # regular constructor
@@ -20,7 +20,8 @@ Pose2Pose2(z::T=MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0]))) where {T 
 Pose2Pose2(::UniformScaling) = Pose2Pose2(MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])))
 
 
-getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) = (rand(cf.factor.z,N), )
+getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) = (rand(cf.factor.Z,N), )
+
 function (cf::CalcFactor{<:Pose2Pose2})(res::AbstractVector{<:Real},
                                         meas,
                                         wxi,
@@ -36,8 +37,8 @@ end
 #TODO wrapper -- consolidate with CalcFactor, see #467
 function (s::Pose2Pose2{<:MvNormal})(wXi::AbstractVector{T}, wXj::AbstractVector{T}; kwargs...) where T <: Real
 
-  meas = mean(s.z)
-  iΣ = invcov(s.z)
+  meas = mean(s.Z)
+  iΣ = invcov(s.Z)
   wXjhat = SE2(wXi[1:3])*SE2(meas[1:3])
   jXjhat = SE2(wXj[1:3]) \ wXjhat
 
@@ -63,14 +64,14 @@ function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)
   return Pose2Pose2(convert(SamplableBelief, d.datastr))
 end
 function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
-  return PackedPose2Pose2(convert(PackedSamplableBelief, d.z))
+  return PackedPose2Pose2(convert(PackedSamplableBelief, d.Z))
 end
 
 
 
 # FIXME, rather have separate compareDensity functions
 function compare(a::Pose2Pose2,b::Pose2Pose2; tol::Float64=1e-10)
-  return compareDensity(a.z, b.z)
+  return compareDensity(a.Z, b.Z)
   # TP = true
   # TP = TP && norm(a.z.μ-b.z.μ) < (tol + 1e-5)
   # TP = TP && norm(a.z.Σ.mat-b.z.Σ.mat) < tol

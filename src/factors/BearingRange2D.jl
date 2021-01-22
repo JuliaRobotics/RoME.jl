@@ -21,6 +21,12 @@ function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange}, N::Int=1)
   return (smpls,)
 end
 
+function IIF.getParametricField(s::Pose2Point2BearingRange{<:Normal, <:Normal})
+  μ = mean.([s.bearing, s.range])
+  σ = var.([s.bearing, s.range])
+  return MvNormal(μ, σ)
+end
+
 # TODO consolidate with parametric constraint, follow at #467
 function (cfo::CalcFactor{<:Pose2Point2BearingRange})(res::AbstractVector{<:Real},
                                                       meas,
