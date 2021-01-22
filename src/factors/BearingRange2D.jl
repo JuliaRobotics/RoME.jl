@@ -10,19 +10,18 @@ Bearing and Range constraint from a Pose2 to Point2 variable.
 mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
     bearing::B
     range::R
-    Pose2Point2BearingRange{B,R}() where {B,R} = new{B,R}()
-    Pose2Point2BearingRange{B,R}(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = new{B,R}(x1,x2)
 end
-Pose2Point2BearingRange(x1::B,x2::R) where {B <: IIF.SamplableBelief,R <: IIF.SamplableBelief} = Pose2Point2BearingRange{B,R}(x1,x2)
+
 function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange}, N::Int=1)
   smpls = zeros(2, N)
   smpls[1,:] = rand(cfo.factor.bearing, N)[:]
   smpls[2,:] = rand(cfo.factor.range, N)[:]
 
+  # must return at least first element in `::Tuple` as `::Matrix`
   return (smpls,)
 end
 
-# define the conditional probability constraint
+# TODO consolidate with parametric constraint, follow at #467
 function (cfo::CalcFactor{<:Pose2Point2BearingRange})(res::AbstractVector{<:Real},
                                                       meas,
                                                       xi,
@@ -109,8 +108,6 @@ function (s::Pose2Point2BearingRange{<:Normal})(xi::AbstractVector{T}, lm::Abstr
 
 end
 
-# import RoME: Pose2Point2BearingRange
-
 
 # Support for database based solving
 
@@ -119,16 +116,13 @@ passTypeThrough(d::FunctionNodeData{Pose2Point2Range}) = d
 mutable struct PackedPose2Point2BearingRange <: IncrementalInference.PackedInferenceType
     bearstr::String
     rangstr::String
-    PackedPose2Point2BearingRange() = new()
-    PackedPose2Point2BearingRange(s1::AS, s2::AS) where {AS <: AbstractString} = new(string(s1),string(s2))
 end
 
-function convert(::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange{B, R}) where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}
-  return PackedPose2Point2BearingRange(convert(PackedSamplableBelief, d.bearing), convert(PackedSamplableBelief, d.range))
+function convert( ::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange )
+  return PackedPose2Point2BearingRange( convert(PackedSamplableBelief, d.bearing), convert(PackedSamplableBelief, d.range) )
 end
 
 # TODO -- should not be resorting to string, consider specialized code for parametric distribution types and KDEs
-function convert(::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange)
- # where {B <: IIF.SamplableBelief, R <: IIF.SamplableBelief}
-  Pose2Point2BearingRange(convert(SamplableBelief, d.bearstr), convert(SamplableBelief, d.rangstr))
+function convert( ::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange )
+  Pose2Point2BearingRange( convert(SamplableBelief, d.bearstr), convert(SamplableBelief, d.rangstr) )
 end
