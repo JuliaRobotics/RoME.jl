@@ -21,10 +21,6 @@ Pose2Pose2(::UniformScaling) = Pose2Pose2(MvNormal(zeros(3),LinearAlgebra.diagm(
 
 getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) = (rand(cf.factor.z,N), )
 
-function IIF.getParametricField(s::Pose2Pose2)
-  return s.z
-end
-
 function (cf::CalcFactor{<:Pose2Pose2})(res::AbstractVector{<:Real},
                                         meas,
                                         wxi,
