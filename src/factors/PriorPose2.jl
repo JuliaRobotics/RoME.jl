@@ -24,21 +24,6 @@ function getSample(cfo::CalcFactor{<:PriorPose2}, N::Int=1)
   return (rand(cfo.factor.Z,N), )
 end
 
-function (s::CalcFactor{<:PriorPose2})(res::AbstractVector{<:Real}, 
-                                       meas, 
-                                       wXi)
-  #
-  iXihat = SE2(meas) \ SE2(wXi)
-  res = se2vee(iXihat)
-
-  @info meas maxlog=1
-  @info wXi maxlog=1
-  @info res maxlog=1
-  @info "\n" maxlog=1
-
-  nothing
-end
-
 #TODO wrapper Consolidate with CalcFactor version, see #467
 function (s::PriorPose2{<:MvNormal})(wXi::AbstractVector{T}; kwargs...) where T <: Real
 
