@@ -31,7 +31,8 @@ testfiles = [
 "testpackingconverters.jl";
 "TestDefaultFGInitialization.jl";
 "testAccumulateFactors.jl";
-"testDeadReckoningTether.jl"; ]
+"testDeadReckoningTether.jl"; 
+"testPoint2Point2.jl"]
 
 ## Tests not ready yet
 # "HexagonalLightGraphs.jl"
