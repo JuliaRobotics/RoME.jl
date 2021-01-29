@@ -19,8 +19,8 @@ end
 Pose2Pose2(z::T=MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0]))) where {T <: IIF.SamplableBelief} = Pose2Pose2{T}(z)
 Pose2Pose2(::UniformScaling) = Pose2Pose2(MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])))
 
-
 getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) = (rand(cf.factor.z,N), )
+
 function (cf::CalcFactor{<:Pose2Pose2})(res::AbstractVector{<:Real},
                                         meas,
                                         wxi,
