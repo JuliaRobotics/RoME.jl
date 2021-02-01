@@ -23,7 +23,7 @@ function (cfo::CalcFactor{<:Point2Point2Range})(
   XX = lm[1] - (rho[1]*cos(theta[1]) + xi[1])
   YY = lm[2] - (rho[1]*sin(theta[1]) + xi[2])
   res[1] = XX^2 + YY^2
-  res[1]
+  return nothing
 end
 
 

@@ -18,6 +18,15 @@ function getSample(cfo::CalcFactor{<:PriorPoint2}, N::Int=1)
   return (rand(cfo.factor.Z, N),)
 end
 
+function (s::CalcFactor{<:PriorPoint2})(res::AbstractVector{<:Real}, 	
+                                        meas, 	
+                                        X1)	
+  #	
+  res[1:2] .= meas[1:2] .- X1[1:2]
+
+  nothing	
+end
+
 #TODO wrapper
 function (s::PriorPoint2{<:MvNormal})(X1::AbstractVector{T}; kwargs...) where T <: Real
 
