@@ -1,8 +1,8 @@
 name: CI
 on:
-  - pull_request:
-  - push:
-    branch:
+  pull_request:
+  push:
+    branches:
       - master
       - develop
       - release**
