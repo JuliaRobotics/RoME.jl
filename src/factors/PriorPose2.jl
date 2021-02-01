@@ -24,9 +24,19 @@ function getSample(cfo::CalcFactor{<:PriorPose2}, N::Int=1)
   return (rand(cfo.factor.Z,N), )
 end
 
-#TODO wrapper Consolidate with CalcFactor version, see #467
-function (s::PriorPose2{<:MvNormal})(wXi::AbstractVector{T}; kwargs...) where T <: Real
+function (s::CalcFactor{<:PriorPose2})(res::AbstractVector{<:Real}, 	
+                                       meas, 	
+                                       wXi)	
+  #	
+  iXihat = SE2(meas) \ SE2(wXi)	
+  #NOTE do not forget the .=
+  res .= se2vee(iXihat)	
 
+  nothing	
+end
+
+#TODO wrapper Consolidate with CalcFactor version, see #467
+function (s::PriorPose2{<:MvNormal})(wXi::AbstractVector{<:Real}; kwargs...)
 
   meas = mean(s.Z)
   iΣ = invcov(s.Z)

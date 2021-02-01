@@ -26,6 +26,13 @@ function getSample(cfo::CalcFactor{<:Pose2Point2}, N::Int=1)
 
   return (smpls,)
 end
+
+function IIF.getParametricMeasurement(s::Pose2Point2{<:MvNormal})
+
+  return IIF.getParametricMeasurement(s.Zij)
+
+end
+
 # define the conditional probability constraint
 function (cfo::CalcFactor{<:Pose2Point2})(res::AbstractVector{<:Real},
                                           meas,
@@ -42,30 +49,6 @@ function (cfo::CalcFactor{<:Pose2Point2})(res::AbstractVector{<:Real},
   # return res[1]
   nothing
 end
-
-
-#TODO wrapper
-# function (s::Pose2Point2{<:Normal})(xi::AbstractVector{T}, lm::AbstractVector{T}; kwargs...) where T <: Real
-#   meas = [mean(s.bearing), mean(s.range)]
-#   iΣ = [var(s.bearing)         0.0;
-#                    0.0 var(s.range)]
-#   #
-#
-#   # world frame
-#   θ = meas[1] + xi[3]
-#   mx = meas[2]*cos(θ)
-#   my = meas[2]*sin(θ)
-#
-#   ex = lm[1] - (mx + xi[1])
-#   ey = lm[2] - (my + xi[2])
-#   er = sqrt(ex^2 + ey^2)
-#
-#   eθ = atan((my + xi[2]), (mx + xi[1])) - atan(lm[2], lm[1])
-#
-#   res = [eθ, er]
-#
-#   return res' * iΣ * res
-# end
 
 
 ## Serialization support
