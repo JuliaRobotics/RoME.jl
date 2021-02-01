@@ -1,8 +1,8 @@
 # RoME.jl
 
-| Stable | Dev | Coverage |
+| Stable v0.12 | Dev | Coverage |
 |--------|-----|----------|
-| [![Build Status](https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.5)](https://travis-ci.org/JuliaRobotics/RoME.jl) | ![CI](https://github.com/JuliaRobotics/RoME.jl/workflows/CI/badge.svg?branch=master) | [![codecov.io](https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master)](https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master)
+| [![Build Status](https://travis-ci.org/JuliaRobotics/RoME.jl.svg?branch=release%2Fv0.12)](https://travis-ci.org/JuliaRobotics/RoME.jl) | [![CI](https://github.com/JuliaRobotics/RoME.jl/workflows/CI/badge.svg?branch=master)](https://github.com/JuliaRobotics/RoME.jl/actions?query=workflow%3ACI) | [![codecov.io](https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master)](https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master)
 
 Robot Motion Estimate: A set of functions for developing front-ends for SLAM in [Julia](www.julialang.org) which adds transform, visualization and convenience functions to the [Multi-modal iSAM](http://frc.ri.cmu.edu/~kaess/pub/Fourie16iros.pdf) backend solver. The back-end solver is implemented in [IncrementalInference.jl](https://github.com/JuliaRobotics/IncrementalInference.jl).
 
