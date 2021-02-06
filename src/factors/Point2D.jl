@@ -18,23 +18,10 @@ function getSample(cfo::CalcFactor{<:PriorPoint2}, N::Int=1)
   return (rand(cfo.factor.Z, N),)
 end
 
-function (s::CalcFactor{<:PriorPoint2})(res::AbstractVector{<:Real}, 	
-                                        meas, 	
+function (s::CalcFactor{<:PriorPoint2})(meas, 	
                                         X1)	
   #	
-  res[1:2] .= meas[1:2] .- X1[1:2]
-
-  nothing	
-end
-
-#TODO wrapper
-function (s::PriorPoint2{<:MvNormal})(X1::AbstractVector{T}; kwargs...) where T <: Real
-
-  meas = mean(s.Z)
-  iΣ = invcov(s.Z)
-  res = meas[1:2] .- X1[1:2]
-  return res' * iΣ * res
-
+  return meas[1:2] .- X1[1:2] 	
 end
 
 """
@@ -53,24 +40,12 @@ Point2Point2(x::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.1;0.1]))) where {T <:
 function getSample(cfo::CalcFactor{<:Point2Point2}, N::Int=1)
   return (rand(cfo.factor.Zij,N),  )
 end
-function (pp2r::CalcFactor{<:Point2Point2})(res::AbstractVector{<:Real},
-                                            meas,
+function (pp2r::CalcFactor{<:Point2Point2})(meas,
                                             xi,
                                             xj )
   #
-  res[1:2] .= meas[1:2] .- (xj[1:2] .- xi[1:2])
-  nothing
+  return meas[1:2] .- (xj[1:2] .- xi[1:2])
 end
-
-#TODO wrapper, consolidate see #467
-function (s::Point2Point2{<:MvNormal})(X1::AbstractVector{T}, X2::AbstractVector{T}; kwargs...) where T <: Real
-
-  meas = mean(s.Zij)
-  iΣ = invcov(s.Zij)
-  res = meas[1:2] .- (X2[1:2] .- X1[1:2])
-  return res' * iΣ * res
-end
-
 
 
 

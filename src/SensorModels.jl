@@ -27,15 +27,8 @@ mutable struct LinearRangeBearingElevation <: IIF.AbstractRelativeMinimize
   LinearRangeBearingElevation() = new()
   LinearRangeBearingElevation( r::Tuple{Float64,Float64}, b::Tuple{Float64,Float64}; elev=Uniform(-0.25133,0.25133)) = new(Normal(r...),Normal(b...),elev, reuseLBRA[reuseLBRA(0) for i in 1:Threads.nthreads()] )
 end
-function (cfo::CalcFactor{<:LinearRangeBearingElevation})(res::Vector{Float64},
-                                                          meas,
-                                                          pose,
-                                                          landm  )
-  #
-  residualLRBE!(res, meas, pose, landm, cfo.factor.reuse[Threads.threadid()])
-  
-  # residual stored in res
-  nothing
+function (cfo::CalcFactor{<:LinearRangeBearingElevation})(meas, pose, landm)
+  return residualLRBE!(meas, pose, landm, cfo.factor.reuse[Threads.threadid()])  
 end
 
 function getSample!(y::Array{Float64,2}, las::LinearRangeBearingElevation, idx::Int )
@@ -85,8 +78,7 @@ end
 # measurement z is measurement vector with [range; bearing; elevation]
 # variables are tuple (pose X [dim6], landmark L [dim3])
 # function handle follows required parameter list
-function residualLRBE!( resid::AbstractVector{<:Real}, 
-                        z::AbstractVector{<:Real}, 
+function residualLRBE!( z::AbstractVector{<:Real}, 
                         X::AbstractVector{<:Real}, 
                         L::AbstractVector{<:Real}, 
                         reuse::reuseLBRA )
@@ -95,9 +87,7 @@ function residualLRBE!( resid::AbstractVector{<:Real},
   # TODO just switch directly to parameterized function
   
   ominus!(reuse, X, L)
-  resid .= z .- reuse.rbe
-
-  nothing
+  return  z .- reuse.rbe
 end
 
 

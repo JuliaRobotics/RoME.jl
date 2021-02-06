@@ -9,6 +9,8 @@ using Test
 # - Pose2Pose2
 # - Pose2Point2BearingRange
 # - Pose2Point2
+# - DynPose2VelocityPrior
+# - VelPose2VelPose2
 
 @testset "Test PriorPose2 and Pose2Pose2" begin
 
@@ -160,4 +162,31 @@ vardict, result, varIds, Σ = IIF.solveFactorGraphParametric(fg, useCalcFactor=t
 
 # IIF.updateParametricSolution(fg, vardict)
 # pl = plotSLAM2D(fg; lbls=true, solveKey=:parametric, point_size=4pt, drawPoints=false, drawContour=false)
+end
+
+
+@testset "Test Parametric DynPose2VelocityPrior and VelPose2VelPose2" begin
+
+fg = LightDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
+
+# add first pose locations
+addVariable!(fg, :x0, DynPose2; nanosecondtime=0)
+
+# Prior factor as boundary condition
+pp0 = DynPose2VelocityPrior(MvNormal(zeros(3), [0.01; 0.01; 0.001]), MvNormal([10.0;0], [0.1; 0.1]))
+addFactor!(fg, [:x0;], pp0)
+
+addVariable!(fg, :x1, DynPose2;  nanosecondtime=1000_000_000)
+
+# conditional likelihood between Dynamic Point2
+dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], [0.01;0.01;0.001]), MvNormal([0.0;0], [0.1; 0.1]))
+addFactor!(fg, [:x0;:x1], dp2dp2)
+
+ensureAllInitialized!(fg)
+
+vardict, result, varIds, Σ = IIF.solveFactorGraphParametric!(fg)
+
+@test isapprox(vardict[:x0].val, [0, 0, 0, 10, 0], atol = 1e-3)
+@test isapprox(vardict[:x1].val, [10, 0, 0, 10, 0], atol = 1e-3)
+
 end

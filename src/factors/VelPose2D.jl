@@ -16,11 +16,28 @@ VelPose2VelPose2(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.Sam
 
 getSample(cf::CalcFactor{<:VelPose2VelPose2}, N::Int=1) = ([rand(cf.factor.Zpose.z,N);rand(cf.factor.Zvel,N)], )
 
-function (cf::CalcFactor{<:VelPose2VelPose2})(res::AbstractVector{<:Real},
-                                              meas,
+function IIF.getParametricMeasurement(s::VelPose2VelPose2{<:MvNormal, <:MvNormal}) 
+
+  meas = [mean(s.Zpose.z); mean(s.Zvel)]
+
+  iΣp = invcov(s.Zpose.z)
+  iΣv = invcov(s.Zvel)
+
+  iΣ = zeros(eltype(iΣp), 5,5)
+
+  iΣ[1:3,1:3] .= iΣp
+  iΣ[4:5,4:5] .= iΣv
+
+  return meas, iΣ
+end
+
+function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
                                               Xi,
                                               Xj  )
   #
+  #FIXME JT - Createing new res for simplicity, it may not hold up well though
+  res = Vector{eltype(Xi)}(undef, 5)
+  
   z = meas
   wxi, wxj = Xi, Xj
   # @show z, wxi, wxj
@@ -28,7 +45,12 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(res::AbstractVector{<:Real},
   # fill!(vp2vp2.reuseres[Threads.threadid()], 0.0)
   wXjhat = SE2(wxi[1:3])*SE2(meas[1:3])
   jXjhat = SE2(wxj[1:3]) \ wXjhat
-  se2vee!(cf.factor.reuseres[Threads.threadid()], jXjhat)
+
+  #FIXME this does not work with parametric
+  # se2vee!(cf.factor.reuseres[Threads.threadid()], jXjhat)
+  #FIXME cf.factor.reuseres has type issues with parametric
+  se2vee!(res, jXjhat)
+
   # vp2vp2.Zpose(vp2vp2.reuseres[Threads.threadid()], userdata, idx, meas, Xi, Xj)
 
   wDXij = (wxj[4:5]-wxi[4:5])
@@ -36,7 +58,8 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(res::AbstractVector{<:Real},
   
   # calculate the residual
   dx = se2vee(SE2(wxi[1:3]) \ SE2(wxj[1:3]))
-  res[1:3] .= cf.factor.reuseres[Threads.threadid()]
+  #FIXME cf.factor.reuseres has type issues with parametric
+  # res[1:3] .= cf.factor.reuseres[Threads.threadid()]
   res[4:5] .= z[4:5] .- bDXij
   res[4:5] .^= 2
   res[4:5] .+= (dx[1:2]/dt .- 0.5*(wxj[4:5] .+ wxi[4:5])).^2
@@ -47,7 +70,7 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(res::AbstractVector{<:Real},
   # res[1] += sum((dx[1:2]/dt - 0.5*(wxj[4:5]+wxi[4:5])).^2)  # first order integration
   # res[1]
 
-  nothing
+  return res
 end
 
 

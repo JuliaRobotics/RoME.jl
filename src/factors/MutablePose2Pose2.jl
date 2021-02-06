@@ -26,16 +26,11 @@ Related
 
 Pose2Pose2, Pose3Pose3, InertialPose3, DynPose2Pose2, Point2Point2, VelPoint2VelPoint2
 """
-function (cfo::CalcFactor{<:MutablePose2Pose2Gaussian})(
-                  res::AbstractVector{<:Real},
-                  meas,
-                  wxi,
-                  wxj  )
+function (cfo::CalcFactor{<:MutablePose2Pose2Gaussian})(meas, wxi, wxj)
   #
   wXjhat = SE2(wxi[1:3])*SE2(meas[1:3])
   jXjhat = SE2(wxj[1:3]) \ wXjhat
-  se2vee!(res, jXjhat)
-  nothing
+  return se2vee(jXjhat)
 end
 
 

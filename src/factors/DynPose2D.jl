@@ -17,7 +17,31 @@ DynPose2VelocityPrior(z1::T1,z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF
 getSample(cf::CalcFactor{<:DynPose2VelocityPrior}, N::Int=1) = ([rand(cf.factor.Zpose,N);rand(cf.factor.Zvel,N)], )
 
 
+function IIF.getParametricMeasurement(s::DynPose2VelocityPrior{<:MvNormal, <:MvNormal}) 
 
+  meas = [mean(s.Zpose); mean(s.Zvel)]
+
+  iΣp = invcov(s.Zpose)
+  iΣv = invcov(s.Zvel)
+
+  iΣ = zeros(eltype(iΣp), 5,5)
+
+  iΣ[1:3,1:3] .= iΣp
+  iΣ[4:5,4:5] .= iΣv
+
+  return meas, iΣ
+end
+
+function (cf::CalcFactor{<:DynPose2VelocityPrior})(meas, X)
+  #pose part, reused from PriorPose2
+  iXihat = SE2(meas[1:3]) \ SE2(X[1:3])	
+  res_pose = se2vee(iXihat)	
+
+  #velocity part, normal prior
+  res_vel = meas[4:5] .- X[4:5] 
+
+  return [res_pose; res_vel]
+end
 
 """
 $(TYPEDEF)
@@ -33,15 +57,14 @@ DynPose2Pose2(z1::T) where {T <: IIF.SamplableBelief} = DynPose2Pose2{T}(z1)
 
 getSample(cf::CalcFactor{<:DynPose2Pose2}, N::Int=1) = (rand(cf.factor.Zpose.z,N), )
 
-function (cf::CalcFactor{<:DynPose2Pose2})( res::Array{Float64},
-                                            meas,
+function (cf::CalcFactor{<:DynPose2Pose2})( meas,
                                             wXi,
                                             wXj  )
   #
   # cf.factor.Zpose(res, meas, wXi, wXj)
-    wXjhat = SE2(wXi)*SE2(meas)
-    jXjhat = SE2(wXj) \ wXjhat
-    se2vee!(res, jXjhat)
+  wXjhat = SE2(wXi)*SE2(meas)
+  jXjhat = SE2(wXj) \ wXjhat
+  return se2vee(jXjhat)
   # z = meas[1][:,idx]
   # wxi, wxj = wXi[:,idx], wXj[:,idx]
   # dt = (userdata.variableuserdata[2].ut - userdata.variableuserdata[1].ut)*1e-6
@@ -127,8 +150,7 @@ getManifolds(::DynPose2DynPose2) = getManifolds(DynPose2DynPose2)
 
 getSample(cf::CalcFactor{<:DynPose2DynPose2}, N::Int=1) = (rand(cf.factor.Z, N), )
 
-function (cf::CalcFactor{<:DynPose2DynPose2})(res::AbstractArray{<:Real},
-                                              meas,
+function (cf::CalcFactor{<:DynPose2DynPose2})(meas,
                                               wXi,
                                               wXj  )
   #
@@ -141,10 +163,10 @@ function (cf::CalcFactor{<:DynPose2DynPose2})(res::AbstractArray{<:Real},
   dt = Dates.value(cf.metadata.fullvariables[2].nstime - cf.metadata.fullvariables[1].nstime)*1e-9  
   wpj = ( wxi[1:2]+dt*wxi[4:5] + z[1:2] )
   thetaj = se2vee(SE2([0;0;wxi[3]])*SE2([0;0;z[3]]))[3]
-  res[1:3] = se2vee( SE2(wxj[1:3])\SE2([wpj;thetaj]) )
+  res13 = se2vee( SE2(wxj[1:3])\SE2([wpj;thetaj]) )
   # res[1:2] = (wXj[1:2] - (wXi[1:2]+dt*wXi[4:5])+z[1:2])
-  res[4:5] = z[4:5] - (wxj[4:5] -  wxi[4:5])
-  nothing
+  res45 = z[4:5] - (wxj[4:5] -  wxi[4:5])
+  return [res13;res45]
 end
 
 

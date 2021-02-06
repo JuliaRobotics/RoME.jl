@@ -21,31 +21,14 @@ Pose2Pose2(::UniformScaling) = Pose2Pose2(MvNormal(zeros(3),LinearAlgebra.diagm(
 
 getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) = (rand(cf.factor.z,N), )
 
-function (cf::CalcFactor{<:Pose2Pose2})(res::AbstractVector{<:Real},
-                                        meas,
+function (cf::CalcFactor{<:Pose2Pose2})(meas,
                                         wxi,
                                         wxj  )
   #
   wXjhat = SE2(wxi)*SE2(meas)
   jXjhat = SE2(wxj) \ wXjhat
-  se2vee!(res, jXjhat)
-  nothing
+  return se2vee(jXjhat)
 end
-
-
-#TODO wrapper -- consolidate with CalcFactor, see #467
-function (s::Pose2Pose2{<:MvNormal})(wXi::AbstractVector{T}, wXj::AbstractVector{T}; kwargs...) where T <: Real
-
-  meas = mean(s.z)
-  iΣ = invcov(s.z)
-  wXjhat = SE2(wXi[1:3])*SE2(meas[1:3])
-  jXjhat = SE2(wXj[1:3]) \ wXjhat
-
-  res = se2vee(jXjhat)
-  return res' * iΣ * res
-
-end
-
 
 
 # NOTE, serialization support -- will be reduced to macro in future

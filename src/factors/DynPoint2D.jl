@@ -24,19 +24,14 @@ mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeRoots
 end
 
 getSample(cfo::CalcFactor{<:DynPoint2DynPoint2}, N::Int=1) = (rand(cfo.factor.z,N), )
-function (cfo::CalcFactor{<:DynPoint2DynPoint2})(
-            res::AbstractVector{<:Real},
-            z,
-            xi,
-            xj  )
+
+function (cfo::CalcFactor{<:DynPoint2DynPoint2})(z, xi, xj)
   #
   dt = Dates.value(cfo.metadata.fullvariables[2].nstime - cfo.metadata.fullvariables[1].nstime)*1e-9   # roughly the intended use of userdata
-  res[1:2] = z[1:2] - (xj[1:2] - (xi[1:2]+dt*xi[3:4]))
-  res[3:4] = z[3:4] - (xj[3:4] - xi[3:4])
-  nothing
+  res12 = z[1:2] - (xj[1:2] - (xi[1:2]+dt*xi[3:4]))
+  res34 = z[3:4] - (xj[3:4] - xi[3:4])
+  return [res12; res34]
 end
-
-
 
 
 """
@@ -49,8 +44,7 @@ mutable struct Point2Point2Velocity{T <: IIF.SamplableBelief} <: IIF.AbstractRel
 end
 
 getSample(cfo::CalcFactor{<:Point2Point2Velocity}, N::Int=1) = (rand(cfo.factor.z,N), )
-function (cfo::CalcFactor{<:Point2Point2Velocity})( res::AbstractVector{<:Real},
-                                                    z,
+function (cfo::CalcFactor{<:Point2Point2Velocity})( z,
                                                     xi,
                                                     xj  )
   #
@@ -58,10 +52,10 @@ function (cfo::CalcFactor{<:Point2Point2Velocity})( res::AbstractVector{<:Real},
   dp = (xj[1:2] .- xi[1:2])
   dv = (xj[3:4] .- xi[3:4])
 
-  res[1:2] .= z[1:2] .- dp
-  res[3:4] .=  dp/dt .- 0.5*(xj[3:4] .+ xi[3:4])  # (dp/dt - 0.5*(xj[3:4]+xi[3:4])) # midpoint integration
+  res12 = z[1:2] .- dp
+  res34 =  dp/dt .- 0.5*(xj[3:4] .+ xi[3:4])  # (dp/dt - 0.5*(xj[3:4]+xi[3:4])) # midpoint integration
 
-  nothing
+  return [res12; res34]
 end
 
 

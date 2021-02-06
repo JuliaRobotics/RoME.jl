@@ -15,7 +15,6 @@ mutable struct PP3REUSE
 end
 
 function fastpose3pose3residual!( reusethrid::PP3REUSE,
-                                  res::AbstractVector{<:Real},
                                   meas,
                                   wXi,
                                   wXj  )
@@ -29,8 +28,7 @@ function fastpose3pose3residual!( reusethrid::PP3REUSE,
   jTi = SE3( matrix(reusethrid.wTj)\matrix(reusethrid.wTi) )
   # also wasted memory here, should operate directly on iTi and not be assigning new memory
   reusethrid.iTi = (SE3(meas[1:3],Euler(meas[4:6]...)) * jTi)
-  res[:] = veeEuler(reusethrid.iTi)
-  nothing
+  return veeEuler(reusethrid.iTi)
 end
 
 """
@@ -49,14 +47,12 @@ Pose3Pose3(z::T=MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(
 function getSample(cf::CalcFactor{<:Pose3Pose3}, N::Int=1)
   return (rand(cf.factor.Zij, N), )
 end
-function (cf::CalcFactor{<:Pose3Pose3})(res::AbstractVector{<:Real},
-                                        meas,
+function (cf::CalcFactor{<:Pose3Pose3})(meas,
                                         wXi,
                                         wXj  )
   #
   reusethrid = cf.factor.reuse[Threads.threadid()]
-  fastpose3pose3residual!(reusethrid, res, meas, wXi, wXj)
-  nothing
+  return fastpose3pose3residual!(reusethrid, meas, wXi, wXj)
 end
 
 """

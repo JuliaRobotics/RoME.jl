@@ -150,17 +150,13 @@ PartialPose3XYYaw(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.S
 function getSample(cfo::CalcFactor{<:PartialPose3XYYaw}, N::Int=1)
   return ([rand(cfo.factor.xy,N);rand(cfo.factor.yaw,N)[:]'], )
 end
-function (cfo::CalcFactor{<:PartialPose3XYYaw})(res::AbstractVector{<:Real},
-                                                meas,
+function (cfo::CalcFactor{<:PartialPose3XYYaw})(meas,
                                                 wXi,
                                                 wXj  )
   #
   wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
   jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
-  se2vee!(res, jXjhat)
-  
-  # res'*res
-  nothing
+  return se2vee(jXjhat)
 end
 
 """
