@@ -24,32 +24,12 @@ function getSample(cfo::CalcFactor{<:PriorPose2}, N::Int=1)
   return (rand(cfo.factor.Z,N), )
 end
 
-function (s::CalcFactor{<:PriorPose2})(res::AbstractVector{<:Real}, 	
-                                       meas, 	
+function (s::CalcFactor{<:PriorPose2})(meas, 	
                                        wXi)	
   #	
   iXihat = SE2(meas) \ SE2(wXi)	
-  #NOTE do not forget the .=
-  res .= se2vee(iXihat)	
-
-  nothing	
+  return se2vee(iXihat)	
 end
-
-#TODO wrapper Consolidate with CalcFactor version, see #467
-function (s::PriorPose2{<:MvNormal})(wXi::AbstractVector{<:Real}; kwargs...)
-
-  meas = mean(s.Z)
-  iΣ = invcov(s.Z)
-
-  # res = meas .- X1
-  iXihat = SE2(meas[1:3]) \ SE2(wXi[1:3])
-  res = se2vee(iXihat)
-
-  return res' * iΣ * res
-end
-
-
-
 
 ## Serialization support
 

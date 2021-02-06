@@ -14,11 +14,13 @@ end
 getSample(cfo::CalcFactor{<:RotationTest}, N::Int=1) = (reshape(rand(cfo.factor.z,N),3,:),)
 
 # 3 dimensional line, z = [a b][x y]' + c
-function (cfo::CalcFactor{<:RotationTest})( res::AbstractVector{<:Real}, 
-                                            meas, 
+function (cfo::CalcFactor{<:RotationTest})( meas, 
                                             var1, 
                                             var2)
   #
+  #FIXME JT - I'm createing new res for simplicity, it may not hold up well though
+  res = Vector{eltype(var1)}(undef, 3)
+  
   z = meas
   dq = convert(Quaternion, Euler(z...))
   @show var1
@@ -30,7 +32,7 @@ function (cfo::CalcFactor{<:RotationTest})( res::AbstractVector{<:Real},
   qq = dq*q_conj(q12)
   @show res
   vee!(res, convert(TU.so3, qq))
-  nothing
+  return res
 end
 
 rr = RotationTest(MvNormal(zeros(3), 0.001*diagm(ones(3))))

@@ -32,16 +32,9 @@ function IIF.getParametricMeasurement(s::Pose2Point2BearingRange{<:Normal, <:Nor
 end
 
 # TODO consolidate with parametric constraint, follow at #467
-function (cfo::CalcFactor{<:Pose2Point2BearingRange})(res::AbstractVector{<:Real},
-                                                      meas,
-                                                      xi,
-                                                      lm )
-  #
-  # FIXME, consolidate with parametric IIF #467
-
+function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
   # 1-bearing
   # 2-range
-
   # world frame
   θ = meas[1] + xi[3]
   mx = meas[2]*cos(θ)
@@ -51,56 +44,26 @@ function (cfo::CalcFactor{<:Pose2Point2BearingRange})(res::AbstractVector{<:Real
   ey = lm[2] - (my + xi[2])
   
   # res = [eθ, er]
-  res[1] = atan((my + xi[2]), (mx + xi[1])) - atan(lm[2], lm[1])  # eθ
-  res[2] = sqrt(ex^2 + ey^2) # some wasted computation here       # er 
+  eθ = atan((my + xi[2]), (mx + xi[1])) - atan(lm[2], lm[1])  # eθ
+  er= sqrt(ex^2 + ey^2) # some wasted computation here       # er 
+  
+  #Old way
+  # rot = meas[1]+xi[3]
+  # res[1] = ( lm[1] - (meas[2]*cos( rot ) + xi[1]) )^2
+  # res[2] = ( lm[2] - (meas[2]*sin( rot ) + xi[2]) )^2
+  # res[1] += res[2]
+  # res[2] = 0.0
+  # return res[1]
 
-    # rot = meas[1]+xi[3]
-
-    # res[1] = ( lm[1] - (meas[2]*cos( rot ) + xi[1]) )^2
-    # res[2] = ( lm[2] - (meas[2]*sin( rot ) + xi[2]) )^2
-
-    # res[1] += res[2]
-    # res[2] = 0.0
-
-    # return res[1]
-    
-    # IIF v0.21+
-    nothing
+  # IIF v0.21+
+  return [eθ, er]
 end
+
 # quick check
 # pose = (0,0,0),  bear = 0.0,  range = 10.0   ==>  lm = (10,0)
 # pose = (0,0,0),  bear = pi/2,  range = 10.0   ==>  lm = (0,10)
 # pose = (0,0,pi/2),  bear = 0.0,  range = 10.0   ==>  lm = (0,10)
 # pose = (0,0,pi/2),  bear = pi/2,  range = 10.0   ==>  lm = (-10,0)
-
-#TODO wrapper, consolidate with CalcFactor version, see #467
-function (s::Pose2Point2BearingRange{<:Normal})(xi::AbstractVector{T}, lm::AbstractVector{T}; kwargs...) where T <: Real
-
-
-  meas = [mean(s.bearing), mean(s.range)]
-  iΣ = [1/var(s.bearing)             0;
-                      0  1/var(s.range)]
-
-  # 1-bearing
-  # 2-range
-
-  # world frame
-  θ = meas[1] + xi[3]
-  mx = meas[2]*cos(θ)
-  my = meas[2]*sin(θ)
-
-  ex = lm[1] - (mx + xi[1])
-  ey = lm[2] - (my + xi[2])
-  er = sqrt(ex^2 + ey^2)
-
-  eθ = atan((my + xi[2]), (mx + xi[1])) - atan(lm[2], lm[1])
-
-  res = [eθ, er]
-
-  return res' * iΣ * res
-
-end
-
 
 # Support for database based solving
 

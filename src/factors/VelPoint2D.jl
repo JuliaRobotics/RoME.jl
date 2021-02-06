@@ -15,11 +15,11 @@ VelPoint2VelPoint2(z1::T) where {T <: Distribution} = VelPoint2VelPoint2{T}(z1)
 
 getSample(cfo::CalcFactor{<:VelPoint2VelPoint2}, N::Int=1) = (rand(cfo.factor.z,N), )
 
-function (cfo::CalcFactor{<:VelPoint2VelPoint2})( res::AbstractVector{<:Real},
-                                                  z,
-                                                  xi,
-                                                  xj  )
+function (cfo::CalcFactor{<:VelPoint2VelPoint2})(z, xi, xj)
   #
+  #FIXME JT - I'm createing new res for simplicity, it may not hold up well though
+  res = Vector{eltype(xi)}(undef, 4)
+
   # change in time from microseconds with DynPoint2(ut=1_000_000) to seconds
   dt = Dates.value(cfo.metadata.fullvariables[2].nstime - cfo.metadata.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
   # change in psoition Xi \ Xj
@@ -37,6 +37,7 @@ function (cfo::CalcFactor{<:VelPoint2VelPoint2})( res::AbstractVector{<:Real},
   res[3:4] .+= (dp_dt - xi[3:4]).^2 # (meas - predicted) velocity error term
   res[3:4] .= sqrt.(res[3:4])
 
+  return res
   # res[1] = 0.0
   # res[1] += sum((z[1:2] - dp).^2) # (meas - predicted) change in position error term
   # res[1] += sum((z[3:4] - dv).^2) # (meas - predicted) change in velocity error term
@@ -53,8 +54,8 @@ function (cfo::CalcFactor{<:VelPoint2VelPoint2})( res::AbstractVector{<:Real},
   # return objective cost < IIF v0.21
   # return res[1]
 
-  # IIF v0.12+
-  nothing
+  # IIF v0.21+
+  # return residual
 end
 
 

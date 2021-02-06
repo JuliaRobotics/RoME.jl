@@ -23,10 +23,7 @@ function getSample(cfo::CalcFactor{<:Pose2Point2Bearing}, N::Int=1)
   return (reshape(rand(cfo.factor.bearing, N),1,N), )
 end
 # define the conditional probability constraint
-function (cfo::CalcFactor{<:Pose2Point2Bearing})( res::AbstractVector{<:Real},
-                                                  meas,
-                                                  xi,
-                                                  lm  )
+function (cfo::CalcFactor{<:Pose2Point2Bearing})(meas, xi, lm)
   #
   reuse = cfo.factor.reuse[Threads.threadid()]
   reuse.measvec[1] = cos(meas[1] + xi[3])
@@ -40,12 +37,11 @@ function (cfo::CalcFactor{<:Pose2Point2Bearing})( res::AbstractVector{<:Real},
   reuse.resid .-= reuse.predvec
 
   # must return result of length zDim==1 in this case
-  res[1] = sum(abs.(reuse.resid))
+  return sum(abs.(reuse.resid))
   # reuse.resid .^= 2
   # res[1] = reuse.resid[1]
   # res[1] += reuse.resid[2]
-  # return res[1]
-  nothing
+  
 end
 
 

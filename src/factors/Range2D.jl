@@ -13,17 +13,13 @@ Point2Point2Range(d::D) where {D <: IIF.SamplableBelief} = Point2Point2Range{D}(
 function getSample(cfo::CalcFactor{<:Point2Point2Range}, N::Int=1)
   return (reshape(rand(cfo.factor.Z,N),1,N),  2*pi*rand(N))
 end
-function (cfo::CalcFactor{<:Point2Point2Range})(
-            res::AbstractVector{<:Real},
-            rho,
-            theta,
-            xi,
-            lm )
+function (cfo::CalcFactor{<:Point2Point2Range})(rho, theta, xi, lm)
   #
   XX = lm[1] - (rho[1]*cos(theta[1]) + xi[1])
   YY = lm[2] - (rho[1]*sin(theta[1]) + xi[2])
-  res[1] = XX^2 + YY^2
-  return nothing
+  #TODO JT - Should this have a sqrt for parametric?
+  # return XX^2 + YY^2 
+  return sqrt(XX^2 + YY^2)
 end
 
 
@@ -62,8 +58,7 @@ Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range{T}(Z)
 function getSample(cfo::CalcFactor{<:Pose2Point2Range}, N::Int=1)
   return (reshape(rand(cfo.factor.Z,N),1,N) ,  2*pi*rand(N))
 end
-function (pp2r::CalcFactor{<:Pose2Point2Range})(res::AbstractVector{<:Real},
-                                                rho,
+function (pp2r::CalcFactor{<:Pose2Point2Range})(rho,
                                                 theta,
                                                 xi,
                                                 lm  )
@@ -72,9 +67,7 @@ function (pp2r::CalcFactor{<:Pose2Point2Range})(res::AbstractVector{<:Real},
   # this is the noisy range
   XX = lm[1] - (rho[1]*cos(theta[1]) + xi[1])
   YY = lm[2] - (rho[1]*sin(theta[1]) + xi[2])
-  res[1] = sqrt(XX^2 + YY^2)
-
-  nothing
+  return sqrt(XX^2 + YY^2)  
 end
 
 

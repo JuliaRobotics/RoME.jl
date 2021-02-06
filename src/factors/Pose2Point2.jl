@@ -34,20 +34,13 @@ function IIF.getParametricMeasurement(s::Pose2Point2{<:MvNormal})
 end
 
 # define the conditional probability constraint
-function (cfo::CalcFactor{<:Pose2Point2})(res::AbstractVector{<:Real},
-                                          meas,
+function (cfo::CalcFactor{<:Pose2Point2})(meas,
                                           wXi,
                                           wLj )
   #
 
   wLj_pred = SE2(wXi)*SE2([meas;0.0])
-  res[1:2] .= wLj .- se2vee(wLj_pred)[1:2]
-
-  # res .^= 2
-  # res[1] += res[2]
-  # res[2] = 0.0
-  # return res[1]
-  nothing
+  return  wLj .- se2vee(wLj_pred)[1:2]
 end
 
 
