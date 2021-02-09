@@ -59,7 +59,7 @@ accumulateDiscreteLocalFrame!(dfg::AbstractDFG,
                               dt::Float64=1.0;
                               Fk = SE2([0;0;-DX[3]]),
                               Gk = Matrix{Float64}(LinearAlgebra.I, 3,3),
-                              Phik = SE2(DX) ) = accumulateDiscreteLocalFrame!(getFactor(dfg, fctlbl),DX, Qc, dt; Fk=Fk, Gk=Gk, Phik=Phik)
+                              Phik = SE2(DX) ) = accumulateDiscreteLocalFrame!(getFactorFunction(dfg, fctlbl),DX, Qc, dt; Fk=Fk, Gk=Gk, Phik=Phik)
 
 """
     $SIGNATURES
