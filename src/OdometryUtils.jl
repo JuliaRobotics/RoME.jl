@@ -52,6 +52,14 @@ function accumulateDiscreteLocalFrame!( mpp::MutablePose2Pose2Gaussian,
   nothing
 end
 
+accumulateDiscreteLocalFrame!(dfg::AbstractDFG,
+                              fctlbl::Symbol,
+                              DX::Vector{Float64},
+                              Qc::Matrix{Float64},
+                              dt::Float64=1.0;
+                              Fk = SE2([0;0;-DX[3]]),
+                              Gk = Matrix{Float64}(LinearAlgebra.I, 3,3),
+                              Phik = SE2(DX) ) = accumulateDiscreteLocalFrame!(getFactor(dfg, fctlbl),DX, Qc, dt; Fk=Fk, Gk=Gk, Phik=Phik)
 
 """
     $SIGNATURES
