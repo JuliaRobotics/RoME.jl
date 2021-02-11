@@ -8,7 +8,7 @@ using Test
 
 @testset "basic Point2Point2 test" begin
 
-global fg = initfg()
+fg = initfg()
 
 addVariable!(fg, :x0, Point2)
 addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), Matrix{Float64}(LinearAlgebra.I, 2,2))))
@@ -17,7 +17,7 @@ addVariable!(fg, :x1, Point2)
 addFactor!(fg, [:x0;:x1], Point2Point2(MvNormal([10;0.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
 tree, smt, hist = solveTree!(fg)
-# global tree = wipeBuildNewTree!(fg)
+# tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree)
 
 @test sum( abs.(Statistics.mean(getVal(fg, :x0),dims=2) .- [0.0;0]) .< [1.0;1.0]) == 2
@@ -25,6 +25,7 @@ tree, smt, hist = solveTree!(fg)
 
 end
 
+##
 
 # drawGraph(fg, show=true)
 #
@@ -44,8 +45,8 @@ end
 
 ##
 
-global N=100 # return to 200
-global fg = initfg()
+N=100 # return to 200
+fg = initfg()
 
 addVariable!(fg, :x0, Point2, N=N)
 addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], diagm(ones(2)) )))
@@ -65,7 +66,7 @@ addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)) )
 ##
 
 tree, smt, hist = solveTree!(fg)
-# global tree = wipeBuildNewTree!(fg)
+# tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
 
@@ -75,10 +76,10 @@ tree, smt, hist = solveTree!(fg)
 @test 0.1*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
 @test 0.1*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
 
-global voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
+voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
 @test sum( getVal(fg, :l1)[2,voidsel1] .< 70 ) < 0.35*N
 
-global voidsel2 =  10.0 .< getVal(fg, :l1)[2,:]
+voidsel2 =  10.0 .< getVal(fg, :l1)[2,:]
 @test sum( getVal(fg, :l1)[1,voidsel2] .< 70 ) < 0.35*N
 
 @test sum( 120 .< abs.(getVal(fg, :l1)[1,:]) ) < 0.35*N
