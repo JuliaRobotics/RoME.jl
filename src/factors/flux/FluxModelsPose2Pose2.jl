@@ -79,13 +79,16 @@ function calcVelocityInterPose2!( nfb::FluxModelsPose2Pose2,
   nothing
 end
 
-
+# become just getSample(cfo::CalcFactor{<:FluxModelsPose2Pose2}, N::Int=1)
 function sampleFluxModelsPose2Pose2(nfb::FluxModelsPose2Pose2,
                                     N::Int,
                                     fmd::FactorMetadata,
                                     Xi::DFGVariable,
                                     Xj::DFGVariable )
   #
+  # fmd = cfo.metadata
+  # Xi = cfo.fullvariables[1] # X
+  # Xj = cfo.fullvariables[2] # A / B
 
   # get the naive samples
   # model samples (all for theta at this time)
@@ -131,6 +134,7 @@ FluxModelsPose2Pose2( allModels::Vector{P},
 #
 
 
+# (nfb::CalcFactor{<:FluxModelsPose2Pose2})(meas1,meas2,meas3,xi,xj)
 function (nfb::FluxModelsPose2Pose2)(
             res::AbstractArray{<:Real},
             userdata::FactorMetadata,
@@ -139,8 +143,10 @@ function (nfb::FluxModelsPose2Pose2)(
             Xi::AbstractArray{<:Real,2},
             Xj::AbstractArray{<:Real,2}  )
   #
+
+  ## MAYBE JUST MOVE THIS INTO getSample and be done
   # if, use prediction sample
-  if meas[2][idx] == 2
+  if meas[2][idx] == 2 # meas2 == 2
     # get live velocity estimate for each sample (nfb.joyVelData[:,3:4])
     calcVelocityInterPose2!(nfb, Xi, Xj, idx)
     # predict odom for this sample from a specific prediction model
