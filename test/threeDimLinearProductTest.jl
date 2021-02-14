@@ -132,7 +132,7 @@ addFactor!(fg,[:x1;:x2],odoconstr)
 ## test following introduction of inflation, see IIF #1051
 
 # force the inflation trivial error, https://github.com/JuliaRobotics/RoME.jl/issues/380#issuecomment-778795848
-# getSolverParams(fg).inflation = 10.0
+# IIF._getCCW(fg,:x1x2f1).inflation = 10.0
 
 pts = approxConv(fg, :x1x2f1, :x2)
 # X2 = manikde!(pts, Pose3)
