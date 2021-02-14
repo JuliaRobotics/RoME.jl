@@ -33,7 +33,8 @@ testfiles = [
 "testAccumulateFactors.jl";
 "testDeadReckoningTether.jl"; 
 "testPoint2Point2.jl";
-"testParametric.jl"]
+"testParametric.jl";
+"testInflation380.jl"]
 
 ## Tests not ready yet
 # "HexagonalLightGraphs.jl"
