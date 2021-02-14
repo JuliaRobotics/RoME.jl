@@ -47,6 +47,7 @@ end
 
 N=100 # return to 200
 fg = initfg()
+getSolverParams(fg).inflation = 100.0
 
 addVariable!(fg, :x0, Point2, N=N)
 addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], diagm(ones(2)) )))
@@ -66,9 +67,8 @@ addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)) )
 ##
 
 tree, smt, hist = solveTree!(fg)
-# tree = wipeBuildNewTree!(fg)
-# inferOverTree!(fg, tree, N=N)
 
+##
 
 @test 0.1*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
 @test 0.1*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
