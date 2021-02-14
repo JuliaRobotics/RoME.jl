@@ -125,9 +125,19 @@ global odo = SE3([10;0;0], Quaternion(0))
 # global pts0X2 = projectParticles(getVal(fg,:x1), MvNormal(veeEuler(odo), odoCov) )
 global odoconstr = Pose3Pose3( MvNormal(veeEuler(odo), odoCov) )
 global v2 = addVariable!(fg,:x2, Pose3, N=N) # pts0X2
-addFactor!(fg,[:x1;:x2],odoconstr)
+addFactor!(fg,[:x1;:x2],odoconstr, inflation=0.1)
 # @test !isInitialized(fg, :x2)
 
+
+## test opposites
+
+# should be all zero
+res = calcFactorResidual(fg, :x1x2f1, [10;0;0;0;0;0.0], zeros(6), [10;0;0;0;0;0])
+@test norm(res) < 1e-10
+
+# trivial fail case
+# res = calcFactorResidual(fg, :x1x2f1, [10;0;0;0;0;0.0], zeros(6), [10;0;0;pi;pi;pi])
+@warn "suppressing trivial Pose3 fail case until RoME.jl #244 has been completed."
 
 ## test following introduction of inflation, see IIF #1051
 
@@ -143,9 +153,9 @@ pts = approxConv(fg, :x1x2f1, :x2)
 @test 0.7N < sum( -5 .< pts[3,:] .< 5 )
 
 # test rotations through convolution
-@test 0.99N < sum( -2 .< pts[4,:] .< 2 )
-@test 0.99N < sum( -2 .< pts[5,:] .< 2 )
-@test 0.99N < sum( -2 .< pts[6,:] .< 2 )
+@test 0.95N < sum( -2 .< pts[4,:] .< 2 )
+@test 0.95N < sum( -2 .< pts[5,:] .< 2 )
+@test 0.95N < sum( -2 .< pts[6,:] .< 2 )
 
 ##
 
@@ -172,8 +182,6 @@ end
 
 @testset "Construct Bayes tree and perform inference..." begin
   tree, smt, hist = solveTree!(fg)
-  # global tree = wipeBuildNewTree!(fg);
-  # inferOverTree!(fg, tree, N=N)
   @test true
 end
 
