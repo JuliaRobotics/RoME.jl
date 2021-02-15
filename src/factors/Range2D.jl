@@ -11,19 +11,12 @@ mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInferen
 end
 Point2Point2Range(d::D) where {D <: IIF.SamplableBelief} = Point2Point2Range{D}(d)
 function getSample(cfo::CalcFactor{<:Point2Point2Range}, N::Int=1)
-  return (reshape(rand(cfo.factor.Z,N),1,N),  2*pi*rand(N))
-end
-function (cfo::CalcFactor{<:Point2Point2Range})(rho, theta, xi, lm)
-  #
-  XX = lm[1] - (rho[1]*cos(theta[1]) + xi[1])
-  YY = lm[2] - (rho[1]*sin(theta[1]) + xi[2])
-  return XX^2 + YY^2
+  return (reshape(rand(cfo.factor.Z,N),1,N),)
 end
 
-#Parametric only function fro Point2Point2Range 
 function (cfo::CalcFactor{<:Point2Point2Range})(rho, xi, lm)
   # Basically `EuclidDistance`
-  return [rho[1] - norm(lm .- xi)]
+  return [rho[1] - norm(lm[1:2] .- xi[1:2])]
 end
 
 passTypeThrough(d::FunctionNodeData{Point2Point2Range}) = d
@@ -59,20 +52,13 @@ end
 Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range{T}(Z)
 
 function getSample(cfo::CalcFactor{<:Pose2Point2Range}, N::Int=1)
-  return (reshape(rand(cfo.factor.Z,N),1,N) ,  2*pi*rand(N))
-end
-function (pp2r::CalcFactor{<:Pose2Point2Range})(rho,
-                                                theta,
-                                                xi,
-                                                lm  )
-  #
-  # DONE in IIF -- still need to add multi-hypotheses support here
-  # this is the noisy range
-  XX = lm[1] - (rho[1]*cos(theta[1]) + xi[1])
-  YY = lm[2] - (rho[1]*sin(theta[1]) + xi[2])
-  return sqrt(XX^2 + YY^2)  
+  return (reshape(rand(cfo.factor.Z,N),1,N), )
 end
 
+function (cfo::CalcFactor{<:Point2Point2Range})(rho, xi, lm)
+  # Basically `EuclidDistance`
+  return [rho[1] - norm(lm[1:2] .- xi[1:2])]
+end
 
 
 mutable struct PackedPose2Point2Range  <: IncrementalInference.PackedInferenceType
