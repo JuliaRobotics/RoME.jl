@@ -89,8 +89,8 @@ end
 
 
 function calcVelocityInterPose2!( nfb::MixtureFluxPose2Pose2,
-                                  iPts::AbstractMatrix{<:Real},
-                                  jPts::AbstractMatrix{<:Real} )
+                                  iPts::AbstractVector{<:Real},
+                                  jPts::AbstractVector{<:Real} )
   #
   joyVelData = nfb.Zij.components.fluxnn.data
   # DXY[1:2,i] .= TransformUtils.R(iPts[3,i])'*DXY[1:2,i]
