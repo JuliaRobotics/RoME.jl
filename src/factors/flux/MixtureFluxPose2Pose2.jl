@@ -134,10 +134,9 @@ function (cfo::CalcFactor{<:MixtureFluxPose2Pose2})(meas1, meas2, Xi, Xj)
   userdata = cfo.metadata
   nfb = cfo.factor
   fmd = cfo.metadata  
-  meas = (meas1, meas2)
 
   # if, use prediction sample
-  if meas[2] == 2
+  if meas2 == 2
     # get live velocity estimate for each sample (nfb.joyVelData[:,3:4])
     calcVelocityInterPose2!(nfb, Xi, Xj)
     # predict odom for this sample from a specific prediction model
@@ -149,7 +148,7 @@ function (cfo::CalcFactor{<:MixtureFluxPose2Pose2})(meas1, meas2, Xi, Xj)
   #TODO 
   cfZij = CalcFactor( cfo.factor.Zij.mechanics, cfo.metadata, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams)
 
-  return  cfZij(meas[1], Xi, Xj)
+  return  cfZij(meas1, Xi, Xj)
 
 end
 
