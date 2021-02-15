@@ -17,11 +17,14 @@ function (cfo::CalcFactor{<:Point2Point2Range})(rho, theta, xi, lm)
   #
   XX = lm[1] - (rho[1]*cos(theta[1]) + xi[1])
   YY = lm[2] - (rho[1]*sin(theta[1]) + xi[2])
-  #TODO JT - Should this have a sqrt for parametric?
-  # return XX^2 + YY^2 
-  return sqrt(XX^2 + YY^2)
+  return XX^2 + YY^2
 end
 
+#Parametric only function fro Point2Point2Range 
+function (cfo::CalcFactor{<:Point2Point2Range})(rho, xi, lm)
+  # Basically `EuclidDistance`
+  return [rho[1] - norm(lm .- xi)]
+end
 
 passTypeThrough(d::FunctionNodeData{Point2Point2Range}) = d
 
