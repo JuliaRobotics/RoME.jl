@@ -5,9 +5,6 @@ using LinearAlgebra
 using Flux
 using RoME
 
-import RoME: FluxModelsPose2Pose2
-
-
 @testset "Basic funtionality tests on FluxModelsPose2Pose2" begin
 
 
