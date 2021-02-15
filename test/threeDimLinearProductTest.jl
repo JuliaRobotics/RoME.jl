@@ -196,9 +196,9 @@ global muX1 = getPPE(fg, :x1).suggested # Statistics.mean(getVal(fg,:x1),dims=2)
 @test sum(map(Int,abs.(muX1[1:3]) .< 1.0)) == 3
 
 # sidestep trivial case, #412
+# case where points land on trivial rotation error [pi;pi;pi]
 @warn "simplify mean and std testing on Pose3 after #244, see #412"
 pts = getVal(fg,:x1)
-# case where points land on trivial rotation error [pi;pi;pi]
 mask = (2.7 .< abs.(pts[4,:])) .& (2.7 .< abs.(pts[5,:])) .& (2.7 .< abs.(pts[6,:]))
 mask .= xor.(mask,1)
 mu1tmp = Statistics.mean(pts[:,mask],dims=2)
@@ -209,10 +209,20 @@ global stdX1 = Statistics.std(pts[:,mask],dims=2)
 @show stdX1[4:6]
 @test sum(map(Int, 0.02 .< stdX1[4:6] .< 0.5)) == 3
 global muX2 = getPPE(fg, :x2).suggested # Statistics.mean(getVal(fg,:x2),dims=2)
-global stdX2 = Statistics.std(getVal(fg,:x2),dims=2)
 @show muX2[1:3]-[10.0;0;0]
 @test sum(map(Int, abs.(muX2[1:3]-[10.0;0;0]) .< 1.5)) == 3
-@test sum(map(Int, abs.(muX2[4:6]) .< 0.1)) == 3
+
+# case where points land on trivial rotation error [pi;pi;pi]
+@warn "simplify mean and std testing on Pose3 after #244, see #412"
+pts = getVal(fg,:x2)
+mask = (2.7 .< abs.(pts[4,:])) .& (2.7 .< abs.(pts[5,:])) .& (2.7 .< abs.(pts[6,:]))
+mask .= xor.(mask,1)
+mu2tmp = Statistics.mean(pts[:,mask],dims=2)
+@test sum(map(Int, abs.(mu2tmp[4:6]) .< 0.1)) == 3
+global stdX2 = Statistics.std(pts[:,mask],dims=2)
+# @test sum(map(Int, abs.(muX2[4:6]) .< 0.1)) == 3
+# global stdX2 = Statistics.std(getVal(fg,:x2),dims=2)
+
 println("previous test failure 0.75 .< $(round.(stdX2[1:3],digits=2)) .< 2.25")
 @test sum(map(Int, 0.75 .< stdX2[1:3] .< 2.5)) == 3
 println("previous test failure 0.05 .< $(round.(stdX2[4:6],digits=2)) .< 0.35")

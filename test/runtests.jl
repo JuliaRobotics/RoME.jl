@@ -9,6 +9,9 @@ using Test
 # "testG2oParser.jl";  ]
 
 testfiles = [
+"threeDimLinearProductTest.jl";
+"testInflation380.jl";
+"testParametric.jl";
 "testTreeInitCommonMsg_IIF913.jl";
 "testPose3Pose3NH.jl";
 "testBeehive2D_CliqByCliq.jl";      # special case debugging
@@ -25,7 +28,6 @@ testfiles = [
 "testFixedLagFG.jl";
 "testMultimodalRangeBearing.jl";
 "testDynPose2D.jl";
-"threeDimLinearProductTest.jl";
 "testPartialXYH.jl";
 "testpartialpose3.jl";
 "testpackingconverters.jl";
@@ -33,8 +35,7 @@ testfiles = [
 "testAccumulateFactors.jl";
 "testDeadReckoningTether.jl"; 
 "testPoint2Point2.jl";
-"testParametric.jl";
-"testInflation380.jl"]
+]
 
 ## Tests not ready yet
 # "HexagonalLightGraphs.jl"
