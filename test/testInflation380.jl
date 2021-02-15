@@ -4,6 +4,7 @@
 
 using Test
 using RoME
+using Statistics
 
 
 ##
@@ -69,7 +70,11 @@ IIF.solveFactorGraphParametric!(fg)
 @show getPPE(fg, :x2, :default).suggested
 
 test_err = getPPE(fg, :x2, :default).suggested - getPPE(fg, :x2, :parametric).suggested
-test_err[3] = abs(getPPE(fg, :x2, :default).suggested[3]) - abs(getPPE(fg, :x2, :parametric).suggested[3])
+# arg, workaround until #244
+theta = (getBelief(fg, :x2, :default) |> getPoints)[3,:] .+ pi
+theta .= TU.wrapRad.(theta)
+theta_ = Statistics.mean(theta) + pi
+test_err[3] = abs(getPPE(fg, :x2, :parametric).suggested[3]) - theta_
 @show test_err .= abs.(test_err)
 
 @test isapprox(test_err[1], 0, atol=0.5)
@@ -93,5 +98,8 @@ end
 # pl2 = plotSLAM2D(fg, solveKey=:parametric, drawPoints=false, drawContour=false, xmin=-2.5,xmax=0,ymin=-1.5,ymax=1.5)
 # vstack(pl1, pl2)
 
+##
+
+# plotPose(fg, :x2)
 
 ##
