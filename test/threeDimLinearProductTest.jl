@@ -193,9 +193,18 @@ end
 
 # check mean and covariances after one up and down pass over the tree
 global muX1 = getPPE(fg, :x1).suggested # Statistics.mean(getVal(fg,:x1),dims=2)
-global stdX1 = Statistics.std(getVal(fg,:x1),dims=2)
 @test sum(map(Int,abs.(muX1[1:3]) .< 1.0)) == 3
-@test sum(map(Int,abs.(muX1[4:6]) .< 0.1)) == 3
+
+# sidestep trivial case, #412
+@warn "simplify mean and std testing on Pose3 after #244, see #412"
+pts = getVal(fg,:x1)
+# case where points land on trivial rotation error [pi;pi;pi]
+mask = (2.7 .< abs.(pts[4,:])) .& (2.7 .< abs.(pts[5,:])) .& (2.7 .< abs.(pts[6,:]))
+mask .= xor.(mask,1)
+mu1tmp = Statistics.mean(pts[:,mask],dims=2)
+@test sum(map(Int, abs.(mu1tmp[4:6]) .< 0.1)) == 3
+global stdX1 = Statistics.std(pts[:,mask],dims=2)
+
 @test sum(map(Int, 0.4 .< stdX1[1:3] .< 1.6)) == 3 # had a 2==3 failure here
 @show stdX1[4:6]
 @test sum(map(Int, 0.02 .< stdX1[4:6] .< 0.5)) == 3
