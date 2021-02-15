@@ -193,6 +193,7 @@ end
 
 
 @testset "Test Parametric PriorPoint2 and Point2Point2Range" begin
+
 fg = LightDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
 
 addVariable!(fg, :x1, Point2)
@@ -208,11 +209,12 @@ addFactor!(fg, [:x1; :l1], Point2Point2Range(Normal(sqrt(2), 0.1)))
 addFactor!(fg, [:x1; :l2], Point2Point2Range(Normal(1.0, 0.1)))
 addFactor!(fg, [:x1; :l3], Point2Point2Range(Normal(1.0, 0.1)))
 
-ensureAllInitialized!(fg)
-
+# ensureAllInitialized!(fg)
+#FIXME needs initializaiton from non-parametric to converge
+solveTree!(fg)
 IIF.initParametricFrom!(fg)
 
-vardict, result, varIds, Σ = IIF.solveFactorGraphParametric(fg) #autodiff=:finite)
+vardict, result, varIds, Σ = IIF.solveFactorGraphParametric(fg)
 
 @test isapprox(vardict[:x1].val, [1, 1], atol = 1e-3)
 
