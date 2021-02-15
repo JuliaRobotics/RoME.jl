@@ -69,6 +69,7 @@ IIF.solveFactorGraphParametric!(fg)
 @show getPPE(fg, :x2, :default).suggested
 
 test_err = getPPE(fg, :x2, :default).suggested - getPPE(fg, :x2, :parametric).suggested
+test_err[3] = abs(getPPE(fg, :x2, :default).suggested[3]) - abs(getPPE(fg, :x2, :parametric).suggested[3])
 @show test_err .= abs.(test_err)
 
 @test isapprox(test_err[1], 0, atol=0.5)
