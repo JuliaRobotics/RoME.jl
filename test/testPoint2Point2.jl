@@ -70,11 +70,11 @@ tree, smt, hist = solveTree!(fg)
 
 ##
 
-@test 0.1*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
-@test 0.1*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
+@test 0.05*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
+@test 0.05*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
 
-@test 0.1*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
-@test 0.1*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
+@test 0.05*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
+@test 0.05*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
 
 voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
 @test sum( getVal(fg, :l1)[2,voidsel1] .< 70 ) < 0.35*N
