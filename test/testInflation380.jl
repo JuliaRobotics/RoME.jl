@@ -69,8 +69,8 @@ test_err = getPPE(fg, :x2, :default).suggested - getPPE(fg, :x2, :parametric).su
 
 test_err .= abs.(test_err)
 
-@test isapprox(test_err[1], 0, atol=0.3)
-@test isapprox(test_err[2], 0, atol=0.3)
+@test isapprox(test_err[1], 0, atol=0.5)
+@test isapprox(test_err[2], 0, atol=0.5)
 @test isapprox(test_err[3], 0, atol=0.3)
 
 
