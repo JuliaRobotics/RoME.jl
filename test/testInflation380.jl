@@ -73,8 +73,9 @@ test_err = getPPE(fg, :x2, :default).suggested - getPPE(fg, :x2, :parametric).su
 # arg, workaround until #244
 theta = (getBelief(fg, :x2, :default) |> getPoints)[3,:] .+ pi
 theta .= TU.wrapRad.(theta)
-theta_ = Statistics.mean(theta) + pi
-test_err[3] = abs(getPPE(fg, :x2, :parametric).suggested[3]) - theta_
+@show theta_ = Statistics.mean(theta)
+@show theta_ref = TU.wrapRad(getPPE(fg, :x2, :parametric).suggested[3] + pi)
+test_err[3] = theta_ref - theta_
 @show test_err .= abs.(test_err)
 
 @test isapprox(test_err[1], 0, atol=0.5)
