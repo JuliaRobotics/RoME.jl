@@ -297,7 +297,6 @@ function __init__()
     @info "RoME is adding Flux related functionality."
     include("factors/flux/models/Pose2OdoNN_01.jl") # until a better way is found to deserialize
     include("factors/flux/MixtureFluxPose2Pose2.jl")
-    # include("factors/flux/FluxModelsPose2Pose2.jl")
   end
 end
 

@@ -11,6 +11,7 @@ using Test
 testfiles = [
 "threeDimLinearProductTest.jl";
 "testInflation380.jl";
+"testPoint2Point2.jl";
 "testParametric.jl";
 "testTreeInitCommonMsg_IIF913.jl";
 "testPose3Pose3NH.jl";
@@ -18,7 +19,6 @@ testfiles = [
 "testhigherdimroots.jl";
 "testManifoldsPose2Equivalent.jl";
 "testDidsonFunctions.jl";
-"testPoint2Point2.jl";
 "testPoint2Point2Init.jl";
 "testBasicPose2Stationary.jl";
 "TestPoseAndPoint2Constraints.jl";
@@ -34,8 +34,9 @@ testfiles = [
 "TestDefaultFGInitialization.jl";
 "testAccumulateFactors.jl";
 "testDeadReckoningTether.jl"; 
-"testPoint2Point2.jl";
+"testFluxModelsPose2.jl";
 ]
+
 
 ## Tests not ready yet
 # "HexagonalLightGraphs.jl"

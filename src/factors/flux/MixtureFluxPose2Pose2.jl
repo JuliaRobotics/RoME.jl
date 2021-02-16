@@ -12,7 +12,6 @@ struct MixtureFluxPose2Pose2{F <: FunctorInferenceType} <: AbstractRelativeRoots
   Zij::F
   # delta time between variables
   DT::Ref{Float64}
-  specialSampler::Function
 end
 
 mutable struct PackedMixtureFluxPose2Pose2 <: PackedInferenceType
@@ -21,18 +20,24 @@ mutable struct PackedMixtureFluxPose2Pose2 <: PackedInferenceType
   specialSampler::String
 end
 
-function sampleMixtureFluxPose2Pose2( nfb::MixtureFluxPose2Pose2,
-                                      N::Int,
-                                      fmd::FactorMetadata,
-                                      legacy... )
+
+function IIF.getSample(cfo::CalcFactor{<:MixtureFluxPose2Pose2}, N::Int=1)
   #
+  nfb = cfo.factor
+  fmd = cfo.metadata
+
   # only calculate once after default value of 0
   if nfb.DT[] == 0
     # cache the time difference estimate
     nfb.DT[] = (getTimestamp(fmd.fullvariables[2]) - getTimestamp(fmd.fullvariables[1])).value * 1e-3
   end
 
-  return getSample(nfb.Zij, N)
+  cf_ = CalcFactor( cfo.factor.Zij, cfo.metadata, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams)
+
+  smpl = getSample(cf_, N)[1]
+
+  return (smpl, cf_.factor.labels)
+
 end
 
 
@@ -44,8 +49,7 @@ function MixtureFluxPose2Pose2( fluxmodels::AbstractVector,
                                 diversity=[0.5;0.5];
                                 DT::Real=0,
                                 shuffle::Bool=true,
-                                serializeHollow::Bool=false,
-                                specialSampler::Function=sampleMixtureFluxPose2Pose2  )
+                                serializeHollow::Bool=false )
   #
   mix = MixtureFluxModels(Pose2Pose2, 
                           fluxmodels, 
@@ -57,7 +61,7 @@ function MixtureFluxPose2Pose2( fluxmodels::AbstractVector,
                           shuffle=shuffle, 
                           serializeHollow=serializeHollow)
   #
-  MixtureFluxPose2Pose2(mix, Base.RefValue{Float64}(DT), specialSampler)
+  MixtureFluxPose2Pose2(mix, Base.RefValue{Float64}(DT))
 end
 
 
@@ -85,16 +89,15 @@ end
 
 
 function calcVelocityInterPose2!( nfb::MixtureFluxPose2Pose2,
-                                  iPts::AbstractMatrix{<:Real},
-                                  jPts::AbstractMatrix{<:Real},
-                                  idx::Int  )
+                                  iPts::AbstractVector{<:Real},
+                                  jPts::AbstractVector{<:Real} )
   #
   joyVelData = nfb.Zij.components.fluxnn.data
   # DXY[1:2,i] .= TransformUtils.R(iPts[3,i])'*DXY[1:2,i]
-  joyVelData[1,3:4] .= jPts[1:2,idx]
-  joyVelData[1,3:4] .-= iPts[1:2,idx]
+  joyVelData[1,3:4] .= jPts[1:2]
+  joyVelData[1,3:4] .-= iPts[1:2]
   joyVelData[1,3:4] ./= nfb.DT[] # convert to velocity
-  joyVelData[1,3:4] .= TransformUtils.R(iPts[3,idx])'*joyVelData[1,3:4]
+  joyVelData[1,3:4] .= TransformUtils.R(iPts[3])'*joyVelData[1,3:4]
   # just set zero if something is wrong
   if isnan(joyVelData[1,3]) || isinf(abs(joyVelData[1,3])) || isnan(joyVelData[1,4]) || isinf(abs(joyVelData[1,4]))
     joyVelData[1,3:4] .= 0.0
@@ -102,50 +105,51 @@ function calcVelocityInterPose2!( nfb::MixtureFluxPose2Pose2,
   for i in 2:size(joyVelData,1)
     joyVelData[i,3:4] .= joyVelData[1,3:4]
   end
+  return nothing
 end
 
 
-function calcVelocityInterPose2!( nfb::MixtureFluxPose2Pose2,
-                                  iPts::AbstractMatrix{<:Real},
-                                  jPts::AbstractMatrix{<:Real}  )
+# function calcVelocityInterPose2!( nfb::MixtureFluxPose2Pose2,
+#                                   iPts::AbstractMatrix{<:Real},
+#                                   jPts::AbstractMatrix{<:Real}  )
+#   #
+#   @assert size(jPts,2) == size(iPts,2) "calcVelocityInterPose2! can currently only evaluate equal population size variables"
+
+#   # calculate an average velocity component
+#   if nfb.DT[] == 0
+#     # DXY = (@view jPts[1:2,:]) - (@view jPts[1:2,:])
+#     # rotate delta position from world to local iX frame
+#     for i in 1:size(iPts,2)
+#       calcVelocityInterPose2!(nfb, iPts, jPts, i)
+#     end
+#   else
+#     nfb.joyVelData[:,3:4] .= 0.0
+#   end
+#   nothing
+# end
+
+
+function (cfo::CalcFactor{<:MixtureFluxPose2Pose2})(meas1, meas2, Xi, Xj)
   #
-  @assert size(jPts,2) == size(iPts,2) "calcVelocityInterPose2! can currently only evaluate equal population size variables"
+  userdata = cfo.metadata
+  nfb = cfo.factor
+  fmd = cfo.metadata  
 
-  # calculate an average velocity component
-  if nfb.DT[] == 0
-    # DXY = (@view jPts[1:2,:]) - (@view jPts[1:2,:])
-    # rotate delta position from world to local iX frame
-    for i in 1:size(iPts,2)
-      calcVelocityInterPose2!(nfb, iPts, jPts, i)
-    end
-  else
-    nfb.joyVelData[:,3:4] .= 0.0
-  end
-  nothing
-end
-
-
-
-function (nfb::MixtureFluxPose2Pose2)(
-            res::AbstractArray{<:Real},
-            fmd::FactorMetadata,
-            idx::Int,
-            meas::Tuple,
-            Xi::AbstractArray{<:Real,2},
-            Xj::AbstractArray{<:Real,2}  )
-  #
   # if, use prediction sample
-  if meas[2][idx] == 2
+  if meas2 == 2
     # get live velocity estimate for each sample (nfb.joyVelData[:,3:4])
-    calcVelocityInterPose2!(nfb, Xi, Xj, idx)
+    calcVelocityInterPose2!(nfb, Xi, Xj)
     # predict odom for this sample from a specific prediction model
     # NOTE, already integrated as part of Mixture
     # meas[1][1:2,idx] = nfb.allPredModels[meas[3][idx]](nfb.joyVelData)
   end
 
   # calculate the error for that measurement sample as Pose2Pose2
-  nfb.Zij(res, fmd, idx, (meas[1],), Xi, Xj)
-  nothing
+  #TODO 
+  cfZij = CalcFactor( cfo.factor.Zij.mechanics, cfo.metadata, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams)
+
+  return  cfZij(meas1, Xi, Xj)
+
 end
 
 
@@ -165,7 +169,6 @@ FluxModelsPose2Pose2( allModels::Vector{P},
                       jvd::D,
                       naiveModel::M,
                       naiveFrac::Real=0.5,
-                      specialSampler::Function=sampleMixtureFluxPose2Pose2,
                       DT::Real=0.0,
                       shuffle::Bool=true ) where {P, M <: SamplableBelief, D <: AbstractMatrix} = MixtureFluxPose2Pose2(
                                         allModels,
@@ -175,8 +178,7 @@ FluxModelsPose2Pose2( allModels::Vector{P},
                                         [naiveModel;],
                                         [1-naiveFrac;naiveFrac],
                                         DT=DT,
-                                        shuffle=shuffle,
-                                        specialSampler=specialSampler )
+                                        shuffle=shuffle )
 #
 
 

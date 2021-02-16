@@ -13,7 +13,7 @@ buildPose2OdoNN_01_FromElements();
 # FluxModelsPose2Pose2
 
 # the factor definitions
-export FluxModelsPose2Pose2, sampleFluxModelsPose2Pose2, PackedFluxModelsPose2Pose2
+export FluxModelsPose2Pose2, PackedFluxModelsPose2Pose2
 # some utilities
 export setShuffleAll!, setNaiveFracAll!
 
@@ -33,7 +33,6 @@ struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: AbstractRe
   naiveFrac::Ref{Float64}
   # TODO type stability likely wants parameter Pose2Pose2{<:SamplableBelief}
   Zij::Pose2Pose2{<:SamplableBelief}
-  specialSampler::Function # special keyword field name used to invoke 'specialSampler' logic
   DT::Ref{Float64}
   shuffle::Ref{Bool}
 end
@@ -42,14 +41,13 @@ end
 
 function calcVelocityInterPose2!( nfb::FluxModelsPose2Pose2,
                                   iPts::AbstractMatrix{<:Real},
-                                  jPts::AbstractMatrix{<:Real},
-                                  idx::Int  )
+                                  jPts::AbstractMatrix{<:Real})
   #
   # DXY[1:2,i] .= TransformUtils.R(iPts[3,i])'*DXY[1:2,i]
-  nfb.joyVelData[1,3:4] .= jPts[1:2,idx]
-  nfb.joyVelData[1,3:4] .-= iPts[1:2,idx]
+  nfb.joyVelData[1,3:4] .= jPts[1:2]
+  nfb.joyVelData[1,3:4] .-= iPts[1:2]
   nfb.joyVelData[1,3:4] ./= nfb.DT[] # convert to velocity
-  nfb.joyVelData[1,3:4] .= TransformUtils.R(iPts[3,idx])'*nfb.joyVelData[1,3:4]
+  nfb.joyVelData[1,3:4] .= TransformUtils.R(iPts[3])'*nfb.joyVelData[1,3:4]
   # just set zero if something is wrong
   if isnan(nfb.joyVelData[1,3]) || isinf(abs(nfb.joyVelData[1,3])) || isnan(nfb.joyVelData[1,4]) || isinf(abs(nfb.joyVelData[1,4]))
     nfb.joyVelData[1,3:4] .= 0.0
@@ -60,32 +58,32 @@ function calcVelocityInterPose2!( nfb::FluxModelsPose2Pose2,
 end
 
 
-function calcVelocityInterPose2!( nfb::FluxModelsPose2Pose2,
-                                  iPts::AbstractMatrix{<:Real},
-                                  jPts::AbstractMatrix{<:Real}  )
+# function calcVelocityInterPose2!( nfb::FluxModelsPose2Pose2,
+#                                   iPts::AbstractMatrix{<:Real},
+#                                   jPts::AbstractMatrix{<:Real}  )
+#   #
+#   @assert size(jPts,2) == size(iPts,2) "sampleFluxModelsPose2Pose2 can currently only evaluate equal population size variables"
+
+#   # calculate an average velocity component
+#   if nfb.DT[] == 0
+#     # DXY = (@view jPts[1:2,:]) - (@view jPts[1:2,:])
+#     # rotate delta position from world to local iX frame
+#     for i in 1:size(iPts,2)
+#       calcVelocityInterPose2!(nfb, iPts, jPts, i)
+#     end
+#   else
+#     nfb.joyVelData[:,3:4] .= 0.0
+#   end
+#   nothing
+# end
+
+# sampleFluxModelsPose2Pose2
+function IIF.getSample(cfo::CalcFactor{<:FluxModelsPose2Pose2}, N::Int=1)
   #
-  @assert size(jPts,2) == size(iPts,2) "sampleFluxModelsPose2Pose2 can currently only evaluate equal population size variables"
-
-  # calculate an average velocity component
-  if nfb.DT[] == 0
-    # DXY = (@view jPts[1:2,:]) - (@view jPts[1:2,:])
-    # rotate delta position from world to local iX frame
-    for i in 1:size(iPts,2)
-      calcVelocityInterPose2!(nfb, iPts, jPts, i)
-    end
-  else
-    nfb.joyVelData[:,3:4] .= 0.0
-  end
-  nothing
-end
-
-
-function sampleFluxModelsPose2Pose2(nfb::FluxModelsPose2Pose2,
-                                    N::Int,
-                                    fmd::FactorMetadata,
-                                    Xi::DFGVariable,
-                                    Xj::DFGVariable )
-  #
+  nfb = cfo.factor
+  fmd = cfo.metadata
+  Xi = fmd.fullvariables[1] # X
+  Xj = fmd.fullvariables[2] # A / B
 
   # get the naive samples
   # model samples (all for theta at this time)
@@ -97,14 +95,14 @@ function sampleFluxModelsPose2Pose2(nfb::FluxModelsPose2Pose2,
   # number of predictors to choose from, and choose random subset
   numModels = length(nfb.allPredModels)
   allPreds = 1:numModels |> collect # 1:Npreds |> collect
-  # TODO -- compensate when there arent enough prediction models
+  # TODO -- compensate when there aren't enough prediction models
   if numModels < N
     repeat(allPreds, ceil(Int, (N-numModels)/N) + 1)
     allPreds = allPreds[1:N]
   end
   # samples for the order in which to use models, dont shuffle if N models
   # can suppress shuffle for NN training purposes
-  1 < numModels && nfb.shuffle[] ? shuffle!(allPreds) : nothing
+  1 < numModels && nfb.shuffle[] ? Random.shuffle!(allPreds) : nothing
   
   # cache the time difference estimate
   nfb.DT[] = (getTimestamp(Xj) - getTimestamp(Xi)).value * 1e-3
@@ -113,43 +111,60 @@ function sampleFluxModelsPose2Pose2(nfb::FluxModelsPose2Pose2,
 end
 
 # Convenience function to help call the right constuctor
-FluxModelsPose2Pose2( allModels::Vector{P},
-                      jvd::D,
-                      naiveModel::M,
-                      naiveFrac::Real=0.5,
-                      ss::Function=sampleFluxModelsPose2Pose2,
-                      DT::Real=0.0,
-                      shuffle::Bool=true ) where {P, M <: SamplableBelief, D <: AbstractMatrix} = FluxModelsPose2Pose2{P,D,M}(
+FluxModelsPose2Pose2( allModels::Vector,
+                      jvd::AbstractMatrix,
+                      naiveModel::SamplableBelief,
+                      naiveFrac::Float64=0.5,
+                      DT::Float64=0.0,
+                      shuffle::Bool=true ) = FluxModelsPose2Pose2(
                                         allModels,
                                         jvd,
                                         naiveModel,
-                                        naiveFrac,
+                                        Ref(naiveFrac),
                                         Pose2Pose2(MvNormal(zeros(3),diagm(ones(3)))), # this dummy distribution does not get used
-                                        ss,
-                                        DT,
-                                        shuffle )
+                                        Ref(DT),
+                                        Ref(shuffle) )
 #
+# struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: AbstractRelativeRoots
+#   allPredModels::Vector{P}
+#   joyVelData::D
+#   naiveModel::M
+#   naiveFrac::Ref{Float64}
+#   # TODO type stability likely wants parameter Pose2Pose2{<:SamplableBelief}
+#   Zij::Pose2Pose2{<:SamplableBelief}
+#   DT::Ref{Float64}
+#   shuffle::Ref{Bool}
+# end
 
 
-function (nfb::FluxModelsPose2Pose2)(
-            res::AbstractArray{<:Real},
-            userdata::FactorMetadata,
-            idx::Int,
-            meas::Tuple{AbstractArray{<:Real},AbstractArray{<:Int},AbstractArray{<:Int}},
-            Xi::AbstractArray{<:Real,2},
-            Xj::AbstractArray{<:Real,2}  )
+function (cfo::CalcFactor{<:FluxModelsPose2Pose2})(meas1,meas2,meas3,Xi,Xj)
+# function (nfb::FluxModelsPose2Pose2)(
+            # res::AbstractArray{<:Real},
+            # userdata::FactorMetadata,
+            # idx::Int,
+            # meas::Tuple{AbstractArray{<:Real},AbstractArray{<:Int},AbstractArray{<:Int}},
+            # Xi::AbstractArray{<:Real,2},
+            # Xj::AbstractArray{<:Real,2}  )
   #
+  userdata = cfo.metadata
+  nfb = cfo.factor
+  fmd = cfo.metadata
+  meas = (meas1, meas2, meas3)
+
+  ## MAYBE JUST MOVE THIS INTO getSample and be done
   # if, use prediction sample
-  if meas[2][idx] == 2
+  if meas[2] == 2 # meas2 == 2
     # get live velocity estimate for each sample (nfb.joyVelData[:,3:4])
-    calcVelocityInterPose2!(nfb, Xi, Xj, idx)
+    calcVelocityInterPose2!(nfb, Xi, Xj)
     # predict odom for this sample from a specific prediction model
-    meas[1][1:2,idx] = nfb.allPredModels[meas[3][idx]](nfb.joyVelData)
+    meas[1][1:2] = nfb.allPredModels[meas[3]](nfb.joyVelData)
   end
 
   # calculate the error for that measurement sample as Pose2Pose2
-  nfb.Zij(res, userdata, idx, (meas[1],), Xi, Xj)
-  nothing
+  #TODO
+  cfZij = CalcFactor( nfb.Zij, nothing, 0, 0, (), [])
+  res = cfZij((meas[1],), Xi, Xj)
+
 end
 
 """
