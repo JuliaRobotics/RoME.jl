@@ -43,7 +43,7 @@ end
 
 Range only measurement from Pose2 to Point2 variable.
 """
-mutable struct Pose2Point2Range{T} <: IIF.AbstractRelativeMinimize
+mutable struct Pose2Point2Range{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
   Z::T
   partial::Tuple{Int,Int}
   Pose2Point2Range{T}() where T = new()
@@ -55,7 +55,7 @@ function getSample(cfo::CalcFactor{<:Pose2Point2Range}, N::Int=1)
   return (reshape(rand(cfo.factor.Z,N),1,N), )
 end
 
-function (cfo::CalcFactor{<:Point2Point2Range})(rho, xi, lm)
+function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi, lm)
   # Basically `EuclidDistance`
   return [rho[1] - norm(lm[1:2] .- xi[1:2])]
 end
