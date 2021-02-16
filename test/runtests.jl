@@ -9,13 +9,16 @@ using Test
 # "testG2oParser.jl";  ]
 
 testfiles = [
+"threeDimLinearProductTest.jl";
+"testInflation380.jl";
+"testPoint2Point2.jl";
+"testParametric.jl";
 "testTreeInitCommonMsg_IIF913.jl";
 "testPose3Pose3NH.jl";
 "testBeehive2D_CliqByCliq.jl";      # special case debugging
 "testhigherdimroots.jl";
 "testManifoldsPose2Equivalent.jl";
 "testDidsonFunctions.jl";
-"testPoint2Point2.jl";
 "testPoint2Point2Init.jl";
 "testBasicPose2Stationary.jl";
 "TestPoseAndPoint2Constraints.jl";
@@ -25,16 +28,15 @@ testfiles = [
 "testFixedLagFG.jl";
 "testMultimodalRangeBearing.jl";
 "testDynPose2D.jl";
-"threeDimLinearProductTest.jl";
 "testPartialXYH.jl";
 "testpartialpose3.jl";
 "testpackingconverters.jl";
 "TestDefaultFGInitialization.jl";
 "testAccumulateFactors.jl";
 "testDeadReckoningTether.jl"; 
-"testPoint2Point2.jl";
-"testParametric.jl";
-"testFluxModelsPose2.jl"]
+"testFluxModelsPose2.jl";
+]
+
 
 ## Tests not ready yet
 # "HexagonalLightGraphs.jl"
