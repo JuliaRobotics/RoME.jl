@@ -225,10 +225,11 @@ addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 # check the forward convolution is working properly
 pts, = predictbelief(fg, :x0, ls(fg, :x0), N=75)
 
+pts[3,:] .= TU.wrapRad.(pts[3,:])
 @show abs.(Statistics.mean(pts,dims=2))
 @test sum(abs.(Statistics.mean(pts,dims=2)) .< [2.0; 2.0; 2.0]) == 3
 @show Statistics.std(pts,dims=2)
-@test sum([0.1; 0.1; 0.01] .< Statistics.std(pts,dims=2) .< [5.0; 5.0; 2.0]) == 3
+@test sum([0.1; 2.0; 0.01] .< Statistics.std(pts,dims=2) .< [5.0; 10.0; 2.0]) == 3
 
 ##
 
