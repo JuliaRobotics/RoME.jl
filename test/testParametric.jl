@@ -190,3 +190,32 @@ vardict, result, varIds, Σ = IIF.solveFactorGraphParametric!(fg)
 @test isapprox(vardict[:x1].val, [10, 0, 0, 10, 0], atol = 1e-3)
 
 end
+
+
+@testset "Test Parametric PriorPoint2 and Point2Point2Range" begin
+
+fg = LightDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
+
+addVariable!(fg, :x1, Point2)
+addVariable!(fg, :l1, Point2)
+addVariable!(fg, :l2, Point2)
+addVariable!(fg, :l3, Point2)
+
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([0., 0], [0.01, 0.01])))
+addFactor!(fg, [:l2], PriorPoint2(MvNormal([1., 0], [0.01, 0.01])))
+addFactor!(fg, [:l3], PriorPoint2(MvNormal([0., 1], [0.01, 0.01])))
+
+addFactor!(fg, [:x1; :l1], Point2Point2Range(Normal(sqrt(2), 0.1)))
+addFactor!(fg, [:x1; :l2], Point2Point2Range(Normal(1.0, 0.1)))
+addFactor!(fg, [:x1; :l3], Point2Point2Range(Normal(1.0, 0.1)))
+
+# ensureAllInitialized!(fg)
+#FIXME needs initializaiton from non-parametric to converge
+solveTree!(fg)
+IIF.initParametricFrom!(fg)
+
+vardict, result, varIds, Σ = IIF.solveFactorGraphParametric(fg)
+
+@test isapprox(vardict[:x1].val, [1, 1], atol = 1e-3)
+
+end

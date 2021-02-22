@@ -9,6 +9,134 @@ using Statistics
 
 ##
 
+
+@testset "test inflation is working via distance" begin
+
+##
+
+fg = initfg()
+# getSolverParams(fg).inflation = 50.0
+
+N = 100
+
+addVariable!(fg, :x0, ContinuousEuclid{2})
+addVariable!(fg, :x1, ContinuousEuclid{2})
+
+X0_ = zeros(2,N)
+X0_[1,:] .+= 1000.0
+initManual!(fg, :x0, X0_)
+
+addFactor!(fg, [:x0;:x1], EuclidDistance(Normal(100.0, 1.0)))
+
+pts = approxConv(fg, :x0, :x1)
+
+
+##
+# does this give a "donut ring" at 1000?
+
+res = 99999*ones(100)
+
+for i in 1:N
+  res[i] = calcFactorResidual(fg, :x0x1f1, [100.0], [1000.0;0.0], pts[:,i])[1]
+end
+
+@test 0.9*N < sum(abs.(res) .< 5)
+
+## new test trying to force inflation error
+
+X1_ = randn(2,N)
+X1_[1,:] .+= 1100.0
+initManual!(fg, :x1, X1_)
+
+
+##
+
+IIF._getCCW(fg, :x0x1f1).inflation = 50.0
+pts = approxConv(fg, :x0x1f1, :x1)
+
+initManual!(fg, :x1, pts)
+
+pts = approxConv(fg, :x0x1f1, :x1)
+
+
+##
+# does this give a "donut ring" at 1000?
+
+res = 99999*ones(100)
+
+for i in 1:N
+  res[i] = calcFactorResidual(fg, :x0x1f1, [100.0], [1000.0;0.0], pts[:,i])[1]
+end
+
+@test 0.9*N < sum(abs.(res) .< 5)
+
+
+##
+
+# using RoMEPlotting
+# Gadfly.set_default_plot_size(25cm,20cm)
+
+# ##
+
+# # pts = getBelief(fg, :x1) |> getPoints
+# plotKDE(manikde!(pts, ContinuousEuclid{2}))
+
+
+##
+
+end
+
+
+@testset "test inflation on range solve" begin
+
+##
+
+N = 100
+fg = initfg()
+fg.solverParams.inflation = 10.0 # super size the inflation to force wide coverage
+
+addVariable!(fg, :x1, ContinuousEuclid{2})
+addVariable!(fg, :l1, ContinuousEuclid{2})
+
+addFactor!(fg, [:l1], Prior(MvNormal([-1000.0,0], [0.1, 0.1])))
+addFactor!(fg, [:x1; :l1], EuclidDistance(Normal(100.0, 1.0)))
+
+pts = zeros(2,100)
+pts[1,:] .-= 900
+initManual!(fg, :x1, pts)
+
+##
+
+tree, _, = solveGraph!(fg);
+
+##
+
+pts = getBelief(fg, :x1) |> getPoints
+
+@test 0.9*N < sum( -1150 .< pts[1,:] .< -850)
+@test 0.9*N < sum( -150 .< pts[2,:] .< 150)
+
+pts_ = [norm(pts[:,i] - [-1000;0]) for i in 1:N]
+
+@test 0.9*N < sum(80 .< pts_ .< 120)
+
+# must still test spread
+
+@test 0.2*N < sum(-1150 .< pts[1,:] .< -1000)
+@test 0.2*N < sum(-1000 .< pts[1,:] .< -850)
+@test 0.2*N < sum(-150 .< pts[2,:] .< 0)
+@test 0.2*N < sum(0 .< pts[2,:] .< 150)
+
+
+##
+
+# pl = plotKDE(fg, ls(fg))
+
+##
+
+end
+  
+
 @testset "test bearing range with inflation, #380, IIF #1051" begin
 
 ##
