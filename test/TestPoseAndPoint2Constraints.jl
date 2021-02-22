@@ -5,9 +5,11 @@ using Test
 using RoME
 # , IncrementalInference, Distributions
 
+##
 
 @testset "test pose and point combinations..." begin
 
+##
 
 N = 100
 fg = initfg()
@@ -21,9 +23,9 @@ v1 = addVariable!(fg, :x0, Pose2, N=N)
 initPosePrior = PriorPose2(MvNormal(zeros(3), initCov))
 f1  = addFactor!(fg,[v1], initPosePrior)
 
-@test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) != nothing
-@test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) != nothing
-@test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) != nothing
+@test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) !== nothing
+@test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) !== nothing
+@test Pose2Pose2(MvNormal(randn(2), Matrix{Float64}(LinearAlgebra.I, 2,2))) !== nothing
 
 # and a second pose
 v2 = addVariable!(fg, :x1, Pose2, N=N)
@@ -32,9 +34,13 @@ f2 = addFactor!(fg, [:x0;:x1], ppc)
 
 # test evaluation of pose pose constraint
 pts = approxConv(fg, :x0x1f1, :x1)
-# pts = evalFactor(fg, f2, v2.index)
-@test norm(Statistics.mean(pts,dims=2)[1:2] - [50.0;0.0]) < 10.0
-@test abs(Statistics.mean(pts,dims=2)[3] - pi/2) < 0.5
+
+pts[3,:] .= TU.wrapRad.(pts[3,:])
+@show mv = Statistics.mean(pts,dims=2)
+@test norm(mv[1:2] - [50.0;0.0]) < 10.0
+@test abs(mv[3] - pi/2) < 0.5
+
+##
 
 # @show ls(fg)
 tree, smt, hist = solveTree!(fg)
@@ -45,10 +51,14 @@ tree, smt, hist = solveTree!(fg)
 
 # test post evaluation values are correct
 pts = getVal(fg, :x0)
+pts[3,:] .= TU.wrapRad.(pts[3,:])
+
 @test norm(Statistics.mean(pts, dims=2)[1:2] - [0.0;0.0]) < 10.0
 @test abs(Statistics.mean(pts, dims=2)[3]) < 0.5
 
 pts = getVal(fg, :x1)
+pts[3,:] .= TU.wrapRad.(pts[3,:])
+
 @test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;0.0]) < 10.0
 @test abs(Statistics.mean(pts, dims=2)[3]-pi/2) < 0.5
 
@@ -64,14 +74,17 @@ solveTree!(fg)
 # test post evaluation values are correct
 pts = getVal(fg, :x0)
 @test norm(Statistics.mean(pts, dims=2)[1:2]-[0.0;0.0]) < 20.0
+pts[3,:] .= TU.wrapRad.(pts[3,:])
 @test abs(Statistics.mean(pts, dims=2)[3]) < 0.5
 
 pts = getVal(fg, :x1)
 @test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;0.0]) < 20.0
+pts[3,:] .= TU.wrapRad.(pts[3,:])
 @test abs(Statistics.mean(pts, dims=2)[3] - pi/2) < 0.5
 
 pts = getVal(fg, :x2)
 @test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;50.0]) < 20.0
+pts[3,:] .= TU.wrapRad.(pts[3,:])
 @test abs(Statistics.mean(pts, dims=2)[3]-pi/2) < 0.5
 
 println("test bearing range evaluations")
