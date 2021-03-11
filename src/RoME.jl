@@ -19,7 +19,8 @@ using
   ProgressMeter,
   DocStringExtensions,
   DistributedFactorGraphs,
-  TensorCast
+  TensorCast,
+  ManifoldsBase
 
 # using Graphs,  # TODO determine how many parts still require Graphs still directly
 
@@ -299,5 +300,9 @@ function __init__()
     include("factors/flux/MixtureFluxPose2Pose2.jl")
   end
 end
+
+# manifold conversions required during transformation
+
+
 
 end
