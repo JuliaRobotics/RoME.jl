@@ -11,6 +11,7 @@ using Test
 N=100
 fg = initfg()
 getSolverParams(fg).graphinit=false
+getSolverParams(fg).useMsgLikelihoods = true
 # getSolverParams(fg).inflation = 10.0
 
 addVariable!(fg, :x0, Point2, N=N)

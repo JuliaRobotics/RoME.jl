@@ -68,5 +68,11 @@ Function to project only XY data onto Cartesian plane for 2D plotting.
 projectCartesian(pose::Union{Point2,Point3, Pose2, Pose3, DynPoint2, DynPose2}, 
                  x::Vector{Float64}) = [x[1]; x[2]; 0]
 
+#
+
+
+
+
+
 
 #

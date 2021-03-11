@@ -1,5 +1,35 @@
 
 ##==============================================================================
+## Remve as part of Manifolds.jl consolidation, #244
+##==============================================================================
+
+
+## New Manifold types.  Integration phase towards RoME #244 and AMP #41
+
+# FIXME, much consolidation required here, see RoME #244
+
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Point2}) = AMP.Euclid2
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Point3}) = AMP.Euclid3
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:DynPoint2}) = AMP.Euclid4
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Pose2}) = AMP.SE2_Manifold
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Pose3}) = AMP.SE3_Manifold
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:DynPose2}) = AMP.SE2E2_Manifold
+
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Point2Point2}) = AMP.Euclid2
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Pose2Point2}) = AMP.Euclid2
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Pose2Point2Bearing}) = AMP.Euclid
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Point2Point2Range}) = AMP.Euclid
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Pose2Point2Range}) = AMP.Euclid
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Pose2Point2BearingRange}) = AMP.Euclid2
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Pose2Pose2}) = AMP.SE2_Manifold
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:Pose3Pose3}) = AMP.SE3_Manifold
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:DynPoint2DynPoint2}) = AMP.Euclid4
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:DynPose2DynPose2}) = AMP.SE2E2_Manifold
+Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{<:VelPose2VelPose2}) = AMP.SE2E2_Manifold
+
+
+
+##==============================================================================
 ## OLD Victory Park Example code, don't delete until replacements are coded
 ##==============================================================================
 

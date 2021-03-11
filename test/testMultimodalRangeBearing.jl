@@ -7,16 +7,17 @@ import IncrementalInference: getSample
 mutable struct NorthSouthPartial{T} <: AbstractPrior
   Z::T
   partial::Tuple{Int}
-  NorthSouthPartial{D}() where D = new{D}()
-  NorthSouthPartial{D}(Z::D) where {D <: IIF.SamplableBelief} = new{D}(Z, (2,))
 end
-NorthSouthPartial(Z::D) where {D <: IIF.SamplableBelief} = NorthSouthPartial{D}(Z)
+
+NorthSouthPartial(Z::D) where {D <: IIF.SamplableBelief} = NorthSouthPartial(Z, (2,))
 
 getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int=1) = (reshape(rand(cfo.factor.Z, N),1,N),)
 
-
+##
 
 @testset "test standard multimodal range bearing factor setup..." begin
+
+##
 
 # Start with an empty graph
 global N = 100
@@ -46,29 +47,19 @@ addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
 
 predictbelief(fg, :x0, ls(fg, :x0))
 
+##
 
-# writeGraphPdf(fg)
 end
-
-
-
 
 
 @testset "test multimodal bearing range factors calculate pose position properly..." begin
 
-ensureAllInitialized!(fg)
+##
+
+solveTree!(fg);
 
 
-tree, smt, hist = solveTree!(fg)
-# global tree = batchSolve!(fg, N=N, recursive=true)
-# global tree = wipeBuildNewTree!(fg)
-# global infv = [inferOverTreeR!(fg, tree, N=N) for i in 1:4]
-# @test length(infv) == 4
-
-
-# X0 = getKDE(getVariable(fg, :x0))
-# X0pts = getPoints(X0)
-global X0pts = getKDE(getVariable(fg, :x0)) |> getPoints
+global X0pts = getBelief(fg, :x0) |> getPoints
 
 
 @test size(X0pts,1) == 3
@@ -80,64 +71,74 @@ global X0pts = getKDE(getVariable(fg, :x0)) |> getPoints
            0 < sum( 20 .< X0pts[1,:] .< 40);
            0 < sum( 40 .< X0pts[1,:] .< 60)]) >= 2
 
+##
+
 end
 
 
 @testset "test multimodal landmark locations are computed correclty..." begin
 
+##
 
 # Start with an empty graph
-global fg = initfg(sessionname="MULTIMODAL_2D_TUTORIAL")
+fg = initfg(sessionname="MULTIMODAL_2D_TUTORIAL")
+# getSolverParams(fg).spreadNH = 10.0
 
 addVariable!(fg, :x0, Pose2)
-addFactor!(fg, [:x0], PriorPose2(MvNormal([0.0;0.0;0], Matrix(Diagonal([1.0;1.0;0.01].^2)))) ) # TODO IIF.Prior with IIF 0.3.9
+addFactor!(fg, [:x0], PriorPose2(MvNormal([0.0;0.0;0], diagm([1.0;1.0;0.01].^2))) )
 
 # Add landmarks with Bearing range measurements
 addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
-addFactor!(fg, [:l1], PriorPose2(MvNormal([40.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) ) # TODO IIF.Prior with IIF 0.3.9
+addFactor!(fg, [:l1], PriorPose2(MvNormal([40.0;0.0], diagm([1.0;1.0].^2))) )
 
 addVariable!(fg, :l2, Point2, tags=[:LANDMARK;])
 addFactor!(fg, [:l2;], NorthSouthPartial(Normal(0,1.0)))
-# addFactor!(fg, [:l2], PriorPose2(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) ) # TODO IIF.Prior with IIF 0.3.9
+# addFactor!(fg, [:l2], PriorPose2(MvNormal([30.0;0.0], diagm([1.0;1.0].^2))) )
 
-global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
 
-# @test true
+# solve the graph
+solveTree!(fg);
 
-tree, smt, hist = solveTree!(fg)
-# setVal!(getVert(fg, :l2), zeros(2,N))
-# writeGraphPdf(fg)
-# global tree = wipeBuildNewTree!(fg)
-# global infv = [inferOverTreeR!(fg, tree, N=N) for i in 1:4]
-# @test length(infv) == 4
+# check 
 
 
-# L1 = getKDE(getVariable(fg, :l1))
-global L2 = getKDE(getVariable(fg, :l2))
-# X0 = getKDE(getVariable(fg, :x0))
+# check modes on L2
+L2 = getBelief(fg, :l2)
 
-global L2pts = getPoints(L2)
+L2pts = getPoints(L2)
 
 @test size(L2pts,1) == 2
 @test size(L2pts,2) == N
 
-# plot(L2, dims=[1;2])
 
-numM1 = sum(10 .< L2pts[1,:] .< 30)
-numM2 = sum(30 .< L2pts[1,:] .< 50)
-
+# some likelihood that L2 is around +20
+mask = 10 .< L2pts[1,:] .< 30
+numM1 = sum(mask)
 @test 20 < numM1 < 70
+
+# should also have likelihood of being elsewhere
+imask = xor.(mask, 1)
+numM2 = sum(imask)
 @test 20 < numM2 < 70
-@test 0.6*N <= numM1 + numM2
+
+##
+
+# using RoMEPlotting
+# Gadfly.set_default_plot_size(35cm, 20cm)
+
+##
+
+# plotKDE(fg, :l1, dims=[1])
+# plotKDE(L2, dims=[1])
+# plotSLAM2D(fg)
+
+# plotLocalProduct(fg, :l1, levels=10)
+# plotLocalProduct(fg, :l2, levels=10)
+
+##
 
 end
 
 
-# using RoMEPlotting
-# Gadfly.set_default_plot_size(35cm,20cm)
-#
-# drawPosesLandms(fg, spscale = 1.0)
-#
-# plotLocalProduct(fg, :l1, levels=10)
-# plotLocalProduct(fg, :l2, levels=10)

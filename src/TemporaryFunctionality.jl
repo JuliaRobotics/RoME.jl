@@ -52,9 +52,3 @@ end
 
 
 
-# FIXME, much consolidation required here, see RoME #244
-convert(::Type{<:AMP.Manifold}, ::InstanceType{Point2}) = AMP.Euclid2
-convert(::Type{<:AMP.Manifold}, ::InstanceType{Pose2}) = AMP.SE2_Manifold
-
-convert(::Type{<:AMP.Manifold}, ::InstanceType{Point2Point2}) = AMP.Euclid2
-convert(::Type{<:AMP.Manifold}, ::InstanceType{Pose2Pose2}) = AMP.SE2_Manifold
