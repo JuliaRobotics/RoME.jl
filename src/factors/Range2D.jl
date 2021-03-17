@@ -48,11 +48,10 @@ Range only measurement from Pose2 to Point2 variable.
 """
 mutable struct Pose2Point2Range{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
   Z::T
-  partial::Tuple{Int,Int}
+  # partial::Tuple{Int,Int}
   # Pose2Point2Range{T}() where T = new()
 end
-Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range{T}(Z, (1,2))
-# Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range{T}(Z)
+# Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range{T}(Z, (1,2))
 
 function getSample(cfo::CalcFactor{<:Pose2Point2Range}, N::Int=1)
   return (reshape(rand(cfo.factor.Z,N),1,N), )
