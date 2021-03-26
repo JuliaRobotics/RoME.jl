@@ -18,7 +18,7 @@ addVariable!(fg, :x0, Pose2)
 addVariable!(fg, :x1, Point2)
 addFactor!(fg, [:x0;:x1], p2br, graphinit=false)
 
-meas = freshSamples(IIF._getCCW(fg, :x0x1f1), 100)
+meas = sampleFactor(IIF._getCCW(fg, :x0x1f1), 100)
 
 ##
 

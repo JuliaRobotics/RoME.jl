@@ -22,12 +22,15 @@ using
   TensorCast,
   ManifoldsBase
 
+# to avoid name conflicts
+import Manifolds: SpecialEuclidean, ProductRepr
+
 # using Graphs,  # TODO determine how many parts still require Graphs still directly
 
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
-import IncrementalInference: convert, getSample, reshapeVec2Mat, extractdistribution, DFG, getManifolds
+import IncrementalInference: convert, getSample, reshapeVec2Mat, DFG, getManifolds
 # not sure why this is gives import error
 import DistributedFactorGraphs: compare
 import DistributedFactorGraphs: getDimension, getManifolds
