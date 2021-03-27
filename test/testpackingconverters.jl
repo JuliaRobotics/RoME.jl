@@ -178,8 +178,8 @@ upv1data = unpackVariableNodeData(fg, packedv1data)
 # global packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
 # global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
-@test compareAll(DFG.getSolverData(v1), upv1data, skip=[:softtype;])
-@test compareAll(DFG.getSolverData(v1).softtype, upv1data.softtype)
+@test compareAll(DFG.getSolverData(v1), upv1data, skip=[:variableType;])
+@test compareAll(DFG.getSolverData(v1).variableType, upv1data.variableType)
 
 ##
 
