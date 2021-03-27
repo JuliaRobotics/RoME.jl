@@ -91,6 +91,9 @@ global X3pts = approxConv(fg, :x2x3f1, :x3)
 global X2ptsMean = Statistics.mean(X2pts,dims=2)
 global X3ptsMean = Statistics.mean(X3pts,dims=2)
 
+@show X2ptsMean
+@show X3ptsMean
+
 @test  sum(map(Int, abs.(X2ptsMean) - [25.0;0;0;0;0;0] .< 5.0 ))  == 6
 @test  sum(map(Int, abs.(X3ptsMean -  [50.0;0;0;0;0;0]) .< 5.0 )) == 6
 
