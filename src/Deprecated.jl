@@ -16,8 +16,9 @@ getManifolds(::InstanceType{typeof(AMP.SE2_Manifold)}) = (:Euclid, :Euclid, :Cir
 getManifolds(::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid, :Euclid, :Circular, :Euclid, :Euclid)
 getManifolds(::InstanceType{typeof(AMP.SE3_Manifold)}) = (:Euclid, :Euclid, :Euclid, :Circular, :Circular, :Circular)
 
+
 # legacy support, will be deprecated
-Base.convert(::Type{<:Tuple}, mani::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
+# Base.convert(::Type{<:Tuple}, mani::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
 
 Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Point2}) = AMP.Euclid2
 Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Point3}) = AMP.Euclid3
