@@ -31,7 +31,7 @@ function (cfo::CalcFactor{<:RotationTest})( meas,
   q12 = q1*q_conj(q2)
   qq = dq*q_conj(q12)
   @show res
-  vee!(res, convert(TU.so3, qq))
+  TransformUtils.vee!(res, convert(TU.so3, qq))
   return res
 end
 
