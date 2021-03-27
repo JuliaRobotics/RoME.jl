@@ -12,7 +12,7 @@ addons:
       - hdf5-tools
 
 julia:
-  - 1.4
+  - 1.6
   - nightly
 
 after_success:
@@ -23,18 +23,19 @@ jobs:
     - julia: nightly
     - arch: arm64
   include:
-    - name: "DEV MASTERS"
-      julia: 1.5
+    - name: "THIS AND MASTERS"
+      julia: 1.6
       if: NOT branch =~ ^release.*$
       script:
         - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference",rev="master"));'
+        - julia -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="master"));'
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="master"));'
         - julia --check-bounds=yes -e 'using Pkg; Pkg.test("RoME"; coverage=false)'
       after_success: skip
     - name: "ARM64"
       arch: arm64
-      julia: 1.4
+      julia: 1.6
       after_success: skip
   fast_finish: true
 

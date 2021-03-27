@@ -76,5 +76,8 @@ jobs:
       
       - name: Run tests on masters
         run: |
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="master")); Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="master")); Pkg.add(PackageSpec(name="IncrementalInference",rev="master")); Pkg.test("RoME"; coverage=false)'
+          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference",rev="master"));'
+          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="master"));'
+          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="master"));'
+          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.test("RoME"; coverage=false)'
         shell: bash
