@@ -123,7 +123,7 @@ addFactor!(tfg, [:x0;:x1], xyy, graphinit=false)
 
 # meas = getSample(xyy,100)
 ccw = IIF._getCCW(tfg, :x0x1f1)
-meas = freshSamples(ccw, 100)
+meas = sampleFactor(ccw, 100)
 
 @test norm(Statistics.std(meas[1],dims=2) - [0.01;0.01;0.002]) < 0.05
 

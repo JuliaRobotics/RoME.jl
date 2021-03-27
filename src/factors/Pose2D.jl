@@ -1,4 +1,7 @@
 
+export SpecialEuclidean
+
+
 """
 $(TYPEDEF)
 
