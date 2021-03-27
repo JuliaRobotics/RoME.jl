@@ -143,7 +143,8 @@ end
 
 fg = initfg()
 
-getSolverParams(fg).inflation = 3.0
+getSolverParams(fg).gibbsIters = 4
+# getSolverParams(fg).inflation = 3.0
 
 pr_noise = [0.01, 0.01, 0.001]
 od_noise = [0.2;0.2;0.2]
@@ -189,6 +190,7 @@ addFactor!(fg, [:x2; :l2], p2br)
 
 # nonparametric solution
 solveGraph!(fg);
+# parametric solution
 IIF.solveFactorGraphParametric!(fg)
 
 
@@ -199,15 +201,17 @@ IIF.solveFactorGraphParametric!(fg)
 
 test_err = 9999*ones(3)
 test_err[1:2] = getPPE(fg, :x2, :default).suggested[1:2] - getPPE(fg, :x2, :parametric).suggested[1:2]
+
 @show theta     = getPPE(fg, :x2, :default).suggested[3]
 @show theta_ref = getPPE(fg, :x2, :parametric).suggested[3]
+@show test_err[3] = Manifolds.log(Manifolds.Circle(), theta_ref, theta) # theta_ref - theta_
 
 # # arg, workaround until #244
 # theta = (getBelief(fg, :x2, :default) |> getPoints)[3,:] .+ pi
 # theta .= TU.wrapRad.(theta)
 # @show theta_ = Statistics.mean(theta)
 # @show theta_ref = TU.wrapRad(getPPE(fg, :x2, :parametric).suggested[3] + pi)
-@show test_err[3] = Manifolds.log(Manifolds.Circle(), theta_ref, theta) # theta_ref - theta_
+
 @show test_err .= abs.(test_err)
 
 @test isapprox(test_err[1], 0, atol=0.5)
