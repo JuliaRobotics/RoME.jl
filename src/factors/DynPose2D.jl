@@ -4,50 +4,6 @@ export   DynPose2, DynPose2VelocityPrior, PackedDynPose2VelocityPrior, DynPose2P
 
 
 
-## ==================================================================================================
-## Hack to be removed or updated
-## FIXME ME ON FIRE use the ManifoldsBase.jl prescribed interface method instead:
-##   https://juliamanifolds.github.io/Manifolds.jl/stable/examples/manifold.html#manifold-tutorial
-## ==================================================================================================
-
-
-import ApproxManifoldProducts: coords, uncoords, getPointsManifold, _makeVectorManifold
-
-export SE2E2_Manifold
-
-
-# this is a hack and not fully implemented as per: 
-struct _SE2E2 <: ManifoldsBase.Manifold{ManifoldsBase.ℝ} end
-
-const SE2E2_Manifold = _SE2E2()
-
-AMP.coords(::Type{<:typeof(SE2E2_Manifold)}, p::ProductRepr) = [p.parts[1][1], p.parts[1][2], atan(p.parts[2][2,1],p.parts[2][1,1]), p.parts[3][1], p.parts[3][2]]
-
-function AMP.uncoords(::typeof(SE2E2_Manifold), p::AbstractVector{<:Real})
-  α = p[3]
-  ProductRepr(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
-end
-
-function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof(SE2E2_Manifold)}
-  data_ = getPoints(mkd.belief)
-  [uncoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
-end
-
-function Statistics.mean(::typeof(SE2E2_Manifold), pts::AbstractVector)
-  se2_ = (d->ProductRepr(d.parts[1], d.parts[2])).(pts)
-  mse2 = mean(SpecialEuclidean(2), se2_)
-  e2_ = (d->ProductRepr(d.parts[3])).(pts)
-  me2 = mean(Euclidean(2), e2_)
-  ProductRepr(mse2.parts[1], mse2.parts[2], me2.parts[1])
-end
-
-AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(SE2E2_Manifold)} = coords(M, prr)
-
-
-
-## ==================================================================================================
-
-
 
 """
 $(TYPEDEF)
