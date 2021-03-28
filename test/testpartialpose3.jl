@@ -193,7 +193,7 @@ estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.parti
 @show estmu1mean
 @show estmu2mean
 @test sum(abs.(estmu1mean - mu1[[3;1;2]]) .< [0.7; 0.1; 0.1]) == 3
-@test sum(abs.(estmu2mean - mu2) .< [1.0; 1.0; 0.2] ) == 3
+@test sum(abs.(estmu2mean - mu2) .< [1.0; 1.5; 0.2] ) == 3
 
 memcheck = getVal(v2)
 @test 1e-10 < norm(val - memcheck)
