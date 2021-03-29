@@ -3,13 +3,6 @@ import IncrementalInference: selectFactorType, getDomain
 
 export getDomain
 
-## =============================================================================
-## Needs a home
-## =============================================================================
-
-# Still experimental
-# export BearingRange2
-@defVariable BearingRange2 2 (:Circular, :Euclid)
 
 ## ============================================================================
 # Starting integration with Manifolds.jl, via ApproxManifoldProducts.jl first

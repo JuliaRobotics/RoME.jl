@@ -16,16 +16,17 @@ getManifolds(::InstanceType{typeof(AMP.SE2_Manifold)}) = (:Euclid, :Euclid, :Cir
 getManifolds(::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid, :Euclid, :Circular, :Euclid, :Euclid)
 getManifolds(::InstanceType{typeof(AMP.SE3_Manifold)}) = (:Euclid, :Euclid, :Euclid, :Circular, :Circular, :Circular)
 
-
 # legacy support, will be deprecated
-# Base.convert(::Type{<:Tuple}, mani::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
+Base.convert(::Type{<:Tuple}, mani::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
+Base.convert(::Type{<:Tuple}, mani::InstanceType{typeof(BearingRange_Manifold)}) = (:Circular,:Euclid)
 
-Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Point2}) = AMP.Euclid2
-Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Point3}) = AMP.Euclid3
-Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{DynPoint2}) = AMP.Euclid4
-Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Pose2}) = AMP.SE2_Manifold
-Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Pose3}) = AMP.SE3_Manifold
-Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{DynPose2}) = SE2E2_Manifold
+# Variables dont need to re-overload these functions from @defVariable (factors dont have easy macro yet)
+# Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Point2}) = AMP.Euclid2
+# Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Point3}) = AMP.Euclid3
+# Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{DynPoint2}) = AMP.Euclid4
+# Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Pose2}) = AMP.SE2_Manifold
+# Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Pose3}) = AMP.SE3_Manifold
+# Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{DynPose2}) = SE2E2_Manifold
 
 Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Point2Point2}) = AMP.Euclid2
 Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Pose2Point2}) = AMP.Euclid2

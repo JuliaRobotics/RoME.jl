@@ -2,12 +2,13 @@
 
 export projectCartesian
 
+
 """
 $(TYPEDEF)
 
 XY Euclidean manifold variable node softtype.
 """
-@defVariable Point2 2 (:Euclid, :Euclid)
+@defVariable Point2 Euclidean(2) # 2 (:Euclid, :Euclid)
 
 
 """
@@ -21,7 +22,7 @@ Example
 p3 = Point3()
 ```
 """
-@defVariable Point3 3 (:Euclid,:Euclid,:Euclid)
+@defVariable Point3 Euclidean(3) # 3 (:Euclid,:Euclid,:Euclid)
 
 
 """
@@ -29,7 +30,7 @@ $(TYPEDEF)
 
 Pose2 is a SE(2) mechanization of two Euclidean translations and one Circular rotation, used for general 2D SLAM.
 """
-@defVariable Pose2 3 (:Euclid,:Euclid,:Circular)
+@defVariable Pose2 SpecialEuclidean(2) # 3 (:Euclid,:Euclid,:Circular)
 
 """
 $(TYPEDEF)
@@ -41,7 +42,7 @@ Future:
 - Work in progress on AMP3D for proper non-Euler angle on-manifold operations.
 - TODO the AMP upgrade is aimed at resolving 3D to Quat/SE3/SP3 -- current Euler angles will be replaced
 """
-@defVariable Pose3 6 (:Euclid,:Euclid,:Euclid,:Circular,:Circular,:Circular)
+@defVariable Pose3 SpecialEuclidean(3) # 6 (:Euclid,:Euclid,:Euclid,:Circular,:Circular,:Circular)
 
 """
 $(TYPEDEF)
@@ -49,14 +50,17 @@ $(TYPEDEF)
 Dynamic point in 2D space with velocity components: `x, y, dx/dt, dy/dt`
 
 """
-@defVariable DynPoint2 4 (:Euclid,:Euclid,:Euclid,:Euclid)
+@defVariable DynPoint2 Euclidean(4) # 4 (:Euclid,:Euclid,:Euclid,:Euclid)
 
 """
 $(TYPEDEF)
 
 Dynamic pose variable with velocity components: `x, y, theta, dx/dt, dy/dt`
+
+Note
+- The `SE2E2_Manifold` definition used currently is a hack to simplify the transition to Manifolds.jl, see #244 
 """
-@defVariable DynPose2 5 (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
+@defVariable DynPose2 SE2E2_Manifold # 5 (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
 
 
 
@@ -65,12 +69,16 @@ $SIGNATURES
 
 Function to project only XY data onto Cartesian plane for 2D plotting.
 """
-projectCartesian(pose::Union{Point2,Point3, Pose2, Pose3, DynPoint2, DynPose2}, 
+projectCartesian(pose::Union{<:Point2,<:Point3,<:Pose2,<:Pose3,<:DynPoint2,<:DynPose2}, 
                  x::Vector{Float64}) = [x[1]; x[2]; 0]
 
 #
 
 
+
+# Still experimental
+# export BearingRange2
+@defVariable BearingRange2 BearingRange_Manifold # 2 (:Circular, :Euclid)
 
 
 
