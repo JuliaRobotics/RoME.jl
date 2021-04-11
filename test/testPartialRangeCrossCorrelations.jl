@@ -1,4 +1,6 @@
 
+# see correct result with slanted (narrow) L1 modes at y=+-5.  L1 should not be round blobs
+# https://github.com/JuliaRobotics/RoME.jl/pull/434#issuecomment-817246038
 
 using RoME
 using Test
