@@ -45,7 +45,8 @@ addFactor!(fg, [:x0;], NorthSouthPartial(Normal(0,1.0)))
 global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
 
-predictbelief(fg, :x0, ls(fg, :x0))
+
+predictbelief(fg, :x0, :) #ls(fg, :x0))
 
 ##
 
