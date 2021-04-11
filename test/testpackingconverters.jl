@@ -1,9 +1,6 @@
 # test packing functions
 
 
-# using Distributions
-# using KernelDensityEstimate
-# using TransformUtils
 using RoME
 using Test
 using DistributedFactorGraphs
@@ -67,8 +64,7 @@ unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapp
 # unpackeddata
 
 @test DFG.compare(DFG.getSolverData(f1), unpackeddata)
-# TODO -- what what??
-# setSerializationNamespace!("Main" => Main)
+
 # TODO: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/44
 packedv1data = packVariableNodeData(fg, DFG.getSolverData(v1))
 upv1data = unpackVariableNodeData(fg, packedv1data)
@@ -216,22 +212,6 @@ global odoc = Pose3Pose3( MvNormal(veeEuler(odo),odoCov))
 global f3 = addFactor!(fg,[:x1;:x2],odoc, nullhypo=0.5)
 
 
-# @testset "test conversions of Pose3Pose3NH" begin
-#
-#     global dd = convert(PackedPose3Pose3, odoc)
-#     global upd = convert(RoME.Pose3Pose3, dd)
-#
-#     @test norm(odoc.Zij.μ - upd.Zij.μ) < 1e-8
-#     @test norm(odoc.Zij.Σ.mat - upd.Zij.Σ.mat) < 1e-8
-#     @test norm(odoc.nullhypothesis.p - upd.nullhypothesis.p) < 1e-8
-#
-#
-#     global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3NH}, DFG.getSolverData(f3))
-#     global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose3Pose3NH}}, packeddata)
-#
-#     # TODO -- fix ambibuity in compare function
-#     @test DFG.compare(DFG.getSolverData(f3), unpackeddata)
-# end
 
 ##
 
@@ -262,32 +242,6 @@ global unp = convert(PartialPose3XYYaw, pxyy)
 end
 
 ##
-
-# @testset "test conversions of PartialPose3XYYawNH" begin
-#
-#     global xyy = PartialPose3XYYawNH(MvNormal([1.0;2.0;0.5],0.1*Matrix{Float64}(LinearAlgebra.I, 3,3)), [0.6;0.4])
-#
-#     global pxyy = convert(PackedPartialPose3XYYawNH, xyy)
-#     global unp = convert(PartialPose3XYYawNH, pxyy)
-#
-#     @test RoME.compare(xyy, unp)
-# end
-
-#
-# @testset "test PriorPoint2DensityNH" begin
-#
-#     global prpt2 = PriorPoint2DensityNH(kde!(randn(2,100)),[0.25;0.75]  )
-#
-#     global pprpt2 = convert(PackedPriorPoint2DensityNH, prpt2)
-#     global uprpt2 = convert(PriorPoint2DensityNH, pprpt2)
-#
-#     @test norm(getPoints(prpt2.belief)-getPoints(uprpt2.belief)) < 1e-8
-#
-#     @test norm(prpt2.nullhypothesis.p-uprpt2.nullhypothesis.p) < 1e-8
-#
-# end
-#
-
 
 
 

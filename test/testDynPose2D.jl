@@ -171,76 +171,6 @@ getSolverParams(fg).useMsgLikelihoods = false
 smtasks = Task[]
 tree, smt, hist = solveTree!(fg, smtasks=smtasks); #, recordcliqs=ls(fg));
 
-##
-
-# hists = IIF.fetchCliqHistoryAll!(smtasks)
-
-# IIF.printCSMHistorySequential(hists)
-# IIF.printCSMHistorySequential(hists, 3=>1:50)
-# IIF.printCSMHistoryLogical(hists)
-
-# ##
-
-# getLogPath(fg)
-
-# using Caesar, Images, Graphs
-
-# tree = hists[1][1].csmc.tree
-
-# csmAnimateSideBySide(tree, hists, encode=true, nvenc=true, show=true)
-
-# ##
-
-# sfg = hists[3][8].csmc.cliqSubFg
-# drawGraph(sfg, show=true)
-# getSolverParams(hists[3][8].csmc.cliqSubFg).dbg = true
-# fnc_, csmc_ = IIF.repeatCSMStep!(hists, 3, 8);
-# # sfg_= csmc_.cliqSubFg
-
-# sfg = hists[3][9].csmc.cliqSubFg
-# drawGraph(sfg, show=true)
-
-# IIF.getMessageBuffer(hists[3][8].csmc.cliq).downRx.belief
-
-# getSolverParams(hists[3][9].csmc.cliqSubFg).dbg = true
-# IIF.repeatCSMStep!(hists, 3, 9);
-
-# ##
-
-# tree_ = hists[3][9].csmc.tree
-# drawTree(tree_, show=true)
-
-# ## whats up with down msgs
-
-# sfg9 = loadDFG(joinpath(getLogPath(fg), "logs/cliq3", "fg_beforedownsolve.tar.gz"))
-# drawGraph(sfg9, show=true)
-
-# ls(sfg9, :x0)
-
-# getFactor(sfg9, :x0f2)
-
-# ##
-
-# sfg = hists[7][6].csmc.cliqSubFg
-# drawGraph(sfg, show=true)
-# IIF.repeatCSMStep!(hists, 7, 6)
-
-
-# getSolverParams(hists[4][4].csmc.cliqSubFg).dbg = true
-# IIF.repeatCSMStep!(hists, 4, 4);
-
-# IIF.getMessageBuffer(hists[4][4].csmc.cliq).upRx[7].belief
-# IIF.getMessageBuffer(hists[4][4].csmc.cliq).upRx[7]
-# IIF.getMessageBuffer(hists[4][4].csmc.cliq).upRx[7].jointmsg.priors
-
-
-# IIF.repeatCSMStep!(hists, 4, 5)
-
-
-##
-
-# tree = buildTreeReset!(fg);
-# drawTree(tree, show=true);
 
 ##
 
@@ -314,6 +244,8 @@ end
 
 @testset "test many DynPose2 sideways velocity..." begin
 
+##
+
 global N = 100
 global fg = initfg()
 
@@ -359,61 +291,9 @@ global x1 = KDE.getKDEMean(getKDE(getVariable(fg, :x1)))
 @test abs(x1[4]) < 0.4
 @test -1.5 < x1[5] < -0.5
 
+##
 
 end
-
-
-
-
-## debugging 458============================
-
-# using RoMEPlotting, Gadfly
-# Gadfly.set_default_plot_size(35cm,25cm)
-# plotPose(fg, :x10)
-#
-# drawGraph(fg2, show=true)
-# drawTree(tree, show=true, imgs=true)
-#
-#
-# sfg = buildCliqSubgraph(fg, tree, :x9)
-# sfg = buildCliqSubgraph(fg, tree, :x10)
-# drawGraph(sfg)
-#
-# # fg = deepcopy(fg2)
-#
-# getSolverParams(fg).dbg = true
-# getSolverParams(fg).showtree = true
-# getSolverParams(fg).drawtree = true
-# getSolverParams(fg).multiproc = false
-#
-# ##============================================================================
-#
-# getLogPath(fg)
-# tree, mst, hist = solveTree!(fg, recordcliqs=ls(fg))
-#
-#
-#
-# printCliqHistorySummary(tree,:x10)
-#
-# getClique(tree, :x10)
-#
-# csmc1 = hist[1][6][4]
-# csfg = csmc1.cliqSubFg
-# drawGraph(csfg)
-#
-# stuff = sandboxCliqResolveStep(tree, :x10, 6)
-#
-#
-# getKDE(hist[1][6][4].cliqSubFg, :x10) |> getPoints
-# getKDE(hist[1][7][4].cliqSubFg, :x10) |> getPoints
-# getKDE(stuff[4].cliqSubFg, :x10) |> getPoints
-#
-# getKDE(fg, :x10) |> getPoints
-#
-# tree = wipeBuildNewTree!(fg)
-#
-# getData(getClique(tree, :x9 ))
-# getData(getClique(tree, :x10))
 
 
 
