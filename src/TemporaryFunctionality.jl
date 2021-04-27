@@ -1,25 +1,19 @@
 
-import IncrementalInference: selectFactorType, getDomain
+import IncrementalInference: selectFactorType
+# import ApproxManifoldProducts: getManifold
 
-export getDomain
 
 
 ## ============================================================================
 # Starting integration with Manifolds.jl, via ApproxManifoldProducts.jl first
 ## ============================================================================
 
-getDomain(::InstanceType{Point2Point2}) = Point2
-getDomain(::InstanceType{Pose2Point2}) = Point2
-getDomain(::InstanceType{Pose2Pose2}) = Pose2
-# getDomain(::InstanceType{Pose3Point3}) = Point3
-getDomain(::InstanceType{Pose3Pose3}) = Pose3
-getDomain(::InstanceType{Pose2Point2BearingRange}) = BearingRange2
-
-# defines on which variable manifold the measurements for a factor type are represented
-getManifolds(fctType::InstanceType{Pose2Pose2}) = getManifolds(getDomain(fctType))
-getManifolds(fctType::InstanceType{Pose2Point2}) = getManifolds(getDomain(fctType))
-getManifolds(fctType::InstanceType{Point2Point2}) = getManifolds(getDomain(fctType))
-getManifolds(fctType::InstanceType{Pose2Point2BearingRange}) = getManifolds(getDomain(fctType))
+getManifold(::InstanceType{Point2Point2}) = Point2
+getManifold(::InstanceType{Pose2Point2}) = Point2
+getManifold(::InstanceType{Pose2Pose2}) = Pose2
+# getManifold(::InstanceType{Pose3Point3}) = Point3
+getManifold(::InstanceType{Pose3Pose3}) = Pose3
+getManifold(::InstanceType{Pose2Point2BearingRange}) = BearingRange2
 
 
 

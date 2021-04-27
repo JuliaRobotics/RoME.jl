@@ -31,7 +31,7 @@ ensureAllInitialized!(fg)
 
 IIF.initParametricFrom!(fg)
 
-vardict, result, varIds, Σ = IIF.solveFactorGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
+vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
 
 #TODO test +-pi used pi+1e-5
 @test isapprox(vardict[:x0].val, [10, 10, -pi], atol = 1e-3)
@@ -98,8 +98,8 @@ end
 
 # IIF.initParametricFrom!(fg)
 
-# vardict, result, varIds, Σ = IIF.solveFactorGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
-# # vardict, result, varIds, Σ = IIF.solveFactorGraphParametric(fg, useCalcFactor=true, autodiff=:finite)
+# vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
+# # vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, useCalcFactor=true, autodiff=:finite)
 
 # IIF.updateParametricSolution(fg, vardict)
 
@@ -125,7 +125,7 @@ ensureAllInitialized!(fg)
 
 IIF.initParametricFrom!(fg)
 
-vardict, result, varIds, Σ = IIF.solveFactorGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
+vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
 
 @test isapprox(vardict[:x1].val, [0, 0, 0], atol = 1e-3)
 @test isapprox(vardict[:l1].val, [1,  1], atol = 1e-3)
@@ -154,7 +154,7 @@ ensureAllInitialized!(fg)
 
 IIF.initParametricFrom!(fg)
 
-vardict, result, varIds, Σ = IIF.solveFactorGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
+vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
 
 @test isapprox(vardict[:x1].val, [2, 0, pi/2], atol = 1e-3)
 @test isapprox(vardict[:l1].val, [1,  1], atol = 1e-3)
@@ -184,7 +184,7 @@ addFactor!(fg, [:x0;:x1], dp2dp2)
 
 ensureAllInitialized!(fg)
 
-vardict, result, varIds, Σ = IIF.solveFactorGraphParametric!(fg)
+vardict, result, varIds, Σ = IIF.solveGraphParametric!(fg)
 
 @test isapprox(vardict[:x0].val, [0, 0, 0, 10, 0], atol = 1e-3)
 @test isapprox(vardict[:x1].val, [10, 0, 0, 10, 0], atol = 1e-3)
@@ -214,7 +214,7 @@ addFactor!(fg, [:x1; :l3], Point2Point2Range(Normal(1.0, 0.1)))
 solveTree!(fg)
 IIF.initParametricFrom!(fg)
 
-vardict, result, varIds, Σ = IIF.solveFactorGraphParametric(fg)
+vardict, result, varIds, Σ = IIF.solveGraphParametric(fg)
 
 @test isapprox(vardict[:x1].val, [1, 1], atol = 1e-3)
 
