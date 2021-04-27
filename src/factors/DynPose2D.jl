@@ -146,8 +146,8 @@ mutable struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeRoo
 end
 DynPose2DynPose2(z1::T=MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))) where {T <: IIF.SamplableBelief} = DynPose2DynPose2{T}(z1)
 
-getManifolds(::Type{DynPose2DynPose2}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
-getManifolds(::DynPose2DynPose2) = getManifolds(DynPose2DynPose2)
+# getManifolds(::Type{DynPose2DynPose2}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
+# getManifolds(::DynPose2DynPose2) = getManifolds(DynPose2DynPose2)
 
 
 getSample(cf::CalcFactor{<:DynPose2DynPose2}, N::Int=1) = (rand(cf.factor.Z, N), )

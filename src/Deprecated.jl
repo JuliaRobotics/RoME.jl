@@ -6,19 +6,26 @@
 ##==============================================================================
 
 
+# getManifolds(fctType::InstanceType{Pose2Pose2}) = getManifolds(getDomain(fctType))
+# getManifolds(fctType::InstanceType{Pose2Point2}) = getManifolds(getDomain(fctType))
+# getManifolds(fctType::InstanceType{Point2Point2}) = getManifolds(getDomain(fctType))
+# getManifolds(fctType::InstanceType{Pose2Point2BearingRange}) = getManifolds(getDomain(fctType))
+
+
 ## New Manifold types.  Integration phase towards RoME #244 and AMP #32 / #41
 
 # FIXME, much consolidation required here, see RoME #244
 import IncrementalInference: getManifolds
 
 # TODO consolidate Manifolds typing and objects
-getManifolds(::InstanceType{typeof(AMP.SE2_Manifold)}) = (:Euclid, :Euclid, :Circular)
-getManifolds(::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid, :Euclid, :Circular, :Euclid, :Euclid)
-getManifolds(::InstanceType{typeof(AMP.SE3_Manifold)}) = (:Euclid, :Euclid, :Euclid, :Circular, :Circular, :Circular)
+# getManifolds(::InstanceType{typeof(AMP.SE2_Manifold)}) = (:Euclid, :Euclid, :Circular)
+# getManifolds(::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid, :Euclid, :Circular, :Euclid, :Euclid)
+# getManifolds(::InstanceType{typeof(AMP.SE3_Manifold)}) = (:Euclid, :Euclid, :Euclid, :Circular, :Circular, :Circular)
 
 # legacy support, will be deprecated
-Base.convert(::Type{<:Tuple}, mani::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
-Base.convert(::Type{<:Tuple}, mani::InstanceType{typeof(BearingRange_Manifold)}) = (:Circular,:Euclid)
+Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(AMP.SE2_Manifold)}) = (:Euclid, :Euclid, :Circular)
+Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
+Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(BearingRange_Manifold)}) = (:Circular,:Euclid)
 
 # Variables dont need to re-overload these functions from @defVariable (factors dont have easy macro yet)
 # Base.convert(::Type{<:ManifoldsBase.Manifold}, ::InstanceType{Point2}) = AMP.Euclid2

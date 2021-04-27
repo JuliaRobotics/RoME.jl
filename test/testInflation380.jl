@@ -191,7 +191,7 @@ addFactor!(fg, [:x2; :l2], p2br)
 # nonparametric solution
 solveGraph!(fg);
 # parametric solution
-IIF.solveFactorGraphParametric!(fg)
+IIF.solveGraphParametric!(fg)
 
 
 ##
@@ -216,7 +216,7 @@ test_err[1:2] = getPPE(fg, :x2, :default).suggested[1:2] - getPPE(fg, :x2, :para
 
 @test isapprox(test_err[1], 0, atol=0.5)
 @test isapprox(test_err[2], 0, atol=0.5)
-@test isapprox(test_err[3], 0, atol=0.5)
+@test isapprox(test_err[3], 0, atol=0.6)
 
 
 ##
