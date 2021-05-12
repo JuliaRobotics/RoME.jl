@@ -150,135 +150,22 @@ function generateCanonicalFG_Hexagonal(;fg::AbstractDFG=initfg(),
 end
 
 
-"""
-    $SIGNATURES
 
-If you know a variable is `::Type{<:Pose2}` but want to find its default prior `::Type{<:PriorPose2}`.
-
-Assumptions
-- The prior type will be defined in the same module as the variable type.
-- Not exported per default, but can be used with knowledge of the caveats.
-
-Example
-```julia
-using RoME
-@assert RoME.PriorPose2 == DFG._getPriorType(Pose2)
-```
-
-DevNotes
-- TODO move to DFG instead
-"""
-_getPriorType(_type::InferenceVariable) = getfield(_type.name.module, Symbol(:Prior, _type.name.name))
-
-
-"""
-    $SIGNATURES
-
-Check if a variable might already be located at the test location, by means of a (default) `refKey=:simulated` PPE stored in the existing variables.
-
-Notes
-- Checks, using provided `factor` from `srcLabel` in `fg` to an assumed `dest` variable whcih may or may not yet exist.
-- This function was written to aid in building simulation code, 
-  - it's use in real world usage may have unexpected behaviour -- hence not exported.
-- Return `::Tuple{Bool, Vector{Float64}, Symbol}`, eg. already exists `(true, [refVal], :l17)`, or if a refernce variable does not yet `(false, [refVal], :l28)`.
-  - Vector contains the PPE reference location of the new variable as calculated.
-- Auto `destPrefix` is trying to parse `destRegex` labels like `l\\d+` or `tag\\d+`, won't work with weirder labels e.g. `:l_4_23`.
-  - User can overcome weird names by self defining `destPrefix` and `srcNumber`.
-  - User can also ignore and replace the generated new label `Symbol(destPrefix, srcNumber)`.
-- This function does not add new variables or factors to `fg`, user must do that themselves after.
-  - Useful to use in combination with `setPPE!` on new variable.
-- At time of writing `accumulateFactorMeans` could only incorporate priors or binary relative factors.
-  - internal info, see [`solveBinaryFactorParameteric`](@ref),
-  - This means at time of writing `factor` must be a binary factor.
-- Tip, if simulations are inducing odometry bias, think of using two factors from caller (e.g. simPerfect and simBias).
-
-Example
-```julia
-# fg has :x5 and :l2 and PPEs :simulated exists in all variables
-# user wants to add a factor from :x5 to potential new :l5, but maybe a (simulated) variable, say :l2, is already there.
-
-newFactor = RoME.Pose2Point2BearingRange(Normal(), Normal(20,0.5))
-isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, :x5, r"l\\d+", Point2, newFactor)
-
-# maybe add new variable
-if !isAlready
-  @info "New variable with simPPE" genLabel simPPE 
-  newVar = addVariable!(fg, genLabel, Point2)
-  addFactor!(fg, [:x5; genLabel], newFactor)
-
-  # also set :simulated PPE for similar future usage
-  newPPE = DFG.MeanMaxPPE(:simulated, simPPE, simPPE, simPPE)
-  setPPE!(newVar, :simulated, typeof(newPPE), newPPE)   # TODO this API can be improved
-else
-  @info "Adding simulated loop closure with perfect data association" :x5 genLabel
-  addFactor!(fg, [:x5; genLabel], newFactor)
-end
-
-# the point is that only the (0,20) values in newFactor are needed, all calculations are abstracted away.
-```
-
-
-Related
-
-[`RoME.generateCanonicalFG_Beehive!`](@ref), [`accumulateFactorMeans`](@ref), [`getPPE`](@ref)
-"""
-function _checkVariableByReference( fg::AbstractDFG,
-                                    srcLabel::Symbol,            # = :x5
-                                    destRegex::Regex,            # = r"l\d+"
-                                    destType::InferenceVariable, # = Point2
-                                    factor::AbstractRelative;    # = Pose2Poin2BearingRange(...)
-                                    srcType::InferenceVariable = getVariableType(fg, srcLabel) |> typeof,
-                                    refKey::Symbol=:simulated,
-                                    prior = _getPriorType(srcType)( MvNormal(getPPE(fg[srcLabel], refKey).suggested, diagm(ones(getDimension(srcType)))) ),
-                                    atol::Real = 1e-3,
-                                    destPrefix::Symbol = match(r"[a-zA-Z]+", destRegex.pattern) |> Symbol,
-                                    srcNumber = match(r"\d+", string(srcLabel)).match |> x->parse(Int,x)  )
-  #
-  
-  # calculate and add the reference value
-  lPp = 
-  tfg = initfg()
-  addVariable!(tfg, :x0, srcType )
-  addFactor!(tfg, [:x0], prior )
-  addVariable!(tfg, :l0, destType )
-  addFactor!( tfg, [:x0; :l0], factor, graphinit=false )
-  
-  # calculate where the landmark reference position is
-  refVal = accumulateFactorMeans(tfg, [:x0f1; :x0l0f1])
-  ppe = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
-  # setPPE!(v_n, refKey, DFG.MeanMaxPPE, ppe)
-
-  # now check if we already have a landmark at this location
-  varLms = ls(fg, destRegex)
-  ppeLms = getPPE.(getVariable.(fg, varLms), refKey) .|> x->x.suggested
-  errmask = ppeLms .|> x -> norm(x - ppe) < atol
-  already = any(errmask)
-
-  alrLm = varLms[findfirst(errmask)]
-  @assert sum(errmask) == 1 "Besides $alrLm, there should be only one landmark at $ppe"
-  if already
-    # does exist, ppe, variableLabel
-    return true, ppe, alrLm
-  end
-  
-  # Nope does not exist, ppe, generated new variable label only
-  return false, ppe, Symbol(destPrefix, srcNumber)
-end
 
 function _addLandmarkBeehive!(fg, lastPose::Symbol)
   #
   newFactor = RoME.Pose2Point2BearingRange(Normal(0,0.03), Normal(20,0.5))
-  isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, :x5, r"l\\d+", Point2, newFactor)
+  isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, lastPose, r"l\\d+", Point2, newFactor)
 
   # maybe add new variable
   if !isAlready
     @info "New variable with simPPE" genLabel simPPE 
     newVar = addVariable!(fg, genLabel, Point2)
     addFactor!(fg, [lastPose; genLabel], newFactor)
-
+    
     # also set :simulated PPE for similar future usage
-    newPPE = DFG.MeanMaxPPE(:simulated, simPPE, simPPE, simPPE)
-    setPPE!(newVar, :simulated, typeof(newPPE), newPPE)   # TODO this API can be improved
+    # newPPE = DFG.MeanMaxPPE(:simulated, simPPE, simPPE, simPPE)
+    setPPE!(newVar, :simulated, typeof(simPPE), simPPE)   # TODO this API can be improved
   else
     @info "Adding simulated loop closure with perfect data association" lastPose genLabel
     addFactor!(fg, [lastPose; genLabel], newFactor)
@@ -288,32 +175,46 @@ function _addLandmarkBeehive!(fg, lastPose::Symbol)
   return genLabel
 end
 
+function _addPoseBeehive!(fg, 
+                          prevLabel::Symbol,
+                          posecount::Int,
+                          factor::AbstractRelative;
+                          refKey::Symbol=:simulated,
+                          graphinit::Bool=false  )
+  #
+  # calculate and add the reference value
+  isAlready, simPPE, = IIF._checkVariableByReference(fg, prevLabel, r"x\\d+", Pose2, factor, refKey=refKey)
+  
+  @show genLabel = Symbol("x", posecount)
+  # add new pose variable
+  v_n = addVariable!(fg, genLabel, Pose2 )
+  addFactor!(fg, [prevLabel; genLabel], factor, graphinit=graphinit )
+
+  # store simulated PPE for future use
+  # ppe = DFG.MeanMaxPPE(refKey, simPPE, simPPE, simPPE)
+  setPPE!(v_n, refKey, typeof(simPPE), simPPE)
+
+  return genLabel
+end
+
 
 function _driveHex!(fgl::AbstractDFG,
                     posecount::Int;
                     graphinit::Bool=false,
                     gaugePrior::Symbol=:x0f1,
-                    refKey::Symbol=:simulated )
+                    refKey::Symbol=:simulated,
+                    addLandmarks::Bool=true )
   #
 
   # Drive around in a hexagon
   for i in (posecount):(posecount+5)
     psym = Symbol("x$i")
-    posecount += 1
-    nsym = Symbol("x$(i+1)")
-    v_n = addVariable!(fgl, nsym, Pose2)
+    # nsym = Symbol("x$(i+1)")
     pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-    addFactor!(fgl, [psym;nsym], pp, graphinit=graphinit )
-
-    # add a new landmark
-    _addLandmarkBeehive!(fgl, nsym)
-
-    # # calculate and add the reference value
-    # pth = findShortestPathDijkstra(fgl, gaugePrior, nsym, regexVariables=r"x\d+")
-    # pth = pth[isFactor.(fgl, pth)]
-    # refVal = accumulateFactorMeans(fgl, pth)
-    # ppe = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
-    # setPPE!(v_n, refKey, DFG.MeanMaxPPE, ppe)
+    posecount += 1
+    nsym = _addPoseBeehive!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit)
+    # add a new landmark (if not yet present)
+    !addLandmarks ? nothing : _addLandmarkBeehive!(fgl, nsym)
   end
 
   return posecount
@@ -324,26 +225,25 @@ function _offsetHexLeg( fgl::AbstractDFG,
                         direction::Symbol=:right,
                         graphinit::Bool=false,
                         psym = Symbol("x$(posecount)"),
-                        nsym = Symbol("x$(posecount+1)"),
+                        # nsym = Symbol("x$(posecount+1)"),
                         refKey::Symbol=:simulated,
-                        guagePrior::Symbol=:x0f1   )
+                        guagePrior::Symbol=:x0f1,
+                        addLandmarks::Bool=true   )
   #
-  posecount += 1
-  v_n = addVariable!(fgl, nsym, Pose2 )
-  pp = nothing
-  if direction == :right
-      pp = Pose2Pose2(MvNormal([10.0;0;-pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+  dirsign = if direction == :right
+    -1
   elseif direction == :left
-      pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+    +1
+  else
+    error("unknown direction symbol $direction")
   end
-  addFactor!(fgl, [psym; nsym], pp, graphinit=graphinit )
+  pp = Pose2Pose2(MvNormal([10.0;0;dirsign*pi/3], diagm([0.1;0.1;0.1].^2)))
+  
+  posecount += 1
+  nsym = _addPoseBeehive!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit)
 
-  # calculate and add the reference value
-  pth = findShortestPathDijkstra(fgl, gaugePrior, nsym, regexVariables=r"x\d+")
-  pth = pth[isFactor.(fgl, pth)]
-  refVal = accumulateFactorMeans(fgl, pth)
-  ppe = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
-  setPPE!(v_n, refKey, DFG.MeanMaxPPE, ppe)
+  # add a new landmark (if not yet present)
+  !addLandmarks ? nothing : _addLandmarkBeehive!(fgl, nsym)
 
   return posecount
 end
@@ -353,7 +253,8 @@ function generateCanonicalFG_Beehive!(cells::Int=2;
                                       fg::AbstractDFG = initfg(),
                                       direction::Symbol = :right,
                                       graphinit::Bool = false,
-                                      refKey::Symbol=:simulated    )
+                                      refKey::Symbol=:simulated,
+                                      addLandmarks::Bool=true    )
   #
   
   # does anything exist in the graph yet
@@ -364,27 +265,23 @@ function generateCanonicalFG_Beehive!(cells::Int=2;
     match(r"\d+", string(lastPose)).match |> x->parse(Int,x)
   else
     # initial zero pose
-    generateCanonicalFG_ZeroPose2(fg=fg, graphinit=graphinit)
-    
-    # Add landmarks with Bearing range measurements
-    addVariable!(fg, :l0, Point2, tags=[:LANDMARK;])
-    p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-    addFactor!(fg, [:x0; :l0], p2br, graphinit=false )
-    
-    # reference ppe on :x0 and :l0
+    generateCanonicalFG_ZeroPose2(fg=fg, graphinit=graphinit) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+
+    # reference ppe on :x0
     refVal = zeros(3)
     ppe = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
     setPPE!(fg[:x0], refKey, DFG.MeanMaxPPE, ppe)
-    refVal = accumulateFactorMeans(fgl, [:x0f1; :x0l0f1])
-    ppe = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
-    setPPE!(fg[:l0], refKey, DFG.MeanMaxPPE, ppe)
+    
+    # add a new landmark (if not yet present)
+    !addLandmarks ? nothing : _addLandmarkBeehive!(fg, :x0)
+
     # staring posecount (i.e. :x0)
     0
   end
   
   posecount = _driveHex!(fg, posecount)
   # drive the offset leg
-  posecount = _offsetHexLeg(fg, posecount, direction=direction, graphinit=graphinit)
+  # posecount = _offsetHexLeg(fg, posecount, direction=direction, graphinit=graphinit)
   # drive the next hex
   
   return fg

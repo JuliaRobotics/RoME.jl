@@ -22,8 +22,11 @@ using
   TensorCast,
   ManifoldsBase
 
+using StaticArrays
+
 # to avoid name conflicts
-import Manifolds: SpecialEuclidean, ProductRepr
+import Manifolds
+import Manifolds: SpecialEuclidean, ProductRepr, SpecialOrthogonal
 
 # using Graphs,  # TODO determine how many parts still require Graphs still directly
 
