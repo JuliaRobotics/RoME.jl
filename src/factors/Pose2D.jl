@@ -19,7 +19,7 @@ struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRoots
 
   # convenience and default constructor
   Pose2Pose2( z::T=MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])) ) where {T <: IIF.SamplableBelief} = new{T}(z)
-
+end
   # Towards using Manifolds.jl -- this will be easier if IIF just used vector or points, rather than current VND.val::Matrix
   # basis::DefaultOrthogonalBasis{ℝ}
   # shape::S
@@ -37,7 +37,8 @@ struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRoots
   #                                                                         shape,
   #                                                                         R0,
   #                                                                         p0  )
-end
+# end
+
 Pose2Pose2(::UniformScaling) = Pose2Pose2() # MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])) )
 
 
@@ -48,62 +49,62 @@ function (cf::CalcFactor{<:Pose2Pose2})(meas,
                                         wxj  )
   #
 
-  # G = getManifold(cf.factor)
-  # p0 = cf.factor.p0
-  # R0 = cf.factor.R0
-  # M_R = base_manifold(G)[2]
-    # R0 = [1.0 0; 0 1] # cf.factor.R0
-    # _t0, _w0 = [0.0; 0],  hat(M_R, R0, 0)
-    # p0 = ProductRepr(zeros(2), Matrix{Float64}(I,2,2))
-
     #
     wTjhat = SE2(wxi)*SE2(meas)
     jTjhat = SE2(wxj) \ wTjhat
     return se2vee(jTjhat)
-
-
+end
+  
+    # G = getManifold(cf.factor)
+    # p0 = cf.factor.p0
+    # R0 = cf.factor.R0
+    # M_R = base_manifold(G)[2]
+      # R0 = [1.0 0; 0 1] # cf.factor.R0
+      # _t0, _w0 = [0.0; 0],  hat(M_R, R0, 0)
+      # p0 = ProductRepr(zeros(2), Matrix{Float64}(I,2,2))
+  
+  
+      # jPjhat = Manifolds.ProductRepr(jTjhat[1:2,3], jTjhat[1:2,1:2])
+      # return get_coordinates(G, p0, log(G, p0, jPjhat), cf.factor.basis)
+  
+      # wPihat = Manifolds.prod_point(cf.factor.shape, (wxi[1:2], exp(M_R, R0, hat(M_R, R0, wxi[3])))... )
+      # iPj    = Manifolds.prod_point(cf.factor.shape, (meas[1:2], exp(M_R, R0, hat(M_R, R0, meas[3])))... )
+      # wPjhat = Manifolds.prod_point(cf.factor.shape, (wxj[1:2], exp(M_R, R0, hat(M_R, R0, wxj[3])))... )
+  
+    # wWi = get_vector(M_R, R0, wxi[3], cf.factor.basis)
+    # wXi = Manifolds.ProductRepr(wxi[1:2], wWi)
+  
+    # iWj = get_vector(M_R, R0, meas[3], cf.factor.basis)
+    # iXj = Manifolds.ProductRepr(meas[1:2], iWj)
+  
+    # wWj = get_vector(M_R, R0, wxj[3], cf.factor.basis)
+    # wXj = Manifolds.ProductRepr(wxj[1:2], wWi)
+  
+    # wPihat = Manifolds.exp(G, p0, wXi)
+    # iPj    = Manifolds.exp(G, p0, iXj)
+    # wPjhat = Manifolds.exp(G, p0, wXj)
+  
+      # @show wPjpred = compose(G, wPihat, iPj)
+      # @show Manifolds.affine_matrix(G, wPjpred)
+  
+      # @show jhatPw = Manifolds.inv(G, wPjhat)
+      # @show jPjhat = compose(G, jhatPw, wPjpred)
+      # @show Manifolds.affine_matrix(G, jPjhat)
+  
+  
+    # wTi = Manifolds.affine_matrix(G, wPihat)
+    # iTj = Manifolds.affine_matrix(G, iPj)
+    # wTj = Manifolds.affine_matrix(G, wPjhat)
+  
+    # # #
+    # @show jTjhat = (wTi*iTj)\wTj
     # jPjhat = Manifolds.ProductRepr(jTjhat[1:2,3], jTjhat[1:2,1:2])
     # return get_coordinates(G, p0, log(G, p0, jPjhat), cf.factor.basis)
-
-    # wPihat = Manifolds.prod_point(cf.factor.shape, (wxi[1:2], exp(M_R, R0, hat(M_R, R0, wxi[3])))... )
-    # iPj    = Manifolds.prod_point(cf.factor.shape, (meas[1:2], exp(M_R, R0, hat(M_R, R0, meas[3])))... )
-    # wPjhat = Manifolds.prod_point(cf.factor.shape, (wxj[1:2], exp(M_R, R0, hat(M_R, R0, wxj[3])))... )
-
-  # wWi = get_vector(M_R, R0, wxi[3], cf.factor.basis)
-  # wXi = Manifolds.ProductRepr(wxi[1:2], wWi)
-
-  # iWj = get_vector(M_R, R0, meas[3], cf.factor.basis)
-  # iXj = Manifolds.ProductRepr(meas[1:2], iWj)
-
-  # wWj = get_vector(M_R, R0, wxj[3], cf.factor.basis)
-  # wXj = Manifolds.ProductRepr(wxj[1:2], wWi)
-
-  # wPihat = Manifolds.exp(G, p0, wXi)
-  # iPj    = Manifolds.exp(G, p0, iXj)
-  # wPjhat = Manifolds.exp(G, p0, wXj)
-
-    # @show wPjpred = compose(G, wPihat, iPj)
-    # @show Manifolds.affine_matrix(G, wPjpred)
-
-    # @show jhatPw = Manifolds.inv(G, wPjhat)
-    # @show jPjhat = compose(G, jhatPw, wPjpred)
-    # @show Manifolds.affine_matrix(G, jPjhat)
-
-
-  # wTi = Manifolds.affine_matrix(G, wPihat)
-  # iTj = Manifolds.affine_matrix(G, iPj)
-  # wTj = Manifolds.affine_matrix(G, wPjhat)
-
-  # # #
-  # @show jTjhat = (wTi*iTj)\wTj
-  # jPjhat = Manifolds.ProductRepr(jTjhat[1:2,3], jTjhat[1:2,1:2])
-  # return get_coordinates(G, p0, log(G, p0, jPjhat), cf.factor.basis)
- 
-    # error("now this")
-
-    # @show jXj = log(G, p0, jPjhat)
-    # return get_coordinates(G, p0, log(G, p0, jPjhat), cf.factor.basis)
-end
+    
+      # error("now this")
+  
+      # @show jXj = log(G, p0, jPjhat)
+      # return get_coordinates(G, p0, log(G, p0, jPjhat), cf.factor.basis)
 
 
 # NOTE, serialization support -- will be reduced to macro in future
