@@ -30,6 +30,7 @@ import Manifolds: SpecialEuclidean, ProductRepr
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
+import IncrementalInference: MB
 import IncrementalInference: convert, getSample, reshapeVec2Mat, DFG, getManifolds
 # not sure why this is gives import error
 import DistributedFactorGraphs: compare

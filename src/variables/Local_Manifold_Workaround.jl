@@ -1,6 +1,6 @@
 ## ==================================================================================================
 ## Hack to be removed or updated
-## FIXME ME ON FIRE use the ManifoldsBase.jl prescribed interface method instead:
+## FIXME ME ON FIRE use the MB.jl prescribed interface method instead:
 ##   https://juliamanifolds.github.io/Manifolds.jl/stable/examples/manifold.html#manifold-tutorial
 ## ==================================================================================================
 
@@ -11,11 +11,11 @@ export SE2E2_Manifold
 
 
 # this is a hack and not fully implemented as per: 
-struct _SE2E2 <: ManifoldsBase.Manifold{ManifoldsBase.ℝ} end
+struct _SE2E2 <: MB.AbstractManifold{MB.ℝ} end
 
 const SE2E2_Manifold = _SE2E2()
 
-ManifoldsBase.manifold_dimension(::_SE2E2) = 5
+MB.manifold_dimension(::_SE2E2) = 5
 
 AMP.coords(::Type{<:typeof(SE2E2_Manifold)}, p::ProductRepr) = [p.parts[1][1], p.parts[1][2], atan(p.parts[2][2,1],p.parts[2][1,1]), p.parts[3][1], p.parts[3][2]]
 
@@ -49,9 +49,9 @@ AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(SE2E2_Manifold
 export BearingRange_Manifold
 
 
-struct _CircleEuclid <: ManifoldsBase.Manifold{ManifoldsBase.ℝ} end
+struct _CircleEuclid <: MB.AbstractManifold{MB.ℝ} end
 
-ManifoldsBase.manifold_dimension(::_CircleEuclid) = 2
+MB.manifold_dimension(::_CircleEuclid) = 2
 
 const BearingRange_Manifold = _CircleEuclid()
 
