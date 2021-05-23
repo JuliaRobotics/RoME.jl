@@ -1,5 +1,27 @@
 
 
+##==============================================================================
+## Remove before RoME v0.17
+##==============================================================================
+
+# getFactorMean(fct::PriorPose2) = getFactorMean(fct.Z)
+# getFactorMean(fct::Pose2Pose2) = getFactorMean(fct.z)
+# getFactorMean(fct::MutablePose2Pose2Gaussian) = getFactorMean(fct.Zij)
+
+# function driveHex(fgl, posecount::Int; steps::Int=5)
+#   # Drive around in a hexagon
+#   for i in (posecount-1):(posecount-1+steps)
+#       psym = Symbol("x$i")
+#       posecount += 1
+#       nsym = Symbol("x$(i+1)")
+#       addVariable!(fgl, nsym, Pose2)
+#       pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+#       addFactor!(fgl, [psym;nsym], pp, graphinit=false )
+#   end
+
+#   return posecount
+# end
+
 
 ##==============================================================================
 ## Remove as part of Manifolds.jl consolidation, #244

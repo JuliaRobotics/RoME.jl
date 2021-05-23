@@ -12,52 +12,58 @@ addprocs(4)
 
 using Dates
 using RoME
+
+import RoME: _driveHex!, _offsetHexLeg
+
 @everywhere using RoME
 
 #  Do some plotting
 using RoMEPlotting
 Gadfly.set_default_plot_size(35cm,25cm)
 
+##
 
-function driveHex(fgl::G,
-                  posecount::Int;
-                  graphinit::Bool=false ) where G <: AbstractDFG
-    #
-    # Drive around in a hexagon
-    for i in (posecount-1):(posecount-1+5)
-        psym = Symbol("x$i")
-        posecount += 1
-        nsym = Symbol("x$(i+1)")
-        addVariable!(fgl, nsym, Pose2)
-        pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-        addFactor!(fgl, [psym;nsym], pp, graphinit=graphinit )
-    end
+# function _driveHex!(fgl::AbstractDFG,
+#                   posecount::Int;
+#                   graphinit::Bool=false )
+#     #
 
-    return posecount
-end
+#     # Drive around in a hexagon
+#     for i in (posecount):(posecount+5)
+#         psym = Symbol("x$i")
+#         posecount += 1
+#         nsym = Symbol("x$(i+1)")
+#         addVariable!(fgl, nsym, Pose2)
+#         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+#         addFactor!(fgl, [psym;nsym], pp, graphinit=graphinit )
+#     end
+
+#     return posecount+6
+# end
 
 
-function offsetHexLeg(fgl::G,
-                      posecount::Int; direction=:right,
-                      graphinit::Bool=false ) where G <: AbstractDFG
-    #
-    psym = Symbol("x$(posecount-1)")
-    nsym = Symbol("x$(posecount)")
-    posecount += 1
-    addVariable!(fgl, nsym, Pose2)
-    pp = nothing
-    if direction == :right
-        pp = Pose2Pose2(MvNormal([10.0;0;-pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-    elseif direction == :left
-        pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-    end
-    addFactor!(fgl, [psym; nsym], pp, graphinit=graphinit )
-    return posecount
-end
+# function _offsetHexLeg(fgl::G,
+#                       posecount::Int; direction=:right,
+#                       graphinit::Bool=false ) where G <: AbstractDFG
+#     #
+#     psym = Symbol("x$(posecount-1)")
+#     nsym = Symbol("x$(posecount)")
+#     posecount += 1
+#     addVariable!(fgl, nsym, Pose2)
+#     pp = nothing
+#     if direction == :right
+#         pp = Pose2Pose2(MvNormal([10.0;0;-pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+#     elseif direction == :left
+#         pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+#     end
+#     addFactor!(fgl, [psym; nsym], pp, graphinit=graphinit )
+#     return posecount
+# end
 
 
 
 ## start with an empty factor graph object
+
 fg = initfg()
 getSolverParams(fg).isfixedlag = true
 getSolverParams(fg).qfl = 20
@@ -65,7 +71,7 @@ posecount = 0
 
 # Add the first pose :x0
 addVariable!(fg, :x0, Pose2)
-posecount += 1
+# posecount += 1
 
 
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
@@ -73,20 +79,26 @@ addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0],
                                            Matrix(Diagonal([0.1;0.1;0.05].^2))) ), graphinit=false )
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
+addVariable!(fg, :l0, Point2, tags=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x0; :l1], p2br, graphinit=false )
+addFactor!(fg, [:x0; :l0], p2br, graphinit=false )
 
 
 
 
 ## hex 1
 
-posecount = driveHex(fg, posecount)
+posecount = _driveHex!(fg, posecount)
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
+addFactor!(fg, [Symbol("x$(posecount)"); :l0], p2br2, graphinit=false )
+
+
+# Add landmarks with Bearing range measurements
+addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
+p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
+addFactor!(fg, [:x1; :l1], p2br, graphinit=false )
 
 
 printGraphSummary(fg)
@@ -99,7 +111,7 @@ getSolverParams(fg).drawtree = true
 # getSolverParams(fg).logpath="/media/dehann/temp/caesar/$(now())"
 
 # debugging options
-getSolverParams(fg).multiproc = true
+# getSolverParams(fg).multiproc = true
 # getSolverParams(fg).async = true
 # getSolverParams(fg).dbg = true
 # getSolverParams(fg).limititers = 50
@@ -107,9 +119,7 @@ getSolverParams(fg).multiproc = true
 
 
 
-tree, smt, hist = solveTree!(fg) # , recordcliqs=ls(fg))
-
-printGraphSummary(fg)
+tree,_ , = solveTree!(fg)
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
@@ -119,36 +129,35 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 ## fun additions
 # fetchCliqTaskHistoryAll!(smt, hist)
-# assignTreeHistory!(tree, hist)
-# printCliqHistorySummary(hist, tree, :l0)
+# printCliqHistorySummary(hist, tree[:l0])
 # makeCsmMovie(fg, tree)
 
 
 
 ## hex 2
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = _offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
 addVariable!(fg, :l2, Point2, tags=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, graphinit=false )
+addFactor!(fg, [Symbol("x$(posecount)"); :l2], p2br, graphinit=false )
 
 
-posecount = driveHex(fg, posecount)
+posecount = _driveHex!(fg, posecount)
 
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, graphinit=false )
+addFactor!(fg, [Symbol("x$(posecount)"); :l2], p2br2, graphinit=false )
 
-# writeGraphPdf(fg,show=true)
+# drawGraph(fg,show=true)
 
 
 # getSolverParams(fg).downsolve = false
 
 
-tree, smt, hist = solveTree!(fg, tree) #, recordcliqs=ls(fg))
+tree, smt, hist = solveTree!(fg, tree)
 
 
 
@@ -157,7 +166,7 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 
 
-# new sighting on :l0
+## new sighting on :l0
 
 addVariable!(fg, :l0, Point2, tags=[:LANDMARK;])
 p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
@@ -167,8 +176,6 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x12; :l0], p2br2, graphinit=false )
 
 
-
-# and here it goes totally wacko
 
 # getSolverParams(fg).dbg = true
 
@@ -183,27 +190,27 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 ## hex 3
 
-posecount = offsetHexLeg(fg, posecount, direction=:right, graphinit=true)
+posecount = _offsetHexLeg(fg, posecount, direction=:right, graphinit=true)
 
 
-posecount = driveHex(fg, posecount, graphinit=true)
+posecount = _driveHex!(fg, posecount, graphinit=true)
 
 
-# getSolverParams(fg).downsolve=false
-tree, smt, hist = solveTree!(fg, tree) #, recordcliqs=ls(fg))
+
+tree, smt, hist = solveTree!(fg, tree)
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
 
 
-
+##
 
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x19; :l0], p2br2, graphinit=false )
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x18; :l1], p2br2, graphinit=false )
+addFactor!(fg, [:x18; :l0], p2br2, graphinit=false )
 
 
 # Add landmarks with Bearing range measurements
@@ -231,9 +238,9 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 ## hex 4
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = _offsetHexLeg(fg, posecount, direction=:right)
 
-posecount = driveHex(fg, posecount)
+posecount = _driveHex!(fg, posecount)
 
 
 
@@ -247,7 +254,7 @@ addFactor!(fg, [:x27; :l4], p2br, graphinit=false )
 
 
 
-# writeGraphPdf(fg)
+# drawGraph(fg)
 
 tree, smt, hist = solveTree!(fg, tree)
 
@@ -255,7 +262,7 @@ tree, smt, hist = solveTree!(fg, tree)
 pl = plotBeehive_6(fg, meanmax=:mean)
 
 
-
+##
 
 # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
@@ -277,7 +284,7 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 ## hex 5
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = _offsetHexLeg(fg, posecount, direction=:right)
 
 # Add landmarks with Bearing range measurements
 addVariable!(fg, :l5, Point2, tags=[:LANDMARK;])
@@ -298,7 +305,7 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 ## Weird initialization issues happen here
 
 
-posecount = driveHex(fg, posecount, graphinit=true)
+posecount = _driveHex!(fg, posecount, graphinit=true)
 
 # # Add landmarks with Bearing range measurements
 p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
@@ -312,7 +319,7 @@ addFactor!(fg, [:x33; :l0], p2br2, graphinit=false )
 
 
 
-# writeGraphPdf(fg)
+# drawGraph(fg)
 
 
 tree, smt, hist = solveTree!(fg, tree)
@@ -324,9 +331,9 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 ## hex 6
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = _offsetHexLeg(fg, posecount, direction=:right)
 
-posecount = driveHex(fg, posecount, graphinit=true)
+posecount = _driveHex!(fg, posecount, graphinit=true)
 
 # l6 from x35, x41, x11
 # Add landmarks with Bearing range measurements
@@ -350,7 +357,7 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x39; :l4], p2br2, graphinit=false )
 
 
-# writeGraphPdf(fg)
+# drawGraph(fg)
 
 tree, smt, hist = solveTree!(fg, tree)
 
@@ -380,11 +387,11 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 ## hex 7
 
-posecount = offsetHexLeg(fg, posecount, direction=:left)
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = _offsetHexLeg(fg, posecount, direction=:left)
+posecount = _offsetHexLeg(fg, posecount, direction=:right)
 
 
-posecount = driveHex(fg, posecount, graphinit=true)
+posecount = _driveHex!(fg, posecount, graphinit=true)
 
 
 #
@@ -412,68 +419,68 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 ## hex 8
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = _offsetHexLeg(fg, posecount, direction=:right)
 
 
-posecount = driveHex(fg, posecount)
+posecount = _driveHex!(fg, posecount)
 
 # # Add landmarks with Bearing range measurements
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l0], p2br2, graphinit=false )
 
 
-# writeGraphPdf(fg)
+# drawGraph(fg)
 
 tree, smt, hist = solveTree!(fg, tree)
 
 
-
+pl = plotBeehive_6(fg, meanmax=:mean)
 
 
 
 ## hex 9
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = _offsetHexLeg(fg, posecount, direction=:right)
 
 
-posecount = driveHex(fg, posecount)
+posecount = _driveHex!(fg, posecount)
 
 # # Add landmarks with Bearing range measurements
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l0], p2br2, graphinit=false )
 
 
-# writeGraphPdf(fg)
+# drawGraph(fg)
 
 tree, smt, hist = solveTree!(fg, tree)
 
 
 
-
+pl = plotBeehive_6(fg, meanmax=:mean)
 
 
 
 ## hex 10
 
-posecount = offsetHexLeg(fg, posecount, direction=:left)
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = _offsetHexLeg(fg, posecount, direction=:left)
+posecount = _offsetHexLeg(fg, posecount, direction=:right)
 
 
-posecount = driveHex(fg, posecount)
+posecount = _driveHex!(fg, posecount)
 
 # # Add landmarks with Bearing range measurements
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-# addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
+# addFactor!(fg, [Symbol("x$(posecount-1)"); :l0], p2br2, graphinit=false )
 
 
-writeGraphPdf(fg)
+drawGraph(fg)
 
 tree, smt, hist = solveTree!(fg, tree)
 
 
 
 
-drawPosesLandms(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
+plotSLAM2D(fg, meanmax=:max) |> SVG("/tmp/test.svg") || @async run(`eog /tmp/test.svg`)
 
 
 
@@ -497,7 +504,7 @@ stuff = solveCliq!( fg, tree, :x0 )
 
 fg2bd = loadDFG("/tmp/caesar/cliqSubFgs/cliq2/fg_beforedownsolve", Main)
 
-writeGraphPdf(fg2bd, show=true)
+drawGraph(fg2bd, show=true)
 
 
 
@@ -536,7 +543,7 @@ IIF.notifyCliqUpInitStatus!(cliq, :downsolved)
 
 getCliqStatus(cliq)
 
-writeGraphPdf(sfg, show=true)
+drawGraph(sfg, show=true)
 
 
 pl = plotBeehive_6(fg, to=15)
@@ -557,7 +564,7 @@ cliqh = hist[cid][ste][4].cliq
 
 printCliqSummary(sfg, cliqh)
 
-writeGraphPdf(sfg, show=true)
+drawGraph(sfg, show=true)
 
 plotBeehive_6(sfg)
 
@@ -756,7 +763,7 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 cliq = getClique(tree, :l0)
 
-printCliqHistorySummary(tree, :l1)
+printCliqHistorySummary(tree, :l0)
 
 sfg31_ad = getCliqSolveHistory(tree, :l0)[12][4].cliqSubFg
 fg31_11 = getCliqSolveHistory(tree, :l0)[12][4].dfg

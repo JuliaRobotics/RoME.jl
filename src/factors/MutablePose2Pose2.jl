@@ -13,6 +13,10 @@ mutable struct MutablePose2Pose2Gaussian  <: IIF.AbstractRelativeRoots
   timestamp::DateTime
   MutablePose2Pose2Gaussian(Zij::MvNormal=MvNormal(zeros(3),diagm([0.01; 0.01; 0.001].^2)), timestamp::DateTime=now()) = new(Zij, timestamp)
 end
+
+# should auto detect .Zij
+# IIF.getParametricMeasurement(mpp::MutablePose2Pose2Gaussian) = IIF.getParametricMeasurement(Zij)
+
 function getSample(cfo::CalcFactor{<:MutablePose2Pose2Gaussian}, N::Int=100)
   return (rand(cfo.factor.Zij, N), )
 end
