@@ -11,7 +11,7 @@ export SE2E2_Manifold
 
 
 # this is a hack and not fully implemented as per: 
-struct _SE2E2 <: ManifoldsBase.Manifold{ManifoldsBase.ℝ} end
+struct _SE2E2 <: MB.AbstractManifold{ManifoldsBase.ℝ} end
 
 const SE2E2_Manifold = _SE2E2()
 
@@ -49,7 +49,7 @@ AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(SE2E2_Manifold
 export BearingRange_Manifold
 
 
-struct _CircleEuclid <: ManifoldsBase.Manifold{ManifoldsBase.ℝ} end
+struct _CircleEuclid <: MB.AbstractManifold{ManifoldsBase.ℝ} end
 
 ManifoldsBase.manifold_dimension(::_CircleEuclid) = 2
 
