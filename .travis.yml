@@ -6,6 +6,9 @@ arch:
 os:
   - linux
 
+env:
+  - JULIA_PKG_SERVER=""
+
 addons:
   apt:
     packages:
@@ -23,7 +26,7 @@ jobs:
     - julia: nightly
     - arch: arm64
   include:
-    - name: "THIS AND MASTERS"
+    - name: "Upstream Dev, 1.6"
       julia: 1.6
       if: NOT branch =~ ^release.*$
       script:
@@ -33,7 +36,7 @@ jobs:
         - julia -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="master"));'
         - julia --check-bounds=yes -e 'using Pkg; Pkg.test("RoME"; coverage=false)'
       after_success: skip
-    - name: "ARM64"
+    - name: "ARM64, Julia 1.6"
       arch: arm64
       julia: 1.6
       after_success: skip
