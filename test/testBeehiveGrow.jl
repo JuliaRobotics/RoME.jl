@@ -42,9 +42,9 @@ tree, _, _ = solveTree!(fg  , tree);
 # working before IIF 1010
 
 @warn("Test for beehive graph is using loose bounds until IIF #1010 is resolved.")
-@test isapprox( getPPE(fg, :l11).suggested , [5;10*sin(pi/3)], atol=4)
+@test isapprox( getPPE(fg, :l11).suggested , [5;10*sin(pi/3)], atol=6)
 @test isapprox( getPPE(fg, :l0).suggested , [20;0], atol=2)
-@test isapprox( getPPE(fg, :l7).suggested , [20;-20*sin(pi/3)], atol=4)
+@test isapprox( getPPE(fg, :l7).suggested , [20;-20*sin(pi/3)], atol=6)
 
 # likely to fail until IIF 1010 is completed
 @test_broken  isapprox( getPPE(fg, :x21).suggested[1:2] , [10;-20*sin(pi/3)], atol=4)
