@@ -8,9 +8,6 @@ export odomKDE
 export assembleChordsDict
 
 
-getFactorMean(fct::PriorPose2) = getFactorMean(fct.Z)
-getFactorMean(fct::Pose2Pose2) = getFactorMean(fct.z)
-getFactorMean(fct::MutablePose2Pose2Gaussian) = getFactorMean(fct.Zij)
 
 
 """

@@ -9,32 +9,34 @@ using Test
 # "testG2oParser.jl";  ]
 
 testfiles = [
-"threeDimLinearProductTest.jl";
-"testInflation380.jl";
-"testPoint2Point2.jl";
-"testParametric.jl";
-"testTreeInitCommonMsg_IIF913.jl";
-"testPose3Pose3NH.jl";
-"testBeehive2D_CliqByCliq.jl";      # special case debugging
-"testhigherdimroots.jl";
-"testManifoldsPose2Equivalent.jl";
-"testDidsonFunctions.jl";
-"testPoint2Point2Init.jl";
-"testBasicPose2Stationary.jl";
-"TestPoseAndPoint2Constraints.jl";
-"testDynPoint2D.jl";
-"testBearingRange2D.jl";
-"testDeltaOdo.jl";
-"testFixedLagFG.jl";
-"testMultimodalRangeBearing.jl";
-"testDynPose2D.jl";
-"testPartialXYH.jl";
-"testpartialpose3.jl";
-"testpackingconverters.jl";
-"TestDefaultFGInitialization.jl";
-"testAccumulateFactors.jl";
-"testDeadReckoningTether.jl"; 
-"testFluxModelsPose2.jl";
+  "testInflation380.jl";
+  "testPoint2Point2.jl";
+  "testParametric.jl";
+  "testTreeInitCommonMsg_IIF913.jl";
+  "threeDimLinearProductTest.jl";
+  "testPose3Pose3NH.jl";
+  "testBeehive2D_CliqByCliq.jl";      # special case debugging
+  "testhigherdimroots.jl";
+  "testManifoldsPose2Equivalent.jl";
+  "testDidsonFunctions.jl";
+  "testPoint2Point2Init.jl";
+  "testBasicPose2Stationary.jl";
+  "TestPoseAndPoint2Constraints.jl";
+  "testPartialRangeCrossCorrelations.jl";
+  "testDynPoint2D.jl";
+  "testBearingRange2D.jl";
+  "testDeltaOdo.jl";
+  "testFixedLagFG.jl";
+  "testMultimodalRangeBearing.jl";
+  "testDynPose2D.jl";
+  "testPartialXYH.jl";
+  "testpartialpose3.jl";
+  "testpackingconverters.jl";
+  "TestDefaultFGInitialization.jl";
+  "testAccumulateFactors.jl";
+  "testDeadReckoningTether.jl"; 
+  "testFluxModelsPose2.jl";
+  "testBeehiveGrow.jl"
 ]
 
 

@@ -1,0 +1,10 @@
+[deps]
+ApproxManifoldProducts = "9bbbb610-88a1-53cd-9763-118ce10c1f89"
+CoordinateTransformations = "150eb455-5306-5404-9cee-2592286d6298"
+DistributedFactorGraphs = "b5cc3c7e-6572-11e9-2517-99fb8daf2f04"
+IncrementalInference = "904591bb-b899-562f-9e6f-b8df64c7d480"
+KernelDensityEstimate = "2472808a-b354-52ea-a80e-1658a3c6056d"
+RoME = "91fb55c2-4c03-5a59-ba21-f4ea956187b8"
+RoMEPlotting = "238d586b-a4bf-555c-9891-eda6fc5e55a2"
+Rotations = "6038ab10-8711-5258-84ad-4b1120ba62dc"
+TransformUtils = "9b8138ad-1b09-5408-aa39-e87ed6d21b63"

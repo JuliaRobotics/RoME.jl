@@ -22,18 +22,24 @@ using
   TensorCast,
   ManifoldsBase
 
+using StaticArrays
+
 # to avoid name conflicts
-import Manifolds: SpecialEuclidean, ProductRepr
+import Manifolds
+import Manifolds: SpecialEuclidean, ProductRepr, SpecialOrthogonal
 
 # using Graphs,  # TODO determine how many parts still require Graphs still directly
 
 
 import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
+import IncrementalInference: MB
 import IncrementalInference: convert, getSample, reshapeVec2Mat, DFG, getManifolds
 # not sure why this is gives import error
 import DistributedFactorGraphs: compare
-import DistributedFactorGraphs: getDimension, getManifolds
+import DistributedFactorGraphs: getDimension, getManifold
+import ApproxManifoldProducts: getManifolds # TODO must be deprecated
+
 # const AMP = ApproxManifoldProducts
 
 const InstanceType{T} = Union{Type{<:T},T}
