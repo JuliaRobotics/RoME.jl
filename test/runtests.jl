@@ -36,7 +36,8 @@ testfiles = [
   "testAccumulateFactors.jl";
   "testDeadReckoningTether.jl"; 
   "testFluxModelsPose2.jl";
-  "testBeehiveGrow.jl"
+  "testBeehiveGrow.jl";
+  "testGenerateHelix.jl";
 ]
 
 
