@@ -3,16 +3,43 @@
 export generateCanonicalFG_ZeroPose2, generateCanonicalFG_Hexagonal, generateCanonicalFG_TwoPoseOdo, generateCanonicalFG_Circle
 export warmUpSolverJIT
 
+
+function _addPose2Canonical!( fg::AbstractDFG, 
+                              prevLabel::Symbol,
+                              posecount::Int,
+                              factor::AbstractRelative;
+                              refKey::Symbol=:simulated,
+                              graphinit::Bool=false,
+                              poseRegex::Regex=r"x\d+",
+                              genLabel = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, posecount),
+                              overridePPE=nothing  )
+  #
+  # calculate and add the reference value
+  isAlready, simPPE, = IIF._checkVariableByReference(fg, prevLabel, poseRegex, Pose2, factor, refKey=refKey, overridePPE=overridePPE)
+
+  # add new pose variable
+  v_n = addVariable!(fg, genLabel, Pose2 )
+  addFactor!(fg, [prevLabel; genLabel], factor, graphinit=graphinit )
+
+  # store simulated PPE for future use
+  # ppe = DFG.MeanMaxPPE(refKey, simPPE, simPPE, simPPE)
+  setPPE!(v_n, refKey, typeof(simPPE), simPPE)
+
+  return v_n
+end
+
+
+
 """
     $SIGNATURES
 
 Generate a canonical factor graph with a Pose2 `:x0` and MvNormal with covariance `P0`
 """
 function generateCanonicalFG_ZeroPose2(;fg::AbstractDFG=initfg(),
-                                       graphinit::Bool=true,
-                                       Σ0::AbstractMatrix{<:Real}= 0.01*Matrix{Float64}(LinearAlgebra.I,3,3),
-                                       μ0::AbstractVector{<:Real}=zeros(3),
-                                       label::Symbol=:x0 )
+                                        graphinit::Bool=true,
+                                        Σ0::AbstractMatrix{<:Real}= 0.01*Matrix{Float64}(LinearAlgebra.I,3,3),
+                                        μ0::AbstractVector{<:Real}=zeros(3),
+                                        label::Symbol=:x0 )
   #
   if !exists(fg, label)
     addVariable!(fg, label, Pose2)

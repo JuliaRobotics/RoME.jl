@@ -1,6 +1,9 @@
 
+export generateCanonicalFG_Helix2D!
 
-## DEPRECATE BELOW TO GENERALIZED HELIX
+## ================================================================================================
+## DEPRECATE SECTION TO GENERALIZED HELIX
+## ================================================================================================
 
 
 """
@@ -30,6 +33,7 @@ function _calcHelix2DApprox(; N_ppt::Integer = 20,
   bx_ = (runback * (real.(bot_) .- 1) .+ 1)
   bot = bx_ .+ im.*imag.(bot_)
   # special care on squashed gradiens for bottom half 
+  # df = df/dx*Dx + df/dy*Dy
   dydx = exp.(im.*angb_)
   dy = imag.(dydx)
   dx = runback .* real.(dydx)
@@ -60,3 +64,72 @@ function _calcHelix2DTurnsX(turns=1;
 
   return allpts
 end
+
+
+
+
+## ================================================================================================
+## GENERATE CANONICAL GRAPH
+## ================================================================================================
+
+
+
+# assume poses are labeled according to r"x\d+"
+function generateCanonicalFG_Helix2D!(numposes::Integer=40;
+                                      posesperturn::Integer=20,
+                                      dfg::AbstractDFG=initfg(),
+                                      radius::Real=10,
+                                      runback::Real=5/7,
+                                      graphinit::Bool=false,
+                                      poseRegex::Regex=r"x\d+",
+                                      useMsgLikelihoods::Bool=true,
+                                      refKey::Symbol=:simulated,
+                                      Qd::Matrix{<:Real}=diagm( [0.1;0.1;0.05].^2 )   )
+  #
+  
+  # add first pose if not already exists
+  if !( :x0 in ls(dfg) )
+    μ0=[0;0;pi/2]
+    generateCanonicalFG_ZeroPose2(fg=dfg, μ0=μ0, graphinit=graphinit) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
+    # reference ppe on :x0
+    ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
+    setPPE!(dfg[:x0], refKey, DFG.MeanMaxPPE, ppe)
+  end
+  
+  # what is the last pose
+  @show ls(dfg)
+  lastPose = (ls(dfg, poseRegex) |> sortDFG)[end]
+  # get latest posecount number
+  posecount = match(r"\d+", string(lastPose)).match |> x->parse(Int,x)    
+  
+  @show turns = ceil(numposes/posesperturn)
+  for tn in 0:(turns-1)
+    tmp_ = _calcHelix2DApprox(N_ppt=posesperturn, radius=radius, runback=runback)
+    # adjust for turn progression in x
+    tmp_[1,:] .+= tn*(2radius*(1-runback))
+    oldpose = SE2(tmp_[:,1])
+    
+    # add each new pose (skippin the first element)
+    for ps in 2:size(tmp_,2)
+      # check exit condition
+      numposes-1 <= posecount && break
+      # add a new pose
+      newpose = TU.SE2(tmp_[:,ps])
+      deltaodo = se2vee(oldpose \ newpose)
+      factor = Pose2Pose2( MvNormal(deltaodo, Qd) )
+      posecount += 1
+      v_n = _addPose2Canonical!(dfg, lastPose, posecount, factor, poseRegex=poseRegex, refKey=refKey, overridePPE=tmp_[:,ps])
+      lastPose = getLabel(v_n)
+      oldpose = newpose
+    end
+  end
+  
+  # 
+  return dfg
+end
+
+
+
+
+#

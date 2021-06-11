@@ -94,28 +94,6 @@ function _addLandmarkBeehive!(fg,
   return genLabel
 end
 
-function _addPoseBeehive!(fg, 
-                          prevLabel::Symbol,
-                          posecount::Int,
-                          factor::AbstractRelative;
-                          refKey::Symbol=:simulated,
-                          graphinit::Bool=false  )
-  #
-  # calculate and add the reference value
-  isAlready, simPPE, = IIF._checkVariableByReference(fg, prevLabel, r"x\\d+", Pose2, factor, refKey=refKey)
-  
-  @show genLabel = Symbol("x", posecount)
-  # add new pose variable
-  v_n = addVariable!(fg, genLabel, Pose2 )
-  addFactor!(fg, [prevLabel; genLabel], factor, graphinit=graphinit )
-
-  # store simulated PPE for future use
-  # ppe = DFG.MeanMaxPPE(refKey, simPPE, simPPE, simPPE)
-  setPPE!(v_n, refKey, typeof(simPPE), simPPE)
-
-  return genLabel
-end
-
 
 function _driveHex!(fgl::AbstractDFG,
                     posecount::Int;
@@ -136,7 +114,8 @@ function _driveHex!(fgl::AbstractDFG,
     # nsym = Symbol("x$(i+1)")
     pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
     posecount += 1
-    nsym = _addPoseBeehive!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit)
+    v_n = _addPose2Canonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit)
+    nsym = getLabel(v_n)
     # add a new landmark (if not yet present)
     !addLandmarks ? nothing : _addLandmarkBeehive!(fgl, nsym, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
   end
@@ -170,7 +149,8 @@ function _offsetHexLeg( fgl::AbstractDFG,
   pp = Pose2Pose2(MvNormal([10.0;0;dirsign*pi/3], diagm([0.1;0.1;0.1].^2)))
   
   posecount += 1
-  nsym = _addPoseBeehive!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit)
+  v_n = _addPose2Canonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit)
+  nsym = getLabel(v_n)
 
   # add a new landmark (if not yet present)
   !addLandmarks ? nothing : _addLandmarkBeehive!(fgl, nsym, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
