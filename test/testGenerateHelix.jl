@@ -26,7 +26,8 @@ lastpose = sortDFG(ls(fg))[end]
 
 ##
 
-fg = RoME.generateCanonicalFG_Helix2DSpiral!()
+fg = RoME.generateCanonicalFG_Helix2DSpiral!(200, graphinit=false, rate_r=0.6, rate_a=6)
+
 
 ##
 

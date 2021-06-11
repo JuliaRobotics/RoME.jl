@@ -1,6 +1,7 @@
 
 export generateCanonicalFG_Helix2D!
-export generateCanonicalFG_Helix2DSlew!
+export generateCanonicalFG_Helix2DSlew!, generateCanonicalFG_Helix2DSpiral!
+
 
 
 """
@@ -134,10 +135,9 @@ generateCanonicalFG_Helix2DSlew!( numposes::Integer=40;
 generateCanonicalFG_Helix2DSpiral!( numposes::Integer=100;
                                     rate_r=0.3,
                                     rate_a=4,
-                                    spine_t=(t)->rate_r*(t^0.707)*cis(rate_a*sqrt(t)),
+                                    spine_t=(t)->rate_r*(t^0.5)*cis(rate_a*(t^0.4)),
                                     kwargs...  ) = generateCanonicalFG_Helix2D!(numposes; spine_t=spine_t, kwargs...)
 #
-
 
 
 #
