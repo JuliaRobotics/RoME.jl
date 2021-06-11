@@ -1,68 +1,42 @@
 
 export generateCanonicalFG_Helix2D!
 
-## ================================================================================================
-## DEPRECATE SECTION TO GENERALIZED HELIX
-## ================================================================================================
-
 
 """
     $SIGNATURES
 
-Generate an appoximate 2D helix (1 turn).
+Generate generalized helix parameterized by a curve along "t-axis" (i.e. z-axis, assuming z(t)=t).  
 
-DevNotes
-- TODO replace with generalized helix parameterized by a curve along z-axis  
+Notes
+- Returns vectors for (`t`, `x,y`, and `yaw` angle).
+- Offset to start at origin and facing direction along +y-axis.
+- Use callbacks `x_t(t)` and `y_t(t)` to skew the helix with any desired curve, examples include
+  - `x_t = (t) -> (1/3)t` to generate helix pattern along x-axis,
+  - or make spiral along t using x_t, y_t to generate a rose pattern on xy.
+- Use the function twice for simulated and noisy trajectories (i.e. easier Gauss-Markov processes)
+- Gradient (i.e. angle) calculations are on the order of 1e-8.
+
+Related
+
+[`generateCanonicalFG_Helix2D!`](@ref)
 """
-function _calcHelix2DApprox(; N_ppt::Integer = 20,
-                              radius::Real = 0.5,
-                              runback::Real = 5/7  )
+function _calcHelix_T(start::Real=0,
+                      stop::Real=1,
+                      pointsperturn=20;
+                      T::AbstractVector{<:Real}=(start:(stop*pointsperturn))./pointsperturn,
+                      radius::Real = 0.5,
+                      x_t::Function=(t)->0,
+                      y_t::Function=(t)->0  )
   #
-  @assert iseven(N_ppt) "N_ppt=$N_ppt must be an even number"
+  # calc the position
+  f(t, x=x_t(t), y=y_t(t)) = radius*( exp(im*(pi - 2pi*t)) + 1) + x + im*y
+  vals = f.(T)
 
-  # two part construction of helix, top and bottom
-  theta_top = LinRange(0,pi,Int(N_ppt/2)) |> reverse
-  theta_bot = - LinRange(0,pi,Int(N_ppt/2))
-  # top half xy is easy, and get tangent gradient as angle from local
-  top = exp.(im.*theta_top)
-  angt = rem2pi.(angle.(top) .- pi/2, RoundNearest)
-  # bottom half to be squashed in local x
-  bot_ = exp.(im.*theta_bot)
-  angb_ = rem2pi.(angle.(bot_) .- pi/2, RoundNearest)
-  # and sqeeze on local x (not y)
-  bx_ = (runback * (real.(bot_) .- 1) .+ 1)
-  bot = bx_ .+ im.*imag.(bot_)
-  # special care on squashed gradiens for bottom half 
-  # df = df/dx*Dx + df/dy*Dy
-  dydx = exp.(im.*angb_)
-  dy = imag.(dydx)
-  dx = runback .* real.(dydx)
-  angb = angle.(dx .+ im.*dy)
+  # calc the gradient
+  g(t, h=1e-8) = (f(t+h)-f(t))/h
+  grad = g.(T)
 
-  # scale to radius and offset for starting at local 0
-  loop = radius .* (1 .+ vcat(top, bot[2:end]))
-  ang = vcat(angt, angb[2:end])
-
-  # return 2D array of data, rows are (x,y,theta) and columns are knot/pose points around helix2D
-  return hcat(real.(loop), imag.(loop), ang)'
-end
-
-
-# TODO replace with generalized helix generator
-function _calcHelix2DTurnsX(turns=1;
-                            N_ppt::Integer = 20,  
-                            radius::Real = 0.5,
-                            runback::Real = 5/7  )
-  #
-
-  allpts = Matrix{Float64}(undef, 3, 0)
-  for tn in 0:(turns-1)
-    tmp_ = _calcHelix2DApprox(N_ppt=N_ppt, radius=radius, runback=runback)
-    tmp_[1,:] .+= tn*(2radius*(1-runback))
-    allpts = hcat(allpts, tmp_[:,2:end])
-  end
-
-  return allpts
+  return T, hcat(real.(vals), imag.(vals)), angle.(grad)
 end
 
 
@@ -75,11 +49,12 @@ end
 
 
 # assume poses are labeled according to r"x\d+"
+#- Gradient (i.e. angle) calculations are on the order of 1e-8.
 function generateCanonicalFG_Helix2D!(numposes::Integer=40;
                                       posesperturn::Integer=20,
                                       dfg::AbstractDFG=initfg(),
                                       radius::Real=10,
-                                      runback::Real=5/7,
+                                      runback::Real=1/3,
                                       graphinit::Bool=false,
                                       poseRegex::Regex=r"x\d+",
                                       useMsgLikelihoods::Bool=true,
@@ -103,11 +78,19 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
   # get latest posecount number
   posecount = match(r"\d+", string(lastPose)).match |> x->parse(Int,x)    
   
-  @show turns = ceil(numposes/posesperturn)
-  for tn in 0:(turns-1)
-    tmp_ = _calcHelix2DApprox(N_ppt=posesperturn, radius=radius, runback=runback)
+  turns = numposes/posesperturn
+  # TODO dont always start from 0
+  tmp = _calcHelix_T(0, turns, posesperturn, radius=radius, x_t=t->radius*runback*t)
+
+  bidx = 1
+  eidx = 1
+  for tn in 0:(ceil(Int, turns)-1)
+    eidx += posesperturn
+    eidx = minimum( [eidx, length(tmp[1])] )
+    # tmp_ = _calcHelix2DApprox(N_ppt=posesperturn, radius=radius, runback=runback)
+    tmp_ = hcat(tmp[2][bidx:eidx,:],tmp[3][bidx:eidx])'
     # adjust for turn progression in x
-    tmp_[1,:] .+= tn*(2radius*(1-runback))
+    # tmp_[1,:] .+= tn*(2radius*(1-runback))
     oldpose = SE2(tmp_[:,1])
     
     # add each new pose (skippin the first element)
@@ -123,6 +106,8 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
       lastPose = getLabel(v_n)
       oldpose = newpose
     end
+
+    bidx = eidx
   end
   
   # 
