@@ -12,7 +12,8 @@ function _addPose2Canonical!( fg::AbstractDFG,
                               graphinit::Bool=false,
                               poseRegex::Regex=r"x\d+",
                               genLabel = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, posecount),
-                              overridePPE=nothing  )
+                              overridePPE=nothing,
+                              postpose_cb::Function=(fg_,latestpose)->()  )
   #
   # calculate and add the reference value
   isAlready, simPPE, = IIF._checkVariableByReference(fg, prevLabel, poseRegex, Pose2, factor, refKey=refKey, overridePPE=overridePPE)
@@ -24,6 +25,9 @@ function _addPose2Canonical!( fg::AbstractDFG,
   # store simulated PPE for future use
   # ppe = DFG.MeanMaxPPE(refKey, simPPE, simPPE, simPPE)
   setPPE!(v_n, refKey, typeof(simPPE), simPPE)
+
+  # user callback in case something more needs to be passed down
+  postpose_cb(fg, genLabel)
 
   return v_n
 end

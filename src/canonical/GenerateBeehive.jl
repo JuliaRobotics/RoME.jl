@@ -102,7 +102,8 @@ function _driveHex!(fgl::AbstractDFG,
                     gaugePrior::Symbol=:x0f1,
                     refKey::Symbol=:simulated,
                     addLandmarks::Bool=true,
-                    landmarkSolvable::Int=1  )
+                    landmarkSolvable::Int=1,
+                    postpose_cb::Function=(fg_,latestpose)->()  )
   #
 
   # Drive around in a hexagon
@@ -114,7 +115,7 @@ function _driveHex!(fgl::AbstractDFG,
     # nsym = Symbol("x$(i+1)")
     pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
     posecount += 1
-    v_n = _addPose2Canonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit)
+    v_n = _addPose2Canonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit, postpose_cb=postpose_cb)
     nsym = getLabel(v_n)
     # add a new landmark (if not yet present)
     !addLandmarks ? nothing : _addLandmarkBeehive!(fgl, nsym, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
@@ -133,7 +134,8 @@ function _offsetHexLeg( fgl::AbstractDFG,
                         refKey::Symbol=:simulated,
                         guagePrior::Symbol=:x0f1,
                         addLandmarks::Bool=true,
-                        landmarkSolvable::Int=1   )
+                        landmarkSolvable::Int=1,
+                        postpose_cb::Function=(fg_,latestpose)->()   )
   #
   #skip out early if pose count target has been reached
   if poseCountTarget <= posecount
@@ -149,7 +151,7 @@ function _offsetHexLeg( fgl::AbstractDFG,
   pp = Pose2Pose2(MvNormal([10.0;0;dirsign*pi/3], diagm([0.1;0.1;0.1].^2)))
   
   posecount += 1
-  v_n = _addPose2Canonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit)
+  v_n = _addPose2Canonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit, postpose_cb=postpose_cb)
   nsym = getLabel(v_n)
 
   # add a new landmark (if not yet present)

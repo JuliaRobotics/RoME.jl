@@ -16,13 +16,17 @@ tmp = RoME._calcHelix_T(0, 3, 25, radius=5, x_t=t->(1/3)*t)
 
 ##
 
-fg = RoME.generateCanonicalFG_Helix2D!(46, posesperturn=15, radius=10, useMsgLikelihoods=false, Qd=diagm( [0.1;0.1;0.05].^2 ))
+fg = generateCanonicalFG_Helix2DSlew!(46, slew_x=3/2, posesperturn=15, radius=10, useMsgLikelihoods=false, Qd=diagm( [0.1;0.1;0.05].^2 ))
+
+## # test slew in x
+
+lastpose = sortDFG(ls(fg))[end]
+@test isapprox( getPPE(fg, lastpose, :simulated).suggested , [20,0,1.465088], atol=0.001 )
+
 
 ##
 
-lastpose = sortDFG(ls(fg))[end]
-
-@test isapprox( getPPE(fg, lastpose, :simulated).suggested , [20,0,1.465088], atol=0.001 )
+fg = RoME.generateCanonicalFG_Helix2DSpiral!()
 
 ##
 
@@ -32,6 +36,7 @@ end
 
 # using TensorCast
 # using Gadfly
+# Gadfly.set_default_plot_size(35cm,25cm)
 
 # ##
 

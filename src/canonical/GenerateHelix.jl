@@ -1,5 +1,6 @@
 
 export generateCanonicalFG_Helix2D!
+export generateCanonicalFG_Helix2DSlew!
 
 
 """
@@ -10,9 +11,11 @@ Generate generalized helix parameterized by a curve along "t-axis" (i.e. z-axis,
 Notes
 - Returns vectors for (`t`, `x,y`, and `yaw` angle).
 - Offset to start at origin and facing direction along +y-axis.
-- Use callbacks `x_t(t)` and `y_t(t)` to skew the helix with any desired curve, examples include
-  - `x_t = (t) -> (1/3)t` to generate helix pattern along x-axis,
-  - or make spiral along t using x_t, y_t to generate a rose pattern on xy.
+- Use callbacks `xr_t(t)` and `yr_t(t)` to skew the helix with any desired curve, examples include
+  - `xr_t = (t) -> (1/3)t` to generate helix pattern along x-axis,
+  - or make spiral along t using xr_t, yr_t to generate a rose pattern on xy,
+  - use `spine_t(t)=xr_t(t) + im*yr_t(t)` as shortcut for more complicated patterns,
+  - note `xr_t` and `yr_t` are scaled by a factor `radius`, unscale the input by division if desired.
 - Use the function twice for simulated and noisy trajectories (i.e. easier Gauss-Markov processes)
 - Gradient (i.e. angle) calculations are on the order of 1e-8.
 
@@ -25,11 +28,12 @@ function _calcHelix_T(start::Real=0,
                       pointsperturn=20;
                       T::AbstractVector{<:Real}=(start:(stop*pointsperturn))./pointsperturn,
                       radius::Real = 0.5,
-                      x_t::Function=(t)->0,
-                      y_t::Function=(t)->0  )
+                      spine_t=(t)->0 + im*0,
+                      xr_t::Function=(t)->real(spine_t(t)),
+                      yr_t::Function=(t)->imag(spine_t(t))  )
   #
   # calc the position
-  f(t, x=x_t(t), y=y_t(t)) = radius*( exp(im*(pi - 2pi*t)) + 1) + x + im*y
+  f(t, x=xr_t(t), y=yr_t(t)) = radius*( cis(pi - 2pi*t) + 1 + x + im*y)
   vals = f.(T)
 
   # calc the gradient
@@ -54,12 +58,16 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
                                       posesperturn::Integer=20,
                                       dfg::AbstractDFG=initfg(),
                                       radius::Real=10,
-                                      runback::Real=1/3,
+                                      # runback::Real=2/3,
+                                      spine_t=(t)->0 + im*0,
+                                      xr_t::Function=(t)->real(spine_t(t)),
+                                      yr_t::Function=(t)->imag(spine_t(t)),
                                       graphinit::Bool=false,
                                       poseRegex::Regex=r"x\d+",
                                       useMsgLikelihoods::Bool=true,
                                       refKey::Symbol=:simulated,
-                                      Qd::Matrix{<:Real}=diagm( [0.1;0.1;0.05].^2 )   )
+                                      Qd::Matrix{<:Real}=diagm( [0.1;0.1;0.05].^2 ),
+                                      postpose_cb::Function=(fg_,latestpose)->()   )
   #
   
   # add first pose if not already exists
@@ -73,14 +81,13 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
   end
   
   # what is the last pose
-  @show ls(dfg)
-  lastPose = (ls(dfg, poseRegex) |> sortDFG)[end]
+  lastpose = (ls(dfg, poseRegex) |> sortDFG)[end]
   # get latest posecount number
-  posecount = match(r"\d+", string(lastPose)).match |> x->parse(Int,x)    
+  posecount = match(r"\d+", string(lastpose)).match |> x->parse(Int,x)    
   
   turns = numposes/posesperturn
   # TODO dont always start from 0
-  tmp = _calcHelix_T(0, turns, posesperturn, radius=radius, x_t=t->2radius*runback*t)
+  tmp = _calcHelix_T(0, turns, posesperturn, radius=radius, spine_t=spine_t, xr_t=xr_t, yr_t=yr_t)
 
   bidx = 1
   eidx = 1
@@ -102,7 +109,7 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
       deltaodo = se2vee(oldpose \ newpose)
       factor = Pose2Pose2( MvNormal(deltaodo, Qd) )
       posecount += 1
-      v_n = _addPose2Canonical!(dfg, lastPose, posecount, factor, poseRegex=poseRegex, refKey=refKey, overridePPE=tmp_[:,ps])
+      v_n = _addPose2Canonical!(dfg, lastpose, posecount, factor, poseRegex=poseRegex, refKey=refKey, overridePPE=tmp_[:,ps], postpose_cb=postpose_cb)
       lastPose = getLabel(v_n)
       oldpose = newpose
     end
@@ -114,6 +121,22 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
   return dfg
 end
 
+
+
+generateCanonicalFG_Helix2DSlew!( numposes::Integer=40;
+                                  slew_x::Real=2/3,
+                                  slew_y::Real=0,
+                                  spine_t=(t)->slew_x*t + im*slew_y*t,
+                                  kwargs...  ) = generateCanonicalFG_Helix2D!(numposes; spine_t=spine_t, kwargs...)
+#
+
+
+generateCanonicalFG_Helix2DSpiral!( numposes::Integer=100;
+                                    rate_r=0.3,
+                                    rate_a=4,
+                                    spine_t=(t)->rate_r*(t^0.707)*cis(rate_a*sqrt(t)),
+                                    kwargs...  ) = generateCanonicalFG_Helix2D!(numposes; spine_t=spine_t, kwargs...)
+#
 
 
 
