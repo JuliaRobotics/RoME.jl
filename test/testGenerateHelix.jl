@@ -22,7 +22,7 @@ fg = RoME.generateCanonicalFG_Helix2D!(46, posesperturn=15, radius=10, useMsgLik
 
 lastpose = sortDFG(ls(fg))[end]
 
-@test isapprox( getPPE(fg, lastpose, :simulated).suggested , [10,0,1.517794], atol=0.001 )
+@test isapprox( getPPE(fg, lastpose, :simulated).suggested , [20,0,1.465088], atol=0.001 )
 
 ##
 

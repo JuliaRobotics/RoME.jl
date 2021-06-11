@@ -80,7 +80,7 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
   
   turns = numposes/posesperturn
   # TODO dont always start from 0
-  tmp = _calcHelix_T(0, turns, posesperturn, radius=radius, x_t=t->radius*runback*t)
+  tmp = _calcHelix_T(0, turns, posesperturn, radius=radius, x_t=t->2radius*runback*t)
 
   bidx = 1
   eidx = 1
