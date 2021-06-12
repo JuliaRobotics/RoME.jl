@@ -12,11 +12,13 @@ using RoME
 
 ##
 
-tmp = RoME._calcHelix_T(0, 3, 25, radius=5, x_t=t->(1/3)*t)
+tmp = RoME._calcHelix_T(0, 3, 25, radius=5, xr_t=t->(1/3)*t)
 
 ##
 
-fg = generateCanonicalFG_Helix2DSlew!(46, slew_x=3/2, posesperturn=15, radius=10, useMsgLikelihoods=false, Qd=diagm( [0.1;0.1;0.05].^2 ))
+cb(fg_, lp) = @show lp, length(ls(fg_))
+
+fg = generateCanonicalFG_Helix2DSlew!(46, slew_x=2/3, posesperturn=15, radius=10, useMsgLikelihoods=false, Qd=diagm( [0.1;0.1;0.05].^2 ), postpose_cb=cb)
 
 ## # test slew in x
 
@@ -26,7 +28,7 @@ lastpose = sortDFG(ls(fg))[end]
 
 ##
 
-fg = RoME.generateCanonicalFG_Helix2DSpiral!(200, graphinit=false, rate_r=0.6, rate_a=6)
+fg = RoME.generateCanonicalFG_Helix2DSpiral!(200, graphinit=false, rate_r=0.6, rate_a=6, radius=100)
 
 
 ##

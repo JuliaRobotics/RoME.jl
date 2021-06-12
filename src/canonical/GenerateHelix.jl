@@ -55,11 +55,11 @@ end
 
 # assume poses are labeled according to r"x\d+"
 #- Gradient (i.e. angle) calculations are on the order of 1e-8.
+#- use `postpose_cb = (fg_, lastestpose) -> ...` for additional user features after each new pose
 function generateCanonicalFG_Helix2D!(numposes::Integer=40;
                                       posesperturn::Integer=20,
                                       dfg::AbstractDFG=initfg(),
                                       radius::Real=10,
-                                      # runback::Real=2/3,
                                       spine_t=(t)->0 + im*0,
                                       xr_t::Function=(t)->real(spine_t(t)),
                                       yr_t::Function=(t)->imag(spine_t(t)),
@@ -74,7 +74,7 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
   # add first pose if not already exists
   if !( :x0 in ls(dfg) )
     μ0=[0;0;pi/2]
-    generateCanonicalFG_ZeroPose2(fg=dfg, μ0=μ0, graphinit=graphinit) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateCanonicalFG_ZeroPose2(fg=dfg, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
     getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
     # reference ppe on :x0
     ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
@@ -133,8 +133,8 @@ generateCanonicalFG_Helix2DSlew!( numposes::Integer=40;
 
 
 generateCanonicalFG_Helix2DSpiral!( numposes::Integer=100;
-                                    rate_r=0.3,
-                                    rate_a=4,
+                                    rate_r=0.6,
+                                    rate_a=6,
                                     spine_t=(t)->rate_r*(t^0.5)*cis(rate_a*(t^0.4)),
                                     kwargs...  ) = generateCanonicalFG_Helix2D!(numposes; spine_t=spine_t, kwargs...)
 #

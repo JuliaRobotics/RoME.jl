@@ -168,7 +168,8 @@ function generateCanonicalFG_Beehive!(poseCountTarget::Int=36;
                                       refKey::Symbol=:simulated,
                                       addLandmarks::Bool=true,
                                       landmarkSolvable::Int=0,
-                                      useMsgLikelihoods::Bool=false     )
+                                      useMsgLikelihoods::Bool=false,
+                                      postpose_cb::Function=(fg_,latestpose)->()     )
   #
   global _beehiveRecipe
 
@@ -180,7 +181,7 @@ function generateCanonicalFG_Beehive!(poseCountTarget::Int=36;
     match(r"\d+", string(lastPose)).match |> x->parse(Int,x)
   else
     # initial zero pose
-    generateCanonicalFG_ZeroPose2(fg=fg, graphinit=graphinit) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateCanonicalFG_ZeroPose2(fg=fg, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
     getSolverParams(fg).useMsgLikelihoods = useMsgLikelihoods    
 
     # reference ppe on :x0
@@ -197,13 +198,13 @@ function generateCanonicalFG_Beehive!(poseCountTarget::Int=36;
 
   # keep adding poses until the target number is reached
   while posecount < poseCountTarget
-    posecount = _driveHex!(fg, posecount, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget)
+    posecount = _driveHex!(fg, posecount, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)
     # drive the offset legs
     lastPose = Symbol(:x, posecount)
     if haskey(_beehiveRecipe, lastPose)
-      posecount = _offsetHexLeg(fg, posecount, direction=_beehiveRecipe[lastPose], graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget)    
+      posecount = _offsetHexLeg(fg, posecount, direction=_beehiveRecipe[lastPose], graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)    
     end
-    posecount = _offsetHexLeg(fg, posecount, direction=direction, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget)
+    posecount = _offsetHexLeg(fg, posecount, direction=direction, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)
   end
 
   # FIXME force everything solvable for now

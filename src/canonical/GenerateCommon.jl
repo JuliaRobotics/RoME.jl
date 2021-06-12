@@ -7,20 +7,25 @@ export warmUpSolverJIT
 function _addPose2Canonical!( fg::AbstractDFG, 
                               prevLabel::Symbol,
                               posecount::Int,
-                              factor::AbstractRelative;
+                              factor::AbstractFactor;
                               refKey::Symbol=:simulated,
                               graphinit::Bool=false,
                               poseRegex::Regex=r"x\d+",
                               genLabel = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, posecount),
                               overridePPE=nothing,
+                              srcType::Type{<:InferenceVariable} = getVariableType(fg, prevLabel) |> typeof,
                               postpose_cb::Function=(fg_,latestpose)->()  )
   #
   # calculate and add the reference value
-  isAlready, simPPE, = IIF._checkVariableByReference(fg, prevLabel, poseRegex, Pose2, factor, refKey=refKey, overridePPE=overridePPE)
+  isAlready, simPPE, = IIF._checkVariableByReference(fg, prevLabel, poseRegex, Pose2, factor, refKey=refKey, srcType=srcType, overridePPE=overridePPE)
 
+  # dispatch on prior or binary factor
+  _getlabels(fact::AbstractPrior) = [genLabel;]
+  _getlabels(fact::AbstractRelative) = [prevLabel; genLabel]
+  
   # add new pose variable
   v_n = addVariable!(fg, genLabel, Pose2 )
-  addFactor!(fg, [prevLabel; genLabel], factor, graphinit=graphinit )
+  addFactor!(fg, _getlabels(factor), factor, graphinit=graphinit )
 
   # store simulated PPE for future use
   # ppe = DFG.MeanMaxPPE(refKey, simPPE, simPPE, simPPE)
@@ -29,6 +34,7 @@ function _addPose2Canonical!( fg::AbstractDFG,
   # user callback in case something more needs to be passed down
   postpose_cb(fg, genLabel)
 
+  # return the new variable
   return v_n
 end
 
@@ -43,13 +49,18 @@ function generateCanonicalFG_ZeroPose2(;fg::AbstractDFG=initfg(),
                                         graphinit::Bool=true,
                                         Σ0::AbstractMatrix{<:Real}= 0.01*Matrix{Float64}(LinearAlgebra.I,3,3),
                                         μ0::AbstractVector{<:Real}=zeros(3),
-                                        label::Symbol=:x0 )
+                                        label::Symbol=:x0,
+                                        postpose_cb::Function=(fg_,latestpose)->()  )
   #
   if !exists(fg, label)
-    addVariable!(fg, label, Pose2)
     prpo = PriorPose2(MvNormal(μ0, Σ0))
-    addFactor!(fg, [label], prpo, graphinit=graphinit)
+    _addPose2Canonical!( fg, :x0, 0, prpo, genLabel=label, graphinit=graphinit, srcType=Pose2, postpose_cb=postpose_cb )
+    # addVariable!(fg, label, Pose2)
+    # addFactor!(fg, [label], prpo, graphinit=graphinit)
+    # # user callback for additional features
+    # postpose_cb(fg, label)
   end
+
   return fg
 end
 
