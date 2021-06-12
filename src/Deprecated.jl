@@ -4,6 +4,7 @@
 ## Remove before RoME v0.17
 ##==============================================================================
 
+@deprecate generateCanonicalFG_Beehive!(w...; kw...) generateCanonicalFG_Honeycomb!(w...; kw...)
 
 """
     $SIGNATURES

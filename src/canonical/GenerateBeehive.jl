@@ -161,7 +161,7 @@ function _offsetHexLeg( fgl::AbstractDFG,
 end
 
 
-function generateCanonicalFG_Beehive!(poseCountTarget::Int=36;
+function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
                                       fg::AbstractDFG = initfg(),
                                       direction::Symbol = :right,
                                       graphinit::Bool = false,

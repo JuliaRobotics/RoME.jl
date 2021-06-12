@@ -136,12 +136,12 @@ refVal = accumulateFactorMeans(fg, [:x2f1; :x2x3f1])
 end
 
 
-@testset "Test canonical FG Beehive generation" begin
+@testset "Test canonical FG Honeycomb generation" begin
 
 ##
 
 # build the graph
-fg = RoME.generateCanonicalFG_Beehive!()
+fg = RoME.generateCanonicalFG_Honeycomb!()
 
 # check that pose :x3 has rotation near +-pi
 t,m,gn = IIF._checkVariableByReference(fg, :x2, r"x\d+", Pose2, getFactorType(fg, :x2x3f1),destPrefix=:x, srcNumber=2)
