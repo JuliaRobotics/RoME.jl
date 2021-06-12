@@ -292,7 +292,12 @@ include("SimulationUtils.jl")
 include("OdometryUtils.jl")
 include("RobotDataTypes.jl")
 include("NavigationSystem.jl")
-include("CanonicalGraphs.jl")
+
+# generate canonical graphs
+include("canonical/GenerateCommon.jl")
+include("canonical/GenerateBeehive.jl")
+include("canonical/GenerateHelix.jl")
+
 include("g2oParser.jl")
 
 

@@ -27,7 +27,7 @@ for i in 0:3
     pp = Pose2Pose2(MvNormal([10.0;0;pi/2], [0.1;0.1;0.1]))
     addFactor!(fg, [psym;nsym], pp)
 end
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 IIF.initParametricFrom!(fg)
 
@@ -94,7 +94,7 @@ end
 #                                Normal(sqrt(2) + rand(Normal(0,σ_range)), σ_range))
 # addFactor!(fg, [:x2; :l2], p2br)
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 
 # IIF.initParametricFrom!(fg)
 
@@ -121,7 +121,7 @@ addFactor!(fg, [:x1], PriorPose2(MvNormal([0.,0, 0], [0.01, 0.01, 0.01])))
 
 addFactor!(fg, [:x1; :l1], Pose2Point2(MvNormal([1.0, 1], [0.1,0.1])))
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 IIF.initParametricFrom!(fg)
 
@@ -150,7 +150,7 @@ addFactor!(fg, [:l2], PriorPoint2(MvNormal([1.,-1], [0.01, 0.01])))
 addFactor!(fg, [:x1; :l1], Pose2Point2BearingRange(Normal(pi/4, 0.01), Normal(sqrt(2), 0.1)))
 addFactor!(fg, [:x1; :l2], Pose2Point2BearingRange(Normal(3pi/4, 0.01), Normal(sqrt(2), 0.1)))
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 IIF.initParametricFrom!(fg)
 
@@ -182,7 +182,7 @@ addVariable!(fg, :x1, DynPose2;  nanosecondtime=1000_000_000)
 dp2dp2 = VelPose2VelPose2(MvNormal([10.0;0;0], [0.01;0.01;0.001]), MvNormal([0.0;0], [0.1; 0.1]))
 addFactor!(fg, [:x0;:x1], dp2dp2)
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 vardict, result, varIds, Σ = IIF.solveGraphParametric!(fg)
 
@@ -209,7 +209,7 @@ addFactor!(fg, [:x1; :l1], Point2Point2Range(Normal(sqrt(2), 0.1)))
 addFactor!(fg, [:x1; :l2], Point2Point2Range(Normal(1.0, 0.1)))
 addFactor!(fg, [:x1; :l3], Point2Point2Range(Normal(1.0, 0.1)))
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 #FIXME needs initializaiton from non-parametric to converge
 solveTree!(fg)
 IIF.initParametricFrom!(fg)
