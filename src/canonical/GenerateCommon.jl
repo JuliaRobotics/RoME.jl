@@ -6,12 +6,12 @@ export warmUpSolverJIT
 
 function _addPoseCanonical!(fg::AbstractDFG, 
                             prevLabel::Symbol,
-                            posecount::Int,
+                            posecount::Int, # can be overriden with genLabel
                             factor::AbstractFactor;
                             poseRegex::Regex=r"x\d+",
                             genLabel = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, posecount),
-                            poseType::Type{<:InferenceVariable} = Pose2,
                             srcType::Type{<:InferenceVariable} = getVariableType(fg, prevLabel) |> typeof,
+                            poseType::Type{<:InferenceVariable} = srcType, # control destination type TODO simplify
                             graphinit::Bool=false,
                             solvable::Int=1,
                             variableTags::AbstractVector{Symbol}=Symbol[],
