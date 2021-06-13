@@ -295,7 +295,7 @@ include("NavigationSystem.jl")
 
 # generate canonical graphs
 include("canonical/GenerateCommon.jl")
-include("canonical/GenerateBeehive.jl")
+include("canonical/GenerateHoneycomb.jl")
 include("canonical/GenerateHelix.jl")
 
 include("g2oParser.jl")
