@@ -17,23 +17,23 @@ using RoME
 
 ##
 
-fg = RoME.generateCanonicalFG_Beehive!(7, graphinit=true, useMsgLikelihoods = true)
+fg = RoME.generateCanonicalFG_Honeycomb!(7, graphinit=true, useMsgLikelihoods = true)
 tree, _, _ = solveTree!(fg);
 
-fg = RoME.generateCanonicalFG_Beehive!(14, graphinit=true, fg=fg)
+fg = RoME.generateCanonicalFG_Honeycomb!(14, graphinit=true, fg=fg)
 tree, _, _ = solveTree!(fg, tree);
 
 tree_ = deepcopy(tree); fg_ = deepcopy(fg);
-fg = RoME.generateCanonicalFG_Beehive!(21, graphinit=true, fg=fg)
+fg = RoME.generateCanonicalFG_Honeycomb!(21, graphinit=true, fg=fg)
 tree, _, _ = solveTree!(fg  , tree);
 
-# fg = RoME.generateCanonicalFG_Beehive!(28, graphinit=true, fg=fg)
+# fg = RoME.generateCanonicalFG_Honeycomb!(28, graphinit=true, fg=fg)
 # tree, _, _ = solveTree!(fg, tree);
 
-# fg = RoME.generateCanonicalFG_Beehive!(35, graphinit=true, fg=fg)
+# fg = RoME.generateCanonicalFG_Honeycomb!(35, graphinit=true, fg=fg)
 # tree, _, _ = solveTree!(fg, tree);
 
-# fg = RoME.generateCanonicalFG_Beehive!(42, graphinit=true, fg=fg)
+# fg = RoME.generateCanonicalFG_Honeycomb!(42, graphinit=true, fg=fg)
 # tree, _, _ = solveTree!(fg, tree);
 
 

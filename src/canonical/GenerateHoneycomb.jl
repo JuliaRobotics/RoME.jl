@@ -115,7 +115,7 @@ function _driveHex!(fgl::AbstractDFG,
     # nsym = Symbol("x$(i+1)")
     pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
     posecount += 1
-    v_n = _addPose2Canonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit, postpose_cb=postpose_cb)
+    v_n = _addPoseCanonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit, postpose_cb=postpose_cb)
     nsym = getLabel(v_n)
     # add a new landmark (if not yet present)
     !addLandmarks ? nothing : _addLandmarkBeehive!(fgl, nsym, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
@@ -151,7 +151,7 @@ function _offsetHexLeg( fgl::AbstractDFG,
   pp = Pose2Pose2(MvNormal([10.0;0;dirsign*pi/3], diagm([0.1;0.1;0.1].^2)))
   
   posecount += 1
-  v_n = _addPose2Canonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit, postpose_cb=postpose_cb)
+  v_n = _addPoseCanonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit, postpose_cb=postpose_cb)
   nsym = getLabel(v_n)
 
   # add a new landmark (if not yet present)
@@ -161,7 +161,7 @@ function _offsetHexLeg( fgl::AbstractDFG,
 end
 
 
-function generateCanonicalFG_Beehive!(poseCountTarget::Int=36;
+function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
                                       fg::AbstractDFG = initfg(),
                                       direction::Symbol = :right,
                                       graphinit::Bool = false,

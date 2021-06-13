@@ -8,7 +8,7 @@ using Test
 
 ##
 
-N=100
+N=150
 fg = initfg()
 getSolverParams(fg).graphinit=false
 getSolverParams(fg).useMsgLikelihoods = true
