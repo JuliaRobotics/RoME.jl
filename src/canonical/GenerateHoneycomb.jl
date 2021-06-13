@@ -1,6 +1,6 @@
 
 
-global _beehiveRecipe = Dict{Symbol,Symbol}(
+global _honeycombRecipe = Dict{Symbol,Symbol}(
   :l6   =>:l0,
   :l18  =>:l0,
   :l42  =>:l0,
@@ -66,13 +66,13 @@ function _addLandmarkBeehive!(fg,
   isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, lastPose, r"l\\d+", Point2, newFactor)
 
   # force isAlready until fixed _checkVariableByReference parametric solution at -pi Optim issue
-  global _beehiveRecipe
+  global _honeycombRecipe
   isAlready = false
   srcNumber = match(r"\d+", string(lastPose)).match |> x->parse(Int,x)
   genLabel = Symbol(:l, srcNumber)
-  if haskey(_beehiveRecipe, genLabel) 
+  if haskey(_honeycombRecipe, genLabel) 
     isAlready = true
-    genLabel = _beehiveRecipe[genLabel]
+    genLabel = _honeycombRecipe[genLabel]
     simPPE = getPPE(fg, genLabel, refKey)
   end
 
@@ -162,16 +162,17 @@ end
 
 
 function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
-                                      fg::AbstractDFG = initfg(),
-                                      direction::Symbol = :right,
-                                      graphinit::Bool = false,
-                                      refKey::Symbol=:simulated,
-                                      addLandmarks::Bool=true,
-                                      landmarkSolvable::Int=0,
-                                      useMsgLikelihoods::Bool=false,
-                                      postpose_cb::Function=(fg_,latestpose)->()     )
+                                        fg::AbstractDFG = initfg(),
+                                        direction::Symbol = :right,
+                                        graphinit::Bool = false,
+                                        solvable::Int=1,
+                                        refKey::Symbol=:simulated,
+                                        addLandmarks::Bool=true,
+                                        landmarkSolvable::Int=0,
+                                        useMsgLikelihoods::Bool=false,
+                                        postpose_cb::Function=(fg_,latestpose)->()     )
   #
-  global _beehiveRecipe
+  global _honeycombRecipe
 
   # does anything exist in the graph yet
   posecount = if :x0 in ls(fg)
@@ -181,7 +182,7 @@ function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
     match(r"\d+", string(lastPose)).match |> x->parse(Int,x)
   else
     # initial zero pose
-    generateCanonicalFG_ZeroPose2(fg=fg, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateCanonicalFG_ZeroPose(fg=fg, varType=Pose2, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
     getSolverParams(fg).useMsgLikelihoods = useMsgLikelihoods    
 
     # reference ppe on :x0
@@ -201,15 +202,15 @@ function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
     posecount = _driveHex!(fg, posecount, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)
     # drive the offset legs
     lastPose = Symbol(:x, posecount)
-    if haskey(_beehiveRecipe, lastPose)
-      posecount = _offsetHexLeg(fg, posecount, direction=_beehiveRecipe[lastPose], graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)    
+    if haskey(_honeycombRecipe, lastPose)
+      posecount = _offsetHexLeg(fg, posecount, direction=_honeycombRecipe[lastPose], graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)    
     end
     posecount = _offsetHexLeg(fg, posecount, direction=direction, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)
   end
 
-  # FIXME force everything solvable for now
-  setSolvable!.(fg, ls(fg), 1)
-  setSolvable!.(fg, lsf(fg), 1)
+  # NOTE solvable forced for everything at this time
+  setSolvable!.(fg, ls(fg),  solvable)
+  setSolvable!.(fg, lsf(fg), solvable)
 
   return fg
 end

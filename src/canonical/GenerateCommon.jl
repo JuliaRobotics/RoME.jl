@@ -1,6 +1,6 @@
 # canonical factor graph examples useful for development and learning.
 
-export generateCanonicalFG_ZeroPose2, generateCanonicalFG_Hexagonal, generateCanonicalFG_TwoPoseOdo, generateCanonicalFG_Circle
+export generateCanonicalFG_ZeroPose, generateCanonicalFG_Hexagonal, generateCanonicalFG_TwoPoseOdo, generateCanonicalFG_Circle
 export warmUpSolverJIT
 
 
@@ -44,158 +44,40 @@ end
 
 
 
+
 """
     $SIGNATURES
 
-Generate a canonical factor graph with a Pose2 `:x0` and MvNormal with covariance `P0`
+Generate a canonical factor graph with a Pose2 `:x0` and MvNormal with covariance `P0`.
+
+Notes
+- Use e.g. `varType=Point2` to change from the default variable type `Pose2`.
+- Use `priorArgs::Tuple` to override the default input arguments to `priorType`.
 """
-function generateCanonicalFG_ZeroPose2(;fg::AbstractDFG=initfg(),
-                                        graphinit::Bool=true,
-                                        Σ0::AbstractMatrix{<:Real}= 0.01*Matrix{Float64}(LinearAlgebra.I,3,3),
-                                        μ0::AbstractVector{<:Real}=zeros(3),
+function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2,
+                                        fg::AbstractDFG=initfg(),
                                         label::Symbol=:x0,
+                                        graphinit::Bool=true,
+                                        priorType::Type{<:AbstractPrior}=DFG._getPriorType(varType),
+                                        μ0::AbstractVector{<:Real}= zeros(getDimension(varType)),
+                                        Σ0::AbstractMatrix{<:Real}= diagm(0.01*ones(getDimension(varType))),
+                                        priorArgs::Tuple = (MvNormal(μ0, Σ0),),
                                         postpose_cb::Function=(fg_,latestpose)->()  )
   #
   # only add the first variable if none others exist
   if !exists(fg, label)
     # generate a default prior
-    prpo = PriorPose2(MvNormal(μ0, Σ0))
+    prpo = priorType(priorArgs...)
     # add the variable and prior with canonical helper function
-    _addPoseCanonical!( fg, :x0, 0, prpo, genLabel=label, graphinit=graphinit, srcType=Pose2, postpose_cb=postpose_cb )
+    _addPoseCanonical!( fg, label, 0, prpo, genLabel=label, graphinit=graphinit, 
+                        srcType=varType, postpose_cb=postpose_cb )
+    #
   else
     @warn "$label already exists in the factor graph, no new variables added."
   end
 
   return fg
 end
-
-"""
-    $SIGNATURES
-
-Generate a canonical factor graph: driving in a circular pattern with one landmark.
-
-Notes
-- Poses, :x0, :x1,... Pose2,
-- Odometry, :x0x1f1, etc., Pose2Pose2 (Gaussian)
-- OPTIONAL: 1 Landmark, :l1, Point2,
-- 2 Sightings, :x0l1f1, :x6l1f1, RangeBearing (Gaussian)
-
-Example
-```julia
-using RoME
-
-fg = generateCanonicalFG_Hexagonal()
-drawGraph(fg, show=true)
-```
-
-Related
-
-generateCanonicalFG_Circle, generateCanonicalFG_Kaess, generateCanonicalFG_TwoPoseOdo
-"""
-function generateCanonicalFG_Circle(poses::Int=6;
-                                    fg::AbstractDFG=initfg(),
-                                    offsetPoses::Int=maximum([length(ls(fg, r"x\d"))-1;0]),
-                                    autoinit::Union{Bool, Nothing}=nothing,
-                                    graphinit::Bool=true,
-                                    landmark::Bool=true,
-                                    loopClosure::Bool=true,
-                                    stopEarly::Int=9999999,
-                                    biasTurn::Real=0.0,
-                                    kappaOdo::Real=1.0,
-                                    cyclePoses::Int=poses )
-  # assume empty factor graph object fg
-  @assert offsetPoses < poses "`offsetPoses` must be smaller than total number of `poses`"
-  # IIF.getSolverParams(fg).drawtree = true
-
-  graphinit = if autoinit === nothing
-    graphinit
-  else
-    @warn "autoinit is deprecated, use graphinit instead"
-    autoinit
-  end
-
-  ## 1. Drive around in a hexagon
-  # Add the first pose :x0
-  if !exists(fg, :x0)
-    addVariable!(fg, :x0, Pose2)
-    prpo = PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I,3,3)))
-    addFactor!(fg, [:x0], prpo, graphinit=graphinit)
-  end
-
-  # println("STEP 1: Driving around a bit")
-  # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-  for i in offsetPoses:poses-1
-    if stopEarly <= i
-      break
-    end
-    psym = Symbol("x$i")
-    nsym = Symbol("x$(i+1)")
-    addVariable!(fg, nsym, Pose2)
-    pp = Pose2Pose2(MvNormal([10.0;0;2pi/(cyclePoses)+biasTurn], Matrix(Diagonal((kappaOdo*[0.1;0.1;0.1]).^2))))
-    addFactor!(fg, [psym;nsym], pp , graphinit=graphinit)
-  end
-
-  if !landmark
-    return fg
-  end
-  if !exists(fg, :l1)
-    # Add node linking initial pose with a bearing range measurement landmark
-    addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
-    p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-    addFactor!(fg, [:x0; :l1], p2br, graphinit=graphinit)
-  end
-
-  if !loopClosure || !exists(fg, Symbol("x$poses"))
-    return fg
-  end
-  # add loop closure sighting
-  p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-  addFactor!(fg, [Symbol("x$poses"); :l1], p2br, graphinit=graphinit)
-
-  # return the new factor graph object
-  return fg
-end
-
-
-
-"""
-    $SIGNATURES
-
-Generate a canonical factor graph: driving in a hexagonal circular pattern with one landmark.
-
-Notes
-- 7 Poses, :x0-:x6, Pose2,
-- 1 Landmark, :l1, Point2,
-- 6 Odometry, :x0x1f1, etc., Pose2Pose2 (Gaussian)
-- 2 Sightings, :x0l1f1, :x6l1f1, RangeBearing (Gaussian)
-
-Example
-```julia
-using RoME
-
-fg = generateCanonicalFG_Hexagonal()
-drawGraph(fg, show=true)
-```
-
-Related
-
-generateCanonicalFG_Circle, generateCanonicalFG_Kaess, generateCanonicalFG_TwoPoseOdo
-"""
-function generateCanonicalFG_Hexagonal(;fg::AbstractDFG=initfg(),
-                                        N::Int=100,
-                                        autoinit::Union{Bool, Nothing}=nothing,
-                                        graphinit::Bool=true  )
-  #
-  getSolverParams(fg).N = N
-  graphinit = if autoinit === nothing
-    graphinit
-  else
-    @warn "autoinit is deprecated, use graphinit instead"
-    autoinit
-  end
-  return generateCanonicalFG_Circle(6, graphinit=graphinit, landmark=true, loopClosure=true; fg=fg)
-end
-
 
 
 """
@@ -231,26 +113,47 @@ function generateCanonicalFG_TwoPoseOdo(;fg::AbstractDFG=initfg(),
 end
 
 
+
+
 """
     $SIGNATURES
 
-Load and solve a canonical or user factor graph to warm up---precompile---several RoME/Caesar related functions.
+Generate generalized helix parameterized by a curve along "t-axis" (i.e. z-axis, assuming z(t)=t).  
+
+Notes
+- Returns vectors for (`t`, `x,y`, and `yaw` angle).
+- Offset to start at origin and facing direction along +y-axis.
+- Use callbacks `xr_t(t)` and `yr_t(t)` to skew the helix with any desired curve, examples include
+  - `xr_t = (t) -> (1/3)t` to generate helix pattern along x-axis,
+  - or make spiral along t using xr_t, yr_t to generate a rose pattern on xy,
+  - use `spine_t(t)=xr_t(t) + im*yr_t(t)` as shortcut for more complicated patterns,
+  - note `xr_t` and `yr_t` are scaled by a factor `radius`, unscale the input by division if desired.
+- Use the function twice for simulated and noisy trajectories (i.e. easier Gauss-Markov processes)
+- Gradient (i.e. angle) calculations are on the order of 1e-8.
+
+Related
+
+[`generateCanonicalFG_Helix2D!`](@ref)
 """
-function warmUpSolverJIT(;fg::AbstractDFG=generateCanonicalFG_Hexagonal(),
-                          drawtree::Bool=true )::Nothing
+function _calcHelix_T(start::Real=0,
+                      stop::Real=1,
+                      pointsperturn=20;
+                      T::AbstractVector{<:Real}=(start:(stop*pointsperturn))./pointsperturn,
+                      radius::Real = 0.5,
+                      spine_t=(t)->0 + im*0,
+                      xr_t::Function=(t)->real(spine_t(t)),
+                      yr_t::Function=(t)->imag(spine_t(t))  )
   #
+  # calc the position
+  f(t, x=xr_t(t), y=yr_t(t)) = radius*( cis(pi - 2pi*t) + 1 + x + im*y)
+  vals = f.(T)
 
-  fcts = ls(fg, :x0)
-  fcts = ls(fg)
-  fcts = lsf(fg, :x0f1)
-  fcts = lsf(fg)
-  getSolverParams(fg).drawtree = drawtree
-  tree, smt, hist = solveTree!(fg)
-  nothing
+  # calc the gradient
+  g(t, h=1e-8) = (f(t+h)-f(t))/h
+  grad = g.(T)
+
+  return T, hcat(real.(vals), imag.(vals)), angle.(grad)
 end
-
-
-
 
 
 #
