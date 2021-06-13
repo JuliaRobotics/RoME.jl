@@ -4,28 +4,32 @@ export generateCanonicalFG_ZeroPose2, generateCanonicalFG_Hexagonal, generateCan
 export warmUpSolverJIT
 
 
-function _addPose2Canonical!( fg::AbstractDFG, 
-                              prevLabel::Symbol,
-                              posecount::Int,
-                              factor::AbstractFactor;
-                              refKey::Symbol=:simulated,
-                              graphinit::Bool=false,
-                              poseRegex::Regex=r"x\d+",
-                              genLabel = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, posecount),
-                              overridePPE=nothing,
-                              srcType::Type{<:InferenceVariable} = getVariableType(fg, prevLabel) |> typeof,
-                              postpose_cb::Function=(fg_,latestpose)->()  )
+function _addPoseCanonical!(fg::AbstractDFG, 
+                            prevLabel::Symbol,
+                            posecount::Int,
+                            factor::AbstractFactor;
+                            poseRegex::Regex=r"x\d+",
+                            genLabel = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, posecount),
+                            poseType::Type{<:InferenceVariable} = Pose2,
+                            srcType::Type{<:InferenceVariable} = getVariableType(fg, prevLabel) |> typeof,
+                            graphinit::Bool=false,
+                            solvable::Int=1,
+                            variableTags::AbstractVector{Symbol}=Symbol[],
+                            factorTags::AbstractVector{Symbol}=Symbol[],
+                            refKey::Symbol=:simulated,
+                            overridePPE=nothing,
+                            postpose_cb::Function=(fg_,latestpose)->()  )
   #
   # calculate and add the reference value
-  isAlready, simPPE, = IIF._checkVariableByReference(fg, prevLabel, poseRegex, Pose2, factor, refKey=refKey, srcType=srcType, overridePPE=overridePPE)
+  isAlready, simPPE, = IIF._checkVariableByReference(fg, prevLabel, poseRegex, poseType, factor, refKey=refKey, srcType=srcType, overridePPE=overridePPE)
 
   # dispatch on prior or binary factor
   _getlabels(fact::AbstractPrior) = [genLabel;]
   _getlabels(fact::AbstractRelative) = [prevLabel; genLabel]
   
   # add new pose variable
-  v_n = addVariable!(fg, genLabel, Pose2 )
-  addFactor!(fg, _getlabels(factor), factor, graphinit=graphinit )
+  v_n = addVariable!(fg, genLabel, poseType, solvable=solvable, tags=variableTags )
+  addFactor!(fg, _getlabels(factor), factor, graphinit=graphinit, solvable=solvable, tags=factorTags )
 
   # store simulated PPE for future use
   # ppe = DFG.MeanMaxPPE(refKey, simPPE, simPPE, simPPE)
@@ -52,13 +56,14 @@ function generateCanonicalFG_ZeroPose2(;fg::AbstractDFG=initfg(),
                                         label::Symbol=:x0,
                                         postpose_cb::Function=(fg_,latestpose)->()  )
   #
+  # only add the first variable if none others exist
   if !exists(fg, label)
+    # generate a default prior
     prpo = PriorPose2(MvNormal(μ0, Σ0))
-    _addPose2Canonical!( fg, :x0, 0, prpo, genLabel=label, graphinit=graphinit, srcType=Pose2, postpose_cb=postpose_cb )
-    # addVariable!(fg, label, Pose2)
-    # addFactor!(fg, [label], prpo, graphinit=graphinit)
-    # # user callback for additional features
-    # postpose_cb(fg, label)
+    # add the variable and prior with canonical helper function
+    _addPoseCanonical!( fg, :x0, 0, prpo, genLabel=label, graphinit=graphinit, srcType=Pose2, postpose_cb=postpose_cb )
+  else
+    @warn "$label already exists in the factor graph, no new variables added."
   end
 
   return fg
