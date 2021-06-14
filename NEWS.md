@@ -6,3 +6,5 @@ RoME.jl follows semver, with only a few case specific exceptions.  Please see re
 
 - A new canonical generator's name is changed to `generateCanonicalFG_Honeycomb!` (#445), and instead keeping the previous but recent function name (#440) `Beehive` available for a different upcoming canonical graph generator.
 - Adding new `generateCanonicalFG_Helix2D!` plus convenience wrappers `Slew` and `Spiral`.
+- Deprecating `generateCanonicalFG_ZeroPose2` and replaced by `generateCanonicalFG_ZeroPose`, already defaulting to keyword `varType=Pose2`.
+

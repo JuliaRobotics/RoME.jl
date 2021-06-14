@@ -238,17 +238,6 @@ export
 
 include("SpecialDefinitions.jl")
 
-## More variable types
-# 2D
-# include("variables/Point2D.jl")
-# include("variables/Pose2D.jl")
-# include("variables/DynPoint2D.jl")
-# include("variables/DynPose2D.jl")
-
-# 3D
-# include("variables/Point3D.jl")
-# include("variables/Pose3D.jl")
-
 #uses DFG v0.10.2 @defVariable for above
 include("variables/Local_Manifold_Workaround.jl")
 include("variables/VariableTypes.jl")
@@ -295,10 +284,14 @@ include("NavigationSystem.jl")
 
 # generate canonical graphs
 include("canonical/GenerateCommon.jl")
+include("canonical/GenerateCircular.jl")
 include("canonical/GenerateBox.jl")
+include("canonical/GenerateHexagonal.jl")
 include("canonical/GenerateHoneycomb.jl")
 include("canonical/GenerateHelix.jl")
 
+# more utils requiring earlier functions
+include("AdditionalUtils.jl")
 include("g2oParser.jl")
 
 

@@ -1,61 +1,27 @@
 
-export generateCanonicalFG_Helix2D!
-export generateCanonicalFG_Helix2DSlew!, generateCanonicalFG_Helix2DSpiral!
-
+export 
+  generateCanonicalFG_Helix2D!,
+  generateCanonicalFG_Helix2DSlew!,
+  generateCanonicalFG_Helix2DSpiral!
 
 
 """
     $SIGNATURES
 
-Generate generalized helix parameterized by a curve along "t-axis" (i.e. z-axis, assuming z(t)=t).  
+Generalized canonical graph generator function for helix patterns.
 
 Notes
-- Returns vectors for (`t`, `x,y`, and `yaw` angle).
-- Offset to start at origin and facing direction along +y-axis.
-- Use callbacks `xr_t(t)` and `yr_t(t)` to skew the helix with any desired curve, examples include
-  - `xr_t = (t) -> (1/3)t` to generate helix pattern along x-axis,
-  - or make spiral along t using xr_t, yr_t to generate a rose pattern on xy,
-  - use `spine_t(t)=xr_t(t) + im*yr_t(t)` as shortcut for more complicated patterns,
-  - note `xr_t` and `yr_t` are scaled by a factor `radius`, unscale the input by division if desired.
-- Use the function twice for simulated and noisy trajectories (i.e. easier Gauss-Markov processes)
+- assumes poses are labeled according to r"x\\d+"
 - Gradient (i.e. angle) calculations are on the order of 1e-8.
+- Use callback `spine_t(t)::Complex` to modify how the helix pattern is moved in x, y along the progression of `t`,
+  - See related wrapper functions for convenient generators of helix patterns in 2D,
+  - Real valued `xr_t(t)` and `yr_t(t)` can be modified (and will override) complex valued `spine_t` instead.
+- use `postpose_cb = (fg_, lastestpose) -> ...` for additional user features after each new pose
 
 Related
 
-[`generateCanonicalFG_Helix2D!`](@ref)
+[`generateCanonicalFG_Helix2DSlew!`](@ref), [`generateCanonicalFG_Helix2DSpiral!`](@ref)
 """
-function _calcHelix_T(start::Real=0,
-                      stop::Real=1,
-                      pointsperturn=20;
-                      T::AbstractVector{<:Real}=(start:(stop*pointsperturn))./pointsperturn,
-                      radius::Real = 0.5,
-                      spine_t=(t)->0 + im*0,
-                      xr_t::Function=(t)->real(spine_t(t)),
-                      yr_t::Function=(t)->imag(spine_t(t))  )
-  #
-  # calc the position
-  f(t, x=xr_t(t), y=yr_t(t)) = radius*( cis(pi - 2pi*t) + 1 + x + im*y)
-  vals = f.(T)
-
-  # calc the gradient
-  g(t, h=1e-8) = (f(t+h)-f(t))/h
-  grad = g.(T)
-
-  return T, hcat(real.(vals), imag.(vals)), angle.(grad)
-end
-
-
-
-
-## ================================================================================================
-## GENERATE CANONICAL GRAPH
-## ================================================================================================
-
-
-
-# assume poses are labeled according to r"x\d+"
-#- Gradient (i.e. angle) calculations are on the order of 1e-8.
-#- use `postpose_cb = (fg_, lastestpose) -> ...` for additional user features after each new pose
 function generateCanonicalFG_Helix2D!(numposes::Integer=40;
                                       posesperturn::Integer=20,
                                       dfg::AbstractDFG=initfg(),
@@ -74,7 +40,7 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
   # add first pose if not already exists
   if !( :x0 in ls(dfg) )
     μ0=[0;0;pi/2]
-    generateCanonicalFG_ZeroPose2(fg=dfg, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateCanonicalFG_ZeroPose(fg=dfg, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
     getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
     # reference ppe on :x0
     ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
@@ -123,7 +89,20 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
 end
 
 
+"""
+    $SIGNATURES
 
+Generate canonical slewed helix graph (like a flattened slinky).
+
+Notes
+- Use `slew_x` and `slew_y` to pull the "slinky" out in different directions at constant rate.
+- See generalized helix generator for more details. 
+- Defaults are choosen to slew along x and have multple trajectory intersects between consecutive loops of the helix.
+
+Related
+
+[`generateCanonicalFG_Helix2D!`](@ref), [`generateCanonicalFG_Helix2DSpiral!`](@ref)
+"""
 generateCanonicalFG_Helix2DSlew!( numposes::Integer=40;
                                   slew_x::Real=2/3,
                                   slew_y::Real=0,
@@ -131,7 +110,21 @@ generateCanonicalFG_Helix2DSlew!( numposes::Integer=40;
                                   kwargs...  ) = generateCanonicalFG_Helix2D!(numposes; spine_t=spine_t, kwargs...)
 #
 
+"""
+    $SIGNATURES
 
+Generate canonical helix graph that expands along a spiral pattern, analogous flower petals.
+
+Notes
+- This function wraps the complex `spine_t(t)` function to generate the spiral pattern.
+  - `rate_a` and `rate_r` can be varied for different spiral behavior.
+- See generalized helix generator for more details. 
+- Defaults are choosen to slewto have multple trajectory intersects between consecutive loops of the helix and do a decent job of moving around coverage area with a relative balance of encircled area sizes.
+
+Related 
+
+[`generateCanonicalFG_Helix2D!`](@ref), [`generateCanonicalFG_Helix2DSlew!`](@ref)
+"""
 generateCanonicalFG_Helix2DSpiral!( numposes::Integer=100;
                                     rate_r=0.6,
                                     rate_a=6,
