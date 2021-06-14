@@ -22,7 +22,7 @@ drawGraph(fg, show=true)
 
 Related
 
-generateCanonicalFG_Circle, generateCanonicalFG_Kaess, generateCanonicalFG_TwoPoseOdo
+[`generateCanonicalFG_Circle`](@ref), [`generateCanonicalFG_Kaess`](@ref), [`generateCanonicalFG_TwoPoseOdo`](@ref), [`generateCanonicalFG_Boxes2D!`](@ref)
 """
 function generateCanonicalFG_Hexagonal(;fg::AbstractDFG=initfg(),
                                         N::Int=100,
