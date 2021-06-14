@@ -3,7 +3,19 @@
 export generateCanonicalFG_ZeroPose, generateCanonicalFG_Hexagonal, generateCanonicalFG_TwoPoseOdo, generateCanonicalFG_Circle
 export warmUpSolverJIT
 
+"""
+    $SIGNATURES
 
+Lower level utility function for simulated canonical graph generation, where a pose variable and factor is added using this function.
+
+Notes
+- Also adds the `refKey=:simulated` (default) PPE as in graph record of the simulated values. 
+- Use callback `postpose_cb(g::AbstractDFG,lastpose::Symbol)` to call user operations after each pose step.
+
+Related
+
+[`generateCanonicalFG_ZeroPose`](@ref), [`generateCanonicalFG_Helix2D!`](@ref)
+"""
 function _addPoseCanonical!(fg::AbstractDFG, 
                             prevLabel::Symbol,
                             posecount::Int, # can be overriden with genLabel
@@ -53,6 +65,7 @@ Generate a canonical factor graph with a Pose2 `:x0` and MvNormal with covarianc
 Notes
 - Use e.g. `varType=Point2` to change from the default variable type `Pose2`.
 - Use `priorArgs::Tuple` to override the default input arguments to `priorType`.
+- Use callback `postpose_cb(g::AbstractDFG,lastpose::Symbol)` to call user operations after each pose step.
 """
 function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2,
                                         fg::AbstractDFG=initfg(),
@@ -62,15 +75,19 @@ function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2
                                         μ0::AbstractVector{<:Real}= zeros(getDimension(varType)),
                                         Σ0::AbstractMatrix{<:Real}= diagm(0.01*ones(getDimension(varType))),
                                         priorArgs::Tuple = (MvNormal(μ0, Σ0),),
+                                        variableTags::AbstractVector{Symbol}=Symbol[],
+                                        factorTags::AbstractVector{Symbol}=Symbol[],
                                         postpose_cb::Function=(fg_,latestpose)->()  )
   #
+
   # only add the first variable if none others exist
   if !exists(fg, label)
     # generate a default prior
     prpo = priorType(priorArgs...)
     # add the variable and prior with canonical helper function
     _addPoseCanonical!( fg, label, 0, prpo, genLabel=label, graphinit=graphinit, 
-                        srcType=varType, postpose_cb=postpose_cb )
+                        srcType=varType, variableTags=variableTags, factorTags=factorTags,
+                        postpose_cb=postpose_cb )
     #
   else
     @warn "$label already exists in the factor graph, no new variables added."
