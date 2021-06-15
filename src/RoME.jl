@@ -288,6 +288,7 @@ include("canonical/GenerateCircular.jl")
 include("canonical/GenerateBox.jl")
 include("canonical/GenerateHexagonal.jl")
 include("canonical/GenerateHoneycomb.jl")
+include("canonical/GenerateBeehive.jl")
 include("canonical/GenerateHelix.jl")
 
 # more utils requiring earlier functions

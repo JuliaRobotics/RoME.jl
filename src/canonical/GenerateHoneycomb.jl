@@ -169,7 +169,7 @@ function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
                                         refKey::Symbol=:simulated,
                                         addLandmarks::Bool=true,
                                         landmarkSolvable::Int=0,
-                                        useMsgLikelihoods::Bool=false,
+                                        useMsgLikelihoods::Bool=getSolverParams(fg).useMsgLikelihoods,
                                         postpose_cb::Function=(fg_,latestpose)->()     )
   #
   global _honeycombRecipe
@@ -183,12 +183,11 @@ function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
   else
     # initial zero pose
     generateCanonicalFG_ZeroPose(fg=fg, varType=Pose2, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
-    getSolverParams(fg).useMsgLikelihoods = useMsgLikelihoods    
 
-    # reference ppe on :x0
-    refVal = zeros(3)
-    ppe = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
-    setPPE!(fg[:x0], refKey, DFG.MeanMaxPPE, ppe)
+    # # reference ppe on :x0
+    # refVal = zeros(3)
+    # ppe = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
+    # setPPE!(fg[:x0], refKey, DFG.MeanMaxPPE, ppe)
     
     # add a new landmark (if not yet present)
     !addLandmarks ? nothing : _addLandmarkBeehive!(fg, :x0, refKey=refKey, solvable=landmarkSolvable, graphinit=false)

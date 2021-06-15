@@ -54,6 +54,18 @@ tree, _, _ = solveTree!(fg  , tree);
 
 end
 
+@testset "Test stochastic Beehive trajectory generator" begin
+
+##
+
+fg = generateCanonicalFG_Beehive!(8, postpose_cb=(g,l)->@show l)
+
+@test isapprox( getPPE(fg, :x0, :simulated).suggested[1:2], [0.0;0.0], atol = 1e-8)
+
+##
+
+end
+
 ##
 
 # using RoMEPlotting
