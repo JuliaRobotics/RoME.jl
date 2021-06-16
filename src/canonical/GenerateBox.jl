@@ -53,7 +53,7 @@ function driveLeg!( fg,
   # add end pose of the leg
   newPose = incrSuffix(lastPose)
   
-  v_n = RoME._addPoseCanonical!(fg, lastPose, -1, factor, genLabel=newPose, srcType=Point2,
+  v_n = RoME._addPoseCanonical!(fg, lastPose, -1, factor, genLabel=newPose, srcType=RoME.Point2,
                                 graphinit=false, variableTags=[:POSE;direction], 
                                 factorTags=[:ODOMETRY; direction],
                                 overridePPE=overridePPE,
@@ -122,7 +122,7 @@ function generateCanonicalFG_Boxes2D!(numposes::Integer=16;
   #
 
   # actually start adding nodes 
-  generateCanonicalFG_ZeroPose(fg=dfg, varType=Point2, variableTags=[:POSE;], postpose_cb=postpose_cb)
+  generateCanonicalFG_ZeroPose(fg=dfg, varType=RoME.Point2, variableTags=[:POSE;], postpose_cb=postpose_cb)
 
   numboxes = ceil(Int, numposes/4)
   

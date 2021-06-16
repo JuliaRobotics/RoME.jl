@@ -60,10 +60,11 @@ function _addLandmarkBeehive!(fg,
                               lastPose::Symbol; 
                               refKey::Symbol=:simulated, 
                               solvable::Int=1,
-                              graphinit::Bool=true  )
+                              graphinit::Bool=true,
+                              landmarkRegex::Regex=r"l\d+"  )
   #
   newFactor = RoME.Pose2Point2BearingRange(Normal(0,0.03), Normal(20,0.5))
-  isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, lastPose, r"l\\d+", Point2, newFactor)
+  isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, lastPose, landmarkRegex, RoME.Point2, newFactor)
 
   # force isAlready until fixed _checkVariableByReference parametric solution at -pi Optim issue
   global _honeycombRecipe
@@ -79,7 +80,7 @@ function _addLandmarkBeehive!(fg,
   # maybe add new variable
   if !isAlready
     @info "New variable with simPPE" genLabel round.(simPPE.suggested,digits=2)
-    newVar = addVariable!(fg, genLabel, Point2, solvable=solvable)
+    newVar = addVariable!(fg, genLabel, RoME.Point2, solvable=solvable)
     addFactor!(fg, [lastPose; genLabel], newFactor, solvable=solvable, graphinit=graphinit)
     
     # also set :simulated PPE for similar future usage
@@ -182,7 +183,7 @@ function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
     match(r"\d+", string(lastPose)).match |> x->parse(Int,x)
   else
     # initial zero pose
-    generateCanonicalFG_ZeroPose(dfg=dfg, varType=Pose2, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateCanonicalFG_ZeroPose(dfg=dfg, varType=RoME.Pose2, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
 
     # # reference ppe on :x0
     # refVal = zeros(3)
