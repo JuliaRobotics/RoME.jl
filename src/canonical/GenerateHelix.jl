@@ -40,7 +40,7 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
   # add first pose if not already exists
   if !( :x0 in ls(dfg) )
     μ0=[0;0;pi/2]
-    generateCanonicalFG_ZeroPose(fg=dfg, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateCanonicalFG_ZeroPose(dfg=dfg, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
     getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
     # reference ppe on :x0
     ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
