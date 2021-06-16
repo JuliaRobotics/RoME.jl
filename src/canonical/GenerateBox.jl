@@ -109,19 +109,17 @@ Related
 [`generateCanonicalFG_ZeroPose`](@ref), [`generateCanonicalFG_Helix2DSlew!`](@ref), [`generateCanonicalFG_Hexagonal`](@ref)
 """
 function generateCanonicalFG_Boxes2D!(numposes::Integer=16;
-                                      dfg::AbstractDFG=initfg(),
-                                      length_x::Real=15,
-                                      length_y::Real=15,
-                                      slew_x::Real=2/3,
                                       graphinit::Bool=false,
-                                      poseRegex::Regex=r"x\d+",
                                       useMsgLikelihoods::Bool=true,
+                                      dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit, useMsgLikelihoods=useMsgLikelihoods)),
+                                      length_x::Real=15,
+                                      length_y::Real=length_x,
+                                      slew_x::Real=2/3,
+                                      poseRegex::Regex=r"x\d+",
                                       refKey::Symbol=:simulated,
                                       Qd::Matrix{<:Real}=diagm( [0.1;0.1;0.05].^2 ),
                                       postpose_cb::Function=(fg_,latestpose)->()   )
   #
-
-
 
   # actually start adding nodes 
   generateCanonicalFG_ZeroPose(fg=dfg, varType=Point2, variableTags=[:POSE;], postpose_cb=postpose_cb)

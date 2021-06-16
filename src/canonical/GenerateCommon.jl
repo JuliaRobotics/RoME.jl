@@ -68,9 +68,10 @@ Notes
 - Use callback `postpose_cb(g::AbstractDFG,lastpose::Symbol)` to call user operations after each pose step.
 """
 function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2,
-                                        fg::AbstractDFG=initfg(),
-                                        label::Symbol=:x0,
                                         graphinit::Bool=true,
+                                        useMsgLikelihoods::Bool=true,
+                                        dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit, useMsgLikelihoods=useMsgLikelihoods)),  
+                                        label::Symbol=:x0,
                                         priorType::Type{<:AbstractPrior}=DFG._getPriorType(varType),
                                         μ0::AbstractVector{<:Real}= zeros(getDimension(varType)),
                                         Σ0::AbstractMatrix{<:Real}= diagm(0.01*ones(getDimension(varType))),
@@ -82,11 +83,11 @@ function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2
   #
 
   # only add the first variable if none others exist
-  if !exists(fg, label)
+  if !exists(dfg, label)
     # generate a default prior
     prpo = priorType(priorArgs...)
     # add the variable and prior with canonical helper function
-    _addPoseCanonical!( fg, label, 0, prpo, genLabel=label, graphinit=graphinit, solvable=solvable,
+    _addPoseCanonical!( dfg, label, 0, prpo, genLabel=label, graphinit=graphinit, solvable=solvable,
                         srcType=varType, variableTags=variableTags, factorTags=factorTags,
                         postpose_cb=postpose_cb )
     #
@@ -94,7 +95,7 @@ function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2
     @warn "$label already exists in the factor graph, no new variables added."
   end
 
-  return fg
+  return dfg
 end
 
 
