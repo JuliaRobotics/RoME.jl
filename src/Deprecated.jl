@@ -4,7 +4,7 @@
 ## Remove before RoME v0.17
 ##==============================================================================
 
-@deprecate generateCanonicalFG_ZeroPose2(;kw...) generateCanonicalFG_ZeroPose(; kw...)
+@deprecate generateCanonicalFG_ZeroPose2(;fg::AbstractDFG=initfg(), kw...) generateCanonicalFG_ZeroPose(; dfg=fg, kw...)
 
 # @deprecate generateCanonicalFG_Beehive!(w...; kw...) generateCanonicalFG_Honeycomb!(w...; kw...)
 

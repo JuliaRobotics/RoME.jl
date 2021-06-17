@@ -4,32 +4,34 @@ export generateCanonicalFG_Beehive!
 
 
 function generateCanonicalFG_Beehive!(poseCountTarget::Int=10;
-                                      dfg::AbstractDFG = initfg(),
-                                      direction::Symbol = :right,
-                                      graphinit::Bool = false,
-                                      solvable::Int=1,
-                                      refKey::Symbol=:simulated,
-                                      addLandmarks::Bool=true,
+                                      graphinit::Bool = true,
+                                      useMsgLikelihoods::Bool=true,
+                                      dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit, useMsgLikelihoods=useMsgLikelihoods)),
+                                      solvable::Int = 1,
+                                      refKey::Symbol = :simulated,
+                                      addLandmarks::Bool = true,
                                       landmarkSolvable::Int=0,
-                                      useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
+                                      poseRegex::Regex=r"x\d+",
+                                      pose0::Symbol=Symbol(match(r"[a-zA-Z_]+", poseRegex.pattern).match, 0),
+                                      yaw0::Real = ([0.0;-2pi/3;2pi/3])[rand(1:3)],
+                                      μ0::AbstractVector{<:Real} = [0;0;yaw0],                                  
                                       postpose_cb::Function=(fg_,latestpose)->()     )
   #
 
   # does anything exist in the graph yet
-  posecount = if :x0 in ls(dfg)
+  posecount = if pose0 in ls(dfg)
     # what is the last pose
-    lastPose = (ls(dfg, r"x\d+") |> sortDFG)[end]
+    lastPose = (ls(dfg, poseRegex) |> sortDFG)[end]
     # get latest posecount number
     match(r"\d+", string(lastPose)).match |> x->parse(Int,x)
   else
     # pick a random staring direction
-    yaw0 = ([0.0;-2pi/3;2pi/3])[rand(1:3)]
-    μ0 = [0;0;yaw0]
     # initial zero pose
-    generateCanonicalFG_ZeroPose(fg=dfg, varType=Pose2, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateCanonicalFG_ZeroPose(fg=dfg, varType=Pose2, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb)
+    getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods
     
     # add a new landmark (if not yet present)
-    !addLandmarks ? nothing : _addLandmarkBeehive!(dfg, :x0, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
+    !addLandmarks ? nothing : _addLandmarkBeehive!(dfg, pose0, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
 
     # staring posecount (i.e. :x0)
     0

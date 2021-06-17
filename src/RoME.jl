@@ -163,6 +163,9 @@ export
   PackedDynPoint2VelocityPrior,
   PackedVelPoint2VelPoint2,
 
+  Point3Point3,
+  PackedPoint3Point3,
+
   # likely to be deprecated
   solveLandm,
   solvePose2,
@@ -259,6 +262,7 @@ include("factors/VelPoint2D.jl")
 include("factors/DynPose2D.jl")
 include("factors/VelPose2D.jl")
 include("factors/Point3D.jl")
+include("factors/Point3Point3.jl")
 include("factors/Pose3D.jl")
 include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")

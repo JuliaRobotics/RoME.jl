@@ -60,10 +60,11 @@ function _addLandmarkBeehive!(fg,
                               lastPose::Symbol; 
                               refKey::Symbol=:simulated, 
                               solvable::Int=1,
-                              graphinit::Bool=true  )
+                              graphinit::Bool=true,
+                              landmarkRegex::Regex=r"l\d+"  )
   #
   newFactor = RoME.Pose2Point2BearingRange(Normal(0,0.03), Normal(20,0.5))
-  isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, lastPose, r"l\\d+", Point2, newFactor)
+  isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, lastPose, landmarkRegex, RoME.Point2, newFactor)
 
   # force isAlready until fixed _checkVariableByReference parametric solution at -pi Optim issue
   global _honeycombRecipe
@@ -79,7 +80,7 @@ function _addLandmarkBeehive!(fg,
   # maybe add new variable
   if !isAlready
     @info "New variable with simPPE" genLabel round.(simPPE.suggested,digits=2)
-    newVar = addVariable!(fg, genLabel, Point2, solvable=solvable)
+    newVar = addVariable!(fg, genLabel, RoME.Point2, solvable=solvable)
     addFactor!(fg, [lastPose; genLabel], newFactor, solvable=solvable, graphinit=graphinit)
     
     # also set :simulated PPE for similar future usage
@@ -162,35 +163,35 @@ end
 
 
 function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
-                                        fg::AbstractDFG = initfg(),
-                                        direction::Symbol = :right,
                                         graphinit::Bool = false,
+                                        useMsgLikelihoods::Bool=true,
+                                        dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit, useMsgLikelihoods=useMsgLikelihoods)),  
+                                        direction::Symbol = :right,
                                         solvable::Int=1,
                                         refKey::Symbol=:simulated,
                                         addLandmarks::Bool=true,
                                         landmarkSolvable::Int=0,
-                                        useMsgLikelihoods::Bool=getSolverParams(fg).useMsgLikelihoods,
                                         postpose_cb::Function=(fg_,latestpose)->()     )
   #
   global _honeycombRecipe
 
   # does anything exist in the graph yet
-  posecount = if :x0 in ls(fg)
+  posecount = if :x0 in ls(dfg)
     # what is the last pose
-    lastPose = (ls(fg, r"x\d+") |> sortDFG)[end]
+    lastPose = (ls(dfg, r"x\d+") |> sortDFG)[end]
     # get latest posecount number
     match(r"\d+", string(lastPose)).match |> x->parse(Int,x)
   else
     # initial zero pose
-    generateCanonicalFG_ZeroPose(fg=fg, varType=Pose2, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateCanonicalFG_ZeroPose(dfg=dfg, varType=RoME.Pose2, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
 
     # # reference ppe on :x0
     # refVal = zeros(3)
     # ppe = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
-    # setPPE!(fg[:x0], refKey, DFG.MeanMaxPPE, ppe)
+    # setPPE!(dfg[:x0], refKey, DFG.MeanMaxPPE, ppe)
     
     # add a new landmark (if not yet present)
-    !addLandmarks ? nothing : _addLandmarkBeehive!(fg, :x0, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
+    !addLandmarks ? nothing : _addLandmarkBeehive!(dfg, :x0, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
 
     # staring posecount (i.e. :x0)
     0
@@ -198,18 +199,18 @@ function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
 
   # keep adding poses until the target number is reached
   while posecount < poseCountTarget
-    posecount = _driveHex!(fg, posecount, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)
+    posecount = _driveHex!(dfg, posecount, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)
     # drive the offset legs
     lastPose = Symbol(:x, posecount)
     if haskey(_honeycombRecipe, lastPose)
-      posecount = _offsetHexLeg(fg, posecount, direction=_honeycombRecipe[lastPose], graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)    
+      posecount = _offsetHexLeg(dfg, posecount, direction=_honeycombRecipe[lastPose], graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)    
     end
-    posecount = _offsetHexLeg(fg, posecount, direction=direction, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)
+    posecount = _offsetHexLeg(dfg, posecount, direction=direction, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)
   end
 
   # NOTE solvable forced for everything at this time
-  setSolvable!.(fg, ls(fg),  solvable)
-  setSolvable!.(fg, lsf(fg), solvable)
+  setSolvable!.(dfg, ls(dfg),  solvable)
+  setSolvable!.(dfg, lsf(dfg), solvable)
 
-  return fg
+  return dfg
 end

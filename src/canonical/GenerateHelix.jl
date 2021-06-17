@@ -24,14 +24,14 @@ Related
 """
 function generateCanonicalFG_Helix2D!(numposes::Integer=40;
                                       posesperturn::Integer=20,
-                                      dfg::AbstractDFG=initfg(),
+                                      graphinit::Bool=false,
+                                      useMsgLikelihoods::Bool=true,
+                                      dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit, useMsgLikelihoods=useMsgLikelihoods)),
                                       radius::Real=10,
                                       spine_t=(t)->0 + im*0,
                                       xr_t::Function=(t)->real(spine_t(t)),
                                       yr_t::Function=(t)->imag(spine_t(t)),
-                                      graphinit::Bool=false,
                                       poseRegex::Regex=r"x\d+",
-                                      useMsgLikelihoods::Bool=true,
                                       refKey::Symbol=:simulated,
                                       Qd::Matrix{<:Real}=diagm( [0.1;0.1;0.05].^2 ),
                                       postpose_cb::Function=(fg_,latestpose)->()   )
@@ -40,7 +40,7 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
   # add first pose if not already exists
   if !( :x0 in ls(dfg) )
     μ0=[0;0;pi/2]
-    generateCanonicalFG_ZeroPose(fg=dfg, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateCanonicalFG_ZeroPose(dfg=dfg, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
     getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
     # reference ppe on :x0
     ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
