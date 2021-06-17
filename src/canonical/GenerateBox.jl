@@ -122,7 +122,7 @@ function generateCanonicalFG_Boxes2D!(numposes::Integer=16;
   #
 
   # actually start adding nodes 
-  generateCanonicalFG_ZeroPose(fg=dfg, varType=RoME.Point2, variableTags=[:POSE;], postpose_cb=postpose_cb)
+  generateCanonicalFG_ZeroPose(dfg=dfg, varType=RoME.Point2, variableTags=[:POSE;], postpose_cb=postpose_cb)
 
   numboxes = ceil(Int, numposes/4)
   
