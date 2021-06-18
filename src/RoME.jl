@@ -163,6 +163,9 @@ export
   PackedDynPoint2VelocityPrior,
   PackedVelPoint2VelPoint2,
 
+  Point3Point3,
+  PackedPoint3Point3,
+
   # likely to be deprecated
   solveLandm,
   solvePose2,
@@ -238,17 +241,6 @@ export
 
 include("SpecialDefinitions.jl")
 
-## More variable types
-# 2D
-# include("variables/Point2D.jl")
-# include("variables/Pose2D.jl")
-# include("variables/DynPoint2D.jl")
-# include("variables/DynPose2D.jl")
-
-# 3D
-# include("variables/Point3D.jl")
-# include("variables/Pose3D.jl")
-
 #uses DFG v0.10.2 @defVariable for above
 include("variables/Local_Manifold_Workaround.jl")
 include("variables/VariableTypes.jl")
@@ -270,6 +262,7 @@ include("factors/VelPoint2D.jl")
 include("factors/DynPose2D.jl")
 include("factors/VelPose2D.jl")
 include("factors/Point3D.jl")
+include("factors/Point3Point3.jl")
 include("factors/Pose3D.jl")
 include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")
@@ -292,7 +285,18 @@ include("SimulationUtils.jl")
 include("OdometryUtils.jl")
 include("RobotDataTypes.jl")
 include("NavigationSystem.jl")
-include("CanonicalGraphs.jl")
+
+# generate canonical graphs
+include("canonical/GenerateCommon.jl")
+include("canonical/GenerateCircular.jl")
+include("canonical/GenerateBox.jl")
+include("canonical/GenerateHexagonal.jl")
+include("canonical/GenerateHoneycomb.jl")
+include("canonical/GenerateBeehive.jl")
+include("canonical/GenerateHelix.jl")
+
+# more utils requiring earlier functions
+include("AdditionalUtils.jl")
 include("g2oParser.jl")
 
 

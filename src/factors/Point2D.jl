@@ -91,8 +91,10 @@ mutable struct PackedPoint2Point2 <: IncrementalInference.PackedInferenceType
     PackedPoint2Point2(s::AS) where {AS <: AbstractString} = new(s)
 end
 function convert(::Type{Point2Point2}, d::PackedPoint2Point2)
-  return Point2Point2( extractdistribution(d.str) )
+  return Point2Point2( convert(SamplableBelief, d.str) )
 end
 function convert(::Type{PackedPoint2Point2}, d::Point2Point2)
-  return PackedPoint2Point2( string(d.Zij) )
+  return PackedPoint2Point2( convert(PackedSamplableBelief, d.Zij) )
 end
+
+

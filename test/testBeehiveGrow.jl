@@ -17,23 +17,23 @@ using RoME
 
 ##
 
-fg = RoME.generateCanonicalFG_Beehive!(7, graphinit=true, useMsgLikelihoods = true)
+fg = RoME.generateCanonicalFG_Honeycomb!(7, graphinit=true, useMsgLikelihoods = true)
 tree, _, _ = solveTree!(fg);
 
-fg = RoME.generateCanonicalFG_Beehive!(14, graphinit=true, fg=fg)
+fg = RoME.generateCanonicalFG_Honeycomb!(14, graphinit=true, dfg=fg)
 tree, _, _ = solveTree!(fg, tree);
 
 tree_ = deepcopy(tree); fg_ = deepcopy(fg);
-fg = RoME.generateCanonicalFG_Beehive!(21, graphinit=true, fg=fg)
+fg = RoME.generateCanonicalFG_Honeycomb!(21, graphinit=true, dfg=fg)
 tree, _, _ = solveTree!(fg  , tree);
 
-# fg = RoME.generateCanonicalFG_Beehive!(28, graphinit=true, fg=fg)
+# fg = RoME.generateCanonicalFG_Honeycomb!(28, graphinit=true, dfg=fg)
 # tree, _, _ = solveTree!(fg, tree);
 
-# fg = RoME.generateCanonicalFG_Beehive!(35, graphinit=true, fg=fg)
+# fg = RoME.generateCanonicalFG_Honeycomb!(35, graphinit=true, dfg=fg)
 # tree, _, _ = solveTree!(fg, tree);
 
-# fg = RoME.generateCanonicalFG_Beehive!(42, graphinit=true, fg=fg)
+# fg = RoME.generateCanonicalFG_Honeycomb!(42, graphinit=true, dfg=fg)
 # tree, _, _ = solveTree!(fg, tree);
 
 
@@ -49,6 +49,18 @@ tree, _, _ = solveTree!(fg  , tree);
 # likely to fail until IIF 1010 is completed
 @test_broken  isapprox( getPPE(fg, :x21).suggested[1:2] , [10;-20*sin(pi/3)], atol=4)
 
+
+##
+
+end
+
+@testset "Test stochastic Beehive trajectory generator" begin
+
+##
+
+fg = generateCanonicalFG_Beehive!(8, graphinit=false, postpose_cb=(g,l)->@show l)
+
+@test isapprox( getPPE(fg, :x0, :simulated).suggested[1:2], [0.0;0.0], atol = 1e-8)
 
 ##
 
