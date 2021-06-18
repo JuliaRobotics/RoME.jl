@@ -8,7 +8,7 @@ $(TYPEDEF)
 
 XY Euclidean manifold variable node softtype.
 """
-@defVariable Point2 Euclidean(2)
+@defVariable Point2 Euclidean(2) Vector{Float64}
 
 
 """
@@ -22,7 +22,7 @@ Example
 p3 = Point3()
 ```
 """
-@defVariable Point3 Euclidean(3)
+@defVariable Point3 Euclidean(3) Vector{Float64}
 
 
 """
@@ -30,7 +30,7 @@ $(TYPEDEF)
 
 Pose2 is a SE(2) mechanization of two Euclidean translations and one Circular rotation, used for general 2D SLAM.
 """
-@defVariable Pose2 SpecialEuclidean(2)
+@defVariable Pose2 SpecialEuclidean(2) ProductRepr{Tuple{Vector{Float64}, Matrix{Float64}}}
 
 """
 $(TYPEDEF)
@@ -42,7 +42,7 @@ Future:
 - Work in progress on AMP3D for proper non-Euler angle on-manifold operations.
 - TODO the AMP upgrade is aimed at resolving 3D to Quat/SE3/SP3 -- current Euler angles will be replaced
 """
-@defVariable Pose3 SpecialEuclidean(3)
+@defVariable Pose3 SpecialEuclidean(3) ProductRepr{Tuple{Vector{Float64}, Matrix{Float64}}}
 
 """
 $(TYPEDEF)
@@ -50,7 +50,7 @@ $(TYPEDEF)
 Dynamic point in 2D space with velocity components: `x, y, dx/dt, dy/dt`
 
 """
-@defVariable DynPoint2 Euclidean(4)
+@defVariable DynPoint2 Euclidean(4) Vector{Float64}
 
 """
 $(TYPEDEF)
@@ -60,7 +60,7 @@ Dynamic pose variable with velocity components: `x, y, theta, dx/dt, dy/dt`
 Note
 - The `SE2E2_Manifold` definition used currently is a hack to simplify the transition to Manifolds.jl, see #244 
 """
-@defVariable DynPose2 SE2E2_Manifold
+@defVariable DynPose2 SE2E2_Manifold ProductRepr{Tuple{Vector{Float64}, Matrix{Float64}, Vector{Float64}}}
 
 
 
@@ -78,7 +78,7 @@ projectCartesian(pose::Union{<:Point2,<:Point3,<:Pose2,<:Pose3,<:DynPoint2,<:Dyn
 
 # Still experimental
 # export BearingRange2
-@defVariable BearingRange2 BearingRange_Manifold
+@defVariable BearingRange2 BearingRange_Manifold ProductRepr{Tuple{Float64,Float64}}
 
 
 
