@@ -27,7 +27,7 @@ function generateCanonicalFG_Beehive!(poseCountTarget::Int=10;
   else
     # pick a random staring direction
     # initial zero pose
-    generateCanonicalFG_ZeroPose(fg=dfg, varType=Pose2, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb)
+    generateCanonicalFG_ZeroPose(dfg=dfg, varType=Pose2, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb)
     getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods
     
     # add a new landmark (if not yet present)
