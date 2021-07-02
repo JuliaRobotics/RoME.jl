@@ -91,6 +91,15 @@ end
 ## Remove as part of Manifolds.jl consolidation, #244
 ##==============================================================================
 
+export veePose3, veePose
+
+function veePose3(s::SE3)
+  TransformUtils.veeEuler(s)
+end
+function veePose(s::SE3)
+  TransformUtils.veeEuler(s)
+end
+
 
 # getManifolds(fctType::InstanceType{Pose2Pose2}) = getManifolds(getDomain(fctType))
 # getManifolds(fctType::InstanceType{Pose2Point2}) = getManifolds(getDomain(fctType))

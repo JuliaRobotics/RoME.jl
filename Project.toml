@@ -50,7 +50,7 @@ Requires = "1.0"
 Rotations = "0.13, 1"
 StaticArrays = "1"
 TensorCast = "0.3.3, 0.4"
-TransformUtils = "0.2.10"
+TransformUtils = "0.2.11"
 julia = "1.4"
 
 [extras]

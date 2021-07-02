@@ -132,6 +132,18 @@ function extractDeltaOdo(XX, YY, TH)
 end
 
 
+# DX = [transx, transy, theta]
+function addPose2Pose2!(retval::Array{<:Real,1}, x::Array{<:Real,1}, dx::Array{<:Real,1})
+  X = SE2(x)
+  DX = SE2(dx)
+  se2vee!(retval, X*DX)
+  nothing
+end
+function addPose2Pose2(x::Array{<:Real,1}, dx::Array{<:Real,1})
+  retval = zeros(3)
+  addPose2Pose2!(retval, x, dx)
+  return retval
+end
 
 
 ## Previous methods

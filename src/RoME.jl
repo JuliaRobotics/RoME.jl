@@ -67,8 +67,6 @@ export
   addAutoLandmBR!,
   projNewLandm!,
   malahanobisBR,
-  veePose3,
-  veePose,
   \,
   RangeAzimuthElevation,
 
