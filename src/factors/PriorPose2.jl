@@ -21,14 +21,30 @@ end
 PriorPose2(x::T) where {T <: IncrementalInference.SamplableBelief} = PriorPose2{T}(x)
 
 function getSample(cfo::CalcFactor{<:PriorPose2}, N::Int=1)
-  return (rand(cfo.factor.Z,N), )
+  Z = cfo.factor.Z
+  M = getManifold(Pose2)
+  p = getPointIdentity(Pose2)
+  
+  Xc = [rand(Z) for _ in 1:N]
+  
+  # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
+  X = hat.(Ref(M), Ref(p), Xc)
+  points = exp.(Ref(M), Ref(p), X)
+
+  return (points, )
 end
 
 function (s::CalcFactor{<:PriorPose2})(meas, 	
                                        wXi)	
   #	
-  iXihat = SE2(meas) \ SE2(wXi)	
-  return se2vee(iXihat)	
+  M = getManifold(Pose2)
+  p = getPointIdentity(Pose2)
+
+  X = hat(M, p, meas)
+  # FIXME, confirm if this is right?
+  return IIF.distanceTangent2Point(M, X, p, wXi)
+  # iXihat = SE2(meas) \ SE2(wXi)	
+  # return se2vee(iXihat)	
 end
 
 ## Serialization support
