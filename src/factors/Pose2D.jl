@@ -42,7 +42,20 @@ end
 Pose2Pose2(::UniformScaling) = Pose2Pose2() # MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])) )
 
 
-getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) = (rand(cf.factor.z,N), )
+function getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) 
+  Z = cfo.factor.Z
+  M = getManifold(Pose2)
+  p = getPointIdentity(Pose2)
+  
+  Xc = [rand(Z) for _ in 1:N]
+  
+  # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
+  X = hat.(Ref(M), Ref(p), Xc)
+  points = exp.(Ref(M), Ref(p), X)
+
+  (points, )
+end
+
 
 function (cf::CalcFactor{<:Pose2Pose2})(meas,
                                         wxi,
