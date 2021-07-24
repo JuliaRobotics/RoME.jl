@@ -14,13 +14,15 @@ Related
 
 [`Pose3Pose3`](@ref), [`Point2Point2`](@ref), [`MutablePose2Pose2Gaussian`](@ref), [`DynPose2`](@ref), [`InertialPose3`](ref)
 """
-struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRoots
+struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
   z::T
-
-  # convenience and default constructor
-  Pose2Pose2( z::T=MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])) ) where {T <: IIF.SamplableBelief} = new{T}(z)
 end
-  # Towards using Manifolds.jl -- this will be easier if IIF just used vector or points, rather than current VND.val::Matrix
+# convenience and default constructor
+Pose2Pose2() = Pose2Pose2(MvNormal([1.0; 1.0; 1.0]))
+ 
+DFG.getManifold(::Pose2Pose2) = Manifolds.SpecialEuclidean(2)
+
+# Towards using Manifolds.jl -- this will be easier if IIF just used vector or points, rather than current VND.val::Matrix
   # basis::DefaultOrthogonalBasis{ℝ}
   # shape::S
   # R0::R
@@ -43,29 +45,40 @@ Pose2Pose2(::UniformScaling) = Pose2Pose2() # MvNormal(zeros(3),LinearAlgebra.di
 
 
 function getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) 
-  Z = cfo.factor.Z
-  M = getManifold(Pose2)
-  p = getPointIdentity(Pose2)
+  # Z = cf.factor.Z
+  # M = getManifold(Pose2)
+  # p = getPointIdentity(Pose2)
   
-  Xc = [rand(Z) for _ in 1:N]
+  # Xc = [rand(Z) for _ in 1:N]
   
-  # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
-  X = hat.(Ref(M), Ref(p), Xc)
-  points = exp.(Ref(M), Ref(p), X)
+  # # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
+  # X = hat.(Ref(M), Ref(p), Xc)
+  # points = exp.(Ref(M), Ref(p), X)
 
-  (points, )
+  # (points, )
+
+  Xc = [rand(cf.factor.z) for _ in 1:N]
+  (Xc, )
 end
 
 
-function (cf::CalcFactor{<:Pose2Pose2})(meas,
-                                        wxi,
-                                        wxj  )
-  #
+# function (cf::CalcFactor{<:Pose2Pose2})(meas,
+#                                         wxi,
+#                                         wxj  )
+#   #
 
-    #
-    wTjhat = SE2(wxi)*SE2(meas)
-    jTjhat = SE2(wxj) \ wTjhat
-    return se2vee(jTjhat)
+#     #
+#     wTjhat = SE2(wxi)*SE2(meas)
+#     jTjhat = SE2(wxj) \ wTjhat
+#     return se2vee(jTjhat)
+# end
+
+function (cf::CalcFactor{<:Pose2Pose2})(Xc, p, q)
+    M = getManifold(cf.factor)
+    X = hat(M, p, Xc)
+
+    q̂ = Manifolds.compose(M, p, exp(M, identity(M, p), X)) #for groups
+    return log(M, q, q̂)
 end
   
     # G = getManifold(cf.factor)

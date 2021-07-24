@@ -10,20 +10,28 @@ Example:
 PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
-mutable struct PriorPose2{T} <: IncrementalInference.AbstractPrior  where {T <: IncrementalInference.SamplableBelief}
+# mutable struct PriorPose2{T} <: IncrementalInference.AbstractPrior  where {T <: IncrementalInference.SamplableBelief}
+#   Z::T
+#   # empty constructor
+#   PriorPose2{T}() where T = new{T}()
+#   # regular constructor
+#   PriorPose2{T}(x::T) where {T <: IncrementalInference.SamplableBelief}  = new{T}(x)
+# end
+# # convenience and default object helper
+# PriorPose2(x::T) where {T <: IncrementalInference.SamplableBelief} = PriorPose2{T}(x)
+struct PriorPose2{P, T <: SamplableBelief} <: IIF.AbstractPrior
+  p::P 
   Z::T
-  # empty constructor
-  PriorPose2{T}() where T = new{T}()
-  # regular constructor
-  PriorPose2{T}(x::T) where {T <: IncrementalInference.SamplableBelief}  = new{T}(x)
 end
-# convencience and default object helper
-PriorPose2(x::T) where {T <: IncrementalInference.SamplableBelief} = PriorPose2{T}(x)
 
-function getSample(cfo::CalcFactor{<:PriorPose2}, N::Int=1)
-  Z = cfo.factor.Z
-  M = getManifold(Pose2)
-  p = getPointIdentity(Pose2)
+DFG.getManifold(::PriorPose2) = SpecialEuclidean(2)
+
+PriorPose2(z::IIF.SamplableBelief) = PriorPose2(getPointIdentity(Pose2), z)
+
+function getSample(cf::CalcFactor{<:PriorPose2}, N::Int=1)
+  Z = cf.factor.Z
+  p = cf.factor.p
+  M = getManifold(cf.factor)
   
   Xc = [rand(Z) for _ in 1:N]
   
@@ -34,19 +42,15 @@ function getSample(cfo::CalcFactor{<:PriorPose2}, N::Int=1)
   return (points, )
 end
 
-function (s::CalcFactor{<:PriorPose2})(meas, 	
-                                       wXi)	
+function (cf::CalcFactor{<:PriorPose2})(m, p)	
   #	
-  M = getManifold(Pose2)
-  p = getPointIdentity(Pose2)
-
-  X = hat(M, p, meas)
-  # FIXME, confirm if this is right?
-  return IIF.distanceTangent2Point(M, X, p, wXi)
+  M = getManifold(cf.factor)
+  return log(M, p, m)
   # iXihat = SE2(meas) \ SE2(wXi)	
   # return se2vee(iXihat)	
 end
 
+#TODO serialization
 ## Serialization support
 
 """
