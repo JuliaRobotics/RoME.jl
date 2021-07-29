@@ -46,19 +46,10 @@ function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
   # res = [eθ, er]
   eθ = atan((my + xi[2]), (mx + xi[1])) - atan(lm[2], lm[1])  # eθ
   er= sqrt(ex^2 + ey^2) # some wasted computation here       # er 
-  
-  #Old way
-  # rot = meas[1]+xi[3]
-  # res[1] = ( lm[1] - (meas[2]*cos( rot ) + xi[1]) )^2
-  # res[2] = ( lm[2] - (meas[2]*sin( rot ) + xi[2]) )^2
-  # res[1] += res[2]
-  # res[2] = 0.0
-  # return res[1]
 
   # IIF v0.21+
   return [eθ, er]
 end
-
 # quick check
 # pose = (0,0,0),  bear = 0.0,  range = 10.0   ==>  lm = (10,0)
 # pose = (0,0,0),  bear = pi/2,  range = 10.0   ==>  lm = (0,10)

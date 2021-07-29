@@ -22,8 +22,7 @@ N = 100
 addVariable!(fg, :x0, ContinuousEuclid{2})
 addVariable!(fg, :x1, ContinuousEuclid{2})
 
-X0_ = zeros(2,N)
-X0_[1,:] .+= 1000.0
+X0_ = [[1000; 0.0] for _ in 1:N]
 initManual!(fg, :x0, X0_)
 
 addFactor!(fg, [:x0;:x1], EuclidDistance(Normal(100.0, 1.0)))
@@ -37,15 +36,17 @@ pts = approxConv(fg, :x0, :x1)
 res = 99999*ones(100)
 
 for i in 1:N
-  res[i] = calcFactorResidual(fg, :x0x1f1, [100.0], [1000.0;0.0], pts[:,i])[1]
+  res[i] = calcFactorResidual(fg, :x0x1f1, [100.0], [1000.0;0.0], pts[i])[1]
 end
 
 @test 0.9*N < sum(abs.(res) .< 5)
 
 ## new test trying to force inflation error
 
-X1_ = randn(2,N)
-X1_[1,:] .+= 1100.0
+X1_ = [randn(2) for _ in 1:N]
+for pt in X1_
+  pt[1] += 1100.0
+end
 initManual!(fg, :x1, X1_)
 
 
@@ -65,7 +66,7 @@ pts = approxConv(fg, :x0x1f1, :x1)
 res = 99999*ones(100)
 
 for i in 1:N
-  res[i] = calcFactorResidual(fg, :x0x1f1, [100.0], [1000.0;0.0], pts[:,i])[1]
+  res[i] = calcFactorResidual(fg, :x0x1f1, [100.0], [1000.0;0.0], pts[i])[1]
 end
 
 @test 0.9*N < sum(abs.(res) .< 5)
@@ -101,8 +102,8 @@ addVariable!(fg, :l1, ContinuousEuclid{2})
 addFactor!(fg, [:l1], Prior(MvNormal([-1000.0,0], [0.1, 0.1])))
 addFactor!(fg, [:x1; :l1], EuclidDistance(Normal(100.0, 1.0)))
 
-pts = zeros(2,100)
-pts[1,:] .-= 900
+pts = [zeros(2) for _ in 1:100]
+(p->(p[1] -= 900)).(pts)
 initManual!(fg, :x1, pts)
 
 ##
@@ -111,12 +112,14 @@ tree, _, = solveGraph!(fg);
 
 ##
 
-pts = getBelief(fg, :x1) |> getPoints
+pts_ = getBelief(fg, :x1) |> getPoints
+
+pts = AMP._pointsToMatrixCoords(getManifold(fg[:x1]), pts_)
 
 @test 0.9*N < sum( -1150 .< pts[1,:] .< -850)
 @test 0.9*N < sum( -150 .< pts[2,:] .< 150)
 
-pts_ = [norm(pts[:,i] - [-1000;0]) for i in 1:N]
+pts_ = [norm(pts_[i] - [-1000;0]) for i in 1:N]
 
 @test 0.9*N < sum(80 .< pts_ .< 120)
 
@@ -171,6 +174,7 @@ addFactor!(fg, [:x1; :l1], p2br)
 
 p2br = Pose2Point2BearingRange(Normal(-pi/2 + rand(Normal(0,σ_bearing)), σ_bearing),
                                 Normal(1 + rand(Normal(0,σ_range)), σ_range))
+#
 addFactor!(fg, [:x1; :l2], p2br)
 
 addVariable!(fg, :x2, Pose2)
