@@ -12,7 +12,7 @@ mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.Sampla
   range::R
 end
 
-getManifold(::ManiPose2Point2BearingRange) = ProductManifold(SpecialOrthogonal(2), TranslationGroup(1))
+getManifold(::Pose2Point2BearingRange) = ProductManifold(SpecialOrthogonal(2), TranslationGroup(1))
 
 function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange}, N::Int=1)
 
@@ -59,7 +59,7 @@ end
 # pose = (0,0,pi/2),  bear = pi/2,  range = 10.0   ==>  lm = (-10,0)
 
 
-# function (cfo::CalcFactor{<:ManiPose2Point2BearingRange})(measX, p, q)
+# function (cfo::CalcFactor{<:Pose2Point2BearingRange})(measX, p, q)
 #   #
 #   M = SpecialEuclidean(2)
 #   q_SE = ProductRepr(q, identity(SpecialOrthogonal(2), p.parts[2]))
