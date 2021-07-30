@@ -47,7 +47,7 @@ X1 = addVariable!(fg, :x1, Point2)
 
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 
-xi = zeros(3)
+xi = getPointIdentity(Pose2)
 li = zeros(2); li[1] = 20.0;
 zi = (zeros(2),); zi[1][2] = 20.0
 
@@ -59,6 +59,7 @@ res = testFactorResidualBinary( p2br,
                                 li, 
                                 zi )
 #
+# calcFactorResidualTemporary(p2br, zi, (Pose2, xi), (Point2, li))
 
 @show res
 @test norm(res) < 1e-14
@@ -157,18 +158,19 @@ fg = initfg()
 addVariable!(fg, :x0, Pose2)
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))), graphinit=false)
 # force particular initialization
-setVal!(fg, :x0, zeros(3,1))
+setVal!(fg, :x0, [getPointIdentity(Pose2)])
 
 ##----------- sanity check that predictbelief plumbing is doing the right thing
-pts, = predictbelief(fg, :x0, ls(fg, :x0), N=75)
+_pts, = predictbelief(fg, :x0, ls(fg, :x0), N=75)
+@cast pts[j,i] := DFG.getCoordinates.(Pose2, _pts)[i][j]
 @test sum(abs.(Statistics.mean(pts,dims=2)) .< [0.1; 0.1; 0.1]) == 3
 @test sum([0.05; 0.05; 0.05] .< Statistics.std(pts,dims=2) .< [0.15; 0.15; 0.15]) == 3
 #------------
 
 # Add landmark
 addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
-li = zeros(2,1); li[1,1] = 20.0;
-setVal!(fg, :l1, li)
+li = zeros(2); li[1] = 20.0;
+setVal!(fg, :l1, [li])
 
 
 # Add bearing range measurement between pose and landmark
@@ -180,7 +182,8 @@ addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 # drawGraph(fg, show=true)
 
 # check the forward convolution is working properly
-pts, = predictbelief(fg, :l1, ls(fg, :l1), N=75)
+_pts, = predictbelief(fg, :l1, ls(fg, :l1), N=75)
+@cast pts[j,i] := _pts[i][j]
 @test sum(abs.(Statistics.mean(pts,dims=2) - [20.0; 0.0]) .< [2.0; 2.0]) == 2
 @test sum([0.1; 0.1] .< Statistics.std(pts,dims=2) .< [3.0; 3.0]) == 2
 
@@ -206,13 +209,13 @@ fg = initfg()
 # Add landmark
 addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
 addFactor!(fg, [:l1], PriorPoint2(MvNormal([20.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))),  graphinit=false ) # could be IIF.Prior
-li = zeros(2,1); li[1,1] = 20.0;
-setVal!(fg, :l1, li)
+li = zeros(2); li[1] = 20.0;
+setVal!(fg, :l1, [li])
 
 #add pose with partial constraint
 addVariable!(fg, :x0, Pose2)
 # force particular initialization
-setVal!(fg, :x0, zeros(3,1))
+setVal!(fg, :x0, [getPointIdentity(Pose2)])
 
 # Add bearing range measurement between pose and landmark
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
@@ -223,9 +226,13 @@ addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 # writeGraphPdf(fg)
 
 # check the forward convolution is working properly
-pts, = predictbelief(fg, :x0, ls(fg, :x0), N=75)
+_pts, = predictbelief(fg, :x0, ls(fg, :x0), N=75)
+p_μ = mean(SpecialEuclidean(2), _pts)
 
-pts[3,:] .= TU.wrapRad.(pts[3,:])
+_pts = getCoordinates.(Pose2, _pts)
+@cast pts[j,i] := _pts[i][j]
+
+# pts[3,:] .= TU.wrapRad.(pts[3,:])
 @show abs.(Statistics.mean(pts,dims=2))
 @test sum(abs.(Statistics.mean(pts,dims=2)) .< [2.0; 2.0; 2.0]) == 3
 @show Statistics.std(pts,dims=2)

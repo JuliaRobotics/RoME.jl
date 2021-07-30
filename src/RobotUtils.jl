@@ -65,13 +65,6 @@ end
 # should be deprecated or indicated more clearly
 lsrBR(a) = [a[2,:];a[1,:]]';
 
-function veePose3(s::SE3)
-  TransformUtils.veeEuler(s)
-end
-function veePose(s::SE3)
-  TransformUtils.veeEuler(s)
-end
-
 
 function \(s::SE3, wTr::CTs.Translation)
   bTr = s.R.R'*(wTr.v-s.t)

@@ -7,18 +7,21 @@ Direction observation information of a `Point2` variable.
 mutable struct PriorPoint2{T <: IIF.SamplableBelief} <: IncrementalInference.AbstractPrior
   Z::T
   # empty constructor
-  PriorPoint2{T}() where T = new()
+  # PriorPoint2{T}() where T = new()
   # regular constructor
-  PriorPoint2{T}(dist::T) where {T <: IIF.SamplableBelief} = new{T}(dist)
+  # PriorPoint2{T}(dist::T) where {T <: IIF.SamplableBelief} = new{T}(dist)
 end
+
 # convenience helper and default object
-PriorPoint2(z::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))) where {T <: IIF.SamplableBelief} = PriorPoint2{T}(z)
+PriorPoint2() = PriorPoint2(MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01])))
+
+DFG.getManifold(::PriorPoint2) = TranslationGroup(2)
 
 function getSample(cfo::CalcFactor{<:PriorPoint2}, N::Int=1)
-  return (rand(cfo.factor.Z, N),)
+  return [rand(cfo.factor.Z) for _=1:N]
 end
 
-function (s::CalcFactor{<:PriorPoint2})(meas, 	
+function (cf::CalcFactor{<:PriorPoint2})(meas, 	
                                         X1)	
   #	
   return meas[1:2] .- X1[1:2] 	
@@ -38,7 +41,7 @@ end
 Point2Point2(x::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.1;0.1]))) where {T <: IIF.SamplableBelief} = Point2Point2{T}(x)
 
 function getSample(cfo::CalcFactor{<:Point2Point2}, N::Int=1)
-  return (rand(cfo.factor.Zij,N),  )
+  return [rand(cfo.factor.Zij) for _=1:N] 
 end
 function (pp2r::CalcFactor{<:Point2Point2})(meas,
                                             xi,

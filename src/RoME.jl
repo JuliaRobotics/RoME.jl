@@ -26,7 +26,7 @@ using StaticArrays
 
 # to avoid name conflicts
 import Manifolds
-import Manifolds: SpecialEuclidean, ProductRepr, SpecialOrthogonal
+using Manifolds: ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup
 
 # using Graphs,  # TODO determine how many parts still require Graphs still directly
 

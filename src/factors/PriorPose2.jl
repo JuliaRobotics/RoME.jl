@@ -19,14 +19,17 @@ PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 # end
 # # convenience and default object helper
 # PriorPose2(x::T) where {T <: IncrementalInference.SamplableBelief} = PriorPose2{T}(x)
-struct PriorPose2{P, T <: SamplableBelief} <: IIF.AbstractPrior
-  p::P 
+struct PriorPose2{T <: SamplableBelief, P} <: IIF.AbstractPrior
   Z::T
+  p::P 
 end
+
+PriorPose2(z::IIF.SamplableBelief) = PriorPose2(z, getPointIdentity(Pose2))
+PriorPose2{T,P}(z::IIF.SamplableBelief) where {T,P} = PriorPose2{T,P}(z, getPointIdentity(Pose2))
+
 
 DFG.getManifold(::PriorPose2) = SpecialEuclidean(2)
 
-PriorPose2(z::IIF.SamplableBelief) = PriorPose2(getPointIdentity(Pose2), z)
 
 function getSample(cf::CalcFactor{<:PriorPose2}, N::Int=1)
   Z = cf.factor.Z
