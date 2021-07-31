@@ -22,7 +22,7 @@ drawGraph(fg, show=true)
 ```
 
 DevNotes
-- TODO refactor to use new `_calcHelix_T`.
+- TODO refactor to use new `calcHelix_T`.
 
 Related
 
