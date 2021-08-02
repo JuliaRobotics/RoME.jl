@@ -23,7 +23,7 @@ initCov = 0.0001*Matrix{Float64}(LinearAlgebra.I, 6,6)
 odoCov = deepcopy(initCov)
 odo = Pose3Pose3( MvNormal(veeEuler(tf), odoCov) )
 
-X = [0.01*randn(5,N); (0*pi/4 .+ 0.01*randn(1,N))]
+X = getPoint.(Pose3, [[0.01*randn(5); (0*pi/4 .+ 0.01*randn(1))] for _=1:N])
 
 fg = initfg()
 addVariable!(fg, :x0, Pose3)
@@ -49,7 +49,7 @@ initCov = 0.01*Matrix{Float64}(LinearAlgebra.I, 6,6)
 odoCov = deepcopy(initCov)
 odo = Pose3Pose3(  MvNormal(veeEuler(tf), odoCov) )
 
-X = [0.01*randn(5,N); (0*pi/4.0 .+ 0.01*randn(1,N))]
+X = getPoint.(Pose3, [[0.01*randn(5); (0*pi/4 .+ 0.01*randn(1))] for _=1:N])
 
 fg = initfg()
 addVariable!(fg, :x0, Pose3)
@@ -91,13 +91,20 @@ end
 ##
 
 @testset "Ensure vertex initialized properly" begin
+  M = getManifold(Pose3)
   # start with initialization
   ensureAllInitialized!(fg)
   @test isInitialized(fg, :x1)
-  @show muX1 = Statistics.mean(getVal(fg,:x1),dims=2)
-  @show stdX1 = Statistics.std(getVal(fg,:x1),dims=2)
-  @test sum(map(Int,abs.(muX1[1:3]) .< 0.5)) == 3
-  @test sum(map(Int,abs.(muX1[4:6]) .< 0.05)) == 3
+  @show muX1 = Statistics.mean(M, getVal(fg,:x1))
+  
+  T = muX1.parts[1]
+  @test sum(map(Int,abs.(T) .< 0.5)) == 3
+  
+  Rc = muX1.parts[2]
+  @test isapprox(SpecialOrthogonal(3), R, [1 0 0; 0 1 0; 0 0 1], atol=0.05)
+
+  coX1 = getCoordinates.(Pose3, getVal(fg,:x1))
+  @show stdX1 = Statistics.std(coX1)
   @test sum(map(Int, 0.5 .< stdX1[1:3] .< 1.5)) == 3
   @test sum(map(Int, 0.05 .< stdX1[4:6] .< 0.15)) == 3
 end
@@ -106,7 +113,8 @@ end
 @testset "Testing PriorPose3 evaluation..." begin
 
 global priorpts = approxConv(fg, :x1f1, :x1) # fg.g.vertices[2], 1
-global means = Statistics.mean(priorpts,dims=2)
+coX1 = getCoordinates.(Pose3, priorpts)
+global means = Statistics.mean(coX1)
 @test sum(map(Int,abs.(means[1:3]) .> 0.5)) == 0
 @test sum(map(Int,abs.(means[4:6]) .> 0.05)) == 0
 
