@@ -53,7 +53,7 @@ function (cf::CalcFactor{<:PriorPose2})(m, p)
   # return se2vee(iXihat)	
 end
 
-#TODO serialization
+#TODO Serialization of reference point p 
 ## Serialization support
 
 """
@@ -69,7 +69,7 @@ function convert(::Type{PackedPriorPose2}, d::PriorPose2)
 end
 function convert(::Type{PriorPose2}, d::PackedPriorPose2)
   distr = convert(SamplableBelief, d.str)
-  return PriorPose2{typeof(distr)}(distr)
+  return PriorPose2(distr)
 end
 
 

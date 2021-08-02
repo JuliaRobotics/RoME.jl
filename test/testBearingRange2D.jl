@@ -23,11 +23,14 @@ meas = sampleFactor(IIF._getCCW(fg, :x0x1f1), 100)
 ##
 
 # meas = getSample(p2br, 100)
-@test abs(Statistics.mean(meas[1][1,:])) < 0.1
-@test 0.05 < abs(Statistics.std(meas[1][1,:])) < 0.2
+mu = Statistics.mean(meas[1])
+sigma = Statistics.std(meas[1])
 
-@test abs(Statistics.mean(meas[1][2,:]) - 20.0) < 1.0
-@test 0.5 < abs(Statistics.std(meas[1][2,:])) < 1.5
+@test abs(mu[1]) < 0.1
+@test 0.05 < abs(sigma[1]) < 0.2
+
+@test abs(mu[2] - 20.0) < 1.0
+@test 0.5 < abs(sigma[2]) < 1.5
 
 ##
 
