@@ -2,7 +2,6 @@
 
 using RoME
 using Test
-using Manifolds
 using TensorCast
 
 @testset "basic pose2 trivial case without forcing autoinit..." begin

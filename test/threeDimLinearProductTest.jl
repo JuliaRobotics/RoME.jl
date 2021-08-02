@@ -9,6 +9,8 @@ using Test
 
 
 ##
+M = getManifold(Pose3)
+ϵ = getPointIdentity(Pose3)
 
 
 @testset "test 3D convolutions and products" begin
@@ -101,7 +103,7 @@ end
   @test sum(map(Int,abs.(T) .< 0.5)) == 3
   
   Rc = muX1.parts[2]
-  @test isapprox(SpecialOrthogonal(3), R, [1 0 0; 0 1 0; 0 0 1], atol=0.05)
+  @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.05)
 
   coX1 = getCoordinates.(Pose3, getVal(fg,:x1))
   @show stdX1 = Statistics.std(coX1)
@@ -140,20 +142,33 @@ addFactor!(fg,[:x1;:x2],odoconstr, inflation=0.1)
 ## test opposites
 
 # should be all zero
-res = calcFactorResidual(fg, :x1x2f1, [10;0;0;0;0;0.0], zeros(6), [10;0;0;0;0;0])
+p = deepcopy(ϵ)
+q = deepcopy(ϵ)
+q.parts[1][1] = 10.0
+X = Manifolds.hat(M, ϵ, [10.,0,0,0,0,0])
+res = calcFactorResidual(fg, :x1x2f1, X, p, q)
 @test norm(res) < 1e-10
 
 # trivial fail case
 # res = calcFactorResidual(fg, :x1x2f1, [10;0;0;0;0;0.0], zeros(6), [10;0;0;pi;pi;pi])
 @warn "suppressing trivial Pose3 fail case until RoME.jl #244 has been completed."
+#TODO is this the case for the warn?
+p = deepcopy(ϵ)
+q = getPoint(Pose3, [10;0;0;pi;pi;pi])
+X = Manifolds.hat(M, ϵ, [10.,0,0,pi,pi,pi])
+
+res = calcFactorResidual(fg, :x1x2f1, X, p, q)
+@test norm(res) < 1e-10
+
 
 ## test following introduction of inflation, see IIF #1051
 
 # force the inflation trivial error, https://github.com/JuliaRobotics/RoME.jl/issues/380#issuecomment-778795848
 # IIF._getCCW(fg,:x1x2f1).inflation = 10.0
 
-pts = approxConv(fg, :x1x2f1, :x2)
+_pts = approxConv(fg, :x1x2f1, :x2)
 # X2 = manikde!(pts, Pose3)
+@cast pts[j,i] := getCoordinates.(Pose3, _pts)[i][j]
 
 # test translations through convolution
 @test 0.8N < sum( 5 .< pts[1,:] .<15 )
@@ -180,17 +195,35 @@ global X1pts = approxConv(fg, :x1x2f1, :x1)
 # X1pts = evalFactor(fg, fg.g.vertices[4], 1)
 global X2pts = approxConv(fg, :x1x2f1, :x2)
 # X2pts = evalFactor(fg, fg.g.vertices[4], 3)
-global X2ptsMean = Statistics.mean(X2pts,dims=2)
-global X1ptsMean = Statistics.mean(X1pts,dims=2)
-@show X1ptsMean
-@test  sum(map(Int, abs.(X1ptsMean) .< 1.25 )) == 6
-@test  sum(map(Int, abs.(X2ptsMean .- [10.0;0;0;0;0;0]) .< 1.25 )) == 6
+
+mu = mean(M, getVal(fg,:x1))
+T = mu.parts[1]
+@test isapprox(T, [0,0,0], atol=0.5)
+Rc = mu.parts[2]
+@test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.05)
+
+mu = mean(M, getVal(fg,:x2))
+T = mu.parts[1]
+@test isapprox(T, [10,0,0], atol=0.5)
+Rc = mu.parts[2]
+@test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.05)
+
 
 end
 
 @testset "Construct Bayes tree and perform inference..." begin
   tree, smt, hist = solveTree!(fg)
-  @test true
+  mu = mean(M, getVal(fg,:x1))
+  T = mu.parts[1]
+  @test isapprox(T, [0,0,0], atol=0.5)
+  Rc = mu.parts[2]
+  @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.05)
+
+  mu = mean(M, getVal(fg,:x2))
+  T = mu.parts[1]
+  @test isapprox(T, [10,0,0], atol=0.5)
+  Rc = mu.parts[2]
+  @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.05)
 end
 
 ##
@@ -206,7 +239,9 @@ global muX1 = getPPE(fg, :x1).suggested # Statistics.mean(getVal(fg,:x1),dims=2)
 # sidestep trivial case, #412
 # case where points land on trivial rotation error [pi;pi;pi]
 @warn "simplify mean and std testing on Pose3 after #244, see #412"
-pts = getVal(fg,:x1)
+_pts = getVal(fg,:x1)
+@cast pts[j,i] := getCoordinates.(Pose3, _pts)[i][j]
+
 mask = (2.7 .< abs.(pts[4,:])) .& (2.7 .< abs.(pts[5,:])) .& (2.7 .< abs.(pts[6,:]))
 mask .= xor.(mask,1)
 mu1tmp = Statistics.mean(pts[:,mask],dims=2)
@@ -216,13 +251,18 @@ global stdX1 = Statistics.std(pts[:,mask],dims=2)
 @test sum(map(Int, 0.4 .< stdX1[1:3] .< 1.6)) == 3 # had a 2==3 failure here
 @show stdX1[4:6]
 @test sum(map(Int, 0.02 .< stdX1[4:6] .< 0.5)) == 3
+
+
 global muX2 = getPPE(fg, :x2).suggested # Statistics.mean(getVal(fg,:x2),dims=2)
 @show muX2[1:3]-[10.0;0;0]
 @test sum(map(Int, abs.(muX2[1:3]-[10.0;0;0]) .< 1.5)) == 3
 
 # case where points land on trivial rotation error [pi;pi;pi]
 @warn "simplify mean and std testing on Pose3 after #244, see #412"
-pts = getVal(fg,:x2)
+_pts = getVal(fg,:x2)
+_pts = getVal(fg,:x1)
+@cast pts[j,i] := getCoordinates.(Pose3, _pts)[i][j]
+
 mask = (2.7 .< abs.(pts[4,:])) .& (2.7 .< abs.(pts[5,:])) .& (2.7 .< abs.(pts[6,:]))
 mask .= xor.(mask,1)
 mu2tmp = Statistics.mean(pts[:,mask],dims=2)

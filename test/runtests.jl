@@ -4,7 +4,8 @@
 using RoME
 using Test
 using TensorCast
-using Manifolds
+import Manifolds
+using Manifolds: ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup
 using DistributedFactorGraphs
 
 ## FIXME remove
