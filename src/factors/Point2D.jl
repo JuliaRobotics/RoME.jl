@@ -18,7 +18,7 @@ PriorPoint2() = PriorPoint2(MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01])))
 DFG.getManifold(::PriorPoint2) = TranslationGroup(2)
 
 function getSample(cfo::CalcFactor{<:PriorPoint2}, N::Int=1)
-  return [rand(cfo.factor.Z) for _=1:N]
+  return ([rand(cfo.factor.Z) for _=1:N], )
 end
 
 function (cf::CalcFactor{<:PriorPoint2})(meas, 	
@@ -41,7 +41,7 @@ end
 Point2Point2(x::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.1;0.1]))) where {T <: IIF.SamplableBelief} = Point2Point2{T}(x)
 
 function getSample(cfo::CalcFactor{<:Point2Point2}, N::Int=1)
-  return [rand(cfo.factor.Zij) for _=1:N] 
+  return ([rand(cfo.factor.Zij) for _=1:N], ) 
 end
 function (pp2r::CalcFactor{<:Point2Point2})(meas,
                                             xi,
@@ -99,5 +99,4 @@ end
 function convert(::Type{PackedPoint2Point2}, d::Point2Point2)
   return PackedPoint2Point2( convert(PackedSamplableBelief, d.Zij) )
 end
-
 
