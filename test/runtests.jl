@@ -5,6 +5,7 @@ using RoME
 using Test
 using TensorCast
 using Manifolds
+using DistributedFactorGraphs
 
 ## FIXME remove
 #  quick and dirty skipping of broken testsets
