@@ -9,7 +9,7 @@ export Pose2Point2, PackedPose2Point2
 
 Bearing and Range constraint from a Pose2 to Point2 variable.
 """
-struct Pose2Point2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
+struct Pose2Point2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
     Zij::T
     partial::Tuple{Int,Int}
     # empty constructor
@@ -22,10 +22,7 @@ Pose2Point2(x1::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))) where {T 
 
 # prescribed sampling function
 function getSample(cfo::CalcFactor{<:Pose2Point2}, N::Int=1)
-  smpls = zeros(2, N)
-  smpls[1:2,:] .= rand(cfo.factor.Zij, N)
-
-  return (smpls,)
+  return ([rand(cfo.factor.Zij) for _=1:N], )
 end
 
 function IIF.getParametricMeasurement(s::Pose2Point2{<:MvNormal})
@@ -39,8 +36,9 @@ function (cfo::CalcFactor{<:Pose2Point2})(meas,
                                           wXi,
                                           wLj )
   #
-
-  wLj_pred = SE2(wXi)*SE2([meas;0.0])
+  #FIXME upgrade to manifolds 
+  _wXi = getCoordinates(Pose2, wXi)
+  wLj_pred = SE2(_wXi)*SE2([meas;0.0])
   return  wLj .- se2vee(wLj_pred)[1:2]
 end
 

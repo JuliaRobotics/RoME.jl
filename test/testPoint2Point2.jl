@@ -20,8 +20,8 @@ tree, smt, hist = solveTree!(fg)
 # tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree)
 
-@test sum( abs.(Statistics.mean(getVal(fg, :x0),dims=2) .- [0.0;0]) .< [1.0;1.0]) == 2
-@test sum( abs.(Statistics.mean(getVal(fg, :x1),dims=2) .- [10.0;0]) .< [1.0;1.0]) == 2
+@test isapprox(mean(getVal(fg, :x0)), [0,0], atol=1.0)
+@test isapprox(mean(getVal(fg, :x1)), [10,0], atol=1.0)
 
 end
 
@@ -69,9 +69,10 @@ for ic in 1:3
   tree, _, = solveTree!(fg)
 
   # mode 1
-  @show T1 = (0.05*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 ) && 0.05*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 ))
+  @cast l1_val[j,i] := getVal(fg, :l1)[i][j]
+  @show T1 = (0.05*N < sum( 90 .< l1_val[1,:] .< 110 ) && 0.05*N < sum( 90 .< l1_val[2,:] .< 110 ))
   # mode 2
-  @show T2 = (0.05*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 ) && 0.05*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 ))
+  @show T2 = (0.05*N < sum( -10 .< l1_val[1,:] .< 10 ) && 0.05*N < sum( -10 .< l1_val[2,:] .< 10 ))
   TP |= T1 && T2
   TP && break
 end
@@ -83,15 +84,16 @@ end
 
 # @test 0.05*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
 # @test 0.05*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
+@cast l1_val[j,i] := getVal(fg, :l1)[i][j]
 
-voidsel1 =  10.0 .< getVal(fg, :l1)[1,:]
-@test sum( getVal(fg, :l1)[2,voidsel1] .< 70 ) < 0.35*N
+voidsel1 =  10.0 .< l1_val[1,:]
+@test sum( l1_val[2,voidsel1] .< 70 ) < 0.35*N
 
-voidsel2 =  10.0 .< getVal(fg, :l1)[2,:]
-@test sum( getVal(fg, :l1)[1,voidsel2] .< 70 ) < 0.35*N
+voidsel2 =  10.0 .< l1_val[2,:]
+@test sum( l1_val[1,voidsel2] .< 70 ) < 0.35*N
 
-@test sum( 120 .< abs.(getVal(fg, :l1)[1,:]) ) < 0.35*N
-@test sum( 120 .< abs.(getVal(fg, :l1)[2,:]) ) < 0.35*N
+@test sum( 120 .< abs.(l1_val[1,:]) ) < 0.35*N
+@test sum( 120 .< abs.(l1_val[2,:]) ) < 0.35*N
 
 ##
 

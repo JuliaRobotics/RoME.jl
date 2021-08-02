@@ -3,7 +3,8 @@
 
 using RoME
 using Test
-
+using TensorCast
+using Manifolds
 
 ## FIXME remove
 #  quick and dirty skipping of broken testsets

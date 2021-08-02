@@ -74,38 +74,25 @@ tree, _, = solveTree!(fg, eliminationOrder=eo);
 
 ##
 
-@test 10 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
-@test 10 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
+@cast l1_vals[j,i] := getVal(fg, :l1)[i][j]
 
-@test 10 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
-@test 10 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
+@test 10 < sum( 80 .< l1_vals[1,:] .< 120 )
+@test 10 < sum( -20 .< l1_vals[2,:] .< 20 )
 
-
-
-@test 80 < sum( 80 .< getVal(fg, :x0)[1,:] .< 120 )
-@test 80 < sum( -20 .< getVal(fg, :x0)[2,:] .< 20 )
+@test 10 < sum( -20 .< l1_vals[1,:] .< 20 )
+@test 10 < sum( 80 .< l1_vals[2,:] .< 120 )
 
 
-@test 80 < sum( -20 .< getVal(fg, :x1)[1,:] .< 20 )
-@test 80 < sum( 80 .< getVal(fg, :x1)[2,:] .< 120 )
+@cast x0_vals[j,i] := getVal(fg, :x0)[i][j]
+
+@test 80 < sum( 80 .< x0_vals[1,:] .< 120 )
+@test 80 < sum( -20 .< x0_vals[2,:] .< 20 )
 
 
+@cast x1_vals[j,i] := getVal(fg, :x1)[i][j]
 
-
-@test 10 < sum( 80 .< getVal(fg, :l1)[1,:] .< 120 )
-@test 10 < sum( -20 .< getVal(fg, :l1)[2,:] .< 20 )
-
-@test 10 < sum( -20 .< getVal(fg, :l1)[1,:] .< 20 )
-@test 10 < sum( 80 .< getVal(fg, :l1)[2,:] .< 120 )
-
-
-
-@test 80 < sum( 80 .< getVal(fg, :x0)[1,:] .< 120 )
-@test 80 < sum( -20 .< getVal(fg, :x0)[2,:] .< 20 )
-
-
-@test 80 < sum( -20 .< getVal(fg, :x1)[1,:] .< 20 )
-@test 80 < sum( 80 .< getVal(fg, :x1)[2,:] .< 120 )
+@test 80 < sum( -20 .< x1_vals[1,:] .< 20 )
+@test 80 < sum( 80 .< x1_vals[2,:] .< 120 )
 
 ##
 
