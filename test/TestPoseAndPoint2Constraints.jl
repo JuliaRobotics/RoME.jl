@@ -35,10 +35,10 @@ f2 = addFactor!(fg, [:x0;:x1], ppc)
 # test evaluation of pose pose constraint
 pts = approxConv(fg, :x0x1f1, :x1)
 
-pts[3,:] .= TU.wrapRad.(pts[3,:])
-@show mv = Statistics.mean(pts,dims=2)
-@test norm(mv[1:2] - [50.0;0.0]) < 10.0
-@test abs(mv[3] - pi/2) < 0.5
+# pts[3,:] .= TU.wrapRad.(pts[3,:])
+M = getManifold(Pose2)
+@show mv = mean(M, pts)
+@test isapprox(M, mv, ProductRepr([50,0], [0 -1; 1 0]), atol=0.5)
 
 ##
 
@@ -51,17 +51,11 @@ tree, smt, hist = solveTree!(fg)
 
 # test post evaluation values are correct
 pts = getVal(fg, :x0)
-pts[3,:] .= TU.wrapRad.(pts[3,:])
+@test isapprox(M, mean(M, pts), ProductRepr([0,0], [1 0; 0 1]), atol=0.5)
 
-@test norm(Statistics.mean(pts, dims=2)[1:2] - [0.0;0.0]) < 10.0
-@test abs(Statistics.mean(pts, dims=2)[3]) < 0.5
 
 pts = getVal(fg, :x1)
-pts[3,:] .= TU.wrapRad.(pts[3,:])
-
-@test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;0.0]) < 10.0
-@test abs(Statistics.mean(pts, dims=2)[3]-pi/2) < 0.5
-
+@test isapprox(M, mean(M, pts), ProductRepr([50,0], [0 -1; 1 0]), atol=0.5)
 
 # check that yaw is working
 v3 = addVariable!(fg, :x2, Pose2, N=N)
@@ -69,23 +63,21 @@ ppc = Pose2Pose2(MvNormal([50.0;0.0;0.0], odoCov))
 f3 = addFactor!(fg, [v2;v3], ppc)
 
 solveTree!(fg)
-solveTree!(fg)
+# solveTree!(fg)
 
 # test post evaluation values are correct
 pts = getVal(fg, :x0)
-@test norm(Statistics.mean(pts, dims=2)[1:2]-[0.0;0.0]) < 20.0
-pts[3,:] .= TU.wrapRad.(pts[3,:])
-@test abs(Statistics.mean(pts, dims=2)[3]) < 0.5
+@test isapprox(M, mean(M, pts), ProductRepr([0,0], [1 0; 0 1]), atol=0.5)
 
 pts = getVal(fg, :x1)
-@test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;0.0]) < 20.0
-pts[3,:] .= TU.wrapRad.(pts[3,:])
-@test abs(Statistics.mean(pts, dims=2)[3] - pi/2) < 0.5
+mv = mean(M, pts)
+@test isapprox(mv.parts[1], [50,0], atol=3.0)
+@test isapprox(mv.parts[2], [0 -1; 1 0], atol=0.1)
 
 pts = getVal(fg, :x2)
-@test norm(Statistics.mean(pts, dims=2)[1:2]-[50.0;50.0]) < 20.0
-pts[3,:] .= TU.wrapRad.(pts[3,:])
-@test abs(Statistics.mean(pts, dims=2)[3]-pi/2) < 0.5
+mv = mean(M, pts)
+@test isapprox(mv.parts[1], [50,50], atol=3.0)
+@test isapprox(mv.parts[2], [0 -1; 1 0], atol=0.1)
 
 println("test bearing range evaluations")
 
@@ -104,8 +96,8 @@ pts = approxConv(fg, :x0l1f1, :l1, N=N)
 ## ppr(res,nothing,1,meas,xi,lm )
 
 # all points should lie in a ring around 0,0
-@test sum(sqrt.(sum(pts.^2, dims=1 )) .< 5.0) == 0
-@test sum(sqrt.(sum(pts.^2, dims=1 )) .< 15.0) == N
+@test sum(norm.(pts) .< 5.0) == 0
+@test sum(norm.(pts) .< 15.0) == N
 
 
 pts = approxConv(fg, :x0l1f1, :x0)
@@ -123,7 +115,7 @@ pts = approxConv(fg, f5.label, l1.label)
 # pts = evalFactor(fg, f5, l1.label)
 
 
-@test norm(Statistics.mean(pts, dims=2)[:]-[10.0;0.0]) < 5.0
+@test isapprox(Statistics.mean(pts), [10, 0], atol=1.0)
 
 # println("test Pose2D plotting")
 

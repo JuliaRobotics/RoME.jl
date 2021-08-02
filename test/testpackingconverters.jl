@@ -47,10 +47,12 @@ v2 = addVariable!(fg, :x2, Pose2, N=N)
 ppc = Pose2Pose2( MvNormal([50.0;0.0;pi/2], odoCov) )
 f2 = addFactor!(fg, [:x1;:x2], ppc)
 
-
+##
 
 @testset "test conversions of PriorPose2" begin
 global fg
+##
+
 
 dd = convert(PackedPriorPose2, ipp)
 upd = convert(RoME.PriorPose2, dd)
@@ -74,12 +76,12 @@ upv1data = unpackVariableNodeData(fg, packedv1data)
 @test compareAll(DFG.getSolverData(v1), upv1data, skip=[:variableType;])
 @test compareFields(DFG.getSolverData(v1).variableType, upv1data.variableType)
 
-end
-
 ##
+end
 
 
 @testset "test conversions of Pose2Pose2" begin
+##
 
 global dd = convert(PackedPose2Pose2, ppc)
 global upd = convert(RoME.Pose2Pose2, dd)

@@ -18,8 +18,9 @@ using Statistics
 
     tree, smt, hist = solveTree!(fg)
 
-    @test isapprox(mean(getVal(fg, :x1),dims=2), [0,0,0], atol = 0.05)
-    @test isapprox(mean(getVal(fg, :l1),dims=2), [0,-1], atol = 0.05)
+    M = getManifold(Pose2)
+    @test isapprox(M, mean(M, getVal(fg, :x1)), ProductRepr([0,0], [1 0; 0 1]), atol=0.05) 
+    @test isapprox(mean(getVal(fg, :l1)), [0,-1], atol = 0.05)
 end
 
 

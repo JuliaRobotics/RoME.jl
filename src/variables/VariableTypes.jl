@@ -1,5 +1,7 @@
 # TODO integration underway with Manifolds.jl, see RoME #244, also see IIF #467 regarding consolidation effort.
 
+import DistributedFactorGraphs: getVariableType
+
 export projectCartesian
 
 
@@ -81,6 +83,12 @@ projectCartesian(pose::Union{<:Point2,<:Point3,<:Pose2,<:Pose3,<:DynPoint2,<:Dyn
 @defVariable BearingRange2 BearingRange_Manifold ProductRepr(0.0,0.0)
 
 
+
+
+## Serialization helpers
+
+getVariableType(M::typeof(SpecialEuclidean(2))) = Pose2()
+getVariableType(M::typeof(SpecialEuclidean(3))) = Pose3()
 
 
 #
