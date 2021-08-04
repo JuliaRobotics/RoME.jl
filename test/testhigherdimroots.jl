@@ -11,7 +11,7 @@ mutable struct RotationTest <: IncrementalInference.AbstractRelativeRoots
   z::MvNormal
 end
 
-getSample(cfo::CalcFactor{<:RotationTest}, N::Int=1) = (reshape(rand(cfo.factor.z,N),3,:),)
+getSample(cfo::CalcFactor{<:RotationTest}, N::Int=1) = ([rand(cfo.factor.z) for _=1:N],)
 
 # 3 dimensional line, z = [a b][x y]' + c
 function (cfo::CalcFactor{<:RotationTest})( meas, 
