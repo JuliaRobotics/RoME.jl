@@ -52,10 +52,12 @@ end
 @testset "Ensure variables initialized properly" begin
 
 # start with to tight an initialization
-global muX1 = Statistics.mean(getVal(fg,:x1),dims=2)
-global stdX1 = Statistics.std(getVal(fg,:x1),dims=2)
-@test sum(map(Int,abs.(muX1[1:3]) .< 0.4)) == 3
-@test sum(map(Int,abs.(muX1[4:6]) .< 0.04)) == 3
+global muX1 = mean(SpecialEuclidean(3), getVal(fg,:x1))
+@test isapprox(muX1.parts[1], [0,0,0], atol=0.4)
+@test isapprox(muX1.parts[2], [1 0 0; 0 1 0; 0 0 1], atol=0.04)
+
+# global stdX1 = std(getVal(fg,:x1),dims=2)
+global stdX1 = sqrt.(diag(cov(Pose3(), getVal(fg,:x1))))
 @test sum(map(Int,abs.(1.0 .- stdX1[1:3]) .< 0.3)) == 3
 @test sum(map(Int,abs.(0.01 .- stdX1[4:6]) .< 0.1)) == 3
 
@@ -66,9 +68,9 @@ end
 
 global priorpts = approxConv(fg, :x1f1, :x1)
 # priorpts = evalFactor(fg, fg.g.vertices[2], 1)
-global means = Statistics.mean(priorpts,dims=2)
-@test sum(map(Int,abs.(means[1:3]) .> 0.5)) == 0
-@test sum(map(Int,abs.(means[4:6]) .> 0.05)) == 0
+global means = mean(SpecialEuclidean(3), priorpts)
+@test sum(map(Int,abs.(means.parts[1]) .> 0.5)) == 0
+@test isapprox(means.parts[2], [1 0 0; 0 1 0; 0 0 1], atol=0.05)
 
 # global v2, f2 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
 # global v3, f3 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
@@ -85,18 +87,20 @@ end
 @testset "Testing Pose3Pose3 evaluation..." begin
 
 global X1pts = getVal(fg, :x1)
-global X2pts = approxConv(fg, :x2x3f1, :x2, N=N)
+global X2pts = approxConv(fg, :x1x2f1, :x2, N=N)
 # X2pts = evalFactor(fg, fg.g.vertices[6], 3, N=N)
 global X3pts = approxConv(fg, :x2x3f1, :x3)
-global X2ptsMean = Statistics.mean(X2pts,dims=2)
-global X3ptsMean = Statistics.mean(X3pts,dims=2)
+global X2ptsMean = mean(SpecialEuclidean(3), X2pts)
+global X3ptsMean = mean(SpecialEuclidean(3), X3pts)
 
-@show X2ptsMean
-@show X3ptsMean
+# @show X2ptsMean
+# @show X3ptsMean
 
-@test  sum(map(Int, abs.(X2ptsMean) - [25.0;0;0;0;0;0] .< 5.0 ))  == 6
-@test  sum(map(Int, abs.(X3ptsMean -  [50.0;0;0;0;0;0]) .< 5.0 )) == 6
+@test isapprox(X2ptsMean.parts[1], [25,0,0], atol=5.0)
+@test isapprox(X2ptsMean.parts[2], [1 0 0; 0 1 0; 0 0 1], atol=0.5)
 
+@test isapprox(X3ptsMean.parts[1], [50,0,0], atol=5.0)
+@test isapprox(X3ptsMean.parts[2], [1 0 0; 0 1 0; 0 0 1], atol=0.5)
 
 tree,smt,hist = solveTree!(fg)
 
@@ -105,8 +109,7 @@ end
 
 @testset "Adding Pose3Pose3 w nullhypo to graph..." begin
 
-global odo3 = SE3([-35;0;0], Quaternion(0))
-global odoc3 = Pose3Pose3( MvNormal(veeEuler(odo3), odoCov) )
+global odoc3 = Pose3Pose3( MvNormal([-35;0;0;0;0;0.0], odoCov) )
 
 @test length(intersect(DFG.listVariables(fg), [:x1;:x2;:x3])) == 3
 # define 50/50% hypothesis
@@ -124,8 +127,10 @@ end
 @testset "loading validation data for testing." begin
 
 global tstdtdir = dirname(@__FILE__)
-global X1ptst = readdlm(joinpath(tstdtdir, "X1ptst.csv"),',')
-global X2ptst = readdlm(joinpath(tstdtdir, "X2ptst.csv"),',')
+_X1ptst = readdlm(joinpath(tstdtdir, "X1ptst.csv"),',')
+global X1ptst = map(X->getPoint(Pose3, X), eachcol(_X1ptst))
+_X2ptst = readdlm(joinpath(tstdtdir, "X2ptst.csv"),',')
+global X2ptst = map(X->getPoint(Pose3, X), eachcol(_X2ptst))
 
 global p1t = manikde!(X1ptst, Pose3)
 global p2t = manikde!(X2ptst, Pose3)
@@ -133,8 +138,8 @@ global p2t = manikde!(X2ptst, Pose3)
 # plotKDE([p2t;p2],c=["red";"blue"],dims=[1;2],levels=3)
 # kld(marginal(p1,[2]), marginal(p1t,[2]), method=:unscented)
 
-global t1 = mmd(X1ptst, X1pts, AMP.SE3_Manifold, size(X1ptst,2), size(X1pts,2), bw=[0.001;])
-global t2 = mmd(X2ptst, X2pts, AMP.SE3_Manifold, size(X1ptst,2), size(X1pts,2), bw=[0.001;])
+global t1 = mmd(X1ptst, X1pts, AMP.SE3_Manifold, length(X1ptst), length(X1pts), bw=[0.001;])
+global t2 = mmd(X2ptst, X2pts, AMP.SE3_Manifold, length(X1ptst), length(X1pts), bw=[0.001;])
 # TODO Change to mmd
 # global t1 = minimum([abs(kld(p1, p1t)[1]) ; abs(kld(p1t, p1)[1])])
 # global t2 = minimum([abs(kld(p2, p2t)[1]) ; abs(kld(p2t, p2)[1])])
