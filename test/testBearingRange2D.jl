@@ -54,7 +54,7 @@ xi = getPointIdentity(Pose2)
 li = zeros(2); li[1] = 20.0;
 zi = (zeros(2),); zi[1][2] = 20.0
 
-res = calcFactorResidualTemporary( p2br, zi, (Pose2, Point2), (xi, li)) 
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li)) 
 #
 # calcFactorResidualTemporary(p2br, zi, (Pose2, xi), (Point2, li))
 
@@ -71,7 +71,7 @@ zi = (zeros(2),); zi[1][:] = [pi/2;20.0]
 # res = zeros(2)
 # p2br(res, fmd, idx, zi, xi, li)
 
-res = calcFactorResidualTemporary( p2br, zi, (Pose2, Point2), (xi, li)) 
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li)) 
 
 @show res
 @test norm(res) < 1e-14
@@ -82,7 +82,7 @@ li = zeros(2); li[2] = 20.0;
 zi = (zeros(2),); zi[1][:] = [0.0;20.0]
 
 
-res = calcFactorResidualTemporary( p2br, zi, (Pose2, Point2), (xi, li)) 
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
 
 #
 @show res
@@ -100,7 +100,7 @@ zi = (zeros(2),); zi[1][:] = [pi/2;20.0]
 # res = zeros(2)
 # p2br(res, fmd, idx, zi, xi, li)
 
-res = calcFactorResidualTemporary( p2br, zi, (Pose2, Point2), (xi, li)) 
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
 
 
 @show res
