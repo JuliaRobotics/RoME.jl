@@ -77,7 +77,7 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
       factor = Pose2Pose2( MvNormal(deltaodo, Qd) )
       posecount += 1
       v_n = _addPoseCanonical!(dfg, lastpose, posecount, factor, poseRegex=poseRegex, refKey=refKey, overridePPE=tmp_[:,ps], postpose_cb=postpose_cb)
-      lastPose = getLabel(v_n)
+      lastpose = getLabel(v_n)
       oldpose = newpose
     end
 
