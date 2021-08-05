@@ -4,8 +4,18 @@
 using RoME
 using Test
 using TensorCast
-using Manifolds
+import Manifolds
+using Manifolds: ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup
 using DistributedFactorGraphs
+using Statistics
+
+# TODO move to IIF?
+function Statistics.cov(vartype::InferenceVariable, ptsArr::Vector{P}) where P
+  M = getManifold(vartype)
+  μ = mean(M, ptsArr)
+  Xcs = vee.(Ref(M), Ref(μ), log.(Ref(M), Ref(μ), ptsArr))
+  return mean(Xcs .* transpose.(Xcs))
+end
 
 ## FIXME remove
 #  quick and dirty skipping of broken testsets

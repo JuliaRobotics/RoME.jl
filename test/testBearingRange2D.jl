@@ -54,13 +54,7 @@ xi = getPointIdentity(Pose2)
 li = zeros(2); li[1] = 20.0;
 zi = (zeros(2),); zi[1][2] = 20.0
 
-
-res = testFactorResidualBinary( p2br, 
-                                Pose2, 
-                                Point2, 
-                                xi, 
-                                li, 
-                                zi )
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li)) 
 #
 # calcFactorResidualTemporary(p2br, zi, (Pose2, xi), (Point2, li))
 
@@ -69,7 +63,7 @@ res = testFactorResidualBinary( p2br,
 
 ##
 
-xi = zeros(3)
+xi = getPointIdentity(Pose2)
 li = zeros(2); li[2] = 20.0;
 zi = (zeros(2),); zi[1][:] = [pi/2;20.0]
 
@@ -77,35 +71,27 @@ zi = (zeros(2),); zi[1][:] = [pi/2;20.0]
 # res = zeros(2)
 # p2br(res, fmd, idx, zi, xi, li)
 
-res = testFactorResidualBinary( p2br, 
-                                Pose2, 
-                                Point2, 
-                                xi, 
-                                li, 
-                                zi )
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li)) 
 
 @show res
 @test norm(res) < 1e-14
 
-
-xi = zeros(3); xi[3] = pi/2
+Xi = zeros(3); Xi[3] = pi/2
+xi = getPoint(Pose2, Xi) 
 li = zeros(2); li[2] = 20.0;
 zi = (zeros(2),); zi[1][:] = [0.0;20.0]
 
 
-res = testFactorResidualBinary( p2br, 
-                                Pose2, 
-                                Point2, 
-                                xi, 
-                                li, 
-                                zi )
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
+
 #
 @show res
 @test norm(res) < 1e-14
 
 ##
 
-xi = zeros(3); xi[3] = -pi/2
+Xi = zeros(3); Xi[3] = -pi/2
+xi = getPoint(Pose2, Xi) 
 li = zeros(2); li[1] = 20.0;
 # zi = ([0.0;pi/2],[0.0;20.0],)
 zi = (zeros(2),); zi[1][:] = [pi/2;20.0]
@@ -114,12 +100,7 @@ zi = (zeros(2),); zi[1][:] = [pi/2;20.0]
 # res = zeros(2)
 # p2br(res, fmd, idx, zi, xi, li)
 
-res = testFactorResidualBinary( p2br, 
-                                Pose2, 
-                                Point2, 
-                                xi, 
-                                li, 
-                                zi )
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
 
 
 @show res

@@ -5,7 +5,6 @@
 using Test
 using RoME
 using Statistics
-using Manifolds
 
 ##
 
