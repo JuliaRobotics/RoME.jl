@@ -149,8 +149,8 @@ global dd = convert(PackedPriorPose3, ipp)
 global upd = convert(RoME.PriorPose3, dd)
 
 # @test TransformUtils.compare(ipp.Zi, upd.Zi)
-@test norm(ipp.Zi.μ - upd.Zi.μ) < 1e-10
-@test norm(ipp.Zi.Σ.mat - upd.Zi.Σ.mat) < 1e-8
+@test norm(ipp.Z.μ - upd.Z.μ) < 1e-10
+@test norm(ipp.Z.Σ.mat - upd.Z.Σ.mat) < 1e-8
 
 global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, DFG.getSolverData(f1))
 global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose3}}, packeddata)
@@ -158,9 +158,9 @@ global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonCo
 # TODO -- fix ambibuity in compare function
 @test compareAll(DFG.getSolverData(f1), unpackeddata, skip=[:fnc;])
 @test compareAll(DFG.getSolverData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!])
-@test compareAll(DFG.getSolverData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;])
-@test compareAll(DFG.getSolverData(f1).fnc.usrfnc!.Zi, unpackeddata.fnc.usrfnc!.Zi, skip=[:Σ;])
-@test compareAll(DFG.getSolverData(f1).fnc.usrfnc!.Zi.Σ, unpackeddata.fnc.usrfnc!.Zi.Σ)
+@test compareAll(DFG.getSolverData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;:Z])
+@test compareAll(DFG.getSolverData(f1).fnc.usrfnc!.Z, unpackeddata.fnc.usrfnc!.Z, skip=[:Σ;])
+@test compareAll(DFG.getSolverData(f1).fnc.usrfnc!.Z.Σ, unpackeddata.fnc.usrfnc!.Z.Σ)
 
 @error "not comparing CCW.fnc.cpt, see this test file for details -- pending IIF #825, and DFG #590"
 # see https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/590#issuecomment-776838053

@@ -11,7 +11,7 @@ end
 
 NorthSouthPartial(Z::D) where {D <: IIF.SamplableBelief} = NorthSouthPartial(Z, (2,))
 
-getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int=1) = (reshape(rand(cfo.factor.Z, N),1,N),)
+getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int=1) = (rand(cfo.factor.Z, N),)
 
 ##
 

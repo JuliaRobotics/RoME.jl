@@ -53,5 +53,5 @@ function convert(::Type{PriorPose3}, packed::PackedPriorPose3)
   return PriorPose3( convert(SamplableBelief, packed.Zi) )
 end
 function convert(::Type{PackedPriorPose3}, obj::PriorPose3)
-  return PackedPriorPose3(convert(PackedSamplableBelief, obj.Zi))
+  return PackedPriorPose3(convert(PackedSamplableBelief, obj.Z))
 end
