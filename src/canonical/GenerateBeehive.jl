@@ -5,8 +5,8 @@ export generateCanonicalFG_Beehive!
 
 function generateCanonicalFG_Beehive!(poseCountTarget::Int=10;
                                       graphinit::Bool = true,
-                                      useMsgLikelihoods::Bool=true,
-                                      dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit, useMsgLikelihoods=useMsgLikelihoods)),
+                                      dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),
+                                      useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
                                       solvable::Int = 1,
                                       refKey::Symbol = :simulated,
                                       addLandmarks::Bool = true,
