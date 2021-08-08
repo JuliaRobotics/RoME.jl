@@ -24,9 +24,9 @@ Related
 """
 function generateCanonicalFG_Helix2D!(numposes::Integer=40;
                                       posesperturn::Integer=20,
-                                      graphinit::Bool=false,
-                                      useMsgLikelihoods::Bool=true,
                                       dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit, useMsgLikelihoods=useMsgLikelihoods)),
+                                      useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
+                                      graphinit::Bool=false,
                                       radius::Real=10,
                                       spine_t=(t)->0 + im*0,
                                       xr_t::Function=(t)->real(spine_t(t)),
