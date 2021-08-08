@@ -38,7 +38,7 @@ end
 
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
     M = getManifold(Pose2)
-    q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
+    q̂ = Manifolds.compose(M, p, exp(M, Manifolds.Identity(M), X)) #for groups
     return vee(M, q, log(M, q, q̂))
 end
   
