@@ -33,7 +33,7 @@ end
 
 function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
   SE2 = SpecialEuclidean(2)
-  Xi = vee(SE2, xi, log(SE2, identity(SE2, xi), xi))
+  Xi = vee(SE2, xi, log(SE2, Manifolds.Identity(SE2), xi))
 
   # 1-bearing
   # 2-range

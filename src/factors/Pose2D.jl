@@ -27,10 +27,10 @@ Pose2Pose2(::UniformScaling) = Pose2Pose2() # MvNormal(zeros(3),LinearAlgebra.di
 function getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) 
   
   Xc = [rand(cf.factor.z) for _ in 1:N]
-  #NOTE be carefull using this as template as it will not work in general for all manifolds
+  #NOTE be careful using this as template as it will not work in general for all manifolds
   M = getManifold(Pose2)
-  ϵ = getPointIdentity(Pose2)
-  X = hat.(Ref(M), Ref(ϵ), Xc)
+  # ϵ = getPointIdentity(Pose2)
+  X = hat.(Ref(M), Ref(Manifolds.Identity(M)), Xc)
   # return a vector
   return (X, )
 end
@@ -38,7 +38,7 @@ end
 
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
     M = getManifold(Pose2)
-    q̂ = Manifolds.compose(M, p, exp(M, identity(M, p), X)) #for groups
+    q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
     return vee(M, q, log(M, q, q̂))
 end
   
