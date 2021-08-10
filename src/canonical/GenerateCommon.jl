@@ -69,8 +69,8 @@ Notes
 """
 function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2,
                                         graphinit::Bool=true,
-                                        useMsgLikelihoods::Bool=true,
-                                        dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit, useMsgLikelihoods=useMsgLikelihoods)),  
+                                        dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),  
+                                        useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
                                         label::Symbol=:x0,
                                         priorType::Type{<:AbstractPrior}=DFG._getPriorType(varType),
                                         μ0::AbstractVector{<:Real}= zeros(getDimension(varType)),

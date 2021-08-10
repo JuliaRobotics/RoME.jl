@@ -1,4 +1,5 @@
 
+export generateCanonicalFG_Honeycomb!
 
 global _honeycombRecipe = Dict{Symbol,Symbol}(
   :l6   =>:l0,
@@ -164,8 +165,8 @@ end
 
 function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
                                         graphinit::Bool = false,
-                                        useMsgLikelihoods::Bool=true,
-                                        dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit, useMsgLikelihoods=useMsgLikelihoods)),  
+                                        dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),  
+                                        useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
                                         direction::Symbol = :right,
                                         solvable::Int=1,
                                         refKey::Symbol=:simulated,
