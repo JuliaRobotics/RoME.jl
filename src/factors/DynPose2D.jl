@@ -19,7 +19,7 @@ DynPose2VelocityPrior(z1::T1,z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF
 getSample(cf::CalcFactor{<:DynPose2VelocityPrior}, N::Int=1) = ([rand(cf.factor.Zpose,N);rand(cf.factor.Zvel,N)], )
 
 
-function IIF.getParametricMeasurement(s::DynPose2VelocityPrior{<:MvNormal, <:MvNormal}) 
+function IIF.getMeasurementParametric(s::DynPose2VelocityPrior{<:MvNormal, <:MvNormal}) 
 
   meas = [mean(s.Zpose); mean(s.Zvel)]
 

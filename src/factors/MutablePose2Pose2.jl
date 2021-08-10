@@ -15,7 +15,7 @@ mutable struct MutablePose2Pose2Gaussian  <: IIF.AbstractRelativeRoots
 end
 
 # should auto detect .Zij
-# IIF.getParametricMeasurement(mpp::MutablePose2Pose2Gaussian) = IIF.getParametricMeasurement(Zij)
+# IIF.getMeasurementParametric(mpp::MutablePose2Pose2Gaussian) = IIF.getMeasurementParametric(Zij)
 
 function getSample(cfo::CalcFactor{<:MutablePose2Pose2Gaussian}, N::Int=100)
   return (rand(cfo.factor.Zij, N), )
