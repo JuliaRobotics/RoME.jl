@@ -14,7 +14,7 @@ end
 PriorPoint3(z::T) where {T <: IIF.SamplableBelief} = PriorPoint3{T}(z)
 
 function getSample(p3::PriorPoint3, N::Int=1)
-  return (rand(p3.Z, N),)
+  return ([rand(p3.Z) for _=1:N],)
 end
 
 
