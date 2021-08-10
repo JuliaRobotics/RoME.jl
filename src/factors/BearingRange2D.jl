@@ -33,7 +33,7 @@ end
 
 function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
   SE2 = SpecialEuclidean(2)
-  Xi = vee(SE2, xi, log(SE2, Manifolds.identity_element(SE2), xi))
+  Xi = vee(SE2, xi, log(SE2, identity_element(SE2, xi), xi))
 
   # 1-bearing
   # 2-range
@@ -62,9 +62,9 @@ end
 # function (cfo::CalcFactor{<:Pose2Point2BearingRange})(measX, p, q)
 #   #
 #   M = SpecialEuclidean(2)
-#   q_SE = ProductRepr(q, identity(SpecialOrthogonal(2), p.parts[2]))
+#   q_SE = ProductRepr(q, identity_element(SpecialOrthogonal(2), p.parts[2]))
 
-#   X_se2 = log(M, identity(M, p), compose(M, inv(M, p), q_SE))
+#   X_se2 = log(M, identity_element(M, p), compose(M, inv(M, p), q_SE))
 #   X = X_se2.parts[1]
 #   # NOTE this: `X̂ = log(M, p, q_SE)` wrong for what we want
 #   #go to tangent vector
