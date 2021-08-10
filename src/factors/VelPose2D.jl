@@ -5,7 +5,7 @@ export VelPose2VelPose2, PackedVelPose2VelPose2
 """
 $(TYPEDEF)
 """
-mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
+mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
   Zpose::Pose2Pose2{T1} #Zpose::T1
   Zvel::T2
   reuseres::Vector{Vector{Float64}}
@@ -14,7 +14,9 @@ mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBel
 end
 VelPose2VelPose2(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = VelPose2VelPose2{T1,T2}(z1, z2)
 
-getSample(cf::CalcFactor{<:VelPose2VelPose2}, N::Int=1) = ([rand(cf.factor.Zpose.z,N);rand(cf.factor.Zvel,N)], )
+getManifold(::VelPose2VelPose2) = getManifold(DynPose2)
+
+getSample(cf::CalcFactor{<:VelPose2VelPose2}, N::Int=1) = ([[rand(cf.factor.Zpose.z);rand(cf.factor.Zvel)] for _=1:N], )
 
 function IIF.getParametricMeasurement(s::VelPose2VelPose2{<:MvNormal, <:MvNormal}) 
 
@@ -32,9 +34,13 @@ function IIF.getParametricMeasurement(s::VelPose2VelPose2{<:MvNormal, <:MvNormal
 end
 
 function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
-                                              Xi,
-                                              Xj  )
+                                              _Xi,
+                                              _Xj  )
   #
+  M = getManifold(DynPose2)
+  Xi = vee(M, _Xi, log(M, identity_element(M, _Xi), _Xi))
+  Xj = vee(M, _Xj, log(M, identity_element(M, _Xj), _Xj))
+
   #FIXME JT - Createing new res for simplicity, it may not hold up well though
   res = Vector{eltype(Xi)}(undef, 5)
   

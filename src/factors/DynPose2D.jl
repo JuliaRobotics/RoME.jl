@@ -16,8 +16,22 @@ mutable struct DynPose2VelocityPrior{T1,T2} <: IncrementalInference.AbstractPrio
 end
 DynPose2VelocityPrior(z1::T1,z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = DynPose2VelocityPrior{T1,T2}(z1,z2)
 
-getSample(cf::CalcFactor{<:DynPose2VelocityPrior}, N::Int=1) = ([rand(cf.factor.Zpose,N);rand(cf.factor.Zvel,N)], )
+DFG.getManifold(::DynPose2VelocityPrior) = getManifold(DynPose2)
 
+function getSample(cf::CalcFactor{<:DynPose2VelocityPrior}, N::Int=1)
+  Zpose = cf.factor.Zpose
+  Zvel = cf.factor.Zvel
+  p = getPointIdentity(DynPose2())
+  M = getManifold(cf.factor)
+  
+  Xc = [[rand(Zpose);rand(Zvel)] for _ in 1:N]
+  
+  # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
+  X = hat.(Ref(M), Ref(p), Xc)
+  points = exp.(Ref(M), Ref(p), X)
+
+  return (points, )
+end
 
 function IIF.getParametricMeasurement(s::DynPose2VelocityPrior{<:MvNormal, <:MvNormal}) 
 
@@ -150,7 +164,7 @@ DynPose2DynPose2(z1::T=MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))) 
 # getManifolds(::DynPose2DynPose2) = getManifolds(DynPose2DynPose2)
 
 
-getSample(cf::CalcFactor{<:DynPose2DynPose2}, N::Int=1) = (rand(cf.factor.Z, N), )
+getSample(cf::CalcFactor{<:DynPose2DynPose2}, N::Int=1) = ([rand(cf.factor.Z) for _=1:N], )
 
 function (cf::CalcFactor{<:DynPose2DynPose2})(meas,
                                               wXi,
