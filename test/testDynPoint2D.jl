@@ -139,14 +139,16 @@ addFactor!(fg, [:x1,:x2], vp, graphinit=false)
 # lets init the first
 # IncrementalInference.doautoinit!(fg, :x1)
 
-global X1 = getVal(fg, :x1)
+_X1 = getVal(fg, :x1)
+@cast X1[j,i] := _X1[i][j]
 @test 0.7*N < sum(-0.5 .< X1[1,:] .< 0.5)
 @test 0.7*N < sum(-0.5 .< X1[2,:] .< 0.5)
 @test 0.7*N < sum(9.0 .< X1[3,:] .< 11.0)
-@test 0.7*N < sum(9.0 .< X1[3,:] .< 11.0)
+
 
 # now test "projection" / probabilistic-convolution through VelPointVelPoint{D, N}
-global pX2 = approxConv(fg, :x1x2f1, :x2)
+_pX2 = approxConv(fg, :x1x2f1, :x2)
+@cast pX2[j,i] := _pX2[i][j]
 
 @test 0.7*N < sum(9 .< pX2[1,:] .< 11)
 @test 0.7*N < sum(-2 .< pX2[2,:] .< 2)
