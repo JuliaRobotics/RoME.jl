@@ -3,7 +3,8 @@
 
 using Test
 using RoME
-
+using DistributedFactorGraphs
+using TensorCast
 ##
 
 @testset "sanity check on Hex example" begin
@@ -20,8 +21,10 @@ getSolverParams(fg).treeinit = true
 getSolverParams(fg).downsolve = true
 getSolverParams(fg).multiproc = false
 getSolverParams(fg).async = false
-getSolverParams(fg).useMsgLikelihoods=true
 
+@test_skip false
+# getSolverParams(fg).useMsgLikelihoods=true
+@error "Restore useMsgLikelihoods=true"
 
 # direct solve would be
 tree, smt, hist = solveTree!(fg)
@@ -29,36 +32,51 @@ tree, smt, hist = solveTree!(fg)
 
 
 @error "Hex init test degraded quality during useMsgLikelihoods refactor, must restore to 55"
-@test 35 < sum(-3.0 .< getPoints(getKDE(fg, :x0))[1,:] .< 3.0)
-@test 35 < sum(-3.0 .< getPoints(getKDE(fg, :x0))[2,:] .< 3.0)
-@test 35 < sum(-0.3 .< getPoints(getKDE(fg, :x0))[3,:] .< 0.3)
+M = getManifold(Pose2())
 
-@test 35 < sum(7.0 .< getPoints(getKDE(fg, :x1))[1,:] .< 13.0)
-@test 35 < sum(-3.0 .< getPoints(getKDE(fg, :x1))[2,:] .< 3.0)
-@test 35 < sum(0.7 .< getPoints(getKDE(fg, :x1))[3,:] .< 1.3)
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x0)))[i][j]
+@test 35 < sum(-3.0 .< cs[1,:] .< 3.0)
+@test 35 < sum(-3.0 .< cs[2,:] .< 3.0)
+@test 35 < sum(-0.3 .< cs[3,:] .< 0.3)
 
-@test 35 < sum(12.0 .< getPoints(getKDE(fg, :x2))[1,:] .< 18.0)
-@test 35 < sum(6.0 .< getPoints(getKDE(fg, :x2))[2,:] .< 11.0)
-@test 35 < sum(1.8 .< getPoints(getKDE(fg, :x2))[3,:] .< 2.4)
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x1)))[i][j]
+@test 35 < sum(7.0 .< cs[1,:] .< 13.0)
+@test 35 < sum(-3.0 .< cs[2,:] .< 3.0)
+@test 35 < sum(0.7 .< cs[3,:] .< 1.3)
 
-@test 35 < sum(7.0 .< getPoints(getKDE(fg, :x3))[1,:] .< 13.0)
-@test 35 < sum(15.0 .< getPoints(getKDE(fg, :x3))[2,:] .< 20.0)
-# @test 35 < sum(-0.3 .< getPoints(getKDE(fg, :x3))[3,:] .< 0.3)
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x2)))[i][j]
+@test 35 < sum(12.0 .< cs[1,:] .< 18.0)
+@test 35 < sum(6.0 .< cs[2,:] .< 11.0)
+@test 35 < sum(1.8 .< cs[3,:] .< 2.4)
 
-@test 35 < sum(-5.0 .< getPoints(getKDE(fg, :x4))[1,:] .< 5.0)
-@test 35 < sum(13.0 .< getPoints(getKDE(fg, :x4))[2,:] .< 22.0)
-@test 35 < sum(-2.8 .< getPoints(getKDE(fg, :x4))[3,:] .< -1.5)
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x3)))[i][j]
+@test 35 < sum(7.0 .< cs[1,:] .< 13.0)
+@test 35 < sum(15.0 .< cs[2,:] .< 20.0)
+# @test 35 < sum(-0.3 .< cs[3,:] .< 0.3)
+μ = mean(M, getPoints(getKDE(fg, :x3)))
+@test isapprox(μ.parts[1], [11; 17.5], atol=2.5)
+@test isapprox(SpecialOrthogonal(2), μ.parts[2], [-1 0; 0 -1], atol=0.5)
+Σ = cov(Pose2(), getPoints(getKDE(fg, :x3)))
+@test all(diag(Σ) .< [5,5,1]) #TODO smaller
 
-@test 35 < sum(-8.0 .< getPoints(getKDE(fg, :x5))[1,:] .< -2.0)
-@test 35 < sum(6.0 .< getPoints(getKDE(fg, :x5))[2,:] .< 11.0)
-@test 35 < sum(-1.3 .< getPoints(getKDE(fg, :x5))[3,:] .< -0.7)
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x4)))[i][j]
+@test 35 < sum(-5.0 .< cs[1,:] .< 5.0)
+@test 35 < sum(13.0 .< cs[2,:] .< 22.0)
+@test 35 < sum(-2.8 .< cs[3,:] .< -1.5)
 
-@test 35 < sum(-3.0 .< getPoints(getKDE(fg, :x6))[1,:] .< 3.0)
-@test 35 < sum(-3.0 .< getPoints(getKDE(fg, :x6))[2,:] .< 3.0)
-@test 35 < sum(-0.3 .< getPoints(getKDE(fg, :x6))[3,:] .< 0.3)
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x5)))[i][j]
+@test 35 < sum(-8.0 .< cs[1,:] .< -2.0)
+@test 35 < sum(6.0 .< cs[2,:] .< 11.0)
+@test 35 < sum(-1.3 .< cs[3,:] .< -0.7)
 
-@test 35 < sum(17.0 .< getPoints(getKDE(fg, :l1))[1,:] .< 23.0)
-@test 35 < sum(-5.0 .< getPoints(getKDE(fg, :l1))[2,:] .< 5.0)
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x6)))[i][j]
+@test 35 < sum(-3.0 .< cs[1,:] .< 3.0)
+@test 35 < sum(-3.0 .< cs[2,:] .< 3.0)
+@test 35 < sum(-0.3 .< cs[3,:] .< 0.3)
+
+@cast cs[j,i] := getCoordinates.(Point2, getPoints(getKDE(fg, :l1)))[i][j]
+@test 35 < sum(17.0 .< cs[1,:] .< 23.0)
+@test 35 < sum(-5.0 .< cs[2,:] .< 5.0)
 
 
 ##

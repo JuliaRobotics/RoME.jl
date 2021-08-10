@@ -110,8 +110,8 @@ Related
 """
 function generateCanonicalFG_Boxes2D!(numposes::Integer=16;
                                       graphinit::Bool=false,
-                                      useMsgLikelihoods::Bool=true,
-                                      dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit, useMsgLikelihoods=useMsgLikelihoods)),
+                                      dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),
+                                      useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
                                       length_x::Real=15,
                                       length_y::Real=length_x,
                                       slew_x::Real=2/3,
