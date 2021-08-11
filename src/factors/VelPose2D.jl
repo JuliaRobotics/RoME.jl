@@ -16,7 +16,22 @@ VelPose2VelPose2(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.Sam
 
 getManifold(::VelPose2VelPose2) = getManifold(DynPose2)
 
-getSample(cf::CalcFactor{<:VelPose2VelPose2}, N::Int=1) = ([[rand(cf.factor.Zpose.z);rand(cf.factor.Zvel)] for _=1:N], )
+function _getSample(cf::CalcFactor{<:VelPose2VelPose2})
+    #Pose2 part
+    Xc = rand(cf.factor.Zpose.z)
+    M = getManifold(Pose2)
+    ϵ = getPointIdentity(Pose2)
+    # ϵ = Manifolds.Identity(M)
+    Xpose = hat(M, ϵ, Xc)
+    #velocity part
+    Xvel = rand(cf.factor.Zvel)
+
+    return ProductRepr(Xpose, Xvel)
+end
+
+function getSample(cf::CalcFactor{<:VelPose2VelPose2}, N::Int=1)
+  return ([_getSample(cf) for _=1:N], )
+end
 
 function IIF.getParametricMeasurement(s::VelPose2VelPose2{<:MvNormal, <:MvNormal}) 
 
@@ -33,6 +48,34 @@ function IIF.getParametricMeasurement(s::VelPose2VelPose2{<:MvNormal, <:MvNormal
   return meas, iΣ
 end
 
+function (cf::CalcFactor{<:VelPose2VelPose2})(X, p, q)
+  #
+  #Pose2 part
+  M1 = getManifold(Pose2)
+  X1 = X.parts[1] 
+  p1 = p.parts[1] 
+  q1 = q.parts[1] 
+  ϵ1 = identity_element(M1, p1)
+  q̂1 = Manifolds.compose(M1, p1, exp(M1, ϵ1, X1))
+  pose_res = vee(M1, q1, log(M1, q1, q̂1))
+  
+  #velocity part
+  dt = Dates.value(cf.metadata.fullvariables[2].nstime - cf.metadata.fullvariables[1].nstime)*1e-9
+  X2 = X.parts[2]
+  p2 = p.parts[2]
+  q2 = q.parts[2]
+  # bDXij = TransformUtils.R(-wxi[3])*wDXij
+  bDXij = transpose(p1.parts[2])*(q2 .- p2)
+
+  Xpq = log(M1, ϵ1, Manifolds.compose(M1, Manifolds.inv(M1, p1), q1))
+  dx = vee(M1, ϵ1, Xpq)[1:2]
+  # calculate the residual
+  res_vel = (X2 .- bDXij).^2 .+ (dx/dt .- 0.5*(p2 .+ q2)).^2
+  res_vel = sqrt.(res_vel)
+
+  return [pose_res; res_vel]
+end
+#=
 function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
                                               _Xi,
                                               _Xj  )
@@ -78,7 +121,7 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
 
   return res
 end
-
+=#
 
 
 function compare(a::VelPose2VelPose2, b::VelPose2VelPose2; tol::Float64=1e-10)::Bool
