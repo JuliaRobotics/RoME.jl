@@ -25,11 +25,8 @@ function getSample(cfo::CalcFactor{<:Pose2Point2}, N::Int=1)
   return ([rand(cfo.factor.Zij) for _=1:N], )
 end
 
-function IIF.getMeasurementParametric(s::Pose2Point2{<:MvNormal})
-
-  return IIF.getMeasurementParametric(s.Zij)
-
-end
+# Could also revert to IIF default for Zij
+IIF.getMeasurementParametric(s::Pose2Point2{<:MvNormal}) = getMeasurementParametric(s.Zij)
 
 # define the conditional probability constraint
 function (cfo::CalcFactor{<:Pose2Point2})(meas,
@@ -47,8 +44,8 @@ end
 
 mutable struct PackedPose2Point2 <: IncrementalInference.PackedInferenceType
     Zij::String
-    PackedPose2Point2() = new()
-    PackedPose2Point2(s1::AS) where {AS <: AbstractString} = new(string(s1))
+    # PackedPose2Point2() = new()
+    # PackedPose2Point2(s1::AS) where {AS <: AbstractString} = new(string(s1))
 end
 
 function convert(::Type{PackedPose2Point2}, obj::Pose2Point2{T}) where {T <: IIF.SamplableBelief}
