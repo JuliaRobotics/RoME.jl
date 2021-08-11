@@ -116,3 +116,5 @@ printstyled("  Pass:$(n_pass)\n";color=:green)
 printstyled("  Broken:$(n_broken)\n"; color=:yellow)
 printstyled("  Fail:$(n_fail)\n"; color=:red)
 printstyled("  Error:$(n_error)\n"; color=:red)
+
+0 < n_error ? error("RoME tests failed") : nothing

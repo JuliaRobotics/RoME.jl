@@ -186,6 +186,7 @@ function assembleChordsDict(dfg::AbstractDFG,
     maxadi = MAXADI < maxadi ? MAXADI : maxadi
     for adi in 1:maxadi
       to = Symbol("x",getVariableLabelNumber(from)+adi)
+      # FIXME replace with approxConvBelief instead
       tt = Threads.@spawn accumulateFactorChain(dfg, $from, $to)
       @async begin
         chords[$from][$to] = fetch(tt)

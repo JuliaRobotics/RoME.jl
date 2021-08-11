@@ -16,7 +16,7 @@ VelPose2VelPose2(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.Sam
 
 getSample(cf::CalcFactor{<:VelPose2VelPose2}, N::Int=1) = ([rand(cf.factor.Zpose.z,N);rand(cf.factor.Zvel,N)], )
 
-function IIF.getParametricMeasurement(s::VelPose2VelPose2{<:MvNormal, <:MvNormal}) 
+function IIF.getMeasurementParametric(s::VelPose2VelPose2{<:MvNormal, <:MvNormal}) 
 
   meas = [mean(s.Zpose.z); mean(s.Zvel)]
 

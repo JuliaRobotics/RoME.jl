@@ -10,7 +10,7 @@ $(TYPEDEF)
 
 XY Euclidean manifold variable node softtype.
 """
-@defVariable Point2 Euclidean(2) [0.0;0.0]
+@defVariable Point2 TranslationGroup(2) [0.0;0.0]
 
 
 """
@@ -24,7 +24,7 @@ Example
 p3 = Point3()
 ```
 """
-@defVariable Point3 Euclidean(3) [0;0;0.0]
+@defVariable Point3 TranslationGroup(3) [0;0;0.0]
 
 
 """
@@ -52,7 +52,7 @@ $(TYPEDEF)
 Dynamic point in 2D space with velocity components: `x, y, dx/dt, dy/dt`
 
 """
-@defVariable DynPoint2 Euclidean(4) zeros(4)
+@defVariable DynPoint2 TranslationGroup(4) zeros(4)
 
 """
 $(TYPEDEF)
@@ -72,7 +72,7 @@ $SIGNATURES
 Function to project only XY data onto Cartesian plane for 2D plotting.
 """
 projectCartesian(pose::Union{<:Point2,<:Point3,<:Pose2,<:Pose3,<:DynPoint2,<:DynPose2}, 
-                 x::Vector{Float64}) = [x[1]; x[2]; 0]
+                  x::Vector{Float64}) = [x[1]; x[2]; 0]
 
 #
 

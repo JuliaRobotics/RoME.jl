@@ -62,7 +62,8 @@ function _addLandmarkBeehive!(fg,
                               refKey::Symbol=:simulated, 
                               solvable::Int=1,
                               graphinit::Bool=true,
-                              landmarkRegex::Regex=r"l\d+"  )
+                              landmarkRegex::Regex=r"l\d+",
+                              srcNumber::Integer = match(r"\d+", string(lastPose)).match |> x->parse(Int,x) )
   #
   newFactor = RoME.Pose2Point2BearingRange(Normal(0,0.03), Normal(20,0.5))
   isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, lastPose, landmarkRegex, RoME.Point2, newFactor)
@@ -70,7 +71,6 @@ function _addLandmarkBeehive!(fg,
   # force isAlready until fixed _checkVariableByReference parametric solution at -pi Optim issue
   global _honeycombRecipe
   isAlready = false
-  srcNumber = match(r"\d+", string(lastPose)).match |> x->parse(Int,x)
   genLabel = Symbol(:l, srcNumber)
   if haskey(_honeycombRecipe, genLabel) 
     isAlready = true
@@ -85,7 +85,6 @@ function _addLandmarkBeehive!(fg,
     addFactor!(fg, [lastPose; genLabel], newFactor, solvable=solvable, graphinit=graphinit)
     
     # also set :simulated PPE for similar future usage
-    # newPPE = DFG.MeanMaxPPE(:simulated, simPPE, simPPE, simPPE)
     setPPE!(newVar, :simulated, typeof(simPPE), simPPE)   # TODO this API can be improved
   else
     @info "Adding simulated loop closure with perfect data association" lastPose genLabel

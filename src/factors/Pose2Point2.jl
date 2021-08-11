@@ -25,9 +25,9 @@ function getSample(cfo::CalcFactor{<:Pose2Point2}, N::Int=1)
   return ([rand(cfo.factor.Zij) for _=1:N], )
 end
 
-function IIF.getParametricMeasurement(s::Pose2Point2{<:MvNormal})
+function IIF.getMeasurementParametric(s::Pose2Point2{<:MvNormal})
 
-  return IIF.getParametricMeasurement(s.Zij)
+  return IIF.getMeasurementParametric(s.Zij)
 
 end
 

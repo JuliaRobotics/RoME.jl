@@ -22,7 +22,7 @@ function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange}, N::Int=1)
 end
 
 
-function IIF.getParametricMeasurement(s::Pose2Point2BearingRange{<:Normal, <:Normal})
+function IIF.getMeasurementParametric(s::Pose2Point2BearingRange{<:Normal, <:Normal})
 
   meas = [mean(s.bearing), mean(s.range)]
   iΣ = [1/var(s.bearing)             0;
