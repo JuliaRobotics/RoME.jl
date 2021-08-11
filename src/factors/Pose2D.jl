@@ -36,6 +36,7 @@ function getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1)
 end
 
 
+# Assumes X is a tangent vector
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
     M = getManifold(Pose2)
     q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
