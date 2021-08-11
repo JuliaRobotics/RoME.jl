@@ -38,6 +38,7 @@ end
 
 # Assumes X is a tangent vector
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
+    @assert X isa ProductRepr "Pose2Pose2 expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
     M = getManifold(Pose2)
     q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
     return vee(M, q, log(M, q, q̂))
