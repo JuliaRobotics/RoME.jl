@@ -50,6 +50,7 @@ end
 
 function (cf::CalcFactor{<:VelPose2VelPose2})(X, p, q)
   #
+  pose_res = Vector{Manifolds.number_eltype(X)}(undef, 3)
   #Pose2 part
   M1 = getManifold(Pose2)
   X1 = X.parts[1] 
@@ -57,7 +58,7 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(X, p, q)
   q1 = q.parts[1] 
   ϵ1 = identity_element(M1, p1)
   q̂1 = Manifolds.compose(M1, p1, exp(M1, ϵ1, X1))
-  pose_res = vee(M1, q1, log(M1, q1, q̂1))
+  vee!(M1, pose_res, q1, log(M1, q1, q̂1))
   
   #velocity part
   dt = Dates.value(cf.metadata.fullvariables[2].nstime - cf.metadata.fullvariables[1].nstime)*1e-9
@@ -68,9 +69,10 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(X, p, q)
   bDXij = transpose(p1.parts[2])*(q2 .- p2)
 
   Xpq = log(M1, ϵ1, Manifolds.compose(M1, Manifolds.inv(M1, p1), q1))
-  dx = vee(M1, ϵ1, Xpq)[1:2]
+  dx = Vector{Manifolds.number_eltype(X)}(undef, 3)
+  vee!(M1, dx, ϵ1, Xpq)
   # calculate the residual
-  res_vel = (X2 .- bDXij).^2 .+ (dx/dt .- 0.5*(p2 .+ q2)).^2
+  res_vel = (X2 .- bDXij).^2 .+ (view(dx, 1:2)/dt .- 0.5*(p2 .+ q2)).^2
   res_vel = sqrt.(res_vel)
 
   return [pose_res; res_vel]
