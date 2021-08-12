@@ -5,7 +5,7 @@ export VelPose2VelPose2, PackedVelPose2VelPose2
 """
 $(TYPEDEF)
 """
-mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
+mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
   Zpose::Pose2Pose2{T1} #Zpose::T1
   Zvel::T2
   reuseres::Vector{Vector{Float64}}
@@ -14,7 +14,24 @@ mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBel
 end
 VelPose2VelPose2(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = VelPose2VelPose2{T1,T2}(z1, z2)
 
-getSample(cf::CalcFactor{<:VelPose2VelPose2}, N::Int=1) = ([rand(cf.factor.Zpose.z,N);rand(cf.factor.Zvel,N)], )
+getManifold(::VelPose2VelPose2) = getManifold(DynPose2)
+
+function _getSample(cf::CalcFactor{<:VelPose2VelPose2})
+    #Pose2 part
+    Xc = rand(cf.factor.Zpose.z)
+    M = getManifold(Pose2)
+    ϵ = getPointIdentity(Pose2)
+    # ϵ = Manifolds.Identity(M)
+    Xpose = hat(M, ϵ, Xc)
+    #velocity part
+    Xvel = rand(cf.factor.Zvel)
+
+    return ProductRepr(Xpose, Xvel)
+end
+
+function getSample(cf::CalcFactor{<:VelPose2VelPose2}, N::Int=1)
+  return ([_getSample(cf) for _=1:N], )
+end
 
 function IIF.getMeasurementParametric(s::VelPose2VelPose2{<:MvNormal, <:MvNormal}) 
 
@@ -31,10 +48,44 @@ function IIF.getMeasurementParametric(s::VelPose2VelPose2{<:MvNormal, <:MvNormal
   return meas, iΣ
 end
 
-function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
-                                              Xi,
-                                              Xj  )
+function (cf::CalcFactor{<:VelPose2VelPose2})(X, p, q)
   #
+  pose_res = Vector{Manifolds.number_eltype(X)}(undef, 3)
+  #Pose2 part
+  M1 = getManifold(Pose2)
+  X1 = X.parts[1] 
+  p1 = p.parts[1] 
+  q1 = q.parts[1] 
+  ϵ1 = identity_element(M1, p1)
+  q̂1 = Manifolds.compose(M1, p1, exp(M1, ϵ1, X1))
+  vee!(M1, pose_res, q1, log(M1, q1, q̂1))
+  
+  #velocity part
+  dt = Dates.value(cf.metadata.fullvariables[2].nstime - cf.metadata.fullvariables[1].nstime)*1e-9
+  X2 = X.parts[2]
+  p2 = p.parts[2]
+  q2 = q.parts[2]
+  # bDXij = TransformUtils.R(-wxi[3])*wDXij
+  bDXij = transpose(p1.parts[2])*(q2 .- p2)
+
+  Xpq = log(M1, ϵ1, Manifolds.compose(M1, Manifolds.inv(M1, p1), q1))
+  dx = Vector{Manifolds.number_eltype(X)}(undef, 3)
+  vee!(M1, dx, ϵ1, Xpq)
+  # calculate the residual
+  res_vel = (X2 .- bDXij).^2 .+ (view(dx, 1:2)/dt .- 0.5*(p2 .+ q2)).^2
+  res_vel = sqrt.(res_vel)
+
+  return [pose_res; res_vel]
+end
+#=
+function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
+                                              _Xi,
+                                              _Xj  )
+  #
+  M = getManifold(DynPose2)
+  Xi = vee(M, _Xi, log(M, identity_element(M, _Xi), _Xi))
+  Xj = vee(M, _Xj, log(M, identity_element(M, _Xj), _Xj))
+
   #FIXME JT - Createing new res for simplicity, it may not hold up well though
   res = Vector{eltype(Xi)}(undef, 5)
   
@@ -72,7 +123,7 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
 
   return res
 end
-
+=#
 
 
 function compare(a::VelPose2VelPose2, b::VelPose2VelPose2; tol::Float64=1e-10)::Bool

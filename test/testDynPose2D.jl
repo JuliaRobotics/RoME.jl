@@ -34,8 +34,8 @@ pts = approxConv(fg, :x0x1f1, :x1)
 
 tree, smt, hist = solveTree!(fg);
 
-X1 = getVal(fg, :x1)
-
+_X1 = getCoordinates.(DynPose2, getVal(fg, :x1))
+@cast X1[j,i] := _X1[i][j]
 @test 0.9*N <= sum(abs.(X1[1,:] .- 10.0) .< 0.75)
 @test 0.9*N <= sum(abs.(X1[2,:] .- 0.0) .< 0.75)
 # @show TU.wrapRad.(X1[3,:])

@@ -122,6 +122,7 @@ Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(AMP.SE2_Manifold)}) = (:Eucl
 Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
 Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(BearingRange_Manifold)}) = (:Circular,:Euclid)
 
+Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(Manifolds.ProductGroup(ProductManifold(SpecialEuclidean(2), TranslationGroup(2))))}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
 # Variables dont need to re-overload these functions from @defVariable (factors dont have easy macro yet)
 # Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Point2}) = AMP.Euclid2
 # Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Point3}) = AMP.Euclid3
