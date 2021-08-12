@@ -2,7 +2,8 @@ using RoME
 using Statistics
 # , Distributions
 using Test
-
+using DistributedFactorGraphs
+using TensorCast
 import Base: convert
 
 ##
