@@ -39,7 +39,10 @@ end
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
     M = getManifold(Pose2)
     q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
-    return vee(M, q, log(M, q, q̂))
+    #TODO allocalte for vee! see Manifolds #412, fix for AD
+    Xc = zeros(3)
+    vee!(M, Xc, q, log(M, q, q̂))
+    return Xc
 end
   
 
