@@ -14,7 +14,7 @@ getManifold(::InstanceType{PriorPose2}) = Pose2 |> getManifold
 getManifold(::InstanceType{Pose2Pose2}) = Pose2 |> getManifold
 # getManifold(::InstanceType{Pose3Point3}) = Point3
 getManifold(::InstanceType{Pose3Pose3}) = Pose3 |> getManifold
-getManifold(::InstanceType{Pose2Point2BearingRange}) = BearingRange2 |> getManifold
+# getManifold(::InstanceType{Pose2Point2BearingRange}) = BearingRange2 |> getManifold
 
 
 
