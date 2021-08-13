@@ -10,8 +10,10 @@ Pretend a bee is walking in a hive where each step (pose) follows one edge of an
 and at after each step a new direction left or right is stochastically chosen and the process repeats.
 
 Notes
-- The keyword `locality::Integer=3` is a positive integer value, where higher numbers imply direction decisions are more sticky for multiple steps.
+- The keyword `locality::Integer=2` is a positive integer value, where higher numbers imply direction decisions are more sticky for multiple steps.
 - Use keyword callback function `postpose_cb = (fg, lastpose) -> ...` to hook in your own features right after each new pose step.
+
+See also: [`generateCanonicalFG_Honeycomb!`](@ref), [`generateCanonicalFG_Hexagonal`](@ref), [`generateCanonicalFG_ZeroPose`](@ref)
 """
 function generateCanonicalFG_Beehive!(poseCountTarget::Int=10;
                                       graphinit::Bool = true,
@@ -51,7 +53,7 @@ function generateCanonicalFG_Beehive!(poseCountTarget::Int=10;
   # keep adding poses until the target number is reached
   direction = rand(1:2) === 1 ? :left : :right
   while posecount < poseCountTarget
-    #change or keep direction according to location keyword
+    #change or keep direction according to locality keyword
     direction = rand(0:locality) !== 0 ? direction : (direction == :left ? :right : :left)
     posecount = _offsetHexLeg(dfg, posecount, direction=direction, graphinit=graphinit, 
                               landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, 
