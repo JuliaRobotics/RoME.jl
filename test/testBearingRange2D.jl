@@ -24,8 +24,11 @@ meas = sampleFactor(IIF._getCCW(fg, :x0x1f1), 100)
 ##
 
 # meas = getSample(p2br, 100)
-mu = Statistics.mean(meas[1])
-sigma = Statistics.std(meas[1])
+M = getManifold(p2br)
+mcords = vee.(Ref(M), Ref(identity_element(M)), meas[1])
+
+mu = Statistics.mean(mcords)
+sigma = Statistics.std(mcords)
 
 @test abs(mu[1]) < 0.1
 @test 0.05 < abs(sigma[1]) < 0.2
@@ -53,7 +56,10 @@ p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 
 xi = getPointIdentity(Pose2)
 li = zeros(2); li[1] = 20.0;
-zi = (zeros(2),); zi[1][2] = 20.0
+
+M = getManifold(p2br)
+_zi = [0,20.0]
+zi = (Manifolds.hat(M, identity_element(M), _zi),)
 
 res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li)) 
 #
@@ -66,8 +72,8 @@ res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
 
 xi = getPointIdentity(Pose2)
 li = zeros(2); li[2] = 20.0;
-zi = (zeros(2),); zi[1][:] = [pi/2;20.0]
-
+_zi = [pi/2,20.0]
+zi = (Manifolds.hat(M, identity_element(M), _zi),)
 # idx = 1
 # res = zeros(2)
 # p2br(res, fmd, idx, zi, xi, li)
@@ -80,8 +86,8 @@ res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
 Xi = zeros(3); Xi[3] = pi/2
 xi = getPoint(Pose2, Xi) 
 li = zeros(2); li[2] = 20.0;
-zi = (zeros(2),); zi[1][:] = [0.0;20.0]
-
+_zi = [0.0,20.0]
+zi = (Manifolds.hat(M, identity_element(M), _zi),)
 
 res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
 
@@ -95,8 +101,8 @@ Xi = zeros(3); Xi[3] = -pi/2
 xi = getPoint(Pose2, Xi) 
 li = zeros(2); li[1] = 20.0;
 # zi = ([0.0;pi/2],[0.0;20.0],)
-zi = (zeros(2),); zi[1][:] = [pi/2;20.0]
-
+_zi = [pi/2,20.0]
+zi = (Manifolds.hat(M, identity_element(M), _zi),)
 # idx = 2
 # res = zeros(2)
 # p2br(res, fmd, idx, zi, xi, li)
