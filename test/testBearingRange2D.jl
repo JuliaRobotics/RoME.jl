@@ -24,8 +24,11 @@ meas = sampleFactor(IIF._getCCW(fg, :x0x1f1), 100)
 ##
 
 # meas = getSample(p2br, 100)
-mu = Statistics.mean(meas[1])
-sigma = Statistics.std(meas[1])
+M = getManifold(p2br)
+mcords = vee.(Ref(M), Ref(identity_element(M)), meas[1])
+
+mu = Statistics.mean(mcords)
+sigma = Statistics.std(mcords)
 
 @test abs(mu[1]) < 0.1
 @test 0.05 < abs(sigma[1]) < 0.2
