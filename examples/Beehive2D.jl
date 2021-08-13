@@ -101,7 +101,6 @@ p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x1; :l1], p2br, graphinit=false )
 
 
-printGraphSummary(fg)
 
 # draw figures for debugging
 getSolverParams(fg).drawtree = true
