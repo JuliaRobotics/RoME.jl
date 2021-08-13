@@ -12,12 +12,18 @@ mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.Sampla
   range::R
 end
 
-getManifold(::Pose2Point2BearingRange) = ProductGroup(ProductManifold(SpecialOrthogonal(2), TranslationGroup(1)))
+getManifold(::IIF.InstanceType{<:Pose2Point2BearingRange}) = ProductGroup(ProductManifold(SpecialOrthogonal(2), TranslationGroup(1)))
 
 function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange}, N::Int=1)
+  # defaults, TODO better reuse
+  M = getManifold(cfo.factor)
+  e0 = ProductRepr([1 0; 0 1.], [0.])
 
-  smpls = [[rand(cfo.factor.bearing), rand(cfo.factor.range)] for _ = 1:N]
-  # must return at least first element in `::Tuple` as `::Matrix`
+  # vector of tangents
+  smppt = () -> hat(M, e0, [rand(cfo.factor.bearing), rand(cfo.factor.range)])
+  smpls = [smppt() for _ = 1:N]
+
+  # return IIF `::Tuple` format
   return (smpls,)
 end
 
@@ -33,24 +39,28 @@ end
 
 function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
   SE2 = SpecialEuclidean(2)
-  Xi = vee(SE2, xi, log(SE2, identity_element(SE2, xi), xi))
+  Mt = SE2.manifold.manifolds[1]
+  Mr = SE2.manifold.manifolds[2]
 
-  # 1-bearing
-  # 2-range
-  # world frame
-  θ = meas[1] + Xi[3]
-  mx = meas[2]*cos(θ)
-  my = meas[2]*sin(θ)
+  # compose rotations
+  rRi = xi.parts[2]
+  rRo = retract(Mr, rRi, meas.parts[1])
 
-  ex = lm[1] - (mx + Xi[1])
-  ey = lm[2] - (my + Xi[2])
-  
-  # res = [eθ, er]
-  eθ = atan((my + Xi[2]), (mx + Xi[1])) - atan(lm[2], lm[1])  # eθ
-  er= sqrt(ex^2 + ey^2) # some wasted computation here       # er 
+  # new SE2 objects containing the rotation
+  rTo = ProductRepr(xi.parts[1], rRo)
+  oTl = ProductRepr([meas.parts[2];0], identity_element(Mr, rRi))
 
-  # return hat(facM, ProductRepr([1. 0;0 1], [0.]), [eθ, er])
-  return [eθ, er]
+  # prediction landmark
+  rTo = Manifolds.compose(SE2, rTo, oTl)
+
+  # cartesian difference in predicted and estimated landmark
+  δ_l = Manifolds.compose(Mt, inv(Mt, rTo.parts[1]), lm)
+
+  # find the residuals as though in polar coordinates
+  δθ = atan(δ_l[2], δ_l[1])
+  δr = norm(δ_l)
+
+  return [δθ; δr]
 end  
 # quick check
 # pose = (0,0,0),  bear = 0.0,  range = 10.0   ==>  lm = (10,0)
