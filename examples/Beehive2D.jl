@@ -572,7 +572,7 @@ ls(sfg, :x19)
 
 pts = approxConv(sfg, :x19l0f1, :x19)
 
-X19 = manikde!(pts, getManifolds(Pose2()))
+X19 = manikde!(pts, Pose2())
 
 plotPose(Pose2(), X19)
 

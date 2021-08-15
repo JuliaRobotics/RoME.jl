@@ -109,8 +109,6 @@ end
 
 ## New Manifold types.  Integration phase towards RoME #244 and AMP #32 / #41
 
-# FIXME, much consolidation required here, see RoME #244
-import IncrementalInference: getManifolds
 
 # TODO consolidate Manifolds typing and objects
 # getManifolds(::InstanceType{typeof(AMP.SE2_Manifold)}) = (:Euclid, :Euclid, :Circular)

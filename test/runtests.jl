@@ -10,11 +10,8 @@ using DistributedFactorGraphs
 using Statistics
 
 # TODO move to IIF?
-function Statistics.cov(vartype::InferenceVariable, ptsArr::Vector{P}) where P
-  M = getManifold(vartype)
-  μ = mean(M, ptsArr)
-  Xcs = vee.(Ref(M), Ref(μ), log.(Ref(M), Ref(μ), ptsArr))
-  return mean(Xcs .* transpose.(Xcs))
+function Statistics.cov(vartype::InferenceVariable, ptsArr::AbstractVector; basis::AbstractBasis = DefaultOrthogonalBasis(), kwargs...)
+  cov(getManifold(vartype), ptsArr; basis, kwargs... )
 end
 
 ## FIXME remove
