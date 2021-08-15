@@ -4,7 +4,7 @@
 
 using RoME
 using Test
-
+using TensorCast
 
 ##
 
@@ -40,7 +40,8 @@ tree, smt, hist = solveTree!(fg)
 
 ## check that stuff is where it should be
 
-L1_ = getPoints(getBelief(fg, :l1))
+L1 = getPoints(getBelief(fg, :l1))
+@cast L1_[j,i] := L1[i][j]
 
 @test 0.3*N < sum(L1_[2,:] .< 0)
 @test 0.3*N < sum(0 .< L1_[2,:])

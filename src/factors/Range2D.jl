@@ -9,7 +9,7 @@ mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInferen
 end
 
 function getSample(cfo::CalcFactor{<:Point2Point2Range}, N::Int=1)
-  return (reshape(rand(cfo.factor.Z,N),1,N),)
+  return (rand(cfo.factor.Z, N),)
 end
 
 function (cfo::CalcFactor{<:Point2Point2Range})(rho, xi, lm)
@@ -40,19 +40,21 @@ end
 
 Range only measurement from Pose2 to Point2 variable.
 """
-mutable struct Pose2Point2Range{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
+mutable struct Pose2Point2Range{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
   Z::T
   partial::Tuple{Int,Int}
 end
 Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range{T}(Z, (1,2))
 
+getManifold(::Pose2Point2Range) = TranslationGroup(1)
+
 function getSample(cfo::CalcFactor{<:Pose2Point2Range}, N::Int=1)
-  return (reshape(rand(cfo.factor.Z,N),1,N), )
+  return (rand(cfo.factor.Z,N), )
 end
 
 function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi, lm)
   # Basically `EuclidDistance`
-  return rho .- norm(lm[1:2] .- xi[1:2])
+  return rho .- norm(lm[1:2] .- xi.parts[1][1:2])
 end
 
 
