@@ -10,7 +10,7 @@ using DistributedFactorGraphs
 using Statistics
 
 # TODO move to IIF?
-function Statistics.cov(vartype::InferenceVariable, ptsArr::AbstractVector; basis::AbstractBasis = DefaultOrthogonalBasis(), kwargs...)
+function Statistics.cov(vartype::InferenceVariable, ptsArr::AbstractVector; basis::Manifolds.AbstractBasis = Manifolds.DefaultOrthogonalBasis(), kwargs...)
   cov(getManifold(vartype), ptsArr; basis, kwargs... )
 end
 
