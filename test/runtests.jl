@@ -60,7 +60,6 @@ testfiles = [
   "testPose3Pose3NH.jl";
   "testBeehive2D_CliqByCliq.jl";      # special case debugging
   "testhigherdimroots.jl";
-  "testManifoldsPose2Equivalent.jl";
   "testDidsonFunctions.jl";
   "testPoint2Point2Init.jl";
   "testBasicPose2Stationary.jl";

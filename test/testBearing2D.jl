@@ -42,9 +42,51 @@ for (i,p) in enumerate(ps)
     @test isapprox(r, rs[i], atol=0.001) 
 end
 
-end
 @warn "Bearing2D, must still test factor gradients, which will also verify the sign on residual function calculations"
 @test_broken false
+
+end
+
+
+@testset "Simple Bearing2D test" begin
+  
+# new factor graph
+fg = initfg()
+
+addVariable!(fg, :x1, Pose2)
+addVariable!(fg, :x2, Pose2)
+addFactor!(fg, [:x1], PriorPose2(MvNormal([10.0; 0; 0], diagm([0.01;0.01;0.001].^2))))
+addFactor!(fg, [:x2], PriorPose2(MvNormal([0.0;10.0; 0], diagm([0.01;0.01;0.001].^2))))
+
+addVariable!(fg, :l1, Point2)
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([0.,0], diagm([10.,10].^2))))
+
+initAll!(fg)
+
+addFactor!(fg, [:x1;:l1], Pose2Point2Bearing(Normal(pi, 0.001)))
+addFactor!(fg, [:x2;:l1], Pose2Point2Bearing(Normal(-pi/2,0.001)))
+
+points = approxConv(fg, :x1l1f1, :l1)
+@cast pts[j,i] := points[i][j]
+#x1l1 "partial" constrian on x-axis 
+#FIXME very pesamistic tests, should be way better
+@test sum(abs.(pts[2,:]) .< 100) > 30
+
+points = approxConv(fg, :x2l1f1, :l1)
+@cast pts[j,i] := points[i][j]
+@test sum(abs.(pts[1,:]) .< 100) > 30
+
+solveTree!(fg)
+
+points = getPoints(getBelief(fg, :l1))
+@cast pts[j,i] := points[i][j]
+pts = collect(pts)
+#FIXME check test after Bearing2D is fixed
+@test_broken all(sum(abs.(pts) .< [10,10],dims=2) .> [80,80])
+
+
+end
+
 @testset "Triangulation test in 2D, 3 beacons" begin
 
 # noise models

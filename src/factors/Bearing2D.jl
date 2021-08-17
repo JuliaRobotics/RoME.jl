@@ -19,7 +19,7 @@ struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinim
 end
 Pose2Point2Bearing(x1::B) where {B <: IIF.SamplableBelief} = Pose2Point2Bearing{B}(x1)
 
-getManifold(::Pose2Point2Bearing) = TranslationGroup(1)
+getManifold(::Pose2Point2Bearing) = SpecialOrthogonal(2)
 
 function getSample(cfo::CalcFactor{<:Pose2Point2Bearing}, N::Int=1)
   return (rand(cfo.factor.bearing, N), )
