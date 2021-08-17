@@ -68,6 +68,7 @@ testfiles = [
   "testPartialRangeCrossCorrelations.jl";
   "testDynPoint2D.jl";
   "testBearingRange2D.jl";
+  "testBearing2D.jl";
   "testDeltaOdo.jl";
   "testFixedLagFG.jl";
   "testMultimodalRangeBearing.jl";

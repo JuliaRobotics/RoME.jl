@@ -2,6 +2,47 @@
 
 using RoME
 using Test
+using TensorCast
+using DistributedFactorGraphs
+import Manifolds as Mani
+
+@testset "Testing Bearing2D factor" begin
+M = SpecialEuclidean(2)
+ϵ = identity_element(M)
+ps = [exp(M, ϵ,  hat(M, ϵ, [0.,0,0]))]
+push!(ps, exp(M, ϵ,  hat(M, ϵ, [5.,0,0])))
+push!(ps, exp(M, ϵ,  hat(M, ϵ, [10.,0,0])))
+push!(ps, exp(M, ϵ,  hat(M, ϵ, [10.,5,0])))
+push!(ps, exp(M, ϵ,  hat(M, ϵ, [10.,10,0])))
+push!(ps, exp(M, ϵ,  hat(M, ϵ, [5.,10,0])))
+push!(ps, exp(M, ϵ,  hat(M, ϵ, [0.,10,0])))
+push!(ps, exp(M, ϵ,  hat(M, ϵ, [0.,5,0])))
+
+push!(ps, exp(M, ϵ,  hat(M, ϵ, [0.,0,pi/4])))
+push!(ps, exp(M, ϵ,  hat(M, ϵ, [0.,0,-pi/4])))
+
+push!(ps, exp(M, ϵ,  hat(M, ϵ, [1.,2,0]))) # [4,3,0]
+# push!(ps, exp(M, ϵ,  hat(M, ϵ, [1.,2,pi/2]))) # [3,-4,-pi/2]
+# push!(ps, exp(M, ϵ,  hat(M, ϵ, [1.,2,pi]))) # [-4,-3,-pi]
+# push!(ps, exp(M, ϵ,  hat(M, ϵ, [1.,2,-pi]))) # [-3,4,pi]
+
+rs = [0, -pi/4, -pi/2, -3pi/4, pi, 3pi/4, pi/2, pi/4, pi/4, -pi/4]
+
+push!(rs, pi/4 - atan(3,4))
+
+q = [5., 5]
+m = ([pi/4],)
+
+f = Pose2Point2Bearing(Normal(pi/4,0.05))
+
+for (i,p) in enumerate(ps)
+    # @show p
+    r = calcFactorResidualTemporary(f, (Pose2, Point2), m, (p, q))
+    # @warn "comp: $(isapprox(r, rs[i], atol=0.001))" a=r b=rs[i]
+    @test isapprox(r, rs[i], atol=0.001) 
+end
+
+end
 
 @testset "Triangulation test in 2D, 3 beacons" begin
 
@@ -25,6 +66,17 @@ addVariable!(fg, :x1, Pose2)
 addFactor!(fg, [:x1;:l1], Pose2Point2Bearing(Normal(pi/2,0.05)), graphinit=false)
 addFactor!(fg, [:x1;:l2], Pose2Point2Bearing(Normal(-pi/6,0.05)), graphinit=false)
 addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(-pi+pi/6,0.05)), graphinit=false)
+
+# #TODO remove easier just for tests
+# # landmarks
+# addFactor!(fg, [:l1], PriorPoint2(MvNormal([10.0;0.0],lmp_noise)))
+# addFactor!(fg, [:l2], PriorPoint2(MvNormal([0.0;10.0],lmp_noise)))
+# addFactor!(fg, [:l3], PriorPoint2(MvNormal([10.0,10],lmp_noise)))
+# # pose
+# addVariable!(fg, :x1, Pose2)
+# addFactor!(fg, [:x1;:l1], Pose2Point2Bearing(Normal(0.0,0.05)), graphinit=false)
+# addFactor!(fg, [:x1;:l2], Pose2Point2Bearing(Normal(pi/2,0.05)), graphinit=false)
+# addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(pi/4,0.05)), graphinit=false)
 
 
 # initManual!(fg, :x1, [30.0*randn(2,100);randn(1,100)])
@@ -60,7 +112,11 @@ tree,smt,hist = solveTree!(fg)
 
 ## complete the unit test
 
-pts = getPoints(getKDE(fg, :x1))
+points = getPoints(getBelief(fg, :x1))
+mean(SpecialEuclidean(2), points)
+
+@cast pts[j,i] := getCoordinates.(Pose2, points)[i][j]
+pts = collect(pts)
 pts[1,:] .-= 10.0
 
 N = size(pts,2)
@@ -101,14 +157,19 @@ addFactor!(fg, [:x1;:l2], Pose2Point2Bearing(Normal(-pi/6,0.05)), graphinit=fals
 addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(-pi+pi/6,0.05)), graphinit=false)
 
 
-initManual!(fg, :x1, [0.01*randn(2,100);-randn(1,100)])
+# initManual!(fg, :x1, [0.01*randn(2,100);-randn(1,100)])
 # initManual!(fg, :x1, [30.0*randn(2,100);randn(1,100)])
 
 # drawGraph(fg)
 
 tree,smt,hist = solveTree!(fg)
 
-pts = getPoints(getKDE(fg, :x1))
+points = getPoints(getBelief(fg, :x1))
+mean(SpecialEuclidean(2), points)
+
+@cast pts[j,i] := getCoordinates.(Pose2, points)[i][j]
+pts = collect(pts)
+
 pts[1,:] .+= 10.0
 pts[2,:] .+= 10.0
 
