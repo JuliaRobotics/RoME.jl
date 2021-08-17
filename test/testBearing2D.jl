@@ -4,7 +4,7 @@ using RoME
 using Test
 using TensorCast
 using DistributedFactorGraphs
-import Manifolds as Mani
+using Manifolds: hat
 
 @testset "Testing Bearing2D factor" begin
 M = SpecialEuclidean(2)
