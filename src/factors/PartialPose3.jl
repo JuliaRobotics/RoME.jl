@@ -5,7 +5,7 @@
 
 Partial prior belief on Z, Roll, and Pitch of a `Pose3`.
 """
-mutable struct PriorPose3ZRP{T1,T2} <: IncrementalInference.AbstractPrior where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+mutable struct PriorPose3ZRP{T1<:SamplableBelief,T2<:SamplableBelief} <: IncrementalInference.AbstractPrior
   z::T1
   rp::T2
   partial::Tuple{Int,Int,Int}
@@ -52,7 +52,7 @@ end
 
 Partial prior belief on Roll Pitch and Z of a `Pose3` variable.
 """
-mutable struct PartialPriorRollPitchZ{T1,T2} <: IncrementalInference.AbstractPrior where {T1 <: SamplableBelief, T2 <: SamplableBelief}
+mutable struct PartialPriorRollPitchZ{T1<: SamplableBelief,T2<: SamplableBelief} <: IncrementalInference.AbstractPrior
   rp::T1
   z::T2
   partial::Tuple{Int,Int,Int}
