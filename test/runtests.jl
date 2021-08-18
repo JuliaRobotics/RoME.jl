@@ -72,6 +72,7 @@ testfiles = [
   "testFixedLagFG.jl";
   "testMultimodalRangeBearing.jl";
   "testDynPose2D.jl";
+  "testPartialPriorYawPose2.jl";
   "testPartialXYH.jl";
   "testpartialpose3.jl";
   "testpackingconverters.jl";
