@@ -246,3 +246,200 @@ p2p2bTest = convert(Pose2Point2Bearing, packed)
 ##
 
 end
+
+#=
+
+
+fg = LightDFG{SolverParams}(solverParams=SolverParams())
+
+# Add the first pose :x0
+x0 = addVariable!(fg, :x0, Pose2)
+
+p = getPoint(Pose2, [10; 10; -pi])
+
+prior = addFactor!(fg, [:x0], PriorPose2( MvNormal([0.1,0.1,0.05]), p ) )
+
+
+for i in 0:5
+    psym = Symbol("x$i")
+    nsym = Symbol("x$(i+1)")
+    addVariable!(fg, nsym, Pose2)
+    pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+    addFactor!(fg, [psym;nsym], pp )
+end
+
+addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
+p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+addFactor!(fg, [:x0; :l1], p2br)
+
+p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+addFactor!(fg, [:x6; :l1], p2br)
+
+smtasks = Task[]
+solveTree!(fg; smtasks)
+#add bearing range
+
+
+
+## ================================================================================================
+## Other tests
+## ================================================================================================
+hist = hists[3]
+step = 7
+fnc_ = hist[step].f
+# the data before step
+csmc_ = deepcopy(hist[step].csmc);
+csmc_.enableLogging = false;
+csmc_.logger =  SimpleLogger(Base.devnull);#NullLogger()
+
+##
+
+fg = initfg()
+
+pRight = 0.9
+pWrong = 0.1
+pr_noise = [0.01, 0.01, 0.001]
+od_noise = [0.2; 0.2; 0.2]
+lm_noise = [0.01, 0.01, 0.001]
+
+#x0 prior
+addVariable!(fg, :x0, Pose2)
+prpo = MvNormal([0,0,-pi], pr_noise)
+addFactor!(fg, [:x0], PriorPose2(MvNormal(rand(prpo), pr_noise)))
+
+#l1 and l2
+addVariable!(fg, :l1, Pose2, tags=[:LANDMARK])
+addVariable!(fg, :l2, Pose2, tags=[:LANDMARK])
+
+#x0 to l1 or l2
+p2ln = MvNormal([1, 1, pi], lm_noise)
+p2p = Pose2Pose2(MvNormal(rand(p2ln), lm_noise))
+addFactor!(fg, [:x0; :l1; :l2], p2p, multihypo = [1.0, pRight, pWrong])
+
+#x0 to x1
+addVariable!(fg, :x1, Pose2)
+pp = MvNormal([1.0,0,0], od_noise)
+addFactor!(fg, [:x0,:x1], Pose2Pose2(MvNormal(rand(pp), od_noise)))
+
+#x1 to l1 or l2
+p2ln = MvNormal([0, 1, pi], lm_noise)
+p2p = Pose2Pose2(MvNormal(rand(p2ln), lm_noise))
+addFactor!(fg, [:x1; :l1; :l2], p2p, multihypo = [1.0, pRight, pWrong])
+
+#x1 to l2 or l1
+p2ln = MvNormal([0, -1, pi], lm_noise)
+p2p = Pose2Pose2(MvNormal(rand(p2ln), lm_noise))
+addFactor!(fg, [:x1; :l2; :l1], p2p, multihypo = [1.0, pRight, pWrong])
+
+#aslo good example without x2
+#x1 to x2
+addVariable!(fg, :x2, Pose2)
+pp = MvNormal([1.0,0,0], od_noise)
+addFactor!(fg, [:x1,:x2], Pose2Pose2(MvNormal(rand(pp), od_noise)))
+
+#x2 to l1 or l2
+p2ln = MvNormal([-1, 1, pi], lm_noise)
+p2p = Pose2Pose2(MvNormal(rand(p2ln), lm_noise))
+addFactor!(fg, [:x2; :l1; :l2], p2p, multihypo = [1.0, pRight, pWrong])
+
+#x2 to l2 or l1
+p2ln = MvNormal([-1, -1, pi], lm_noise)
+p2p = Pose2Pose2(MvNormal(rand(p2ln), lm_noise))
+addFactor!(fg, [:x2; :l2; :l1], p2p, multihypo = [1.0, pRight, pWrong])
+
+
+##
+
+fg.solverParams.inflation=0.1
+fg.solverParams.spreadNH=0.1
+solveTree!(fg)
+
+plotSLAM2D(fg)
+
+
+
+
+##
+
+# Random.seed!(42) # The answer to reproducable noise
+
+fg = LightDFG(solverParams=SolverParams(graphinit=false, gibbsIters=5, spreadNH=5.0))
+
+pRight = 0.8
+pWrong = 0.2
+pr_noise = 0.01
+od_noise = 0.1
+lm_noise = 0.01
+
+# true positions
+# x0 at 0
+# x1 at 1
+# l1 at 1
+# l2 at 2
+
+#x0 prior
+addVariable!(fg, :x0, ContinuousScalar)
+prpo = Normal(0.0, pr_noise)
+addFactor!(fg, [:x0], Prior(Normal(rand(prpo), pr_noise)))
+
+#l1 and l2
+addVariable!(fg, :l1, ContinuousScalar, tags=[:LANDMARK])
+addVariable!(fg, :l2, ContinuousScalar, tags=[:LANDMARK])
+
+#x0 to l1 or l2
+p2ln = Normal(1.0, lm_noise)
+p2p = LinearRelative(Normal(rand(p2ln), lm_noise))
+addFactor!(fg, [:x0; :l1; :l2], p2p, multihypo = [1, pRight, pWrong])
+# addFactor!(fg, [:x0; :l1], p2p) #this one used for sanity check
+
+#x0 to x1
+addVariable!(fg, :x1, ContinuousScalar)
+pp = Normal(1.0, od_noise)
+addFactor!(fg, [:x0,:x1], LinearRelative(Normal(rand(pp), od_noise)))
+
+#x1 to l1 or l2
+p2ln = Normal(0.0, lm_noise)
+p2p = LinearRelative(Normal(rand(p2ln), lm_noise))
+addFactor!(fg, [:x1; :l1; :l2], p2p, multihypo = [1, pRight, pWrong])
+# addFactor!(fg, [:x1; :l1], p2p) #this one used for sanity check
+
+#x1 to l2 or l1
+p2ln = Normal(1.0, lm_noise)
+p2p = LinearRelative(Normal(rand(p2ln), lm_noise))
+addFactor!(fg, [:x1; :l2; :l1], p2p, multihypo = [1, pRight, pWrong])
+# addFactor!(fg, [:x1; :l2], p2p) #this one used for sanity check
+
+#
+
+# prescribe an elimination order to get a single clique
+eo = [:l2,:x1,:x0,:l1]
+# fg.solverParams.graphinit=true
+
+fg.solverParams.inflation=3.0
+fg.solverParams.spreadNH=1.0
+fg.solverParams.dbg = true
+##
+smtasks = Task[]
+tree, _, = solveTree!(fg; smtasks, eliminationOrder=eo) #, smtasks=smtasks, recordcliqs=ls(fg));
+
+
+# hists = fetchCliqHistoryAll!(smtasks)
+
+plotKDE(fg, ls(fg))
+
+##
+
+@test isapprox(DFG.getPPESuggested(fg, :x0)[], 0, atol = 0.2) 
+@test isapprox(DFG.getPPESuggested(fg, :x1)[], 1, atol = 0.2) 
+@test isapprox(DFG.getPPESuggested(fg, :l1)[], 1, atol = 0.2) 
+
+L2 = getBelief(fg, :l2)
+L2_ = manikde!(2 .+ 0.1*randn(size(getPoints(L2),2)), ContinuousScalar)
+
+# test that there is at least a mode present
+mmd(L2_, L2, ContinuousScalar)
+@test isapprox(DFG.getPPESuggested(fg, :l2)[], 2, atol = 0.2) 
+
+
+
+=#
