@@ -3,6 +3,7 @@
 using RoME
 using CoordinateTransformations, Rotations
 # Distributions, TransformUtils
+import Manifolds
 using Test
 
 
@@ -12,11 +13,11 @@ using Test
 @testset "test x translation case" begin
 
 ##
-
+#TODO update to use manifolds and remove TransformUtils
 # trivial cases first, orientation based tests below
 wTx = Vector{AffineMap}(undef, 2)
-wTx[1] = Translation(0.0,0,0) ∘ LinearMap(Quat(1.0, 0, 0, 0))
-wTx[2] = Translation(10.0, 0, 0) ∘ LinearMap(Quat(1.0, 0, 0, 0))
+wTx[1] = Translation(0.0,0,0) ∘ LinearMap(UnitQuaternion(1.0, 0, 0, 0))
+wTx[2] = Translation(10.0, 0, 0) ∘ LinearMap(UnitQuaternion(1.0, 0, 0, 0))
 
 # Recalculate XYH
 # change toolbox
@@ -40,8 +41,12 @@ testpp3 = Pose3Pose3(MvNormal(veeEuler(x1Tx2),0.001*diagm(ones(6))))
 
 
 # dummy value
-meas = (veeEuler(x1Tx2),)
-res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
+M = Manifolds.SpecialEuclidean(3)
+ϵ = identity_element(M)
+meas = (Manifolds.hat(M, ϵ, veeEuler(x1Tx2)),)
+p = exp(M, ϵ, Manifolds.hat(M, ϵ, veeEuler(wTx1)))
+q = exp(M, ϵ, Manifolds.hat(M, ϵ, veeEuler(wTx2)))
+res = calcFactorResidualTemporary(testpp3, (Pose3, Pose3), meas, (p, q))
 
 @test norm(res[1:3]) < 1e-10
 @test norm(res[4:6]) < 1e-10

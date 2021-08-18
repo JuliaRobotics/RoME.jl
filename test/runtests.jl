@@ -5,16 +5,13 @@ using RoME
 using Test
 using TensorCast
 import Manifolds
-using Manifolds: ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup
+using Manifolds: ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element
 using DistributedFactorGraphs
 using Statistics
 
 # TODO move to IIF?
-function Statistics.cov(vartype::InferenceVariable, ptsArr::Vector{P}) where P
-  M = getManifold(vartype)
-  μ = mean(M, ptsArr)
-  Xcs = vee.(Ref(M), Ref(μ), log.(Ref(M), Ref(μ), ptsArr))
-  return mean(Xcs .* transpose.(Xcs))
+function Statistics.cov(vartype::InferenceVariable, ptsArr::AbstractVector; basis::Manifolds.AbstractBasis = Manifolds.DefaultOrthogonalBasis(), kwargs...)
+  cov(getManifold(vartype), ptsArr; basis, kwargs... )
 end
 
 ## FIXME remove
@@ -63,7 +60,6 @@ testfiles = [
   "testPose3Pose3NH.jl";
   "testBeehive2D_CliqByCliq.jl";      # special case debugging
   "testhigherdimroots.jl";
-  "testManifoldsPose2Equivalent.jl";
   "testDidsonFunctions.jl";
   "testPoint2Point2Init.jl";
   "testBasicPose2Stationary.jl";
@@ -71,10 +67,12 @@ testfiles = [
   "testPartialRangeCrossCorrelations.jl";
   "testDynPoint2D.jl";
   "testBearingRange2D.jl";
+  "testBearing2D.jl";
   "testDeltaOdo.jl";
   "testFixedLagFG.jl";
   "testMultimodalRangeBearing.jl";
   "testDynPose2D.jl";
+  "testPartialPriorYawPose2.jl";
   "testPartialXYH.jl";
   "testpartialpose3.jl";
   "testpackingconverters.jl";

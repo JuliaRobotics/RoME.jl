@@ -32,13 +32,12 @@ using Manifolds: ProductGroup, ProductManifold, SpecialEuclidean, ProductRepr, S
 
 
 import Base: +, \, convert
-import TransformUtils: ⊖, ⊕, convert, compare, ominus, veeQuaternion
+import TransformUtils: ⊖, ⊕, convert, ominus, veeQuaternion
 import IncrementalInference: MB
-import IncrementalInference: convert, getSample, reshapeVec2Mat, DFG, getManifolds
+import IncrementalInference: convert, getSample, reshapeVec2Mat, DFG
 # not sure why this is gives import error
 import DistributedFactorGraphs: compare
 import DistributedFactorGraphs: getDimension, getManifold
-import ApproxManifoldProducts: getManifolds # TODO must be deprecated
 
 # const AMP = ApproxManifoldProducts
 

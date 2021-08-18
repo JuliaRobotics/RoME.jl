@@ -11,7 +11,7 @@ end
 
 NorthSouthPartial(Z::D) where {D <: IIF.SamplableBelief} = NorthSouthPartial(Z, (2,))
 
-getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int=1) = (rand(cfo.factor.Z, N),)
+getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int=1) = ([[rand(cfo.factor.Z)] for _=1:N],)
 
 ##
 
@@ -22,13 +22,13 @@ getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int=1) = (rand(cfo.factor.Z, 
 # Start with an empty graph
 global N = 100
 global fg = initfg(sessionname="MULTIMODAL_2D_TUTORIAL")
-
+# fg.solverParams.attemptGradients=false
 # Add landmarks with Bearing range measurements
 addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
 addVariable!(fg, :l2, Point2, tags=[:LANDMARK;])
 
-addFactor!(fg, [:l1], Prior(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
-addFactor!(fg, [:l2], Prior(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
+addFactor!(fg, [:l2], PriorPoint2(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 
 val, = predictbelief(fg, :l1, [:l1f1;])
 setVal!(fg, :l1, val)
@@ -60,8 +60,9 @@ end
 solveTree!(fg);
 
 
-global X0pts = getBelief(fg, :x0) |> getPoints
-
+_X0pts = getBelief(fg, :x0) |> getPoints
+@cast cX0pts[j,i] := getCoordinates.(Pose2, _X0pts)[i][j]
+global X0pts = copy(cX0pts)
 
 @test size(X0pts,1) == 3
 @test size(X0pts,2) == N
@@ -90,7 +91,7 @@ addFactor!(fg, [:x0], PriorPose2(MvNormal([0.0;0.0;0], diagm([1.0;1.0;0.01].^2))
 
 # Add landmarks with Bearing range measurements
 addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
-addFactor!(fg, [:l1], PriorPose2(MvNormal([40.0;0.0], diagm([1.0;1.0].^2))) )
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([40.0;0.0], diagm([1.0;1.0].^2))) )
 
 addVariable!(fg, :l2, Point2, tags=[:LANDMARK;])
 addFactor!(fg, [:l2;], NorthSouthPartial(Normal(0,1.0)))
@@ -108,7 +109,7 @@ solveTree!(fg);
 # check modes on L2
 L2 = getBelief(fg, :l2)
 
-L2pts = getPoints(L2)
+@cast L2pts[j,i] := getPoints(L2)[i][j]
 
 @test size(L2pts,1) == 2
 @test size(L2pts,2) == N
