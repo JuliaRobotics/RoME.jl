@@ -227,13 +227,7 @@ export
   predictVariableByFactor,
 
   # jld required Features Type
-  LaserFeatures,
-
-  # Deprecated
-  PartialPriorRollPitchZ,
-  PackedPartialPriorRollPitchZ,
-  PartialPose3XYYaw,
-  PackedPartialPose3XYYaw
+  LaserFeatures
 
 
 include("SpecialDefinitions.jl")

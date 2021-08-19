@@ -1,8 +1,13 @@
-
-
 ##==============================================================================
 ## Remove before RoME v0.17
 ##==============================================================================
+  # Deprecated a while ago, finalise with a message
+export PartialPriorRollPitchZ, PackedPartialPriorRollPitchZ, PartialPose3XYYaw, PackedPartialPose3XYYaw
+PartialPose3XYYaw(args...) = error("PartialPose3XYYaw is deprecated, use Pose3Pose3XYYaw")
+PackedPartialPose3XYYaw(args...) = error("PackedPartialPose3XYYaw is deprecated, use PackedPose3Pose3XYYaw")
+PartialPriorRollPitchZ(args...) = error("PartialPriorRollPitchZ is deprecated, use PriorPose3ZRP")
+PackedPartialPriorRollPitchZ(args...) = error("PackedPartialPriorRollPitchZ is deprecated, use PackedPriorPose3ZRP")
+
 
 @deprecate generateCanonicalFG_ZeroPose2(;fg::AbstractDFG=initfg(), kw...) generateCanonicalFG_ZeroPose(; dfg=fg, kw...)
 
