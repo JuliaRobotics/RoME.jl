@@ -3,29 +3,31 @@
 using Statistics
 using RoME
 using Test
+import Manifolds
 
-# PartialPriorRollPitchZ
-# PartialPose3XYYaw
+# using CoordinateTransformations, Rotations
 
 ##
-
-N=50
 fg = initfg()
 
-v1 = addVariable!(fg,:x1, Pose3, N=N) # 0.001*randn(6,N)
+# @testset "Test Building a PriorPose3ZRP FG" begin
+N = 50
+fg.solverParams.N = N
+
+v1 = addVariable!(fg,:x1, Pose3) # 0.001*randn(6,N)
 f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal(zeros(6),1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 
 sigx = 0.01
 sigy = 0.01
 sigth = 0.0281
 mu1 = [0.0;0.0; -10.0]
-prpz = PartialPriorRollPitchZ(
-  MvNormal( mu1[1:2], [sigx 0.0; 0.0 sigy]^2 ),
-  Normal( mu1[3], sigth )
+prpz = PriorPose3ZRP(
+  Normal( mu1[3], sigth ),
+  MvNormal( mu1[1:2], [sigx 0.0; 0.0 sigy]^2 )
 )
 
 mu2 = [20.0,5.0,pi/2]
-xyy = PartialPose3XYYaw(
+xyy = Pose3Pose3XYYaw(
   MvNormal(
     mu2[1:2],
     [sigx 0.0; 0.0 sigy]^2
@@ -33,15 +35,15 @@ xyy = PartialPose3XYYaw(
   Normal( mu2[3], sigth )
 )
 
-v2 = addVariable!(fg,:x2, Pose3, N=N) # randn(6,N)
+v2 = addVariable!(fg,:x2, Pose3)
 
 f1 = addFactor!(fg, [:x2], prpz, graphinit=false)
 f2 = addFactor!(fg, [:x1;:x2], xyy, graphinit=false)
 
-##
+#
+# end
 
-
-@testset "test PartialPriorRollPitchZ evaluations" begin
+@testset "test PriorPose3ZRP evaluations" begin
 
 ##
 
@@ -91,7 +93,7 @@ olddims = setdiff(collect(1:6), newdims)
 end
 
 
-@testset "test residual function of PartialPose3XYYaw" begin
+@testset "test residual function of Pose3Pose3XYYaw" begin
 
 ##
 
@@ -136,7 +138,7 @@ end
 
 
 
-@testset "test PartialPose3XYYaw evaluations" begin
+@testset "test Pose3Pose3XYYaw evaluations" begin
 
 ##
 
@@ -209,16 +211,8 @@ end
 #
 
 
-# test PartialPose3XYYaw
+# from testTartialPose3XYYaw
 
-using RoME
-using CoordinateTransformations, Rotations
-# Distributions, TransformUtils
-import Manifolds
-using Test
-
-# PartialPriorRollPitchZ
-# PartialPose3XYYaw
 
 
 ##
@@ -267,11 +261,11 @@ res = calcFactorResidualTemporary(testpp3, (Pose3, Pose3), meas, (p, q))
 #
 
 # test with PartialXYH
-testppxyh = PartialPose3XYYaw(
+testppxyh = Pose3Pose3XYYaw(
   MvNormal(XYH1_2[1:2], 0.001*diagm([1.0;1.0])),
   Normal(XYH1_2[3], 0.001)
 )
-# testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
+# testppxyh = Pose3Pose3XYYaw(  MvNormal(XYH1_2,0.001*Matrix{Float64}(LinearAlgebra.I, 3,3))  )
 
 # res = zeros(3)
 # cfo = CalcFactor(testppxyh, fmd, 1, 1, meas, ARR)
@@ -332,7 +326,7 @@ res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(w
 #
 
 # test with PartialXYH
-testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
+testppxyh = Pose3Pose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 res = zeros(3)
 
 # cfo = CalcFactor(testppxyh, fmd, 1, 1, meas, ARR)
@@ -397,7 +391,7 @@ res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(w
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
+testppxyh = Pose3Pose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 
 meas = (vectoarr2(XYH1_2),)
 res = testFactorResidualBinary(testppxyh, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
@@ -463,7 +457,7 @@ res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(w
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
+testppxyh = Pose3Pose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 
 meas = (XYH1_2,)
 res = testFactorResidualBinary(testppxyh, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
@@ -526,7 +520,7 @@ res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(w
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
+testppxyh = Pose3Pose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 
 meas = (XYH1_2,)
 res = testFactorResidualBinary(testppxyh, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
@@ -587,7 +581,7 @@ res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(w
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
+testppxyh = Pose3Pose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 
 meas = (XYH1_2,)
 res = testFactorResidualBinary(testppxyh, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
@@ -653,7 +647,7 @@ res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(w
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
+testppxyh = Pose3Pose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 
 meas = (XYH1_2,)
 res = testFactorResidualBinary(testppxyh, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
@@ -722,7 +716,7 @@ res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(w
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
+testppxyh = Pose3Pose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 
 meas = (XYH1_2,)
 res = testFactorResidualBinary(testppxyh, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
@@ -737,15 +731,6 @@ res = testFactorResidualBinary(testppxyh, Pose3, Pose3, veeEuler(wTx1), veeEuler
 ##
 
 end
-
-
-
-
-
-
-
-
-
 
 
 
@@ -795,7 +780,7 @@ res = testFactorResidualBinary(testpp3, Pose3, Pose3, veeEuler(wTx1), veeEuler(w
 @test norm(res[4:6]) < 1e-10
 
 # test with PartialXYH
-testppxyh = PartialPose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
+testppxyh = Pose3Pose3XYYaw(  MvNormal(XYH1_2[1:2],0.001*Matrix{Float64}(LinearAlgebra.I, 2,2)), Normal(XYH1_2[3], 0.001)  )
 
 meas = (XYH1_2,)
 res = testFactorResidualBinary(testppxyh, Pose3, Pose3, veeEuler(wTx1), veeEuler(wTx2), meas)
