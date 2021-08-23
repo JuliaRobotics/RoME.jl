@@ -24,14 +24,13 @@ DFG.getManifold(::Pose2Pose2) = Manifolds.SpecialEuclidean(2)
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2() # MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])) )
 
-function getSample(cf::CalcFactor{<:Pose2Pose2}, N::Int=1) 
+
+function getSample(cf::CalcFactor{<:Pose2Pose2}) 
   
-  Xc = [rand(cf.factor.z) for _ in 1:N]
-  #NOTE be careful using this as template as it will not work in general for all manifolds
-  M = getManifold(Pose2)
-  # ϵ = getPointIdentity(Pose2)
-  X = hat.(Ref(M), Ref(Manifolds.Identity(M)), Xc)
-  # return a vector
+  M = getManifold(cf.factor)
+  ϵ = getPointIdentity(Pose2)
+
+  X = sampleTangent(M, cf.factor.z, ϵ)
   return (X, )
 end
 
