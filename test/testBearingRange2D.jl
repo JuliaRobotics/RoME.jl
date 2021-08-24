@@ -19,13 +19,13 @@ addVariable!(fg, :x0, Pose2)
 addVariable!(fg, :x1, Point2)
 addFactor!(fg, [:x0;:x1], p2br, graphinit=false)
 
-meas = sampleFactor(IIF._getCCW(fg, :x0x1f1), 100)
-
+_meas = sampleFactor(IIF._getCCW(fg, :x0x1f1), 100)
+meas = map(x->x[1], _meas)
 ##
 
 # meas = getSample(p2br, 100)
 M = getManifold(p2br)
-mcords = vee.(Ref(M), Ref(identity_element(M)), meas[1])
+mcords = vee.(Ref(M), Ref(identity_element(M)), meas)
 
 mu = Statistics.mean(mcords)
 sigma = Statistics.std(mcords)
@@ -61,7 +61,7 @@ M = getManifold(p2br)
 _zi = [0,20.0]
 zi = (Manifolds.hat(M, identity_element(M), _zi),)
 
-res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li)) 
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), [zi], (xi, li)) 
 #
 # calcFactorResidualTemporary(p2br, zi, (Pose2, xi), (Point2, li))
 
@@ -78,7 +78,7 @@ zi = (Manifolds.hat(M, identity_element(M), _zi),)
 # res = zeros(2)
 # p2br(res, fmd, idx, zi, xi, li)
 
-res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li)) 
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), [zi], (xi, li)) 
 
 @show res
 @test norm(res) < 1e-14
@@ -89,7 +89,7 @@ li = zeros(2); li[2] = 20.0;
 _zi = [0.0,20.0]
 zi = (Manifolds.hat(M, identity_element(M), _zi),)
 
-res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), [zi], (xi, li))
 
 #
 @show res
@@ -107,7 +107,7 @@ zi = (Manifolds.hat(M, identity_element(M), _zi),)
 # res = zeros(2)
 # p2br(res, fmd, idx, zi, xi, li)
 
-res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
+res = calcFactorResidualTemporary( p2br, (Pose2, Point2), [zi], (xi, li))
 
 
 @show res

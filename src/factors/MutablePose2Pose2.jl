@@ -16,11 +16,11 @@ end
 
 DFG.getManifold(::MutablePose2Pose2Gaussian) = Manifolds.SpecialEuclidean(2)
 
-function getSample(cf::CalcFactor{<:MutablePose2Pose2Gaussian}, N::Int=100)
-  Xc = [rand(cf.factor.Z) for _ in 1:N]
+function getSample(cf::CalcFactor{<:MutablePose2Pose2Gaussian})
+  Xc = rand(cf.factor.Z)
 
   M = SpecialEuclidean(2)
-  X = hat.(Ref(M), Ref(Manifolds.Identity(M)), Xc)
+  X = hat(M, Manifolds.Identity(M), Xc)
   return (X, )
 end
 

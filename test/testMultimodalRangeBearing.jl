@@ -1,5 +1,8 @@
 using RoME
 using Test
+using DistributedFactorGraphs
+using Manifolds: TranslationGroup
+using TensorCast
 # using RoMEPlotting, Distributions
 
 import IncrementalInference: getSample
@@ -11,7 +14,9 @@ end
 
 NorthSouthPartial(Z::D) where {D <: IIF.SamplableBelief} = NorthSouthPartial(Z, (2,))
 
-getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int=1) = ([[rand(cfo.factor.Z)] for _=1:N],)
+DFG.getManifold(::NorthSouthPartial) = TranslationGroup(1)
+
+getSample(cfo::CalcFactor{<:NorthSouthPartial}) = (samplePoint(getManifold(cfo.factor), cfo.factor.Z), )
 
 ##
 

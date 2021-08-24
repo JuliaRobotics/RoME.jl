@@ -22,8 +22,8 @@ PriorPose3ZRP(z::T1,rp::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief}
 getManifold(::PriorPose3ZRP) = ProductGroup(ProductManifold(TranslationGroup(1), SpecialOrthogonal(3)))
 
 #FIXME update
-function getSample(cfo::CalcFactor{<:PriorPose3ZRP}, N::Int=1)
-  return ([[rand(cfo.factor.z); rand(cfo.factor.rp)] for _=1:N], )
+function getSample(cfo::CalcFactor{<:PriorPose3ZRP})
+  return ([rand(cfo.factor.z); rand(cfo.factor.rp)], )
 end
 
 
@@ -79,8 +79,8 @@ end
 
 Pose3Pose3XYYaw(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} =  Pose3Pose3XYYaw{T1,T2}(xy, yaw)
 
-function getSample(cfo::CalcFactor{<:Pose3Pose3XYYaw}, N::Int=1)
-  return ([[rand(cfo.factor.xy);rand(cfo.factor.yaw)] for _=1:N], )
+function getSample(cfo::CalcFactor{<:Pose3Pose3XYYaw})
+  return ([rand(cfo.factor.xy);rand(cfo.factor.yaw)], )
 end
 
 getManifold(::Pose3Pose3XYYaw) = SpecialEuclidean(2)

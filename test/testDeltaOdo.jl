@@ -66,7 +66,7 @@ nXYT = zeros(3,size(DX,2))
 Qc = 1e-6*Matrix(LinearAlgebra.I, 3,3)
 for i in 1:size(DX,2)
   RoME.accumulateDiscreteLocalFrame!(mpp,DX[:,i],Qc,dt)
-  nXYT[:,i] .= mpp.Zij.μ
+  nXYT[:,i] .= mpp.Z.μ
 end
 
 

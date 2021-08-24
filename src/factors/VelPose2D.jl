@@ -16,7 +16,7 @@ VelPose2VelPose2(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.Sam
 
 getManifold(::VelPose2VelPose2) = getManifold(DynPose2)
 
-function _getSample(cf::CalcFactor{<:VelPose2VelPose2})
+function getSample(cf::CalcFactor{<:VelPose2VelPose2})
     #Pose2 part
     Xc = rand(cf.factor.Zpose.z)
     M = getManifold(Pose2)
@@ -26,12 +26,9 @@ function _getSample(cf::CalcFactor{<:VelPose2VelPose2})
     #velocity part
     Xvel = rand(cf.factor.Zvel)
 
-    return ProductRepr(Xpose, Xvel)
+    return (ProductRepr(Xpose, Xvel), )
 end
 
-function getSample(cf::CalcFactor{<:VelPose2VelPose2}, N::Int=1)
-  return ([_getSample(cf) for _=1:N], )
-end
 
 function IIF.getMeasurementParametric(s::VelPose2VelPose2{<:MvNormal, <:MvNormal}) 
 

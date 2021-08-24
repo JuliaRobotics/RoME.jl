@@ -14,17 +14,16 @@ end
 
 getManifold(::IIF.InstanceType{<:Pose2Point2BearingRange}) = ProductGroup(ProductManifold(SpecialOrthogonal(2), TranslationGroup(1)))
 
-function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange}, N::Int=1)
+function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange})
   # defaults, TODO better reuse
   M = getManifold(cfo.factor)
   e0 = ProductRepr([1 0; 0 1.], [0.])
 
   # vector of tangents
-  smppt = () -> hat(M, e0, [rand(cfo.factor.bearing), rand(cfo.factor.range)])
-  smpls = [smppt() for _ = 1:N]
+  smpl = hat(M, e0, [rand(cfo.factor.bearing), rand(cfo.factor.range)])
 
   # return IIF `::Tuple` format
-  return (smpls,)
+  return (smpl,)
 end
 
 

@@ -36,11 +36,11 @@ function getSample(cf::CalcFactor{<:PriorPose2}, N::Int=1)
   p = cf.factor.p
   M = getManifold(cf.factor)
   
-  Xc = [rand(Z) for _ in 1:N]
+  Xc = rand(Z)
   
   # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
-  X = hat.(Ref(M), Ref(p), Xc)
-  points = exp.(Ref(M), Ref(p), X)
+  X = hat(M, p, Xc)
+  points = exp(M, p, X)
 
   return (points, )
 end

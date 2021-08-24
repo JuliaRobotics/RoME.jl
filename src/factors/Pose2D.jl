@@ -18,12 +18,11 @@ struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
   z::T
 end
 # convenience and default constructor
-Pose2Pose2() = Pose2Pose2(MvNormal([1.0; 1.0; 1.0]))
+Pose2Pose2() = Pose2Pose2(MvNormal(Diagonal([1.0; 1.0; 1.0])))
  
 DFG.getManifold(::Pose2Pose2) = Manifolds.SpecialEuclidean(2)
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2() # MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])) )
-
 
 function getSample(cf::CalcFactor{<:Pose2Pose2}) 
   

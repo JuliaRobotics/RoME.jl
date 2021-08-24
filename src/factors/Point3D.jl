@@ -13,8 +13,8 @@ mutable struct PriorPoint3{T} <: IncrementalInference.AbstractPrior where {T <: 
 end
 PriorPoint3(z::T) where {T <: IIF.SamplableBelief} = PriorPoint3{T}(z)
 
-function getSample(p3::PriorPoint3, N::Int=1)
-  return ([rand(p3.Z) for _=1:N],)
+function getSample(p3::PriorPoint3)
+  return (rand(p3.Z),)
 end
 
 

@@ -18,17 +18,17 @@ DynPose2VelocityPrior(z1::T1,z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF
 
 DFG.getManifold(::DynPose2VelocityPrior) = getManifold(DynPose2)
 
-function getSample(cf::CalcFactor{<:DynPose2VelocityPrior}, N::Int=1)
+function getSample(cf::CalcFactor{<:DynPose2VelocityPrior})
   Zpose = cf.factor.Zpose
   Zvel = cf.factor.Zvel
   p = getPointIdentity(DynPose2())
   M = getManifold(cf.factor)
   
-  Xc = [[rand(Zpose);rand(Zvel)] for _ in 1:N]
+  Xc = [rand(Zpose);rand(Zvel)]
   
   # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
-  X = hat.(Ref(M), Ref(p), Xc)
-  points = exp.(Ref(M), Ref(p), X)
+  X = hat(M, p, Xc)
+  points = exp(M, p, X)
 
   return (points, )
 end
@@ -71,7 +71,7 @@ mutable struct DynPose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRo
 end
 DynPose2Pose2(z1::T) where {T <: IIF.SamplableBelief} = DynPose2Pose2{T}(z1)
 
-getSample(cf::CalcFactor{<:DynPose2Pose2}, N::Int=1) = (rand(cf.factor.Zpose.z,N), )
+getSample(cf::CalcFactor{<:DynPose2Pose2}) = (rand(cf.factor.Zpose.z), )
 
 function (cf::CalcFactor{<:DynPose2Pose2})( meas,
                                             wXi,
@@ -164,7 +164,7 @@ DynPose2DynPose2(z1::T=MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))) 
 # getManifolds(::DynPose2DynPose2) = getManifolds(DynPose2DynPose2)
 
 
-getSample(cf::CalcFactor{<:DynPose2DynPose2}, N::Int=1) = ([rand(cf.factor.Z) for _=1:N], )
+getSample(cf::CalcFactor{<:DynPose2DynPose2}) = (rand(cf.factor.Z), )
 
 function (cf::CalcFactor{<:DynPose2DynPose2})(meas,
                                               wXi,

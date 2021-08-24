@@ -219,10 +219,10 @@ global f3 = addFactor!(fg,[:x1;:x2],odoc, nullhypo=0.5)
 
 @testset "test conversions of PartialPriorRollPitchZ" begin
 
-global prpz = PartialPriorRollPitchZ(MvNormal([0.0;0.5],0.1*diagm([1.0;1])),Normal(3.0,0.5))
+global prpz = PriorPose3ZRP(MvNormal([0.0;0.5],0.1*diagm([1.0;1])),Normal(3.0,0.5))
 
-global pprpz = convert(PackedPartialPriorRollPitchZ, prpz)
-global unp = convert(PartialPriorRollPitchZ, pprpz)
+global pprpz = convert(PackedPriorPose3ZRP, prpz)
+global unp = convert(PriorPose3ZRP, pprpz)
 
 @test RoME.compare(prpz, unp)
 
@@ -231,14 +231,14 @@ end
 
 @testset "test conversions of PartialPose3XYYaw" begin
 
-global xyy = PartialPose3XYYaw(
+global xyy = Pose3Pose3XYYaw(
             MvNormal( [1.0;2.0],
                     0.1*diagm([1.0;1]) ),
             Normal(0.5, 0.1)
         )
 
-global pxyy = convert(PackedPartialPose3XYYaw, xyy)
-global unp = convert(PartialPose3XYYaw, pxyy)
+global pxyy = convert(PackedPose3Pose3XYYaw, xyy)
+global unp = convert(Pose3Pose3XYYaw, pxyy)
 
 @test RoME.compare(xyy, unp)
 end

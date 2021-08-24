@@ -31,7 +31,7 @@ rs = [0, -pi/4, -pi/2, -3pi/4, pi, 3pi/4, pi/2, pi/4, pi/4, -pi/4]
 push!(rs, pi/4 - atan(3,4))
 
 q = [5., 5]
-m = ([pi/4],)
+m = [([pi/4],)]
 
 f = Pose2Point2Bearing(Normal(pi/4,0.05))
 

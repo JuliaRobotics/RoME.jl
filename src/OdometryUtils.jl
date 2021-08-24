@@ -37,15 +37,15 @@ function accumulateDiscreteLocalFrame!( mpp::MutablePose2Pose2Gaussian,
                                         Gk = Matrix{Float64}(LinearAlgebra.I, 3,3),
                                         Phik = SE2(DX) )
   #
-  kXk1 = SE2(mpp.Zij.μ)*Phik
+  kXk1 = SE2(mpp.Z.μ)*Phik
   phi, gamma, Qd = cont2disc(Fk, Gk, Qc, dt, Phik)
-  Covk1 = Phik*(mpp.Zij.Σ.mat)*(Phik') + Qd
+  Covk1 = Phik*(mpp.Z.Σ.mat)*(Phik') + Qd
   check = norm(Covk1 - Covk1')
   1e-4 < check ? @warn("Covk1 is getting dangerously non-Hermitian, still forcing symmetric covariance matrix.") : nothing
   @assert check < 1.0
   Covk1 .+= Covk1'
   Covk1 ./= 2
-  mpp.Zij = MvNormal(se2vee(kXk1), Covk1)
+  mpp.Z = MvNormal(se2vee(kXk1), Covk1)
   nothing
 end
 
@@ -83,7 +83,7 @@ function duplicateToStandardFactorVariable( ::Type{Pose2Pose2},
   #
 
   # extract factor values and create PosePose object
-  posepose = Pose2Pose2(MvNormal(mpp.Zij.μ, cov===nothing ? mpp.Zij.Σ.mat : cov))
+  posepose = Pose2Pose2(MvNormal(mpp.Z.μ, cov===nothing ? mpp.Z.Σ.mat : cov))
 
   # modify the factor graph
   addVariable!(dfg, newsym, Pose2, solvable=solvable, timestamp=mpp.timestamp)
@@ -99,7 +99,7 @@ end
 Reset the transform value stored in a `::MutablePose2Pose2Gaussian` to zero.
 """
 function resetFactor!(mpp::MutablePose2Pose2Gaussian)::Nothing
-  mpp.Zij = MvNormal(zeros(3), 1e-6*Matrix{Float64}(LinearAlgebra.I, 3,3) )
+  mpp.Z = MvNormal(zeros(3), 1e-6*Matrix{Float64}(LinearAlgebra.I, 3,3) )
   nothing
 end
 
