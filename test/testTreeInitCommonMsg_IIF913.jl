@@ -25,7 +25,7 @@ X4 = getPoints(fg, :x4)
 μX4 =  mean(getManifold(Pose2), X4)
 
 @error("Must first fix IIF #913")
-@test_broken 2.0 < μX4.parts[1][1]
+@test 2.0 < μX4.parts[1][1]
 @test -1.5 < μX4.parts[1][2] < 1.5
 
 

@@ -199,6 +199,8 @@ export
   # partial Pose3
   PriorPose3ZRP,
   Pose3Pose3XYYaw,
+  PackedPose3Pose3XYYaw,
+  PackedPriorPose3ZRP,
   # Various utilities
   passTypeThrough,
 

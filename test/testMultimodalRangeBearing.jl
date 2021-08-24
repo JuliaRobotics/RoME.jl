@@ -1,6 +1,8 @@
 using RoME
 using Test
 using DistributedFactorGraphs
+using Manifolds: TranslationGroup
+using TensorCast
 # using RoMEPlotting, Distributions
 
 import IncrementalInference: getSample
