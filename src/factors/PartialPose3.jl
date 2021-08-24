@@ -19,11 +19,21 @@ end
 
 PriorPose3ZRP(z::T1,rp::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = PriorPose3ZRP{T1,T2}(z, rp)
 
-getManifold(::PriorPose3ZRP) = ProductGroup(ProductManifold(TranslationGroup(1), SpecialOrthogonal(3)))
+# getManifold(::PriorPose3ZRP) = ProductGroup(ProductManifold(TranslationGroup(1), SpecialOrthogonal(3)))
+getManifold(::PriorPose3ZRP) = SpecialEuclidean(3)
 
-#FIXME update
-function getSample(cfo::CalcFactor{<:PriorPose3ZRP})
-  return ([rand(cfo.factor.z); rand(cfo.factor.rp)], )
+#FIXME update to also only one measurement
+function getSample(cf::CalcFactor{<:PriorPose3ZRP})
+  
+  M = getManifold(cf.factor)
+
+  ϵ = identity_element(M)
+
+  X = hat(M, ϵ, [0; 0; rand(cf.factor.z); rand(cf.factor.rp); 0])
+
+  p = exp(M, ϵ, X)
+
+  return (p, )
 end
 
 
@@ -69,29 +79,36 @@ end
 Partial factor between XY and Yaw of two Pose3 variables.
 
 """
-mutable struct Pose3Pose3XYYaw{T1 <: SamplableBelief,T2 <: SamplableBelief} <: IIF.AbstractManifoldMinimize
-  xy::T1
-  yaw::T2
+struct Pose3Pose3XYYaw{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
+  Z::T
   partial::Tuple{Int,Int,Int}
-  Pose3Pose3XYYaw{T1,T2}() where {T1, T2} = new()
-  Pose3Pose3XYYaw{T1,T2}(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new(xy, yaw, (1,2,6))
 end
+Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) = error("Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) where {T1 <: , T2 <: IIF.SamplableBelief} is deprecated, use one belief")
 
-Pose3Pose3XYYaw(xy::T1, yaw::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} =  Pose3Pose3XYYaw{T1,T2}(xy, yaw)
+Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,6))
 
-function getSample(cfo::CalcFactor{<:Pose3Pose3XYYaw})
-  return ([rand(cfo.factor.xy);rand(cfo.factor.yaw)], )
+function getSample(cf::CalcFactor{<:Pose3Pose3XYYaw})
+  return (sampleTangent(getManifold(cf.factor), cf.factor.Z), )
 end
 
 getManifold(::Pose3Pose3XYYaw) = SpecialEuclidean(2)
 
-function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(meas,
-                                                wXi,
-                                                wXj  )
+
+function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, p_SE3, q_SE3 )
   #
-  wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
-  jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
-  return se2vee(jXjhat)
+  M = SpecialEuclidean(2)
+  p = ProductRepr(p_SE3.parts[1][1:2], p_SE3.parts[2][1:2, 1:2])
+  q = ProductRepr(q_SE3.parts[1][1:2], q_SE3.parts[2][1:2, 1:2])
+
+  q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) 
+  #TODO allocalte for vee! see Manifolds #412, fix for AD
+  Xc = zeros(3)
+  vee!(M, Xc, q, log(M, q, q̂))
+  return Xc
+
+  # wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
+  # jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
+  # return se2vee(jXjhat)
 end
 
 
