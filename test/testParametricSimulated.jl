@@ -1,3 +1,5 @@
+#FIXME update to manifolds
+#FIXME add to tests
 # test simulated PPE in reverse
 
 
@@ -29,9 +31,9 @@ pp2 = Pose2Pose2( MvNormal([0;0;-pi+0.01], diagm(0.03*ones(3)) ))
 
 ##
 
-@test isapprox( abs.(testFactorResidualBinary(pp2, Pose2, Pose2, zeros(3),  zeros(3), ([0;0;-pi],))), [0;0;pi] )
-@test isapprox( testFactorResidualBinary(pp2, Pose2, Pose2, zeros(3), [0;0;-pi], ([0;0;-pi],) ), [0;0;0], atol=1e-14 )
-@test isapprox( testFactorResidualBinary(pp2, Pose2, Pose2, zeros(3),  [0;0;pi], ([0;0;-pi],) ), [0;0;0], atol=1e-14 )
+@test isapprox( abs.(calcFactorResidualTemporary(pp2, (Pose2, Pose2), [([0;0;-pi],)], (zeros(3),  zeros(3)))), [0;0;pi] )
+@test isapprox( calcFactorResidualTemporary(pp2, (Pose2, Pose2), (zeros(3), [([0;0;-pi],)], [0;0;-pi])), [0;0;0], atol=1e-14 )
+@test isapprox( calcFactorResidualTemporary(pp2, (Pose2, Pose2), (zeros(3), [([0;0;-pi],)], [0;0; pi])), [0;0;0], atol=1e-14 )
 
 
 # wXjhat = SE2(zeros(3))*SE2([0;0;-pi])

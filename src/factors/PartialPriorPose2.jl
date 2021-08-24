@@ -12,16 +12,16 @@ mutable struct PartialPriorYawPose2{T <: IIF.SamplableBelief} <: IIF.AbstractPri
 end
 PartialPriorYawPose2(x::T) where {T <: IIF.SamplableBelief} = PartialPriorYawPose2{T}(x)
 
-function getSample(cf::CalcFactor{<:PartialPriorYawPose2}, N::Int=1)
+function getSample(cf::CalcFactor{<:PartialPriorYawPose2})
     
   Z = cf.factor.Z
   M = getManifold(cf.factor)
   p = identity_element(M)
   
-  Xc = [rand(Z) for _ in 1:N]
+  Xc = rand(Z)
   
-  X = hat.(Ref(M), Ref(p), Xc)
-  points = exp.(Ref(M), Ref(p), X)
+  X = hat(M, p, Xc)
+  points = exp(M, p, X)
   return (points, )
 end
 

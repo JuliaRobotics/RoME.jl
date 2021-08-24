@@ -20,11 +20,11 @@ Pose3Pose3(::UniformScaling) = Pose3Pose3() # MvNormal(zeros(3),LinearAlgebra.di
 
 function getSample(cf::CalcFactor{<:Pose3Pose3}, N::Int=1) 
   
-  Xc = [rand(cf.factor.z) for _ in 1:N]
+  Xc = rand(cf.factor.z)
   #NOTE be carefull using this as template as it will not work in general for all manifolds
   M = getManifold(Pose3)
   ϵ = getPointIdentity(Pose3)
-  X = hat.(Ref(M), Ref(ϵ), Xc)
+  X = hat(M, ϵ, Xc)
   # return a vector
   return (X, )
 end

@@ -11,7 +11,7 @@ mutable struct RotationTest <: IncrementalInference.AbstractRelativeRoots
   z::MvNormal
 end
 
-getSample(cfo::CalcFactor{<:RotationTest}, N::Int=1) = ([rand(cfo.factor.z) for _=1:N],)
+getSample(cfo::CalcFactor{<:RotationTest}) = (rand(cfo.factor.z), )
 
 # 3 dimensional line, z = [a b][x y]' + c
 function (cfo::CalcFactor{<:RotationTest})( meas, 
@@ -51,12 +51,11 @@ R2 = zeros(3)
 res = randn(3)
 
 # should be Sphere3
-res = testFactorResidualBinary( rr, 
-                                ContinuousEuclid{3}, 
-                                ContinuousEuclid{3}, 
-                                R1, 
-                                R2, 
-                                (eul,))
+res = calcFactorResidualTemporary(rr, 
+                                  (ContinuousEuclid{3}, ContinuousEuclid{3}), 
+                                  [(eul,)],
+                                  (R1, R2) 
+                                  )
 # rr(res, nothing, 1, (zeros(3,1),), R1, R2)
 
 
@@ -72,12 +71,11 @@ R2 = rand(3)
 
 # res = zeros(3)
 
-res = testFactorResidualBinary( rr, 
-                                ContinuousEuclid{3}, 
-                                ContinuousEuclid{3}, 
-                                R1, 
-                                R2, 
-                                (eul,))
+res = calcFactorResidualTemporary(rr, 
+                                  (ContinuousEuclid{3}, ContinuousEuclid{3}), 
+                                  [(eul,)],
+                                  (R1, R2) 
+                                  )
 # rr(res, nothing, 1, (zeros(3),), R1, R2)
 
 
