@@ -19,7 +19,6 @@ end
 
 PriorPose3ZRP(z::T1,rp::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = PriorPose3ZRP{T1,T2}(z, rp)
 
-# getManifold(::PriorPose3ZRP) = ProductGroup(ProductManifold(TranslationGroup(1), SpecialOrthogonal(3)))
 getManifold(::PriorPose3ZRP) = SpecialEuclidean(3)
 
 #FIXME update to also only one measurement
@@ -29,11 +28,14 @@ function getSample(cf::CalcFactor{<:PriorPose3ZRP})
 
   ϵ = identity_element(M)
 
-  X = hat(M, ϵ, [0; 0; rand(cf.factor.z); rand(cf.factor.rp); 0])
+  #Rotation part: roll and pitch
+  r,p = rand(cf.factor.rp)
+  R = Rotations.RotXY(r, p)
+  
+  # Translation part: Z
+  T = [0; 0; rand(cf.factor.z)]
 
-  p = exp(M, ϵ, X)
-
-  return (p, )
+  return (ProductRepr(T, R), )
 end
 
 
