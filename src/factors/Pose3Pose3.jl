@@ -107,7 +107,7 @@ function convert(::Type{Pose3Pose3}, packed::PackedPose3Pose3)
   return Pose3Pose3( convert(SamplableBelief, packed.Zij) )
 end
 function convert(::Type{PackedPose3Pose3}, obj::Pose3Pose3)
-  return PackedPose3Pose3( convert(PackedSamplableBelief, obj.Zij) )
+  return PackedPose3Pose3( convert(PackedSamplableBelief, obj.z) )
 end
 
 

@@ -118,24 +118,22 @@ end
 Serialization type of Pose3Pose3XYYaw.
 """
 mutable struct PackedPose3Pose3XYYaw <: IncrementalInference.PackedInferenceType
-  xydata::String
-  yawdata::String
+  Z::String
   PackedPose3Pose3XYYaw() = new()
-  PackedPose3Pose3XYYaw(xy::String, yaw::String) = new(xy, yaw)
+  PackedPose3Pose3XYYaw(Z::String) = new(Z)
 end
 
 function convert(::Type{Pose3Pose3XYYaw}, d::PackedPose3Pose3XYYaw)
-  return Pose3Pose3XYYaw( convert(SamplableBelief, d.xydata), convert(SamplableBelief, d.yawdata) )
+  return Pose3Pose3XYYaw( convert(SamplableBelief, d.Z))
 end
 
 function convert(::Type{PackedPose3Pose3XYYaw}, d::Pose3Pose3XYYaw)
-  return PackedPose3Pose3XYYaw( convert(PackedSamplableBelief, d.xy), convert(PackedSamplableBelief, d.yaw) )
+  return PackedPose3Pose3XYYaw( convert(PackedSamplableBelief, d.Z))
 end
 
 function compare(a::Pose3Pose3XYYaw, b::Pose3Pose3XYYaw; tol::Float64=1e-10)
   TP = true
-  TP = TP && compareDensity(a.xy, b.xy)
-  TP = TP && compareDensity(a.yaw, b.yaw)
+  TP = TP && compareDensity(a.Z, b.Z)
   TP = TP && norm(collect(a.partial)-collect(b.partial)) < tol
   return TP
 end
