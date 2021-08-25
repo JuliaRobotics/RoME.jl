@@ -1,8 +1,10 @@
 # test sonar functions directly
 
 using RoME
+using DistributedFactorGraphs
 using Distributions
-
+using Manifolds: TranslationGroup
+using Test
 ##
 
 @testset "bearing range elevation functions" begin
@@ -12,15 +14,15 @@ using Distributions
 meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 
 N=100
-X = 0.01*randn(6,N)
-
+Xc = [0.01*randn(6) for _=1:N]
+pts = getPoint.(Pose3, Xc)
 
 # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
 # measurement = getSample(meas, N)
 
 fg = initfg()
 X0 = addVariable!(fg, :x0, Pose3)
-initManual!(fg, :x0, X)
+initManual!(fg, :x0, pts)
 X1 = addVariable!(fg, :x1, Point3)
 addFactor!(fg, [:x0;:x1], meas, graphinit=false)
 
@@ -30,7 +32,7 @@ pts = approxConv(fg, :x0x1f1, :x1)
 
 @warn "still need to insert kld(..) test to ensure this is working"
 
-p1 = kde!(pts);
+p1 = manikde!(TranslationGroup(3), pts);
 
 
 println("Test back projection from ")
@@ -38,9 +40,7 @@ println("Test back projection from ")
 meas = LinearRangeBearingElevation((3.0,3e-4),(0.2,3e-4))
 
 N = 100
-L = zeros(3,N);
-L[1,:] .+= 3.0
-L[2,:] .+= 0.65
+L = [[3.0; 0.65; 0] for _=1:N]
 
 fg = initfg()
 X0 = addVariable!(fg, :x0, Pose3)
@@ -51,7 +51,7 @@ addFactor!(fg, [:x0;:x1], meas, graphinit=false)
 pts = approxConv(fg, :x0x1f1, :x0)
 
 
-p2 = kde!(pts);
+p2 = manikde!(SpecialEuclidean(3), pts);
 
 
 end
