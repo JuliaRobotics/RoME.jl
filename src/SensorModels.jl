@@ -37,7 +37,7 @@ function (cfo::CalcFactor{<:LinearRangeBearingElevation})(meas, _pose, _landm)
   return residualLRBE!(meas, pose, landm, cfo.factor.reuse[Threads.threadid()])  
 end
 
-function getSample!(y::Array{Float64,1}, las::LinearRangeBearingElevation)
+function getSample!(y::AbstractVector{<:Real}, las::LinearRangeBearingElevation)
   y[1] = rand(las.range)
   y[2] = rand(las.bearing)
   y[3] = rand(las.elev)
