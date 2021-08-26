@@ -19,7 +19,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct LinearRangeBearingElevation <: IIF.AbstractRelativeMinimize
+mutable struct LinearRangeBearingElevation <: IIF.AbstractManifoldMinimize
   range::Normal
   bearing::Normal
   elev::Uniform
@@ -27,21 +27,25 @@ mutable struct LinearRangeBearingElevation <: IIF.AbstractRelativeMinimize
   LinearRangeBearingElevation() = new()
   LinearRangeBearingElevation( r::Tuple{Float64,Float64}, b::Tuple{Float64,Float64}; elev=Uniform(-0.25133,0.25133)) = new(Normal(r...),Normal(b...),elev, reuseLBRA[reuseLBRA(0) for i in 1:Threads.nthreads()] )
 end
-function (cfo::CalcFactor{<:LinearRangeBearingElevation})(meas, pose, landm)
+
+getManifold(::LinearRangeBearingElevation) = Euclidean(3)#FIXME
+
+function (cfo::CalcFactor{<:LinearRangeBearingElevation})(meas, _pose, _landm)
+  #FIXME update to manifolds, quick fix convert for now
+  pose = getCoordinates(Pose3, _pose)
+  landm = getCoordinates(Point3, _landm)
   return residualLRBE!(meas, pose, landm, cfo.factor.reuse[Threads.threadid()])  
 end
 
-function getSample!(y::Array{Float64,2}, las::LinearRangeBearingElevation, idx::Int )
-  y[1,idx] = rand(las.range)
-  y[2,idx] = rand(las.bearing)
-  y[3,idx] = rand(las.elev)
+function getSample!(y::AbstractVector{<:Real}, las::LinearRangeBearingElevation)
+  y[1] = rand(las.range)
+  y[2] = rand(las.bearing)
+  y[3] = rand(las.elev)
   nothing
 end
-function getSample( cfo::CalcFactor{<:LinearRangeBearingElevation}, N::Int=1 )
-  y = zeros(3,N)
-  for i in 1:N
-    getSample!(y, cfo.factor, i)
-  end
+function getSample( cfo::CalcFactor{<:LinearRangeBearingElevation})
+  y = zeros(3)
+  getSample!(y, cfo.factor)
   return (y,)
 end
 

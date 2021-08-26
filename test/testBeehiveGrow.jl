@@ -47,7 +47,7 @@ tree, _, _ = solveTree!(fg  , tree);
 @test isapprox( getPPE(fg, :l7).suggested , [20;-20*sin(pi/3)], atol=6)
 
 # likely to fail until IIF 1010 is completed
-@test_broken  isapprox( getPPE(fg, :x21).suggested[1:2] , [10;-20*sin(pi/3)], atol=4)
+@test_skip  isapprox( getPPE(fg, :x21).suggested[1:2] , [10;-20*sin(pi/3)], atol=4)
 
 
 ##

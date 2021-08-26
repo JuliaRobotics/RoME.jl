@@ -18,14 +18,14 @@ function getSample(cf::CalcFactor{<:PartialPriorYawPose2})
   M = getManifold(cf.factor)
   p = identity_element(M)
   
-  Xc = rand(Z)
+  Xc = [0,0,rand(Z)]
   
   X = hat(M, p, Xc)
   points = exp(M, p, X)
   return (points, )
 end
 
-getManifold(::PartialPriorYawPose2) = SpecialOrthogonal(2)
+getManifold(::PartialPriorYawPose2) = SpecialEuclidean(2)
 
 ## Serialization support
 
