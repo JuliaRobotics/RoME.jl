@@ -22,7 +22,7 @@ function getSample(cf::CalcFactor{<:PartialPriorYawPose2})
   
   X = hat(M, p, Xc)
   points = exp(M, p, X)
-  return (points, )
+  return points
 end
 
 getManifold(::PartialPriorYawPose2) = SpecialEuclidean(2)

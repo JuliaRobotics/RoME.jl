@@ -13,7 +13,7 @@ mutable struct VelPoint2VelPoint2{T <: IIF.SamplableBelief} <: IIF.AbstractRelat
 end
 VelPoint2VelPoint2(z1::T) where {T <: Distribution} = VelPoint2VelPoint2{T}(z1)
 
-getSample(cfo::CalcFactor{<:VelPoint2VelPoint2}) = (rand(cfo.factor.z), )
+getSample(cfo::CalcFactor{<:VelPoint2VelPoint2}) = rand(cfo.factor.z)
 
 function (cfo::CalcFactor{<:VelPoint2VelPoint2})(z, xi, xj)
   #

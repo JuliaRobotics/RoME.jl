@@ -22,7 +22,7 @@ Pose2Point2Bearing(x1::B) where {B <: IIF.SamplableBelief} = Pose2Point2Bearing{
 getManifold(::Pose2Point2Bearing) = SpecialOrthogonal(2)
 
 function getSample(cfo::CalcFactor{<:Pose2Point2Bearing})
-  return (rand(cfo.factor.bearing), )
+  return rand(cfo.factor.bearing)
 end
 
 function (cfo::CalcFactor{<:Pose2Point2Bearing})(Xc, p, l)

@@ -26,7 +26,7 @@ function getSample(cf::CalcFactor{<:Pose3Pose3}, N::Int=1)
   ϵ = getPointIdentity(Pose3)
   X = hat(M, ϵ, Xc)
   # return a vector
-  return (X, )
+  return X
 end
 
 function (cf::CalcFactor{<:Pose3Pose3})(X, p, q)
