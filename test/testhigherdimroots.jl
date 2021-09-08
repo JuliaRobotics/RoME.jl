@@ -4,7 +4,7 @@ using RoME
 # , IncrementalInference, TransformUtils, Distributions
 using Test
 import  IncrementalInference: getSample
-
+using TransformUtils: Euler
 ##
 
 mutable struct RotationTest <: IncrementalInference.AbstractRelativeRoots
@@ -22,7 +22,7 @@ function (cfo::CalcFactor{<:RotationTest})( meas,
   res = Vector{eltype(var1)}(undef, 3)
   
   z = meas
-  dq = convert(Quaternion, Euler(z...))
+  dq = convert(Quaternion, Euler(z))
   @show var1
   @show s1 = TU.so3(var1)
   s2 = TU.so3(var2)
@@ -53,7 +53,7 @@ res = randn(3)
 # should be Sphere3
 res = calcFactorResidualTemporary(rr, 
                                   (ContinuousEuclid{3}, ContinuousEuclid{3}), 
-                                  [(eul,)],
+                                  eul,
                                   (R1, R2) 
                                   )
 # rr(res, nothing, 1, (zeros(3,1),), R1, R2)
@@ -73,7 +73,7 @@ R2 = rand(3)
 
 res = calcFactorResidualTemporary(rr, 
                                   (ContinuousEuclid{3}, ContinuousEuclid{3}), 
-                                  [(eul,)],
+                                  eul,
                                   (R1, R2) 
                                   )
 # rr(res, nothing, 1, (zeros(3),), R1, R2)

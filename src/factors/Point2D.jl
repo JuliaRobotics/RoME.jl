@@ -18,7 +18,7 @@ PriorPoint2() = PriorPoint2(MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01])))
 DFG.getManifold(::PriorPoint2) = TranslationGroup(2)
 
 function getSample(cfo::CalcFactor{<:PriorPoint2})
-  returnrand(cfo.factor.Z)
+  return rand(cfo.factor.Z)
 end
 
 function (cf::CalcFactor{<:PriorPoint2})(meas, 	
