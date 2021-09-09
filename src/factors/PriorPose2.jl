@@ -42,7 +42,7 @@ function getSample(cf::CalcFactor{<:PriorPose2}, N::Int=1)
   X = hat(M, p, Xc)
   points = exp(M, p, X)
 
-  return (points, )
+  return points
 end
 
 function (cf::CalcFactor{<:PriorPose2})(m, p)	

@@ -30,7 +30,7 @@ function getSample(cf::CalcFactor{<:DynPose2VelocityPrior})
   X = hat(M, p, Xc)
   points = exp(M, p, X)
 
-  return (points, )
+  return points
 end
 
 function IIF.getMeasurementParametric(s::DynPose2VelocityPrior{<:MvNormal, <:MvNormal}) 
@@ -71,7 +71,7 @@ mutable struct DynPose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRo
 end
 DynPose2Pose2(z1::T) where {T <: IIF.SamplableBelief} = DynPose2Pose2{T}(z1)
 
-getSample(cf::CalcFactor{<:DynPose2Pose2}) = (rand(cf.factor.Zpose.z), )
+getSample(cf::CalcFactor{<:DynPose2Pose2}) = rand(cf.factor.Zpose.z)
 
 function (cf::CalcFactor{<:DynPose2Pose2})( meas,
                                             wXi,
@@ -164,7 +164,7 @@ DynPose2DynPose2(z1::T=MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))) 
 # getManifolds(::DynPose2DynPose2) = getManifolds(DynPose2DynPose2)
 
 
-getSample(cf::CalcFactor{<:DynPose2DynPose2}) = (rand(cf.factor.Z), )
+getSample(cf::CalcFactor{<:DynPose2DynPose2}) = rand(cf.factor.Z)
 
 function (cf::CalcFactor{<:DynPose2DynPose2})(meas,
                                               wXi,

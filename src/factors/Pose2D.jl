@@ -30,7 +30,7 @@ function getSample(cf::CalcFactor{<:Pose2Pose2})
   ϵ = getPointIdentity(Pose2)
 
   X = sampleTangent(M, cf.factor.z, ϵ)
-  return (X, )
+  return X
 end
 
 

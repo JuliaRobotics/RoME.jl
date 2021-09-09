@@ -16,8 +16,8 @@ NorthSouthPartial(Z::D) where {D <: IIF.SamplableBelief} = NorthSouthPartial(Z, 
 
 # DFG.getManifold(::NorthSouthPartial) = TranslationGroup(1)
 
-# getSample(cfo::CalcFactor{<:NorthSouthPartial}) = (samplePoint(getManifold(cfo.factor), cfo.factor.Z), )
-getSample(cfo::CalcFactor{<:NorthSouthPartial}) = (samplePoint(TranslationGroup(1), cfo.factor.Z), )
+# getSample(cfo::CalcFactor{<:NorthSouthPartial}) = samplePoint(getManifold(cfo.factor), cfo.factor.Z)
+getSample(cfo::CalcFactor{<:NorthSouthPartial}) = samplePoint(TranslationGroup(1), cfo.factor.Z)
 
 ##
 

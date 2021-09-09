@@ -11,7 +11,7 @@ mutable struct DynPoint2VelocityPrior{T <: SamplableBelief} <: AbstractPrior
 end
 DynPoint2VelocityPrior(z1::T) where {T <: SamplableBelief} = DynPoint2VelocityPrior{T}(z1)
 
-getSample(cfo::CalcFactor{<:DynPoint2VelocityPrior}) = (rand(cfo.factor.z), )
+getSample(cfo::CalcFactor{<:DynPoint2VelocityPrior}) = rand(cfo.factor.z)
 
 
 """
@@ -23,7 +23,7 @@ mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeRoots
   DynPoint2DynPoint2(z1::T) where {T <: SamplableBelief} = new{T}(z1)
 end
 
-getSample(cfo::CalcFactor{<:DynPoint2DynPoint2}) = (rand(cfo.factor.z), )
+getSample(cfo::CalcFactor{<:DynPoint2DynPoint2}) = rand(cfo.factor.z)
 
 function (cfo::CalcFactor{<:DynPoint2DynPoint2})(z, xi, xj)
   #
@@ -43,7 +43,7 @@ mutable struct Point2Point2Velocity{T <: IIF.SamplableBelief} <: IIF.AbstractRel
   Point2Point2Velocity(z1::T) where {T <: IIF.SamplableBelief} = new{T}(z1)
 end
 
-getSample(cfo::CalcFactor{<:Point2Point2Velocity}) = (rand(cfo.factor.z), )
+getSample(cfo::CalcFactor{<:Point2Point2Velocity}) = rand(cfo.factor.z)
 function (cfo::CalcFactor{<:Point2Point2Velocity})( z,
                                                     xi,
                                                     xj  )

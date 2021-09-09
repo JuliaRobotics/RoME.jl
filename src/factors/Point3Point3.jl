@@ -23,7 +23,7 @@ end
 Point3Point3(x::T=MvNormal(zeros(3),LinearAlgebra.diagm([0.1;0.1;0.1]))) where {T <: IIF.SamplableBelief} = Point3Point3{T}(x)
 
 function getSample(cfo::CalcFactor{<:Point3Point3})
-  return (rand(cfo.factor.Zij), )
+  return rand(cfo.factor.Zij)
 end
 function (cf::CalcFactor{<:Point3Point3})(meas,
                                             xi,

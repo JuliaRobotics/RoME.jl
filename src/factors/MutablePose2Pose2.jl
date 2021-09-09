@@ -21,7 +21,7 @@ function getSample(cf::CalcFactor{<:MutablePose2Pose2Gaussian})
 
   M = SpecialEuclidean(2)
   X = hat(M, Manifolds.Identity(M), Xc)
-  return (X, )
+  return X
 end
 
 """

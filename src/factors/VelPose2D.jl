@@ -26,7 +26,7 @@ function getSample(cf::CalcFactor{<:VelPose2VelPose2})
     #velocity part
     Xvel = rand(cf.factor.Zvel)
 
-    return (ProductRepr(Xpose, Xvel), )
+    return ProductRepr(Xpose, Xvel)
 end
 
 
