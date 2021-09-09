@@ -40,7 +40,7 @@ function solve_batch(total_meas::Integer)
     # Solve the graph, and save a copy of the tree.
     saveDFG(fg, "$(getLogPath(fg))/fg-before-solve")
     getSolverParams(fg).maxincidence = 
-    tree, smt, hist = solveTree!(fg)
+    tree = solveTree!(fg)
     saveDFG(fg, "$(getLogPath(fg))/fg-after-solve")
     saveTree(tree, "$(getLogPath(fg))/tree$(manhattan_total_meas).jld2")
     drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt.pdf")

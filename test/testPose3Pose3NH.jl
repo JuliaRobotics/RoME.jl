@@ -102,7 +102,7 @@ global X3ptsMean = mean(SpecialEuclidean(3), X3pts)
 @test isapprox(X3ptsMean.parts[1], [50,0,0], atol=5.0)
 @test isapprox(X3ptsMean.parts[2], [1 0 0; 0 1 0; 0 0 1], atol=0.5)
 
-tree,smt,hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 end
 

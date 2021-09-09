@@ -32,7 +32,7 @@ pts = approxConv(fg, :x0x1f1, :x1)
 
 # ensureAllInitialized!(fg)
 
-tree, smt, hist = solveTree!(fg);
+tree = solveTree!(fg);
 
 _X1 = getCoordinates.(DynPose2, getVal(fg, :x1))
 @cast X1[j,i] := _X1[i][j]
@@ -169,7 +169,7 @@ getSolverParams(fg).useMsgLikelihoods = false
 
 # solve
 smtasks = Task[]
-tree, smt, hist = solveTree!(fg, smtasks=smtasks); #, recordcliqs=ls(fg));
+tree = solveTree!(fg, smtasks=smtasks); #, recordcliqs=ls(fg));
 
 
 ##

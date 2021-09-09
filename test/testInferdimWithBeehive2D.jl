@@ -86,7 +86,7 @@ getSolverParams(fg).async = true
 
 
 # do inference over factor graph
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 
 
 fetchCliqTaskHistoryAll!(smt, hist)
@@ -305,7 +305,7 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, graphinit=false )
 getSolverParams(fg).downsolve = false
 
 
-tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+tree = solveTree!(fg, tree, recordcliqs=ls(fg))
 
 
 

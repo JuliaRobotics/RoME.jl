@@ -27,8 +27,8 @@ getSolverParams(fg).async = false
 @error "Restore useMsgLikelihoods=true"
 
 # direct solve would be
-tree, smt, hist = solveTree!(fg)
-# tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
+# tree = solveTree!(fg)
 
 
 @error "Hex init test degraded quality during useMsgLikelihoods refactor, must restore to 55"

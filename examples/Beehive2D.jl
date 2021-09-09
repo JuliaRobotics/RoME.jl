@@ -156,7 +156,7 @@ addFactor!(fg, [Symbol("x$(posecount)"); :l2], p2br2, graphinit=false )
 # getSolverParams(fg).downsolve = false
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 
@@ -178,7 +178,7 @@ addFactor!(fg, [:x12; :l0], p2br2, graphinit=false )
 
 # getSolverParams(fg).dbg = true
 
-tree, smt, hist = solveTree!(fg, tree) #, recordcliqs=ls(fg))
+tree = solveTree!(fg, tree) #, recordcliqs=ls(fg))
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
@@ -196,7 +196,7 @@ posecount = _driveHex!(fg, posecount, graphinit=true)
 
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
@@ -225,7 +225,7 @@ addFactor!(fg, [:x20; :l3], p2br, graphinit=false )
 
 # getSolverParams(fg).dbg = true
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
@@ -255,7 +255,7 @@ addFactor!(fg, [:x27; :l4], p2br, graphinit=false )
 
 # drawGraph(fg)
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
@@ -272,7 +272,7 @@ p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x25; :l2], p2br2, graphinit=false )
 
 
-tree, smt, hist = solveTree!(fg, tree, recordcliqs=ls(fg))
+tree = solveTree!(fg, tree, recordcliqs=ls(fg))
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
@@ -295,7 +295,7 @@ p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 addFactor!(fg, [:x4; :l5], p2br, graphinit=false )
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 pl = plotBeehive_6(fg, meanmax=:mean)
 
@@ -321,7 +321,7 @@ addFactor!(fg, [:x33; :l0], p2br2, graphinit=false )
 # drawGraph(fg)
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 pl = plotBeehive_6(fg, meanmax=:mean)
 
@@ -358,7 +358,7 @@ addFactor!(fg, [:x39; :l4], p2br2, graphinit=false )
 
 # drawGraph(fg)
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
@@ -373,7 +373,7 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 # # getSolverParams(fg).dbg = false
 # # getSolverParams(fg).multiproc = false
 #
-# tree, smt, hist = solveTree!(fg) # , recordcliqs=ls(fg)
+# tree = solveTree!(fg) # , recordcliqs=ls(fg)
 #
 # pl = plotBeehive_6(fg, meanmax=:mean)
 #
@@ -403,7 +403,7 @@ addFactor!(fg, [:x48; :l6], p2br2, graphinit=false )
 
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
@@ -430,7 +430,7 @@ posecount = _driveHex!(fg, posecount)
 
 # drawGraph(fg)
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 pl = plotBeehive_6(fg, meanmax=:mean)
@@ -451,7 +451,7 @@ posecount = _driveHex!(fg, posecount)
 
 # drawGraph(fg)
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 
@@ -474,7 +474,7 @@ posecount = _driveHex!(fg, posecount)
 
 drawGraph(fg)
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 
@@ -712,7 +712,7 @@ dontMarginalizeVariablesAll!(fg)
 getSolverParams(fg).dbg = true
 # getSolverParams(fg).multiproc = false
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 
 pl = plotBeehive_6(fg, meanmax=:mean)
 
@@ -756,7 +756,7 @@ pl = plotKDE(fg, ls(fg, r"x"), levels=1)
 
 dontMarginalizeVariablesAll!(fg)
 getSolverParams(fg).dbg=true
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg)) #, tree)
+tree = solveTree!(fg, recordcliqs=ls(fg)) #, tree)
 
 pl = plotBeehive_6(fg, meanmax=:mean)
 

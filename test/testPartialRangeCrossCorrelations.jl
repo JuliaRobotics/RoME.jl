@@ -35,7 +35,7 @@ addFactor!(fg, [:x1; :l1], ppr )
 
 ##
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 ## check that stuff is where it should be

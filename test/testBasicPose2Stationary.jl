@@ -35,7 +35,7 @@ setValKDE!(fg, :x2, manikde!(badval, Pose2))
 
 N = 100
 # batchSolve!(fg, N=N)
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 for xx in [:x0; :x1; :x2]
   pts = getVal(fg, xx)

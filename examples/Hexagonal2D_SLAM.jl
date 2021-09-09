@@ -30,7 +30,7 @@ end
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
 getSolverParams(fg).drawtree=true
 getSolverParams(fg).showtree=true
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 pl = drawPoses(fg) #, meanmax=:mean)

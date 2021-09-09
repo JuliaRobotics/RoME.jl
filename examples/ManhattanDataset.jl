@@ -46,7 +46,7 @@ function runManhattanStep(step::Integer)
 
     # Solve the graph, and save a copy of the tree.
     saveDFG(fg, "$(getLogPath(fg))/fg-before-solve")
-    tree, smt, hist = solveTree!(fg)
+    tree = solveTree!(fg)
     saveDFG(fg, "$(getLogPath(fg))/fg-after-solve")
     saveTree(tree, "$(getLogPath(fg))/tree$(padded_step).jld2")
     drawTree(tree, show=false, filepath="$(getLogPath(fg))/bt$(padded_step).pdf")

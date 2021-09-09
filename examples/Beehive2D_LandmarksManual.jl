@@ -86,7 +86,7 @@ getSolverParams(fg).downsolve = false
 getSolverParams(fg).multiproc = false
 
 
-tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 
 
 # hist = getCliqSolveHistory(tree, :x1)
@@ -122,7 +122,7 @@ addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, graphinit=false )
 
 # fg.solverParams.async = true
 
-tree, smt, chi = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
@@ -163,7 +163,7 @@ posecount = driveHex(fg, posecount)
 
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 # solve
@@ -208,7 +208,7 @@ addFactor!(fg, [:x19; :l0], p2br2, graphinit=false )
 
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 # tree2, smtasks = batchSolve!(fg, tree, dbg=true, drawpdf=true, show=true, incremental=true)
@@ -240,7 +240,7 @@ posecount = driveHex(fg, posecount)
 # writeGraphPdf(fg)
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 # tree2, smtasks = batchSolve!(fg, tree, dbg=true, drawpdf=true, show=true, incremental=true)
 # tree=tree2
@@ -268,7 +268,7 @@ addFactor!(fg, [:x26; :l0], p2br2, graphinit=false )
 
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 
@@ -300,7 +300,7 @@ posecount = driveHex(fg, posecount)
 
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 
@@ -336,7 +336,7 @@ addFactor!(fg, [:x33; :l0], p2br2, graphinit=false )
 
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 
@@ -375,7 +375,7 @@ posecount = driveHex(fg, posecount)
 
 
 
-tree, smt, hist = solveTree!( fg, tree )
+tree = solveTree!( fg, tree )
 
 
 # tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
@@ -405,7 +405,7 @@ addFactor!(fg, [:x39; :l4], p2br2, graphinit=false )
 
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)|
 
@@ -439,7 +439,7 @@ addFactor!(fg, [:x2; :l7], p2br2, graphinit=false )
 recordcliqs = [:x29;:x44;:x38;:x47;:x49]
 
 
-tree, smt, hist = solveTree!(fg, tree, recordcliqs=recordcliqs)
+tree = solveTree!(fg, tree, recordcliqs=recordcliqs)
 0
 
 
@@ -471,7 +471,7 @@ posecount = driveHex(fg, posecount)
 
 
 
-tree, smt, chi = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
@@ -506,7 +506,7 @@ addFactor!(fg, [:x55; :l6], p2br2, graphinit=false )
 
 
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
@@ -534,7 +534,7 @@ posecount = driveHex(fg, posecount)
 
 
 
-tree, smt, chi = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 

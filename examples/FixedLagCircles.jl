@@ -25,7 +25,7 @@ getSolverParams(fg).showtree = true
 # drawTree(tree, filepath=joinLogPath(fg, "bt5.pdf"))
 
 
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 
 # plfl1 = drawPosesLandms(fg, spscale=1.0)
 fg5a = deepcopy(fg)
@@ -53,7 +53,7 @@ saveDFG(fg_, joinLogPath(fg_,"fg_10B"))
 
 fgI = deepcopy(fg_)
 
-tree, smt, hist = solveTree!(fgI, deepcopy(tree5), recordcliqs=ls(fgI))
+tree = solveTree!(fgI, deepcopy(tree5), recordcliqs=ls(fgI))
 
 
 plotCirc10BA(fg_, fgI, filepath=joinLogPath(fg, "circ$(SIZE)IncrBA.pdf"), pointsList_=[:x8])
@@ -78,7 +78,7 @@ filter!(x->!(x in [:x5;:x4]), vo)
 push!(vo, :x4)
 push!(vo, :x5)
 
-tree, smt, hist = solveTree!(fgM, recordcliqs=ls(fgM), variableOrder=vo)
+tree = solveTree!(fgM, recordcliqs=ls(fgM), variableOrder=vo)
 
 ## Plot ellipses to illustrate covariance fit
 
@@ -111,7 +111,7 @@ fgR = deepcopy(fg_)
 defaultFixedLagOnTree!(fgR, round(Int, SIZE/2), limitfixeddown=false)
 
 
-tree, smt, hist = solveTree!(fgR, deepcopy(tree5), recordcliqs=ls(fgR))
+tree = solveTree!(fgR, deepcopy(tree5), recordcliqs=ls(fgR))
 
 
 pl10recl = plotCirc10BA(fg_, fgR, filepath=joinLogPath(fg, "circ$(SIZE)ReclBA.pdf"), levels=3, drawEllipse=true, ellipseList_=[:x9])

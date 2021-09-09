@@ -16,7 +16,7 @@ addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), Matrix{Float64}(LinearAlgeb
 addVariable!(fg, :x1, Point2)
 addFactor!(fg, [:x0;:x1], Point2Point2(MvNormal([10;0.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree)
 
@@ -66,7 +66,7 @@ addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)) , graphinit=fals
 @warn("Point2Point2 range 2 mode, allow 3 attempts until IIF #1010 is completed")
 TP = false
 for ic in 1:3
-  tree, _, = solveTree!(fg)
+  tree = solveTree!(fg)
 
   # mode 1
   @cast l1_val[j,i] := getVal(fg, :l1)[i][j]

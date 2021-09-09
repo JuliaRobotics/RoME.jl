@@ -62,7 +62,7 @@ addFactor!(fg, [:l100; :l3], ppr)
 
 
 ## solve system
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 # plot the first results
@@ -108,7 +108,7 @@ vehicle_drives_to!(fg, :l101, GTp, GTl)
 vehicle_drives_to!(fg, :l102, GTp, GTl)
 
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:2], dims=[1;2])
@@ -122,7 +122,7 @@ vehicle_drives_to!(fg, :l104, GTp, GTl)
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2]) |> PDF("/tmp/test.pdf")
 @async run(`evince /tmp/test.pdf`)
@@ -133,7 +133,7 @@ vehicle_drives_to!(fg, :l105, GTp, GTl)
 vehicle_drives_to!(fg, :l106, GTp, GTl)
 
 # allow potential for incremental updates
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2]) |> PDF("/tmp/test.pdf")
 @async run(`evince /tmp/test.pdf`)
@@ -143,7 +143,7 @@ pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 0:4], dims=[1;2]) |> PDF("/tmp/te
 vehicle_drives_to!(fg, :l107, GTp, GTl)
 
 # do a batch solve again
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 
@@ -151,7 +151,7 @@ tree, smt, hist = solveTree!(fg)
 vehicle_drives_to!(fg, :l108, GTp, GTl)
 
 # and incremental again
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 2:8], dims=[1;2], levels=6)
 pl |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
@@ -161,13 +161,13 @@ pl |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
 vehicle_drives_to!(fg, :l109, GTp, GTl)
 vehicle_drives_to!(fg, :l110, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 vehicle_drives_to!(fg, :l111, GTp, GTl)
 vehicle_drives_to!(fg, :l112, GTp, GTl)
 
-tree, smt, hist = solveTree!(fg, tree)
+tree = solveTree!(fg, tree)
 
 
 pl = plotKDE(fg, [Symbol("l$(100+i)") for i in 7:12], dims=[1;2])

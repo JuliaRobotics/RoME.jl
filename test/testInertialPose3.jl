@@ -116,7 +116,7 @@ norm(DATA[n][3]-DATA[n][3]')
 
 ensureAllInitialized!(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree)
 

@@ -60,7 +60,7 @@ println("STEP 2: Solve graph when shorter than fixed length")
 
 # getSolverParams(fg).drawtree = true
 # getSolverParams(fg).showtree = true
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 # Add another node when it comes around again, linking the node with the initial landmark
 p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
@@ -100,7 +100,7 @@ fifoFreeze!(fg)
 
 # Now solve again, which will freeze vertices < 5
 println("STEP 4: Solve graph when shorter than fixed length, and show time to solve")
-tree, smt, hist = solveTree!(fg, tree, verbose=true); # , recordcliqs=ls(fg));
+tree = solveTree!(fg, tree, verbose=true); # , recordcliqs=ls(fg));
 
 
 # Confirm that the initial nodes (x0 - x5) are frozen.
