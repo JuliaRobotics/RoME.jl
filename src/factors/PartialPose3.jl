@@ -125,7 +125,7 @@ mutable struct PackedPose3Pose3XYYaw <: IncrementalInference.PackedInferenceType
   PackedPose3Pose3XYYaw(Z::String) = new(Z)
 end
 
-function convert(::Type{Pose3Pose3XYYaw}, d::PackedPose3Pose3XYYaw)
+function convert(::Type{<:Pose3Pose3XYYaw}, d::PackedPose3Pose3XYYaw)
   return Pose3Pose3XYYaw( convert(SamplableBelief, d.Z))
 end
 
@@ -154,7 +154,7 @@ Converter: PriorPose3ZRP::Dict{String, Any} -> PriorPose3ZRP
 DevNotes
 - FIXME drop _evalType approach, use convert(SamplableBelief, obj) instead?
 """
-function convert(::Type{RoME.PriorPose3ZRP}, fact::Dict{String, Any})
+function convert(::Type{<:PriorPose3ZRP}, fact::Dict{String, Any})
     rp = fact["measurement"][1]
     z = fact["measurement"][2]
     # FIXME drop _evalType
@@ -166,7 +166,7 @@ end
 """
 Converter: PriorPose3ZRP::Dict{String, Any} -> PriorPose3ZRP
 """
-function convert(::Type{Dict{String, Any}}, fact::RoME.PriorPose3ZRP)
+function convert(::Type{Dict{String, Any}}, fact::PriorPose3ZRP)
     pf = Dict{String, Any}(
         "measurement" => [
             convert(Dict{String, Any}, fact.rp),
@@ -182,7 +182,7 @@ end
 
 Converter: Dict{String, Any} -> Pose3Pose3XYYaw
 """
-function convert(::Type{Dict{String, Any}}, fact::RoME.Pose3Pose3XYYaw)
+function convert(::Type{Dict{String, Any}}, fact::Pose3Pose3XYYaw)
     pf = Dict{String, Any}(
         "measurement" => [
             convert(Dict{String, Any}, fact.xy),
@@ -201,7 +201,7 @@ Converter: Pose3Pose3XYYaw -> Dict{String, Any}
 DevNotes
 - FIXME stop using _evalType, see DFG #590
 """
-function convert(::Type{RoME.Pose3Pose3XYYaw}, fact::Dict{String, Any})
+function convert(::Type{<:Pose3Pose3XYYaw}, fact::Dict{String, Any})
     xy = fact["measurement"][1]
     yaw = fact["measurement"][2]
     xy = convert(_evalType(xy["distType"]), xy)
