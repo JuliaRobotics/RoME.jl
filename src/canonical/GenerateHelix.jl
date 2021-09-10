@@ -32,6 +32,7 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
                                       xr_t::Function=(t)->real(spine_t(t)),
                                       yr_t::Function=(t)->imag(spine_t(t)),
                                       poseRegex::Regex=r"x\d+",
+                                      μ0=[0;0;pi/2],
                                       refKey::Symbol=:simulated,
                                       Qd::Matrix{<:Real}=diagm( [0.1;0.1;0.05].^2 ),
                                       postpose_cb::Function=(fg_,latestpose)->()   )
@@ -39,7 +40,6 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
   
   # add first pose if not already exists
   if !( :x0 in ls(dfg) )
-    μ0=[0;0;pi/2]
     generateCanonicalFG_ZeroPose(dfg=dfg, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
     getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
     # reference ppe on :x0
@@ -56,6 +56,8 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
   # TODO dont always start from 0
   tmp = calcHelix_T(0, turns, posesperturn, radius=radius, spine_t=spine_t, xr_t=xr_t, yr_t=yr_t)
 
+  Tμ = SE2(μ0-[0;0;pi/2])
+
   bidx = 1
   eidx = 1
   for tn in 0:(ceil(Int, turns)-1)
@@ -65,18 +67,18 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
     tmp_ = hcat(tmp[2][bidx:eidx,:],tmp[3][bidx:eidx])'
     # adjust for turn progression in x
     # tmp_[1,:] .+= tn*(2radius*(1-runback))
-    oldpose = SE2(tmp_[:,1])
+    oldpose = Tμ*SE2(tmp_[:,1])
     
     # add each new pose (skippin the first element)
     for ps in 2:size(tmp_,2)
       # check exit condition
       numposes-1 <= posecount && break
       # add a new pose
-      newpose = TU.SE2(tmp_[:,ps])
+      newpose = Tμ*TU.SE2(tmp_[:,ps])
       deltaodo = se2vee(oldpose \ newpose)
       factor = Pose2Pose2( MvNormal(deltaodo, Qd) )
       posecount += 1
-      v_n = _addPoseCanonical!(dfg, lastpose, posecount, factor, poseRegex=poseRegex, refKey=refKey, overridePPE=tmp_[:,ps], postpose_cb=postpose_cb)
+      v_n = _addPoseCanonical!(dfg, lastpose, posecount, factor, poseRegex=poseRegex, refKey=refKey, overridePPE=se2vee(newpose), postpose_cb=postpose_cb)
       lastpose = getLabel(v_n)
       oldpose = newpose
     end
