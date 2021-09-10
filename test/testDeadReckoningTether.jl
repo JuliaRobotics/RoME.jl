@@ -70,7 +70,7 @@ tree = buildTreeFromOrdering!(fg,vo)
 
 
 # breaks because internal saveDFG somewhere is failing on bad converter for MutablePose2Pose2Gaussian
-tree2, smt, hist = solveTree!(fg, recordcliqs=ls(fg));
+tree2 = solveTree!(fg, recordcliqs=ls(fg));
 
 @test !isInitialized(fg, :deadreckon_x0)
 

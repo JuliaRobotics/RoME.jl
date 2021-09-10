@@ -107,7 +107,7 @@ initManual!(fg, :x1, pts)
 
 ##
 
-tree, _, = solveGraph!(fg);
+tree = solveGraph!(fg);
 
 ##
 

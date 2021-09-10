@@ -201,7 +201,7 @@ addFactor!(fg, [:x10;], pp10)
 
 fg2 = deepcopy(fg)
 
-tree, mst, hist = solveTree!(fg) # N=N
+tree = solveTree!(fg) # N=N
 
 
 x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
