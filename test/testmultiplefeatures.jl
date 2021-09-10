@@ -233,7 +233,7 @@ ef2pts = approxConv(fg, :x1x2l1l2l3f1, :l2)
 # evalFactor(fg, f2, fg.IDs[:l2])
 
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # ensureAllInitialized!(fg)
 # tree = wipeBuildNewTree!(fg)
 # # spyCliqMat(tree.cliques[1])

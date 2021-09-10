@@ -22,7 +22,7 @@ Pose2Point2(x1::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))) where {T 
 
 # prescribed sampling function
 function getSample(cfo::CalcFactor{<:Pose2Point2}, N::Int=1)
-  return (rand(cfo.factor.Zij), )
+  return rand(cfo.factor.Zij)
 end
 
 # Could also revert to IIF default for Zij

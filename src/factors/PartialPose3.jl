@@ -35,7 +35,7 @@ function getSample(cf::CalcFactor{<:PriorPose3ZRP})
   # Translation part: Z
   T = [0; 0; rand(cf.factor.z)]
 
-  return (ProductRepr(T, R), )
+  return ProductRepr(T, R)
 end
 
 
@@ -90,7 +90,7 @@ Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) = error("Pose3Pose3XY
 Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,6))
 
 function getSample(cf::CalcFactor{<:Pose3Pose3XYYaw})
-  return (sampleTangent(getManifold(cf.factor), cf.factor.Z), )
+  return sampleTangent(getManifold(cf.factor), cf.factor.Z)
 end
 
 getManifold(::Pose3Pose3XYYaw) = SpecialEuclidean(2)

@@ -26,7 +26,7 @@ end
 # perform inference, and remember first runs are slower owing to Julia's just-in-time compiling
 # Can do with graph too!
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 @test 80 < sum(-3.0+10 .< getPoints(getKDE(fg, :x0))[1,:] .< 3.0+10)

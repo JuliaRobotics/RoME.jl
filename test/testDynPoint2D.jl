@@ -31,7 +31,7 @@ ensureAllInitialized!(fg)
 
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree)
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 # X1 = getVal(fg, :x1)
@@ -85,7 +85,7 @@ ensureAllInitialized!(fg)
 
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree)
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 # X1 = getVal(fg, :x1)

@@ -14,7 +14,7 @@ function warmUpSolverJIT(;fg::AbstractDFG=generateCanonicalFG_Hexagonal(),
   fcts = lsf(fg, :x0f1)
   fcts = lsf(fg)
   getSolverParams(fg).drawtree = drawtree
-  tree, smt, hist = solveTree!(fg)
+  tree = solveTree!(fg)
   nothing
 end
 

@@ -23,7 +23,7 @@ function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange})
   smpl = hat(M, e0, [rand(cfo.factor.bearing), rand(cfo.factor.range)])
 
   # return IIF `::Tuple` format
-  return (smpl,)
+  return smpl
 end
 
 

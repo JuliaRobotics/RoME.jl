@@ -49,7 +49,7 @@ eo = [:x1; :x0; :l1]
 ##
 
 
-tree, _, = solveTree!(fg, eliminationOrder=eo);
+tree = solveTree!(fg, eliminationOrder=eo);
 
 ##
 

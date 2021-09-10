@@ -25,7 +25,7 @@ f0 = addFactor!(fg, [:x1], PriorPose3(MvNormal([0.0, 5.0, 9.0, 0.1, 0.0, pi/2], 
 prpz = PriorPose3ZRP( Normal(11.0, 1.0), MvNormal( [-0.1, 0.0], diagm([0.1, 0.1].^2) ))
 f1 = addFactor!(fg, [:x1], prpz)
 
-sf = map(x->x[1], sampleFactor(fg, :x1f2, 100))
+sf = sampleFactor(fg, :x1f2, 100)
 mu = getCoordinates(Pose3, mean(M, sf))
 
 solveTree!(fg)
@@ -143,7 +143,7 @@ M = getManifold(Pose3)
 xi = deepcopy(ϵ)
 xja = deepcopy(ϵ)
 
-res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), Tuple[], (xi, xja))
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xja))
 
 
 @test abs(res[1]-mu2[1]) < 0.3
@@ -158,7 +158,7 @@ xjb = exp(M, ϵ, hat(M, ϵ, Xjb))
 # res = zeros(3)
 # xyy(res, fmd, idx, meas, xi, xjb)
 
-res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), Tuple[], (xi, xjb))
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xjb))
 
 @test 0.0 < norm(res) < 0.3
 
@@ -167,10 +167,9 @@ res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), Tuple[], (xi, xjb))
 addFactor!(tfg, [:x0;:x1], xyy, graphinit=false)
 
 # meas = getSample(xyy,100)
-ccw = IIF._getCCW(tfg, :x0x1f1)
-_meas = sampleFactor(ccw, 100)
+ccw = IIF._getCCW(tfg, :x0x1f1);
+meas = sampleFactor(ccw, 100)
 
-meas = map(x->x[1], _meas)
 
 M = getManifold(xyy)
 
@@ -311,7 +310,7 @@ XYH1_2 = [xyz_rpy[1], xyz_rpy[2], xyz_rpy[6]]
 # test with Pose3Pose3
 testpp3 = Pose3Pose3(MvNormal(Xc, 0.001*diagm(ones(6))))
 
-meas = [(X,)]
+meas = X
 
 res = calcFactorResidualTemporary(testpp3, (Pose3, Pose3), meas, (wTx1, wTx2))
 
@@ -322,7 +321,7 @@ res = calcFactorResidualTemporary(testpp3, (Pose3, Pose3), meas, (wTx1, wTx2))
 testppxyh = Pose3Pose3XYYaw( MvNormal(XYH1_2, 0.001*diagm([1.0;1;1])))
 
 Xc = hat(M2, ϵ2, XYH1_2)
-meas = [(Xc, )]
+meas = Xc
 res = calcFactorResidualTemporary(testppxyh, (Pose3, Pose3), meas, (wTx1, wTx2))
 
 

@@ -46,7 +46,7 @@ end
 function getSample( cfo::CalcFactor{<:LinearRangeBearingElevation})
   y = zeros(3)
   getSample!(y, cfo.factor)
-  return (y,)
+  return y
 end
 
 

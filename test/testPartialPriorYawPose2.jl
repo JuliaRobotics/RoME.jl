@@ -17,7 +17,7 @@ addFactor!(fg, [:x; :l], Pose2Point2(MvNormal([1.,1], [0.1,0.1])))
 
 initAll!(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 M = getManifold(Pose2)
 @test isapprox(M, mean(M, getVal(fg, :x)), ProductRepr([0,0], [1 0; 0 1]), atol=0.05) 

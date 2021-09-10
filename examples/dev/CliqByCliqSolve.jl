@@ -3,7 +3,7 @@
 #
 # hist = getCliqSolveHistory(tree, :x1)
 #
-# tree, smt, hist = solveTree!(fg, skipcliqids=[:x1;:x6;:x4;:x3], recordcliqs=[:x2;:x0])
+# tree = solveTree!(fg, skipcliqids=[:x1;:x6;:x4;:x3], recordcliqs=[:x2;:x0])
 #
 # plotTreeUpMsgs(fg, tree, :x1, levels=1)
 #

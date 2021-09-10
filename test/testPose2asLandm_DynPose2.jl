@@ -73,7 +73,7 @@ global pts = IIF.approxConv(fg, :x0l1f1, :l1, N=N)
 global pts = IIF.approxConv(fg, :x0l1f1, :x0, N=N)
 
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTreeR!(fg, tree, N=N)
 
@@ -106,7 +106,7 @@ addFactor!(fg, [:x1;:l12], DynPose2Pose2(MvNormal(gtpt[:x1l12],Matrix(Diagonal([
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTreeR!(fg, tree, N=N)
 
@@ -133,7 +133,7 @@ addFactor!(fg, [:x2;:l3], DynPose2Pose2(MvNormal(gtpt[:x2l3],Matrix(Diagonal([0.
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
@@ -160,7 +160,7 @@ addFactor!(fg, [:x3;:l13], DynPose2Pose2(MvNormal(gtpt[:x3l13],Matrix(Diagonal([
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
@@ -194,7 +194,7 @@ addFactor!(fg, [:x4;:l14], DynPose2Pose2(MvNormal(gtpt[:x4l14],Matrix(Diagonal([
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
@@ -224,7 +224,7 @@ addFactor!(fg, [:x5;:l14], DynPose2Pose2(MvNormal(gtpt[:x5l14],Matrix(Diagonal([
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
@@ -253,7 +253,7 @@ addFactor!(fg, [:x6;:l4], DynPose2Pose2(MvNormal(gtpt[:x6l4],Matrix(Diagonal([0.
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
