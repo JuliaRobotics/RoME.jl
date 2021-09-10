@@ -34,7 +34,7 @@ addFactor!(fg, [:x4;:l4], br)
 getSolverParams(fg).drawtree = true
 
 # and solve
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 
@@ -90,7 +90,7 @@ addFactor!(fg, [:x4;:l4], br)
 getSolverParams(fg).drawtree = true
 
 # and solve
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 

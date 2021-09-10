@@ -224,7 +224,7 @@ end
 
 
 getSolverParams(fg).drawtree = true
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg)*"\n$argstr")
@@ -287,14 +287,14 @@ end
 getSolverParams(fg).dbg = true
 saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)before"))
 getSolverParams(fg).maxincidence = 1000
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+tree = solveTree!(fg, recordcliqs=ls(fg))
 saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_solve"))
 
 plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg)*"\n$argstr", landmsPPE=:max, contour=true)
 plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_solve.pdf"), 20cm, 17cm)
 
 if pargs["resolve"]
-  tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg))
+  tree = solveTree!(fg, recordcliqs=ls(fg))
   saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_resolve"))
   plfl1 = drawPosesLandms(fg, spscale=1.0,title=getLogPath(fg)*"\n$argstr", landmsPPE=:max, contour=true)
   plfl1 |> PDF(joinLogPath(fg, "plot_x$(POSEOFFSET+10)_resolve.pdf"), 20cm, 17cm)
@@ -308,7 +308,7 @@ end
 
 getSolverParams(fg).dbg = true
 getSolverParams(fg).maxincidence = 1000
-tree, smt, hist = solveTree!(fg, recordcliqs=ls(fg)) #[:l9_0;:x14])
+tree = solveTree!(fg, recordcliqs=ls(fg)) #[:l9_0;:x14])
 saveDFG(fg, joinLogPath(fg, "fg_x$(POSEOFFSET+10)_final"))
 
 

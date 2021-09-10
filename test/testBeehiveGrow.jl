@@ -18,23 +18,23 @@ using RoME
 ##
 
 fg = RoME.generateCanonicalFG_Honeycomb!(7, graphinit=true, useMsgLikelihoods = true)
-tree, _, _ = solveTree!(fg);
+tree = solveTree!(fg);
 
 fg = RoME.generateCanonicalFG_Honeycomb!(14, graphinit=true, dfg=fg)
-tree, _, _ = solveTree!(fg, tree);
+tree = solveTree!(fg, tree);
 
 tree_ = deepcopy(tree); fg_ = deepcopy(fg);
 fg = RoME.generateCanonicalFG_Honeycomb!(21, graphinit=true, dfg=fg)
-tree, _, _ = solveTree!(fg  , tree);
+tree = solveTree!(fg  , tree);
 
 # fg = RoME.generateCanonicalFG_Honeycomb!(28, graphinit=true, dfg=fg)
-# tree, _, _ = solveTree!(fg, tree);
+# tree = solveTree!(fg, tree);
 
 # fg = RoME.generateCanonicalFG_Honeycomb!(35, graphinit=true, dfg=fg)
-# tree, _, _ = solveTree!(fg, tree);
+# tree = solveTree!(fg, tree);
 
 # fg = RoME.generateCanonicalFG_Honeycomb!(42, graphinit=true, dfg=fg)
-# tree, _, _ = solveTree!(fg, tree);
+# tree = solveTree!(fg, tree);
 
 
 ## test numerical results

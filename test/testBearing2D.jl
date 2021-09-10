@@ -135,7 +135,7 @@ addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(-pi+pi/6,0.05)), graphinit=f
 # getSolverParams(fg).showtree = true
 
 
-tree,smt,hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 
 ## Look at results
@@ -205,7 +205,7 @@ addFactor!(fg, [:x1;:l3], Pose2Point2Bearing(Normal(-pi+pi/6,0.05)), graphinit=f
 
 # drawGraph(fg)
 
-tree,smt,hist = solveTree!(fg)
+tree = solveTree!(fg)
 
 points = getPoints(getBelief(fg, :x1))
 mean(SpecialEuclidean(2), points)

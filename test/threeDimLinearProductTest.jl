@@ -212,7 +212,7 @@ Rc = mu.parts[2]
 end
 
 @testset "Construct Bayes tree and perform inference..." begin
-  tree, smt, hist = solveTree!(fg)
+  tree = solveTree!(fg)
   mu = mean(M, getVal(fg,:x1))
   T = mu.parts[1]
   @test isapprox(T, [0,0,0], atol=0.5)

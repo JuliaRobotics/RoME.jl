@@ -16,7 +16,7 @@ using Statistics
 
     ensureAllInitialized!(fg)
 
-    tree, smt, hist = solveTree!(fg)
+    tree = solveTree!(fg)
 
     M = getManifold(Pose2)
     @test isapprox(M, mean(M, getVal(fg, :x1)), ProductRepr([0,0], [1 0; 0 1]), atol=0.05) 

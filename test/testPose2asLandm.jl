@@ -56,7 +56,7 @@ addFactor!(fg, [:x0;:l1], Pose2Pose2(MvNormal(gtpt[:x0l1],Matrix(Diagonal([0.1;0
 addVariable!(fg, :l11, Pose2)
 addFactor!(fg, [:x0;:l11], Pose2Pose2(MvNormal(gtpt[:x0l11],Matrix(Diagonal([0.1;0.1;0.01].^2)))) )
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
@@ -81,7 +81,7 @@ addFactor!(fg, [:x1;:l12], Pose2Pose2(MvNormal(gtpt[:x1l12],Matrix(Diagonal([0.1
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
@@ -107,7 +107,7 @@ addFactor!(fg, [:x2;:l3], Pose2Pose2(MvNormal(gtpt[:x2l3], Matrix(Diagonal([0.1;
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
@@ -133,7 +133,7 @@ addFactor!(fg, [:x3;:l13], Pose2Pose2(MvNormal(gtpt[:x3l13], Matrix(Diagonal([0.
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
@@ -166,7 +166,7 @@ addFactor!(fg, [:x4;:l14], Pose2Pose2(MvNormal(gtpt[:x4l14], Matrix(Diagonal([0.
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 
@@ -195,7 +195,7 @@ addFactor!(fg, [:x5;:l14], Pose2Pose2(MvNormal(gtpt[:x5l14], Matrix(Diagonal([0.
 
 # writeGraphPdf(fg)
 
-tree, smt, hist = solveTree!(fg)
+tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)
 # inferOverTree!(fg, tree, N=N)
 

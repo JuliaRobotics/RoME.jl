@@ -24,7 +24,7 @@ end
 ensureAllInitialized!(fg)
 getPPESuggested.(fg, sortDFG(ls(fg)))
 
-# tree, smt, hist = solveTree!(fg)
+# tree = solveTree!(fg)
 
 
 # end
@@ -53,7 +53,7 @@ end
 ensureAllInitialized!(fg)
 getPPESuggested.(fg, sortDFG(ls(fg)))
 
-# tree, smt, hist = solveTree!(fg)
+# tree = solveTree!(fg)
 
 
 # end
