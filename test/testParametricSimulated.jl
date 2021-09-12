@@ -5,8 +5,8 @@
 
 using Test
 using RoME
-
-
+using DistributedFactorGraphs
+using Manifolds: hat, exp
 ##
 
 @testset "ensure solveParametricBinary is working" begin
@@ -31,9 +31,19 @@ pp2 = Pose2Pose2( MvNormal([0;0;-pi+0.01], diagm(0.03*ones(3)) ))
 
 ##
 
-@test isapprox( abs.(calcFactorResidualTemporary(pp2, (Pose2, Pose2), [([0;0;-pi],)], (zeros(3),  zeros(3)))), [0;0;pi] )
-@test isapprox( calcFactorResidualTemporary(pp2, (Pose2, Pose2), (zeros(3), [([0;0;-pi],)], [0;0;-pi])), [0;0;0], atol=1e-14 )
-@test isapprox( calcFactorResidualTemporary(pp2, (Pose2, Pose2), (zeros(3), [([0;0;-pi],)], [0;0; pi])), [0;0;0], atol=1e-14 )
+M = getManifold(Pose2())
+ϵ = getPointIdentity(Pose2())
+
+X = hat(M, ϵ, [0;0;-pi]) #measurement
+p = ϵ # variable from
+q = ϵ  # variable to
+@test isapprox( abs.(calcFactorResidualTemporary(pp2, (Pose2, Pose2), X, (p,  q))), [0;0;pi] )
+
+q = exp(M, ϵ, hat(M, ϵ, [0;0;-pi])) # variable to
+@test isapprox( calcFactorResidualTemporary(pp2, (Pose2, Pose2), X, (p,  q)), [0;0;0], atol=1e-14 )
+
+q = exp(M, ϵ, hat(M, ϵ, [0;0;pi])) # variable to
+@test isapprox( calcFactorResidualTemporary(pp2, (Pose2, Pose2), X, (p,  q)), [0;0;0], atol=1e-14 )
 
 
 # wXjhat = SE2(zeros(3))*SE2([0;0;-pi])
@@ -92,10 +102,17 @@ addFactor!(fg, [:x2;:x3], pp, graphinit=false)
 ##
 
 # nlsolve failing ?
-meas = ([10.0, 0.0, 1.0471975511965976],)
+meas = [10.0, 0.0, 1.0471975511965976]
 X1 = [15.000000000016204, 8.660254037814505, 2.0943951023931953]
 # X2 = [0.0004014798555661571, 0.0006953833518543132, 1.206557444798529e-10]
 X2 = [10.00004891350537; 17.320479835550103; 4.498439149584132e-6]
+
+M = getManifold(Pose2())
+ϵ = getPointIdentity(Pose2())
+
+X = hat(M, ϵ, meas) #measurement
+p = exp(M, ϵ, hat(M, ϵ, X1)) # variable from
+q = exp(M, ϵ, hat(M, ϵ, X2)) # variable to
 
 ## NLsolve not moving the cost value and "terminating too early"
 # res = [3.469264352442895e-5, -2.002964655985515e-5, -3.1415887889926792]
@@ -107,20 +124,22 @@ X2 = [10.00004891350537; 17.320479835550103; 4.498439149584132e-6]
 
 # @test isapprox( 
 
-resVal = testFactorResidualBinary( pp, Pose2, Pose2, X1, X2, meas )
+resVal = calcFactorResidualTemporary( pp, (Pose2, Pose2), X, (p, q))
 
 @test isapprox( resVal[1:2], [0;0], atol=1e-4)
 @test isapprox( abs(resVal[3]), π, atol=1e-4)
 
 # test positive angle
 X2 = [10.00004891350537; 17.320479835550103; π]
-resVal = testFactorResidualBinary( pp, Pose2, Pose2, X1, X2, meas )
+q = exp(M, ϵ, hat(M, ϵ, X2)) # variable to
+resVal = calcFactorResidualTemporary( pp, (Pose2, Pose2), X, (p, q))
 @test isapprox( resVal[1:2], [0;0], atol=1e-4)
 @test isapprox( abs(resVal[3]), 0, atol=1e-4)
 
 # test negative angle
 X2 = [10.00004891350537; 17.320479835550103; -π]
-resVal = testFactorResidualBinary( pp, Pose2, Pose2, X1, X2, meas )
+q = exp(M, ϵ, hat(M, ϵ, X2)) # variable to
+resVal = calcFactorResidualTemporary( pp, (Pose2, Pose2), X, (p, q))
 @test isapprox( resVal[1:2], [0;0], atol=1e-4)
 @test isapprox( abs(resVal[3]), 0, atol=1e-4)
 

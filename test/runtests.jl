@@ -56,6 +56,7 @@ testfiles = [
   "testInflation380.jl";
   "testPoint2Point2.jl";
   # "testParametric.jl";
+  "testParametricSimulated.jl";
   "testTreeInitCommonMsg_IIF913.jl";
   "threeDimLinearProductTest.jl";
   "testPose3Pose3NH.jl";
