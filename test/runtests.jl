@@ -28,7 +28,7 @@ testfiles = [
   "testTreeInitCommonMsg_IIF913.jl";
   "threeDimLinearProductTest.jl";
   "testPose3Pose3NH.jl";
-  "testBeehive2D_CliqByCliq.jl";      # special case debugging
+  "testHexagonal2D_CliqByCliq.jl";      # special case debugging
   "testhigherdimroots.jl";
   "testDidsonFunctions.jl";
   "testPoint2Point2Init.jl";
