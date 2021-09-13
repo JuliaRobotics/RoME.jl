@@ -69,7 +69,7 @@ refVal = accumulateFactorMeans(fg, [:x0f1; :x0x1f1])
 
 isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, :x0, r"x\\d+", Pose2, pp2)
 
-@test isapprox(simPPE.suggested[1:2], [0;0], atol=1e-4)
+@test isapprox(simPPE.suggested[1:2], [0;0], atol=1e-2)
 @test 0.9pi < abs(simPPE.suggested[3])
 
 
