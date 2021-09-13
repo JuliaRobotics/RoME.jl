@@ -24,6 +24,7 @@ testfiles = [
   # "testParametric.jl";
   # "testG2oParser.jl"; 
   "testParametricSimulated.jl";
+  "testBasicPose2Conv.jl";
   "testTreeInitCommonMsg_IIF913.jl";
   "threeDimLinearProductTest.jl";
   "testPose3Pose3NH.jl";
