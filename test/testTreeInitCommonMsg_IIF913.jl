@@ -3,7 +3,11 @@ using Test
 using Statistics
 using RoME
 
+##
+
 @testset "Testing tree init prior usage" begin
+
+##
 
 fg = generateCanonicalFG_Circle(4;graphinit=true)
 # deleteVariable!.(fg, [:x3, :x4, :l1])
@@ -16,10 +20,18 @@ fg.solverParams.useMsgLikelihoods = true
 
 # now move the graph prior somewhere else (ie all init is wrong)
 deleteFactor!(fg, :x0f1)
-prpo = PriorPose2(MvNormal([5.,0.,0.0], 0.01*Matrix{Float64}(LinearAlgebra.I,3,3)))
+prpo = PriorPose2(MvNormal([5.,0.,0.0], 0.01*diagm([1;1;1.])))
 addFactor!(fg, [:x0], prpo)
 
-solveTree!(fg);
+##
+
+smtasks = Task[]
+tree = solveTree!(fg, smtasks=smtasks); #, recordcliqs=ls(fg));
+
+# hists = fetchCliqHistoryAll!(smtasks)
+# printCSMHistoryLogical(hists)
+
+##
 
 X4 = getPoints(fg, :x4)
 μX4 =  mean(getManifold(Pose2), X4)
@@ -28,5 +40,5 @@ X4 = getPoints(fg, :x4)
 @test 2.0 < μX4.parts[1][1]
 @test -1.5 < μX4.parts[1][2] < 1.5
 
-
+##
 end

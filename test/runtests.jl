@@ -50,12 +50,12 @@ end
 
 @error("must restore testG2oParser.jl")
 @error("must restore testParametric.jl")
-# "testG2oParser.jl";  ]
 
 testfiles = [
   "testInflation380.jl";
   "testPoint2Point2.jl";
   # "testParametric.jl";
+  # "testG2oParser.jl"; 
   "testParametricSimulated.jl";
   "testTreeInitCommonMsg_IIF913.jl";
   "threeDimLinearProductTest.jl";
@@ -93,7 +93,6 @@ testfiles = [
 # "testPoint2Point2WorldBearing.jl";  # deprecate
 
 
-test_results = @testset BrokenTestSet "Broken Testset for RoME" begin
 for testf in testfiles
   println("[TEST] $testf")
   include(testf)
