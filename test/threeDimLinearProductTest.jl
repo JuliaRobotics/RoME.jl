@@ -92,10 +92,10 @@ end
 
 ##
 
-@testset "Ensure vertex initialized properly" begin
+@testset "Ensure variable is properly initialized" begin
   M = getManifold(Pose3)
   # start with initialization
-  ensureAllInitialized!(fg)
+  initAll!(fg)
   @test isInitialized(fg, :x1)
   @show muX1 = Statistics.mean(M, getVal(fg,:x1))
   
@@ -103,7 +103,7 @@ end
   @test sum(map(Int,abs.(T) .< 0.5)) == 3
   
   Rc = muX1.parts[2]
-  @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.05)
+  @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
   coX1 = getCoordinates.(Pose3, getVal(fg,:x1))
   @show stdX1 = Statistics.std(coX1)
@@ -189,7 +189,7 @@ end
 # Noticed a DomainError on convolutions here after mutlithreading upgrade.  Previously used fill(PP3REUSE, Threads.nthreads())
 @testset "Testing Pose3Pose3 evaluation..." begin
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 @test isInitialized(fg, :x2)
 global X1pts = approxConv(fg, :x1x2f1, :x1)
 # X1pts = evalFactor(fg, fg.g.vertices[4], 1)
