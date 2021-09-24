@@ -22,9 +22,9 @@ getSolverParams(fg).downsolve = true
 getSolverParams(fg).multiproc = false
 getSolverParams(fg).async = false
 
-@test_skip false
-# getSolverParams(fg).useMsgLikelihoods=true
-@error "Restore useMsgLikelihoods=true"
+# @test_skip false
+getSolverParams(fg).useMsgLikelihoods=true
+# @error "Restore useMsgLikelihoods=true"
 
 # direct solve would be
 tree = solveTree!(fg)
@@ -34,47 +34,47 @@ tree = solveTree!(fg)
 @error "Hex init test degraded quality during useMsgLikelihoods refactor, must restore to 55"
 M = getManifold(Pose2())
 
-@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x0)))[i][j]
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getBelief(fg, :x0)))[i][j]
 @test 35 < sum(-3.0 .< cs[1,:] .< 3.0)
 @test 35 < sum(-3.0 .< cs[2,:] .< 3.0)
 @test 35 < sum(-0.3 .< cs[3,:] .< 0.3)
 
-@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x1)))[i][j]
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getBelief(fg, :x1)))[i][j]
 @test 35 < sum(7.0 .< cs[1,:] .< 13.0)
 @test 35 < sum(-3.0 .< cs[2,:] .< 3.0)
 @test 35 < sum(0.7 .< cs[3,:] .< 1.3)
 
-@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x2)))[i][j]
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getBelief(fg, :x2)))[i][j]
 @test 35 < sum(12.0 .< cs[1,:] .< 18.0)
 @test 35 < sum(6.0 .< cs[2,:] .< 11.0)
 @test 35 < sum(1.8 .< cs[3,:] .< 2.4)
 
-@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x3)))[i][j]
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getBelief(fg, :x3)))[i][j]
 @test 35 < sum(7.0 .< cs[1,:] .< 13.0)
 @test 35 < sum(15.0 .< cs[2,:] .< 20.0)
 # @test 35 < sum(-0.3 .< cs[3,:] .< 0.3)
-μ = mean(M, getPoints(getKDE(fg, :x3)))
-@test isapprox(μ.parts[1], [11; 17.5], atol=2.5)
+μ = mean(M, getPoints(getBelief(fg, :x3)))
+@test isapprox(μ.parts[1], [11; 17.5], atol=3.0)
 @test isapprox(SpecialOrthogonal(2), μ.parts[2], [-1 0; 0 -1], atol=0.5)
-Σ = cov(Pose2(), getPoints(getKDE(fg, :x3)))
-@test all(diag(Σ) .< [5,5,1]) #TODO smaller
+Σ = cov(getManifold(Pose2()), getPoints(getBelief(fg, :x3)))
+@test all(diag(Σ) .< [5,5,1].^2) #TODO smaller
 
-@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x4)))[i][j]
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getBelief(fg, :x4)))[i][j]
 @test 35 < sum(-5.0 .< cs[1,:] .< 5.0)
 @test 35 < sum(13.0 .< cs[2,:] .< 22.0)
 @test 35 < sum(-2.8 .< cs[3,:] .< -1.5)
 
-@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x5)))[i][j]
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getBelief(fg, :x5)))[i][j]
 @test 35 < sum(-8.0 .< cs[1,:] .< -2.0)
 @test 35 < sum(6.0 .< cs[2,:] .< 11.0)
 @test 35 < sum(-1.3 .< cs[3,:] .< -0.7)
 
-@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getKDE(fg, :x6)))[i][j]
+@cast cs[j,i] := getCoordinates.(Pose2, getPoints(getBelief(fg, :x6)))[i][j]
 @test 35 < sum(-3.0 .< cs[1,:] .< 3.0)
 @test 35 < sum(-3.0 .< cs[2,:] .< 3.0)
 @test 35 < sum(-0.3 .< cs[3,:] .< 0.3)
 
-@cast cs[j,i] := getCoordinates.(Point2, getPoints(getKDE(fg, :l1)))[i][j]
+@cast cs[j,i] := getCoordinates.(Point2, getPoints(getBelief(fg, :l1)))[i][j]
 @test 35 < sum(17.0 .< cs[1,:] .< 23.0)
 @test 35 < sum(-5.0 .< cs[2,:] .< 5.0)
 

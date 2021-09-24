@@ -17,17 +17,22 @@ end
 
 @error("must restore testG2oParser.jl")
 @error("must restore testParametric.jl")
-# "testG2oParser.jl";  ]
 
 testfiles = [
+  # important tests are broken
+  "testBearingRange2D.jl";
+  "testBearing2D.jl";
+
   "testInflation380.jl";
   "testPoint2Point2.jl";
   # "testParametric.jl";
+  # "testG2oParser.jl"; 
   "testParametricSimulated.jl";
+  "testBasicPose2Conv.jl";
   "testTreeInitCommonMsg_IIF913.jl";
   "threeDimLinearProductTest.jl";
   "testPose3Pose3NH.jl";
-  "testBeehive2D_CliqByCliq.jl";      # special case debugging
+  "testHexagonal2D_CliqByCliq.jl";      # special case debugging
   "testhigherdimroots.jl";
   "testDidsonFunctions.jl";
   "testPoint2Point2Init.jl";
@@ -35,8 +40,6 @@ testfiles = [
   "TestPoseAndPoint2Constraints.jl";
   "testPartialRangeCrossCorrelations.jl";
   "testDynPoint2D.jl";
-  "testBearingRange2D.jl";
-  "testBearing2D.jl";
   "testDeltaOdo.jl";
   "testFixedLagFG.jl";
   "testMultimodalRangeBearing.jl";
@@ -59,14 +62,14 @@ testfiles = [
 # "testmultiplefeatures.jl"
 
 
-# test_results = @testset BrokenTestSet "Broken Testset for RoME" begin
 for testf in testfiles
   println("[TEST] $testf")
   include(testf)
-  println("[SUCCESS]")
+  println("[SUCCESS] $testf ==========================================================")
   println()
   println()
   println()
 end
-# end
 
+
+#

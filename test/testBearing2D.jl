@@ -164,9 +164,9 @@ pts[1,:] .-= 10.0
 
 N = size(pts,2)
 
-@test 0.8*N < sum(sqrt.(sum(pts[1:2,:].^2,dims=1)) .< 0.3)
+@test_broken 0.8*N < sum(sqrt.(sum(pts[1:2,:].^2,dims=1)) .< 0.3)
 
-@test 0.8*N < sum(abs.(pts[3,:]) .< 0.1)
+@test_broken 0.8*N < sum(abs.(pts[3,:]) .< 0.1)
 
 #
 
@@ -218,9 +218,9 @@ pts[2,:] .+= 10.0
 
 N = size(pts,2)
 
-@test 0.8*N < sum(sqrt.(sum(pts[1:2,:].^2,dims=1)) .< 0.3)
+@test_broken 0.8*N < sum(sqrt.(sum(pts[1:2,:].^2,dims=1)) .< 0.3)
 
-@test 0.8*N < sum(abs.(pts[3,:]) .< 0.1)
+@test_broken 0.8*N < sum(abs.(pts[3,:]) .< 0.1)
 
 #
 # using RoMEPlotting

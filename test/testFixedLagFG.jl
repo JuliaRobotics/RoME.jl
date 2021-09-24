@@ -19,10 +19,10 @@ function driveSomeMore!(fg::AbstractDFG, idx)
 end
 
 
-
+##
 
 @testset "test basic fixed lag operations..." begin
-
+##
 
 # start with an empty factor graph object
 fg = initfg()
@@ -111,10 +111,16 @@ tree = solveTree!(fg, tree, verbose=true); # , recordcliqs=ls(fg));
 # X6 should be different
 X5cmp = deepcopy(getVal(fg, :x5))
 X7cmp = deepcopy(getVal(fg, :x7))
-@test X5 == X5cmp #Frozen
-@test X7 != X7cmp #Recalculated
+for i in 1:length(X5)
+  @test isapprox(X5[i].parts[1], X5cmp[i].parts[1])  #Frozen
+  @test isapprox(X5[i].parts[2], X5cmp[i].parts[2])  #Frozen
+end
+for i in 1:length(X7)
+  @test !isapprox(X7[i].parts[1], X7cmp[i].parts[1]) #Recalculated
+  @test !isapprox(X7[i].parts[2], X7cmp[i].parts[2]) #Recalculated
+end
 
-
+##
 end
 
 
