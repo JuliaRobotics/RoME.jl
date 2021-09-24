@@ -80,14 +80,14 @@ end
 
 ##
 
-# using RoMEPlotting
+# using Cairo, RoMEPlotting
 # Gadfly.set_default_plot_size(35cm,25cm)
 
 ##
 
 
-# plotSLAM2D(fg)
+# plotSLAM2D(fg, drawPoints=false)
 
-# plotKDE(fg, :l1, levels=3)
+# plotKDE(fg, :l1, levels=10)
 
 ##
