@@ -221,7 +221,7 @@ end
 
   mu = mean(M, getVal(fg,:x2))
   T = mu.parts[1]
-  @test isapprox(T, [10,0,0], atol=0.5)
+  @test isapprox(T, [10,0,0], atol=0.75)
   Rc = mu.parts[2]
   @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 end

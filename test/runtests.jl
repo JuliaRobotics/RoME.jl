@@ -19,6 +19,10 @@ end
 @error("must restore testParametric.jl")
 
 testfiles = [
+  # important tests are broken
+  "testBearingRange2D.jl";
+  "testBearing2D.jl";
+
   "testInflation380.jl";
   "testPoint2Point2.jl";
   # "testParametric.jl";
@@ -36,8 +40,6 @@ testfiles = [
   "TestPoseAndPoint2Constraints.jl";
   "testPartialRangeCrossCorrelations.jl";
   "testDynPoint2D.jl";
-  "testBearingRange2D.jl";
-  "testBearing2D.jl";
   "testDeltaOdo.jl";
   "testFixedLagFG.jl";
   "testMultimodalRangeBearing.jl";
@@ -63,7 +65,7 @@ testfiles = [
 for testf in testfiles
   println("[TEST] $testf")
   include(testf)
-  println("[SUCCESS]")
+  println("[SUCCESS] $testf ==========================================================")
   println()
   println()
   println()

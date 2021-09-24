@@ -1,6 +1,7 @@
 
 using RoME
 using Test
+using TensorCast
 
 ##
 
@@ -11,8 +12,11 @@ using Test
 N=150
 fg = initfg()
 getSolverParams(fg).graphinit=false
+getSolverParams(fg).treeinit=false
 getSolverParams(fg).useMsgLikelihoods = true
+getSolverParams(fg).gibbsIters = 5
 # getSolverParams(fg).inflation = 10.0
+
 
 addVariable!(fg, :x0, Point2, N=N)
 addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], [1.0 0; 0 1])), graphinit=false)
@@ -49,6 +53,7 @@ eo = [:x1; :x0; :l1]
 ##
 
 
+tree = solveTree!(fg, eliminationOrder=eo);
 tree = solveTree!(fg, eliminationOrder=eo);
 
 ##
