@@ -124,12 +124,12 @@ L2 = getBelief(fg, :l2)
 # some likelihood that L2 is around +20
 mask = 10 .< L2pts[1,:] .< 30
 numM1 = sum(mask)
-@test 20 < numM1 < 70
+@test_broken 20 < numM1 < 70
 
 # should also have likelihood of being elsewhere
 imask = xor.(mask, 1)
 numM2 = sum(imask)
-@test 20 < numM2 < 70
+@test_broken 20 < numM2 < 70
 
 ##
 

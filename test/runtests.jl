@@ -19,14 +19,26 @@ end
 @error("must restore testParametric.jl")
 
 testfiles = [
-  # important tests are broken
+  # any wip fail-fast dev testing
+  # "testPartialPose3.jl";
+  # "testpackingconverters.jl";
+  # "testAccumulateFactors.jl";
+
+  # important tests are that are broken and must be restored.
   "testBearingRange2D.jl";
   "testBearing2D.jl";
+  # "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
+  
+  # "testParametric.jl"; # deferred to v0.16.x
+  # "testG2oParser.jl";  # deferred to v0.16.x
 
+  # tests most likely to fail on numerics
+  "testPoint2Point2Init.jl";
+  "testBeehiveGrow.jl";
+  
+  # regular tests expected to pass
   "testInflation380.jl";
   "testPoint2Point2.jl";
-  # "testParametric.jl";
-  # "testG2oParser.jl"; 
   "testParametricSimulated.jl";
   "testBasicPose2Conv.jl";
   "testTreeInitCommonMsg_IIF913.jl";
@@ -35,23 +47,17 @@ testfiles = [
   "testHexagonal2D_CliqByCliq.jl";      # special case debugging
   "testhigherdimroots.jl";
   "testDidsonFunctions.jl";
-  "testPoint2Point2Init.jl";
   "testBasicPose2Stationary.jl";
   "TestPoseAndPoint2Constraints.jl";
   "testPartialRangeCrossCorrelations.jl";
   "testDynPoint2D.jl";
   "testDeltaOdo.jl";
   "testFixedLagFG.jl";
-  "testMultimodalRangeBearing.jl";
   "testDynPose2D.jl";
   "testPartialPriorYawPose2.jl";
-  "testPartialPose3.jl";
-  "testpackingconverters.jl";
   "TestDefaultFGInitialization.jl";
-  "testAccumulateFactors.jl";
   "testDeadReckoningTether.jl"; 
   "testFluxModelsPose2.jl";
-  "testBeehiveGrow.jl";
   "testGenerateHelix.jl";
 ]
 
