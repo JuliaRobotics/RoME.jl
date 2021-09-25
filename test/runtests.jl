@@ -19,14 +19,21 @@ end
 @error("must restore testParametric.jl")
 
 testfiles = [
-  # important tests are broken
+  # any wip fail-fast dev testing
+
+  # tests most likely to fail on numerics
+  "testPoint2Point2Init.jl";
+  
+  # important tests are that are broken and must be restored.
   "testBearingRange2D.jl";
   "testBearing2D.jl";
-
-  "testInflation380.jl";
-  "testPoint2Point2.jl";
+  "testMultimodalRangeBearing.jl";
   # "testParametric.jl";
   # "testG2oParser.jl"; 
+
+  # regular tests expected to pass
+  "testInflation380.jl";
+  "testPoint2Point2.jl";
   "testParametricSimulated.jl";
   "testBasicPose2Conv.jl";
   "testTreeInitCommonMsg_IIF913.jl";
@@ -35,14 +42,12 @@ testfiles = [
   "testHexagonal2D_CliqByCliq.jl";      # special case debugging
   "testhigherdimroots.jl";
   "testDidsonFunctions.jl";
-  "testPoint2Point2Init.jl";
   "testBasicPose2Stationary.jl";
   "TestPoseAndPoint2Constraints.jl";
   "testPartialRangeCrossCorrelations.jl";
   "testDynPoint2D.jl";
   "testDeltaOdo.jl";
   "testFixedLagFG.jl";
-  "testMultimodalRangeBearing.jl";
   "testDynPose2D.jl";
   "testPartialPriorYawPose2.jl";
   "testPartialPose3.jl";
