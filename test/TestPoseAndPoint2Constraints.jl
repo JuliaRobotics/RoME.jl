@@ -55,7 +55,9 @@ pts = getVal(fg, :x0)
 
 
 pts = getVal(fg, :x1)
-@test isapprox(M, mean(M, pts), ProductRepr([50,0], [0 -1; 1 0]), atol=0.5)
+me_ = mean(M, pts)
+@test isapprox(M.manifold[1], me_.parts[1], [50,0], atol=0.5)
+@test isapprox(M.manifold[2], me_.parts[2], [0 -1; 1 0], atol=0.25)
 
 # check that yaw is working
 v3 = addVariable!(fg, :x2, Pose2, N=N)
@@ -67,7 +69,9 @@ solveTree!(fg)
 
 # test post evaluation values are correct
 pts = getVal(fg, :x0)
-@test isapprox(M, mean(M, pts), ProductRepr([0,0], [1 0; 0 1]), atol=0.5)
+me_ = mean(M, pts)
+@test isapprox(M.manifold[1], me_.parts[1], [0,0], atol=0.5)
+@test isapprox(M.manifold[2], me_.parts[2], [1 0; 0 1], atol=0.25)
 
 pts = getVal(fg, :x1)
 mv = mean(M, pts)
