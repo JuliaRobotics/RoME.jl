@@ -24,17 +24,18 @@ testfiles = [
   # "testpackingconverters.jl";
   # "testAccumulateFactors.jl";
 
-  # tests most likely to fail on numerics
-  "testPoint2Point2Init.jl";
-  "testBeehiveGrow.jl";
-  # "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
-  
   # important tests are that are broken and must be restored.
   "testBearingRange2D.jl";
   "testBearing2D.jl";
-  # "testParametric.jl";
-  # "testG2oParser.jl"; 
+  # "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
+  
+  # "testParametric.jl"; # deferred to v0.16.x
+  # "testG2oParser.jl";  # deferred to v0.16.x
 
+  # tests most likely to fail on numerics
+  "testPoint2Point2Init.jl";
+  "testBeehiveGrow.jl";
+  
   # regular tests expected to pass
   "testInflation380.jl";
   "testPoint2Point2.jl";
