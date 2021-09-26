@@ -20,10 +20,9 @@ end
 
 testfiles = [
   # any wip fail-fast dev testing
-  # "testPartialPose3.jl";
-  # "testpackingconverters.jl";
   # "testAccumulateFactors.jl";
-
+  # "testPartialPose3.jl";
+  
   # important tests are that are broken and must be restored.
   "testBearingRange2D.jl";
   "testBearing2D.jl";
@@ -31,12 +30,13 @@ testfiles = [
   
   # "testParametric.jl"; # deferred to v0.16.x
   # "testG2oParser.jl";  # deferred to v0.16.x
-
+  
   # tests most likely to fail on numerics
   "testPoint2Point2Init.jl";
-  "testBeehiveGrow.jl";
+  "testBeehiveGrow.jl"; # also starts multiprocess
   
   # regular tests expected to pass
+  "testpackingconverters.jl";
   "testInflation380.jl";
   "testPoint2Point2.jl";
   "testParametricSimulated.jl";

@@ -73,7 +73,8 @@ upv1data = unpackVariableNodeData(fg, packedv1data)
 # packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
 # upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
-@test compareAll(DFG.getSolverData(v1), upv1data, skip=[:variableType;])
+@test compareAll(DFG.getSolverData(v1), upv1data, skip=[:variableType;:val])
+@test all( isapprox.(DFG.getSolverData(v1).val, upv1data.val) )
 @test compareFields(DFG.getSolverData(v1).variableType, upv1data.variableType)
 
 ##
@@ -95,10 +96,12 @@ global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonCo
 # TODO -- fix ambibuity in compare function
 @test DFG.compare(DFG.getSolverData(f2), unpackeddata)
 
+##
 end
 
 
 @testset "test conversions of Pose2Point2BearingRange" begin
+##
 
 # and a second pose
 global v3 = addVariable!(fg, :l1, Point2, N=N)
@@ -124,7 +127,9 @@ global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonCo
 @test ppbr.range.μ == unpackeddata.fnc.usrfnc!.range.μ
 @test ppbr.range.σ == unpackeddata.fnc.usrfnc!.range.σ
 
+##
 end
+##
 
 # parameters
 global N = 300
@@ -157,8 +162,11 @@ global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonCo
 
 # TODO -- fix ambibuity in compare function
 @test compareAll(DFG.getSolverData(f1), unpackeddata, skip=[:fnc;])
-@test compareAll(DFG.getSolverData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!])
-@test compareAll(DFG.getSolverData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;:Z])
+@test compareAll(DFG.getSolverData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!;:vartypes])
+@test compareAll(DFG.getSolverData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;:Z;:p])
+
+@test isapprox( DFG.getSolverData(f1).fnc.usrfnc!.p, unpackeddata.fnc.usrfnc!.p)
+
 @test compareAll(DFG.getSolverData(f1).fnc.usrfnc!.Z, unpackeddata.fnc.usrfnc!.Z, skip=[:Σ;])
 @test compareAll(DFG.getSolverData(f1).fnc.usrfnc!.Z.Σ, unpackeddata.fnc.usrfnc!.Z.Σ)
 
@@ -176,7 +184,8 @@ upv1data = unpackVariableNodeData(fg, packedv1data)
 # global packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
 # global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
-@test compareAll(DFG.getSolverData(v1), upv1data, skip=[:variableType;])
+@test compareAll(DFG.getSolverData(v1), upv1data, skip=[:variableType;:val])
+@test all( isapprox.(DFG.getSolverData(v1).val, upv1data.val ) )
 @test compareAll(DFG.getSolverData(v1).variableType, upv1data.variableType)
 
 ##
