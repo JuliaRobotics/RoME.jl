@@ -185,26 +185,33 @@ end
 ##
 
 # get existing and predict new
-_X2pts = getCoordinates.(Pose3, getBelief(fg, :x2) |> getPoints)
-@cast X2pts[j,i] :=  _X2pts[i][j]
+_X2pts_ = getBelief(fg, :x2) |> getPoints
+# _X2pts = getCoordinates.(Pose3, _X2_)
+# @cast X2pts[j,i] :=  _X2pts[i][j]
 
-_pts = getCoordinates.(Pose3, approxConv(fg, :x1x2f1, :x2, N=N))
-@cast pts[j,i] :=  _pts[i][j]
+_X2prd_ = approxConv(fg, :x1x2f1, :x2, N=N)
+# _pts = getCoordinates.(Pose3, _X2prd_)
+# @cast pts[j,i] :=  _pts[i][j]
 
-pts = collect(pts)
+# pts = collect(pts)
 
 # find which dimensions are and and are not updated by XYYaw partial
 newdims = collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
 olddims = setdiff(collect(1:6), newdims)
 
 # check the number of points are correct
-@test size(pts, 1) == 6
-@test size(pts, 2) == N
+# @test size(pts, 1) == 6
+@test length(_X2pts_) == N
+
+## DEV
+@show convert(TU.Euler, SO3(_X2prd_[1].parts[2])).R
+@show convert(TU.Euler, SO3(_X2pts_[1].parts[2])).R
 
 # ensure the unchanged dimensions actually remain unchanged
 @show X2pts[olddims,1];
 @show pts[olddims,1];
-@test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10
+# SEE ABOVE Yaw Pitch Roll work
+@test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10  # TEST BROKEN
 
 for i in 1:N
     pts[6,i] = wrapRad(pts[6,i])
