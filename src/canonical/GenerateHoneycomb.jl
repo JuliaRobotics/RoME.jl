@@ -63,19 +63,24 @@ function _addLandmarkBeehive!(fg,
                               solvable::Int=1,
                               graphinit::Bool=true,
                               landmarkRegex::Regex=r"l\d+",
-                              srcNumber::Integer = match(r"\d+", string(lastPose)).match |> x->parse(Int,x) )
+                              srcNumber::Integer = match(r"\d+", string(lastPose)).match |> x->parse(Int,x),
+                              atol::Real=1,
+                              _doHoneycomb::Bool=false )
   #
   newFactor = RoME.Pose2Point2BearingRange(Normal(0,0.03), Normal(20,0.5))
-  isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, lastPose, landmarkRegex, RoME.Point2, newFactor)
+  isAlready, simPPE, genLabel = IIF._checkVariableByReference(fg, lastPose, landmarkRegex, RoME.Point2, newFactor; atol=atol)
 
-  # force isAlready until fixed _checkVariableByReference parametric solution at -pi Optim issue
-  global _honeycombRecipe
-  isAlready = false
-  genLabel = Symbol(:l, srcNumber)
-  if haskey(_honeycombRecipe, genLabel) 
-    isAlready = true
-    genLabel = _honeycombRecipe[genLabel]
-    simPPE = getPPE(fg, genLabel, refKey)
+  # FIXME, oddball option that should be refactored (breaks Beehive usecase if true)
+  if _doHoneycomb
+    # force isAlready until fixed _checkVariableByReference parametric solution at -pi Optim issue
+    global _honeycombRecipe
+    isAlready = false
+    genLabel = Symbol(:l, srcNumber)
+    if haskey(_honeycombRecipe, genLabel) 
+      isAlready = true
+      genLabel = _honeycombRecipe[genLabel]
+      simPPE = getPPE(fg, genLabel, refKey)
+    end
   end
 
   # maybe add new variable
@@ -104,6 +109,8 @@ function _driveHex!(fgl::AbstractDFG,
                     refKey::Symbol=:simulated,
                     addLandmarks::Bool=true,
                     landmarkSolvable::Int=1,
+                    _doHoneycomb::Bool=false,
+                    atol::Real=1,
                     postpose_cb::Function=(fg_,latestpose)->()  )
   #
 
@@ -119,7 +126,7 @@ function _driveHex!(fgl::AbstractDFG,
     v_n = _addPoseCanonical!(fgl, psym, posecount, pp, refKey=refKey, graphinit=graphinit, postpose_cb=postpose_cb)
     nsym = getLabel(v_n)
     # add a new landmark (if not yet present)
-    !addLandmarks ? nothing : _addLandmarkBeehive!(fgl, nsym, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
+    !addLandmarks ? nothing : _addLandmarkBeehive!(fgl, nsym; refKey=refKey, solvable=landmarkSolvable, atol=atol, graphinit=false, _doHoneycomb=_doHoneycomb)
   end
 
   return posecount
@@ -136,6 +143,8 @@ function _offsetHexLeg( fgl::AbstractDFG,
                         guagePrior::Symbol=:x0f1,
                         addLandmarks::Bool=true,
                         landmarkSolvable::Int=1,
+                        atol::Real=1,
+                        _doHoneycomb::Bool=false,
                         postpose_cb::Function=(fg_,latestpose)->()   )
   #
   #skip out early if pose count target has been reached
@@ -156,7 +165,7 @@ function _offsetHexLeg( fgl::AbstractDFG,
   nsym = getLabel(v_n)
 
   # add a new landmark (if not yet present)
-  !addLandmarks ? nothing : _addLandmarkBeehive!(fgl, nsym, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
+  !addLandmarks ? nothing : _addLandmarkBeehive!(fgl, nsym; refKey=refKey, solvable=landmarkSolvable, atol=atol, graphinit=false, _doHoneycomb=_doHoneycomb )
 
   return posecount
 end
@@ -171,6 +180,7 @@ function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
                                         refKey::Symbol=:simulated,
                                         addLandmarks::Bool=true,
                                         landmarkSolvable::Int=0,
+                                        atol::Real=1,
                                         postpose_cb::Function=(fg_,latestpose)->()     )
   #
   global _honeycombRecipe
@@ -191,7 +201,7 @@ function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
     # setPPE!(dfg[:x0], refKey, DFG.MeanMaxPPE, ppe)
     
     # add a new landmark (if not yet present)
-    !addLandmarks ? nothing : _addLandmarkBeehive!(dfg, :x0, refKey=refKey, solvable=landmarkSolvable, graphinit=false)
+    !addLandmarks ? nothing : _addLandmarkBeehive!(dfg, :x0; refKey=refKey, solvable=landmarkSolvable, atol=atol, _doHoneycomb=true, graphinit=false)
 
     # staring posecount (i.e. :x0)
     0
@@ -199,13 +209,13 @@ function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
 
   # keep adding poses until the target number is reached
   while posecount < poseCountTarget
-    posecount = _driveHex!(dfg, posecount, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)
+    posecount = _driveHex!(dfg, posecount; graphinit=graphinit, landmarkSolvable=landmarkSolvable, atol=atol, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb, _doHoneycomb=true)
     # drive the offset legs
     lastPose = Symbol(:x, posecount)
     if haskey(_honeycombRecipe, lastPose)
-      posecount = _offsetHexLeg(dfg, posecount, direction=_honeycombRecipe[lastPose], graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)    
+      posecount = _offsetHexLeg(dfg, posecount; direction=_honeycombRecipe[lastPose], graphinit=graphinit, atol=atol, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb, _doHoneycomb=true)
     end
-    posecount = _offsetHexLeg(dfg, posecount, direction=direction, graphinit=graphinit, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb)
+    posecount = _offsetHexLeg(dfg, posecount; direction=direction, graphinit=graphinit, atol=atol, landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, postpose_cb=postpose_cb, _doHoneycomb=true)
   end
 
   # NOTE solvable forced for everything at this time
