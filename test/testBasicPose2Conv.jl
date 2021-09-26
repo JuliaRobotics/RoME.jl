@@ -28,7 +28,7 @@ x1_ = getPoints(X1_) .|> x->AMP.makeCoordsFromPoint(M,x)
 μ_x1_ = mean(X1_)
 Σ_x1_ =  cov(M, getPoints(X1_))
 
-@test isapprox( μ_x1_.parts[1], [10; 0], atol=0.1)
+@test isapprox( μ_x1_.parts[1], [10; 0], atol=0.2)
 @test isapprox( μ_x1_.parts[2], [-1 0; 0 -1], atol=0.2)
 
 @test isapprox( Σ_x1_, [0.15 0 0; 0 0.15 0; 0 0 0.15], atol=0.4)

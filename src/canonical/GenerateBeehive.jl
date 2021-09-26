@@ -52,10 +52,10 @@ function generateCanonicalFG_Beehive!(poseCountTarget::Int=10;
 
   # keep adding poses until the target number is reached
   direction = rand(1:2) === 1 ? :left : :right
-  _locality = 1/(2.0+locality)
+  _locality = 1/(1.0+locality)
   while posecount < poseCountTarget
     #change or keep direction according to locality keyword
-    direction = rand() < _locality ? direction : (direction == :left ? :right : :left)
+    direction = rand() < _locality ? (direction == :left ? :right : :left) : direction
     posecount = _offsetHexLeg(dfg, posecount, direction=direction, graphinit=graphinit, 
                               landmarkSolvable=landmarkSolvable, poseCountTarget=poseCountTarget, 
                               postpose_cb=postpose_cb)

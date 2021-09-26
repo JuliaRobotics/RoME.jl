@@ -20,7 +20,6 @@ end
 
 testfiles = [
   # any wip fail-fast dev testing
-  # "testAccumulateFactors.jl";
   # "testPartialPose3.jl";
   
   # important tests are that are broken and must be restored.
@@ -53,6 +52,7 @@ testfiles = [
   "testDynPoint2D.jl";
   "testDeltaOdo.jl";
   "testFixedLagFG.jl";
+  "testAccumulateFactors.jl";
   "testDynPose2D.jl";
   "testPartialPriorYawPose2.jl";
   "TestDefaultFGInitialization.jl";
