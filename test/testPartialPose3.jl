@@ -7,9 +7,12 @@ using Manifolds: ProductRepr, hat, vee, identity_element, SpecialOrthogonal, Spe
 import Manifolds
 using TensorCast
 using DistributedFactorGraphs
-using Rotations
+# using Rotations
+
+##
 
 @testset "Testing basic PriorPose3ZRP" begin
+##
 
 fg = initfg()
 
@@ -37,12 +40,11 @@ mucrd = getCoordinates(Pose3, mu)
 @test isapprox(mucrd[1:3], [0, 5, 10], atol=1.0)
 @test isapprox(mucrd[4:6], [0, 0, pi/2], atol=0.3)
 
-
+##
 end
 
-# using CoordinateTransformations, Rotations
-
 ##
+
 fg = initfg()
 
 # @testset "Test Building a PriorPose3ZRP FG" begin
@@ -74,8 +76,9 @@ f2 = addFactor!(fg, [:x1;:x2], xyy, graphinit=false)
 #
 # end
 
-@testset "test PriorPose3ZRP evaluations" begin
+##
 
+@testset "test PriorPose3ZRP evaluations" begin
 ##
 
 # ensure that at least the first pose is already initialized
@@ -126,12 +129,10 @@ olddims = setdiff(collect(1:6), newdims)
 # @test norm(X2pts - getVal(v2)) < 1e-10
 
 ##
-
 end
 
 
 @testset "test residual function of Pose3Pose3XYYaw" begin
-
 ##
 
 tfg = initfg()
@@ -176,13 +177,11 @@ M = getManifold(xyy)
 @test isapprox(sqrt.(diag(cov(M, meas))), [0.01;0.01;0.002], atol=0.05)
 
 ##
-
 end
 
 
 
 @testset "test Pose3Pose3XYYaw evaluations" begin
-
 ##
 
 # get existing and predict new
@@ -203,6 +202,8 @@ olddims = setdiff(collect(1:6), newdims)
 @test size(pts, 2) == N
 
 # ensure the unchanged dimensions actually remain unchanged
+@show X2pts[olddims,1];
+@show pts[olddims,1];
 @test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10
 
 for i in 1:N
@@ -223,12 +224,10 @@ memcheck = getVal(v2)
 # @test norm(X2pts - memcheck) < 1e-10
 
 ##
-
 end
 
 
 @testset "test predictbelief with two functions" begin
-
 ##
 
 _val = getCoordinates.(Pose3, predictbelief(fg, :x2, ls(fg, :x2), N=N)[1])
@@ -253,7 +252,6 @@ memcheck = getVal(v2)
 # @test 1e-10 < norm(val - memcheck)
 
 ##
-
 end
 
 
