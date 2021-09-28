@@ -7,6 +7,7 @@ using Manifolds: ProductRepr, hat, vee, identity_element, SpecialOrthogonal, Spe
 import Manifolds
 using TensorCast
 using DistributedFactorGraphs
+using RoTations
 # using Rotations
 
 ##
@@ -107,7 +108,7 @@ _pts = getCoordinates.(Pose3, IIF.approxConv(fg, :x2f1, :x2, N=N))
 
 @cast pts[j,i] :=  _pts[i][j]
 
-newdims = collect(DFG.getSolverData(f1).fnc.usrfnc!.partial)
+newdims = [3;4;5] # collect(DFG.getSolverData(f1).fnc.usrfnc!.partial)
 
 olddims = setdiff(collect(1:6), newdims)
 
@@ -154,14 +155,35 @@ res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xja))
 ##
 
 Xjb = zeros(6,1)
-Xjb[collect(xyy.partial),1] = mu2
+Xjb[[1;2;6],1] = mu2  # Xjb[collect(xyy.partial),1] = mu2
 xjb = exp(M, ϵ, hat(M, ϵ, Xjb))
 # res = zeros(3)
 # xyy(res, fmd, idx, meas, xi, xjb)
 
+# noisy measurements
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xjb))
+@test isapprox(res, [0;0;0], atol=0.1)
 
-@test 0.0 < norm(res) < 0.3
+# more rotated
+xi = ProductRepr([0;0;0.], collect(RotZ(π/2)))
+xj = ProductRepr([-5;20;0.], [-1 0 0; 0 -1 0; 0 0 1.])
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [0;0;0], atol=0.1)
+
+# add z
+xi = ProductRepr([0;0;100.], collect(RotZ(π/2)))
+xj = ProductRepr([-5;20;-100.], [-1 0 0; 0 -1 0; 0 0 1.])
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [0;0;0], atol=0.1)
+
+# add pitch without z
+xi = ProductRepr([0;0;0.], collect(RotY(π/4)))
+xj = ProductRepr([14.14213562;5;-14.14213562], [0 -0.707107 0.707107; 1 0 0; 0 0.707107 0.707107] )
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [0;0;0], atol=0.1)
+
+
+
 
 ##
 
@@ -196,16 +218,26 @@ _X2prd_ = approxConv(fg, :x1x2f1, :x2, N=N)
 # pts = collect(pts)
 
 # find which dimensions are and and are not updated by XYYaw partial
-newdims = collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
+newdims = (1,2,6) # collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
 olddims = setdiff(collect(1:6), newdims)
 
 # check the number of points are correct
 # @test size(pts, 1) == 6
 @test length(_X2pts_) == N
 
+
 ## DEV
+
 @show convert(TU.Euler, SO3(_X2prd_[1].parts[2])).R
 @show convert(TU.Euler, SO3(_X2pts_[1].parts[2])).R
+
+@show convert(TU.Euler, SO3(_X2prd_[1].parts[2])).P
+@show convert(TU.Euler, SO3(_X2pts_[1].parts[2])).P
+
+@show convert(TU.Euler, SO3(_X2prd_[1].parts[2])).Y
+@show convert(TU.Euler, SO3(_X2pts_[1].parts[2])).Y
+
+
 
 # ensure the unchanged dimensions actually remain unchanged
 @show X2pts[olddims,1];

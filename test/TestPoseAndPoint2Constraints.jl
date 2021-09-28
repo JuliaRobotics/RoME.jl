@@ -56,7 +56,7 @@ pts = getVal(fg, :x0)
 
 pts = getVal(fg, :x1)
 me_ = mean(M, pts)
-@test isapprox(M.manifold[1], me_.parts[1], [50,0], atol=0.5)
+@test isapprox(M.manifold[1], me_.parts[1], [50,0], atol=1.0)
 @test isapprox(M.manifold[2], me_.parts[2], [0 -1; 1 0], atol=0.25)
 
 # check that yaw is working

@@ -80,14 +80,28 @@ end
 
 Partial factor between XY and Yaw of two Pose3 variables.
 
+```
+wR2 = wR1*1R2 = wR1*(1Rψ*Rθ*Rϕ)
+wRz = wR1*1Rz
+zRz = wRz \\ wR(Δψ)
+
+M_R = SO(3)
+δ(α,β,γ) = vee(M_R, R_0, log(M_R, R_0, zRz))
+
+M = SE(3)
+p0 = identity_element(M)
+δ(x,y,z,α,β,γ) = vee(M, p0, log(M, p0, zRz))
+```
+
 """
 struct Pose3Pose3XYYaw{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
   Z::T
-  partial::Tuple{Int,Int,Int}
+  partial::Tuple{Int,Int,Int,Int,Int}
 end
 Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) = error("Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) where {T1 <: , T2 <: IIF.SamplableBelief} is deprecated, use one belief")
 
-Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,6))
+# Lie exponentials (pqr) are all three affected by changes in Yaw
+Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,4,5,6))   # (1,2,6))
 
 function getSample(cf::CalcFactor{<:Pose3Pose3XYYaw})
   return sampleTangent(getManifold(cf.factor), cf.factor.Z)
@@ -96,18 +110,41 @@ end
 getManifold(::Pose3Pose3XYYaw) = SpecialEuclidean(2)
 
 
-function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, p_SE3, q_SE3 )
+## NOTE, Yaw only works if you assume a preordained global reference point, such as identity_element(Pose3)
+function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
   #
-  M = SpecialEuclidean(2)
-  p = ProductRepr(p_SE3.parts[1][1:2], p_SE3.parts[2][1:2, 1:2])
-  q = ProductRepr(q_SE3.parts[1][1:2], q_SE3.parts[2][1:2, 1:2])
 
-  q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) 
-  #TODO allocalte for vee! see Manifolds #412, fix for AD
+  # Yaw is around the positive z axis
+  ##
+  # new Manifolds code (tests failing)
+  M3 = SpecialEuclidean(3)
+  M2 = SpecialEuclidean(2)
+  
+  e3 = identity_element(M3, wTp)
+  
+  # can use X here because factor manifold is SE2
+  tmp = zeros(3,3)
+  tmp[1:2,1:2] = X.parts[2]
+  tmp[3,3] = 1
+  X_ = ProductRepr([X.parts[1]; 0], tmp)
+  _wTq = Manifolds.compose(M3, exp(M3, e3, X_), wTp)
+  
+  ψq  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTq.parts[2])).Y )[1:2,1:2]
+  _ψq = Rotations.RotZ( TU.convert(Euler, TU.SO3(_wTq.parts[2])).Y )[1:2,1:2]
+
+  wTq2  = ProductRepr(wTq.parts[1][1:2],   ψq)
+  _wTq2 = ProductRepr(_wTq.parts[1][1:2], _ψq)
+  
+  _qTq2 = Manifolds.compose(M2, inv(M2, _wTq2), wTq2)
+  
+  e2 = identity_element(M2, _qTq2)
+
+  #TODO allocate for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
-  vee!(M, Xc, q, log(M, q, q̂))
+  vee!(M2, Xc, e2, log(M2, e2, _qTq2))
   return Xc
 
+  # Old YPR coordinate code, < v"0.16"
   # wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
   # jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
   # return se2vee(jXjhat)
