@@ -121,27 +121,20 @@ function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
   M2 = SpecialEuclidean(2)
   
   e3 = identity_element(M3, wTp)
-  
-  # can use X here because factor manifold is SE2
-  tmp = zeros(3,3)
-  tmp[1:2,1:2] = X.parts[2]
-  tmp[3,3] = 1
-  X_ = ProductRepr([X.parts[1]; 0], tmp)
-  _wTq = Manifolds.compose(M3, exp(M3, e3, X_), wTp)
-  
-  ψq  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTq.parts[2])).Y )[1:2,1:2]
-  _ψq = Rotations.RotZ( TU.convert(Euler, TU.SO3(_wTq.parts[2])).Y )[1:2,1:2]
+  e2 = identity_element(M2)
 
-  wTq2  = ProductRepr(wTq.parts[1][1:2],   ψq)
-  _wTq2 = ProductRepr(_wTq.parts[1][1:2], _ψq)
-  
-  _qTq2 = Manifolds.compose(M2, inv(M2, _wTq2), wTq2)
-  
-  e2 = identity_element(M2, _qTq2)
 
+  wRpψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTp.parts[2])).Y )[1:2,1:2]
+  wTp_2  = ProductRepr(wTp.parts[1][1:2],   wRpψ_2)
+  wTqhat = Manifolds.compose(M2, wTp_2, exp(M2, e2, X))
+
+  wRqψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTq.parts[2])).Y )[1:2,1:2]
+  wTq_2  = ProductRepr(wTq.parts[1][1:2],   wRqψ_2)
+  qhatTq = Manifolds.compose(M2, inv(M2, wTqhat), wTq_2)
+  
   #TODO allocate for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
-  vee!(M2, Xc, e2, log(M2, e2, _qTq2))
+  vee!(M2, Xc, e2, log(M2, e2, qhatTq))
   return Xc
 
   # Old YPR coordinate code, < v"0.16"
