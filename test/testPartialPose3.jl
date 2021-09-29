@@ -55,7 +55,7 @@ fg.solverParams.N = N
 v1 = addVariable!(fg,:x1, Pose3) # 0.001*randn(6,N)
 # f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal(zeros(6),1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 # check with a point not a identity
-f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal([0.0, 5.0, 10, pi, 0, 0],1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
+f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal([0.0, 5.0, 10, 0, 0, 0],1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 
 sigx = 0.01
 sigy = 0.01
@@ -136,10 +136,6 @@ end
 @testset "test residual function of Pose3Pose3XYYaw" begin
 ##
 
-tfg = initfg()
-X0 = addVariable!(tfg, :x0, Pose3)
-X1 = addVariable!(tfg, :x1, Pose3)
-
 M = getManifold(Pose3)
 ϵ = identity_element(M)
 xi = deepcopy(ϵ)
@@ -182,16 +178,55 @@ xj = ProductRepr([20;5;0.], collect(RotZ(π/2)*RotY(π/4)))
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [0;0;0], atol=0.15)
 
+# add pitch with z
+xi = ProductRepr([0;0;10.], collect(RotY(π/4)))
+xj = ProductRepr([20;5;-10.], collect(RotZ(π/2)*RotY(π/4)))
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [0;0;0], atol=0.15)
+
+# add roll without z
+xi = ProductRepr([0;0;0.], collect(RotX(π/4)))
+xj = ProductRepr([20;5;0.], collect(RotZ(π/2)*RotX(π/4)))
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [0;0;0], atol=0.15)
+
+# add roll with z
+xi = ProductRepr([0;0;10.], collect(RotX(π/4)))
+xj = ProductRepr([20;5;-10.], collect(RotZ(π/2)*RotX(π/4)))
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [0;0;0], atol=0.15)
+
+# add roll with x
+xi = ProductRepr([10;0;0.], collect(RotX(π/4)))
+xj = ProductRepr([10+20;5;0.], collect(RotZ(π/2)*RotX(π/4)))
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [0;0;0], atol=0.15)
+
+# add pitch and roll without z
+xi = ProductRepr([0;0;0.], collect(RotY(π/4)*RotX(π/6)))
+xj = ProductRepr([20;5;0.], collect(RotZ(π/2)*RotY(π/4)*RotX(π/6)))
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [0;0;0], atol=0.15)
+
+# add pitch and roll with x and z
+xi = ProductRepr([10;0;10.], collect(RotY(π/4)*RotX(π/6)))
+xj = ProductRepr([10+20;5;-10.], collect(RotZ(π/2)*RotY(π/4)*RotX(π/6)))
+res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [0;0;0], atol=0.15)
+
 
 
 ##
+
+tfg = initfg()
+X0 = addVariable!(tfg, :x0, Pose3)
+X1 = addVariable!(tfg, :x1, Pose3)
 
 addFactor!(tfg, [:x0;:x1], xyy, graphinit=false)
 
 # meas = getSample(xyy,100)
 ccw = IIF._getCCW(tfg, :x0x1f1);
 meas = sampleFactor(ccw, 100)
-
 
 M = getManifold(xyy)
 
@@ -206,13 +241,15 @@ end
 ##
 
 # get existing and predict new
-_X2pts_ = getBelief(fg, :x2) |> getPoints
-# _X2pts = getCoordinates.(Pose3, _X2_)
-# @cast X2pts[j,i] :=  _X2pts[i][j]
+_X2 = getBelief(fg, :x2) 
+_X2pts_ = _X2 |> getPoints
 
-_X2prd_ = approxConv(fg, :x1x2f1, :x2, N=N)
-# _pts = getCoordinates.(Pose3, _X2prd_)
-# @cast pts[j,i] :=  _pts[i][j]
+_X2prd = approxConvBelief(fg, :x1x2f1, :x2, N=N)
+_X2prd_ = getPoints(_X2prd)
+
+@test isapprox(mean(_X2prd).parts[1], mean(_X2).parts[1], atol=1.0)
+@test isapprox(mean(_X2prd).parts[2], mean(_X2).parts[2], atol=0.5)
+
 
 # pts = collect(pts)
 
@@ -227,27 +264,29 @@ olddims = setdiff(collect(1:6), newdims)
 
 ## DEV
 
-@test isapprox( convert(TU.Euler, SO3(_X2prd_[1].parts[2])).R,
-                convert(TU.Euler, SO3(_X2pts_[1].parts[2])).R, atol=0.2 )
+# _X2prd_ = [xi ;]
+# _X2pts_ = [xj ;]
 
-@test isapprox( convert(TU.Euler, SO3(_X2prd_[1].parts[2])).P,
-                convert(TU.Euler, SO3(_X2pts_[1].parts[2])).P, atol=0.2 )
+i = 1
+for i in 1:N
 
-@test isapprox( convert(TU.Euler, SO3(_X2prd_[1].parts[2])).Y,
-                convert(TU.Euler, SO3(_X2pts_[1].parts[2])).Y, atol=0.2 )
-#
+@tes isapprox( _X2prd_[i].parts[1][3], _X2pts_[i].parts[1][3], atol=0.0001 )
+
+@test isapprox( convert(TU.Euler, SO3(_X2prd_[i].parts[2])).R,
+                convert(TU.Euler, SO3(_X2pts_[i].parts[2])).R, atol=0.2 )
+
+@test isapprox( convert(TU.Euler, SO3(_X2prd_[i].parts[2])).P,
+                convert(TU.Euler, SO3(_X2pts_[i].parts[2])).P, atol=0.2 )
+
+end
+
+# # ensure the unchanged dimensions actually remain unchanged
+# @show X2pts[olddims,1];
+# @show pts[olddims,1];
+# # SEE ABOVE Yaw Pitch Roll work
+# @test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10  # TEST BROKEN
 
 ##
-
-# ensure the unchanged dimensions actually remain unchanged
-@show X2pts[olddims,1];
-@show pts[olddims,1];
-# SEE ABOVE Yaw Pitch Roll work
-@test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10  # TEST BROKEN
-
-for i in 1:N
-    pts[6,i] = wrapRad(pts[6,i])
-end
 
 # ensure the newly updated values match what is specified in mu2
 @show mu2 # mu2 is used for XYYaw
