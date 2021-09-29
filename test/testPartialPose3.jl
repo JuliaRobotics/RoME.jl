@@ -7,8 +7,7 @@ using Manifolds: ProductRepr, hat, vee, identity_element, SpecialOrthogonal, Spe
 import Manifolds
 using TensorCast
 using DistributedFactorGraphs
-using RoTations
-# using Rotations
+using Rotations
 
 ##
 
@@ -249,10 +248,20 @@ _X2prd = approxConvBelief(fg, :x1x2f1, :x2, N=N)
 # test for #1394
 @test isPartial(_X2prd)
 
-_X2prd_ = getPoints(_X2prd)
+_X2prd_ = getPoints(_X2prd, false)
 
-@test isapprox(mean(_X2prd).parts[1], mean(_X2).parts[1], atol=2.0)
-@test isapprox(mean(_X2prd).parts[2], mean(_X2).parts[2], atol=0.5)
+@test isapprox(mean(_X2prd, false).parts[1], mean(_X2, false).parts[1], atol=2.0)
+@test isapprox(mean(_X2prd, false).parts[2], mean(_X2, false).parts[2], atol=0.5)
+
+convert(TU.Euler, SO3(mean(_X2prd, false).parts[2])).Y
+convert(TU.Euler, SO3(mean(_X2prd, false).parts[2])).P
+convert(TU.Euler, SO3(mean(_X2prd, false).parts[2])).R
+
+convert(TU.Euler, SO3(mean(_X2, false).parts[2])).Y
+convert(TU.Euler, SO3(mean(_X2, false).parts[2])).P
+convert(TU.Euler, SO3(mean(_X2, false).parts[2])).R
+
+
 
 
 # pts = collect(pts)
