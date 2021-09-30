@@ -9,11 +9,6 @@ using Manifolds: ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogon
 using DistributedFactorGraphs
 using Statistics
 
-# TODO move to IIF?
-function Statistics.cov(vartype::InferenceVariable, ptsArr::AbstractVector; basis::Manifolds.AbstractBasis = Manifolds.DefaultOrthogonalBasis(), kwargs...)
-  cov(getManifold(vartype), ptsArr; basis, kwargs... )
-end
-
 
 @error("must restore testG2oParser.jl")
 @error("must restore testParametric.jl")

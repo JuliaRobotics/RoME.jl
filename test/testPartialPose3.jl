@@ -142,9 +142,7 @@ xja = deepcopy(ϵ)
 
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xja))
 
-
-@error "verify this partial Pose3 test is setup correctly"
-# @test isapprox(mu2, res, atol=0.3 )
+@test isapprox(mu2, res, atol=0.3 )
 
 ##
 
@@ -231,6 +229,38 @@ M = getManifold(xyy)
 
 @test isapprox(sqrt.(diag(cov(M, meas))), [0.01;0.01;0.002], atol=0.05)
 
+## Testing non zero residuals for sign
+# Lets just make sure we are consistent with signs
+lr = LinearRelative(Normal(20.0,0.01))
+xi = [10]
+xj = [20]
+res = calcFactorResidualTemporary(lr, (ContinuousScalar, ContinuousScalar), [], (xi, xj))
+@test isapprox(res, [10], atol=0.1)
+
+# To compare signs to Point2 case 
+mu = [20.0, 5.0]
+xyy2 = Point2Point2(MvNormal( mu, diagm([0.01, 0.01].^2)))
+xi = [10;0]
+xj = [20;10]
+res = calcFactorResidualTemporary(xyy2, (Point2, Point2), [], (xi, xj))
+@test isapprox(res, [10;-5], atol=0.15)
+
+# Comparing to Point2 for sign only
+mu = [20.0, 5.0, 0.0]
+xyy2 = Pose3Pose3XYYaw(MvNormal( mu, diagm([0.01, 0.01, 0.001].^2)))
+xi = ProductRepr([10;0; 10.], collect(RotZ(0.0)))
+xj = ProductRepr([20;10;-10.], collect(RotZYX(0.0, -pi/4, pi/4)))
+res = calcFactorResidualTemporary(xyy2, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [10;-5;0], atol=0.15)
+
+
+mu = [20.0, 5.0, pi/4]
+xyy2 = Pose3Pose3XYYaw(MvNormal( mu, diagm([0.01, 0.01, 0.001].^2)))
+xi = ProductRepr([10;0; 10.], collect(RotZ(pi/2)))
+xj = ProductRepr([20;10;-10.], collect(RotZYX(0.0, -pi/4, pi/4)))
+res = calcFactorResidualTemporary(xyy2, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [-15;10;3pi/4], atol=0.15)
+
 ##
 end
 
@@ -283,7 +313,7 @@ olddims = setdiff(collect(1:6), newdims)
 i = 1
 for i in 1:N
 
-@tes isapprox( _X2prd_[i].parts[1][3], _X2pts_[i].parts[1][3], atol=0.0001 )
+@test isapprox( _X2prd_[i].parts[1][3], _X2pts_[i].parts[1][3], atol=0.0001 )
 
 @test isapprox( convert(TU.Euler, SO3(_X2prd_[i].parts[2])).R,
                 convert(TU.Euler, SO3(_X2pts_[i].parts[2])).R, atol=0.2 )
@@ -332,7 +362,8 @@ end
 @test size(val, 2) == N
 
 estmu1mean = Statistics.mean(val[collect(DFG.getSolverData(f1).fnc.usrfnc!.partial),:],dims=2)
-estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.partial),:],dims=2)
+# estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.partial),:],dims=2)
+estmu2mean = Statistics.mean(val[[1,2,6],:],dims=2)
 
 @show estmu1mean
 @show estmu2mean
@@ -379,7 +410,7 @@ testsMeasurements_xyz_rpy = [
   [10.,  0,  0, 0, 0, ψ],
   [ 0., 10,  0, 0, 0, ψ],
   [ 0.,  0, 10, 0, 0, ψ],
-  [ 0.,  0, 10, 0, 0, ψ],
+  [ 0., 15, 10, 0, 0, ψ],
 ]
 
 @info "Test Pose3Pose3XYYaw cases:"
