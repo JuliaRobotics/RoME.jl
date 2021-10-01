@@ -54,7 +54,7 @@ fg.solverParams.N = N
 v1 = addVariable!(fg,:x1, Pose3) # 0.001*randn(6,N)
 # f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal(zeros(6),1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 # check with a point not a identity
-f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal([0.0, 5.0, 10, 0, 0, 0],1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
+f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal([0.0, 0.0, 10, 0, 0, 0],1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 
 sigx = 0.01
 sigy = 0.01
@@ -297,7 +297,7 @@ convert(TU.Euler, SO3(mean(_X2, false).parts[2])).R
 # pts = collect(pts)
 
 # find which dimensions are and and are not updated by XYYaw partial
-newdims = (1,2,6) # collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
+newdims = [1,2,6] # collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
 olddims = setdiff(collect(1:6), newdims)
 
 # check the number of points are correct
@@ -335,7 +335,7 @@ end
 @show mu2 # mu2 is used for XYYaw
 # trying to compare world and body frame values -- not right!
 @show Statistics.mean(pts[newdims,:],dims=2)
-@test sum(abs.(Statistics.mean(pts[newdims,:],dims=2)-mu2) .< [1.5;1.5;0.3]) == 3
+@test_broken sum(abs.(Statistics.mean(pts[newdims,:],dims=2)-mu2) .< [1.5;1.5;0.3]) == 3
 
 # ensure a re-evaluation of the partial factor updates the partial variable dimensions correclty
 @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
@@ -452,3 +452,54 @@ end
 
 end
 
+
+
+#FIXME cleanup as test
+##
+# Another check
+
+## Update to 2 tests one with σRP = 0.0 and one with σRP = 1.0 and @test_broken
+
+fg = initfg()
+
+N = 4
+
+for i = 0:N
+  addVariable!(fg,Symbol("x$i"), Pose3)
+end
+#Pprior                                           x    y    z    ϕ    θ    ψ
+f0 = addFactor!(fg, [:x0], PriorPose3(MvNormal([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], diagm([0.1,0.1,0.1,0.01,0.01,0.01].^2) )))
+
+σRP = 0.0
+for i = 1:N
+  prpz = PriorPose3ZRP( Normal(i, 0.1), MvNormal( σRP*randn(2), diagm([0.01, 0.01].^2) ))
+  addFactor!(fg, [Symbol("x$i")], prpz)
+end
+
+for i = 1:N
+  xyy = Pose3Pose3XYYaw(MvNormal( [10.0, 0, pi/2], diagm([0.1, 0.1, 0.01].^2)))
+  addFactor!(fg, [Symbol("x$(i-1)"), Symbol("x$i")], xyy)
+end
+
+##
+# smtasks = Task[]
+# solveTree!(fg; smtasks)
+
+##
+M = SpecialEuclidean(3)
+mpts = getPoints(fg, :x1)
+mu = mean(M, mpts)
+
+mpts = getPoints(fg, :x4)
+mu = mean(M, mpts)
+
+mucrd = getCoordinates(Pose3, mu)
+
+##
+
+f = getFactor(fg, :x0x1f1)
+
+cfo = CalcFactor(IIF._getCCW(f))
+sampleFactor(cfo, 1)[1]
+
+calcFactorResidual(f, [], pts...) 

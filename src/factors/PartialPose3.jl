@@ -30,7 +30,7 @@ function getSample(cf::CalcFactor{<:PriorPose3ZRP})
 
   #Rotation part: roll and pitch
   r,p = rand(cf.factor.rp)
-  R = Rotations.RotXY(r, p)
+  R = Rotations.RotYX(p, r) #TODO confirm RotYX(p,r) or RotXY(r,p)
   
   # Translation part: Z
   T = [0; 0; rand(cf.factor.z)]
@@ -96,12 +96,14 @@ p0 = identity_element(M)
 """
 struct Pose3Pose3XYYaw{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
   Z::T
-  partial::Tuple{Int,Int,Int,Int,Int}
+  # partial::Tuple{Int,Int,Int,Int,Int}
+  partial::Tuple{Int,Int,Int}
 end
 Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) = error("Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) where {T1 <: , T2 <: IIF.SamplableBelief} is deprecated, use one belief")
 
 # Lie exponentials (pqr) are all three affected by changes in Yaw
-Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,4,5,6))   # (1,2,6))
+# Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,4,5,6))   # (1,2,6))
+Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,6))
 
 function getSample(cf::CalcFactor{<:Pose3Pose3XYYaw})
   return sampleTangent(getManifold(cf.factor), cf.factor.Z)
@@ -118,15 +120,15 @@ function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
     
   M = SpecialEuclidean(2)
 
-  rx = normalize(wTp.parts[2][1:2, 1])
-  R = [rx[1] -rx[2];
-       rx[2]  rx[1]]
-  p = ProductRepr(wTp.parts[1][1:2], R)
+  rx = normalize(view(wTp.parts[2],1:2, 1))
+  R = SA[rx[1] -rx[2];
+         rx[2]  rx[1]]
+  p = ProductRepr(view(wTp.parts[1], 1:2), R)
 
-  rx = normalize(wTq.parts[2][1:2, 1])
-  R = [rx[1] -rx[2];
-       rx[2]  rx[1]]
-  q = ProductRepr(wTq.parts[1][1:2], R)
+  rx = normalize(view(wTq.parts[2],1:2, 1))
+  R = SA[rx[1] -rx[2];
+         rx[2]  rx[1]]
+  q = ProductRepr(view(wTq.parts[1], 1:2), R)
 
 
   q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) 

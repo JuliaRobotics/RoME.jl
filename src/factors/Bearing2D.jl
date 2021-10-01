@@ -33,7 +33,9 @@ function (cfo::CalcFactor{<:Pose2Point2Bearing})(Xc, p, l)
   # TODO Xc is a coordinate (ie angle), maybe change to X ϵ so2 
   # m̂ = exp(so{N}(hat(SpecialOrthogonal(N), SO{N}()[], atan(y, x))))
   # distance(m, m̂)/sqrt(2)
-  return Xc[1] .- atan(y, x)
+
+  # FIXME, this should be a vee(log()), not linear - and add to test
+  return  Xc[1] - atan(y, x)
 end
 # define the conditional probability constraint
 # function (cfo::CalcFactor{<:Pose2Point2Bearing})(meas, _xi, lm)

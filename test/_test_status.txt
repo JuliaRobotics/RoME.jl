@@ -1,0 +1,122 @@
+
+# Parametric #this is skipped
+Broken testset: test bearing range with inflation, #380, IIF #1051
+Results:  pass:0 broken:1 fail:0 error:1
+
+# Parametric
+Broken testset: Test PriorPose2 and Pose2Pose2
+Results:  pass:0 broken:0 fail:0 error:1
+
+# Parametric
+Broken testset: Test Parametric PriorPose2 and Pose2Point2
+Results:  pass:0 broken:0 fail:0 error:1
+
+# Parametric
+Broken testset: Test Parametric PriorPoint2 and Pose2Point2BearingRange
+Results:  pass:0 broken:0 fail:0 error:1
+
+# Parametric
+Broken testset: Test Parametric DynPose2VelocityPrior and VelPose2VelPose2
+Results:  pass:0 broken:0 fail:0 error:1
+
+# Possible numerical issue
+Broken testset: Testing tree init prior usage
+Results:  pass:1 broken:0 fail:1 error:0
+
+# intermittent
+Broken testset: Testing Pose3Pose3 evaluation...
+Results:  pass:4 broken:0 fail:1 error:0
+
+# intermittent
+Broken testset: Construct Bayes tree and perform inference...
+Results:  pass:2 broken:0 fail:2 error:0
+
+# intermittent
+Broken testset: Ensure basic parameters on x1,x2 after inference...
+Results:  pass:7 broken:0 fail:1 error:0
+
+Broken testset: sanity check on Hex example
+Results:  pass:19 broken:1 fail:6 error:0
+
+# intermittent
+Broken testset: test tree based autoinit on small bimodal point2 trilateration...
+Results:  pass:6 broken:0 fail:2 error:0
+
+# intermittent
+Broken testset: test pose and point combinations...
+Results:  pass:13 broken:0 fail:1 error:0
+
+Broken testset: Test correlation induced by partials
+Results:  pass:3 broken:0 fail:10 error:0
+
+Broken testset: test BearingRange factor residual function...
+Results:  pass:2 broken:0 fail:2 error:0
+
+# intermittent
+Broken testset: test unimodal bearing range factor, solve for landmark...
+Results:  pass:4 broken:0 fail:1 error:0
+
+Broken testset: Testing Bearing2D factor
+Results:  pass:11 broken:1 fail:0 error:0
+
+Broken testset: Simple Bearing2D test
+Results:  pass:2 broken:1 fail:0 error:0
+
+Broken testset: Triangulation test in 2D, 3 beacons
+Results:  pass:0 broken:0 fail:2 error:0
+
+Broken testset: Triangulation test in 2D (opposite), 3 beacons
+Results:  pass:0 broken:0 fail:2 error:0
+
+# intermittent
+Broken testset: test unimodal bearing range factor, solve for pose...
+Results:  pass:2 broken:0 fail:1 error:0
+
+# intermittent
+Broken testset: test basic fixed lag operations...
+Results:  pass:5 broken:0 fail:1 error:0
+
+# intermittent
+Broken testset: test multimodal bearing range factors calculate pose position properly...
+Results:  pass:2 broken:0 fail:1 error:0
+
+Broken testset: test multimodal landmark locations are computed correclty...
+Results:  pass:2 broken:0 fail:2 error:0
+
+# testParialPose3
+
+Broken testset: test Pose3Pose3XYYaw evaluations
+Results:  pass:2 broken:0 fail:3 error:0
+
+Broken testset: test predictbelief with two functions
+Results:  pass:3 broken:0 fail:1 error:0
+
+Broken testset: test conversions of PriorPose2
+Results:  pass:3 broken:0 fail:1 error:0
+
+Broken testset: test conversions of PriorPose3
+Results:  pass:7 broken:0 fail:2 error:0
+
+Broken testset: Test parametric mean accumulation...
+Results:  pass:0 broken:0 fail:1 error:0
+
+Broken testset: testing against solvable...
+Results:  pass:6 broken:0 fail:1 error:0
+
+#this is skipped
+Broken testset: Basic funtionality tests on FluxModelsPose2Pose2
+Results:  pass:0 broken:1 fail:0 error:1
+
+Broken testset: sequential beehive, repeated growing and solving
+Results:  pass:2 broken:1 fail:1 error:0
+
+
++++++++++++++++++++++++++++++++++++++++++++++
+Broken testset: Broken Testset for RoME
+Results:  pass:0 broken:0 fail:0 error:0
+
+Broken Testset for RoME summary: 
+  Pass:354
+  Broken:6
+  Fail:38
+  Error:0
