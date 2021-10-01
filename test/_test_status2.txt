@@ -1,0 +1,69 @@
+Broken testset: test bearing range with inflation, #380, IIF #1051
+Results:  pass:0 broken:1 fail:0 error:0
+
+Broken testset: Testing tree init prior usage
+Results:  pass:1 broken:0 fail:1 error:0
+
+Broken testset: Construct Bayes tree and perform inference...
+Results:  pass:1 broken:0 fail:3 error:0
+
+Broken testset: sanity check on Hex example
+Results:  pass:19 broken:1 fail:6 error:0
+
+Broken testset: Test correlation induced by partials
+Results:  pass:4 broken:0 fail:9 error:0
+
+Broken testset: test BearingRange factor residual function...
+Results:  pass:2 broken:0 fail:2 error:0
+
+Broken testset: test unimodal bearing range factor, solve for landmark...
+Results:  pass:4 broken:0 fail:1 error:0
+
+Broken testset: Testing Bearing2D factor
+Results:  pass:11 broken:1 fail:0 error:0
+
+Broken testset: Simple Bearing2D test
+Results:  pass:2 broken:1 fail:0 error:0
+
+Broken testset: Triangulation test in 2D, 3 beacons
+Results:  pass:0 broken:0 fail:2 error:0
+
+Broken testset: Triangulation test in 2D (opposite), 3 beacons
+Results:  pass:0 broken:0 fail:2 error:0
+
+Broken testset: test basic fixed lag operations...
+Results:  pass:5 broken:0 fail:1 error:0
+
+Broken testset: test multimodal bearing range factors calculate pose position properly...
+Results:  pass:2 broken:0 fail:1 error:0
+
+Broken testset: test multimodal landmark locations are computed correclty...
+Results:  pass:2 broken:0 fail:2 error:0
+
+Broken testset: test Pose3Pose3XYYaw evaluations
+Results:  pass:2 broken:0 fail:3 error:0
+
+Broken testset: test predictbelief with two functions
+Results:  pass:3 broken:0 fail:1 error:0
+
+Broken testset: test conversions of PriorPose2
+Results:  pass:3 broken:0 fail:1 error:0
+
+Broken testset: test conversions of PriorPose3
+Results:  pass:6 broken:0 fail:3 error:0
+
+Broken testset: Test parametric mean accumulation...
+Results:  pass:0 broken:0 fail:1 error:0
+
+Broken testset: testing against solvable...
+Results:  pass:6 broken:0 fail:1 error:0
+
+Broken testset: Basic funtionality tests on FluxModelsPose2Pose2
+Results:  pass:0 broken:1 fail:0 error:0
+
+Broken testset: sequential beehive, repeated growing and solving
+Results:  pass:3 broken:1 fail:0 error:0
+
+Broken testset: Broken Testset for RoME
+  Broken:6
+  Fail:40

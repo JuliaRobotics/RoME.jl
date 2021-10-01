@@ -54,7 +54,7 @@ fg.solverParams.N = N
 v1 = addVariable!(fg,:x1, Pose3) # 0.001*randn(6,N)
 # f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal(zeros(6),1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 # check with a point not a identity
-f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal([0.0, 5.0, 10, 0, 0, 0],1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
+f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal([0.0, 0.0, 10, 0, 0, 0],1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 
 sigx = 0.01
 sigy = 0.01
@@ -142,9 +142,7 @@ xja = deepcopy(ϵ)
 
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xja))
 
-
-@error "verify this partial Pose3 test is setup correctly"
-# @test isapprox(mu2, res, atol=0.3 )
+@test isapprox(mu2, res, atol=0.3 )
 
 ##
 
@@ -231,6 +229,38 @@ M = getManifold(xyy)
 
 @test isapprox(sqrt.(diag(cov(M, meas))), [0.01;0.01;0.002], atol=0.05)
 
+## Testing non zero residuals for sign
+# Lets just make sure we are consistent with signs
+lr = LinearRelative(Normal(20.0,0.01))
+xi = [10]
+xj = [20]
+res = calcFactorResidualTemporary(lr, (ContinuousScalar, ContinuousScalar), [], (xi, xj))
+@test isapprox(res, [10], atol=0.1)
+
+# To compare signs to Point2 case 
+mu = [20.0, 5.0]
+xyy2 = Point2Point2(MvNormal( mu, diagm([0.01, 0.01].^2)))
+xi = [10;0]
+xj = [20;10]
+res = calcFactorResidualTemporary(xyy2, (Point2, Point2), [], (xi, xj))
+@test isapprox(res, [10;-5], atol=0.15)
+
+# Comparing to Point2 for sign only
+mu = [20.0, 5.0, 0.0]
+xyy2 = Pose3Pose3XYYaw(MvNormal( mu, diagm([0.01, 0.01, 0.001].^2)))
+xi = ProductRepr([10;0; 10.], collect(RotZ(0.0)))
+xj = ProductRepr([20;10;-10.], collect(RotZYX(0.0, -pi/4, pi/4)))
+res = calcFactorResidualTemporary(xyy2, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [10;-5;0], atol=0.15)
+
+
+mu = [20.0, 5.0, pi/4]
+xyy2 = Pose3Pose3XYYaw(MvNormal( mu, diagm([0.01, 0.01, 0.001].^2)))
+xi = ProductRepr([10;0; 10.], collect(RotZ(pi/2)))
+xj = ProductRepr([20;10;-10.], collect(RotZYX(0.0, -pi/4, pi/4)))
+res = calcFactorResidualTemporary(xyy2, (Pose3, Pose3), [], (xi, xj))
+@test isapprox(res, [-15;10;3pi/4], atol=0.15)
+
 ##
 end
 
@@ -267,7 +297,7 @@ convert(TU.Euler, SO3(mean(_X2, false).parts[2])).R
 # pts = collect(pts)
 
 # find which dimensions are and and are not updated by XYYaw partial
-newdims = (1,2,6) # collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
+newdims = [1,2,6] # collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
 olddims = setdiff(collect(1:6), newdims)
 
 # check the number of points are correct
@@ -283,7 +313,7 @@ olddims = setdiff(collect(1:6), newdims)
 i = 1
 for i in 1:N
 
-@tes isapprox( _X2prd_[i].parts[1][3], _X2pts_[i].parts[1][3], atol=0.0001 )
+@test isapprox( _X2prd_[i].parts[1][3], _X2pts_[i].parts[1][3], atol=0.0001 )
 
 @test isapprox( convert(TU.Euler, SO3(_X2prd_[i].parts[2])).R,
                 convert(TU.Euler, SO3(_X2pts_[i].parts[2])).R, atol=0.2 )
@@ -305,7 +335,7 @@ end
 @show mu2 # mu2 is used for XYYaw
 # trying to compare world and body frame values -- not right!
 @show Statistics.mean(pts[newdims,:],dims=2)
-@test sum(abs.(Statistics.mean(pts[newdims,:],dims=2)-mu2) .< [1.5;1.5;0.3]) == 3
+@test_broken sum(abs.(Statistics.mean(pts[newdims,:],dims=2)-mu2) .< [1.5;1.5;0.3]) == 3
 
 # ensure a re-evaluation of the partial factor updates the partial variable dimensions correclty
 @test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
@@ -332,7 +362,8 @@ end
 @test size(val, 2) == N
 
 estmu1mean = Statistics.mean(val[collect(DFG.getSolverData(f1).fnc.usrfnc!.partial),:],dims=2)
-estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.partial),:],dims=2)
+# estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.partial),:],dims=2)
+estmu2mean = Statistics.mean(val[[1,2,6],:],dims=2)
 
 @show estmu1mean
 @show estmu2mean
@@ -379,7 +410,7 @@ testsMeasurements_xyz_rpy = [
   [10.,  0,  0, 0, 0, ψ],
   [ 0., 10,  0, 0, 0, ψ],
   [ 0.,  0, 10, 0, 0, ψ],
-  [ 0.,  0, 10, 0, 0, ψ],
+  [ 0., 15, 10, 0, 0, ψ],
 ]
 
 @info "Test Pose3Pose3XYYaw cases:"
@@ -421,3 +452,54 @@ end
 
 end
 
+
+
+#FIXME cleanup as test
+##
+# Another check
+
+## Update to 2 tests one with σRP = 0.0 and one with σRP = 1.0 and @test_broken
+
+fg = initfg()
+
+N = 4
+
+for i = 0:N
+  addVariable!(fg,Symbol("x$i"), Pose3)
+end
+#Pprior                                           x    y    z    ϕ    θ    ψ
+f0 = addFactor!(fg, [:x0], PriorPose3(MvNormal([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], diagm([0.1,0.1,0.1,0.01,0.01,0.01].^2) )))
+
+σRP = 0.0
+for i = 1:N
+  prpz = PriorPose3ZRP( Normal(i, 0.1), MvNormal( σRP*randn(2), diagm([0.01, 0.01].^2) ))
+  addFactor!(fg, [Symbol("x$i")], prpz)
+end
+
+for i = 1:N
+  xyy = Pose3Pose3XYYaw(MvNormal( [10.0, 0, pi/2], diagm([0.1, 0.1, 0.01].^2)))
+  addFactor!(fg, [Symbol("x$(i-1)"), Symbol("x$i")], xyy)
+end
+
+##
+# smtasks = Task[]
+# solveTree!(fg; smtasks)
+
+##
+M = SpecialEuclidean(3)
+mpts = getPoints(fg, :x1)
+mu = mean(M, mpts)
+
+mpts = getPoints(fg, :x4)
+mu = mean(M, mpts)
+
+mucrd = getCoordinates(Pose3, mu)
+
+##
+
+f = getFactor(fg, :x0x1f1)
+
+cfo = CalcFactor(IIF._getCCW(f))
+sampleFactor(cfo, 1)[1]
+
+calcFactorResidual(f, [], pts...) 
