@@ -35,7 +35,7 @@ function (cfo::CalcFactor{<:Pose2Point2Bearing})(Xc, p, l)
   # distance(m, m̂)/sqrt(2)
 
   # FIXME, this should be a vee(log()), not linear - and add to test
-  return  Xc[1] - atan(y, x)
+  return  Manifolds.sym_rem(Xc[1] - atan(y, x))
 end
 # define the conditional probability constraint
 # function (cfo::CalcFactor{<:Pose2Point2Bearing})(meas, _xi, lm)

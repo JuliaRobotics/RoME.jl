@@ -7,6 +7,7 @@ using DistributedFactorGraphs
 using Manifolds: hat
 
 @testset "Testing Bearing2D factor" begin
+##
 M = SpecialEuclidean(2)
 ϵ = identity_element(M)
 ps = [exp(M, ϵ,  hat(M, ϵ, [0.,0,0]))]
@@ -26,7 +27,7 @@ push!(ps, exp(M, ϵ,  hat(M, ϵ, [1.,2,0]))) # [4,3,0]
 # push!(ps, exp(M, ϵ,  hat(M, ϵ, [1.,2,pi]))) # [-4,-3,-pi]
 # push!(ps, exp(M, ϵ,  hat(M, ϵ, [1.,2,-pi]))) # [-3,4,pi]
 
-rs = [0, -pi/4, -pi/2, -3pi/4, pi, 3pi/4, pi/2, pi/4, pi/4, -pi/4]
+rs = [0, -pi/4, -pi/2, -3pi/4, -pi, 3pi/4, pi/2, pi/4, pi/4, -pi/4]
 
 push!(rs, pi/4 - atan(3,4))
 
@@ -52,6 +53,14 @@ xj = [1.,1]
 res = calcFactorResidualTemporary(f, (Pose2, Point2), [], (xi, xj))
 @test isapprox(res, pi/4, atol=0.1)
 
+# test -pi +pi case
+f = Pose2Point2Bearing(Normal(pi,0.001))
+xi = ProductRepr([0.,0], [1. 0; 0 1])
+xj = [-1, -0.001]
+res = calcFactorResidualTemporary(f, (Pose2, Point2), [pi], (xi, xj))
+@test isapprox(res, -0.001, atol=1e-3)
+
+##
 end
 
 
