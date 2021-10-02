@@ -20,7 +20,7 @@ testfiles = [
   # important tests are that are broken and must be restored.
   "testBearingRange2D.jl";
   "testBearing2D.jl";
-  # "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
+  "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
   
   # "testParametric.jl"; # deferred to v0.16.x
   # "testG2oParser.jl";  # deferred to v0.16.x
