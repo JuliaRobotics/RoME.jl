@@ -292,8 +292,6 @@ convert(TU.Euler, SO3(mean(_X2, false).parts[2])).P
 convert(TU.Euler, SO3(mean(_X2, false).parts[2])).R
 
 
-
-
 # pts = collect(pts)
 
 # find which dimensions are and and are not updated by XYYaw partial
@@ -328,21 +326,6 @@ end
 # @show pts[olddims,1];
 # # SEE ABOVE Yaw Pitch Roll work
 # @test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10  # TEST BROKEN
-
-##
-
-# ensure the newly updated values match what is specified in mu2
-@show mu2 # mu2 is used for XYYaw
-# trying to compare world and body frame values -- not right!
-@show Statistics.mean(pts[newdims,:],dims=2)
-@test_broken sum(abs.(Statistics.mean(pts[newdims,:],dims=2)-mu2) .< [1.5;1.5;0.3]) == 3
-
-# ensure a re-evaluation of the partial factor updates the partial variable dimensions correclty
-@test norm(X2pts[newdims,:] - pts[newdims,:]) < 1.0
-
-# ensure that memory pointers are working correctly
-memcheck = getVal(v2)
-# @test norm(X2pts - memcheck) < 1e-10
 
 ##
 end
@@ -453,53 +436,53 @@ end
 end
 
 
-
-#FIXME cleanup as test
+@testset "Square PriorPose3ZRP and Pose3Pose3XYYaw combination solve" begin
 ##
 # Another check
 
-## Update to 2 tests one with σRP = 0.0 and one with σRP = 1.0 and @test_broken
+## Build 2 test fg one with σRP = 0.0 and one with σRP = 1.0
 
-fg = initfg()
+fg = (initfg(), initfg())
+σRPs = [0.0 1.0]
 
-N = 4
+for j=1:2
+  σRP = σRPs[j]
+  
+  N = 4
 
-for i = 0:N
-  addVariable!(fg,Symbol("x$i"), Pose3)
+  for i = 0:N
+    addVariable!(fg[j],Symbol("x$i"), Pose3)
+  end
+  #Pprior                                           x    y    z    ϕ    θ    ψ
+  f0 = addFactor!(fg[j], [:x0], PriorPose3(MvNormal([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], diagm([0.1,0.1,0.1,0.01,0.01,0.01].^2) )))
+
+  for i = 1:N
+    prpz = PriorPose3ZRP( Normal(i, 0.1), MvNormal( σRP*randn(2), diagm([0.01, 0.01].^2) ))
+    addFactor!(fg[j], [Symbol("x$i")], prpz)
+  end
+
+  for i = 1:N
+    xyy = Pose3Pose3XYYaw(MvNormal( [10.0, 0, pi/2], diagm([0.1, 0.1, 0.01].^2)))
+    addFactor!(fg[j], [Symbol("x$(i-1)"), Symbol("x$i")], xyy)
+  end
+
 end
-#Pprior                                           x    y    z    ϕ    θ    ψ
-f0 = addFactor!(fg, [:x0], PriorPose3(MvNormal([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], diagm([0.1,0.1,0.1,0.01,0.01,0.01].^2) )))
-
-σRP = 0.0
-for i = 1:N
-  prpz = PriorPose3ZRP( Normal(i, 0.1), MvNormal( σRP*randn(2), diagm([0.01, 0.01].^2) ))
-  addFactor!(fg, [Symbol("x$i")], prpz)
-end
-
-for i = 1:N
-  xyy = Pose3Pose3XYYaw(MvNormal( [10.0, 0, pi/2], diagm([0.1, 0.1, 0.01].^2)))
-  addFactor!(fg, [Symbol("x$(i-1)"), Symbol("x$i")], xyy)
-end
-
 ##
+
 # smtasks = Task[]
 # solveTree!(fg; smtasks)
 
 ##
 M = SpecialEuclidean(3)
-mpts = getPoints(fg, :x1)
-mu = mean(M, mpts)
+mpts = getPoints(fg[1], :x4)
+mu_fg1 = mean(M, mpts)
 
-mpts = getPoints(fg, :x4)
-mu = mean(M, mpts)
+@test isapprox(mu_fg1.parts[1], [0,0,4], atol=0.2)
 
-mucrd = getCoordinates(Pose3, mu)
+mpts = getPoints(fg[2], :x4)
+mu_fg2 = mean(M, mpts)
 
-##
+@test_broken isapprox(mu_fg2.parts[1], [0,0,4], atol=0.2)
 
-f = getFactor(fg, :x0x1f1)
 
-cfo = CalcFactor(IIF._getCCW(f))
-sampleFactor(cfo, 1)[1]
-
-calcFactorResidual(f, [], pts...) 
+end

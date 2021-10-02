@@ -115,9 +115,6 @@ getManifold(::Pose3Pose3XYYaw) = SpecialEuclidean(2)
 ## NOTE, Yaw only works if you assume a preordained global reference point, such as identity_element(Pose3)
 function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
   #
-  #FIXME if else is for comparing 2 different aprouches in factor
-  if true
-    
   M = SpecialEuclidean(2)
 
   rx = normalize(view(wTp.parts[2],1:2, 1))
@@ -130,44 +127,42 @@ function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
          rx[2]  rx[1]]
   q = ProductRepr(view(wTq.parts[1], 1:2), R)
 
-
   q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) 
   #TODO allocalte for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
   vee!(M, Xc, q, log(M, q, q̂))
   return Xc
 
-  else
-  # Yaw is around the positive z axis
-  ##
-  # new Manifolds code (tests failing)
-  M3 = SpecialEuclidean(3)
-  M2 = SpecialEuclidean(2)
+end
+
+## Old code and other ideas:
+  # # Yaw is around the positive z axis
+  # ##
+  # # new Manifolds code (tests failing)
+  # M3 = SpecialEuclidean(3)
+  # M2 = SpecialEuclidean(2)
   
-  e3 = identity_element(M3, wTp)
-  e2 = identity_element(M2)
+  # e3 = identity_element(M3, wTp)
+  # e2 = identity_element(M2)
 
 
-  wRpψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTp.parts[2])).Y )[1:2,1:2]
-  wTp_2  = ProductRepr(wTp.parts[1][1:2],   wRpψ_2)
-  wTqhat = Manifolds.compose(M2, wTp_2, exp(M2, e2, X))
+  # wRpψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTp.parts[2])).Y )[1:2,1:2]
+  # wTp_2  = ProductRepr(wTp.parts[1][1:2],   wRpψ_2)
+  # wTqhat = Manifolds.compose(M2, wTp_2, exp(M2, e2, X))
 
-  wRqψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTq.parts[2])).Y )[1:2,1:2]
-  wTq_2  = ProductRepr(wTq.parts[1][1:2],   wRqψ_2)
-  qhatTq = Manifolds.compose(M2, inv(M2, wTqhat), wTq_2)
+  # wRqψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTq.parts[2])).Y )[1:2,1:2]
+  # wTq_2  = ProductRepr(wTq.parts[1][1:2],   wRqψ_2)
+  # qhatTq = Manifolds.compose(M2, inv(M2, wTqhat), wTq_2)
   
-  #TODO allocate for vee! see Manifolds #412, fix for AD
-  Xc = zeros(3)
-  vee!(M2, Xc, e2, log(M2, e2, qhatTq))
-  return Xc
-  end
+  # #TODO allocate for vee! see Manifolds #412, fix for AD
+  # Xc = zeros(3)
+  # vee!(M2, Xc, e2, log(M2, e2, qhatTq))
+  # return Xc
 
   # Old YPR coordinate code, < v"0.16"
   # wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
   # jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
   # return se2vee(jXjhat)
-end
-
 
 """
     $TYPEDEF
