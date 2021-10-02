@@ -30,7 +30,7 @@ function getSample(cf::CalcFactor{<:PriorPose3ZRP})
 
   #Rotation part: roll and pitch
   r,p = rand(cf.factor.rp)
-  R = Rotations.RotXY(r, p)
+  R = Rotations.RotYX(p, r) #TODO confirm RotYX(p,r) or RotXY(r,p)
   
   # Translation part: Z
   T = [0; 0; rand(cf.factor.z)]
@@ -80,13 +80,29 @@ end
 
 Partial factor between XY and Yaw of two Pose3 variables.
 
+```
+wR2 = wR1*1R2 = wR1*(1Rψ*Rθ*Rϕ)
+wRz = wR1*1Rz
+zRz = wRz \\ wR(Δψ)
+
+M_R = SO(3)
+δ(α,β,γ) = vee(M_R, R_0, log(M_R, R_0, zRz))
+
+M = SE(3)
+p0 = identity_element(M)
+δ(x,y,z,α,β,γ) = vee(M, p0, log(M, p0, zRz))
+```
+
 """
 struct Pose3Pose3XYYaw{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
   Z::T
+  # partial::Tuple{Int,Int,Int,Int,Int}
   partial::Tuple{Int,Int,Int}
 end
 Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) = error("Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) where {T1 <: , T2 <: IIF.SamplableBelief} is deprecated, use one belief")
 
+# Lie exponentials (pqr) are all three affected by changes in Yaw
+# Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,4,5,6))   # (1,2,6))
 Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,6))
 
 function getSample(cf::CalcFactor{<:Pose3Pose3XYYaw})
@@ -96,11 +112,20 @@ end
 getManifold(::Pose3Pose3XYYaw) = SpecialEuclidean(2)
 
 
-function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, p_SE3, q_SE3 )
+## NOTE, Yaw only works if you assume a preordained global reference point, such as identity_element(Pose3)
+function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
   #
   M = SpecialEuclidean(2)
-  p = ProductRepr(p_SE3.parts[1][1:2], p_SE3.parts[2][1:2, 1:2])
-  q = ProductRepr(q_SE3.parts[1][1:2], q_SE3.parts[2][1:2, 1:2])
+
+  rx = normalize(view(wTp.parts[2],1:2, 1))
+  R = SA[rx[1] -rx[2];
+         rx[2]  rx[1]]
+  p = ProductRepr(view(wTp.parts[1], 1:2), R)
+
+  rx = normalize(view(wTq.parts[2],1:2, 1))
+  R = SA[rx[1] -rx[2];
+         rx[2]  rx[1]]
+  q = ProductRepr(view(wTq.parts[1], 1:2), R)
 
   q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) 
   #TODO allocalte for vee! see Manifolds #412, fix for AD
@@ -108,11 +133,36 @@ function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, p_SE3, q_SE3 )
   vee!(M, Xc, q, log(M, q, q̂))
   return Xc
 
+end
+
+## Old code and other ideas:
+  # # Yaw is around the positive z axis
+  # ##
+  # # new Manifolds code (tests failing)
+  # M3 = SpecialEuclidean(3)
+  # M2 = SpecialEuclidean(2)
+  
+  # e3 = identity_element(M3, wTp)
+  # e2 = identity_element(M2)
+
+
+  # wRpψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTp.parts[2])).Y )[1:2,1:2]
+  # wTp_2  = ProductRepr(wTp.parts[1][1:2],   wRpψ_2)
+  # wTqhat = Manifolds.compose(M2, wTp_2, exp(M2, e2, X))
+
+  # wRqψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTq.parts[2])).Y )[1:2,1:2]
+  # wTq_2  = ProductRepr(wTq.parts[1][1:2],   wRqψ_2)
+  # qhatTq = Manifolds.compose(M2, inv(M2, wTqhat), wTq_2)
+  
+  # #TODO allocate for vee! see Manifolds #412, fix for AD
+  # Xc = zeros(3)
+  # vee!(M2, Xc, e2, log(M2, e2, qhatTq))
+  # return Xc
+
+  # Old YPR coordinate code, < v"0.16"
   # wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
   # jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
   # return se2vee(jXjhat)
-end
-
 
 """
     $TYPEDEF

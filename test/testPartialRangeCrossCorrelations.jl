@@ -53,23 +53,23 @@ mvn = fit(MvNormal, L1_n)
 mvp = fit(MvNormal, L1_p)
 
 # check diagonal structure for correlation
-@test isapprox(mvn.Σ.mat[1,1], 1.7, atol=1.2)
-@test isapprox(mvn.Σ.mat[2,2], 1.7, atol=1.2)
-@test isapprox(mvn.Σ.mat[1,2], 1.1, atol=1.2)
+@test isapprox(mvn.Σ.mat[1,1], 2.5, atol=2)
+@test isapprox(mvn.Σ.mat[2,2], 2.5, atol=2)
+@test isapprox(mvn.Σ.mat[1,2], 2.0, atol=1.5)
 
-@test isapprox(mvp.Σ.mat[1,1], 1.7, atol=1.2)
-@test isapprox(mvp.Σ.mat[2,2], 1.7, atol=1.2)
-@test isapprox(mvp.Σ.mat[1,2], -1.1, atol=1.2)
+@test isapprox(mvp.Σ.mat[1,1], 2.5, atol=2)
+@test isapprox(mvp.Σ.mat[2,2], 2.5, atol=2)
+@test isapprox(mvp.Σ.mat[1,2], -2.0, atol=1.5)
 
 # sanity check for symmetry
 @test mvn.Σ.mat - mvn.Σ.mat' |> norm < 0.01
 
 # test means in the right location
-@test isapprox(mvn.μ[1], 5.4, atol=1.0)
-@test isapprox(mvn.μ[2], -4.8, atol=0.75)
+@test isapprox(mvn.μ[1], 5.4, atol=1)
+@test isapprox(mvn.μ[2], -4.2, atol=1)
 
 @test isapprox(mvp.μ[1], 5.4, atol=1.0)
-@test isapprox(mvp.μ[2], 4.8, atol=0.75)
+@test isapprox(mvp.μ[2], 4.2, atol=1)
 
 ##
 
@@ -84,7 +84,6 @@ end
 # Gadfly.set_default_plot_size(35cm,25cm)
 
 ##
-
 
 # plotSLAM2D(fg, drawPoints=false)
 

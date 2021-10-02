@@ -7,6 +7,7 @@ using DistributedFactorGraphs
 using Manifolds: hat
 
 @testset "Testing Bearing2D factor" begin
+##
 M = SpecialEuclidean(2)
 ϵ = identity_element(M)
 ps = [exp(M, ϵ,  hat(M, ϵ, [0.,0,0]))]
@@ -26,7 +27,7 @@ push!(ps, exp(M, ϵ,  hat(M, ϵ, [1.,2,0]))) # [4,3,0]
 # push!(ps, exp(M, ϵ,  hat(M, ϵ, [1.,2,pi]))) # [-4,-3,-pi]
 # push!(ps, exp(M, ϵ,  hat(M, ϵ, [1.,2,-pi]))) # [-3,4,pi]
 
-rs = [0, -pi/4, -pi/2, -3pi/4, pi, 3pi/4, pi/2, pi/4, pi/4, -pi/4]
+rs = [0, -pi/4, -pi/2, -3pi/4, -pi, 3pi/4, pi/2, pi/4, pi/4, -pi/4]
 
 push!(rs, pi/4 - atan(3,4))
 
@@ -45,10 +46,25 @@ end
 @warn "Bearing2D, must still test factor gradients, which will also verify the sign on residual function calculations"
 @test_broken false
 
+# test sign
+f = Pose2Point2Bearing(Normal(pi/2,0.001))
+xi = ProductRepr([0.,0], [1. 0; 0 1])
+xj = [1.,1]
+res = calcFactorResidualTemporary(f, (Pose2, Point2), [], (xi, xj))
+@test isapprox(res, pi/4, atol=0.1)
+
+# test -pi +pi case
+f = Pose2Point2Bearing(Normal(pi,0.001))
+xi = ProductRepr([0.,0], [1. 0; 0 1])
+xj = [-1, -0.001]
+res = calcFactorResidualTemporary(f, (Pose2, Point2), [pi], (xi, xj))
+@test isapprox(res, -0.001, atol=1e-3)
+
+##
 end
 
 
-@testset "Simple Bearing2D test" begin
+@testset "Simple Bearing2D test to give narrow vs broad belief posteriors" begin
   
 # new factor graph
 fg = initfg()
@@ -58,6 +74,8 @@ addVariable!(fg, :x2, Pose2)
 addFactor!(fg, [:x1], PriorPose2(MvNormal([10.0; 0; 0], diagm([0.01;0.01;0.001].^2))))
 addFactor!(fg, [:x2], PriorPose2(MvNormal([0.0;10.0; 0], diagm([0.01;0.01;0.001].^2))))
 
+# limit the scope nearby origin, but test was written because it was found with Bearing
+# that many points would suddenly land very far away from the origin, even with the prior.
 addVariable!(fg, :l1, Point2)
 addFactor!(fg, [:l1], PriorPoint2(MvNormal([0.,0], diagm([10.,10].^2))))
 
@@ -69,10 +87,11 @@ addFactor!(fg, [:x2;:l1], Pose2Point2Bearing(Normal(-pi/2,0.001)))
 points = approxConv(fg, :x1l1f1, :l1)
 @cast pts[j,i] := points[i][j]
 #x1l1 "partial" constrian on x-axis 
-#FIXME very pesamistic tests, should be way better
+#FIXME very pessimistic tests, should be way better
 @test sum(abs.(pts[2,:]) .< 100) > 30
 
-points = approxConv(fg, :x2l1f1, :l1)
+L1 = approxConvBelief(fg, :x2l1f1, :l1)
+points = getPoints(L1, false)
 @cast pts[j,i] := points[i][j]
 @test sum(abs.(pts[1,:]) .< 100) > 30
 

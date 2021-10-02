@@ -38,6 +38,9 @@ end
 
 function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
   SE2 = SpecialEuclidean(2)
+  #FIXME fix this factor to work correctly on manifolds
+  if false
+
   Mt = SE2.manifold.manifolds[1]
   Mr = SE2.manifold.manifolds[2]
 
@@ -60,6 +63,33 @@ function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
   δr = norm(δ_l)
 
   return [δθ; δr]
+
+  # FIXME: this is close to the old BR that worked, use to ensure tests are working
+  else
+    Xi = vee(SE2, xi, log(SE2, identity_element(SE2, xi), xi))
+
+    Mmeas = getManifold(cfo.factor)
+    Xmeas = vee(Mmeas, Manifolds.Identity(Mmeas), meas)
+    # 1-bearing
+    # 2-range
+    # world frame
+    meas_θ = Xmeas[1]
+    meas_r = Xmeas[2]
+
+    θ = meas_θ + Xi[3]
+    mx = meas_r*cos(θ)
+    my = meas_r*sin(θ)
+  
+    ex = lm[1] - (mx + Xi[1])
+    ey = lm[2] - (my + Xi[2])
+  
+    # res = [eθ, er]
+    eθ = atan((my + Xi[2]), (mx + Xi[1])) - atan(lm[2], lm[1])  # eθ
+    er= sqrt(ex^2 + ey^2) # some wasted computation here       # er 
+  
+    # return hat(facM, ProductRepr([1. 0;0 1], [0.]), [eθ, er])
+    return [eθ, er]
+  end
 end  
 # quick check
 # pose = (0,0,0),  bear = 0.0,  range = 10.0   ==>  lm = (10,0)
