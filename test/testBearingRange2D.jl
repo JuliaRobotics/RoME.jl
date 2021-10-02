@@ -81,7 +81,7 @@ zi = Manifolds.hat(M, identity_element(M), _zi)
 res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li)) 
 
 @show res
-@test_broken norm( res ) < 1e-14
+@test norm( res ) < 1e-14
 
 ##
 
@@ -95,7 +95,7 @@ res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
 
 #
 @show res
-@test_broken norm(res) < 1e-14
+@test norm(res) < 1e-14
 
 ##
 
@@ -116,24 +116,140 @@ res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
 @test norm(res) < 1e-14
 
 ##
-# #TODO Update to new CalcFactor 
-# # test parametric Pose2Point2BearingRange
-# f = Pose2Point2BearingRange(Normal(0.0,1), Normal(10.0,1))
-# @test isapprox(f([0.,0,0], [10.,0]), 0, atol = 1e-9)
-# @test isapprox(f([0,0,pi/2], [0.,10]), 0, atol = 1e-9)
+x1 = ProductRepr([0.,0], [1. 0; 0 1])
+x2 = ProductRepr([0.,0], [0 -1.; 1 0])
 
-# f = Pose2Point2BearingRange(Normal(pi/2,1), Normal(10.0,1))
-# @test isapprox(f([0.,0,0], [0.,10]), 0, atol = 1e-9)
-# @test isapprox(f([0,0,pi/2], [-10.,0]), 0, atol = 1e-9)
+#measurement setup 1
+meas = (0., 10)
+f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
+X = hat(M, Identity(M), [meas[1],meas[2]])
+# x1
+p = x1
+q = [10.,0]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res, [0,0], atol = 1e-9)
+# x2
+p = x2
+q = [0., 10]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res, [0,0], atol = 1e-9)
 
-# f = Pose2Point2BearingRange(Normal(pi,1), Normal(10.0,1))
-# @test isapprox(f([0.,0,0], [-10.,0]), 0, atol = 1e-9)
-# @test isapprox(f([0,0,pi/2], [0.,-10]), 0, atol = 1e-9)
 
-# f = Pose2Point2BearingRange(Normal(-pi/2,1), Normal(10.0,1))
-# @test isapprox(f([0.,0,0], [0.,-10]), 0, atol = 1e-9)
-# @test isapprox(f([0,0,pi/2], [10.,0]), 0, atol = 1e-9)
+meas = (pi/2., 10)
+f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
+X = hat(M, Identity(M), [meas[1],meas[2]])
+# x1
+p = x1
+q = [0.,10]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res, [0,0], atol = 1e-9)
+# x2
+p = x2
+q = [-10., 0]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res, [0,0], atol = 1e-9)
 
+
+meas = (pi, 10.)
+f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
+X = hat(M, Identity(M), [meas[1],meas[2]])
+# x1
+p = x1
+q = [-10.,0]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res, [0,0], atol = 1e-9)
+# x2
+p = x2
+q = [0., -10]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res, [0,0], atol = 1e-9)
+
+
+meas = (-pi/2., 10.)
+f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
+X = hat(M, Identity(M), [meas[1],meas[2]])
+# x1
+p = x1
+q = [0.,-10]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res, [0,0], atol = 1e-9)
+# x2
+p = x2
+q = [10., 0]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res, [0,0], atol = 1e-9)
+
+##
+# testing non zero errors on range
+#FIXME BR range sign is broken, needed for gradients
+
+meas = (0., 10)
+f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
+X = hat(M, Identity(M), [meas[1],meas[2]])
+# x1
+p = x1
+q = [11., 0]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test_broken isapprox(res, [0,-1], atol = 1e-9)
+# x2
+p = x2
+q = [0., 11]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test_broken isapprox(res, [0,-1], atol = 1e-9)
+
+
+meas = (0., 10)
+f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
+X = hat(M, Identity(M), [meas[1],meas[2]])
+# x1
+p = x1
+q = [9., 0]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res, [0,1], atol = 1e-9)
+# x2
+p = x2
+q = [0., 9]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res, [0,1], atol = 1e-9)
+
+# on small angles also
+s,c = 10 .* sincos(0.001)
+meas = (0., 10)
+f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
+X = hat(M, Identity(M), [meas[1],meas[2]])
+# x1
+p = x1
+q = [c, s]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res[1], -0.001, atol = 1e-9)
+#FIXME ?
+@test isapprox(res[2], 0, atol = 0.1)
+# x2
+p = x2
+q = [s, c]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test isapprox(res[1], 0.001, atol = 1e-9)
+#FIXME ?
+@test isapprox(res[2], 0, atol = 0.1)
+
+
+# WIP testing non zero errors
+# I don't know if this test is needed or even possible
+r2 = 10/sqrt(2)
+meas = (0., 10)
+f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
+X = hat(M, Identity(M), [meas[1],meas[2]])
+# x1
+p = x1
+q = [r2, r2]
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test_broken isapprox(res, [-pi/4,0], atol = 1e-9)
+# x2
+p = x2
+res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
+@test_broken isapprox(res, [pi/4,0], atol = 1e-9)
+
+##
 end
 
 
