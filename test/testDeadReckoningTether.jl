@@ -77,7 +77,7 @@ tree2 = solveTree!(fg, recordcliqs=ls(fg));
 
 val = accumulateFactorMeans(fg, [:x0deadreckon_x0f1])
 
-@test norm(val - calcVariablePPE(fg, :x0).suggested) < 1e-4
+@test norm(val - calcVariablePPE(fg, :x0).suggested) < 1e-3
 
 
 end
