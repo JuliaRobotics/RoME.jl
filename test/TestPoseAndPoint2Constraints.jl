@@ -38,7 +38,8 @@ pts = approxConv(fg, :x0x1f1, :x1)
 # pts[3,:] .= TU.wrapRad.(pts[3,:])
 M = getManifold(Pose2)
 @show mv = mean(M, pts)
-@test isapprox(M, mv, ProductRepr([50,0], [0 -1; 1 0]), atol=0.5)
+@test isapprox(mv.parts[1], [50,0], atol=1)
+@test isapprox(mv.parts[2], [0 -1; 1 0], atol=0.5)
 
 ##
 
