@@ -61,11 +61,11 @@ while 0 < i
     # 
     @cast l1_vals[j,i] := getVal(fg, :l1)[i][j]
     
-    @test 10 < sum( 80 .< l1_vals[1,:] .< 120 )
-    @test 10 < sum( -20 .< l1_vals[2,:] .< 20 )
+    @test 5 < sum( 80 .< l1_vals[1,:] .< 120 )
+    @test 5 < sum( -20 .< l1_vals[2,:] .< 20 )
     
-    @test 10 < sum( -20 .< l1_vals[1,:] .< 20 )
-    @test 10 < sum( 80 .< l1_vals[2,:] .< 120 )
+    @test 5 < sum( -20 .< l1_vals[1,:] .< 20 )
+    @test 5 < sum( 80 .< l1_vals[2,:] .< 120 )
     
     @cast x0_vals[j,i] := getVal(fg, :x0)[i][j]
     
