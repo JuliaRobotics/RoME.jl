@@ -125,13 +125,13 @@ L2 = getBelief(fg, :l2)
 mask = 10 .< L2pts[1,:] .< 30
 numM1 = sum(mask)
 #FIXME relaxing tests was 20 70
-@test 10 < numM1 < 90
+@test 5 < numM1 < 95
 
 # should also have likelihood of being elsewhere
 imask = xor.(mask, 1)
 numM2 = sum(imask)
 #FIXME relaxing tests was 20 70
-@test 10 < numM2 < 90
+@test 5 < numM2 < 95
 
 ##
 
