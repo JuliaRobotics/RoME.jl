@@ -14,8 +14,9 @@ Single dimension bearing constraint from Pose2 to Point2 variable.
 struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
     bearing::B
     reuse::Vector{P2P2BearingReuse}
+    u0::Base.RefValue{Any}#FIXME
     Pose2Point2Bearing{B}() where B = new{B}()
-    Pose2Point2Bearing{B}(x1::B) where {B <: IIF.SamplableBelief} = new{B}(x1, [P2P2BearingReuse() for i in 1:Threads.nthreads()])
+    Pose2Point2Bearing{B}(x1::B) where {B <: IIF.SamplableBelief} = new{B}(x1, [P2P2BearingReuse() for i in 1:Threads.nthreads()], Base.RefValue{Any}())
 end
 Pose2Point2Bearing(x1::B) where {B <: IIF.SamplableBelief} = Pose2Point2Bearing{B}(x1)
 
@@ -33,9 +34,27 @@ function (cfo::CalcFactor{<:Pose2Point2Bearing})(Xc, p, l)
   # TODO Xc is a coordinate (ie angle), maybe change to X ϵ so2 
   # m̂ = exp(so{N}(hat(SpecialOrthogonal(N), SO{N}()[], atan(y, x))))
   # distance(m, m̂)/sqrt(2)
-
+  
+  #FIXME experimental constraint
+  sfvar = cfo.metadata.solvefor
+  varlist = cfo.metadata.variablelist
+  sfvaridx = findfirst(sfvar .== varlist)
+  u0 = cfo.factor.u0[]
+  
+  if sfvaridx == 1  
+    u0x,u0y = u0.parts[1]
+    px,py = p.parts[1]
+    rr = sqrt((px-u0x)^2 + (py-u0y)^2)*0.1
+  elseif sfvaridx == 2
+    q0 = ProductRepr(u0, identity_element(SpecialOrthogonal(2)))
+    x0,y0 = Manifolds.compose(M, inv(M, p), q0).parts[1]    
+    r = norm([x,y])
+    r0 = norm([x0,y0])
+    rr = r0 - r
+  end
+  
   # FIXME, this should be a vee(log()), not linear - and add to test
-  return  Manifolds.sym_rem(Xc[1] - atan(y, x))
+  return  norm([Manifolds.sym_rem(Xc[1] - atan(y, x)) , rr])
 end
 # define the conditional probability constraint
 # function (cfo::CalcFactor{<:Pose2Point2Bearing})(meas, _xi, lm)
