@@ -70,8 +70,55 @@ fg = RoME.generateCanonicalFG_Helix2DSpiral!(200, graphinit=false, rate_r=0.6, r
 
 
 ##
-
 end
+
+
+@testset "test extending fg with helix generator" begin
+##
+
+fg = generateCanonicalFG_Helix2D!(5, posesperturn=15, radius=10, graphinit=false)
+
+@test !getSolverParams(fg).graphinit
+
+# check the helix is being constructed in a consistent way, using ppe solveKey :simulated
+vars = sortDFG(ls(fg))
+ppes = [
+  [0.0, 0.0, 1.5707963267948966],
+  [0.8645454235739924, 4.067366430758004, 1.151917276019672],
+  [3.3086939364114176, 7.431448254773942, 0.7330382545911657],
+  [6.909830056250526, 9.510565162951536, 0.31415923447063226],
+  [11.045284632676536, 9.945218953682733, -0.10471978645923721],
+]
+
+for (i,v) in enumerate(vars)
+  @test isapprox(ppes[i], getPPE(fg, v, :simulated).suggested; atol=1e-5 ) 
+end
+
+
+# check that the graph can be expanded with the same generator function
+
+generateCanonicalFG_Helix2D!(5, dfg=fg, posesperturn=15, radius=10, graphinit=false)
+# check that no new variables were added
+@test length(ls(fg)) == length(vars)
+@test !exists(fg, :x5)
+
+##
+
+generateCanonicalFG_Helix2D!(6, dfg=fg, posesperturn=15, radius=10, graphinit=false)
+# check that only one variable has been added
+@test length(ls(fg)) == length(vars) + 1 
+@test exists(fg, :x5)
+
+# check the simulated location of the new variable is also at the right location
+push!(vars, :x5)
+push!(ppes, [ 15.0;8.660254037844387;-0.5235988055902416] )
+
+@test isapprox(ppes[end], getPPE(fg, :x5, :simulated).suggested; atol=1e-5 )
+
+
+##
+end
+
 
 ##
 
