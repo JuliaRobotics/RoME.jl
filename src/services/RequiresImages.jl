@@ -3,6 +3,7 @@
 @info "Loading RoME.jl tools related to both ImageCore.jl and ImageIO.jl"
 
 using .ImageCore
+using .ImageIO
 
 export generateField_CanyonDEM
 
