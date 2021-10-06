@@ -1,7 +1,7 @@
 # test scalar field
 
 using Test
-using ImageCore
+using ImageCore, ImageIO
 using TensorCast
 using Interpolations
 using RoME

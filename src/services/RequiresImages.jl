@@ -1,6 +1,6 @@
 # ScalarField functions related to Images.jl
 
-@info "Loading RoME.jl tools related to ImageCore.jl"
+@info "Loading RoME.jl tools related to both ImageCore.jl and ImageIO.jl"
 
 using .ImageCore
 

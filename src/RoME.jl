@@ -314,7 +314,9 @@ function __init__()
 
   # Scalar field specifics
   
-  @require ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534" include("services/RequiresImages.jl")
+  @require ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534" begin
+    @require ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19" include("services/RequiresImages.jl")
+  end
   # Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" 
 
   # @require Interpolations="a98d9a8b-a2ab-59e6-89dd-64a1c18fca59" begin 
