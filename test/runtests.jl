@@ -15,6 +15,9 @@ using Statistics
 @error("add test for generateCanonicalFG_Beehive, norm( simulated - default ) < tol")
 
 testfiles = [
+  # new tests wip
+  "testScalarFields.jl"
+
   # any wip fail-fast dev testing
   "testPartialPose3.jl";
   
