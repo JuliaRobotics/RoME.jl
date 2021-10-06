@@ -16,6 +16,7 @@ using RoME
 x_min, x_max = -9000, 9000
 y_min, y_max = -9000, 9000
 # north is regular map image up
+global img
 x, y, img = RoME.generateField_CanyonDEM(1, 100, x_is_north=false, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
 
 

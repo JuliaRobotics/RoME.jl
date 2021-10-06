@@ -27,6 +27,7 @@ testfiles = [
   # "testG2oParser.jl";  # deferred to v0.16.x
   
   # tests most likely to fail on numerics
+  "testScalarFields.jl";
   "testPoint2Point2Init.jl";
   "threeDimLinearProductTest.jl";
   "testBeehiveGrow.jl"; # also starts multiprocess
@@ -55,7 +56,6 @@ testfiles = [
   "testDeadReckoningTether.jl"; 
   "testFluxModelsPose2.jl";
   "testGenerateHelix.jl";
-  "testScalarFields.jl";
 ]
 
 
