@@ -16,7 +16,7 @@ struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinim
     reuse::Vector{P2P2BearingReuse}
     u0::Base.RefValue{Any}#FIXME
     Pose2Point2Bearing{B}() where B = new{B}()
-    Pose2Point2Bearing{B}(x1::B) where {B <: IIF.SamplableBelief} = new{B}(x1, [P2P2BearingReuse() for i in 1:Threads.nthreads()], Base.RefValue{Any}())
+    Pose2Point2Bearing{B}(x1::B) where {B <: IIF.SamplableBelief} = new{B}(x1, [P2P2BearingReuse() for i in 1:Threads.nthreads()], Base.RefValue{Any}(undef))
 end
 Pose2Point2Bearing(x1::B) where {B <: IIF.SamplableBelief} = Pose2Point2Bearing{B}(x1)
 
@@ -39,12 +39,17 @@ function (cfo::CalcFactor{<:Pose2Point2Bearing})(Xc, p, l)
   sfvar = cfo.metadata.solvefor
   varlist = cfo.metadata.variablelist
   sfvaridx = findfirst(sfvar .== varlist)
-  u0 = cfo.factor.u0[]
+  
+  if cfo.factor.u0[] == undef
+    u0 = sfvaridx == 1 ? p : l 
+  else 
+    u0 = cfo.factor.u0[]
+  end
   
   if sfvaridx == 1  
     u0x,u0y = u0.parts[1]
     px,py = p.parts[1]
-    rr = sqrt((px-u0x)^2 + (py-u0y)^2)*0.1
+    rr = sqrt((px-u0x)^2 + (py-u0y)^2)*1.0
   elseif sfvaridx == 2
     q0 = ProductRepr(u0, identity_element(SpecialOrthogonal(2)))
     x0,y0 = Manifolds.compose(M, inv(M, p), q0).parts[1]    
