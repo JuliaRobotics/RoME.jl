@@ -10,6 +10,7 @@ using Reexport
 
 using
   Dates,
+  FileIO,
   Distributed,
   LinearAlgebra,
   Statistics,
@@ -294,6 +295,8 @@ include("canonical/GenerateHelix.jl")
 include("AdditionalUtils.jl")
 include("g2oParser.jl")
 
+# ScalarFields
+include("services/ScalarFields.jl")
 
 # things on their way out
 include("Deprecated.jl")
@@ -304,10 +307,21 @@ using Requires
 function __init__()
   # combining neural networks natively into the non-Gaussian  factor graph object
   @require Flux="587475ba-b771-5e3f-ad9e-33799f191a9c" begin
-    @info "RoME is adding Flux related functionality."
+    @info "Loading RoME.jl tools related to Flux.jl."
     include("factors/flux/models/Pose2OdoNN_01.jl") # until a better way is found to deserialize
     include("factors/flux/MixtureFluxPose2Pose2.jl")
   end
+
+  # Scalar field specifics
+  
+  @require ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534" begin
+    @require ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19" include("services/RequiresImages.jl")
+  end
+  # Images="916415d5-f1e6-5110-898d-aaa5f9f070e0" 
+
+  # @require Interpolations="a98d9a8b-a2ab-59e6-89dd-64a1c18fca59" begin 
+  #   include("services/ScalarFieldsInterpolations.jl")
+  # end
 end
 
 # manifold conversions required during transformation
