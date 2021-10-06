@@ -65,11 +65,11 @@ mvp = fit(MvNormal, L1_p)
 @test mvn.Σ.mat - mvn.Σ.mat' |> norm < 0.01
 
 # test means in the right location
-@test isapprox(mvn.μ[1], 5.4, atol=1.5)
-@test isapprox(mvn.μ[2], -4.2, atol=1.5)
+@test isapprox(mvn.μ[1], 5.4, atol=2.0)
+@test isapprox(mvn.μ[2], -4.2, atol=2.0)
 
-@test isapprox(mvp.μ[1], 5.4, atol=1.5)
-@test isapprox(mvp.μ[2], 4.2, atol=1.5)
+@test isapprox(mvp.μ[1], 5.4, atol=2.0)
+@test isapprox(mvp.μ[2], 4.2, atol=2.0)
 
 ##
 
