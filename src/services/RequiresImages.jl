@@ -16,8 +16,9 @@ function generateField_CanyonDEM( scale=1, N=100;
                                   x_is_north=true,
                                   x_min::Real=-9000, x_max::Real=9000,
                                   y_min::Real=-9000, y_max::Real=9000)
-    #
-  img_ = load(dirname(dirname(@__DIR__)), "data","CanyonDEM.png") .|> Gray
+  #
+  filepath = joinpath(dirname(dirname(@__DIR__)), "data","CanyonDEM.png")
+  img_ = load(filepath) .|> Gray
   img_ = scale.*Float64.(img_)
   
   N_ = minimum([N; size(img_)...])
@@ -25,10 +26,11 @@ function generateField_CanyonDEM( scale=1, N=100;
   
   # flip image so x-axis in plot is North and y-axis is West (ie img[-north,west], because top left is 0,0)
   _img_ = if x_is_north
-      _img = collect(img')
-      reverse(_img, dims=2)
+    _img = collect(img')
+    reverse(_img, dims=2)
   else
-      img
+    # flip so north is down along with Images.jl [i,j] --> (x,y)
+    reverse(img_, dims=1)
   end
   
   x = range(x_min, x_max, length = size(_img_,1)) # North
