@@ -17,10 +17,9 @@ Notes
   - See related wrapper functions for convenient generators of helix patterns in 2D,
   - Real valued `xr_t(t)` and `yr_t(t)` can be modified (and will override) complex valued `spine_t` instead.
 - use `postpose_cb = (fg_, lastestpose) -> ...` for additional user features after each new pose
+- can be used to grow a graph with repeated calls, but keyword parameters are assumed identical between calls.
 
-Related
-
-[`generateCanonicalFG_Helix2DSlew!`](@ref), [`generateCanonicalFG_Helix2DSpiral!`](@ref)
+See also: [`generateCanonicalFG_Helix2DSlew!`](@ref), [`generateCanonicalFG_Helix2DSpiral!`](@ref), [`generateCanonicalFG_Beehive!`](@ref)
 """
 function generateCanonicalFG_Helix2D!(numposes::Integer=40;
                                       posesperturn::Integer=20,
@@ -34,12 +33,13 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
                                       poseRegex::Regex=r"x\d+",
                                       μ0=[0;0;pi/2],
                                       refKey::Symbol=:simulated,
-                                      Qd::Matrix{<:Real}=diagm( [0.1;0.1;0.05].^2 ),
+                                      Qd::AbstractMatrix{<:Real}=diagm( [0.1;0.1;0.05].^2 ),
                                       postpose_cb::Function=(fg_,latestpose)->()   )
   #
   
   # add first pose if not already exists
-  if !( :x0 in ls(dfg) )
+  _initpose = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, 0)
+  if !exists( dfg, _initpose )
     generateCanonicalFG_ZeroPose(dfg=dfg, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
     getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
     # reference ppe on :x0
@@ -47,27 +47,37 @@ function generateCanonicalFG_Helix2D!(numposes::Integer=40;
     setPPE!(dfg[:x0], refKey, DFG.MeanMaxPPE, ppe)
   end
   
-  # what is the last pose
-  lastpose = (ls(dfg, poseRegex) |> sortDFG)[end]
-  # get latest posecount number
+  # start from existsing poses
+  _poses = ls(dfg, poseRegex) |> sortDFG
+  # what is the last pose and posecount number
+  lastpose = _poses[end]
   posecount = match(r"\d+", string(lastpose)).match |> x->parse(Int,x)    
+  # init how many poses at the beginning of a new turn
+  bidx = length(_poses) # 1
   
+  # fractional number of turns to make in total (after all graph generation is done)
   turns = numposes/posesperturn
-  # TODO dont always start from 0
+  # generate helix pattern algebraically
   tmp = calcHelix_T(0, turns, posesperturn, radius=radius, spine_t=spine_t, xr_t=xr_t, yr_t=yr_t)
-
-  Tμ = SE2(μ0-[0;0;pi/2])
-
-  bidx = 1
+  # TODO, dont always start from 0 -- i.e. chop first repeat elements from deterministic helix
+  
+  # select the starting point
+  _μ0 = μ0
+  # @show _μ0 = 1 == bidx ? μ0 : getPPE(dfg, lastpose, refKey).suggested
+  Tμ = SE2(_μ0-[0;0;pi/2])
+  
+  # current end pose count for number of turns
   eidx = 1
   for tn in 0:(ceil(Int, turns)-1)
     eidx += posesperturn
+    # skip out early if extending a previous existing graph
     eidx = minimum( [eidx, length(tmp[1])] )
     # tmp_ = _calcHelix2DApprox(N_ppt=posesperturn, radius=radius, runback=runback)
     tmp_ = hcat(tmp[2][bidx:eidx,:],tmp[3][bidx:eidx])'
     # adjust for turn progression in x
     # tmp_[1,:] .+= tn*(2radius*(1-runback))
     oldpose = Tμ*SE2(tmp_[:,1])
+    eidx < bidx ? continue : nothing
     
     # add each new pose (skippin the first element)
     for ps in 2:size(tmp_,2)
