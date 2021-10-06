@@ -153,7 +153,7 @@ p1 = plot!(x, y, linewidth=lw, α = 0.1, color=:green)
 end
 p1
 ##
-## ====================================================
+## ========================================================================================================
 points = getPoints(fg, :l1)
 @cast pts[j,i] := points[i][j]
 scatter(pts[1,:], pts[2,:], markersize=10,size=(600,600), legend=false)
@@ -169,3 +169,68 @@ points = getPoints(fg, :x1)
 scatDir!(pts; arrow_scale, markersize=2, dir_color=:cyan)
 
 ##
+
+## ========================================================================================================
+using MultiKDE
+using Distributions, Random, Plots
+
+##
+dims = [ContinuousDim(), ContinuousDim(), ContinuousDim()]
+bw = [1, 1, 0.1]
+
+pts = getCoordinates.(Pose2, allpoints)
+
+kd = KDEMulti(dims, bw, pts)
+
+grd = range(-12,12, step=1)
+
+##
+grid = Vector{Vector{Float64}}()
+ps = Float64[]
+ps2d = Vector{Tuple{Float64,Float64,Float64}}()
+ii = 1
+jj = 1
+kk = 1
+angle_range = -pi:0.1:pi
+data_3d = zeros(length(grd),length(grd),length(angle_range))
+for (ii,i)=enumerate(grd), (jj,j)=enumerate(grd), (kk,k)=enumerate(angle_range)
+    push!(grid,[i,j,k])
+    p = MultiKDE.pdf(kd, [i,j,k])
+    push!(ps, p)
+    push!(ps2d, (i,j,p))
+
+    data_3d[ii,jj,kk] = p
+
+
+end
+
+##
+
+idxs = findall(x->x>2.1, data_3d)
+coords = zeros(3,length(idxs))
+for (i,idx) in enumerate(idxs)
+    a = grd[idx[1]]
+    b = grd[idx[2]]
+    c = angle_range[idx[3]]
+    coords[:,i] = [a,b,c]
+end
+
+##
+points = getPoints(fg, :l1)
+@cast pts[j,i] := points[i][j]
+scatter(pts[1,:], pts[2,:], markersize=10,size=(600,600), legend=false)
+
+points = getPoints(fg, :l2)
+@cast pts[j,i] := points[i][j]
+scatter!(pts[1,:], pts[2,:], markersize=10)
+
+scatDir!(coords; arrow_scale, markersize=2, dir_color=:green)
+
+
+##
+
+
+
+
+
+
