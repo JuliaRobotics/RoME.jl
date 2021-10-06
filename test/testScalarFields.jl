@@ -24,12 +24,12 @@ x, y, img = RoME.generateField_CanyonDEM(1, 100, x_is_north=false, x_min=x_min, 
 ## modify to generate elevation measurements (data/smallData as in Boxy) and priors
 
 dem = Interpolations.LinearInterpolation((x,y), img) # interpolated DEM
-elevation(p) = dem[getPPE(fg, p, :simulated).suggested[1:2]'...]
+elevation(p) = dem(getPPE(fg, p, :simulated).suggested[1:2]'...)
 sigma_e = 0.01 # elevation measurement uncertainty
 
 ## test buildDEMSimulated
 
-im = (j->((i->dem[i,j]).(x))).(y);
+im = (j->((i->dem(i,j)).(x))).(y);
 @cast im_[i,j] := im[j][i];
 @test norm(im_ - img) < 1e-10
 
@@ -133,7 +133,7 @@ end
 # using Cairo, RoMEPlotting
 # Gadfly.set_default_plot_size(35cm,20cm)
 
-# plotSLAM2D_KeyAndSim(fg)
+# plotSLAM2D_KeyAndRef(fg)
 
 
 ##
