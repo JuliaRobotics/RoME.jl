@@ -100,10 +100,29 @@ addFactor!(fg, [:x0], pr0)
 
 tree = solveTree!(fg);
 
+## check at least the first five poses
+
+for lb in sortDFG(ls(fg,r"x\d+"))[1:5]
+  sim = getPPE(fg, lb, :simulated).suggested
+  ppe = getPPE(fg, lb).suggested
+  @test isapprox(sim[1:2], ppe[1:2], atol=300)
+  @test isapprox(sim[3], ppe[3], atol=0.5)
+end
+
 ##
 
+try
 
+for lb in sortDFG(ls(fg,r"x\d+"))[6:end]
+  sim = getPPE(fg, lb, :simulated).suggested
+  ppe = getPPE(fg, lb).suggested
+  @test isapprox(sim[1:2], ppe[1:2], atol=300)
+  @test isapprox(sim[3], ppe[3], atol=0.5)
+end
 
+catch
+  @error "ScalarField test failure on latter half poses"
+end
 
 ##
 end
@@ -113,7 +132,7 @@ end
 # using Cairo, RoMEPlotting
 # Gadfly.set_default_plot_size(35cm,20cm)
 
-
+# plotSLAM2D_KeyAndSim(fg)
 
 
 ##
