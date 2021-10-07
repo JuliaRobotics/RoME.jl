@@ -7,7 +7,7 @@
 
 ## Introduction
 
-Robot Motion Estimate (RoME.jl) is part of the overall [Caesar.jl](https://www.github.com/JuliaRobotics/Caesar.jl) and provides a set of graph variables, factors, and utility features for robotics-related navigation, tracking, and mapping (i.e. SLAM).  RoME.jl helps build front-ends using the [Multi-modal iSAM] backend solver which is implemented over at [IncrementalInference.jl](https://github.com/JuliaRobotics/IncrementalInference.jl).  See [the related references of interest here](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Most notably, this package provides common navigation-type variables and factors to be included in more general [DistributedFactorGraphs.jl](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl) graph objects.
+Robot Motion Estimate (RoME.jl) is part of the overall [Caesar.jl][cjl-url] and provides a set of graph variables, factors, and utility features for robotics-related navigation, tracking, and mapping (i.e. SLAM).  RoME.jl helps build front-ends using the [Multi-modal iSAM] backend solver which is implemented over at [IncrementalInference.jl][iif-url].  See [the related references of interest here](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Most notably, this package provides common navigation-type variables and factors to be included in more general [DistributedFactorGraphs.jl](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl) graph objects.
 
 [NavAbility.io](http://www.navability.io) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io) or via the caesarjl Slack badge-link above.
 ## Installation
@@ -19,7 +19,7 @@ using Pkg
 Pkg.add("RoME")
 ```
 
-If you are interested in a broader toolkit, which includes a visualizer and database interaction, please see [Caesar.jl](https://github.com/dehann/Caesar.jl).
+If you are interested in a broader toolkit, which includes a visualizer and database interaction, please see [Caesar.jl][cjl-url].
 
 ## Examples
 
@@ -43,7 +43,9 @@ Please don't hesitate to open issues or suggestions in line with [JuliaRobotics 
 [rjl-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 [rjl-juliahub]: https://juliahub.com/ui/Packages/RoME/VVxXB
 
+[iif-url]: https://github.com/JuliaRobotics/IncrementalInference.jl
 
+[cjl-url]: https://github.com/JuliaRobotics/Caesar.jl
 [cjl-docs-img]: https://img.shields.io/badge/docs-latest-blue.svg
 [cjl-docs-url]: http://juliarobotics.github.io/Caesar.jl/latest/
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
