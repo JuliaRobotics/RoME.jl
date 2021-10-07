@@ -61,7 +61,7 @@ addFactor!( fg, [:x0; :x1], pp2, graphinit=false )
 
 refVal = accumulateFactorMeans(fg, [:x0f1; :x0x1f1])
 
-@test isapprox(refVal[1:2], [0;0], atol=1e-4)
+@test isapprox(refVal[1:2], [0;0], atol=5e-4)
 @test 0.9pi < abs(refVal[3])
 
 
