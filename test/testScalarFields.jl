@@ -112,18 +112,19 @@ end
 
 ##
 
-try
+@error "Skipping latter part of testScalarTest.jl, see #518"
+# try
 
-for lb in sortDFG(ls(fg,r"x\d+"))[5:end]
-  sim = getPPE(fg, lb, :simulated).suggested
-  ppe = getPPE(fg, lb).suggested
-  @test isapprox(sim[1:2], ppe[1:2], atol=400)
-  @test isapprox(sim[3], ppe[3], atol=0.5)
-end
+# for lb in sortDFG(ls(fg,r"x\d+"))[5:end]
+#   sim = getPPE(fg, lb, :simulated).suggested
+#   ppe = getPPE(fg, lb).suggested
+#   @test isapprox(sim[1:2], ppe[1:2], atol=400)
+#   @test isapprox(sim[3], ppe[3], atol=0.5)
+# end
 
-catch
-  @error "ScalarField test failure on latter half poses"
-end
+# catch
+#   @error "ScalarField test failure on latter half poses"
+# end
 
 ##
 end
