@@ -2,7 +2,7 @@
 
 | Stable | Dev | Coverage | Docs |
 |--------|-----|----------|------|
-| [![version][rjl-stable]][rjl-releases] | [![CI][rjl-ci-img]][rjl-ci-url] | [![codecov.io][rjl-cov-img]][rjl-cov-url] | [![docs][docs-shield]][caesar-docs] <br> [![][caesar-slack-badge]][caesar-slack] |
+| [![version][rjl-ver-img]][rjl-releases] | [![CI][rjl-ci-dev-img]][rjl-ci-dev-url] | [![codecov.io][rjl-cov-img]][rjl-cov-url] | [![docs][cjl-docs-img]][cjl-docs-url] <br> [![][caesar-slack-badge]][caesar-slack] |
 
 
 ## Introduction
@@ -21,34 +21,30 @@ Pkg.add("RoME")
 
 If you are interested in a broader toolkit, which includes a visualizer and database interaction, please see [Caesar.jl](https://github.com/dehann/Caesar.jl).
 
+## Examples
+
+See the common Caesar.jl documenation for more details [![cjl-docs-img]][cjl-docs-url].  Further examples can be found in the examples and test folders.
 ## Consider Citing
 
 Consider citing our work using the common reference at [Caesar.jl Citation with IncrementalInference.jl DOI](https://github.com/JuliaRobotics/Caesar.jl#contributors).  We are grateful for many, many contributions within the Julia package ecosystem -- see the [Juliahub.com](https://juliahub.com/ui/Packages/RoME/VVxXB) page for dependencies.
-
-## Examples
-
-[![docs][docs-shield]][caesar-docs]
-See project wide Caesar.jl documentation for more details (click on badge).
-
-<a href="https://vimeo.com/190052649" target="_blank"><img src="https://raw.githubusercontent.com/JuliaRobotics/IncrementalInference.jl/master/doc/images/mmisamvid01.gif" alt="IMAGE ALT TEXT HERE" width="480" border="10" /></a>
 
 ## Comments and Issues Welcome
 
 Please don't hesitate to open issues or suggestions in line with [JuliaRobotics code of conduct](https://github.com/JuliaRobotics/administration/blob/master/code_of_conduct.md).  Find [the Gist here](https://gist.github.com/dehann/5f943d833f5fb06f4e00a2f4fb9f945a).
 
-
+<!-- md variables duplicated in Caesar.jl README -->
 [rjl-url]: http://www.github.com/JuliaRobotics/RoME.jl
 [rjl-cov-img]: https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master
 [rjl-cov-url]: https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master
-[rjl-ci-img]: https://github.com/JuliaRobotics/RoME.jl/actions/workflows/ci.yml/badge.svg
-[rjl-ci-url]: https://github.com/JuliaRobotics/RoME.jl/actions/workflows/ci.yml
-[rjl-stable]: https://juliahub.com/docs/RoME/version.svg
+[rjl-ci-dev-img]: https://github.com/JuliaRobotics/RoME.jl/actions/workflows/ci.yml/badge.svg
+[rjl-ci-dev-url]: https://github.com/JuliaRobotics/RoME.jl/actions/workflows/ci.yml
+[rjl-ver-img]: https://juliahub.com/docs/RoME/version.svg
 [rjl-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [rjl-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
 [rjl-juliahub]: https://juliahub.com/ui/Packages/RoME/VVxXB
 
 
-[docs-shield]: https://img.shields.io/badge/docs-latest-blue.svg
-[caesar-docs]: http://juliarobotics.github.io/Caesar.jl/latest/
+[cjl-docs-img]: https://img.shields.io/badge/docs-latest-blue.svg
+[cjl-docs-url]: http://juliarobotics.github.io/Caesar.jl/latest/
 [caesar-slack-badge]: https://img.shields.io/badge/Caesarjl-Slack-green.svg?style=popout
 [caesar-slack]: https://join.slack.com/t/caesarjl/shared_invite/zt-ucs06bwg-y2tEbddwX1vR18MASnOLsw
