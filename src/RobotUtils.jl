@@ -398,7 +398,6 @@ function get2DSamples(fg::G; #::Union{Symbol, S};
     # if vertlbl[1] == sym
       val = parse(Int,split(vertlbl[2:end],'_')[1])
       if from <= val && val <= to
-        # if length( getOutNeighbors(fg, vertlbl[2] , needdata=true ) ) >= minnei
         if length( DFG.getNeighbors(fg, id ) ) >= minnei
           # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
           X=[X; vec(getVal(fg,id)[1,:]) ]

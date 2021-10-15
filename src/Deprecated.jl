@@ -1,7 +1,19 @@
+
+##==============================================================================
+## Remove before RoME v0.18
+##==============================================================================
+
+## Serialization helpers -- moved to DFG v0.16.1
+
+# getVariableType(M::typeof(SpecialEuclidean(2))) = Pose2()
+# getVariableType(M::typeof(SpecialEuclidean(3))) = Pose3()
+
+
 ##==============================================================================
 ## Remove before RoME v0.17
 ##==============================================================================
-  # Deprecated a while ago, finalise with a message
+
+# Deprecated a while ago, finalise with a message
 export PartialPriorRollPitchZ, PackedPartialPriorRollPitchZ, PartialPose3XYYaw, PackedPartialPose3XYYaw
 PartialPose3XYYaw(args...) = error("PartialPose3XYYaw is deprecated, use Pose3Pose3XYYaw")
 PackedPartialPose3XYYaw(args...) = error("PackedPartialPose3XYYaw is deprecated, use PackedPose3Pose3XYYaw")
