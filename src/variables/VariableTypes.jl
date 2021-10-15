@@ -86,10 +86,4 @@ projectCartesian(pose::Union{<:Point2,<:Point3,<:Pose2,<:Pose3,<:DynPoint2,<:Dyn
 
 
 
-## Serialization helpers
-
-getVariableType(M::typeof(SpecialEuclidean(2))) = Pose2()
-getVariableType(M::typeof(SpecialEuclidean(3))) = Pose3()
-
-
 #
