@@ -51,7 +51,7 @@ Rotations = "0.13, 1"
 StaticArrays = "1"
 TensorCast = "0.3.3, 0.4"
 TransformUtils = "0.2.11"
-julia = "1.5"
+julia = "1.6"
 
 [extras]
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
