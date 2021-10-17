@@ -86,7 +86,7 @@ function _addLandmarkBeehive!(fg,
   # maybe add new variable
   if !isAlready
     @info "New variable with simPPE" genLabel round.(simPPE.suggested,digits=2)
-    newVar = addVariable!(fg, genLabel, RoME.Point2, solvable=solvable)
+    newVar = addVariable!(fg, genLabel, RoME.Point2, solvable=solvable, tags=[:LANDMARK;])
     addFactor!(fg, [lastPose; genLabel], newFactor, solvable=solvable, graphinit=graphinit)
     
     # also set :simulated PPE for similar future usage
