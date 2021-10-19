@@ -6,6 +6,7 @@ using TensorCast
 using Interpolations
 using RoME
 
+import IncrementalInference: LevelSetGridNormal
 
 ##
 
@@ -47,7 +48,7 @@ function cb(fg_, lastpose)
   @info "Callback for DEM heatmap priors" lastpose ls(fg_, lastpose) z_e
   
   # create prior
-  hmd = HeatmapDensityRegular(img, (x,y), z_e, sigma_e, N=10000, sigma_scale=1)
+  hmd = LevelSetGridNormal(img, (x,y), z_e, sigma_e, N=10000, sigma_scale=1)
   pr = PartialPriorPassThrough(hmd, (1,2))
   addFactor!(fg_, [lastpose], pr, tags=[:DEM;], graphinit=false, nullhypo=0.1)
   nothing
