@@ -1,6 +1,7 @@
 # canonical factor graph examples useful for development and learning.
 
 export generateCanonicalFG_ZeroPose, generateCanonicalFG_Hexagonal, generateCanonicalFG_TwoPoseOdo, generateCanonicalFG_Circle
+export buildGraphChain!
 export warmUpSolverJIT
 
 """
@@ -28,12 +29,13 @@ function _addPoseCanonical!(fg::AbstractDFG,
                             solvable::Integer=1,
                             variableTags::AbstractVector{Symbol}=Symbol[],
                             factorTags::AbstractVector{Symbol}=Symbol[],
-                            refKey::Symbol=:simulated,
-                            overridePPE=nothing,
+                            doRef::Bool=true,
+                            refKey::Symbol = :simulated,
+                            overridePPE = doRef ? nothing : zeros(getDimension(poseType)),
                             postpose_cb::Function=(fg_,latestpose)->()  )
   #
   # calculate and add the reference value
-  isAlready, simPPE, = IIF._checkVariableByReference(fg, prevLabel, poseRegex, poseType, factor, refKey=refKey, srcType=srcType, overridePPE=overridePPE)
+  isAlready, simPPE, = IIF._checkVariableByReference(fg, prevLabel, poseRegex, poseType, factor, refKey=refKey, srcType=srcType, doRef=doRef, overridePPE=overridePPE)
 
   # dispatch on prior or binary factor
   _getlabels(fact::AbstractPrior) = [genLabel;]
@@ -45,7 +47,7 @@ function _addPoseCanonical!(fg::AbstractDFG,
 
   # store simulated PPE for future use
   # ppe = DFG.MeanMaxPPE(refKey, simPPE, simPPE, simPPE)
-  setPPE!(v_n, refKey, typeof(simPPE), simPPE)
+  doRef ? setPPE!(v_n, refKey, typeof(simPPE), simPPE) : nothing
 
   # user callback in case something more needs to be passed down
   postpose_cb(fg, genLabel)
@@ -70,6 +72,7 @@ Notes
 function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2,
                                         graphinit::Bool=true,
                                         dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),  
+                                        doRef::Bool=true,
                                         useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
                                         label::Symbol=:x0,
                                         priorType::Type{<:AbstractPrior}=DFG._getPriorType(varType),
@@ -89,6 +92,7 @@ function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2
     # add the variable and prior with canonical helper function
     _addPoseCanonical!( dfg, label, 0, prpo, genLabel=label, graphinit=graphinit, solvable=solvable,
                         srcType=varType, variableTags=variableTags, factorTags=factorTags,
+                        doRef=doRef,
                         postpose_cb=postpose_cb )
     #
   else
@@ -102,9 +106,72 @@ end
 """
     $SIGNATURES
 
+Build a chain of variables with binary factors.
+
+Notes:
+- `fctData[1]` aligns with the first variable (likely `:x0` for default empty `dfg`), and 
+  - `:x0` has no previous variable/factor data.
+  
+DevNotes
+- TODO Consolidate with [`IIF._buildGraphByFactorAndTypes!`](@ref) and wrap in RoME?
+"""
+function buildGraphChain!(  fctData::AbstractVector = [MvNormal([10;0;0.],diagm(0.1.*ones(3))) for _ in 1:3],
+                            fctType::Type{<:AbstractRelative} = Pose2Pose2,
+                            preFct_args_cb::Function = (fg_,data)->(data.currData,);
+                            stopAfter::Integer=(2^Sys.WORD_SIZE-1),
+                            varType::IIF.InstanceType{InferenceVariable} = Pose2,
+                            graphinit::Bool = true,
+                            solvable::Integer = 1,
+                            fctKwargs::NamedTuple = (;),
+                            varTags::AbstractVector{Symbol} = Symbol[],
+                            fctTags::AbstractVector{Symbol} = Symbol[],
+                            postpose_cb::Function = (fg_, lastpose) -> nothing,
+                            doRef::Bool=true,
+                            dfg::AbstractDFG = generateCanonicalFG_ZeroPose(varType=varType, graphinit=graphinit, solvable=solvable, doRef=doRef, postpose_cb=postpose_cb),
+                            varRegex::Regex = r"x\d+",
+                            varLast::Symbol = sortDFG(ls(dfg, varRegex))[end],
+                            varCount::Integer = match(r"\d+", string(varLast)).match |> x->parse(Int,x),
+                            varPrefix::Symbol = match(r"[a-zA-Z_]+", varRegex.pattern).match |> Symbol  )
+  #
+
+  for i in 1:length(fctData)
+    i <= stopAfter ? nothing : break
+    varCount += 1
+    varCurr = Symbol(varPrefix, varCount)
+    # prep small container for data
+    prev_ = 1 <= i-1 ? fctData[i-1] : nothing
+    next_ = i+1 <= length(fctData) ? fctData[i+1] : nothing
+    dat_ = (;varCurr=varCurr, varLast=varLast, prevData=prev_, currData=fctData[i], nextData=next_)
+    _addPoseCanonical!( dfg, 
+                        varLast, 
+                        varCount,
+                        fctType(preFct_args_cb(dfg,dat_)...; fctKwargs...);
+                        doRef=doRef,
+                        poseRegex=varRegex,
+                        genLabel=varCurr,
+                        srcType=varType,
+                        solvable=solvable,
+                        variableTags=varTags,
+                        factorTags=fctTags,
+                        postpose_cb=postpose_cb )
+    #
+    varLast = varCurr
+  end
+  
+  dfg
+end
+
+
+
+"""
+    $SIGNATURES
+
 Build a basic factor graph in Pose2 with two `Pose2` and one landmark `Point2` variables,
 along with `PriorPose2` on `:x0` and `Pose2Pose2` to `:x1`.  Also a `Pose2Point2BearingRange`
 to landmark `:l1`.
+
+DevNotes
+- TODO refactor using [`buildGraphChain!`](@ref)
 """
 function generateCanonicalFG_TwoPoseOdo(;fg::AbstractDFG=initfg(),
                                         type::Type{<:Pose2}=Pose2,
