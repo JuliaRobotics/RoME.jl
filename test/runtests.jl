@@ -38,6 +38,7 @@ testfiles = [
   "testPoint2Point2.jl";
   "testParametricSimulated.jl";
   "testBasicPose2Conv.jl";
+  "testGraphGenerators.jl";
   "testTreeInitCommonMsg_IIF913.jl";
   "testPose3Pose3NH.jl";
   "testHexagonal2D_CliqByCliq.jl";      # special case debugging
