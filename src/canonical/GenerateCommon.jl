@@ -27,6 +27,7 @@ function _addPoseCanonical!(fg::AbstractDFG,
                             poseType::Type{<:InferenceVariable} = srcType, # control destination type TODO simplify
                             graphinit::Bool=false,
                             solvable::Integer=1,
+                            inflation::Real=getSolverParams(fg).inflation,
                             variableTags::AbstractVector{Symbol}=Symbol[],
                             factorTags::AbstractVector{Symbol}=Symbol[],
                             doRef::Bool=true,
@@ -42,8 +43,8 @@ function _addPoseCanonical!(fg::AbstractDFG,
   _getlabels(fact::AbstractRelative) = [prevLabel; genLabel]
   
   # add new pose variable
-  v_n = addVariable!(fg, genLabel, poseType, solvable=solvable, tags=variableTags )
-  addFactor!(fg, _getlabels(factor), factor, graphinit=graphinit, solvable=solvable, tags=factorTags )
+  v_n = addVariable!(fg, genLabel, poseType; solvable, tags=variableTags )
+  addFactor!(fg, _getlabels(factor), factor; graphinit, solvable, tags=factorTags, inflation )
 
   # store simulated PPE for future use
   # ppe = DFG.MeanMaxPPE(refKey, simPPE, simPPE, simPPE)
@@ -70,8 +71,9 @@ Notes
 - Use callback `postpose_cb(g::AbstractDFG,lastpose::Symbol)` to call user operations after each pose step.
 """
 function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2,
-                                        graphinit::Bool=true,
-                                        dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),  
+                                        graphinit = nothing,
+                                        solverParams::SolverParams=SolverParams(),
+                                        dfg::AbstractDFG = LightDFG{SolverParams}(;solverParams),  
                                         doRef::Bool=true,
                                         useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
                                         label::Symbol=:x0,
@@ -84,16 +86,16 @@ function generateCanonicalFG_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2
                                         factorTags::AbstractVector{Symbol}=Symbol[],
                                         postpose_cb::Function=(fg_,latestpose)->()  )
   #
+  (graphinit isa Nothing) ? nothing : @error("generateCanonicalFG_ZeroPose keyword graphinit obsolete, use solverParams(graphinit=..) instead.")
 
   # only add the first variable if none others exist
   if !exists(dfg, label)
     # generate a default prior
     prpo = priorType(priorArgs...)
     # add the variable and prior with canonical helper function
-    _addPoseCanonical!( dfg, label, 0, prpo, genLabel=label, graphinit=graphinit, solvable=solvable,
-                        srcType=varType, variableTags=variableTags, factorTags=factorTags,
-                        doRef=doRef,
-                        postpose_cb=postpose_cb )
+    _addPoseCanonical!( dfg, label, 0, prpo; genLabel=label, solvable,
+                        srcType=varType, variableTags, factorTags, graphinit = solverParams.graphinit,
+                        doRef, postpose_cb )
     #
   else
     @warn "$label already exists in the factor graph, no new variables added."
@@ -118,16 +120,17 @@ DevNotes
 function buildGraphChain!(  fctData::AbstractVector = [MvNormal([10;0;0.],diagm(0.1.*ones(3))) for _ in 1:3],
                             fctType::Type{<:AbstractRelative} = Pose2Pose2,
                             preFct_args_cb::Function = (fg_,data)->(data.currData,);
-                            stopAfter::Integer=(2^Sys.WORD_SIZE-1),
+                            stopAfter::Integer=2^(Sys.WORD_SIZE-1)-1,
                             varType::IIF.InstanceType{InferenceVariable} = Pose2,
-                            graphinit::Bool = true,
+                            solverParams::SolverParams = SolverParams(),
                             solvable::Integer = 1,
                             fctKwargs::NamedTuple = (;),
                             varTags::AbstractVector{Symbol} = Symbol[],
                             fctTags::AbstractVector{Symbol} = Symbol[],
                             postpose_cb::Function = (fg_, lastpose) -> nothing,
                             doRef::Bool=true,
-                            dfg::AbstractDFG = generateCanonicalFG_ZeroPose(varType=varType, graphinit=graphinit, solvable=solvable, doRef=doRef, postpose_cb=postpose_cb),
+                            dfg::AbstractDFG = generateCanonicalFG_ZeroPose(; varType, solverParams, solvable, doRef, postpose_cb),
+                            inflation_fct::Real = getSolverParams(dfg).inflation,
                             varRegex::Regex = r"x\d+",
                             varLast::Symbol = sortDFG(ls(dfg, varRegex))[end],
                             varCount::Integer = match(r"\d+", string(varLast)).match |> x->parse(Int,x),
@@ -151,6 +154,7 @@ function buildGraphChain!(  fctData::AbstractVector = [MvNormal([10;0;0.],diagm(
                         genLabel=varCurr,
                         srcType=varType,
                         solvable=solvable,
+                        inflation=inflation_fct,
                         variableTags=varTags,
                         factorTags=fctTags,
                         postpose_cb=postpose_cb )
@@ -171,31 +175,34 @@ along with `PriorPose2` on `:x0` and `Pose2Pose2` to `:x1`.  Also a `Pose2Point2
 to landmark `:l1`.
 
 DevNotes
-- TODO refactor using [`buildGraphChain!`](@ref)
+- TODO standardize to latest and greatest generator api pattern
+
+See also: [`buildGraphChain!`](@ref)
 """
-function generateCanonicalFG_TwoPoseOdo(;fg::AbstractDFG=initfg(),
-                                        type::Type{<:Pose2}=Pose2,
+function generateCanonicalFG_TwoPoseOdo(;solverParams::SolverParams = SolverParams(),
+                                        varType::Type{<:Pose2}=Pose2,
+                                        solvable::Integer = 1,
+                                        doRef::Bool=true,
+                                        postpose_cb::Function = (fg_, lastpose) -> nothing,
+                                        dfg::AbstractDFG=generateCanonicalFG_ZeroPose(; varType, solverParams, solvable, doRef, postpose_cb),
                                         addlandmark::Bool=true,
-                                        autoinit::Union{Bool,Nothing}=nothing,
-                                        graphinit::Bool=true )
+                                        fg=nothing,
+                                        graphinit=nothing )
   #
+  (graphinit isa Nothing) ? nothing : @error("generateCanonicalFG_TwoPoseOdo keyword graphinit obsolete, use solverParams=SolverParams(graphinit=..) instead.")
+  (fg isa Nothing) ? nothing : @error("generateCanonicalFG_TwoPoseOdo keyword fg obsolete, use dfg= instead.")
 
-  graphinit = if autoinit === nothing
-    graphinit
-  else
-    @warn "autoinit is deprecated, use graphinit instead"
-    autoinit
+  buildGraphChain!( [MvNormal([10.0;0;0.0],diagm([1.0;1.0;0.01]));];
+                    dfg,
+                    varType )
+  
+  if addlandmark 
+    addVariable!(dfg, :l1, Point2)
+    addFactor!( dfg, [:x1;:l1], Pose2Point2BearingRange(Normal(0.0,0.01), Normal(20.0, 1.0)), graphinit=solverParams.graphinit )
   end
-
-  addVariable!(fg, :x0, Pose2)
-  addVariable!(fg, :x1, Pose2)
-  !addlandmark ? nothing : addVariable!(fg, :l1, Point2)
-
-  addFactor!(fg, [:x0], PriorPose2(MvNormal([0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))), graphinit=graphinit)
-  addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal([10.0;0;0.0],Matrix(Diagonal([1.0;1.0;0.01])))), graphinit=graphinit)
-  !addlandmark ? nothing : addFactor!(fg, [:x1;:l1], Pose2Point2BearingRange(Normal(0.0,0.01), Normal(20.0, 1.0)), graphinit=graphinit)
-
-  return fg
+  
+  # return the built graph
+  return dfg
 end
 
 
