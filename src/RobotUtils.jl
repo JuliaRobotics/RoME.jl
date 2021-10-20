@@ -381,8 +381,8 @@ end
 
 
 
-function get2DSamples(fg::G; #::Union{Symbol, S};
-                      from::Int=0, to::Int=999999999,
+function get2DSamples(fg::G;
+                      from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1),
                       minnei::Int=0,
                       regexKey::Regex=r"x") where {G <: AbstractDFG, S <: AbstractString}
   #
@@ -420,7 +420,7 @@ DFG.getVariableLabelNumber, DFT.findFactorsBetweenNaive
 """
 function listVariablesLabelsWithinRange(fg::AbstractDFG,
                                         regexKey::Regex=r"x";
-                                        from::Int=0, to::Int=9999999999,
+                                        from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1),
                                         minnei::Int=0)
   #
 
@@ -435,7 +435,7 @@ function listVariablesLabelsWithinRange(fg::AbstractDFG,
     if length( DFG.getNeighbors(fg, id) ) >= minnei
       mask[count] = true
     end
-    if occursin(regexKey, string(id)) && (from != 0 || to != 9999999999)
+    if occursin(regexKey, string(id)) && (from != 0 || to != (2^(Sys.WORD_SIZE-1)-1))
       vertlbl = string(id)
         # TODO won't work with nested labels
         m = match(r"\d+", string(id))
@@ -451,11 +451,11 @@ function listVariablesLabelsWithinRange(fg::AbstractDFG,
   saids[mask]
 end
 
-@deprecate getVariablesLabelsWithinRange(fg::AbstractDFG,regexKey::Regex=r"x";from::Int=0, to::Int=9999999999,minnei::Int=0) listVariablesLabelsWithinRange(fg,regexKey,from=from,to=to,minnei=minnei)
+@deprecate getVariablesLabelsWithinRange(fg::AbstractDFG,regexKey::Regex=r"x";from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1),minnei::Int=0) listVariablesLabelsWithinRange(fg,regexKey,from=from,to=to,minnei=minnei)
 
 function get2DSampleMeans(fg::AbstractDFG,
                           regexKey::Regex=r"x";
-                          from::Int=0, to::Int=9999999999,
+                          from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1),
                           minnei::Int=0)
   #
   X = Array{Float64,1}()
@@ -486,18 +486,18 @@ function getAll2DPoses(fg::G; regexKey=r"x") where G <: AbstractDFG
     return getAll2DSamples(fg, regexKey=regexKey )
 end
 
-function get2DPoseSamples(fg::G; from::Int=0, to::Int=999999999, regexKey=r"x") where G <: AbstractDFG
+function get2DPoseSamples(fg::G; from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1), regexKey=r"x") where G <: AbstractDFG
   return get2DSamples(fg, regexKey=regexKey, from=from, to=to )
 end
 
-function get2DPoseMeans(fg::G; from::Int=0, to::Int=999999999, regexKey=r"x") where G <: AbstractDFG
+function get2DPoseMeans(fg::G; from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1), regexKey=r"x") where G <: AbstractDFG
   return get2DSampleMeans(fg, regexKey, from=from, to=to )
 end
 
 
 function get2DPoseMax(fgl::G;
 					  regexKey::Regex=r"x",
-                      from::Int=-99999999999, to::Int=9999999999 ) where G <: AbstractDFG
+                      from::Int=-(2^(Sys.WORD_SIZE-1)-1), to::Int=(2^(Sys.WORD_SIZE-1)-1) ) where G <: AbstractDFG
   #
   # xLB,ll = ls(fgl) # TODO add: from, to, special option 'x'
   xLB = DFG.getVariableIds(fgl, regexKey)
@@ -522,14 +522,14 @@ end
 
 function get2DLandmSamples(fg::G;
                            from::Int=0,
-                           to::Int=999999999,
+                           to::Int=(2^(Sys.WORD_SIZE-1)-1),
                            minnei::Int=0 ) where G <: AbstractDFG
   #
   return get2DSamples(fg, regexKey=r"l", from=from, to=to, minnei=minnei )
 end
 
 function get2DLandmMeans(fg::G;
-                         from::Int=0, to::Int=999999999,
+                         from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1),
                          minnei::Int=0,
                          landmarkRegex::Regex=r"l" ) where G <: AbstractDFG
   #
@@ -559,8 +559,8 @@ function removeKeysFromArr(fgl::G,
 end
 
 function get2DLandmMax(fgl::G;
-                       from::Int=-99999999999,
-                       to::Int=9999999999,
+                       from::Int=-(2^(Sys.WORD_SIZE-1)-1),
+                       to::Int=(2^(Sys.WORD_SIZE-1)-1),
                        showmm=false, MM::Dict{Int,T}=Dict{Int,Int}(),
                        regexLandmark::Regex=r"l"  ) where {G <: AbstractDFG, T}
   #
