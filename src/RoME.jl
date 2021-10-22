@@ -29,6 +29,8 @@ using StaticArrays
 import Manifolds
 using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element
 
+import Manifolds: project, project!
+
 export SpecialOrthogonal, SpecialEuclidean
 
 # using Graphs,  # TODO determine how many parts still require Graphs still directly

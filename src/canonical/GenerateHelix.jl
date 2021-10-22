@@ -21,27 +21,30 @@ Notes
 
 See also: [`generateCanonicalFG_Helix2DSlew!`](@ref), [`generateCanonicalFG_Helix2DSpiral!`](@ref), [`generateCanonicalFG_Beehive!`](@ref)
 """
-function generateCanonicalFG_Helix2D!(numposes::Integer=40;
-                                      posesperturn::Integer=20,
-                                      graphinit::Bool=false,
-                                      dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),
-                                      useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
-                                      radius::Real=10,
-                                      spine_t=(t)->0 + im*0,
-                                      xr_t::Function=(t)->real(spine_t(t)),
-                                      yr_t::Function=(t)->imag(spine_t(t)),
-                                      poseRegex::Regex=r"x\d+",
-                                      μ0=[0;0;pi/2],
-                                      refKey::Symbol=:simulated,
-                                      Qd::AbstractMatrix{<:Real}=diagm( [0.1;0.1;0.05].^2 ),
-                                      postpose_cb::Function=(fg_,latestpose)->()   )
+function generateCanonicalFG_Helix2D!(numposes::Integer = 40;
+                                      posesperturn::Integer = 20,
+                                      graphinit = nothing,
+                                      useMsgLikelihoods = nothing,
+                                      solverParams::SolverParams = SolverParams(;graphinit=false),
+                                      dfg::AbstractDFG = LightDFG{SolverParams}(;solverParams),
+                                      radius::Real = 10,
+                                      spine_t = (t)->0 + im*0,
+                                      xr_t::Function = (t)->real(spine_t(t)),
+                                      yr_t::Function = (t)->imag(spine_t(t)),
+                                      poseRegex::Regex = r"x\d+",
+                                      μ0 = [0;0;pi/2],
+                                      refKey::Symbol = :simulated,
+                                      Qd::AbstractMatrix{<:Real} = diagm( [0.1;0.1;0.05].^2 ),
+                                      postpose_cb::Function = (fg_,latestpose)->()   )
   #
+  (graphinit isa Nothing) ? nothing : @error("generateCanonicalFG_Helix2D! keyword graphinit obsolete, use solverParams=SolverParams(graphinit=..) instead.")
+  (useMsgLikelihoods isa Nothing) ? nothing : @error("generateCanonicalFG_Helix2D! keyword useMsgLikelihoods obsolete, use solverParams=SolverParams(useMsgLikelihoods=..) instead.")
   
   # add first pose if not already exists
   _initpose = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, 0)
   if !exists( dfg, _initpose )
-    generateCanonicalFG_ZeroPose(dfg=dfg, μ0=μ0, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
-    getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
+    generateCanonicalFG_ZeroPose(;dfg, μ0, solverParams, postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    # getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
     # reference ppe on :x0
     ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
     setPPE!(dfg[:x0], refKey, DFG.MeanMaxPPE, ppe)
