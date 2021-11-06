@@ -10,7 +10,7 @@ export Pose2Point2, PackedPose2Point2
 Bearing and Range constraint from a Pose2 to Point2 variable.
 """
 struct Pose2Point2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-    Zij::T
+    Z::T
     partial::Tuple{Int,Int}
     # empty constructor
     # Pose2Point2{T}() where {T} = new{T}()
@@ -22,11 +22,8 @@ Pose2Point2(x1::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))) where {T 
 
 # prescribed sampling function
 function getSample(cfo::CalcFactor{<:Pose2Point2}, N::Int=1)
-  return rand(cfo.factor.Zij)
+  return rand(cfo.factor.Z)
 end
-
-# Could also revert to IIF default for Zij
-IIF.getMeasurementParametric(s::Pose2Point2{<:MvNormal}) = getMeasurementParametric(s.Zij)
 
 # define the conditional probability constraint
 function (cfo::CalcFactor{<:Pose2Point2})(meas,
@@ -43,16 +40,16 @@ end
 ## Serialization support
 
 mutable struct PackedPose2Point2 <: IncrementalInference.PackedInferenceType
-    Zij::String
+    Z::String
     # PackedPose2Point2() = new()
     # PackedPose2Point2(s1::AS) where {AS <: AbstractString} = new(string(s1))
 end
 
 function convert(::Type{PackedPose2Point2}, obj::Pose2Point2{T}) where {T <: IIF.SamplableBelief}
-  return PackedPose2Point2(convert(PackedSamplableBelief, obj.Zij))
+  return PackedPose2Point2(convert(PackedSamplableBelief, obj.Z))
 end
 
 # TODO -- should not be resorting to string, consider specialized code for parametric distribution types and KDEs
 function convert(::Type{Pose2Point2}, packed::PackedPose2Point2)
-  Pose2Point2(convert(SamplableBelief, packed.Zij))
+  Pose2Point2(convert(SamplableBelief, packed.Z))
 end

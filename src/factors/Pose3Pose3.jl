@@ -9,7 +9,7 @@ $(TYPEDEF)
 Rigid transform factor between two Pose3 compliant variables.
 """
 struct Pose3Pose3{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-  z::T
+  Z::T
 end
 # convenience and default constructor
 Pose3Pose3() = Pose3Pose3(MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)])))
@@ -20,7 +20,7 @@ Pose3Pose3(::UniformScaling) = Pose3Pose3() # MvNormal(zeros(3),LinearAlgebra.di
 
 function getSample(cf::CalcFactor{<:Pose3Pose3}, N::Int=1) 
   
-  Xc = rand(cf.factor.z)
+  Xc = rand(cf.factor.Z)
   #NOTE be carefull using this as template as it will not work in general for all manifolds
   M = getManifold(Pose3)
   ϵ = getPointIdentity(Pose3)
@@ -73,15 +73,15 @@ end
 # Rigid transform factor between two Pose3 compliant variables.
 # """
 # mutable struct Pose3Pose3{T <: IIF.SamplableBelief} <: AbstractRelativeRoots
-#     Zij::T
+#     Z::T
 #     reuse::Vector{PP3REUSE}
 #     Pose3Pose3{T}() where T = new{T}()
 #     Pose3Pose3{T}(s::T) where {T <: SamplableBelief} = new{T}(s, PP3REUSE[PP3REUSE() for i in 1:Threads.nthreads()]  )
 # end
-# Pose3Pose3(z::T=MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)]))) where {T <: IIF.SamplableBelief} = Pose3Pose3{T}(z)
+# Pose3Pose3(Z::T=MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)]))) where {T <: IIF.SamplableBelief} = Pose3Pose3{T}(Z)
 
 # function getSample(cf::CalcFactor{<:Pose3Pose3}, N::Int=1)
-#   return (rand(cf.factor.Zij, N), )
+#   return (rand(cf.factor.Z, N), )
 # end
 # function (cf::CalcFactor{<:Pose3Pose3})(meas,
 #                                         wXi,
@@ -99,15 +99,15 @@ $(TYPEDEF)
 Serialization type for `Pose3Pose3`.
 """
 mutable struct PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
-  Zij::String
+  Z::String
   PackedPose3Pose3() = new()
   PackedPose3Pose3(x::AbstractString) = new(x)
 end
 function convert(::Type{Pose3Pose3}, packed::PackedPose3Pose3)
-  return Pose3Pose3( convert(SamplableBelief, packed.Zij) )
+  return Pose3Pose3( convert(SamplableBelief, packed.Z) )
 end
 function convert(::Type{PackedPose3Pose3}, obj::Pose3Pose3)
-  return PackedPose3Pose3( convert(PackedSamplableBelief, obj.z) )
+  return PackedPose3Pose3( convert(PackedSamplableBelief, obj.Z) )
 end
 
 

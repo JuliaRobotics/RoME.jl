@@ -15,7 +15,7 @@ Related
 [`Pose3Pose3`](@ref), [`Point2Point2`](@ref), [`MutablePose2Pose2Gaussian`](@ref), [`DynPose2`](@ref), [`InertialPose3`](ref)
 """
 struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-  z::T
+  Z::T
 end
 # convenience and default constructor
 Pose2Pose2() = Pose2Pose2(MvNormal(Diagonal([1.0; 1.0; 1.0])))
@@ -24,12 +24,13 @@ DFG.getManifold(::Pose2Pose2) = Manifolds.SpecialEuclidean(2)
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2() # MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])) )
 
+#TODO remove to use default
 function getSample(cf::CalcFactor{<:Pose2Pose2}) 
   
   M = getManifold(cf.factor)
   ϵ = getPointIdentity(Pose2)
 
-  X = sampleTangent(M, cf.factor.z, ϵ)
+  X = sampleTangent(M, cf.factor.Z, ϵ)
   return X
 end
 
@@ -62,14 +63,14 @@ function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)
   return Pose2Pose2(convert(SamplableBelief, d.datastr))
 end
 function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
-  return PackedPose2Pose2(convert(PackedSamplableBelief, d.z))
+  return PackedPose2Pose2(convert(PackedSamplableBelief, d.Z))
 end
 
 
 
 # FIXME, rather have separate compareDensity functions
 function compare(a::Pose2Pose2,b::Pose2Pose2; tol::Float64=1e-10)
-  return compareDensity(a.z, b.z)
+  return compareDensity(a.Z, b.Z)
   # TP = true
   # TP = TP && norm(a.z.μ-b.z.μ) < (tol + 1e-5)
   # TP = TP && norm(a.z.Σ.mat-b.z.Σ.mat) < tol
