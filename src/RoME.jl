@@ -81,9 +81,6 @@ include("factors/PartialPose3.jl")
 include("factors/MultipleFeaturesConstraint.jl")
 include("factors/InertialPose3.jl")
 
-# tools that come and go
-include("TemporaryFunctionality.jl")
-
 # additional tools
 include("FactorGraphAnalysisTools.jl")
 
