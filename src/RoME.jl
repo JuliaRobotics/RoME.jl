@@ -46,8 +46,6 @@ import DistributedFactorGraphs: getDimension, getManifold
 
 # const AMP = ApproxManifoldProducts
 
-const InstanceType{T} = Union{Type{<:T},T}
-
 # export the API
 include("ExportAPI.jl")
 
