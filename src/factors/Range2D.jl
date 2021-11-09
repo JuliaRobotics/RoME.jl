@@ -8,6 +8,8 @@ mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInferen
   Z::D
 end
 
+getManifold(::Point2Point2Range) = TranslationGroup(1)
+
 function getSample(cfo::CalcFactor{<:Point2Point2Range})
   return rand(cfo.factor.Z)
 end
