@@ -15,7 +15,7 @@ VelPoint2VelPoint2(z1::T) where {T <: Distribution} = VelPoint2VelPoint2{T}(z1)
 
 getSample(cfo::CalcFactor{<:VelPoint2VelPoint2}) = rand(cfo.factor.Z)
 
-function (cfo::CalcFactor{<:VelPoint2VelPoint2})(Z, xi, xj)
+function (cfo::CalcFactor{<:VelPoint2VelPoint2})(z, xi, xj)
   #
   #FIXME JT - I'm createing new res for simplicity, it may not hold up well though
   res = Vector{eltype(xi)}(undef, 4)
@@ -29,8 +29,8 @@ function (cfo::CalcFactor{<:VelPoint2VelPoint2})(Z, xi, xj)
 
   dp_dt = dp./dt
 
-  res[1:2] .= Z[1:2] .- dp # (meas - predicted) change in position error term
-  res[3:4] .= (Z[3:4] .- dv).^2 # (meas - predicted) change in velocity error term
+  res[1:2] .= z[1:2] .- dp # (meas - predicted) change in position error term
+  res[3:4] .= (z[3:4] .- dv).^2 # (meas - predicted) change in velocity error term
 
   # now cross couple the change in position information, via timestamps to accompanying velocity
   # TODO validate that 
