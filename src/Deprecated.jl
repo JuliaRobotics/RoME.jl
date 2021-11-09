@@ -3,6 +3,34 @@
 ## Remove before RoME v0.18
 ##==============================================================================
 
+getManifold(::IIF.InstanceType{Point2Point2}) = Point2 |> getManifold
+getManifold(::IIF.InstanceType{Pose2Point2}) = Point2 |> getManifold
+getManifold(::IIF.InstanceType{PriorPose2}) = Pose2 |> getManifold
+getManifold(::IIF.InstanceType{Pose2Pose2}) = Pose2 |> getManifold
+# getManifold(::IIF.InstanceType{Pose3Point3}) = Point3
+getManifold(::IIF.InstanceType{Pose3Pose3}) = Pose3 |> getManifold
+# getManifold(::IIF.InstanceType{Pose2Point2BearingRange}) = BearingRange2 |> getManifold
+
+
+# function selectFactorType(T1::Type{<:InferenceVariable}, T2::Type{<:InferenceVariable})
+#   # hacky version
+#   if T1 == Pose2 && T2 == Pose2
+#     return Pose2Pose2
+#   elseif T1 == Pose2 && T2 == Point2
+#     return Pose2Point2  
+#   elseif T1 == DynPose2 && T2 == DynPose2
+#       return DynPose2DynPose2
+#   elseif T1 == Point2 && T2 == Point2
+#     return Point2Point2
+#   elseif T1 == Point3 && T2 == Point3
+#     return Point3Point3
+#   elseif T1 == Pose3 && T2 == Pose3
+#     return Pose3Pose3
+#   else
+#     error("dont know which Factor type to select between $T1 and $T2")
+#   end
+# end
+
 ## Serialization helpers -- moved to DFG v0.16.1
 
 # getVariableType(M::typeof(SpecialEuclidean(2))) = Pose2()
@@ -12,6 +40,8 @@
 ##==============================================================================
 ## Remove before RoME v0.17
 ##==============================================================================
+
+# const InstanceType{T} = Union{Type{<:T},<:T}
 
 # Deprecated a while ago, finalise with a message
 export PartialPriorRollPitchZ, PackedPartialPriorRollPitchZ, PartialPose3XYYaw, PackedPartialPose3XYYaw
@@ -118,45 +148,25 @@ function veePose(s::SE3)
 end
 
 
-# getManifolds(fctType::InstanceType{Pose2Pose2}) = getManifolds(getDomain(fctType))
-# getManifolds(fctType::InstanceType{Pose2Point2}) = getManifolds(getDomain(fctType))
-# getManifolds(fctType::InstanceType{Point2Point2}) = getManifolds(getDomain(fctType))
-# getManifolds(fctType::InstanceType{Pose2Point2BearingRange}) = getManifolds(getDomain(fctType))
-
-
-## New Manifold types.  Integration phase towards RoME #244 and AMP #32 / #41
-
-
-# TODO consolidate Manifolds typing and objects
-# getManifolds(::InstanceType{typeof(AMP.SE2_Manifold)}) = (:Euclid, :Euclid, :Circular)
-# getManifolds(::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid, :Euclid, :Circular, :Euclid, :Euclid)
-# getManifolds(::InstanceType{typeof(AMP.SE3_Manifold)}) = (:Euclid, :Euclid, :Euclid, :Circular, :Circular, :Circular)
-
 # legacy support, will be deprecated
-Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(AMP.SE2_Manifold)}) = (:Euclid, :Euclid, :Circular)
-Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
-Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(BearingRange_Manifold)}) = (:Circular,:Euclid)
+Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(AMP.SE2_Manifold)}) = (:Euclid, :Euclid, :Circular)
+Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
+Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(BearingRange_Manifold)}) = (:Circular,:Euclid)
 
-Base.convert(::Type{<:Tuple}, ::InstanceType{typeof(Manifolds.ProductGroup(ProductManifold(SpecialEuclidean(2), TranslationGroup(2))))}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
-# Variables dont need to re-overload these functions from @defVariable (factors dont have easy macro yet)
-# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Point2}) = AMP.Euclid2
-# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Point3}) = AMP.Euclid3
-# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{DynPoint2}) = AMP.Euclid4
-# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Pose2}) = AMP.SE2_Manifold
-# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Pose3}) = AMP.SE3_Manifold
-# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{DynPose2}) = SE2E2_Manifold
+Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(Manifolds.ProductGroup(ProductManifold(SpecialEuclidean(2), TranslationGroup(2))))}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
 
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Point2Point2}) = AMP.Euclid2
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Pose2Point2}) = AMP.Euclid2
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Pose2Point2Bearing}) = AMP.Euclid
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Point2Point2Range}) = AMP.Euclid
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Pose2Point2Range}) = AMP.Euclid
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Pose2Point2BearingRange}) = AMP.Euclid2
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Pose2Pose2}) = AMP.SE2_Manifold
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{Pose3Pose3}) = AMP.SE3_Manifold
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{DynPoint2DynPoint2}) = AMP.Euclid4
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{DynPose2DynPose2}) = SE2E2_Manifold
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::InstanceType{VelPose2VelPose2}) = SE2E2_Manifold
+
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Point2Point2}) = AMP.Euclid2
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2}) = AMP.Euclid2
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2Bearing}) = AMP.Euclid
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Point2Point2Range}) = AMP.Euclid
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2Range}) = AMP.Euclid
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2BearingRange}) = AMP.Euclid2
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Pose2}) = AMP.SE2_Manifold
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose3Pose3}) = AMP.SE3_Manifold
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{DynPoint2DynPoint2}) = AMP.Euclid4
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{DynPose2DynPose2}) = SE2E2_Manifold
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{VelPose2VelPose2}) = SE2E2_Manifold
 
 
 

@@ -46,8 +46,6 @@ import DistributedFactorGraphs: getDimension, getManifold
 
 # const AMP = ApproxManifoldProducts
 
-const InstanceType{T} = Union{Type{<:T},T}
-
 # export the API
 include("ExportAPI.jl")
 
@@ -82,9 +80,6 @@ include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")
 include("factors/MultipleFeaturesConstraint.jl")
 include("factors/InertialPose3.jl")
-
-# tools that come and go
-include("TemporaryFunctionality.jl")
 
 # additional tools
 include("FactorGraphAnalysisTools.jl")
