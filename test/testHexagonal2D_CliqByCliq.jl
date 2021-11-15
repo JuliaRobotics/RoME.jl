@@ -11,7 +11,7 @@ using TensorCast
 
 ##
 
-fg = generateCanonicalFG_Hexagonal(graphinit=false)
+fg = generateGraph_Hexagonal(graphinit=false)
 
 
 getSolverParams(fg).drawtree = false

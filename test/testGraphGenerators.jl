@@ -6,10 +6,10 @@ using RoME
 
 ##
 
-@testset "test generateCanonicalFG_TwoPoseOdo" begin
+@testset "test generateGraph_TwoPoseOdo" begin
 ##
 
-fg = generateCanonicalFG_TwoPoseOdo()
+fg = generateGraph_TwoPoseOdo()
 
 solveGraph!(fg)
 

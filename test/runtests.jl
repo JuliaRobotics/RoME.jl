@@ -12,7 +12,7 @@ using Statistics
 
 @error("must restore testG2oParser.jl")
 @error("must restore testParametric.jl")
-@error("add test for generateCanonicalFG_Beehive, norm( simulated - default ) < tol")
+@error("add test for generateGraph_Beehive!, norm( simulated - default ) < tol")
 
 testfiles = [
   # any wip fail-fast dev testing
