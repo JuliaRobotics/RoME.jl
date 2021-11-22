@@ -1,6 +1,4 @@
 
-export VelPose2VelPose2, PackedVelPose2VelPose2
-
 
 """
 $(TYPEDEF)
@@ -143,7 +141,7 @@ mutable struct PackedVelPose2VelPose2 <: IncrementalInference.PackedInferenceTyp
 end
 
 function convert(::Type{PackedVelPose2VelPose2}, d::VelPose2VelPose2)
-  return PackedVelPose2VelPose2(convert(PackedSamplableBelief, d.Zpose.z),
+  return PackedVelPose2VelPose2(convert(PackedSamplableBelief, d.Zpose.Z),
                                 convert(PackedSamplableBelief, d.Zvel))
 end
 function convert(::Type{VelPose2VelPose2}, d::PackedVelPose2VelPose2)

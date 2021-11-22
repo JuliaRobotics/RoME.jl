@@ -5,6 +5,7 @@ RoME.jl follows semver, with only a few case specific exceptions.  Please see re
 ## v0.17
 
 - Graph generator API changing to `generateGraph_ABC`.
+- Factors that can default to field `.Z` for easier/better use of dispatch (#538).
 
 ## v0.15.1 -> v0.15.2 (New graph generators)
 

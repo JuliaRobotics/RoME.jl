@@ -1,6 +1,4 @@
 
-export SpecialEuclidean
-
 
 """
 $(TYPEDEF)
@@ -19,20 +17,10 @@ struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
 end
 # convenience and default constructor
 Pose2Pose2() = Pose2Pose2(MvNormal(Diagonal([1.0; 1.0; 1.0])))
- 
+
 DFG.getManifold(::Pose2Pose2) = Manifolds.SpecialEuclidean(2)
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2() # MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])) )
-
-#TODO remove to use default
-function getSample(cf::CalcFactor{<:Pose2Pose2}) 
-  
-  M = getManifold(cf.factor)
-  ϵ = getPointIdentity(Pose2)
-
-  X = sampleTangent(M, cf.factor.Z, ϵ)
-  return X
-end
 
 
 # Assumes X is a tangent vector
@@ -56,8 +44,6 @@ $(TYPEDEF)
 """
 mutable struct PackedPose2Pose2  <: IIF.PackedInferenceType
   datastr::String
-  # PackedPose2Pose2() = new()
-  # PackedPose2Pose2(x::String) = new(x)
 end
 function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)
   return Pose2Pose2(convert(SamplableBelief, d.datastr))
@@ -67,18 +53,9 @@ function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
 end
 
 
-
 # FIXME, rather have separate compareDensity functions
 function compare(a::Pose2Pose2,b::Pose2Pose2; tol::Float64=1e-10)
   return compareDensity(a.Z, b.Z)
-  # TP = true
-  # TP = TP && norm(a.z.μ-b.z.μ) < (tol + 1e-5)
-  # TP = TP && norm(a.z.Σ.mat-b.z.Σ.mat) < tol
-  # return TP
 end
 
-## Deprecated
-# function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Float64})
-#   @warn "Pose2Pose2(mu,cov,w) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))"
-#   Pose2Pose2(MvNormal(mean, cov))
-# end
+#

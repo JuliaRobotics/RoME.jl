@@ -1,6 +1,6 @@
 
 ##==============================================================================
-## Remove before RoME v0.18
+## Legacy, remove some time after DFG v0.19
 ##==============================================================================
 
 @deprecate generateCanonicalFG_Helix2DSlew!(w...;kw...) generateGraph_Helix2DSlew!(w...;kw...)
@@ -21,6 +21,92 @@ getManifold(::IIF.InstanceType{Pose2Pose2}) = Pose2 |> getManifold
 # getManifold(::IIF.InstanceType{Pose3Point3}) = Point3
 getManifold(::IIF.InstanceType{Pose3Pose3}) = Pose3 |> getManifold
 # getManifold(::IIF.InstanceType{Pose2Point2BearingRange}) = BearingRange2 |> getManifold
+
+
+##==============================================================================
+## Remove before RoME v0.18
+##==============================================================================
+
+
+# #TODO remove to use default
+# function getSample(cf::CalcFactor{<:Pose2Pose2}) 
+  
+#   M = getManifold(cf.factor)
+#   ϵ = getPointIdentity(Pose2)
+
+#   X = sampleTangent(M, cf.factor.Z, ϵ)
+#   return X
+# end
+
+## Deprecated
+# function Pose2Pose2(mean::Array{Float64,1}, cov::Array{Float64,2}, w::Vector{Float64})
+#   @warn "Pose2Pose2(mu,cov,w) is deprecated in favor of Pose2Pose2(T(...)) -- use for example Pose2Pose2(MvNormal(mu, cov))"
+#   Pose2Pose2(MvNormal(mean, cov))
+# end
+
+
+# function getSample(cf::CalcFactor{<:Pose3Pose3}) 
+#   Xc = rand(cf.factor.Z)
+#   #NOTE be carefull using this as template as it will not work in general for all manifolds
+#   M = getManifold(Pose3)
+#   ϵ = getPointIdentity(Pose3)
+#   X = hat(M, ϵ, Xc)
+#   # return a vector
+#   return X
+# end
+
+# TODO Deprecate
+
+# """
+# $(TYPEDEF)
+# """
+# mutable struct PP3REUSE
+#   wTi::SE3
+#   wTj::SE3
+#   iTi::SE3
+#   PP3REUSE() = new(SE3(0),SE3(0),SE3(0))
+# end
+
+# function fastpose3pose3residual!( reusethrid::PP3REUSE,
+#                                   meas,
+#                                   wXi,
+#                                   wXj  )
+#   #
+#   reusethrid.wTi.t[1:3] = wXi[1:3]
+#   TransformUtils.convert!(reusethrid.wTi.R, Euler(wXi[4],wXi[5],wXi[6]))
+#   reusethrid.wTj.t[1:3] = wXj[1:3]
+#   TransformUtils.convert!(reusethrid.wTj.R, Euler(wXj[4],wXj[5],wXj[6]))
+
+#   # TODO -- convert to in place convert! functions, many speed-ups possible here
+#   jTi = SE3( matrix(reusethrid.wTj)\matrix(reusethrid.wTi) )
+#   # also wasted memory here, should operate directly on iTi and not be assigning new memory
+#   reusethrid.iTi = (SE3(meas[1:3],Euler(meas[4:6]...)) * jTi)
+#   return veeEuler(reusethrid.iTi)
+# end
+
+# """
+# $(TYPEDEF)
+
+# Rigid transform factor between two Pose3 compliant variables.
+# """
+# mutable struct Pose3Pose3{T <: IIF.SamplableBelief} <: AbstractRelativeRoots
+#     Z::T
+#     reuse::Vector{PP3REUSE}
+#     Pose3Pose3{T}() where T = new{T}()
+#     Pose3Pose3{T}(s::T) where {T <: SamplableBelief} = new{T}(s, PP3REUSE[PP3REUSE() for i in 1:Threads.nthreads()]  )
+# end
+# Pose3Pose3(Z::T=MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)]))) where {T <: IIF.SamplableBelief} = Pose3Pose3{T}(Z)
+
+# function getSample(cf::CalcFactor{<:Pose3Pose3}, N::Int=1)
+#   return (rand(cf.factor.Z, N), )
+# end
+# function (cf::CalcFactor{<:Pose3Pose3})(meas,
+#                                         wXi,
+#                                         wXj  )
+#   #
+#   reusethrid = cf.factor.reuse[Threads.threadid()]
+#   return fastpose3pose3residual!(reusethrid, meas, wXi, wXj)
+# end
 
 
 # function selectFactorType(T1::Type{<:InferenceVariable}, T2::Type{<:InferenceVariable})

@@ -7,6 +7,10 @@ export
   AMP,
   DFG
 
+# from Manifolds
+export SpecialEuclidean
+
+
 export
   # some transform functions
   cart2pol,
@@ -103,6 +107,12 @@ export
 
   # SLAM specific functions
   SLAMWrapper
+
+
+export Pose3Pose3, PackedPose3Pose3
+export VelPose2VelPose2, PackedVelPose2VelPose2
+
+
 
 export generateGraph_ZeroPose, generateGraph_Hexagonal
 export generateGraph_TwoPoseOdo, generateGraph_Circle
