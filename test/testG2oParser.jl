@@ -34,7 +34,7 @@ end
 
 
   # test file generation
-  fg = generateCanonicalFG_Hexagonal(graphinit=false)
+  fg = generateGraph_Hexagonal(graphinit=false)
 
   filepath = exportG2o(fg)
 

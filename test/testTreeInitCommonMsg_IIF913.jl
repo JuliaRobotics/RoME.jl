@@ -9,7 +9,7 @@ using RoME
 
 ##
 
-fg = generateCanonicalFG_Circle(4;graphinit=true)
+fg = generateGraph_Circle(4;graphinit=true)
 # deleteVariable!.(fg, [:x3, :x4, :l1])
 
 

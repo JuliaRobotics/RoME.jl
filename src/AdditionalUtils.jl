@@ -5,7 +5,7 @@
 
 Load and solve a canonical or user factor graph to warm up---precompile---several RoME/Caesar related functions.
 """
-function warmUpSolverJIT(;fg::AbstractDFG=generateCanonicalFG_Hexagonal(),
+function warmUpSolverJIT(;fg::AbstractDFG=generateGraph_Hexagonal(),
                           drawtree::Bool=true )::Nothing
   #
 

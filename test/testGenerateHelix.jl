@@ -11,7 +11,7 @@ using RoME
 ##
 
 
-fg = generateCanonicalFG_Boxes2D!(8, postpose_cb=(g,l)->@show l)
+fg = generateGraph_Boxes2D!(8, postpose_cb=(g,l)->@show l)
 
 ##
 
@@ -56,7 +56,7 @@ end
 
 cb(fg_, lp) = @show lp, length(ls(fg_))
 
-fg = generateCanonicalFG_Helix2DSlew!(46, slew_x=2/3, posesperturn=15, radius=10, Qd=diagm( [0.1;0.1;0.05].^2 ), postpose_cb=cb, solverParams=SolverParams(useMsgLikelihoods=false))
+fg = generateGraph_Helix2DSlew!(46, slew_x=2/3, posesperturn=15, radius=10, Qd=diagm( [0.1;0.1;0.05].^2 ), postpose_cb=cb, solverParams=SolverParams(useMsgLikelihoods=false))
 
 ## # test slew in x
 
@@ -66,7 +66,7 @@ lastpose = sortDFG(ls(fg))[end]
 
 ##
 
-fg = RoME.generateCanonicalFG_Helix2DSpiral!(200, rate_r=0.6, rate_a=6, radius=100, solverParams=SolverParams(graphinit=false))
+fg = RoME.generateGraph_Helix2DSpiral!(200, rate_r=0.6, rate_a=6, radius=100, solverParams=SolverParams(graphinit=false))
 
 
 ##
@@ -76,7 +76,7 @@ end
 @testset "test extending fg with helix generator" begin
 ##
 
-fg = generateCanonicalFG_Helix2D!(5, posesperturn=15, radius=10, solverParams=SolverParams(graphinit=false))
+fg = generateGraph_Helix2D!(5, posesperturn=15, radius=10, solverParams=SolverParams(graphinit=false))
 
 @test !getSolverParams(fg).graphinit
 
@@ -97,14 +97,14 @@ end
 
 # check that the graph can be expanded with the same generator function
 
-generateCanonicalFG_Helix2D!(5, dfg=fg, posesperturn=15, radius=10, solverParams=SolverParams(graphinit=false))
+generateGraph_Helix2D!(5, dfg=fg, posesperturn=15, radius=10, solverParams=SolverParams(graphinit=false))
 # check that no new variables were added
 @test length(ls(fg)) == length(vars)
 @test !exists(fg, :x5)
 
 ##
 
-generateCanonicalFG_Helix2D!(6, dfg=fg, posesperturn=15, radius=10, solverParams=SolverParams(graphinit=false))
+generateGraph_Helix2D!(6, dfg=fg, posesperturn=15, radius=10, solverParams=SolverParams(graphinit=false))
 # check that only one variable has been added
 @test length(ls(fg)) == length(vars) + 1 
 @test exists(fg, :x5)

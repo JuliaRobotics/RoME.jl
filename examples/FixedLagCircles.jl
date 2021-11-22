@@ -16,7 +16,7 @@ SIZE = 10
 ### SETUP first half of circle----------------------------------------------
 
 # drive first half
-fg = generateCanonicalFG_Circle(SIZE, stopEarly=round(Int, SIZE/2), biasTurn=-0.05)
+fg = generateGraph_Circle(SIZE, stopEarly=round(Int, SIZE/2), biasTurn=-0.05)
 
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
@@ -38,7 +38,7 @@ saveDFG(fg5a, joinLogPath(fg5a,"fg_5A"))
 
 # drive second half
 
-generateCanonicalFG_Circle(SIZE, fg=fg, biasTurn=-0.05, loopClosure=true, kappaOdo=3)
+generateGraph_Circle(SIZE, fg=fg, biasTurn=-0.05, loopClosure=true, kappaOdo=3)
 
 ensureAllInitialized!(fg)
 

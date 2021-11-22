@@ -30,7 +30,7 @@ function getSample(cf::CalcFactor{<:PriorPose3ZRP})
 
   #Rotation part: roll and pitch
   r,p = rand(cf.factor.rp)
-  R = Rotations.RotYX(p, r) #TODO confirm RotYX(p,r) or RotXY(r,p)
+  R = _Rot.RotYX(p, r) #TODO confirm RotYX(p,r) or RotXY(r,p)
   
   # Translation part: Z
   T = [0; 0; rand(cf.factor.z)]
