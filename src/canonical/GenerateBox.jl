@@ -1,8 +1,6 @@
 # generate 2D boxy canonical graph pattern
 
 
-export generateCanonicalFG_Boxes2D!
-
 
 _eps_w_int(::Type{T}) where {T <: Real} = eps(T)
 _eps_w_int(::Type{T}) where {T <: Integer} = 1e-17
@@ -106,23 +104,23 @@ Notes
 
 Related
 
-[`generateCanonicalFG_ZeroPose`](@ref), [`generateCanonicalFG_Helix2DSlew!`](@ref), [`generateCanonicalFG_Hexagonal`](@ref)
+[`generateGraph_ZeroPose`](@ref), [`generateGraph_Helix2DSlew!`](@ref), [`generateGraph_Hexagonal`](@ref)
 """
-function generateCanonicalFG_Boxes2D!(numposes::Integer=16;
-                                      graphinit::Bool=false,
-                                      dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),
-                                      useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
-                                      length_x::Real=15,
-                                      length_y::Real=length_x,
-                                      slew_x::Real=2/3,
-                                      poseRegex::Regex=r"x\d+",
-                                      refKey::Symbol=:simulated,
-                                      Qd::Matrix{<:Real}=diagm( [0.1;0.1;0.05].^2 ),
-                                      postpose_cb::Function=(fg_,latestpose)->()   )
+function generateGraph_Boxes2D!(numposes::Integer=16;
+                                graphinit::Bool=false,
+                                dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),
+                                useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
+                                length_x::Real=15,
+                                length_y::Real=length_x,
+                                slew_x::Real=2/3,
+                                poseRegex::Regex=r"x\d+",
+                                refKey::Symbol=:simulated,
+                                Qd::Matrix{<:Real}=diagm( [0.1;0.1;0.05].^2 ),
+                                postpose_cb::Function=(fg_,latestpose)->()   )
   #
 
   # actually start adding nodes 
-  generateCanonicalFG_ZeroPose(dfg=dfg, varType=RoME.Point2, variableTags=[:POSE;], postpose_cb=postpose_cb)
+  generateGraph_ZeroPose(dfg=dfg, varType=RoME.Point2, variableTags=[:POSE;], postpose_cb=postpose_cb)
 
   numboxes = ceil(Int, numposes/4)
   

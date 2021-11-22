@@ -3,6 +3,17 @@
 ## Remove before RoME v0.18
 ##==============================================================================
 
+@deprecate generateCanonicalFG_Helix2DSlew!(w...;kw...) generateGraph_Helix2DSlew!(w...;kw...)
+@deprecate generateCanonicalFG_Helix2DSpiral!(w...;kw...) generateGraph_Helix2DSpiral!(w...;kw...)
+@deprecate generateCanonicalFG_Helix2D!(w...;kw...) generateGraph_Helix2D!(w...;kw...)
+@deprecate generateCanonicalFG_Honeycomb!(w...;kw...) generateGraph_Honeycomb!(w...;kw...)
+@deprecate generateCanonicalFG_Beehive!(w...;kw...) generateGraph_Beehive!(w...;kw...)
+@deprecate generateCanonicalFG_TwoPoseOdo(w...;kw...) generateGraph_TwoPoseOdo(w...;kw...)
+@deprecate generateCanonicalFG_Boxes2D!(w...;kw...) generateGraph_Boxes2D!(w...;kw...)
+@deprecate generateCanonicalFG_Hexagonal(w...;kw...) generateGraph_Hexagonal(w...;kw...)
+@deprecate generateCanonicalFG_ZeroPose(w...;kw...) generateGraph_ZeroPose(w...;kw...)
+@deprecate generateCanonicalFG_Circle(w...;kw...) generateGraph_Circle(w...;kw...)
+
 getManifold(::IIF.InstanceType{Point2Point2}) = Point2 |> getManifold
 getManifold(::IIF.InstanceType{Pose2Point2}) = Point2 |> getManifold
 getManifold(::IIF.InstanceType{PriorPose2}) = Pose2 |> getManifold

@@ -1,5 +1,4 @@
 
-export generateCanonicalFG_Honeycomb!
 
 global _honeycombRecipe = Dict{Symbol,Symbol}(
   :l6   =>:l0,
@@ -171,7 +170,7 @@ function _offsetHexLeg( fgl::AbstractDFG,
 end
 
 
-function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
+function generateGraph_Honeycomb!(poseCountTarget::Int=36;
                                         graphinit::Bool = false,
                                         dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),  
                                         useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
@@ -193,7 +192,7 @@ function generateCanonicalFG_Honeycomb!(poseCountTarget::Int=36;
     match(r"\d+", string(lastPose)).match |> x->parse(Int,x)
   else
     # initial zero pose
-    generateCanonicalFG_ZeroPose(dfg=dfg, varType=RoME.Pose2, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateGraph_ZeroPose(dfg=dfg, varType=RoME.Pose2, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
 
     # # reference ppe on :x0
     # refVal = zeros(3)

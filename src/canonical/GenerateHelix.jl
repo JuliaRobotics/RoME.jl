@@ -1,8 +1,4 @@
 
-export 
-  generateCanonicalFG_Helix2D!,
-  generateCanonicalFG_Helix2DSlew!,
-  generateCanonicalFG_Helix2DSpiral!
 
 
 """
@@ -19,31 +15,31 @@ Notes
 - use `postpose_cb = (fg_, lastestpose) -> ...` for additional user features after each new pose
 - can be used to grow a graph with repeated calls, but keyword parameters are assumed identical between calls.
 
-See also: [`generateCanonicalFG_Helix2DSlew!`](@ref), [`generateCanonicalFG_Helix2DSpiral!`](@ref), [`generateCanonicalFG_Beehive!`](@ref)
+See also: [`generateGraph_Helix2DSlew!`](@ref), [`generateGraph_Helix2DSpiral!`](@ref), [`generateGraph_Beehive!`](@ref)
 """
-function generateCanonicalFG_Helix2D!(numposes::Integer = 40;
-                                      posesperturn::Integer = 20,
-                                      graphinit = nothing,
-                                      useMsgLikelihoods = nothing,
-                                      solverParams::SolverParams = SolverParams(;graphinit=false),
-                                      dfg::AbstractDFG = LightDFG{SolverParams}(;solverParams),
-                                      radius::Real = 10,
-                                      spine_t = (t)->0 + im*0,
-                                      xr_t::Function = (t)->real(spine_t(t)),
-                                      yr_t::Function = (t)->imag(spine_t(t)),
-                                      poseRegex::Regex = r"x\d+",
-                                      μ0 = [0;0;pi/2],
-                                      refKey::Symbol = :simulated,
-                                      Qd::AbstractMatrix{<:Real} = diagm( [0.1;0.1;0.05].^2 ),
-                                      postpose_cb::Function = (fg_,latestpose)->()   )
+function generateGraph_Helix2D!(numposes::Integer = 40;
+                                posesperturn::Integer = 20,
+                                graphinit = nothing,
+                                useMsgLikelihoods = nothing,
+                                solverParams::SolverParams = SolverParams(;graphinit=false),
+                                dfg::AbstractDFG = LightDFG{SolverParams}(;solverParams),
+                                radius::Real = 10,
+                                spine_t = (t)->0 + im*0,
+                                xr_t::Function = (t)->real(spine_t(t)),
+                                yr_t::Function = (t)->imag(spine_t(t)),
+                                poseRegex::Regex = r"x\d+",
+                                μ0 = [0;0;pi/2],
+                                refKey::Symbol = :simulated,
+                                Qd::AbstractMatrix{<:Real} = diagm( [0.1;0.1;0.05].^2 ),
+                                postpose_cb::Function = (fg_,latestpose)->()   )
   #
-  (graphinit isa Nothing) ? nothing : @error("generateCanonicalFG_Helix2D! keyword graphinit obsolete, use solverParams=SolverParams(graphinit=..) instead.")
-  (useMsgLikelihoods isa Nothing) ? nothing : @error("generateCanonicalFG_Helix2D! keyword useMsgLikelihoods obsolete, use solverParams=SolverParams(useMsgLikelihoods=..) instead.")
+  (graphinit isa Nothing) ? nothing : @error("generateGraph_Helix2D! keyword graphinit obsolete, use solverParams=SolverParams(graphinit=..) instead.")
+  (useMsgLikelihoods isa Nothing) ? nothing : @error("generateGraph_Helix2D! keyword useMsgLikelihoods obsolete, use solverParams=SolverParams(useMsgLikelihoods=..) instead.")
   
   # add first pose if not already exists
   _initpose = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, 0)
   if !exists( dfg, _initpose )
-    generateCanonicalFG_ZeroPose(;dfg, μ0, solverParams, postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateGraph_ZeroPose(;dfg, μ0, solverParams, postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
     # getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
     # reference ppe on :x0
     ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
@@ -116,13 +112,13 @@ Notes
 
 Related
 
-[`generateCanonicalFG_Helix2D!`](@ref), [`generateCanonicalFG_Helix2DSpiral!`](@ref)
+[`generateGraph_Helix2D!`](@ref), [`generateGraph_Helix2DSpiral!`](@ref)
 """
-generateCanonicalFG_Helix2DSlew!( numposes::Integer=40;
-                                  slew_x::Real=2/3,
-                                  slew_y::Real=0,
-                                  spine_t=(t)->slew_x*t + im*slew_y*t,
-                                  kwargs...  ) = generateCanonicalFG_Helix2D!(numposes; spine_t=spine_t, kwargs...)
+generateGraph_Helix2DSlew!( numposes::Integer=40;
+                            slew_x::Real=2/3,
+                            slew_y::Real=0,
+                            spine_t=(t)->slew_x*t + im*slew_y*t,
+                            kwargs...  ) = generateGraph_Helix2D!(numposes; spine_t=spine_t, kwargs...)
 #
 
 """
@@ -138,13 +134,13 @@ Notes
 
 Related 
 
-[`generateCanonicalFG_Helix2D!`](@ref), [`generateCanonicalFG_Helix2DSlew!`](@ref)
+[`generateGraph_Helix2D!`](@ref), [`generateGraph_Helix2DSlew!`](@ref)
 """
-generateCanonicalFG_Helix2DSpiral!( numposes::Integer=100;
-                                    rate_r=0.6,
-                                    rate_a=6,
-                                    spine_t=(t)->rate_r*(t^0.5)*cis(rate_a*(t^0.4)),
-                                    kwargs...  ) = generateCanonicalFG_Helix2D!(numposes; spine_t=spine_t, kwargs...)
+generateGraph_Helix2DSpiral!( numposes::Integer=100;
+                              rate_r=0.6,
+                              rate_a=6,
+                              spine_t=(t)->rate_r*(t^0.5)*cis(rate_a*(t^0.4)),
+                              kwargs...  ) = generateGraph_Helix2D!(numposes; spine_t=spine_t, kwargs...)
 #
 
 

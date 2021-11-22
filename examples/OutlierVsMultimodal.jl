@@ -132,11 +132,11 @@ lookup
 ### SETUP first circle----------------------------------------------
 
 # drive first circle
-fg = generateCanonicalFG_Circle(SIZE, kappaOdo=0.1, loopClosure=false, landmark=false, cyclePoses=10)
+fg = generateGraph_Circle(SIZE, kappaOdo=0.1, loopClosure=false, landmark=false, cyclePoses=10)
 
 getSolverParams(fg).spreadNH = pargs["spreadNH"]
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 ## store arguments in results log
 
@@ -262,7 +262,7 @@ global BRdistr
 global pargs
 global POSEOFFSET += 10
 # drive the new loop without landmark detections (dont solve yet)
-fg = generateCanonicalFG_Circle(i*SIZE, fg=fg, kappaOdo=0.1, loopClosure=false, landmark=false, cyclePoses=10)
+fg = generateGraph_Circle(i*SIZE, fg=fg, kappaOdo=0.1, loopClosure=false, landmark=false, cyclePoses=10)
 
 # add modified landmark sighting measurements
 for l in 1:LANDMARKS

@@ -99,10 +99,21 @@ export
   PackedPriorPose3ZRP,
   # Various utilities
   passTypeThrough,
+  buildGraphChain!,
 
   # SLAM specific functions
-  SLAMWrapper,
+  SLAMWrapper
 
+export generateGraph_ZeroPose, generateGraph_Hexagonal
+export generateGraph_TwoPoseOdo, generateGraph_Circle
+export generateGraph_Beehive!, generateGraph_Honeycomb!
+export generateGraph_Boxes2D!
+export generateGraph_Helix2D!, generateGraph_Helix2DSlew!, generateGraph_Helix2DSpiral!
+
+export warmUpSolverJIT
+
+
+export
   # camera model -- TODO --separate out
   CameraIntrinsic,
   CameraExtrinsic,

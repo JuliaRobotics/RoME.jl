@@ -17,7 +17,7 @@ Example
 ```julia
 using RoME
 
-fg = generateCanonicalFG_Hexagonal()
+fg = generateGraph_Hexagonal()
 drawGraph(fg, show=true)
 ```
 
@@ -26,19 +26,19 @@ DevNotes
 
 Related
 
-[`generateCanonicalFG_Circle`](@ref), [`generateCanonicalFG_Kaess`](@ref), [`generateCanonicalFG_TwoPoseOdo`](@ref)
+[`generateGraph_Circle`](@ref), [`generateGraph_Kaess`](@ref), [`generateGraph_TwoPoseOdo`](@ref)
 """
-function generateCanonicalFG_Circle(poses::Int=6;
-                                    fg::AbstractDFG=initfg(),
-                                    offsetPoses::Int=maximum([length(ls(fg, r"x\d"))-1;0]),
-                                    autoinit::Union{Bool, Nothing}=nothing,
-                                    graphinit::Bool=true,
-                                    landmark::Bool=true,
-                                    loopClosure::Bool=true,
-                                    stopEarly::Int=9999999,
-                                    biasTurn::Real=0.0,
-                                    kappaOdo::Real=1.0,
-                                    cyclePoses::Int=poses )
+function generateGraph_Circle(poses::Int=6;
+                              fg::AbstractDFG=initfg(),
+                              offsetPoses::Int=maximum([length(ls(fg, r"x\d"))-1;0]),
+                              autoinit::Union{Bool, Nothing}=nothing,
+                              graphinit::Bool=true,
+                              landmark::Bool=true,
+                              loopClosure::Bool=true,
+                              stopEarly::Int=9999999,
+                              biasTurn::Real=0.0,
+                              kappaOdo::Real=1.0,
+                              cyclePoses::Int=poses )
   # assume empty factor graph object fg
   @assert offsetPoses < poses "`offsetPoses` must be smaller than total number of `poses`"
   # IIF.getSolverParams(fg).drawtree = true

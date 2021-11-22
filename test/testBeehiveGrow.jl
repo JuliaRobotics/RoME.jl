@@ -17,23 +17,23 @@ using RoME
 
 ##
 
-fg = RoME.generateCanonicalFG_Honeycomb!(7, graphinit=true, useMsgLikelihoods = true)
+fg = RoME.generateGraph_Honeycomb!(7, graphinit=true, useMsgLikelihoods = true)
 tree = solveTree!(fg);
 
-fg = RoME.generateCanonicalFG_Honeycomb!(14, graphinit=true, dfg=fg)
+fg = RoME.generateGraph_Honeycomb!(14, graphinit=true, dfg=fg)
 tree = solveTree!(fg, tree);
 
 tree_ = deepcopy(tree); fg_ = deepcopy(fg);
-fg = RoME.generateCanonicalFG_Honeycomb!(21, graphinit=true, dfg=fg)
+fg = RoME.generateGraph_Honeycomb!(21, graphinit=true, dfg=fg)
 tree = solveTree!(fg  , tree);
 
-# fg = RoME.generateCanonicalFG_Honeycomb!(28, graphinit=true, dfg=fg)
+# fg = RoME.generateGraph_Honeycomb!(28, graphinit=true, dfg=fg)
 # tree = solveTree!(fg, tree);
 
-# fg = RoME.generateCanonicalFG_Honeycomb!(35, graphinit=true, dfg=fg)
+# fg = RoME.generateGraph_Honeycomb!(35, graphinit=true, dfg=fg)
 # tree = solveTree!(fg, tree);
 
-# fg = RoME.generateCanonicalFG_Honeycomb!(42, graphinit=true, dfg=fg)
+# fg = RoME.generateGraph_Honeycomb!(42, graphinit=true, dfg=fg)
 # tree = solveTree!(fg, tree);
 
 
@@ -58,7 +58,7 @@ end
 
 ##
 
-fg = generateCanonicalFG_Beehive!(8, graphinit=false, postpose_cb=(g,l)->@show l)
+fg = generateGraph_Beehive!(8, graphinit=false, postpose_cb=(g,l)->@show l)
 
 @test isapprox( getPPE(fg, :x0, :simulated).suggested[1:2], [0.0;0.0], atol = 1e-8)
 

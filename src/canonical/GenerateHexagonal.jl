@@ -16,15 +16,15 @@ Example
 ```julia
 using RoME
 
-fg = generateCanonicalFG_Hexagonal()
+fg = generateGraph_Hexagonal()
 drawGraph(fg, show=true)
 ```
 
 Related
 
-[`generateCanonicalFG_Circle`](@ref), [`generateCanonicalFG_Kaess`](@ref), [`generateCanonicalFG_TwoPoseOdo`](@ref), [`generateCanonicalFG_Boxes2D!`](@ref)
+[`generateGraph_Circle`](@ref), [`generateGraph_Kaess`](@ref), [`generateGraph_TwoPoseOdo`](@ref), [`generateGraph_Boxes2D!`](@ref)
 """
-function generateCanonicalFG_Hexagonal(;fg::AbstractDFG=initfg(),
+function generateGraph_Hexagonal(;fg::AbstractDFG=initfg(),
                                         N::Int=100,
                                         autoinit::Union{Bool, Nothing}=nothing,
                                         graphinit::Bool=true  )
@@ -36,5 +36,5 @@ function generateCanonicalFG_Hexagonal(;fg::AbstractDFG=initfg(),
     @warn "autoinit is deprecated, use graphinit instead"
     autoinit
   end
-  return generateCanonicalFG_Circle(6, graphinit=graphinit, landmark=true, loopClosure=true; fg=fg)
+  return generateGraph_Circle(6, graphinit=graphinit, landmark=true, loopClosure=true; fg=fg)
 end

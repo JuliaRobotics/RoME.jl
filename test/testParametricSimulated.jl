@@ -162,7 +162,7 @@ end
 ##
 
 # build the graph
-fg = RoME.generateCanonicalFG_Honeycomb!()
+fg = RoME.generateGraph_Honeycomb!()
 
 # check that pose :x3 has rotation near +-pi
 t,m,gn = IIF._checkVariableByReference(fg, :x2, r"x\d+", Pose2, getFactorType(fg, :x2x3f1),destPrefix=:x, srcNumber=2)
