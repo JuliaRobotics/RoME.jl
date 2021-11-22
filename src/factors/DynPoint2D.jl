@@ -5,25 +5,25 @@
 $(TYPEDEF)
 """
 mutable struct DynPoint2VelocityPrior{T <: SamplableBelief} <: AbstractPrior
-  z::T
+  Z::T
   DynPoint2VelocityPrior{T}() where {T <: SamplableBelief} = new{T}()
   DynPoint2VelocityPrior{T}(z1::T) where {T <: SamplableBelief} = new{T}(z1)
 end
 DynPoint2VelocityPrior(z1::T) where {T <: SamplableBelief} = DynPoint2VelocityPrior{T}(z1)
 
-getSample(cfo::CalcFactor{<:DynPoint2VelocityPrior}) = rand(cfo.factor.z)
+getSample(cfo::CalcFactor{<:DynPoint2VelocityPrior}) = rand(cfo.factor.Z)
 
 
 """
 $(TYPEDEF)
 """
 mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeRoots
-  z::T
+  Z::T
   DynPoint2DynPoint2{T}() where {T <: SamplableBelief} = new{T}()
   DynPoint2DynPoint2(z1::T) where {T <: SamplableBelief} = new{T}(z1)
 end
 
-getSample(cfo::CalcFactor{<:DynPoint2DynPoint2}) = rand(cfo.factor.z)
+getSample(cfo::CalcFactor{<:DynPoint2DynPoint2}) = rand(cfo.factor.Z)
 
 function (cfo::CalcFactor{<:DynPoint2DynPoint2})(z, xi, xj)
   #
@@ -38,12 +38,12 @@ end
 $(TYPEDEF)
 """
 mutable struct Point2Point2Velocity{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
-  z::T
+  Z::T
   Point2Point2Velocity{T}() where {T <: IIF.SamplableBelief} = new{T}()
   Point2Point2Velocity(z1::T) where {T <: IIF.SamplableBelief} = new{T}(z1)
 end
 
-getSample(cfo::CalcFactor{<:Point2Point2Velocity}) = rand(cfo.factor.z)
+getSample(cfo::CalcFactor{<:Point2Point2Velocity}) = rand(cfo.factor.Z)
 function (cfo::CalcFactor{<:Point2Point2Velocity})( z,
                                                     xi,
                                                     xj  )
@@ -73,7 +73,7 @@ mutable struct PackedDynPoint2VelocityPrior <: IIF.PackedInferenceType
 end
 
 function convert(::Type{PackedDynPoint2VelocityPrior}, d::DynPoint2VelocityPrior)
-  return PackedDynPoint2VelocityPrior(convert(PackedSamplableBelief, d.z))
+  return PackedDynPoint2VelocityPrior(convert(PackedSamplableBelief, d.Z))
 end
 function convert(::Type{DynPoint2VelocityPrior}, d::PackedDynPoint2VelocityPrior)
   distr = convert(SamplableBelief, d.str)

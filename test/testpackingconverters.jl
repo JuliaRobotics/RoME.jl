@@ -205,8 +205,8 @@ global dd = convert(PackedPose3Pose3, pp3)
 global upd = convert(RoME.Pose3Pose3, dd)
 
 
-@test norm(pp3.z.μ - upd.z.μ) < 1e-10
-@test norm(pp3.z.Σ.mat - upd.z.Σ.mat) < 1e-8
+@test norm(pp3.Z.μ - upd.Z.μ) < 1e-10
+@test norm(pp3.Z.Σ.mat - upd.Z.Σ.mat) < 1e-8
 
 global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3}, DFG.getSolverData(f2))
 global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose3Pose3}}, packeddata)

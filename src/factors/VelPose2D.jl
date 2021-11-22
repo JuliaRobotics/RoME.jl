@@ -1,12 +1,10 @@
 
-export VelPose2VelPose2, PackedVelPose2VelPose2
-
 
 """
 $(TYPEDEF)
 """
 mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-  Zpose::Pose2Pose2{T1} #Zpose::T1
+  Zpose::Pose2Pose2{T1}
   Zvel::T2
   reuseres::Vector{Vector{Float64}}
   VelPose2VelPose2{T1,T2}() where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}()
@@ -18,7 +16,7 @@ getManifold(::VelPose2VelPose2) = getManifold(DynPose2)
 
 function getSample(cf::CalcFactor{<:VelPose2VelPose2})
     #Pose2 part
-    Xc = rand(cf.factor.Zpose.z)
+    Xc = rand(cf.factor.Zpose.Z)
     M = getManifold(Pose2)
     ϵ = getPointIdentity(Pose2)
     # ϵ = Manifolds.Identity(M)
@@ -143,7 +141,7 @@ mutable struct PackedVelPose2VelPose2 <: IncrementalInference.PackedInferenceTyp
 end
 
 function convert(::Type{PackedVelPose2VelPose2}, d::VelPose2VelPose2)
-  return PackedVelPose2VelPose2(convert(PackedSamplableBelief, d.Zpose.z),
+  return PackedVelPose2VelPose2(convert(PackedSamplableBelief, d.Zpose.Z),
                                 convert(PackedSamplableBelief, d.Zvel))
 end
 function convert(::Type{VelPose2VelPose2}, d::PackedVelPose2VelPose2)

@@ -7,13 +7,13 @@
 $(TYPEDEF)
 """
 mutable struct VelPoint2VelPoint2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
-  z::T
+  Z::T
   VelPoint2VelPoint2{T}() where {T <: Distribution} = new{T}()
   VelPoint2VelPoint2{T}(z1::T) where {T <: Distribution} = new{T}(z1)
 end
 VelPoint2VelPoint2(z1::T) where {T <: Distribution} = VelPoint2VelPoint2{T}(z1)
 
-getSample(cfo::CalcFactor{<:VelPoint2VelPoint2}) = rand(cfo.factor.z)
+getSample(cfo::CalcFactor{<:VelPoint2VelPoint2}) = rand(cfo.factor.Z)
 
 function (cfo::CalcFactor{<:VelPoint2VelPoint2})(z, xi, xj)
   #
@@ -39,8 +39,8 @@ function (cfo::CalcFactor{<:VelPoint2VelPoint2})(z, xi, xj)
 
   return res
   # res[1] = 0.0
-  # res[1] += sum((z[1:2] - dp).^2) # (meas - predicted) change in position error term
-  # res[1] += sum((z[3:4] - dv).^2) # (meas - predicted) change in velocity error term
+  # res[1] += sum((Z[1:2] - dp).^2) # (meas - predicted) change in position error term
+  # res[1] += sum((Z[3:4] - dv).^2) # (meas - predicted) change in velocity error term
 
   # ## now cross couple the change in position information, via timestamps to accompanying velocity
   #  # recompute integration of velocity influence
@@ -70,7 +70,7 @@ mutable struct PackedVelPoint2VelPoint2 <: IncrementalInference.PackedInferenceT
 end
 
 function convert(::Type{PackedVelPoint2VelPoint2}, d::VelPoint2VelPoint2)
-  return PackedVelPoint2VelPoint2(convert(PackedSamplableBelief, d.z))
+  return PackedVelPoint2VelPoint2(convert(PackedSamplableBelief, d.Z))
 end
 function convert(::Type{VelPoint2VelPoint2}, d::PackedVelPoint2VelPoint2)
   distr = convert(SamplableBelief, d.str)

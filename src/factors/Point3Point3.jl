@@ -13,7 +13,7 @@
 $(TYPEDEF)
 """
 mutable struct Point3Point3{D <: IIF.SamplableBelief} <: AbstractRelativeRoots
-    Zij::D
+    Z::D
     # empty constructor
     Point3Point3{T}() where T = new{T}()
     # regular constructor
@@ -23,7 +23,7 @@ end
 Point3Point3(x::T=MvNormal(zeros(3),LinearAlgebra.diagm([0.1;0.1;0.1]))) where {T <: IIF.SamplableBelief} = Point3Point3{T}(x)
 
 function getSample(cfo::CalcFactor{<:Point3Point3})
-  return rand(cfo.factor.Zij)
+  return rand(cfo.factor.Z)
 end
 function (cf::CalcFactor{<:Point3Point3})(meas,
                                             xi,
@@ -55,5 +55,5 @@ function convert(::Type{Point3Point3}, d::PackedPoint3Point3)
   return Point3Point3( convert(SamplableBelief, d.str) )
 end
 function convert(::Type{PackedPoint3Point3}, d::Point3Point3)
-  return PackedPoint3Point3( convert(PackedSamplableBelief, d.Zij) )
+  return PackedPoint3Point3( convert(PackedSamplableBelief, d.Z) )
 end
