@@ -30,6 +30,7 @@ testfiles = [
   "testScalarFields.jl";
   "testPoint2Point2Init.jl";
   "threeDimLinearProductTest.jl";
+  "testPose3Pose3NH.jl";
   "testBeehiveGrow.jl"; # also starts multiprocess
   
   # regular tests expected to pass
@@ -40,7 +41,6 @@ testfiles = [
   "testBasicPose2Conv.jl";
   "testGraphGenerators.jl";
   "testTreeInitCommonMsg_IIF913.jl";
-  "testPose3Pose3NH.jl";
   "testHexagonal2D_CliqByCliq.jl";      # special case debugging
   "testhigherdimroots.jl";
   "testDidsonFunctions.jl";
@@ -67,9 +67,9 @@ testfiles = [
 
 
 for testf in testfiles
-  println("[TEST] $testf")
+  println("[TEST] $testf =============================================================")
   include(testf)
-  println("[SUCCESS] $testf ==========================================================")
+  println("[SUCCESS] $testf")
   println()
   println()
   println()
