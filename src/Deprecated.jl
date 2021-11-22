@@ -22,11 +22,19 @@ getManifold(::IIF.InstanceType{Pose2Pose2}) = Pose2 |> getManifold
 getManifold(::IIF.InstanceType{Pose3Pose3}) = Pose3 |> getManifold
 # getManifold(::IIF.InstanceType{Pose2Point2BearingRange}) = BearingRange2 |> getManifold
 
+function Base.getproperty(pp::Pose2Pose2, f::Symbol)
+  if f == :z
+    @warn "Pose2Pose2.z is deprecated, use Pose2Pose2.Z instead" maxlog=10
+    pp.Z
+  else
+    getfield(pp, f)
+  end
+end
+
 
 ##==============================================================================
 ## Remove before RoME v0.18
 ##==============================================================================
-
 
 # #TODO remove to use default
 # function getSample(cf::CalcFactor{<:Pose2Pose2}) 
