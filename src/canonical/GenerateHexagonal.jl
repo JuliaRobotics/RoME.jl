@@ -25,9 +25,11 @@ Related
 [`generateGraph_Circle`](@ref), [`generateGraph_Kaess`](@ref), [`generateGraph_TwoPoseOdo`](@ref), [`generateGraph_Boxes2D!`](@ref)
 """
 function generateGraph_Hexagonal(;fg::AbstractDFG=initfg(),
-                                        N::Int=100,
-                                        autoinit::Union{Bool, Nothing}=nothing,
-                                        graphinit::Bool=true  )
+                                  landmark::Bool=true,
+                                  loopClosure::Bool=landmark,
+                                  N::Int=100,
+                                  autoinit::Union{Bool, Nothing}=nothing,
+                                  graphinit::Bool=true  )
   #
   getSolverParams(fg).N = N
   graphinit = if autoinit === nothing
@@ -36,5 +38,5 @@ function generateGraph_Hexagonal(;fg::AbstractDFG=initfg(),
     @warn "autoinit is deprecated, use graphinit instead"
     autoinit
   end
-  return generateGraph_Circle(6, graphinit=graphinit, landmark=true, loopClosure=true; fg=fg)
+  return generateGraph_Circle(6; graphinit, landmark, loopClosure, fg)
 end
