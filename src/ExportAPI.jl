@@ -208,3 +208,11 @@ export
 
   # jld required Features Type
   LaserFeatures
+
+
+
+# from odometry utils
+export getMeasurementParametric
+export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extractDeltaOdo, resetFactor!
+export odomKDE
+export assembleChordsDict
