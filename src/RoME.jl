@@ -41,11 +41,14 @@ import Base: +, \, convert
 import TransformUtils: ⊖, ⊕, convert, ominus, veeQuaternion
 import IncrementalInference: MB
 import IncrementalInference: convert, getSample, reshapeVec2Mat, DFG
+import IncrementalInference: getMeasurementParametric
 # not sure why this is gives import error
 import DistributedFactorGraphs: compare
 import DistributedFactorGraphs: getDimension, getManifold
 
 # const AMP = ApproxManifoldProducts
+
+
 
 # export the API
 include("ExportAPI.jl")

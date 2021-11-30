@@ -1,13 +1,5 @@
 # utility functions that provide Gaussian odometry accumulation
 
-import IncrementalInference: getFactorMean
-
-export getFactorMean
-export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extractDeltaOdo, resetFactor!
-export odomKDE
-export assembleChordsDict
-
-
 
 
 """
