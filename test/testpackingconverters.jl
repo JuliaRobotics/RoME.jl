@@ -11,6 +11,7 @@ import DistributedFactorGraphs: packVariableNodeData, unpackVariableNodeData
 ##
 
 @testset "test PriorPoint2" begin
+##
 
 global prpt2 = PriorPoint2( MvNormal([0.25;0.75], Matrix(Diagonal([1.0;2.0]))) )
 
@@ -24,6 +25,7 @@ global uprpt2 = convert(PriorPoint2, pprpt2)
 # test backwards compatibility, TODO remove
 global prpt2 = PriorPoint2( MvNormal([0.25;0.75], Matrix(Diagonal([1.0;2.0].^2))  ) )
 
+##
 end
 
 
