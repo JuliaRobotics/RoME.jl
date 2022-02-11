@@ -36,7 +36,7 @@ addFactor!(fg, [:x0;], NorthSouthPartial(Normal(0,1.0)))
 
 # writeGraphPdf(fg)
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 
 [solveTree!(fg) for i in 1:4]

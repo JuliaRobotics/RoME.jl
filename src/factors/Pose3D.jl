@@ -44,10 +44,10 @@ $(TYPEDEF)
 
 Serialization type for PriorPose3.
 """
-mutable struct PackedPriorPose3  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPriorPose3  <: AbstractPackedFactor
     Zi::String
-    PackedPriorPose3() = new()
-    PackedPriorPose3(x::AbstractString) = new(x)
+    # PackedPriorPose3() = new()
+    # PackedPriorPose3(x::AbstractString) = new(x)
 end
 function convert(::Type{PriorPose3}, packed::PackedPriorPose3)
   return PriorPose3( convert(SamplableBelief, packed.Zi) )

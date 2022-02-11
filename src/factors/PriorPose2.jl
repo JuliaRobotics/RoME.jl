@@ -50,10 +50,10 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedPriorPose2  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPriorPose2  <: AbstractPackedFactor
     str::String
-    PackedPriorPose2() = new()
-    PackedPriorPose2(x::String) = new(x)
+    # PackedPriorPose2() = new()
+    # PackedPriorPose2(x::String) = new(x)
 end
 function convert(::Type{PackedPriorPose2}, d::PriorPose2)
   return PackedPriorPose2(convert(PackedSamplableBelief, d.Z))

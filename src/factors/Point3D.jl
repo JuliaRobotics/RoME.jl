@@ -24,10 +24,10 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedPriorPoint3  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPriorPoint3  <: AbstractPackedFactor
     str::String
-    PackedPriorPoint3() = new()
-    PackedPriorPoint3(x::String) = new(x)
+    # PackedPriorPoint3() = new()
+    # PackedPriorPoint3(x::String) = new(x)
 end
 
 

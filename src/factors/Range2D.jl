@@ -25,7 +25,7 @@ passTypeThrough(d::FunctionNodeData{Point2Point2Range}) = d
 """
 $(TYPEDEF)
 """
-mutable struct PackedPoint2Point2Range  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPoint2Point2Range  <: AbstractPackedFactor
   str::String
 end
 function convert(::Type{PackedPoint2Point2Range}, d::Point2Point2Range)
@@ -60,7 +60,7 @@ function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi, lm)
 end
 
 
-mutable struct PackedPose2Point2Range  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose2Point2Range  <: AbstractPackedFactor
   str::String
 end
 function convert(::Type{PackedPose2Point2Range}, d::Pose2Point2Range)

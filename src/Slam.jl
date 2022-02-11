@@ -232,7 +232,7 @@ function manageSolveTree!(dfg::AbstractDFG,
       dt_solvable = (time_ns()-t0)/1e9
 
       @info "Ensure all new variables initialized"
-      ensureAllInitialized!(dfg)
+      initAll!(dfg)
       dt_init = (time_ns()-t0)/1e9
       dt_disengage = 0.0
       dt_save1 = 0.0

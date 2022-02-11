@@ -42,7 +42,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedPose2Pose2  <: IIF.PackedInferenceType
+mutable struct PackedPose2Pose2  <: AbstractPackedFactor
   datastr::String
 end
 function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)

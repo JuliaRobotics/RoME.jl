@@ -55,11 +55,11 @@ mvp = fit(MvNormal, L1_p)
 # check diagonal structure for correlation
 @test isapprox(mvn.Σ.mat[1,1], 2.5, atol=2.2)
 @test isapprox(mvn.Σ.mat[2,2], 2.5, atol=2.2)
-@test isapprox(mvn.Σ.mat[1,2], 2.0, atol=1.6)
+@test isapprox(mvn.Σ.mat[1,2], 2.0, atol=1.65)
 
 @test isapprox(mvp.Σ.mat[1,1], 2.5, atol=2.2)
 @test isapprox(mvp.Σ.mat[2,2], 2.5, atol=2.2)
-@test isapprox(mvp.Σ.mat[1,2], -2.0, atol=1.6)
+@test isapprox(mvp.Σ.mat[1,2], -2.0, atol=1.65)
 
 # sanity check for symmetry
 @test mvn.Σ.mat - mvn.Σ.mat' |> norm < 0.01

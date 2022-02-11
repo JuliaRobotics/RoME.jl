@@ -188,7 +188,7 @@ end
 
 ## packing converters
 
-struct PackedFluxModelsPose2Pose2 <: IncrementalInference.PackedInferenceType
+struct PackedFluxModelsPose2Pose2 <: AbstractPackedFactor
   joyVelData::Vector{Vector{Float64}}
   naiveModel::String
   naiveFrac::Float64

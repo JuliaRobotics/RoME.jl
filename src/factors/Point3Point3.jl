@@ -46,10 +46,10 @@ $(TYPEDEF)
 
 Serialization type for `Point3Point3`.
 """
-mutable struct PackedPoint3Point3 <: IncrementalInference.PackedInferenceType
+mutable struct PackedPoint3Point3 <: AbstractPackedFactor
     str::String
-    PackedPoint3Point3() = new()
-    PackedPoint3Point3(s::AS) where {AS <: AbstractString} = new(s)
+    # PackedPoint3Point3() = new()
+    # PackedPoint3Point3(s::AS) where {AS <: AbstractString} = new(s)
 end
 function convert(::Type{Point3Point3}, d::PackedPoint3Point3)
   return Point3Point3( convert(SamplableBelief, d.str) )

@@ -63,7 +63,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedVelPoint2VelPoint2 <: IncrementalInference.PackedInferenceType
+mutable struct PackedVelPoint2VelPoint2 <: AbstractPackedFactor
   str::String
   PackedVelPoint2VelPoint2() = new()
   PackedVelPoint2VelPoint2(z1::String) = new(z1)

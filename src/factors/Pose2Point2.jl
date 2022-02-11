@@ -39,7 +39,7 @@ end
 
 ## Serialization support
 
-mutable struct PackedPose2Point2 <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose2Point2 <: AbstractPackedFactor
     Z::String
     # PackedPose2Point2() = new()
     # PackedPose2Point2(s1::AS) where {AS <: AbstractString} = new(string(s1))

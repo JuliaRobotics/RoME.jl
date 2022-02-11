@@ -62,10 +62,10 @@ $(TYPEDEF)
 
 Serialization type for `PriorPoint2`.
 """
-mutable struct PackedPriorPoint2  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPriorPoint2  <: AbstractPackedFactor
     str::String
-    PackedPriorPoint2() = new()
-    PackedPriorPoint2(x::String) = new(x)
+    # PackedPriorPoint2() = new()
+    # PackedPriorPoint2(x::String) = new(x)
 end
 
 
@@ -88,7 +88,7 @@ $(TYPEDEF)
 
 Serialization type for `Point2Point2`.
 """
-mutable struct PackedPoint2Point2 <: IncrementalInference.PackedInferenceType
+mutable struct PackedPoint2Point2 <: AbstractPackedFactor
     str::String
     PackedPoint2Point2() = new()
     PackedPoint2Point2(s::AS) where {AS <: AbstractString} = new(s)

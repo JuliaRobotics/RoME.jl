@@ -48,11 +48,11 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedMutablePose2Pose2Gaussian  <: IIF.PackedInferenceType
+mutable struct PackedMutablePose2Pose2Gaussian  <: AbstractPackedFactor
   datastr::String
   timestamp::Int64 # serialized in millisecond
-  PackedMutablePose2Pose2Gaussian() = new()
-  PackedMutablePose2Pose2Gaussian(x::String, ts::Int=datetime2unix(now())*1e3 |> Int) = new(x, ts)
+  # PackedMutablePose2Pose2Gaussian() = new()
+  # PackedMutablePose2Pose2Gaussian(x::String, ts::Int=datetime2unix(now())*1e3 |> Int) = new(x, ts)
 end
 function convert(::Type{MutablePose2Pose2Gaussian}, d::PackedMutablePose2Pose2Gaussian)
   return MutablePose2Pose2Gaussian(convert(SamplableBelief, d.datastr), timestamp=unix2datetime(d.timestamp*1e-3))

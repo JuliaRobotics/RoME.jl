@@ -44,7 +44,7 @@ for i in 0:5
   psym = Symbol("x$i")
   nsym = Symbol("x$(i+1)")
   addVariable!(fg, nsym, Pose2)
-  addFactor!(fg, [psym;ensureAllInitialized!nsym], Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2)))))
+  addFactor!(fg, [psym;nsym], Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2)))))
 end
 
 # Graphs.plot(fg.g)
@@ -64,7 +64,7 @@ isInitialized(fg, :l1)
 
 
 # Replace this call with an initialization service that traverses the entire graph
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 
 

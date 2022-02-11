@@ -108,11 +108,11 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedDynPose2VelocityPrior <: IncrementalInference.PackedInferenceType
+mutable struct PackedDynPose2VelocityPrior <: AbstractPackedFactor
   strpose::AbstractString
   strvel::AbstractString
-  PackedDynPose2VelocityPrior() = new()
-  PackedDynPose2VelocityPrior(z1::AS, z2::AS) where {AS <: AbstractString} = new(z1, z2)
+  #PackedDynPose2VelocityPrior() = new()
+  #PackedDynPose2VelocityPrior(z1::AS, z2::AS) where {AS <: AbstractString} = new(z1, z2)
 end
 
 function convert(::Type{PackedDynPose2VelocityPrior}, d::DynPose2VelocityPrior)
@@ -128,7 +128,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedDynPose2Pose2 <: IncrementalInference.PackedInferenceType
+mutable struct PackedDynPose2Pose2 <: AbstractPackedFactor
   strpose::AbstractString
   PackedDynPose2Pose2() = new()
   PackedDynPose2Pose2(z1::AS) where {AS <: AbstractString} = new(z1)
@@ -198,10 +198,10 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedDynPose2DynPose2 <: IncrementalInference.PackedInferenceType
+mutable struct PackedDynPose2DynPose2 <: AbstractPackedFactor
   Z::String
-  PackedDynPose2DynPose2() = new()
-  PackedDynPose2DynPose2(z1::AbstractString) = new(z1)
+  # PackedDynPose2DynPose2() = new()
+  # PackedDynPose2DynPose2(z1::AbstractString) = new(z1)
 end
 
 function convert(::Type{PackedDynPose2DynPose2}, d::DynPose2DynPose2)

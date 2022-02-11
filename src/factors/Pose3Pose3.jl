@@ -34,10 +34,10 @@ $(TYPEDEF)
 
 Serialization type for `Pose3Pose3`.
 """
-mutable struct PackedPose3Pose3 <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose3Pose3 <: AbstractPackedFactor
   Z::String
-  PackedPose3Pose3() = new()
-  PackedPose3Pose3(x::AbstractString) = new(x)
+  # PackedPose3Pose3() = new()
+  # PackedPose3Pose3(x::AbstractString) = new(x)
 end
 function convert(::Type{Pose3Pose3}, packed::PackedPose3Pose3)
   return Pose3Pose3( convert(SamplableBelief, packed.Z) )

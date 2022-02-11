@@ -14,7 +14,7 @@ struct MixtureFluxPose2Pose2{F <: FunctorInferenceType} <: AbstractRelativeRoots
   DT::Ref{Float64}
 end
 
-mutable struct PackedMixtureFluxPose2Pose2 <: PackedInferenceType
+mutable struct PackedMixtureFluxPose2Pose2 <: AbstractPackedFactor
   packedZij::PackedMixture
   DT::Float64
   specialSampler::String
@@ -65,7 +65,7 @@ function MixtureFluxPose2Pose2( fluxmodels::AbstractVector,
 end
 
 
-function Base.convert(::Union{Type{<:PackedInferenceType},Type{<:PackedMixtureFluxPose2Pose2}},
+function Base.convert(::Union{Type{<:AbstractPackedFactor},Type{<:PackedMixtureFluxPose2Pose2}},
                       obj::MixtureFluxPose2Pose2 )
   #
   toFnc = typeof(obj.specialSampler)

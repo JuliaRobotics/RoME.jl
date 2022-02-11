@@ -21,7 +21,7 @@ for i in 0:5
     addFactor!(fg, [psym;nsym], pp )
 end
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 getPPESuggested.(fg, sortDFG(ls(fg)))
 
 # tree = solveTree!(fg)
@@ -50,7 +50,7 @@ for i in 0:5
     addFactor!(fg, [psym;nsym], pp )
 end
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 getPPESuggested.(fg, sortDFG(ls(fg)))
 
 # tree = solveTree!(fg)

@@ -78,7 +78,7 @@ addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal(zeros(3),cov)))
 addVariable!(fg, :x2, Pose2)
 addFactor!(fg, [:x1;:x2], Pose2Pose2(MvNormal(zeros(3),cov)))
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 
 Xc_badval = 0.000001.*randn(3,100)

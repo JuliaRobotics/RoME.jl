@@ -44,11 +44,11 @@ end
 
 Serialization type of `PriorPose3ZRP`.
 """
-mutable struct PackedPriorPose3ZRP <: IIF.PackedInferenceType
+mutable struct PackedPriorPose3ZRP <: AbstractPackedFactor
   zdata::String
   rpdata::String
-  PackedPriorPose3ZRP() = new()
-  PackedPriorPose3ZRP(x1::AS,x2::AS) where {AS <:AbstractString} = new(x1,x2)
+  # PackedPriorPose3ZRP() = new()
+  # PackedPriorPose3ZRP(x1::AS,x2::AS) where {AS <:AbstractString} = new(x1,x2)
 end
 function convert(::Type{PriorPose3ZRP}, d::PackedPriorPose3ZRP)
   # TODO: Change out for extractdistributionJson
@@ -169,10 +169,10 @@ end
 
 Serialization type of Pose3Pose3XYYaw.
 """
-mutable struct PackedPose3Pose3XYYaw <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose3Pose3XYYaw <: AbstractPackedFactor
   Z::String
-  PackedPose3Pose3XYYaw() = new()
-  PackedPose3Pose3XYYaw(Z::String) = new(Z)
+  # PackedPose3Pose3XYYaw() = new()
+  # PackedPose3Pose3XYYaw(Z::String) = new(Z)
 end
 
 function convert(::Type{<:Pose3Pose3XYYaw}, d::PackedPose3Pose3XYYaw)
