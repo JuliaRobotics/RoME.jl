@@ -117,7 +117,6 @@ writeGraphPdf(fg)
 tree = batchSolve!(fg, drawpdf=true)
 
 
-# ensureAllInitialized!(fg)
 pl = drawPosesLandms(fg, meanmax=:max)
 Gadfly.draw(Gadfly.SVG("/tmp/test2.svg"),pl)  # or PNG(...)
 
@@ -151,7 +150,6 @@ tree = batchSolve!(fg, drawpdf=true)
 
 
 
-# ensureAllInitialized!(fg)
 
 pl = drawPosesLandms(fg, meanmax=:max)
 Gadfly.draw(Gadfly.SVG("/tmp/test2.svg"),pl)  # or PNG(...)

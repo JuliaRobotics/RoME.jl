@@ -45,7 +45,7 @@ M = getManifold(Pose2)
 
 # @show ls(fg)
 tree = solveTree!(fg)
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 # tree = wipeBuildNewTree!(fg)
 # inferOverTreeR!(fg, tree,N=N)
 # inferOverTree!(fg, tree, N=N)

@@ -10,15 +10,6 @@ Example:
 PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
-# mutable struct PriorPose2{T} <: IncrementalInference.AbstractPrior  where {T <: IncrementalInference.SamplableBelief}
-#   Z::T
-#   # empty constructor
-#   PriorPose2{T}() where T = new{T}()
-#   # regular constructor
-#   PriorPose2{T}(x::T) where {T <: IncrementalInference.SamplableBelief}  = new{T}(x)
-# end
-# # convenience and default object helper
-# PriorPose2(x::T) where {T <: IncrementalInference.SamplableBelief} = PriorPose2{T}(x)
 struct PriorPose2{T <: SamplableBelief, P} <: IIF.AbstractPrior
   Z::T
   p::P 
@@ -59,10 +50,10 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedPriorPose2  <: IncrementalInference.PackedInferenceType
+mutable struct PackedPriorPose2  <: AbstractPackedFactor
     str::String
-    PackedPriorPose2() = new()
-    PackedPriorPose2(x::String) = new(x)
+    # PackedPriorPose2() = new()
+    # PackedPriorPose2(x::String) = new(x)
 end
 function convert(::Type{PackedPriorPose2}, d::PriorPose2)
   return PackedPriorPose2(convert(PackedSamplableBelief, d.Z))

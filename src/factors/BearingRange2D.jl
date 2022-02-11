@@ -114,7 +114,7 @@ end
 
 passTypeThrough(d::FunctionNodeData{Pose2Point2Range}) = d
 
-mutable struct PackedPose2Point2BearingRange <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose2Point2BearingRange <: AbstractPackedFactor
     bearstr::String
     rangstr::String
 end

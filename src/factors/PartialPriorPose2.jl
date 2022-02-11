@@ -32,10 +32,10 @@ getManifold(::PartialPriorYawPose2) = SpecialEuclidean(2)
 """
 $(TYPEDEF)
 """
-mutable struct PackedPartialPriorYawPose2 <: IIF.PackedInferenceType
+mutable struct PackedPartialPriorYawPose2 <: AbstractPackedFactor
     Z::String
-    PackedPartialPriorYawPose2() = new()
-    PackedPartialPriorYawPose2(x::T) where {T <: AbstractString}  = new(x)
+    # PackedPartialPriorYawPose2() = new()
+    # PackedPartialPriorYawPose2(x::T) where {T <: AbstractString}  = new(x)
 end
 
 function convert(::Type{PackedPartialPriorYawPose2}, d::PartialPriorYawPose2)

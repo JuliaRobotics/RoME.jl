@@ -66,10 +66,10 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedDynPoint2VelocityPrior <: IIF.PackedInferenceType
+mutable struct PackedDynPoint2VelocityPrior <: AbstractPackedFactor
   str::String
-  PackedDynPoint2VelocityPrior() = new()
-  PackedDynPoint2VelocityPrior(z1::String) = new(z1)
+  # PackedDynPoint2VelocityPrior() = new()
+  # PackedDynPoint2VelocityPrior(z1::String) = new(z1)
 end
 
 function convert(::Type{PackedDynPoint2VelocityPrior}, d::DynPoint2VelocityPrior)

@@ -14,7 +14,7 @@ using Statistics
 
     addFactor!(fg, [:x1; :l1], Pose2Point2(MvNormal([0.0,-1], [0.1,0.1])))
 
-    ensureAllInitialized!(fg)
+    initAll!(fg)
 
     tree = solveTree!(fg)
 

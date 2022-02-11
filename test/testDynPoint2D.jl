@@ -26,7 +26,7 @@ global dp2dp2 = DynPoint2DynPoint2(MvNormal([10*ones(2);zeros(2)], 0.1*Matrix{Fl
 global f1 = addFactor!(fg, [:x0;:x1], dp2dp2)
 
 # Graphs.plot(fg.g)
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 
 # global tree = wipeBuildNewTree!(fg)
@@ -76,7 +76,7 @@ global f2 = addFactor!(fg, [:x1;:x2], dp2dp2)
 
 
 # Graphs.plot(fg.g)
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 @test isInitialized(fg, :x0)
 @test isInitialized(fg, :x1)
@@ -122,7 +122,7 @@ addVariable!(fg, :x1, DynPoint2;  nanosecondtime=0)
 global pp = DynPoint2VelocityPrior(MvNormal(pμ,pσ))
 addFactor!(fg, [:x1;], pp, graphinit=false)
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 addVariable!(fg, :x2, DynPoint2;  nanosecondtime=1_000_000_000)
 global dpμ = [10.0;0;0;0];

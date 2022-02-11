@@ -114,7 +114,7 @@ spy(DATA[n][3])
 norm(DATA[n][3]-DATA[n][3]')
 
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 tree = solveTree!(fg)
 # global tree = wipeBuildNewTree!(fg)

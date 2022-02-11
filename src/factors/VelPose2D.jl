@@ -133,11 +133,11 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedVelPose2VelPose2 <: IncrementalInference.PackedInferenceType
+mutable struct PackedVelPose2VelPose2 <: AbstractPackedFactor
   strpose::AbstractString
   strvel::AbstractString
-  PackedVelPose2VelPose2() = new()
-  PackedVelPose2VelPose2(z1::AS, z2::AS) where {AS <: AbstractString} = new(z1, z2)
+  # PackedVelPose2VelPose2() = new()
+  # PackedVelPose2VelPose2(z1::AS, z2::AS) where {AS <: AbstractString} = new(z1, z2)
 end
 
 function convert(::Type{PackedVelPose2VelPose2}, d::VelPose2VelPose2)

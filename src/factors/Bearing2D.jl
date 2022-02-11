@@ -65,10 +65,10 @@ end
 
 
 # Packing and Unpacking
-mutable struct PackedPose2Point2Bearing <: IncrementalInference.PackedInferenceType
+mutable struct PackedPose2Point2Bearing <: AbstractPackedFactor
     bearstr::String
-    PackedPose2Point2Bearing() = new()
-    PackedPose2Point2Bearing(s1::AS) where {AS <: AbstractString} = new(string(s1))
+    # PackedPose2Point2Bearing() = new()
+    # PackedPose2Point2Bearing(s1::AS) where {AS <: AbstractString} = new(string(s1))
 end
 function convert(::Type{PackedPose2Point2Bearing}, d::Pose2Point2Bearing{B}) where {B <: IIF.SamplableBelief}
   return PackedPose2Point2Bearing(convert(PackedSamplableBelief, d.bearing))

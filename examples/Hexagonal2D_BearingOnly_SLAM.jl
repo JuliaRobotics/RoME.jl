@@ -66,7 +66,7 @@ end
 # drawGraph(fg, show=true)
 
 # Initialize :l1 numerical values but do not rerun solver
-ensureAllInitialized!(fg)
+initAll!(fg)
 pl = plotSLAM2D(fg, contour=false)
 pl |> Gadfly.PDF("/tmp/test2.pdf", 20cm, 10cm)  # or PNG(...)
 

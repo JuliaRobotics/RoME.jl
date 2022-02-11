@@ -54,7 +54,7 @@ fg.solverParams.N = N
 v1 = addVariable!(fg,:x1, Pose3) # 0.001*randn(6,N)
 # f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal(zeros(6),1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
 # check with a point not a identity
-f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal([0.0, 0.0, 10, 0, 0, 0],1e-2*Matrix{Float64}(LinearAlgebra.I, 6,6))))
+f0 = addFactor!(fg, [:x1;], PriorPose3(MvNormal([0.0, 0.0, 10, 0, 0, 0],1e-2*diagm(ones(6)))))
 
 sigx = 0.01
 sigy = 0.01
@@ -484,5 +484,5 @@ mu_fg2 = mean(M, mpts)
 
 @test_broken isapprox(mu_fg2.parts[1], [0,0,4], atol=0.2)
 
-
+##
 end

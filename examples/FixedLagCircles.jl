@@ -40,7 +40,7 @@ saveDFG(fg5a, joinLogPath(fg5a,"fg_5A"))
 
 generateGraph_Circle(SIZE, fg=fg, biasTurn=-0.05, loopClosure=true, kappaOdo=3)
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 # keep copy for later
 fg_ = deepcopy(fg)

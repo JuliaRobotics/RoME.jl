@@ -224,7 +224,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedInertialPose3 <: IncrementalInference.PackedInferenceType
+mutable struct PackedInertialPose3 <: AbstractPackedFactor
   vecZij::Array{Float64,1} # 3translations, 3rotation, 3 velocities
   vecCov::Array{Float64,1}
   dimc::Int
@@ -308,7 +308,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedPriorInertialPose3 <: IncrementalInference.PackedInferenceType
+mutable struct PackedPriorInertialPose3 <: AbstractPackedFactor
   vecZi::Array{Float64,1} # 3translations, 3rotation, 3 velocities
   vecCov::Array{Float64,1}
   dimc::Int

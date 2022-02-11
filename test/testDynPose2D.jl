@@ -31,7 +31,7 @@ addFactor!(fg, [:x0;:x1], dp2dp2)
 
 pts = approxConv(fg, :x0x1f1, :x1)
 
-# ensureAllInitialized!(fg)
+# initAll!(fg)
 
 tree = solveTree!(fg);
 
@@ -143,7 +143,7 @@ x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
 @test abs(x5[5]) < 0.5
 
 
-ensureAllInitialized!(fg)
+initAll!(fg)
 
 x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
