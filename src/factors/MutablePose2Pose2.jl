@@ -11,8 +11,8 @@ Specialized Pose2Pose2 factor type (Gaussian), which allows for rapid accumulati
 mutable struct MutablePose2Pose2Gaussian  <: IIF.AbstractManifoldMinimize
   Z::MvNormal
   timestamp::DateTime
-  MutablePose2Pose2Gaussian(Zij::MvNormal=MvNormal(zeros(3),diagm([0.01; 0.01; 0.001].^2)), timestamp::DateTime=now()) = new(Zij, timestamp)
 end
+MutablePose2Pose2Gaussian(Z::MvNormal=MvNormal(zeros(3),diagm([0.01; 0.01; 0.001].^2)), timestamp::DateTime=now()) = MutablePose2Pose2Gaussian(Z, timestamp)
 
 DFG.getManifold(::MutablePose2Pose2Gaussian) = Manifolds.SpecialEuclidean(2)
 
@@ -48,14 +48,12 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedMutablePose2Pose2Gaussian  <: AbstractPackedFactor
-  datastr::String
+Base.@kwdef struct PackedMutablePose2Pose2Gaussian  <: AbstractPackedFactor
+  Z::PackedSamplableBelief
   timestamp::Int64 # serialized in millisecond
-  # PackedMutablePose2Pose2Gaussian() = new()
-  # PackedMutablePose2Pose2Gaussian(x::String, ts::Int=datetime2unix(now())*1e3 |> Int) = new(x, ts)
 end
 function convert(::Type{MutablePose2Pose2Gaussian}, d::PackedMutablePose2Pose2Gaussian)
-  return MutablePose2Pose2Gaussian(convert(SamplableBelief, d.datastr), timestamp=unix2datetime(d.timestamp*1e-3))
+  return MutablePose2Pose2Gaussian(convert(SamplableBelief, d.datastr), unix2datetime(d.timestamp*1e-3))
 end
 function convert(::Type{PackedMutablePose2Pose2Gaussian}, d::MutablePose2Pose2Gaussian)
   return PackedMutablePose2Pose2Gaussian(convert(PackedSamplableBelief, d.Z), datetime2unix(d.timestamp)*1e3 |> Int)

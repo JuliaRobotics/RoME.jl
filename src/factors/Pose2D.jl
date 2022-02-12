@@ -12,15 +12,13 @@ Related
 
 [`Pose3Pose3`](@ref), [`Point2Point2`](@ref), [`MutablePose2Pose2Gaussian`](@ref), [`DynPose2`](@ref), [`InertialPose3`](ref)
 """
-struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-  Z::T
+Base.@kwdef struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+  Z::T = MvNormal(Diagonal([1.0; 1.0; 1.0]))
 end
-# convenience and default constructor
-Pose2Pose2() = Pose2Pose2(MvNormal(Diagonal([1.0; 1.0; 1.0])))
 
-DFG.getManifold(::Pose2Pose2) = Manifolds.SpecialEuclidean(2)
+DFG.getManifold(::InstanceType{Pose2Pose2}) = getManifold(Pose2) # Manifolds.SpecialEuclidean(2)
 
-Pose2Pose2(::UniformScaling) = Pose2Pose2() # MvNormal(zeros(3),LinearAlgebra.diagm([1.0;1.0;1.0])) )
+Pose2Pose2(::UniformScaling) = Pose2Pose2()
 
 
 # Assumes X is a tangent vector
@@ -42,11 +40,11 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedPose2Pose2  <: AbstractPackedFactor
-  datastr::String
+Base.@kwdef struct PackedPose2Pose2  <: AbstractPackedFactor
+  Z::PackedSamplableBelief
 end
 function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)
-  return Pose2Pose2(convert(SamplableBelief, d.datastr))
+  return Pose2Pose2(convert(SamplableBelief, d.Z))
 end
 function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
   return PackedPose2Pose2(convert(PackedSamplableBelief, d.Z))

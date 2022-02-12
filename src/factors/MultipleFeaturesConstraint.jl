@@ -25,9 +25,7 @@ end
 #   return xirvecs
 # end
 
-function residruvec()
-  nothing
-end
+residruvec() = nothing
 
 """
 $(TYPEDEF)
@@ -46,21 +44,21 @@ mutable struct MultipleFeatures2D <: IIF.AbstractRelativeMinimize
   abC::Categorical # OBSOLETE, use addFactor!(..., multihypo=[...]...) instead, see Caesar docs
   bTc::Array{Float64,2}
   zDim::Tuple{Int,Int,Int,Int,Int}
-  # Takes five
-  MultipleFeatures2D(a,b,c,d,e,f,g,h,i ) = new(a,b,c,d,e,f,g,h,i, (3,3,2,2,2) )
 end
+# Takes five
+MultipleFeatures2D(a,b,c,d,e,f,g,h,i ) = MultipleFeatures2D(a,b,c,d,e,f,g,h,i, (3,3,2,2,2) )
 
-function getSample(mm2d::MultipleFeatures2D, N::Int=1)
+function getSample(mm2d::MultipleFeatures2D)
 
-  meas = Array{Float64,3}(undef, 3,N,2)
-  meas[1,:,1] = rand(mm2d.xir1,N)
-  meas[2,:,1] = rand(mm2d.xir2,N)
-  meas[3,:,1] = rand(mm2d.xir3,N)
-  meas[1,:,2] = rand(mm2d.xjr1,N)
-  meas[2,:,2] = rand(mm2d.xjr2,N)
-  meas[3,:,2] = rand(mm2d.xjr3a,N)
+  meas = Array{Float64,2}(undef, 3,2)
+  meas[1,1] = rand(mm2d.xir1)
+  meas[2,1] = rand(mm2d.xir2)
+  meas[3,1] = rand(mm2d.xir3)
+  meas[1,2] = rand(mm2d.xjr1)
+  meas[2,2] = rand(mm2d.xjr2)
+  meas[3,2] = rand(mm2d.xjr3a)
 
-  select = rand(mm2d.abC,N)
+  select = rand(mm2d.abC)
   beb = select .== 2
   numb = sum(beb)
   meas[3,beb,2] = rand(mm2d.xjr3b,numb)
@@ -73,26 +71,25 @@ end
 
 # redo with angles on sightings for minimization
 # NOTE -- an inefficient implementation
-function (mm2d::MultipleFeatures2D)(res::Array{Float64},
-          userdata,
-          idx::Int, meas::Tuple,
-          wAbi::Array{Float64,2},
-          wAbj::Array{Float64,2},
-          wAo1::Array{Float64,2},
-          wAo2::Array{Float64,2},
-          wAo3::Array{Float64,2},
-          wAo3b::Union{Array{Float64,2},Bool}=false  )
+function (mm2d::MultipleFeatures2D)(
+          meas, # Tuple
+          wAbi,
+          wAbj,
+          wAo1,
+          wAo2,
+          wAo3,
+          wAo3b=false  )
   #
   len3b = wAo3b==false ? 0 : size(wAo3b,2)
   dobimodal = len3b > 0
   meas[3] > 0 && !dobimodal ? error("mm2d::MultipleFeatures2D -- bi-modal mismatch") : nothing
 
-  wTbi = SE2(wAbi[:,idx])
-  wTbj = SE2(wAbj[:,idx])
-  wTo1 = SE2([wAo1[:,idx];0.0])
-  wTo2 = SE2([wAo2[:,idx];0.0])
-  wTo3 = SE2([wAo3[:,idx];0.0])
-  wTo3b = dobimodal ? SE2([wAo3b[:,idx];0.0]) : nothing
+  wTbi = SE2(wAbi)
+  wTbj = SE2(wAbj)
+  wTo1 = SE2([wAo1;0.0])
+  wTo2 = SE2([wAo2;0.0])
+  wTo3 = SE2([wAo3;0.0])
+  wTo3b = dobimodal ? SE2([wAo3b;0.0]) : nothing
 
   ciTo1 = (wTbi * mm2d.bTc) \ wTo1
   ciTo2 = (wTbi * mm2d.bTc) \ wTo2
@@ -107,10 +104,10 @@ function (mm2d::MultipleFeatures2D)(res::Array{Float64},
   the2 = atan(se2vee(ciTo2)[2], se2vee(ciTo2)[1])
   the3 = atan(se2vee(ciTo3)[2], se2vee(ciTo3)[1])
 
-  res[1] = 0.0
-  res[1] += ( meas[1][1,idx,1] - the1 )^2
-  res[1] += ( meas[1][2,idx,1] - the2 )^2
-  res[1] += ( meas[1][3,idx,1] - the3 )^2
+  res = 0.0
+  res += ( meas[1][1,1] - the1 )^2
+  res += ( meas[1][2,1] - the2 )^2
+  res += ( meas[1][3,1] - the3 )^2
 
   the1 = atan(se2vee(cjTo1)[2], se2vee(cjTo1)[1])
   the2 = atan(se2vee(cjTo2)[2], se2vee(cjTo2)[1])
@@ -119,24 +116,23 @@ function (mm2d::MultipleFeatures2D)(res::Array{Float64},
 
   # res[2] = 0.0
   tempres = 0.0
-  tempres += ( meas[1][1,idx,2] - the1 )^2
-  tempres += ( meas[1][2,idx,2] - the2 )^2
+  tempres += ( meas[1][1,2] - the1 )^2
+  tempres += ( meas[1][2,2] - the2 )^2
 
   # FIXME OUTDATED, multihypo= and in-place residual IIF v0.21
   if dobimodal
     if !meas[2][idx]
       # 3a case
-      tempres += ( meas[1][3,idx,2] - the3 )^2
+      tempres += ( meas[1][3,2] - the3 )^2
     else
       # 3b case
-      tempres += ( meas[1][3,idx,2] - the3b )^2
+      tempres += ( meas[1][3,2] - the3b )^2
     end
   else
-    tempres += ( meas[1][3,idx,2] - the3 )^2
+    tempres += ( meas[1][3,2] - the3 )^2
   end
-  res[1]+tempres
 
-  return nothing
+  return res+tempres
 end
 
 

@@ -5,12 +5,10 @@ $(TYPEDEF)
 Constrain only the yaw angle of a Pose2, generally used for Gyrocompass, Magnetometer, Dual-GNSS heading type measurements, or any other similar construct.
 """
 mutable struct PartialPriorYawPose2{T <: IIF.SamplableBelief} <: IIF.AbstractPrior
-    Z::T
-    partial::Tuple{Int}
-    PartialPriorYawPose2{T}() where T = new{T}()
-    PartialPriorYawPose2{T}(x::T) where {T <: IIF.SamplableBelief}  = new{T}(x, (3,))
+  Z::T
+  partial::Tuple{Int}
 end
-PartialPriorYawPose2(x::T) where {T <: IIF.SamplableBelief} = PartialPriorYawPose2{T}(x)
+PartialPriorYawPose2(x::T, p::Tuple{Int}=(3,)) where {T <: IIF.SamplableBelief} = PartialPriorYawPose2{T}(x, p)
 
 function getSample(cf::CalcFactor{<:PartialPriorYawPose2})
     
@@ -32,15 +30,13 @@ getManifold(::PartialPriorYawPose2) = SpecialEuclidean(2)
 """
 $(TYPEDEF)
 """
-mutable struct PackedPartialPriorYawPose2 <: AbstractPackedFactor
-    Z::String
-    # PackedPartialPriorYawPose2() = new()
-    # PackedPartialPriorYawPose2(x::T) where {T <: AbstractString}  = new(x)
+Base.@kwdef struct PackedPartialPriorYawPose2 <: AbstractPackedFactor
+    Z::PackedSamplableBelief
 end
 
 function convert(::Type{PackedPartialPriorYawPose2}, d::PartialPriorYawPose2)
-  PackedPartialPriorYawPose2(string(d.Z))
+  PackedPartialPriorYawPose2(convert(PackedSamplableBelief, d.Z))
 end
 function convert(::Type{PartialPriorYawPose2}, d::PackedPartialPriorYawPose2)
-  PartialPriorYawPose2(extractdistribution(d.Z))
+  PartialPriorYawPose2(convert(SamplableBelief, d.Z))
 end

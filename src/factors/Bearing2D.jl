@@ -11,19 +11,14 @@ end
 
 Single dimension bearing constraint from Pose2 to Point2 variable.
 """
-struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-    bearing::B
-    reuse::Vector{P2P2BearingReuse}
-    Pose2Point2Bearing{B}() where B = new{B}()
-    Pose2Point2Bearing{B}(x1::B) where {B <: IIF.SamplableBelief} = new{B}(x1, [P2P2BearingReuse() for i in 1:Threads.nthreads()])
+Base.@kwdef struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+    Z::B = Normal()
 end
-Pose2Point2Bearing(x1::B) where {B <: IIF.SamplableBelief} = Pose2Point2Bearing{B}(x1)
+
+preambleCache(::AbstractDFG, ::AbstractVector{Symbol}, ::Pose2Point2Bearing) = P2P2BearingReuse()
 
 getManifold(::Pose2Point2Bearing) = SpecialOrthogonal(2)
 
-function getSample(cfo::CalcFactor{<:Pose2Point2Bearing})
-  return rand(cfo.factor.bearing)
-end
 
 function (cfo::CalcFactor{<:Pose2Point2Bearing})(Xc, p, l)
   #embed l in SE2
@@ -44,7 +39,7 @@ end
 #   ϵ = identity_element(M)
 #   xi = vee(M, ϵ, log(M, ϵ, _xi))
 
-#   reuse = cfo.factor.reuse[Threads.threadid()]
+#   reuse = cfo.cache.reuse # FIRST IMPL CACHE NOT THREAD SAFE 22Q1 # [Threads.threadid()]
 #   reuse.measvec[1] = cos(meas[1] + xi[3])
 #   reuse.measvec[2] = sin(meas[1] + xi[3])
 
@@ -65,10 +60,9 @@ end
 
 
 # Packing and Unpacking
-mutable struct PackedPose2Point2Bearing <: AbstractPackedFactor
-    bearstr::String
-    # PackedPose2Point2Bearing() = new()
-    # PackedPose2Point2Bearing(s1::AS) where {AS <: AbstractString} = new(string(s1))
+Base.@kwdef struct PackedPose2Point2Bearing <: AbstractPackedFactor
+    Z::PackedSamplableBelief
+    # _type::String = "RoME.PackedPose2Point2Bearing"
 end
 function convert(::Type{PackedPose2Point2Bearing}, d::Pose2Point2Bearing{B}) where {B <: IIF.SamplableBelief}
   return PackedPose2Point2Bearing(convert(PackedSamplableBelief, d.bearing))

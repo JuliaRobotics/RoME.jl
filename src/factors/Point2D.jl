@@ -4,22 +4,12 @@ $(TYPEDEF)
 
 Direction observation information of a `Point2` variable.
 """
-mutable struct PriorPoint2{T <: IIF.SamplableBelief} <: IncrementalInference.AbstractPrior
-  Z::T
-  # empty constructor
-  # PriorPoint2{T}() where T = new()
-  # regular constructor
-  # PriorPoint2{T}(dist::T) where {T <: IIF.SamplableBelief} = new{T}(dist)
+Base.@kwdef struct PriorPoint2{T <: IIF.SamplableBelief} <: IncrementalInference.AbstractPrior
+  Z::T = MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))
 end
 
-# convenience helper and default object
-PriorPoint2() = PriorPoint2(MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01])))
+DFG.getManifold(::InstanceType{PriorPoint2}) = getManifold(Point2)
 
-DFG.getManifold(::PriorPoint2) = TranslationGroup(2)
-
-function getSample(cfo::CalcFactor{<:PriorPoint2})
-  return rand(cfo.factor.Z)
-end
 
 function (cf::CalcFactor{<:PriorPoint2})(meas, 	
                                         X1)	
@@ -30,19 +20,13 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct Point2Point2{D <: IIF.SamplableBelief} <: AbstractRelativeRoots
-    Zij::D
-    # empty constructor
-    Point2Point2{T}() where T = new{T}()
-    # regular constructor
-    Point2Point2{T}(x::T) where {T <: IIF.SamplableBelief} = new{T}(x)
+Base.@kwdef struct Point2Point2{D <: IIF.SamplableBelief} <: AbstractRelativeRoots
+    Z::D = MvNormal(zeros(2),LinearAlgebra.diagm([0.1;0.1]))
 end
-# convenience and default object helper
-Point2Point2(x::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.1;0.1]))) where {T <: IIF.SamplableBelief} = Point2Point2{T}(x)
 
-function getSample(cfo::CalcFactor{<:Point2Point2})
-  return rand(cfo.factor.Zij)
-end
+getManifold(::InstanceType{Point2Point2}) = getManifold(Point2)
+
+
 function (pp2r::CalcFactor{<:Point2Point2})(meas,
                                             xi,
                                             xj )
@@ -62,20 +46,14 @@ $(TYPEDEF)
 
 Serialization type for `PriorPoint2`.
 """
-mutable struct PackedPriorPoint2  <: AbstractPackedFactor
-    str::String
-    # PackedPriorPoint2() = new()
-    # PackedPriorPoint2(x::String) = new(x)
+Base.@kwdef struct PackedPriorPoint2  <: AbstractPackedFactor
+    Z::PackedSamplableBelief
 end
-
 
 function convert(::Type{PriorPoint2}, d::PackedPriorPoint2)
-  # Cov = reshapeVec2Mat(d.vecCov, d.dimc)
-  distr = convert(SamplableBelief, d.str)
-  return PriorPoint2{typeof(distr)}(distr)
+  return PriorPoint2(convert(SamplableBelief, d.Z))
 end
 function convert(::Type{PackedPriorPoint2}, d::PriorPoint2)
-  # v2 = d.mv.Σ.mat[:];
   return PackedPriorPoint2(convert(PackedSamplableBelief, d.Z))
 end
 
@@ -88,15 +66,13 @@ $(TYPEDEF)
 
 Serialization type for `Point2Point2`.
 """
-mutable struct PackedPoint2Point2 <: AbstractPackedFactor
-    str::String
-    PackedPoint2Point2() = new()
-    PackedPoint2Point2(s::AS) where {AS <: AbstractString} = new(s)
+Base.@kwdef struct PackedPoint2Point2 <: AbstractPackedFactor
+    Z::PackedSamplableBelief
 end
 function convert(::Type{Point2Point2}, d::PackedPoint2Point2)
-  return Point2Point2( convert(SamplableBelief, d.str) )
+  return Point2Point2( convert(SamplableBelief, d.Z) )
 end
 function convert(::Type{PackedPoint2Point2}, d::Point2Point2)
-  return PackedPoint2Point2( convert(PackedSamplableBelief, d.Zij) )
+  return PackedPoint2Point2( convert(PackedSamplableBelief, d.Z) )
 end
 

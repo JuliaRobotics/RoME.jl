@@ -10,31 +10,12 @@ Example:
 PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
-struct PriorPose2{T <: SamplableBelief, P} <: IIF.AbstractPrior
+Base.@kwdef struct PriorPose2{T <: SamplableBelief, P} <: IIF.AbstractPrior
   Z::T
-  p::P 
 end
 
-PriorPose2(z::IIF.SamplableBelief) = PriorPose2(z, getPointIdentity(Pose2))
-PriorPose2{T,P}(z::IIF.SamplableBelief) where {T,P} = PriorPose2{T,P}(z, getPointIdentity(Pose2))
+DFG.getManifold(::InstanceType{PriorPose2}) = getManifold(Pose2) # SpecialEuclidean(2)
 
-
-DFG.getManifold(::PriorPose2) = SpecialEuclidean(2)
-
-
-function getSample(cf::CalcFactor{<:PriorPose2}, N::Int=1)
-  Z = cf.factor.Z
-  p = cf.factor.p
-  M = getManifold(cf.factor)
-  
-  Xc = rand(Z)
-  
-  # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
-  X = hat(M, p, Xc)
-  points = exp(M, p, X)
-
-  return points
-end
 
 function (cf::CalcFactor{<:PriorPose2})(m, p)	
   #	
@@ -50,17 +31,14 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedPriorPose2  <: AbstractPackedFactor
-    str::String
-    # PackedPriorPose2() = new()
-    # PackedPriorPose2(x::String) = new(x)
+Base.@kwdef struct PackedPriorPose2  <: AbstractPackedFactor
+    Z::PackedSamplableBelief
 end
 function convert(::Type{PackedPriorPose2}, d::PriorPose2)
   return PackedPriorPose2(convert(PackedSamplableBelief, d.Z))
 end
 function convert(::Type{PriorPose2}, d::PackedPriorPose2)
-  distr = convert(SamplableBelief, d.str)
-  return PriorPose2(distr)
+  return PriorPose2(convert(SamplableBelief, d.Z))
 end
 
 

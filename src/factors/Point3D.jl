@@ -5,17 +5,11 @@ $(TYPEDEF)
 
 Direction observation information of a `Point3` variable.
 """
-mutable struct PriorPoint3{T} <: IncrementalInference.AbstractPrior where {T <: IIF.SamplableBelief}
-  Z::T
-  # W::Array{Float64,1} # TODO, deprecate the weight parameter
-  PriorPoint3{T}() where T = new()
-  PriorPoint3{T}(dist::T) where {T <: IIF.SamplableBelief} = new{T}(dist)
+Base.@kwdef struct PriorPoint3{T} <: IncrementalInference.AbstractPrior where {T <: IIF.SamplableBelief}
+  Z::T = MvNormal(zeros(3),diagm([1;1;1.0]))
 end
-PriorPoint3(z::T) where {T <: IIF.SamplableBelief} = PriorPoint3{T}(z)
 
-function getSample(p3::PriorPoint3)
-  return (rand(p3.Z),)
-end
+getManifold(::InstanceType{PriorPoint3}) = getManifold(Point3)
 
 
 
@@ -24,19 +18,14 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedPriorPoint3  <: AbstractPackedFactor
-    str::String
-    # PackedPriorPoint3() = new()
-    # PackedPriorPoint3(x::String) = new(x)
+Base.@kwdef struct PackedPriorPoint3  <: AbstractPackedFactor
+    Z::PackedSamplableBelief
 end
 
 
 function convert(::Type{PriorPoint3}, d::PackedPriorPoint3)
-  # Cov = reshapeVec2Mat(d.vecCov, d.dimc)
-  distr = extractdistribution(d.str)
-  return PriorPoint3{typeof(distr)}(distr)
+  return PriorPoint3(convert(SamplableBelief, d.Z))
 end
 function convert(::Type{PackedPriorPoint3}, d::PriorPoint3)
-  # v2 = d.mv.Σ.mat[:];
-  return PackedPriorPoint3(string(d.Z))
+  return PackedPriorPoint3(convert(PackedSamplableBelief, d.Z))
 end

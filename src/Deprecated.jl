@@ -1,4 +1,185 @@
 
+
+##==============================================================================
+## Legacy, remove some time after DFG v0.20
+##==============================================================================
+
+# getSample(cfo::CalcFactor{<:VelPoint2VelPoint2}) = rand(cfo.factor.Z)
+
+# function getSample(cfo::CalcFactor{<:Pose2Point2Range})
+#   return rand(cfo.factor.Z)
+# end
+
+# function getSample(cfo::CalcFactor{<:Point2Point2Range})
+#   return rand(cfo.factor.Z)
+# end
+
+# function getSample(cf::CalcFactor{<:PriorPose2})
+#   Z = cf.factor.Z
+#   p = cf.factor.p
+#   M = getManifold(cf.factor)
+  
+#   Xc = rand(Z)
+  
+#   # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
+#   X = hat(M, p, Xc)
+#   points = exp(M, p, X)
+
+#   return points
+# end
+
+# PriorPose2{T,P}(z::IIF.SamplableBelief) where {T,P} = PriorPose2{T,P}(z, getPointIdentity(Pose2))
+
+# convenience and default constructor
+# Pose3Pose3() = Pose3Pose3(MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)])))
+
+# # convenience and default object helper
+# PriorPose3(z::IIF.SamplableBelief) = PriorPose3(Z=z)
+
+# Standardized sampling function
+# function getSample(cf::CalcFactor{<:PriorPose3}, N::Int=1)
+#   Z = cf.factor.Z
+#   p = cf.factor.p
+#   M = getManifold(cf.factor)
+  
+#   Xc = rand(Z)
+  
+#   # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
+#   X = hat(M, p, Xc)
+#   points = exp(M, p, X)
+
+#   return points
+# end
+
+# PriorPose3{T,P}(z::IIF.SamplableBelief) where {T,P} = PriorPose3{T,P}(z, getPointIdentity(Pose3))
+# PriorPose3() = PriorPose3(MvNormal(zeros(6), LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)])))
+
+# prescribed sampling function
+# function getSample(cfo::CalcFactor{<:Pose2Point2}, N::Int=1)
+#   return rand(cfo.factor.Z)
+# end
+
+# PriorPose2(Z::IIF.SamplableBelief) = PriorPose2(;Z)
+
+# convenience and default constructor
+# Pose2Pose2() = Pose2Pose2(MvNormal(Diagonal([1.0; 1.0; 1.0])))
+
+# convenience and default object helper
+# Point2Point2(x::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.1;0.1]))) where {T <: IIF.SamplableBelief} = Point2Point2{T}(x)
+
+# convenience and default object helper
+# PriorPolar(zr::T1=Normal(1,1), za::T2=Normal(0,0.1)) where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = PriorPolar{T1,T2}(zr,za)
+
+# convenience and default object helper
+# PolarPolar(zr::T1=Normal(1,1), za::T2=Normal(0,0.1)) where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = PolarPolar{T1,T2}(zr,za)
+
+# Polar() = new(2,(:Euclid,:Circular))
+
+# convenience and default object helper
+# Point3Point3(x::T=MvNormal(zeros(3),LinearAlgebra.diagm([0.1;0.1;0.1]))) where {T <: IIF.SamplableBelief} = Point3Point3(x)
+
+# function getSample(cfo::CalcFactor{<:Point3Point3})
+#   return rand(cfo.factor.Z)
+# end
+
+# function getSample(p3::PriorPoint3)
+#   return (rand(p3.Z),)
+# end
+
+# function getSample(cfo::CalcFactor{<:Point2Point2})
+#   return rand(cfo.factor.Z)
+# end
+
+# convenience helper and default object
+# PriorPoint2() = PriorPoint2(MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01])))
+
+# function getSample(cfo::CalcFactor{<:PriorPoint2})
+#   return rand(cfo.factor.Z)
+# end
+
+#TODO what is this, can it be removed? Moved here from above
+
+# """
+# Converter: PriorPose3ZRP::Dict{String, Any} -> PriorPose3ZRP
+
+# DevNotes
+# - FIXME drop _evalType approach, use convert(SamplableBelief, obj) instead?
+# """
+# function convert(::Type{<:PriorPose3ZRP}, fact::Dict{String, Any})
+#     rp = fact["measurement"][1]
+#     z = fact["measurement"][2]
+#     # FIXME drop _evalType
+#     rp = convert(_evalType(rp["distType"]), rp)
+#     z = convert(_evalType(z["distType"]), z)
+#     return PriorPose3ZRP(rp, z)
+# end
+
+# """
+# Converter: PriorPose3ZRP::Dict{String, Any} -> PriorPose3ZRP
+# """
+# function convert(::Type{Dict{String, Any}}, fact::PriorPose3ZRP)
+#     pf = Dict{String, Any}(
+#         "measurement" => [
+#             convert(Dict{String, Any}, fact.rp),
+#             convert(Dict{String, Any}, fact.z)
+#         ],
+#         "factorType" => "PriorPose3ZRP"
+#     )
+#     return pf
+# end
+
+# """
+#     $SIGNATURES
+
+# Converter: Dict{String, Any} -> Pose3Pose3XYYaw
+# """
+# function convert(::Type{Dict{String, Any}}, fact::Pose3Pose3XYYaw)
+#     pf = Dict{String, Any}(
+#         "measurement" => [
+#             convert(Dict{String, Any}, fact.xy),
+#             convert(Dict{String, Any}, fact.yaw)
+#         ],
+#         "factorType" => "Pose3Pose3XYYaw"
+#     )
+#     return pf
+# end
+
+# """
+#     $SIGNATURES
+
+# Converter: Pose3Pose3XYYaw -> Dict{String, Any}
+
+# DevNotes
+# - FIXME stop using _evalType, see DFG #590
+# """
+# function convert(::Type{<:Pose3Pose3XYYaw}, fact::Dict{String, Any})
+#     xy = fact["measurement"][1]
+#     yaw = fact["measurement"][2]
+#     xy = convert(_evalType(xy["distType"]), xy)
+#     yaw = convert(_evalType(yaw["distType"]), yaw)
+#     return PriorPose3ZRP(xy, yaw)
+# end
+
+
+# function getSample(cf::CalcFactor{<:Pose3Pose3XYYaw})
+#   return sampleTangent(getManifold(cf.factor), cf.factor.Z)
+# end
+
+# getManifolds(::Type{DynPose2DynPose2}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
+# getManifolds(::DynPose2DynPose2) = getManifolds(DynPose2DynPose2)
+# getSample(ip3::InertialPose3) = rand( ip3.Z)
+# DynPose2Pose2(z1::T) where {T <: IIF.SamplableBelief} = DynPose2Pose2{T}(z1)
+# getSample(cfo::CalcFactor{<:Point2Point2Velocity}) = rand(cfo.factor.Z)
+# getSample(cfo::CalcFactor{<:DynPoint2DynPoint2}) = rand(cfo.factor.Z)
+# DynPoint2VelocityPrior(z1::T) where {T <: SamplableBelief} = DynPoint2VelocityPrior{T}(z1)
+# getSample(cfo::CalcFactor{<:DynPoint2VelocityPrior}) = rand(cfo.factor.Z)
+
+# Pose2Point2Bearing(x1::B) where {B <: IIF.SamplableBelief} = Pose2Point2Bearing{B}(x1)
+# function getSample(cfo::CalcFactor{<:Pose2Point2Bearing})
+#   return rand(cfo.factor.Z)
+# end
+
+
 ##==============================================================================
 ## Legacy, remove some time after DFG v0.19
 ##==============================================================================

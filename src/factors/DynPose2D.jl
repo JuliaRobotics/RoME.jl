@@ -1,9 +1,5 @@
 # 2D SLAM with velocity states
 
-export   DynPose2, DynPose2VelocityPrior, PackedDynPose2VelocityPrior, DynPose2Pose2, PackedDynPose2Pose2
-
-
-
 
 """
 $(TYPEDEF)
@@ -11,8 +7,6 @@ $(TYPEDEF)
 mutable struct DynPose2VelocityPrior{T1,T2} <: IncrementalInference.AbstractPrior where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief}
   Zpose::T1
   Zvel::T2
-  DynPose2VelocityPrior{T1,T2}() where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = new{T1,T2}()
-  DynPose2VelocityPrior{T1,T2}(z1::T1,z2::T2) where {T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} = new{T1,T2}(z1,z2)
 end
 DynPose2VelocityPrior(z1::T1,z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = DynPose2VelocityPrior{T1,T2}(z1,z2)
 
@@ -64,12 +58,10 @@ $(TYPEDEF)
 """
 mutable struct DynPose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRoots
   Zpose::Pose2Pose2{T} #Zpose::T1
-  # reuseres::Vector{Float64}
   partial::Tuple{Int,Int,Int}
-  DynPose2Pose2{T}() where {T <: IIF.SamplableBelief} = new{T}()
-  DynPose2Pose2{T}(z1::T) where {T <: IIF.SamplableBelief} = new{T}(Pose2Pose2(z1), (1,2,3))
 end
-DynPose2Pose2(z1::T) where {T <: IIF.SamplableBelief} = DynPose2Pose2{T}(z1)
+
+preableCache(::AbstractDFG, ::AbstractVector{Symbol}, ::DynPose2Pose2) = zeros(5)
 
 getSample(cf::CalcFactor{<:DynPose2Pose2}) = rand(cf.factor.Zpose.z)
 
@@ -108,11 +100,9 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedDynPose2VelocityPrior <: AbstractPackedFactor
-  strpose::AbstractString
-  strvel::AbstractString
-  #PackedDynPose2VelocityPrior() = new()
-  #PackedDynPose2VelocityPrior(z1::AS, z2::AS) where {AS <: AbstractString} = new(z1, z2)
+Base.@kwdef struct PackedDynPose2VelocityPrior <: AbstractPackedFactor
+  strpose::PackedSamplableBelief
+  strvel::PackedSamplableBelief
 end
 
 function convert(::Type{PackedDynPose2VelocityPrior}, d::DynPose2VelocityPrior)
@@ -128,7 +118,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedDynPose2Pose2 <: AbstractPackedFactor
+Base.@kwdef struct PackedDynPose2Pose2 <: AbstractPackedFactor
   strpose::AbstractString
   PackedDynPose2Pose2() = new()
   PackedDynPose2Pose2(z1::AS) where {AS <: AbstractString} = new(z1)
@@ -152,19 +142,15 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeRoots
+struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeRoots
   Z::T
-  reuseres::Vector{Vector{Float64}}
-  DynPose2DynPose2{T}() where {T <: IIF.SamplableBelief} = new{T}()
-  DynPose2DynPose2{T}(z1::T) where {T <: IIF.SamplableBelief} = new{T}(z1,[zeros(5) for i in 1:Threads.nthreads()])
 end
 DynPose2DynPose2(z1::T=MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))) where {T <: IIF.SamplableBelief} = DynPose2DynPose2{T}(z1)
+preambleCache(::AbstractDFG, ::AbstractVector{Symbol}, ::DynPose2DynPose2) = zeros(5)
 
-# getManifolds(::Type{DynPose2DynPose2}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
-# getManifolds(::DynPose2DynPose2) = getManifolds(DynPose2DynPose2)
+getManifold(::DynPose2DynPose2) = SE2E2_Manifold
+# getSample(cf::CalcFactor{<:DynPose2DynPose2}) = rand(cf.factor.Z)
 
-
-getSample(cf::CalcFactor{<:DynPose2DynPose2}) = rand(cf.factor.Z)
 
 function (cf::CalcFactor{<:DynPose2DynPose2})(meas,
                                               wXi,
@@ -190,7 +176,7 @@ end
 function compare(a::DynPose2DynPose2, b::DynPose2DynPose2; tol::Float64=1e-10)::Bool
   TP = true
   TP = TP && RoME.compareDensity(a.Z, b.Z)
-  TP = TP && norm(a.reuseres - b.reuseres) < tol
+  # TP = TP && norm(a.reuseres - b.reuseres) < tol
   return TP
 end
 
@@ -198,10 +184,8 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedDynPose2DynPose2 <: AbstractPackedFactor
-  Z::String
-  # PackedDynPose2DynPose2() = new()
-  # PackedDynPose2DynPose2(z1::AbstractString) = new(z1)
+Base.@kwdef struct PackedDynPose2DynPose2 <: AbstractPackedFactor
+  Z::PackedSamplableBelief
 end
 
 function convert(::Type{PackedDynPose2DynPose2}, d::DynPose2DynPose2)

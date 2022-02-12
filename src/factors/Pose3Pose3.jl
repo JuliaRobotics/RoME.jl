@@ -6,13 +6,11 @@ $(TYPEDEF)
 
 Rigid transform factor between two Pose3 compliant variables.
 """
-struct Pose3Pose3{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-  Z::T
+Base.@kwdef struct Pose3Pose3{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+  Z::T = MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)]))
 end
-# convenience and default constructor
-Pose3Pose3() = Pose3Pose3(MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)])))
 
-DFG.getManifold(::Pose3Pose3) = Manifolds.SpecialEuclidean(3)
+getManifold(::InstanceType{Pose3Pose3}) = getManifold(Pose3) # Manifolds.SpecialEuclidean(3)
 
 Pose3Pose3(::UniformScaling) = Pose3Pose3()
 
@@ -34,10 +32,8 @@ $(TYPEDEF)
 
 Serialization type for `Pose3Pose3`.
 """
-mutable struct PackedPose3Pose3 <: AbstractPackedFactor
-  Z::String
-  # PackedPose3Pose3() = new()
-  # PackedPose3Pose3(x::AbstractString) = new(x)
+Base.@kwdef struct PackedPose3Pose3 <: AbstractPackedFactor
+  Z::PackedSamplableBelief
 end
 function convert(::Type{Pose3Pose3}, packed::PackedPose3Pose3)
   return Pose3Pose3( convert(SamplableBelief, packed.Z) )

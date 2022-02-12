@@ -9,13 +9,12 @@
 
 Partial prior belief on Z, Roll, and Pitch of a `Pose3`.
 """
-mutable struct PriorPose3ZRP{T1<:SamplableBelief,T2<:SamplableBelief} <: IncrementalInference.AbstractPrior
+struct PriorPose3ZRP{T1<:SamplableBelief,T2<:SamplableBelief} <: IncrementalInference.AbstractPrior
   z::T1
   rp::T2
   partial::Tuple{Int,Int,Int}
-  PriorPose3ZRP{T1,T2}() where {T1, T2} = new{T1,T2}()
-  PriorPose3ZRP{T1,T2}(z::T1,rp::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}(z, rp, (3,4,5))
 end
+PriorPose3ZRP(z::T1,rp::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = PriorPose3ZRP(z, rp, (3,4,5))
 
 PriorPose3ZRP(z::T1,rp::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = PriorPose3ZRP{T1,T2}(z, rp)
 
@@ -44,14 +43,11 @@ end
 
 Serialization type of `PriorPose3ZRP`.
 """
-mutable struct PackedPriorPose3ZRP <: AbstractPackedFactor
-  zdata::String
-  rpdata::String
-  # PackedPriorPose3ZRP() = new()
-  # PackedPriorPose3ZRP(x1::AS,x2::AS) where {AS <:AbstractString} = new(x1,x2)
+Base.@kwdef struct PackedPriorPose3ZRP <: AbstractPackedFactor
+  zdata::PackedSamplableBelief
+  rpdata::PackedSamplableBelief
 end
 function convert(::Type{PriorPose3ZRP}, d::PackedPriorPose3ZRP)
-  # TODO: Change out for extractdistributionJson
   PriorPose3ZRP( convert(SamplableBelief, d.zdata), convert(SamplableBelief, d.rpdata)  )
 end
 function convert(::Type{PackedPriorPose3ZRP}, d::PriorPose3ZRP)
@@ -104,10 +100,6 @@ Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) = error("Pose3Pose3XY
 # Lie exponentials (pqr) are all three affected by changes in Yaw
 # Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,4,5,6))   # (1,2,6))
 Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,6))
-
-function getSample(cf::CalcFactor{<:Pose3Pose3XYYaw})
-  return sampleTangent(getManifold(cf.factor), cf.factor.Z)
-end
 
 getManifold(::Pose3Pose3XYYaw) = SpecialEuclidean(2)
 
@@ -169,10 +161,8 @@ end
 
 Serialization type of Pose3Pose3XYYaw.
 """
-mutable struct PackedPose3Pose3XYYaw <: AbstractPackedFactor
-  Z::String
-  # PackedPose3Pose3XYYaw() = new()
-  # PackedPose3Pose3XYYaw(Z::String) = new(Z)
+Base.@kwdef struct PackedPose3Pose3XYYaw <: AbstractPackedFactor
+  Z::PackedSamplableBelief
 end
 
 function convert(::Type{<:Pose3Pose3XYYaw}, d::PackedPose3Pose3XYYaw)
@@ -193,68 +183,4 @@ end
 
 
 
-##==============================================================================
-##
-##==============================================================================
-#TODO what is this, can it be removed? Moved here from above
-
-"""
-Converter: PriorPose3ZRP::Dict{String, Any} -> PriorPose3ZRP
-
-DevNotes
-- FIXME drop _evalType approach, use convert(SamplableBelief, obj) instead?
-"""
-function convert(::Type{<:PriorPose3ZRP}, fact::Dict{String, Any})
-    rp = fact["measurement"][1]
-    z = fact["measurement"][2]
-    # FIXME drop _evalType
-    rp = convert(_evalType(rp["distType"]), rp)
-    z = convert(_evalType(z["distType"]), z)
-    return PriorPose3ZRP(rp, z)
-end
-
-"""
-Converter: PriorPose3ZRP::Dict{String, Any} -> PriorPose3ZRP
-"""
-function convert(::Type{Dict{String, Any}}, fact::PriorPose3ZRP)
-    pf = Dict{String, Any}(
-        "measurement" => [
-            convert(Dict{String, Any}, fact.rp),
-            convert(Dict{String, Any}, fact.z)
-        ],
-        "factorType" => "PriorPose3ZRP"
-    )
-    return pf
-end
-
-"""
-    $SIGNATURES
-
-Converter: Dict{String, Any} -> Pose3Pose3XYYaw
-"""
-function convert(::Type{Dict{String, Any}}, fact::Pose3Pose3XYYaw)
-    pf = Dict{String, Any}(
-        "measurement" => [
-            convert(Dict{String, Any}, fact.xy),
-            convert(Dict{String, Any}, fact.yaw)
-        ],
-        "factorType" => "Pose3Pose3XYYaw"
-    )
-    return pf
-end
-
-"""
-    $SIGNATURES
-
-Converter: Pose3Pose3XYYaw -> Dict{String, Any}
-
-DevNotes
-- FIXME stop using _evalType, see DFG #590
-"""
-function convert(::Type{<:Pose3Pose3XYYaw}, fact::Dict{String, Any})
-    xy = fact["measurement"][1]
-    yaw = fact["measurement"][2]
-    xy = convert(_evalType(xy["distType"]), xy)
-    yaw = convert(_evalType(yaw["distType"]), yaw)
-    return PriorPose3ZRP(xy, yaw)
-end
+#

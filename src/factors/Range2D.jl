@@ -8,11 +8,8 @@ mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInferen
   Z::D
 end
 
-getManifold(::Point2Point2Range) = TranslationGroup(1)
+getManifold(::InstanceType{Point2Point2Range}) = TranslationGroup(1)
 
-function getSample(cfo::CalcFactor{<:Point2Point2Range})
-  return rand(cfo.factor.Z)
-end
 
 function (cfo::CalcFactor{<:Point2Point2Range})(rho, xi, lm)
   # Basically `EuclidDistance`
@@ -26,13 +23,13 @@ passTypeThrough(d::FunctionNodeData{Point2Point2Range}) = d
 $(TYPEDEF)
 """
 mutable struct PackedPoint2Point2Range  <: AbstractPackedFactor
-  str::String
+  Z::PackedSamplableBelief
 end
 function convert(::Type{PackedPoint2Point2Range}, d::Point2Point2Range)
   return PackedPoint2Point2Range(convert(PackedSamplableBelief, d.Z))
 end
 function convert(::Type{Point2Point2Range}, d::PackedPoint2Point2Range)
-  return Point2Point2Range(convert(SamplableBelief, d.str))
+  return Point2Point2Range(convert(SamplableBelief, d.Z))
 end
 
 
@@ -42,17 +39,14 @@ end
 
 Range only measurement from Pose2 to Point2 variable.
 """
-mutable struct Pose2Point2Range{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+Base.@kwdef struct Pose2Point2Range{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
   Z::T
-  partial::Tuple{Int,Int}
+  partial::Tuple{Int,Int} = (1,2)
 end
-Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range{T}(Z, (1,2))
+Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range(;Z)
 
 getManifold(::Pose2Point2Range) = TranslationGroup(1)
 
-function getSample(cfo::CalcFactor{<:Pose2Point2Range})
-  return rand(cfo.factor.Z)
-end
 
 function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi, lm)
   # Basically `EuclidDistance`
@@ -60,12 +54,12 @@ function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi, lm)
 end
 
 
-mutable struct PackedPose2Point2Range  <: AbstractPackedFactor
-  str::String
+Base.@kwdef struct PackedPose2Point2Range  <: AbstractPackedFactor
+  Z::PackedSamplableBelief
 end
 function convert(::Type{PackedPose2Point2Range}, d::Pose2Point2Range)
   return PackedPose2Point2Range(convert(PackedSamplableBelief, d.Z))
 end
 function convert(::Type{Pose2Point2Range}, d::PackedPose2Point2Range)
-  return Pose2Point2Range(convert(SamplableBelief, d.str))
+  return Pose2Point2Range(convert(SamplableBelief, d.Z))
 end
