@@ -4,11 +4,11 @@ $(TYPEDEF)
 
 Constrain only the yaw angle of a Pose2, generally used for Gyrocompass, Magnetometer, Dual-GNSS heading type measurements, or any other similar construct.
 """
-mutable struct PartialPriorYawPose2{T <: IIF.SamplableBelief} <: IIF.AbstractPrior
+Base.@kwdef struct PartialPriorYawPose2{T <: IIF.SamplableBelief} <: IIF.AbstractPrior
   Z::T
-  partial::Tuple{Int}
+  partial::Tuple{Int} = (3,)
 end
-PartialPriorYawPose2(x::T, p::Tuple{Int}=(3,)) where {T <: IIF.SamplableBelief} = PartialPriorYawPose2{T}(x, p)
+PartialPriorYawPose2(Z::SamplableBelief) = PartialPriorYawPose2(;Z)
 
 function getSample(cf::CalcFactor{<:PartialPriorYawPose2})
     

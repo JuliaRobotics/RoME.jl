@@ -17,14 +17,14 @@ using RoME
 
 ##
 
-fg = RoME.generateGraph_Honeycomb!(7, graphinit=true, useMsgLikelihoods = true)
+fg = RoME.generateGraph_Honeycomb!(7; graphinit=true, useMsgLikelihoods=true)
 tree = solveTree!(fg);
 
-fg = RoME.generateGraph_Honeycomb!(14, graphinit=true, dfg=fg)
+fg = RoME.generateGraph_Honeycomb!(14; dfg=fg, graphinit=true)
 tree = solveTree!(fg, tree);
 
 tree_ = deepcopy(tree); fg_ = deepcopy(fg);
-fg = RoME.generateGraph_Honeycomb!(21, graphinit=true, dfg=fg)
+fg = RoME.generateGraph_Honeycomb!(21; dfg=fg, graphinit=true)
 tree = solveTree!(fg  , tree);
 
 # fg = RoME.generateGraph_Honeycomb!(28, graphinit=true, dfg=fg)

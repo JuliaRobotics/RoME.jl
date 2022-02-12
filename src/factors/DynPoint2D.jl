@@ -8,6 +8,7 @@ mutable struct DynPoint2VelocityPrior{T <: SamplableBelief} <: AbstractPrior
   Z::T
 end
 
+getManifold(::DynPoint2VelocityPrior) = TranslationGroup(4)
 
 """
 $(TYPEDEF)
@@ -15,6 +16,8 @@ $(TYPEDEF)
 mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeRoots
   Z::T
 end
+
+getManifold(::DynPoint2DynPoint2) = TranslationGroup(4)
 
 
 function (cfo::CalcFactor{<:DynPoint2DynPoint2})(z, xi, xj)
@@ -32,6 +35,8 @@ $(TYPEDEF)
 mutable struct Point2Point2Velocity{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
   Z::T
 end
+
+getManifold(::Point2Point2Velocity) = TranslationGroup(4)
 
 function (cfo::CalcFactor{<:Point2Point2Velocity})( z,
                                                     xi,

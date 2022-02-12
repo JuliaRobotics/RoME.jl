@@ -9,16 +9,15 @@
 
 Partial prior belief on Z, Roll, and Pitch of a `Pose3`.
 """
-struct PriorPose3ZRP{T1<:SamplableBelief,T2<:SamplableBelief} <: IncrementalInference.AbstractPrior
+Base.@kwdef struct PriorPose3ZRP{T1<:SamplableBelief,T2<:SamplableBelief} <: IncrementalInference.AbstractPrior
   z::T1
   rp::T2
-  partial::Tuple{Int,Int,Int}
+  partial::Tuple{Int,Int,Int} = (3,4,5)
 end
-PriorPose3ZRP(z::T1,rp::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = PriorPose3ZRP(z, rp, (3,4,5))
+PriorPose3ZRP(z::SamplableBelief,rp::SamplableBelief) = PriorPose3ZRP(;z, rp)
 
-PriorPose3ZRP(z::T1,rp::T2) where {T1 <: SamplableBelief, T2 <: SamplableBelief} = PriorPose3ZRP{T1,T2}(z, rp)
 
-getManifold(::PriorPose3ZRP) = SpecialEuclidean(3)
+getManifold(::PriorPose3ZRP) = getManifold(Pose3) # SpecialEuclidean(3)
 
 #FIXME update to also only one measurement
 function getSample(cf::CalcFactor{<:PriorPose3ZRP})

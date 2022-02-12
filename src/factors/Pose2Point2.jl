@@ -14,7 +14,7 @@ Base.@kwdef struct Pose2Point2{T <: IIF.SamplableBelief} <: IIF.AbstractManifold
     partial::Tuple{Int,Int} = (1,2)
 end
 # convenience and default constructor
-Pose2Point2(x1::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))) where {T <: IIF.SamplableBelief} = Pose2Point2(Z=x1)
+Pose2Point2(Z::SamplableBelief) = Pose2Point2(;Z)
 
 # TODO verify this is right for partial factor
 getManifold(::InstanceType{Pose2Point2}) = getManifold(Point2)

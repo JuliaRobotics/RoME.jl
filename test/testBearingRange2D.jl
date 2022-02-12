@@ -360,8 +360,8 @@ end
 p2p2b = Pose2Point2Bearing( MvNormal([0.2,0.2,0.2], [1.0 0 0;0 1 0;0 0 1]) )
 packed = convert(PackedPose2Point2Bearing, p2p2b)
 p2p2bTest = convert(Pose2Point2Bearing, packed)
-@test p2p2b.bearing.μ == p2p2bTest.bearing.μ
-@test p2p2b.bearing.Σ.mat == p2p2bTest.bearing.Σ.mat
+@test p2p2b.Z.μ == p2p2bTest.Z.μ
+@test p2p2b.Z.Σ.mat == p2p2bTest.Z.Σ.mat
 
 ##
 

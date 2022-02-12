@@ -6,7 +6,7 @@ $(TYPEDEF)
 
 Direct observation information of `Pose3` variable type.
 """
-Base.@kwdef struct PriorPose3{T <: IIF.SamplableBelief, P} <: IncrementalInference.AbstractPrior
+Base.@kwdef struct PriorPose3{T <: IIF.SamplableBelief} <: IncrementalInference.AbstractPrior
   Z::T = MvNormal(zeros(6), diagm([0.01*ones(3);0.0001*ones(3)]))
 end
 

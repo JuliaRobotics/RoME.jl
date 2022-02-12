@@ -8,21 +8,14 @@ export MutablePose2Pose2Gaussian, PackedMutablePose2Pose2Gaussian
 
 Specialized Pose2Pose2 factor type (Gaussian), which allows for rapid accumulation of odometry information as a branch on the factor graph.
 """
-mutable struct MutablePose2Pose2Gaussian  <: IIF.AbstractManifoldMinimize
+Base.@kwdef mutable struct MutablePose2Pose2Gaussian  <: IIF.AbstractManifoldMinimize
   Z::MvNormal
-  timestamp::DateTime
+  timestamp::DateTime = now()
 end
-MutablePose2Pose2Gaussian(Z::MvNormal=MvNormal(zeros(3),diagm([0.01; 0.01; 0.001].^2)), timestamp::DateTime=now()) = MutablePose2Pose2Gaussian(Z, timestamp)
+MutablePose2Pose2Gaussian(Z::MvNormal) = MutablePose2Pose2Gaussian(;Z)
 
-DFG.getManifold(::MutablePose2Pose2Gaussian) = Manifolds.SpecialEuclidean(2)
+DFG.getManifold(::MutablePose2Pose2Gaussian) = getManifold(Pose2) # Manifolds.SpecialEuclidean(2)
 
-function getSample(cf::CalcFactor{<:MutablePose2Pose2Gaussian})
-  Xc = rand(cf.factor.Z)
-
-  M = SpecialEuclidean(2)
-  X = hat(M, Manifolds.Identity(M), Xc)
-  return X
-end
 
 """
     $SIGNATURES

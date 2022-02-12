@@ -4,6 +4,14 @@
 ## Legacy, remove some time after DFG v0.20
 ##==============================================================================
 
+# function getSample(cf::CalcFactor{<:MutablePose2Pose2Gaussian})
+#   Xc = rand(cf.factor.Z)
+
+#   M = SpecialEuclidean(2)
+#   X = hat(M, Manifolds.Identity(M), Xc)
+#   return X
+# end
+
 # getSample(cfo::CalcFactor{<:VelPoint2VelPoint2}) = rand(cfo.factor.Z)
 
 # function getSample(cfo::CalcFactor{<:Pose2Point2Range})
@@ -174,10 +182,6 @@
 # DynPoint2VelocityPrior(z1::T) where {T <: SamplableBelief} = DynPoint2VelocityPrior{T}(z1)
 # getSample(cfo::CalcFactor{<:DynPoint2VelocityPrior}) = rand(cfo.factor.Z)
 
-# Pose2Point2Bearing(x1::B) where {B <: IIF.SamplableBelief} = Pose2Point2Bearing{B}(x1)
-# function getSample(cfo::CalcFactor{<:Pose2Point2Bearing})
-#   return rand(cfo.factor.Z)
-# end
 
 
 ##==============================================================================
@@ -195,12 +199,8 @@
 @deprecate generateCanonicalFG_ZeroPose(w...;kw...) generateGraph_ZeroPose(w...;kw...)
 @deprecate generateCanonicalFG_Circle(w...;kw...) generateGraph_Circle(w...;kw...)
 
-getManifold(::IIF.InstanceType{Point2Point2}) = Point2 |> getManifold
-getManifold(::IIF.InstanceType{Pose2Point2}) = Point2 |> getManifold
-getManifold(::IIF.InstanceType{PriorPose2}) = Pose2 |> getManifold
-getManifold(::IIF.InstanceType{Pose2Pose2}) = Pose2 |> getManifold
+
 # getManifold(::IIF.InstanceType{Pose3Point3}) = Point3
-getManifold(::IIF.InstanceType{Pose3Pose3}) = Pose3 |> getManifold
 # getManifold(::IIF.InstanceType{Pose2Point2BearingRange}) = BearingRange2 |> getManifold
 
 function Base.getproperty(pp::Pose2Pose2, f::Symbol)

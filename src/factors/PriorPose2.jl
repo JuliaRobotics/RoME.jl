@@ -10,19 +10,16 @@ Example:
 PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
-Base.@kwdef struct PriorPose2{T <: SamplableBelief, P} <: IIF.AbstractPrior
-  Z::T
+Base.@kwdef struct PriorPose2{T <: SamplableBelief} <: IIF.AbstractPrior
+  Z::T = MvNormal(zeros(3), diagm([1;1;0.1]))
 end
 
 DFG.getManifold(::InstanceType{PriorPose2}) = getManifold(Pose2) # SpecialEuclidean(2)
 
-
-function (cf::CalcFactor{<:PriorPose2})(m, p)	
-  #	
+# FIXME, we should not need a residual for <:AbstractPriorFactor?
+function (cf::CalcFactor{<:PriorPose2})(m, p)
   M = getManifold(cf.factor)
   return log(M, p, m)
-  # iXihat = SE2(meas) \ SE2(wXi)	
-  # return se2vee(iXihat)	
 end
 
 #TODO Serialization of reference point p 

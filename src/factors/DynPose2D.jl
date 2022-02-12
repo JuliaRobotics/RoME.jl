@@ -119,17 +119,14 @@ end
 $(TYPEDEF)
 """
 Base.@kwdef struct PackedDynPose2Pose2 <: AbstractPackedFactor
-  strpose::AbstractString
-  PackedDynPose2Pose2() = new()
-  PackedDynPose2Pose2(z1::AS) where {AS <: AbstractString} = new(z1)
+  Z::PackedSamplableBelief
 end
 
 function convert(::Type{PackedDynPose2Pose2}, d::DynPose2Pose2)
-  return PackedDynPose2Pose2(string(d.Zpose.z))
+  return PackedDynPose2Pose2(convert(PackedSamplableBelief, d.Zpose.Z))
 end
 function convert(::Type{DynPose2Pose2}, d::PackedDynPose2Pose2)
-  posedistr = extractdistribution(d.strpose)
-  return DynPose2Pose2(posedistr)
+  return DynPose2Pose2(convert(SamplableBelief, d.Z))
 end
 
 
@@ -142,16 +139,15 @@ end
 """
 $(TYPEDEF)
 """
-struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeRoots
-  Z::T
+Base.@kwdef struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeRoots
+  Z::T = MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))
 end
-DynPose2DynPose2(z1::T=MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))) where {T <: IIF.SamplableBelief} = DynPose2DynPose2{T}(z1)
 preambleCache(::AbstractDFG, ::AbstractVector{Symbol}, ::DynPose2DynPose2) = zeros(5)
 
-getManifold(::DynPose2DynPose2) = SE2E2_Manifold
-# getSample(cf::CalcFactor{<:DynPose2DynPose2}) = rand(cf.factor.Z)
-
-
+# FIXME ON FIRE, must update to new Manifolds style factors
+getManifold(::DynPose2DynPose2) = SE2E2_Manifold # not fully impl manifold yet
+# FIXME, should produce tangents, not coordinates.
+getSample(cf::CalcFactor{<:DynPose2DynPose2}) = rand(cf.factor.Z)
 function (cf::CalcFactor{<:DynPose2DynPose2})(meas,
                                               wXi,
                                               wXj  )

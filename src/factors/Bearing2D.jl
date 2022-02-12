@@ -18,7 +18,11 @@ end
 preambleCache(::AbstractDFG, ::AbstractVector{Symbol}, ::Pose2Point2Bearing) = P2P2BearingReuse()
 
 getManifold(::Pose2Point2Bearing) = SpecialOrthogonal(2)
-
+# Pose2Point2Bearing(x1::B) where {B <: IIF.SamplableBelief} = Pose2Point2Bearing{B}(x1)
+# FIXME, there might be something wrong with the sign here
+function getSample(cfo::CalcFactor{<:Pose2Point2Bearing})
+  return rand(cfo.factor.Z)
+end
 
 function (cfo::CalcFactor{<:Pose2Point2Bearing})(Xc, p, l)
   #embed l in SE2
@@ -65,8 +69,8 @@ Base.@kwdef struct PackedPose2Point2Bearing <: AbstractPackedFactor
     # _type::String = "RoME.PackedPose2Point2Bearing"
 end
 function convert(::Type{PackedPose2Point2Bearing}, d::Pose2Point2Bearing{B}) where {B <: IIF.SamplableBelief}
-  return PackedPose2Point2Bearing(convert(PackedSamplableBelief, d.bearing))
+  return PackedPose2Point2Bearing(convert(PackedSamplableBelief, d.Z))
 end
 function convert(::Type{Pose2Point2Bearing}, d::PackedPose2Point2Bearing)
-  Pose2Point2Bearing(convert(SamplableBelief, d.bearstr))
+  Pose2Point2Bearing(convert(SamplableBelief, d.Z))
 end

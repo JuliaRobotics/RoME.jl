@@ -3,11 +3,11 @@
 """
 $(TYPEDEF)
 """
-mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
   Zpose::Pose2Pose2{T1}
   Zvel::T2
 end
-VelPose2VelPose2(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = VelPose2VelPose2(z1, Pose2Pose2(z2))
+VelPose2VelPose2(z1::SamplableBelief, z2::SamplableBelief) = VelPose2VelPose2(Pose2Pose2(z1), z2)
 
 getManifold(::InstanceType{VelPose2VelPose2}) = getManifold(DynPose2)
 

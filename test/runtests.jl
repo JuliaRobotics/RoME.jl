@@ -14,18 +14,14 @@ using Statistics
 @error("must restore testParametric.jl")
 @error("add test for generateGraph_Beehive!, norm( simulated - default ) < tol")
 
-testfiles = [
-  # any wip fail-fast dev testing
-  "testPartialPose3.jl";
-  
-  # important tests are that are broken and must be restored.
-  "testBearingRange2D.jl";
-  "testBearing2D.jl";
-  "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
-  
-  # "testParametric.jl"; # deferred to v0.16.x
-  # "testG2oParser.jl";  # deferred to v0.16.x
-  
+testfiles = [  
+  # known broken tests
+  # "testParametric.jl"; # deferred
+  # "testG2oParser.jl";  # deferred
+
+  # dev test first, for faster issues.
+  # ...
+
   # tests most likely to fail on numerics
   "testScalarFields.jl";
   "testPoint2Point2Init.jl";
@@ -33,6 +29,12 @@ testfiles = [
   "testPose3Pose3NH.jl";
   "testBeehiveGrow.jl"; # also starts multiprocess
   
+  # recent development work
+  "testPartialPose3.jl";
+  "testBearingRange2D.jl";
+  "testBearing2D.jl";
+  "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
+
   # regular tests expected to pass
   "testpackingconverters.jl";
   "testInflation380.jl";
