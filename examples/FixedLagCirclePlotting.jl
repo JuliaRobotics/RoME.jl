@@ -43,7 +43,7 @@ function plotCirc10BA(fg_::AbstractDFG,
   end
 
   for conl in contourList_
-    X = getKDE(fg_, conl)
+    X = getBelief(fg_, conl)
     plcon = plotKDEContour(marginal(X,[1;2]), levels=levels, c=[contourColor_], line_width=contourLineWidth_)
     for ll in plcon.layers
       push!(plfl5.layers, ll)

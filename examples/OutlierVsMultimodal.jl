@@ -161,8 +161,8 @@ for i in 1:2*CYCLES
   lmid = Symbol(i <= 10 ? "l$i" : "l$(i-10)_0")
   # lmid = Symbol("l$i")
   addVariable!(fg, lmid, RoME.Point2)
-  pts = rand(MvNormal(L[i,:],diagm([0.01;0.01].^2)),100)
-  initManual!(fg, lmid, manikde!(pts, RoME.Point2))
+  pts = [rand(MvNormal(L[i,:],diagm([0.01;0.01].^2))) for _ in 1:100]
+  initManual!(fg, lmid, manikde!(Point2, pts))
   setVariablePosteriorEstimates!(fg,lmid)
 
   BR[lmid] = Dict{Symbol,Tuple}()

@@ -185,7 +185,7 @@
 #
 # # csmcX2_test[15][4].cliqSubFg
 #
-# plotKDE(getKDE(csmcX2_test[17][4].cliqSubFg, :x1),dims=[1;2],levels=2,title="csmcX2_test[17]")
+# plotKDE(getBelief(csmcX2_test[17][4].cliqSubFg, :x1),dims=[1;2],levels=2,title="csmcX2_test[17]")
 #
 #
 #
