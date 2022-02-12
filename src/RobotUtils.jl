@@ -103,27 +103,27 @@ Related
 
 approxConv
 """
-function predictVariableByFactor(dfg::AbstractDFG,
-                                 targetsym::Symbol,
-                                 fct::Pose2Point2BearingRange,
-                                 prevars::Vector{Symbol}  )
+function predictVariableByFactor( dfg::AbstractDFG,
+                                  targetsym::Symbol,
+                                  fct::Pose2Point2BearingRange,
+                                  prevars::Vector{Symbol}  )
   #
   @assert targetsym in prevars
-  curr = getKDE(dfg, targetsym)
+  curr = getBelief(dfg, targetsym)
   tfg = initfg()
   for var in prevars
     varnode = getVariable(dfg, var)
     addVariable!(tfg, var, getSofttype(varnode))
     if var != targetsym
       @assert isInitialized(varnode)
-      initManual!(tfg,var,getKDE(varnode))
+      initManual!(tfg,var,getBelief(varnode))
     end
   end
   addFactor!(tfg, prevars, fct, graphinit=false)
   fctsym = ls(tfg, targetsym)
 
   pts, infd = predictbelief(tfg, targetsym, fctsym)
-  pred = manikde!(pts, getSofttype(getVariable(dfg, targetsym)))
+  pred = manikde!(getManifold(getVariable(dfg, targetsym)), pts)
   # return current and predicted beliefs
   return curr, pred
 end
@@ -159,11 +159,11 @@ end
 
 function predictBodyBR(fg::AbstractDFG, a::Symbol, b::Symbol)
   res = zeros(2)
-  A = getKDEMean(getKDE(getVariable(fg,a)))
-  B = getKDEMean(getKDE(getVariable(fg,b)))
+  A = getKDEMean(getBelief(getVariable(fg,a)))
+  B = getKDEMean(getBelief(getVariable(fg,b)))
   Ax = A[1] # Statistics.mean(vec(A[1,:]))
   Ay = A[2] # Statistics.mean(vec(A[2,:]))
-  Ath = getKDEMax(getKDE(getVariable(fg,a)))[3]
+  Ath = getKDEMax(getBelief(getVariable(fg,a)))[3]
   Bx = B[1]
   By = B[2]
   wL = SE2([Bx;By;0.0])

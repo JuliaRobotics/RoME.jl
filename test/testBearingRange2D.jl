@@ -554,7 +554,7 @@ plotKDE(fg, ls(fg))
 @test isapprox(DFG.getPPESuggested(fg, :l1)[], 1, atol = 0.2) 
 
 L2 = getBelief(fg, :l2)
-L2_ = manikde!(2 .+ 0.1*randn(size(getPoints(L2),2)), ContinuousScalar)
+L2_ = manikde!(ContinuousScalar, 2 .+ 0.1*randn(size(getPoints(L2),2)))
 
 # test that there is at least a mode present
 mmd(L2_, L2, ContinuousScalar)

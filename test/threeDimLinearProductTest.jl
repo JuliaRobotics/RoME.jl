@@ -29,7 +29,7 @@ X = getPoint.(Pose3, [[0.01*randn(5); (0*pi/4 .+ 0.01*randn(1))] for _=1:N])
 
 fg = initfg()
 addVariable!(fg, :x0, Pose3)
-X_ = manikde!(X, ones(6), Pose3)
+X_ = manikde!(Pose3, X, bw=ones(6))
 initManual!(fg, :x0, X_)
 
 addVariable!(fg, :x1, Pose3)
@@ -55,7 +55,7 @@ X = getPoint.(Pose3, [[0.01*randn(5); (0*pi/4 .+ 0.01*randn(1))] for _=1:N])
 
 fg = initfg()
 addVariable!(fg, :x0, Pose3)
-X_ = manikde!(X, ones(6), Pose3)
+X_ = manikde!(Pose3, X, bw=ones(6))
 initManual!(fg, :x0, X_)
 
 addVariable!(fg, :x1, Pose3)
@@ -167,7 +167,7 @@ res = calcFactorResidual(fg, :x1x2f1, X, p, q)
 # IIF._getCCW(fg,:x1x2f1).inflation = 10.0
 
 _pts = approxConv(fg, :x1x2f1, :x2)
-# X2 = manikde!(pts, Pose3)
+# X2 = manikde!(Pose3, pts)
 @cast pts[j,i] := getCoordinates.(Pose3, _pts)[i][j]
 
 # test translations through convolution

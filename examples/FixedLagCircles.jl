@@ -215,13 +215,13 @@ plotVariableBeliefs(fg, r"x\d", resolution=(1920,1080), fade=5, sortVars=true)
 # drawTree(tree)
 
 # umx9 = getUpMsgs(tree,:x9)
-# plotKDE(getKDE(fg, :x10), dims=[1;2])
+# plotKDE(getBelief(fg, :x10), dims=[1;2])
 # plotKDE(umx9[:x10][1], dims=[1;2])
 #
 # stuffx10 = solveCliq!(fg, tree, :x10, recordcliq=true)
 #
 # umx10 = getUpMsgs(tree,:x10)
-# plotKDE(getKDE(fg, :x11), dims=[1;2])
+# plotKDE(getBelief(fg, :x11), dims=[1;2])
 # plotKDE(umx10[:x11][1], dims=[1;2])
 #
 

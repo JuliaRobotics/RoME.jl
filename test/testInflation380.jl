@@ -79,7 +79,7 @@ end
 # ##
 
 # # pts = getBelief(fg, :x1) |> getPoints
-# plotKDE(manikde!(pts, ContinuousEuclid{2}))
+# plotKDE(manikde!(ContinuousEuclid{2}, pts))
 
 
 ##

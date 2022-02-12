@@ -48,11 +48,11 @@ _X1 = DFG.getCoordinates.(DynPose2, getVal(fg, :x1))
 # using RoMEPlotting
 # # plotLocalProduct(fg, :x10, dims=[1;2])
 # # plotSLAM2DPoses(fg)
-# xx1 = marginal(getKDE(fg, :x1),[1;2;3])
+# xx1 = marginal(getBelief(fg, :x1),[1;2;3])
 # plotPose(Pose2(), [xx1])
 # plotPose(fg, [:x1], levels=1, show=false)
 #
-# plotKDE(marginal(getKDE(fg, :x1),[4;5]), levels=5)
+# plotKDE(marginal(getBelief(fg, :x1),[4;5]), levels=5)
 
 
 ##
@@ -134,7 +134,7 @@ sym =sy
 end # for
 
 
-x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
+x5 = KDE.getKDEMean(getBelief(getVariable(fg, :x5)))
 
 @test abs(x5[1]) < 1.25
 @test abs(x5[2]) < 1.25
@@ -145,7 +145,7 @@ x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
 
 initAll!(fg)
 
-x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
+x10 = KDE.getKDEMean(getBelief(getVariable(fg, :x10)))
 
 @test abs(x10[1]) < 1.25
 @test abs(x10[2]) < 1.25
@@ -176,7 +176,7 @@ tree = solveTree!(fg, smtasks=smtasks); #, recordcliqs=ls(fg));
 ##
 
 x5 = getPPE(getVariable(fg, :x5)).suggested
-# x5 = KDE.getKDEMean(getKDE(getVariable(fg, :x5)))
+# x5 = KDE.getKDEMean(getBelief(getVariable(fg, :x5)))
 
 @test abs(x5[1]) < 1.5
 @test abs(x5[2]) < 1.5
@@ -184,7 +184,7 @@ x5 = getPPE(getVariable(fg, :x5)).suggested
 @test abs(x5[4]) < 0.5
 @test abs(x5[5]) < 0.5
 
-x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
+x10 = KDE.getKDEMean(getBelief(getVariable(fg, :x10)))
 
 @test abs(x10[1]) < 2.75
 @test abs(x10[2]) < 2.75
@@ -205,7 +205,7 @@ fg2 = deepcopy(fg)
 tree = solveTree!(fg) # N=N
 
 
-x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
+x10 = KDE.getKDEMean(getBelief(getVariable(fg, :x10)))
 
 @test 5.0 < x10[1]
 @test abs(x10[2]) < 1.0
@@ -216,7 +216,7 @@ x10 = KDE.getKDEMean(getKDE(getVariable(fg, :x10)))
 
 for sym in [Symbol("x$i") for i in 2:9]
 
-XX = KDE.getKDEMean(getKDE(getVariable(fg, sym)))
+XX = KDE.getKDEMean(getBelief(getVariable(fg, sym)))
 
 @show sym, round.(XX,digits=5)
 @test -2.0 < XX[1] < 10.0
@@ -275,7 +275,7 @@ solveTree!(fg)
 
 
 # test for velocity in the body frame
-global x0 = KDE.getKDEMean(getKDE(getVariable(fg, :x0)))
+global x0 = KDE.getKDEMean(getBelief(getVariable(fg, :x0)))
 
 @test -0.4 < x0[1] < 2.0
 @test abs(x0[2]) < 0.5
@@ -284,7 +284,7 @@ global x0 = KDE.getKDEMean(getKDE(getVariable(fg, :x0)))
 @test -1.5 < x0[5] < -0.5
 
 
-global x1 = KDE.getKDEMean(getKDE(getVariable(fg, :x1)))
+global x1 = KDE.getKDEMean(getBelief(getVariable(fg, :x1)))
 
 @test -0.1 < x1[1] < 2.0
 @test abs(x1[2]) < 0.5

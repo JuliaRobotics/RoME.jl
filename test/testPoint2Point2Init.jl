@@ -106,6 +106,6 @@ end
 # pts = approxConv(fg, :x1l1f1, :l1)
 # initManual!(fg, :l1, pts)
 
-# plotKDE(manikde!(pts, Point2))
+# plotKDE(manikde!(Point2, pts))
 
 ##
