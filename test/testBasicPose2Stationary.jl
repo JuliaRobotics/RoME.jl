@@ -24,14 +24,11 @@ addFactor!(fg, [:x1;:x2], Pose2Pose2(MvNormal(zeros(3),cov)))
 
 #
 
-Xc_badval = 0.01.*randn(3,100)
-Xc_badval[1,:] .-= 5.0
-Xc_badval[2,:] .-= 2.0
-Xc_badval[3,:] .+= 0.5
+Xc_badval = [AMP.makePointFromCoords(SpecialEuclidean(2), 0.01.*randn(3)+[-5;-2;0.5]) for _ in 1:100]
 
 badval = map((Xc)->DFG.getPoint(Pose2, Xc), eachcol(Xc_badval))
 
-setValKDE!(fg, :x2, manikde!(badval, Pose2))
+setValKDE!(fg, :x2, manikde!(Pose2, badval))
 
 N = 100
 # batchSolve!(fg, N=N)
@@ -81,13 +78,10 @@ addFactor!(fg, [:x1;:x2], Pose2Pose2(MvNormal(zeros(3),cov)))
 initAll!(fg)
 
 
-Xc_badval = 0.000001.*randn(3,100)
-Xc_badval[1,:] .-= 5.0
-Xc_badval[2,:] .-= 2.0
-Xc_badval[3,:] .+= 0.5
+Xc_badval = [AMP.makePointFromCoords(SpecialEuclidean(2), 0.000001.*randn(3)+[-5;-2;0.5]) for _ in 1:100]
 badval = map((Xc)->DFG.getPoint(Pose2, Xc), eachcol(Xc_badval))
 
-setValKDE!(fg, :x2, manikde!(badval, Pose2))
+setValKDE!(fg, :x2, manikde!(Pose, badval))
 
 # tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
 
@@ -142,7 +136,7 @@ addFactor!(fg,
 solveTree!(fg)
 
 
-manipts = getPoints(getKDE(fg, :x0))
+manipts = getPoints(getBelief(fg, :x0))
 manicrd = getCoordinates.(Ref(Pose2), manipts) 
 @cast pts[j,i] := manicrd[i][j]
 
@@ -154,7 +148,7 @@ N = size(pts,2)
 
 
 
-manipts = getPoints(getKDE(fg, :x1))
+manipts = getPoints(getBelief(fg, :x1))
 manicrd = getCoordinates.(Ref(Pose2), manipts) 
 @cast pts[j,i] := manicrd[i][j]
 

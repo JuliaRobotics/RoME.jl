@@ -411,11 +411,6 @@ pl = plotBeehive_6(fg, meanmax=:mean)
 
 
 
-# ## manual
-# pts = predictbelief(fg, :x49, [:x48x49f1;])
-# setValKDE!(fg, :x49, manikde!(pts[1], getManifolds(Pose2())), false, pts[2])
-
-
 ## hex 8
 
 posecount = _offsetHexLeg(fg, posecount, direction=:right)
@@ -572,7 +567,7 @@ ls(sfg, :x19)
 
 pts = approxConv(sfg, :x19l0f1, :x19)
 
-X19 = manikde!(pts, Pose2())
+X19 = manikde!(Pose2, pts)
 
 plotPose(Pose2(), X19)
 
@@ -603,13 +598,13 @@ getSolverParams(csmcStep19.dfg).dbg = true
 stuff = sandboxCliqResolveStep(tree,:x4,19)
 
 
-plotKDE(map(x->getKDE(x, :x4),[fg; csmcStep19.cliqSubFg; stuff[4].dfg]), levels=2 )
+plotKDE(map(x->getBelief(x, :x4),[fg; csmcStep19.cliqSubFg; stuff[4].dfg]), levels=2 )
 
 drawPosesLandms(fg,meanmax=:mean)
 
 
 
-plotKDE([getKDE(csmcStep19.cliqSubFg, :x3);getKDE(csmcStep19.cliqSubFg, :x4); getKDE(csmcStep19.cliqSubFg, :x5)], levels=1)
+plotKDE([getBelief(csmcStep19.cliqSubFg, :x3);getBelief(csmcStep19.cliqSubFg, :x4); getBelief(csmcStep19.cliqSubFg, :x5)], levels=1)
 
 
 plotLocalProduct(csmcStep19.cliqSubFg)
@@ -737,10 +732,10 @@ l0adfg = getCliqSolveHistory(tree,:l0)[12][4].dfg
 plotKDE(l0bdfg, :l0, levels=3)
 plotKDE(l0adfg, :l0, levels=3)
 
-getPoints(getKDE(l0bdfg, :l0))
+getPoints(getBelief(l0bdfg, :l0))
 
 
-getPoints(getKDE(l0adfg, :l0))
+getPoints(getBelief(l0adfg, :l0))
 
 ## DEBUG END
 
