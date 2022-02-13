@@ -171,16 +171,16 @@ end
 
 
 function generateGraph_Honeycomb!(poseCountTarget::Int=36;
-                                        graphinit::Bool = false,
-                                        dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),  
-                                        useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
-                                        direction::Symbol = :right,
-                                        solvable::Int=1,
-                                        refKey::Symbol=:simulated,
-                                        addLandmarks::Bool=true,
-                                        landmarkSolvable::Int=0,
-                                        atol::Real=1,
-                                        postpose_cb::Function=(fg_,latestpose)->()     )
+                                  graphinit::Bool = false,
+                                  dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),  
+                                  useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
+                                  direction::Symbol = :right,
+                                  solvable::Int=1,
+                                  refKey::Symbol=:simulated,
+                                  addLandmarks::Bool=true,
+                                  landmarkSolvable::Int=0,
+                                  atol::Real=1,
+                                  postpose_cb::Function=(fg_,latestpose)->()     )
   #
   global _honeycombRecipe
 
@@ -192,7 +192,7 @@ function generateGraph_Honeycomb!(poseCountTarget::Int=36;
     match(r"\d+", string(lastPose)).match |> x->parse(Int,x)
   else
     # initial zero pose
-    generateGraph_ZeroPose(dfg=dfg, varType=RoME.Pose2, graphinit=graphinit, postpose_cb=postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+    generateGraph_ZeroPose(;dfg, varType=RoME.Pose2, postpose_cb, solverParams=SolverParams(;graphinit)) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
 
     # # reference ppe on :x0
     # refVal = zeros(3)
