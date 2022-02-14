@@ -59,7 +59,8 @@ testfiles = [
   "testFluxModelsPose2.jl";
   "testGenerateHelix.jl";
 
-  # starts multiprocess
+  # starts multiprocess.
+  # don't move up, special factors defined in other test files are not added to multiprocess (Distributed.jl)
   "testBeehiveGrow.jl"; # also starts multiprocess
 ]
 
