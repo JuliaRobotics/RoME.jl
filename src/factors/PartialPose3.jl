@@ -16,15 +16,11 @@ Base.@kwdef struct PriorPose3ZRP{T1<:SamplableBelief,T2<:SamplableBelief} <: Inc
 end
 PriorPose3ZRP(z::SamplableBelief,rp::SamplableBelief) = PriorPose3ZRP(;z, rp)
 
-
+# TODO should be dim 3 manifold
 getManifold(::PriorPose3ZRP) = getManifold(Pose3) # SpecialEuclidean(3)
 
 #FIXME update to also only one measurement
 function getSample(cf::CalcFactor{<:PriorPose3ZRP})
-  
-  M = getManifold(cf.factor)
-
-  ϵ = identity_element(M)
 
   #Rotation part: roll and pitch
   r,p = rand(cf.factor.rp)

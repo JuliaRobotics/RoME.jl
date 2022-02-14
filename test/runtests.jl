@@ -27,7 +27,6 @@ testfiles = [
   "testPoint2Point2Init.jl";
   "threeDimLinearProductTest.jl";
   "testPose3Pose3NH.jl";
-  "testBeehiveGrow.jl"; # also starts multiprocess
   
   # recent development work
   "testPartialPose3.jl";
@@ -59,6 +58,9 @@ testfiles = [
   "testDeadReckoningTether.jl"; 
   "testFluxModelsPose2.jl";
   "testGenerateHelix.jl";
+
+  # starts multiprocess
+  "testBeehiveGrow.jl"; # also starts multiprocess
 ]
 
 
