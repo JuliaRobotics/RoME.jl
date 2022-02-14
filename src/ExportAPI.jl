@@ -111,6 +111,7 @@ export
 
 export Pose3Pose3, PackedPose3Pose3
 export VelPose2VelPose2, PackedVelPose2VelPose2
+export PriorPose3, PackedPriorPose3
 
 
 
@@ -216,3 +217,18 @@ export getMeasurementParametric
 export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extractDeltaOdo, resetFactor!
 export odomKDE
 export assembleChordsDict
+
+export   DynPose2, DynPose2VelocityPrior, PackedDynPose2VelocityPrior, DynPose2Pose2, PackedDynPose2Pose2
+
+# InertialPose3
+export
+  PreintegralCompensationGradients,
+  InertialPose3Container,
+  oplus,
+  ⊕,
+  getSample,
+  InertialPose3,
+  PackedInertialPose3,
+  PriorInertialPose3,
+  PackedPriorInertialPose3,
+  compare

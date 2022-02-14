@@ -5,7 +5,6 @@ using RoME
 using Test
 using DistributedFactorGraphs
 import DistributedFactorGraphs: packVariableNodeData, unpackVariableNodeData
-# import RoME: compare
 
 
 ##
@@ -31,10 +30,8 @@ end
 
 ##
 
-
 N = 100
 fg = initfg()
-
 
 initCov = Matrix(Diagonal([0.03;0.03;0.001]))
 odoCov = Matrix(Diagonal([3.0;3.0;0.01]))
@@ -62,7 +59,8 @@ upd = convert(RoME.PriorPose2, dd)
 @test RoME.compare(ipp, upd)
 
 packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose2}, DFG.getSolverData(f1))
-unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose2}}, packeddata)
+unpackeddata = reconstFactorData(fg, getVariableOrder(f1), IIF.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose2}}, packeddata);
+# unpackeddata = convert(IIF.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose2}}, packeddata)
 
 # DFG.getSolverData(f1)
 # unpackeddata
@@ -93,7 +91,8 @@ global upd = convert(RoME.Pose2Pose2, dd)
 @test RoME.compare(ppc, upd)
 
 global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Pose2}, DFG.getSolverData(f2))
-global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Pose2}}, packeddata)
+global unpackeddata = reconstFactorData(fg, getVariableOrder(f2), IIF.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Pose2}}, packeddata)
+# global unpackeddata = convert(IIF.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Pose2}}, packeddata)
 
 # TODO -- fix ambibuity in compare function
 @test DFG.compare(DFG.getSolverData(f2), unpackeddata)
@@ -121,7 +120,7 @@ global upd = convert(
 
 
 global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose2Point2BearingRange}, DFG.getSolverData(f3))
-global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Point2BearingRange}}, packeddata) # IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Point2BearingRange{Normal{Float64},Normal{Float64}}}}
+global unpackeddata = reconstFactorData(fg, getVariableOrder(f3),IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Point2BearingRange}}, packeddata) # IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose2Point2BearingRange{Normal{Float64},Normal{Float64}}}}
 
 @test ppbr.bearing.μ == unpackeddata.fnc.usrfnc!.bearing.μ
 @test ppbr.bearing.σ == unpackeddata.fnc.usrfnc!.bearing.σ
@@ -160,14 +159,15 @@ global upd = convert(RoME.PriorPose3, dd)
 @test norm(ipp.Z.Σ.mat - upd.Z.Σ.mat) < 1e-8
 
 global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPriorPose3}, DFG.getSolverData(f1))
-global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose3}}, packeddata)
+global unpackeddata = reconstFactorData(fg, getVariableOrder(f1), IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.PriorPose3}}, packeddata)
 
 # TODO -- fix ambibuity in compare function
 @test compareAll(DFG.getSolverData(f1), unpackeddata, skip=[:fnc;])
 @test compareAll(DFG.getSolverData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!;:vartypes])
 @test compareAll(DFG.getSolverData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;:Z;:p])
 
-@test isapprox( DFG.getSolverData(f1).fnc.usrfnc!.p, unpackeddata.fnc.usrfnc!.p)
+# deprecated p
+# @test isapprox( DFG.getSolverData(f1).fnc.usrfnc!.p, unpackeddata.fnc.usrfnc!.p)
 
 @test compareAll(DFG.getSolverData(f1).fnc.usrfnc!.Z, unpackeddata.fnc.usrfnc!.Z, skip=[:Σ;])
 @test compareAll(DFG.getSolverData(f1).fnc.usrfnc!.Z.Σ, unpackeddata.fnc.usrfnc!.Z.Σ)
@@ -211,7 +211,7 @@ global upd = convert(RoME.Pose3Pose3, dd)
 @test norm(pp3.Z.Σ.mat - upd.Z.Σ.mat) < 1e-8
 
 global packeddata = convert(IncrementalInference.PackedFunctionNodeData{RoME.PackedPose3Pose3}, DFG.getSolverData(f2))
-global unpackeddata = convert(IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose3Pose3}}, packeddata)
+global unpackeddata = reconstFactorData(fg, getVariableOrder(f2), IncrementalInference.FunctionNodeData{IIF.CommonConvWrapper{RoME.Pose3Pose3}}, packeddata)
 
 # TODO -- fix ambibuity in compare function
 @test DFG.compare(DFG.getSolverData(f2), unpackeddata)

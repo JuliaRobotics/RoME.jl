@@ -1,16 +1,5 @@
 # inertial pose3
 
-export
-  PreintegralCompensationGradients,
-  InertialPose3Container,
-  oplus,
-  ⊕,
-  getSample,
-  InertialPose3,
-  PackedInertialPose3,
-  PriorInertialPose3,
-  PackedPriorInertialPose3,
-  compare
 
 abstract type PreintContainer end
 
@@ -148,7 +137,8 @@ Inertial Odometry version of preintegration procedure and used as a factor betwe
 """
 mutable struct InertialPose3 <: AbstractRelativeRoots
   # Zij is entropy of veeLie15, pioc is preintegral measurements, pido is compensation gradients.
-  Zij::Distribution
+  # TODO, expand to <:SamplableBelief
+  Z::Distribution
   pioc::InertialPose3Container
   picg::PreintegralCompensationGradients
   reuse::Vector{Tuple{InertialPose3Container,InertialPose3Container, InertialPose3Container}} # number of threads
@@ -165,9 +155,6 @@ mutable struct InertialPose3 <: AbstractRelativeRoots
       )
 end
 
-function getSample(ip3::InertialPose3, N::Int=1)
-  return (rand( ip3.Zij, N ), )
-end
 
 
 function (ip3::InertialPose3)(
@@ -224,10 +211,11 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedInertialPose3 <: AbstractPackedFactor
-  vecZij::Array{Float64,1} # 3translations, 3rotation, 3 velocities
-  vecCov::Array{Float64,1}
-  dimc::Int
+Base.@kwdef mutable struct PackedInertialPose3 <: AbstractPackedFactor
+  Z::PackedSamplableBelief
+  # vecZij::Array{Float64,1} # 3translations, 3rotation, 3 velocities
+  # vecCov::Array{Float64,1}
+  # dimc::Int
   vecpioc::Vector{Float64}
   rnTime::Int
   picgvecdPdDa::Vector{Float64}
@@ -235,15 +223,15 @@ mutable struct PackedInertialPose3 <: AbstractPackedFactor
   picgvecdPdDw::Vector{Float64}
   picgvecdVdDw::Vector{Float64}
   picgvecdRdDw::Vector{Float64}
-  PackedInertialPose3() = new()
-  PackedInertialPose3(ip3::InertialPose3) = new( ip3.Zij.μ, ip3.Zij.Σ.mat[:], size(ip3.Zij.Σ.mat,1),
-            veeQuaternion(ip3.pioc), ip3.pioc.rnTime,
-            ip3.dPdDa[:] ,ip3.dVdDa[:] ,ip3.dPdDw[:] ,ip3.dVdDw[:] ,ip3.dRdDw[:] )
 end
+PackedInertialPose3(ip3::InertialPose3) = PackedInertialPose3( 
+          convert(PackedSamplableBelief, ip3.Z),
+          veeQuaternion(ip3.pioc), ip3.pioc.rnTime,
+          ip3.dPdDa[:] ,ip3.dVdDa[:] ,ip3.dPdDw[:] ,ip3.dVdDw[:] ,ip3.dRdDw[:] )
 
 convert(::Type{PackedInertialPose3}, ip3::InertialPose3) = PackedInertialPose3(ip3)
 
-function convert(::Type{InertialPose3}, pip3::PackedInertialPose3)
+function convert(::Type{<:InertialPose3}, pip3::PackedInertialPose3)
   pioc = InertialPose3Container(
       rPosp=pip3.vecpioc[1:3],
       rRp=Quaternion(vecpioc[4],vecpioc[5:7]),
@@ -259,7 +247,7 @@ function convert(::Type{InertialPose3}, pip3::PackedInertialPose3)
       reshapeVec2Mat(pip3.picgvecdVdDw, 3),
       reshapeVec2Mat(pip3.picgvecdRdDw, 3)
   )
-  InertialPose3(Distributions.MvNormal(pip3.vecZij, reshapeVec2Mat(pip3.vecCov, pip3.dimc)), pioc, picg)
+  InertialPose3(convert(SamplableBelief, pip3.Z), pioc, picg)
 end
 
 
@@ -275,9 +263,10 @@ function compare(a::PreintegralCompensationGradients, b::PreintegralCompensation
   return TP
 end
 function compare(a::InertialPose3, b::InertialPose3)
-  TP = true
-  TP = TP && norm(a.Zij.μ - b.Zij.μ) < 1e-10
-  TP = TP && norm(a.Zij.Σ.mat - b.Zij.Σ.mat) < 1e-10
+  TP = compareDensity(a.Z, b.Z)
+  # TP = true
+  # TP = TP && norm(a.Zij.μ - b.Zij.μ) < 1e-10
+  # TP = TP && norm(a.Zij.Σ.mat - b.Zij.Σ.mat) < 1e-10
   TP = TP && compare(a.pido, b.pido)
   return TP
 end
@@ -312,9 +301,8 @@ mutable struct PackedPriorInertialPose3 <: AbstractPackedFactor
   vecZi::Array{Float64,1} # 3translations, 3rotation, 3 velocities
   vecCov::Array{Float64,1}
   dimc::Int
-  PackedPriorInertialPose3() = new()
-  PackedPriorInertialPose3(prip3::PriorInertialPose3) = new( prip3.Zi.μ, prip3.Zi.Σ.mat[:], size(prip3.Zi.Σ.mat,1)  )
 end
+PackedPriorInertialPose3(prip3::PriorInertialPose3) = PackedPriorInertialPose3( prip3.Zi.μ, prip3.Zi.Σ.mat[:], size(prip3.Zi.Σ.mat,1)  )
 
 convert(::Type{PackedPriorInertialPose3}, prip3::PriorInertialPose3) = PackedPriorInertialPose3(prip3)
 

@@ -305,9 +305,6 @@ olddims = setdiff(collect(1:6), newdims)
 
 ## DEV
 
-# _X2prd_ = [xi ;]
-# _X2pts_ = [xj ;]
-
 i = 1
 for i in 1:N
 
@@ -321,11 +318,7 @@ for i in 1:N
 
 end
 
-# # ensure the unchanged dimensions actually remain unchanged
-# @show X2pts[olddims,1];
-# @show pts[olddims,1];
-# # SEE ABOVE Yaw Pitch Roll work
-# @test norm(X2pts[olddims,:] - pts[olddims,:]) < 1e-10  # TEST BROKEN
+# ensure the unchanged dimensions actually remain unchanged
 
 ##
 end
@@ -467,10 +460,7 @@ for j=1:2
   end
 
 end
-##
 
-# smtasks = Task[]
-# solveTree!(fg; smtasks)
 
 ##
 M = SpecialEuclidean(3)

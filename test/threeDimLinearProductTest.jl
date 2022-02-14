@@ -2,16 +2,13 @@
 using RoME
 using TransformUtils
 using Statistics
-# , IncrementalInference, TransformUtils
-# using Distributions
-# using KernelDensityEstimate
 using Test
 
 
-##
 M = getManifold(Pose3)
 ϵ = getPointIdentity(Pose3)
 
+##
 
 @testset "test 3D convolutions and products" begin
 

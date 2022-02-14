@@ -4,7 +4,10 @@ using RoME
 using Test
 using TensorCast
 
+##
+
 @testset "basic pose2 trivial case without forcing autoinit..." begin
+##
 
 fg = initfg()
 
@@ -22,13 +25,14 @@ addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal(zeros(3),cov)))
 addVariable!(fg, :x2, Pose2)
 addFactor!(fg, [:x1;:x2], Pose2Pose2(MvNormal(zeros(3),cov)))
 
-#
+##
 
-Xc_badval = [AMP.makePointFromCoords(SpecialEuclidean(2), 0.01.*randn(3)+[-5;-2;0.5]) for _ in 1:100]
+M = getManifold(Pose2)
+Xc_badval = [AMP.makePointFromCoords(M, 0.01.*randn(3)+[-5;-2;0.5], identity_element(M)) for _ in 1:100]
 
-badval = map((Xc)->DFG.getPoint(Pose2, Xc), eachcol(Xc_badval))
+# badval = map((Xc)->DFG.getPoint(Pose2, Xc), Xc_badval)
 
-setValKDE!(fg, :x2, manikde!(Pose2, badval))
+setValKDE!(fg, :x2, manikde!(Pose2, Xc_badval))
 
 N = 100
 # batchSolve!(fg, N=N)
@@ -58,6 +62,7 @@ end
 
 
 @testset "basic pose2 with forcing bad initialization..." begin
+##
 
 fg = initfg()
 
@@ -77,11 +82,11 @@ addFactor!(fg, [:x1;:x2], Pose2Pose2(MvNormal(zeros(3),cov)))
 
 initAll!(fg)
 
+M = getManifold(Pose2)
+Xc_badval = [AMP.makePointFromCoords(M, 0.000001.*randn(3)+[-5;-2;0.5], identity_element(M)) for _ in 1:100]
+# badval = map((Xc)->DFG.getPoint(Pose2, Xc), eachcol(Xc_badval))
 
-Xc_badval = [AMP.makePointFromCoords(SpecialEuclidean(2), 0.000001.*randn(3)+[-5;-2;0.5]) for _ in 1:100]
-badval = map((Xc)->DFG.getPoint(Pose2, Xc), eachcol(Xc_badval))
-
-setValKDE!(fg, :x2, manikde!(Pose, badval))
+setValKDE!(fg, :x2, manikde!(Pose2, Xc_badval))
 
 # tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
 
@@ -89,7 +94,7 @@ N = 100
 getSolverParams(fg).N = N
 solveTree!(fg)
 
-
+##
 
 for xx in [:x0; :x1; :x2]
   manipts = getVal(fg, xx)
@@ -101,6 +106,7 @@ for xx in [:x0; :x1; :x2]
   @test 0.95*N < sum( -1.0 .< pts[3,:] .< 1.0 )
 end
 
+##
 end
 
 
@@ -114,7 +120,7 @@ end
 
 
 @testset "test basic banana (split)..." begin
-
+##
 
 fg = initfg()
 
@@ -157,7 +163,6 @@ manicrd = getCoordinates.(Ref(Pose2), manipts)
 @test 0.7*N < sum(abs.(pts[3,:]) .< 2.0)
 
 
-
 #
 # using RoMEPlotting
 # using Gadfly
@@ -165,5 +170,5 @@ manicrd = getCoordinates.(Ref(Pose2), manipts)
 #
 # plotKDE(fg, ls(fg))
 
-
+##
 end

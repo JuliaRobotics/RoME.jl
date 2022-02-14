@@ -8,21 +8,14 @@ export MutablePose2Pose2Gaussian, PackedMutablePose2Pose2Gaussian
 
 Specialized Pose2Pose2 factor type (Gaussian), which allows for rapid accumulation of odometry information as a branch on the factor graph.
 """
-mutable struct MutablePose2Pose2Gaussian  <: IIF.AbstractManifoldMinimize
+Base.@kwdef mutable struct MutablePose2Pose2Gaussian  <: IIF.AbstractManifoldMinimize
   Z::MvNormal
-  timestamp::DateTime
-  MutablePose2Pose2Gaussian(Zij::MvNormal=MvNormal(zeros(3),diagm([0.01; 0.01; 0.001].^2)), timestamp::DateTime=now()) = new(Zij, timestamp)
+  timestamp::DateTime = now()
 end
+MutablePose2Pose2Gaussian(Z::MvNormal) = MutablePose2Pose2Gaussian(;Z)
 
-DFG.getManifold(::MutablePose2Pose2Gaussian) = Manifolds.SpecialEuclidean(2)
+DFG.getManifold(::MutablePose2Pose2Gaussian) = getManifold(Pose2) # Manifolds.SpecialEuclidean(2)
 
-function getSample(cf::CalcFactor{<:MutablePose2Pose2Gaussian})
-  Xc = rand(cf.factor.Z)
-
-  M = SpecialEuclidean(2)
-  X = hat(M, Manifolds.Identity(M), Xc)
-  return X
-end
 
 """
     $SIGNATURES
@@ -48,14 +41,12 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedMutablePose2Pose2Gaussian  <: AbstractPackedFactor
-  datastr::String
+Base.@kwdef struct PackedMutablePose2Pose2Gaussian  <: AbstractPackedFactor
+  Z::PackedSamplableBelief
   timestamp::Int64 # serialized in millisecond
-  # PackedMutablePose2Pose2Gaussian() = new()
-  # PackedMutablePose2Pose2Gaussian(x::String, ts::Int=datetime2unix(now())*1e3 |> Int) = new(x, ts)
 end
 function convert(::Type{MutablePose2Pose2Gaussian}, d::PackedMutablePose2Pose2Gaussian)
-  return MutablePose2Pose2Gaussian(convert(SamplableBelief, d.datastr), timestamp=unix2datetime(d.timestamp*1e-3))
+  return MutablePose2Pose2Gaussian(convert(SamplableBelief, d.datastr), unix2datetime(d.timestamp*1e-3))
 end
 function convert(::Type{PackedMutablePose2Pose2Gaussian}, d::MutablePose2Pose2Gaussian)
   return PackedMutablePose2Pose2Gaussian(convert(PackedSamplableBelief, d.Z), datetime2unix(d.timestamp)*1e3 |> Int)

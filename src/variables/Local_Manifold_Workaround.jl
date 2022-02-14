@@ -54,6 +54,7 @@ struct _CircleEuclid <: MB.AbstractManifold{MB.ℝ} end
 MB.manifold_dimension(::_CircleEuclid) = 2
 
 const BearingRange_Manifold = _CircleEuclid()
+# MB.manifold_dimension(::BearingRange_Manifold) = 2
 
 AMP.coords(::Type{<:typeof(BearingRange_Manifold)}, p::ProductRepr) = [p.parts[1][1]; p.parts[2][1]]
 

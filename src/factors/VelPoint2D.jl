@@ -8,12 +8,9 @@ $(TYPEDEF)
 """
 mutable struct VelPoint2VelPoint2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
   Z::T
-  VelPoint2VelPoint2{T}() where {T <: Distribution} = new{T}()
-  VelPoint2VelPoint2{T}(z1::T) where {T <: Distribution} = new{T}(z1)
 end
-VelPoint2VelPoint2(z1::T) where {T <: Distribution} = VelPoint2VelPoint2{T}(z1)
 
-getSample(cfo::CalcFactor{<:VelPoint2VelPoint2}) = rand(cfo.factor.Z)
+getManifold(::InstanceType{VelPoint2VelPoint2}) = TranslationGroup(4)
 
 function (cfo::CalcFactor{<:VelPoint2VelPoint2})(z, xi, xj)
   #
@@ -63,16 +60,13 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedVelPoint2VelPoint2 <: AbstractPackedFactor
-  str::String
-  PackedVelPoint2VelPoint2() = new()
-  PackedVelPoint2VelPoint2(z1::String) = new(z1)
+Base.@kwdef struct PackedVelPoint2VelPoint2 <: AbstractPackedFactor
+  Z::PackedSamplableBelief
 end
 
 function convert(::Type{PackedVelPoint2VelPoint2}, d::VelPoint2VelPoint2)
   return PackedVelPoint2VelPoint2(convert(PackedSamplableBelief, d.Z))
 end
 function convert(::Type{VelPoint2VelPoint2}, d::PackedVelPoint2VelPoint2)
-  distr = convert(SamplableBelief, d.str)
-  return VelPoint2VelPoint2(distr)
+  return VelPoint2VelPoint2(convert(SamplableBelief, d.Z))
 end

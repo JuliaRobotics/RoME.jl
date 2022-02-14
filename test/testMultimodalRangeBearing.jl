@@ -14,7 +14,8 @@ end
 
 NorthSouthPartial(Z::D) where {D <: IIF.SamplableBelief} = NorthSouthPartial(Z, (2,))
 
-# DFG.getManifold(::NorthSouthPartial) = TranslationGroup(1)
+# see JuliaRobotics/IncrementalInference.jl
+DFG.getManifold(::NorthSouthPartial) = TranslationGroup(1)
 
 # getSample(cfo::CalcFactor{<:NorthSouthPartial}) = samplePoint(getManifold(cfo.factor), cfo.factor.Z)
 getSample(cfo::CalcFactor{<:NorthSouthPartial}) = samplePoint(TranslationGroup(1), cfo.factor.Z)
@@ -52,7 +53,7 @@ global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
 
 
-predictbelief(fg, :x0, :) #ls(fg, :x0))
+predictbelief(fg, :x0, :)
 
 ##
 

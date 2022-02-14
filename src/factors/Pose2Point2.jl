@@ -9,21 +9,15 @@ export Pose2Point2, PackedPose2Point2
 
 Bearing and Range constraint from a Pose2 to Point2 variable.
 """
-struct Pose2Point2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-    Z::T
-    partial::Tuple{Int,Int}
-    # empty constructor
-    # Pose2Point2{T}() where {T} = new{T}()
-    # # regular constructor
-    # Pose2Point2{T}(x1::T) where {T <: IIF.SamplableBelief} = new{T}(x1)
+Base.@kwdef struct Pose2Point2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+    Z::T = MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))
+    partial::Tuple{Int,Int} = (1,2)
 end
 # convenience and default constructor
-Pose2Point2(x1::T=MvNormal(zeros(2),LinearAlgebra.diagm([0.01;0.01]))) where {T <: IIF.SamplableBelief} = Pose2Point2{T}(x1, (1,2))
+Pose2Point2(Z::SamplableBelief) = Pose2Point2(;Z)
 
-# prescribed sampling function
-function getSample(cfo::CalcFactor{<:Pose2Point2}, N::Int=1)
-  return rand(cfo.factor.Z)
-end
+# TODO verify this is right for partial factor
+getManifold(::InstanceType{Pose2Point2}) = getManifold(Point2)
 
 # define the conditional probability constraint
 function (cfo::CalcFactor{<:Pose2Point2})(meas,
@@ -39,10 +33,8 @@ end
 
 ## Serialization support
 
-mutable struct PackedPose2Point2 <: AbstractPackedFactor
-    Z::String
-    # PackedPose2Point2() = new()
-    # PackedPose2Point2(s1::AS) where {AS <: AbstractString} = new(string(s1))
+Base.@kwdef struct PackedPose2Point2 <: AbstractPackedFactor
+    Z::PackedSamplableBelief
 end
 
 function convert(::Type{PackedPose2Point2}, obj::Pose2Point2{T}) where {T <: IIF.SamplableBelief}

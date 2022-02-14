@@ -3,16 +3,15 @@
 """
 $(TYPEDEF)
 """
-mutable struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
   Zpose::Pose2Pose2{T1}
   Zvel::T2
-  reuseres::Vector{Vector{Float64}}
-  VelPose2VelPose2{T1,T2}() where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}()
-  VelPose2VelPose2{T1,T2}(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = new{T1,T2}(Pose2Pose2(z1),z2,[zeros(3) for i in 1:Threads.nthreads()])
 end
-VelPose2VelPose2(z1::T1, z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = VelPose2VelPose2{T1,T2}(z1, z2)
+VelPose2VelPose2(z1::SamplableBelief, z2::SamplableBelief) = VelPose2VelPose2(Pose2Pose2(z1), z2)
 
-getManifold(::VelPose2VelPose2) = getManifold(DynPose2)
+getManifold(::InstanceType{VelPose2VelPose2}) = getManifold(DynPose2)
+
+preableCache(::AbstractDFG, ::AbstractVector{Symbol}, ::VelPose2VelPose2) = zeros(3)
 
 function getSample(cf::CalcFactor{<:VelPose2VelPose2})
     #Pose2 part
@@ -125,7 +124,7 @@ function compare(a::VelPose2VelPose2, b::VelPose2VelPose2; tol::Float64=1e-10)::
   TP = true
   TP = TP && RoME.compare(a.Zpose, b.Zpose)
   TP = TP && RoME.compareDensity(a.Zvel, b.Zvel)
-  TP = TP && norm(a.reuseres - b.reuseres) < tol
+  # TP = TP && norm(a.reuseres - b.reuseres) < tol
   return TP
 end
 
@@ -133,11 +132,9 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedVelPose2VelPose2 <: AbstractPackedFactor
-  strpose::AbstractString
-  strvel::AbstractString
-  # PackedVelPose2VelPose2() = new()
-  # PackedVelPose2VelPose2(z1::AS, z2::AS) where {AS <: AbstractString} = new(z1, z2)
+Base.@kwdef struct PackedVelPose2VelPose2 <: AbstractPackedFactor
+  Zpose::PackedSamplableBelief
+  Zvel::PackedSamplableBelief
 end
 
 function convert(::Type{PackedVelPose2VelPose2}, d::VelPose2VelPose2)
@@ -145,7 +142,7 @@ function convert(::Type{PackedVelPose2VelPose2}, d::VelPose2VelPose2)
                                 convert(PackedSamplableBelief, d.Zvel))
 end
 function convert(::Type{VelPose2VelPose2}, d::PackedVelPose2VelPose2)
-  posedistr = convert(SamplableBelief, d.strpose)
-  veldistr = convert(SamplableBelief, d.strvel)
-  return VelPose2VelPose2(posedistr, veldistr)
+  posediZ = convert(SamplableBelief, d.Zpose)
+  veldiZ = convert(SamplableBelief, d.Zvel)
+  return VelPose2VelPose2(posediZ, veldiZ)
 end

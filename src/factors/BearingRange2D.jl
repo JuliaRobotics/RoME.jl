@@ -114,9 +114,9 @@ end
 
 passTypeThrough(d::FunctionNodeData{Pose2Point2Range}) = d
 
-mutable struct PackedPose2Point2BearingRange <: AbstractPackedFactor
-    bearstr::String
-    rangstr::String
+Base.@kwdef struct PackedPose2Point2BearingRange <: AbstractPackedFactor
+    bearstr::PackedSamplableBelief
+    rangstr::PackedSamplableBelief
 end
 
 function convert( ::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange )
