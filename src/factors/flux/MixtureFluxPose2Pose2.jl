@@ -9,19 +9,18 @@ export MixtureFluxPose2Pose2, PackedMixtureFluxPose2Pose2
 
 
 struct MixtureFluxPose2Pose2{F <: FunctorInferenceType} <: AbstractRelativeRoots
-  Zij::F
+  Z::F
   # delta time between variables
-  DT::Ref{Float64}
+  DT::Base.RefValue{Float64}
 end
 
 mutable struct PackedMixtureFluxPose2Pose2 <: AbstractPackedFactor
-  packedZij::PackedMixture
+  Z::PackedMixture
   DT::Float64
-  specialSampler::String
 end
 
 
-function IIF.getSample(cfo::CalcFactor{<:MixtureFluxPose2Pose2}, N::Int=1)
+function IIF.getSample(cfo::CalcFactor{<:MixtureFluxPose2Pose2})
   #
   nfb = cfo.factor
   fmd = cfo.metadata
@@ -32,9 +31,9 @@ function IIF.getSample(cfo::CalcFactor{<:MixtureFluxPose2Pose2}, N::Int=1)
     nfb.DT[] = (getTimestamp(fmd.fullvariables[2]) - getTimestamp(fmd.fullvariables[1])).value * 1e-3
   end
 
-  cf_ = CalcFactor( cfo.factor.Zij, cfo.metadata, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams)
+  cf_ = CalcFactor( cfo.factor.Zij, cfo.metadata, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams, cfo.cache)
 
-  smpl = getSample(cf_, N)[1]
+  smpl = getSample(cf_)
 
   return (smpl, cf_.factor.labels)
 
@@ -68,21 +67,15 @@ end
 function Base.convert(::Union{Type{<:AbstractPackedFactor},Type{<:PackedMixtureFluxPose2Pose2}},
                       obj::MixtureFluxPose2Pose2 )
   #
-  toFnc = typeof(obj.specialSampler)
-  fncName = string(toFnc.name.module)*"."*string(toFnc.name.name)
-  PackedMixtureFluxPose2Pose2(convert(PackedMixture,obj.Zij),
-                              obj.DT[],
-                              fncName)
+  PackedMixtureFluxPose2Pose2(convert(PackedMixture,obj.Z),
+                              obj.DT[] )
 end
 
-function Base.convert(::Union{Type{<:FunctorInferenceType},Type{<:MixtureFluxPose2Pose2}},
+function Base.convert(::Union{Type{<:AbstractFactor},Type{<:MixtureFluxPose2Pose2}},
                       obj::PackedMixtureFluxPose2Pose2 )
   #
-  sFnc = split(obj.specialSampler, '.') .|> Symbol
-  specFnc = getfield(getfield(Main, sFnc[1]), sFnc[2])
-  PackedMixtureFluxPose2Pose2(convert(Mixture,obj.packedZij),
-                                      obj.DT,
-                                      specFnc)
+  MixtureFluxPose2Pose2(convert(Mixture,obj.Z),
+                                Ref(obj.DT) )
 end
 
 
@@ -131,9 +124,9 @@ end
 
 function (cfo::CalcFactor{<:MixtureFluxPose2Pose2})(meas1, meas2, Xi, Xj)
   #
-  userdata = cfo.metadata
+  # userdata = cfo.metadata
+  # fmd = cfo.metadata  
   nfb = cfo.factor
-  fmd = cfo.metadata  
 
   # if, use prediction sample
   if meas2 == 2
@@ -145,10 +138,10 @@ function (cfo::CalcFactor{<:MixtureFluxPose2Pose2})(meas1, meas2, Xi, Xj)
   end
 
   # calculate the error for that measurement sample as Pose2Pose2
-  #TODO 
-  cfZij = CalcFactor( cfo.factor.Zij.mechanics, cfo.metadata, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams)
+  #TODO, this is constructor in the hot loop is way to expensive.
+  cfZ = CalcFactor( cfo.factor.Z.mechanics, cfo.metadata, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams, cfo.cache)
 
-  return  cfZij(meas1, Xi, Xj)
+  return  cfZ(meas1, Xi, Xj)
 
 end
 
