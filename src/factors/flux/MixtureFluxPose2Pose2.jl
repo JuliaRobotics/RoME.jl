@@ -8,7 +8,7 @@ import IncrementalInference: getSample
 export MixtureFluxPose2Pose2, PackedMixtureFluxPose2Pose2
 
 
-struct MixtureFluxPose2Pose2{F <: FunctorInferenceType} <: AbstractRelativeRoots
+struct MixtureFluxPose2Pose2{F <: AbstractFactor} <: AbstractRelativeRoots
   Z::F
   # delta time between variables
   DT::Base.RefValue{Float64}
@@ -180,7 +180,7 @@ FluxModelsPose2Pose2( allModels::Vector{P},
 
 
 
-# struct MixtureFlux{N,F<:FunctorInferenceType,S,T}
+# struct MixtureFlux{N,F<:AbstractFactor,S,T}
 #   mixture::Mixture{N,F,S,T}
 #   # special keyword field name used to invoke 'specialSampler' logic
 #   specialSampler::Function 
@@ -198,7 +198,7 @@ FluxModelsPose2Pose2( allModels::Vector{P},
 
 # # const _IIFListTypes = Union{<:AbstractVector, <:Tuple, <:NTuple}
 
-# function MixtureFlux( F_::FunctorInferenceType, 
+# function MixtureFlux( F_::AbstractFactor, 
 #                       compList::_IIFListTypes, 
 #                       diversity::Union{<:AbstractVector, <:NTuple, <:DiscreteNonParametric}) 
 #   #
@@ -207,7 +207,7 @@ FluxModelsPose2Pose2( allModels::Vector{P},
 #   return _populateMixture(mix)
 # end
 
-# MixtureFlux(::Type{F}, w...;kw...) where F <: FunctorInferenceType = MixtureFlux(F(LA.I), w...;kw...)
+# MixtureFlux(::Type{F}, w...;kw...) where F <: AbstractFactor = MixtureFlux(F(LA.I), w...;kw...)
 
 
 
