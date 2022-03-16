@@ -381,31 +381,34 @@ end
 
 
 
-function get2DSamples(fg::G;
+function get2DSamples(fg::AbstractDFG;
                       from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1),
                       minnei::Int=0,
-                      regexKey::Regex=r"x") where {G <: AbstractDFG, S <: AbstractString}
+                      regexKey::Regex=r"x")
   #
-  X = Array{Float64,1}()
-  Y = Array{Float64,1}()
+  X = Vector{Float64}()
+  Y = Vector{Float64}()
 
   # if sym = 'l', ignore single measurement landmarks
   allids = listVariables(fg, regexKey)  # fg.IDs
   saids = DFG.sortDFG(allids)
   for id in saids
-    # vertlbl = string(id[1])
     vertlbl = string(id)
-    # if vertlbl[1] == sym
-      val = parse(Int,split(vertlbl[2:end],'_')[1])
-      if from <= val && val <= to
-        if length( DFG.getNeighbors(fg, id ) ) >= minnei
-          # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
-          X=[X; vec(getVal(fg,id)[1,:]) ]
-          Y=[Y; vec(getVal(fg,id)[2,:]) ]
-        end
+    val = parse(Int,split(vertlbl[2:end],'_')[1])
+    if from <= val && val <= to
+      if length( DFG.getNeighbors(fg, id ) ) >= minnei
+        # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
+        M = getManifold(getVariable(fg, id))
+        pts = getPoints(fg, id)
+        pts_ = AMP.makeCoordsFromPoint.(Ref(M), pts)
+        @cast X_[i] := pts_[i][1]
+        @cast Y_[i] := pts_[i][2]
+        X = [X; X_]
+        Y = [Y; Y_]
       end
-    # end
+    end
   end
+
   return X,Y
 end
 
@@ -482,15 +485,15 @@ function getAll2DMeans(fg, sym::Regex)
   return get2DSampleMeans(fg, sym )
 end
 
-function getAll2DPoses(fg::G; regexKey=r"x") where G <: AbstractDFG
+function getAll2DPoses(fg::AbstractDFG; regexKey=r"x")
     return getAll2DSamples(fg, regexKey=regexKey )
 end
 
-function get2DPoseSamples(fg::G; from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1), regexKey=r"x") where G <: AbstractDFG
+function get2DPoseSamples(fg::AbstractDFG; from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1), regexKey=r"x")
   return get2DSamples(fg, regexKey=regexKey, from=from, to=to )
 end
 
-function get2DPoseMeans(fg::G; from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1), regexKey=r"x") where G <: AbstractDFG
+function get2DPoseMeans(fg::AbstractDFG; from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1), regexKey=r"x")
   return get2DSampleMeans(fg, regexKey, from=from, to=to )
 end
 
