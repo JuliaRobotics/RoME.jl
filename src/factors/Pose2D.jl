@@ -20,7 +20,7 @@ DFG.getManifold(::InstanceType{Pose2Pose2}) = getManifold(Pose2) # Manifolds.Spe
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2()
 
-function preambleCache(pp::Pose2Pose2)
+function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, pp::Pose2Pose2)
   M = getManifold(pp)
   (;manifold=M, ϵ0=identity_element(M), Xc=zeros(3))
 end
@@ -29,7 +29,7 @@ end
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
     @assert X isa ProductRepr "Pose2Pose2 expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
 
-    @info "HERE" cf.cache
+    # @info "HERE" cf.cache
     M = cf.cache.manifold # getManifold(Pose2)
     ϵ0 = cf.cache.ϵ0
 
