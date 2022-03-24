@@ -14,13 +14,26 @@ end
 
 getManifold(::IIF.InstanceType{<:Pose2Point2BearingRange}) = ProductGroup(ProductManifold(SpecialOrthogonal(2), TranslationGroup(1)))
 
-function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange})
-  # defaults, TODO better reuse
-  M = getManifold(cfo.factor)
+# What a hot mess, TODO, clean up
+function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, fct::Pose2Point2BearingRange)
+  M = getManifold(fct)
   e0 = ProductRepr([1 0; 0 1.], [0.])
+  SE2 = SpecialEuclidean(2)
+  SE2_0 = identity_element(SE2)
+  Xi = vee(SE2, SE2_0, SE2_0)
+
+  smpl = hat(M, e0, [rand(fct.bearing), rand(fct.range)])
+  Xmeas = vee(M, Manifolds.Identity(M), smpl)
+  return (;M, e0, SE2, SE2_0, Xi, Xmeas)
+end
+
+function getSample(cf::CalcFactor{<:Pose2Point2BearingRange})
+  # defaults, TODO better reuse
+  M = cf.cache.M
+  e0 = cf.cache.e0
 
   # vector of tangents
-  smpl = hat(M, e0, [rand(cfo.factor.bearing), rand(cfo.factor.range)])
+  smpl = hat(M, e0, [rand(cf.factor.bearing), rand(cf.factor.range)])
 
   # return IIF `::Tuple` format
   return smpl
@@ -37,39 +50,43 @@ function IIF.getMeasurementParametric(s::Pose2Point2BearingRange{<:Normal, <:Nor
 end
 
 function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
-  SE2 = SpecialEuclidean(2)
+  SE2 = cfo.cache.SE2
   #FIXME fix this factor to work correctly on manifolds
   if false
 
-  Mt = SE2.manifold.manifolds[1]
-  Mr = SE2.manifold.manifolds[2]
+    Mt = SE2.manifold.manifolds[1]
+    Mr = SE2.manifold.manifolds[2]
 
-  # compose rotations
-  rRi = xi.parts[2]
-  rRo = retract(Mr, rRi, meas.parts[1])
+    # compose rotations
+    rRi = xi.parts[2]
+    rRo = retract(Mr, rRi, meas.parts[1])
 
-  # new SE2 objects containing the rotation
-  rTo = ProductRepr(xi.parts[1], rRo)
-  oTl = ProductRepr([meas.parts[2];0], identity_element(Mr, rRi))
+    # new SE2 objects containing the rotation
+    rTo = ProductRepr(xi.parts[1], rRo)
+    oTl = ProductRepr([meas.parts[2];0], identity_element(Mr, rRi))
 
-  # prediction landmark
-  rTo = Manifolds.compose(SE2, rTo, oTl)
+    # prediction landmark
+    rTo = Manifolds.compose(SE2, rTo, oTl)
 
-  # cartesian difference in predicted and estimated landmark
-  δ_l = Manifolds.compose(Mt, inv(Mt, rTo.parts[1]), lm)
+    # cartesian difference in predicted and estimated landmark
+    δ_l = Manifolds.compose(Mt, inv(Mt, rTo.parts[1]), lm)
 
-  # find the residuals as though in polar coordinates
-  δθ = atan(δ_l[2], δ_l[1])
-  δr = norm(δ_l)
+    # find the residuals as though in polar coordinates
+    δθ = atan(δ_l[2], δ_l[1])
+    δr = norm(δ_l)
 
-  return [δθ; δr]
+    return [δθ; δr]
 
   # FIXME: this is close to the old BR that worked, use to ensure tests are working
   else
-    Xi = vee(SE2, xi, log(SE2, identity_element(SE2, xi), xi))
+    SE2_0 = cfo.cache.SE2_0
+    Xi = cfo.cache.Xi
 
-    Mmeas = getManifold(cfo.factor)
-    Xmeas = vee(Mmeas, Manifolds.Identity(Mmeas), meas)
+    vee!(SE2, Xi, xi, log(SE2, SE2_0, xi))
+    
+    Mmeas = cfo.cache.M
+    Xmeas = cfo.cache.Xmeas
+    vee!(Mmeas, Xmeas, cfo.cache.e0, meas)
     # 1-bearing
     # 2-range
     # world frame
@@ -85,7 +102,7 @@ function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
   
     # res = [eθ, er]
     eθ = atan((my + Xi[2]), (mx + Xi[1])) - atan(lm[2], lm[1])  # eθ
-    er= sqrt(ex^2 + ey^2) # some wasted computation here       # er 
+    er= sqrt(ex^2 + ey^2) # some wasted computation here        # er 
   
     # return hat(facM, ProductRepr([1. 0;0 1], [0.]), [eθ, er])
     return [eθ, er]
