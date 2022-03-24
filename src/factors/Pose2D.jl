@@ -22,26 +22,24 @@ Pose2Pose2(::UniformScaling) = Pose2Pose2()
 
 function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, pp::Pose2Pose2)
   M = getManifold(pp)
-  (;manifold=M, ϵ0=identity_element(M), Xc=zeros(3))
+  (;manifold=M, ϵ0=identity_element(M), Xc=zeros(3), q̂=identity_element(M))
 end
 
 # Assumes X is a tangent vector
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
-    @assert X isa ProductRepr "Pose2Pose2 expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
-
-    # @info "HERE" cf.cache
+    @assert X isa ProductRepr || X isa Manifolds.ArrayPartition "Pose2Pose2 expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
+    
     M = cf.cache.manifold # getManifold(Pose2)
     ϵ0 = cf.cache.ϵ0
-
-    q̂ = Manifolds.compose(M, p, exp(M, ϵ0, X)) #for groups
-    # q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
-    #TODO allocalte for vee! see Manifolds #412, fix for AD
+    q̂ = cf.cache.q̂
+    
+    #for groups
+    Manifolds.compose!(M, q̂, p, exp(M, ϵ0, X)) 
     fill!(cf.cache.Xc, 0.0)
-    # Xc = zeros(3)
     vee!(M, cf.cache.Xc, q, log(M, q, q̂))
     return cf.cache.Xc
 end
-  
+
 
 
 # NOTE, serialization support -- will be reduced to macro in future
