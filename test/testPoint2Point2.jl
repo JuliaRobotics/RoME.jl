@@ -1,6 +1,6 @@
 using RoME
 using Statistics
-# , Distributions
+using JSON2
 
 using Test
 
@@ -98,6 +98,27 @@ voidsel2 =  10.0 .< l1_val[2,:]
 ##
 
 end
+
+
+##
+@testset "Unpack of Point2Point2Range, #563" begin
+##
+
+fg = initfg()
+
+addVariable!(fg, :x0, Point2)
+addVariable!(fg, :l3, Point2)
+
+point2point2rangeString = "{\"label\":\"x0l3f1\",\"_version\":\"0.18.1\",\"_variableOrderSymbols\":[\"x0\",\"l3\"],\"data\":{\"eliminated\":false,\"potentialused\":false,\"edgeIDs\":[],\"fnc\":{\"Z\":{\"_type\":\"IncrementalInference.PackedNormal\",\"mu\":89.44271909999159,\"sigma\":3.0}},\"multihypo\":[],\"certainhypo\":[1,2],\"nullhypo\":0.0,\"solveInProgress\":0,\"inflation\":5.0},\"tags\":[\"FACTOR\"],\"timestamp\":\"2022-03-26T01:24:44.373-05:00\",\"nstime\":\"0\",\"fnctype\":\"Point2Point2Range\",\"solvable\":1}"
+jback = JSON2.read(point2point2rangeString, Dict{String, Any})
+f = unpackFactor(fg, jback)
+
+
+##
+end
+
+
+
 
 #
 #
