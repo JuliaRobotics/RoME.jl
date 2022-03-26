@@ -22,7 +22,7 @@ passTypeThrough(d::FunctionNodeData{Point2Point2Range}) = d
 """
 $(TYPEDEF)
 """
-mutable struct PackedPoint2Point2Range  <: AbstractPackedFactor
+Base.@kwdef mutable struct PackedPoint2Point2Range  <: AbstractPackedFactor
   Z::PackedSamplableBelief
 end
 function convert(::Type{PackedPoint2Point2Range}, d::Point2Point2Range)
