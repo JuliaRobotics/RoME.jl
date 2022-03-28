@@ -21,6 +21,7 @@ testfiles = [
 
   # dev test first, for faster issues.
   # ...
+  "testPPE_IIF1507.jl";
 
   # tests most likely to fail on numerics
   "testScalarFields.jl";
