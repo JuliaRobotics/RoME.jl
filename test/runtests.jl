@@ -21,6 +21,8 @@ testfiles = [
 
   # dev test first, for faster issues.
   # ...
+  # "testFluxModelsPose2.jl";
+
 
   # tests most likely to fail on numerics
   "testScalarFields.jl";
@@ -56,7 +58,6 @@ testfiles = [
   "TestDefaultFGInitialization.jl";
   "testAccumulateFactors.jl";
   "testDeadReckoningTether.jl"; 
-  "testFluxModelsPose2.jl";
   "testGenerateHelix.jl";
 
   # starts multiprocess.
