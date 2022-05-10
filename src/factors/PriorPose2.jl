@@ -19,7 +19,8 @@ DFG.getManifold(::InstanceType{PriorPose2}) = getManifold(Pose2) # SpecialEuclid
 # FIXME, we should not need a residual for <:AbstractPriorFactor?
 function (cf::CalcFactor{<:PriorPose2})(m, p)
   M = getManifold(cf.factor)
-  return log(M, p, m)
+  Xc = vee(M, p, log(M, p, m))
+  return Xc
 end
 
 #TODO Serialization of reference point p 

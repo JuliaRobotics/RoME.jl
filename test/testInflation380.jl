@@ -194,8 +194,6 @@ addFactor!(fg, [:x2; :l2], p2br)
 # nonparametric solution
 solveGraph!(fg);
 
-@test_broken begin
-@error "#FIXME parametric solve part of test bearing range with inflation, #380, IIF #1051 is broken"
 # parametric solution
 IIF.solveGraphParametric!(fg)
 
@@ -223,9 +221,6 @@ test_err[1:2] = getPPE(fg, :x2, :default).suggested[1:2] - getPPE(fg, :x2, :para
 @test isapprox(test_err[1], 0, atol=0.5)
 @test isapprox(test_err[2], 0, atol=0.5)
 @test isapprox(test_err[3], 0, atol=0.6)
-
-true
-end
 
 ##
 
