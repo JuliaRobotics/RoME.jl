@@ -5,6 +5,21 @@ $(TYPEDEF)
 
 Rigid transform between two Pose2's, assuming (x,y,theta).
 
+Calcuated as:
+```math
+\\begin{aligned}
+\\hat{q}=\\exp_pX_m\\\\
+X = \\log_q \\hat{q}\\\\
+X^i = vee(q, X)
+\\end{aligned}
+```
+with:
+``\\mathcal M= \\mathrm{SE}(2)`` Special Euclidean group\\
+``p`` and ``q`` ``\\in \\mathcal M`` the two Pose2 points\\
+the measurement vector ``X_m \\in T_p \\mathcal M``\\
+and the error vector ``X \\in T_p \\mathcal M``\\
+``X^i`` coordinates of ``X``
+
 DevNotes
 - Maybe with Manifolds.jl, `{T <: IIF.SamplableBelief, S, R, P}`
 
