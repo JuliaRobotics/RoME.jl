@@ -11,12 +11,10 @@ using Statistics
 
 
 @error("must restore testG2oParser.jl")
-@error("must restore testParametric.jl")
 @error("add test for generateGraph_Beehive!, norm( simulated - default ) < tol")
 
 testfiles = [  
   # known broken tests
-  # "testParametric.jl"; # deferred
   # "testG2oParser.jl";  # deferred
 
   # dev test first, for faster issues.
@@ -59,6 +57,9 @@ testfiles = [
   "testAccumulateFactors.jl";
   "testDeadReckoningTether.jl"; 
   "testGenerateHelix.jl";
+
+  #parametric tests
+  "testParametric.jl";
 
   # starts multiprocess.
   # don't move up, special factors defined in other test files are not added to multiprocess (Distributed.jl)
