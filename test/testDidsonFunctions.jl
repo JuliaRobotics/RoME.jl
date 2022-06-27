@@ -22,7 +22,7 @@ pts = getPoint.(Pose3, Xc)
 
 fg = initfg()
 X0 = addVariable!(fg, :x0, Pose3)
-initManual!(fg, :x0, pts)
+initVariable!(fg, :x0, pts)
 X1 = addVariable!(fg, :x1, Point3)
 addFactor!(fg, [:x0;:x1], meas, graphinit=false)
 
@@ -45,7 +45,7 @@ L = [[3.0; 0.65; 0] for _=1:N]
 fg = initfg()
 X0 = addVariable!(fg, :x0, Pose3)
 X1 = addVariable!(fg, :x1, Point3)
-initManual!(fg, :x1, L)
+initVariable!(fg, :x1, L)
 addFactor!(fg, [:x0;:x1], meas, graphinit=false)
 
 pts = approxConv(fg, :x0x1f1, :x0)

@@ -162,7 +162,7 @@ for i in 1:2*CYCLES
   # lmid = Symbol("l$i")
   addVariable!(fg, lmid, RoME.Point2)
   pts = [rand(MvNormal(L[i,:],diagm([0.01;0.01].^2))) for _ in 1:100]
-  initManual!(fg, lmid, manikde!(Point2, pts))
+  initVariable!(fg, lmid, manikde!(Point2, pts))
   setVariablePosteriorEstimates!(fg,lmid)
 
   BR[lmid] = Dict{Symbol,Tuple}()
@@ -280,7 +280,7 @@ for l in 1:LANDMARKS
   # reinit all lm_0 with the latest factor
   if 0 < length(ls(fg, lmid_0))
     pts = approxConv(fg, ls(fg, lmid_0)[1], lmid_0  )
-    initManual!(fg,lmid_0,pts)
+    initVariable!(fg,lmid_0,pts)
   end
 end
 

@@ -15,7 +15,7 @@ u0 = ProductRepr([0;0.0], [1 0; 0 1.])
 M = getManifold(Pose2) # TODO add better dispatch to simplify
 x0 = [AMP.makePointFromCoords(M,0.01*randn(3),u0) for _ in 1:100];
 X0 = manikde!(M, x0)
-initManual!(fg, :x0, X0)
+initVariable!(fg, :x0, X0)
 
 addVariable!(fg, :x1, Pose2)
 addFactor!(fg, [:x0;:x1], Pose2Pose2(MvNormal([10;0;pi], 0.1*diagm([1;1;1]))), graphinit=false)

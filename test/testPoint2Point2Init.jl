@@ -41,9 +41,9 @@ eo = [:x1; :x0; :l1]
 # prior first
 
 # pts, = predictbelief(sfg2,:x1, :)
-# initManual!(sfg2, :x1, pts)
+# initVariable!(sfg2, :x1, pts)
 # pts, = predictbelief(sfg2, :l1, :)
-# initManual!(sfg2, :l1, pts)
+# initVariable!(sfg2, :l1, pts)
 
 
 ##
@@ -104,7 +104,7 @@ end
 
 # IIF._getCCW(fg, :x1l1f1).inflation = 100.0
 # pts = approxConv(fg, :x1l1f1, :l1)
-# initManual!(fg, :l1, pts)
+# initVariable!(fg, :l1, pts)
 
 # plotKDE(manikde!(Point2, pts))
 

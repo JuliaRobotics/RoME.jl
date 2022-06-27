@@ -116,7 +116,7 @@ function predictVariableByFactor( dfg::AbstractDFG,
     addVariable!(tfg, var, getSofttype(varnode))
     if var != targetsym
       @assert isInitialized(varnode)
-      initManual!(tfg,var,getBelief(varnode))
+      initVariable!(tfg,var,getBelief(varnode))
     end
   end
   addFactor!(tfg, prevars, fct, graphinit=false)
