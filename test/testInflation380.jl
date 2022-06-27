@@ -22,7 +22,7 @@ addVariable!(fg, :x0, ContinuousEuclid{2})
 addVariable!(fg, :x1, ContinuousEuclid{2})
 
 X0_ = [[1000; 0.0] for _ in 1:N]
-initManual!(fg, :x0, X0_)
+initVariable!(fg, :x0, X0_)
 
 addFactor!(fg, [:x0;:x1], EuclidDistance(Normal(100.0, 1.0)))
 
@@ -46,7 +46,7 @@ X1_ = [randn(2) for _ in 1:N]
 for pt in X1_
   pt[1] += 1100.0
 end
-initManual!(fg, :x1, X1_)
+initVariable!(fg, :x1, X1_)
 
 
 ##
@@ -54,7 +54,7 @@ initManual!(fg, :x1, X1_)
 IIF._getCCW(fg, :x0x1f1).inflation = 50.0
 pts = approxConv(fg, :x0x1f1, :x1)
 
-initManual!(fg, :x1, pts)
+initVariable!(fg, :x1, pts)
 
 pts = approxConv(fg, :x0x1f1, :x1)
 
@@ -103,7 +103,7 @@ addFactor!(fg, [:x1; :l1], EuclidDistance(Normal(100.0, 1.0)))
 
 pts = [zeros(2) for _ in 1:100]
 (p->(p[1] -= 900)).(pts)
-initManual!(fg, :x1, pts)
+initVariable!(fg, :x1, pts)
 
 ##
 

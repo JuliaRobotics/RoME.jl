@@ -147,7 +147,7 @@ tfg = initfg()
 
 # add a starting point (skipping prior for brevity)
 addVariable!(tfg, :a, Pose2)
-initManual!(tfg, :a, 0.01*randn(3,100))
+initVariable!(tfg, :a, 0.01*randn(3,100))
 
 addVariable!(tfg, :a_drt, Pose2)
 
