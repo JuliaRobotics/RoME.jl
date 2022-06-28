@@ -23,6 +23,7 @@ testfiles = [
 
   #parametric tests
   "testParametric.jl";
+  "testPose3.jl";
 
   # tests most likely to fail on numerics
   "testScalarFields.jl";
