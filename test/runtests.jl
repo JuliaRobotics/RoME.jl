@@ -21,6 +21,9 @@ testfiles = [
   # ...
   # "testFluxModelsPose2.jl";
 
+  #parametric tests
+  "testParametric.jl";
+  "testPose3.jl";
 
   # tests most likely to fail on numerics
   "testScalarFields.jl";
@@ -58,8 +61,6 @@ testfiles = [
   "testDeadReckoningTether.jl"; 
   "testGenerateHelix.jl";
 
-  #parametric tests
-  "testParametric.jl";
 
   # starts multiprocess.
   # don't move up, special factors defined in other test files are not added to multiprocess (Distributed.jl)
