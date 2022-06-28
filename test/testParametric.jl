@@ -31,7 +31,7 @@ initAll!(fg)
 
 IIF.initParametricFrom!(fg)
 
-vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
+vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
 #TODO test +-pi used pi+1e-5
 #FIXME look if something is wrong with angle bounds [-pi,pi), test failed
@@ -102,8 +102,8 @@ end
 
 # IIF.initParametricFrom!(fg)
 
-# vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
-# # vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, useCalcFactor=true, autodiff=:finite)
+# vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
+# # vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, autodiff=:finite)
 
 # IIF.updateParametricSolution(fg, vardict)
 
@@ -129,7 +129,7 @@ initAll!(fg)
 
 IIF.initParametricFrom!(fg)
 
-vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
+vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
 @test isapprox(vardict[:x1].val, [0, 0, 0], atol = 1e-3)
 @test isapprox(vardict[:l1].val, [1,  1], atol = 1e-3)
@@ -158,7 +158,7 @@ initAll!(fg)
 
 IIF.initParametricFrom!(fg)
 
-vardict, result, varIds, Σ = IIF.solveGraphParametric(fg, useCalcFactor=true) #autodiff=:finite)
+vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
 x1_res = DFG.getPoint(Pose2, vardict[:x1].val)
 @test isapprox(SpecialEuclidean(2), x1_res, ProductRepr([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
