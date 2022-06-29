@@ -34,6 +34,11 @@ Pose2 is a SE(2) mechanization of two Euclidean translations and one Circular ro
 """
 @defVariable Pose2 SpecialEuclidean(2) ProductRepr([0;0.0],[1 0; 0 1.0])
 
+# """
+
+# """
+# @defVariable Pose2z SpecialEuclidean2z ProductRepr(MVector(0.,0.,0.), MMatrix{2,2}([1 0; 0 1.]))
+
 """
 $(TYPEDEF)
 
