@@ -15,7 +15,7 @@ Base.@kwdef struct Pose2Point2Bearing{B <: IIF.SamplableBelief} <: IIF.AbstractM
     Z::B = Normal()
 end
 
-preambleCache(::AbstractDFG, ::AbstractVector{Symbol}, ::Pose2Point2Bearing) = P2P2BearingReuse()
+preambleCache(::AbstractDFG, ::AbstractVector{<:DFGVariable}, ::Pose2Point2Bearing) = P2P2BearingReuse()
 
 getManifold(::Pose2Point2Bearing) = SpecialOrthogonal(2)
 # Pose2Point2Bearing(x1::B) where {B <: IIF.SamplableBelief} = Pose2Point2Bearing{B}(x1)
