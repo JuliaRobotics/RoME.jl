@@ -142,7 +142,7 @@ $(TYPEDEF)
 Base.@kwdef struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeRoots
   Z::T = MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))
 end
-preambleCache(::AbstractDFG, ::AbstractVector{Symbol}, ::DynPose2DynPose2) = zeros(5)
+preambleCache(::AbstractDFG, ::AbstractVector{<:DFGVariable}, ::DynPose2DynPose2) = zeros(5)
 
 # FIXME ON FIRE, must update to new Manifolds style factors
 getManifold(::DynPose2DynPose2) = SE2E2_Manifold # not fully impl manifold yet
