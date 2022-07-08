@@ -28,7 +28,7 @@ addFactor!(fg, [:x1;:x2], Pose2Pose2(MvNormal(zeros(3),cov)))
 ##
 
 M = getManifold(Pose2)
-Xc_badval = [AMP.makePointFromCoords(M, 0.01.*randn(3)+[-5;-2;0.5], identity_element(M)) for _ in 1:100]
+Xc_badval = [AMP.makePointFromCoords(M, 0.01.*randn(3)+[-5;-2;0.5], getPointIdentity(M)) for _ in 1:100]
 
 # badval = map((Xc)->DFG.getPoint(Pose2, Xc), Xc_badval)
 
@@ -83,7 +83,7 @@ addFactor!(fg, [:x1;:x2], Pose2Pose2(MvNormal(zeros(3),cov)))
 initAll!(fg)
 
 M = getManifold(Pose2)
-Xc_badval = [AMP.makePointFromCoords(M, 0.000001.*randn(3)+[-5;-2;0.5], identity_element(M)) for _ in 1:100]
+Xc_badval = [AMP.makePointFromCoords(M, 0.000001.*randn(3)+[-5;-2;0.5], getPointIdentity(M)) for _ in 1:100]
 # badval = map((Xc)->DFG.getPoint(Pose2, Xc), eachcol(Xc_badval))
 
 setValKDE!(fg, :x2, manikde!(Pose2, Xc_badval))

@@ -37,7 +37,7 @@ Pose2Pose2(::UniformScaling) = Pose2Pose2()
 
 function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, pp::Pose2Pose2)
   M = getManifold(pp)
-  (;manifold=M, ϵ0=identity_element(M), Xc=zeros(3), q̂=identity_element(M))
+  (;manifold=M, ϵ0=getPointIdentity(M), Xc=zeros(3), q̂=getPointIdentity(M))
 end
 
 # Assumes X is a tangent vector

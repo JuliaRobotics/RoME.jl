@@ -21,7 +21,7 @@ AMP.coords(::Type{<:typeof(SE2E2_Manifold)}, p::Manifolds.ProductRepr) = [p.part
 
 function AMP.uncoords(::typeof(SE2E2_Manifold), p::AbstractVector{<:Real})
   α = p[3]
-  Manifolds.ProductRepr(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
+  Manifolds.ArrayPartition(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
 end
 
 function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof(SE2E2_Manifold)}
@@ -30,11 +30,11 @@ function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof
 end
 
 function Statistics.mean(::typeof(SE2E2_Manifold), pts::AbstractVector)
-  se2_ = (d->Manifolds.ProductRepr(d.parts[1], d.parts[2])).(pts)
+  se2_ = (d->Manifolds.ArrayPartition(submanifold_component(d, 1), submanifold_component(d, 2))).(pts)
   mse2 = mean(Manifolds.SpecialEuclidean(2), se2_)
-  e2_ = (d->Manifolds.ProductRepr(d.parts[3])).(pts)
+  e2_ = (d->Manifolds.ArrayPartition(submanifold_component(d, 3))).(pts)
   me2 = mean(Euclidean(2), e2_)
-  Manifolds.ProductRepr(mse2.parts[1], mse2.parts[2], me2.parts[1])
+  Manifolds.ArrayPartition(submanifold_component(mse2, 1), submanifold_component(mse2, 2), submanifold_component(me2, 1))
 end
 
 # AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(SE2E2_Manifold)} = coords(M, prr)
@@ -59,7 +59,7 @@ const BearingRange_Manifold = _CircleEuclid()
 AMP.coords(::Type{<:typeof(BearingRange_Manifold)}, p::ProductRepr) = [p.parts[1][1]; p.parts[2][1]]
 
 function AMP.uncoords(::typeof(BearingRange_Manifold), p::AbstractVector{<:Real})
-  ProductRepr(([p[1];]), ([p[2];]))
+  ArrayRepresentation(([p[1];]), ([p[2];]))
 end
 
 function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof(BearingRange_Manifold)}

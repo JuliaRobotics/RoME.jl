@@ -17,7 +17,7 @@ getManifold(::IIF.InstanceType{<:Pose2Point2BearingRange}) = ProductGroup(Produc
 function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange})
   # defaults, TODO better reuse
   M = getManifold(cfo.factor)
-  e0 = ProductRepr([1 0; 0 1.], [0.])
+  e0 = ArrayPartition([1 0; 0 1.], [0.])
 
   # vector of tangents
   smpl = hat(M, e0, [rand(cfo.factor.bearing), rand(cfo.factor.range)])
@@ -49,8 +49,8 @@ function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
   rRo = retract(Mr, rRi, meas.parts[1])
 
   # new SE2 objects containing the rotation
-  rTo = ProductRepr(xi.parts[1], rRo)
-  oTl = ProductRepr([meas.parts[2];0], identity_element(Mr, rRi))
+  rTo = ArrayPartition(xi.parts[1], rRo)
+  oTl = ArrayPartition([meas.parts[2];0], identity_element(Mr, rRi))
 
   # prediction landmark
   rTo = Manifolds.compose(SE2, rTo, oTl)

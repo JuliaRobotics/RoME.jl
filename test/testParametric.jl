@@ -161,7 +161,7 @@ IIF.initParametricFrom!(fg)
 vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
 x1_res = DFG.getPoint(Pose2, vardict[:x1].val)
-@test isapprox(SpecialEuclidean(2), x1_res, ProductRepr([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
+@test isapprox(SpecialEuclidean(2), x1_res, ArrayRepresentation([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
 
 @test isapprox(vardict[:l1].val, [1,  1], atol = 1e-3)
 @test isapprox(vardict[:l2].val, [1, -1], atol = 1e-3)
