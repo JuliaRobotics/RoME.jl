@@ -60,6 +60,7 @@ export
   PackedDynPoint2VelocityPrior,
   PackedVelPoint2VelPoint2,
 
+  Point3,
   Point3Point3,
   PackedPoint3Point3,
 
