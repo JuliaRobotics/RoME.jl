@@ -5,7 +5,7 @@
 ## ==================================================================================================
 
 
-import ApproxManifoldProducts: coords, uncoords, getPointsManifold, _makeVectorManifold
+import ApproxManifoldProducts: coords, uncoords, getPointsManifold
 
 export SE2E2_Manifold
 
@@ -37,7 +37,7 @@ function Statistics.mean(::typeof(SE2E2_Manifold), pts::AbstractVector)
   Manifolds.ProductRepr(mse2.parts[1], mse2.parts[2], me2.parts[1])
 end
 
-AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(SE2E2_Manifold)} = coords(M, prr)
+# AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(SE2E2_Manifold)} = coords(M, prr)
 
 
 
@@ -76,7 +76,6 @@ function Statistics.mean(::typeof(BearingRange_Manifold), pts::AbstractVector)
   return [mc; mr]
 end
 
-AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(BearingRange_Manifold)} = coords(M, prr)
 
 
 
