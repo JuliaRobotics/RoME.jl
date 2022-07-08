@@ -55,8 +55,8 @@ initAll!(fg)
 
 # start with to tight an initialization
 muX1 = mean(SpecialEuclidean(3), getVal(fg,:x1))
-@test isapprox(muX1.parts[1], [0,0,0], atol=0.4)
-@test isapprox(muX1.parts[2], [1 0 0; 0 1 0; 0 0 1], atol=0.04)
+@test isapprox(submanifold_component(muX1,1), [0,0,0], atol=0.4)
+@test isapprox(submanifold_component(muX1,2), [1 0 0; 0 1 0; 0 0 1], atol=0.04)
 
 # stdX1 = std(getVal(fg,:x1),dims=2)
 stdX1 = sqrt.(diag(cov(Pose3(), getVal(fg,:x1))))
@@ -69,8 +69,8 @@ stdX1 = sqrt.(diag(cov(Pose3(), getVal(fg,:x1))))
 priorpts = approxConv(fg, :x1f1, :x1)
 # priorpts = evalFactor(fg, fg.g.vertices[2], 1)
 means = mean(SpecialEuclidean(3), priorpts)
-@test sum(map(Int,abs.(means.parts[1]) .> 0.5)) == 0
-@test isapprox(means.parts[2], [1 0 0; 0 1 0; 0 0 1], atol=0.05)
+@test sum(map(Int,abs.(submanifold_component(means,1)) .> 0.5)) == 0
+@test isapprox(submanifold_component(means,2), [1 0 0; 0 1 0; 0 0 1], atol=0.05)
 
 # v2, f2 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
 # v3, f3 = addOdoFG!(fg, Pose3Pose3( MvNormal([25;0;0;0;0;0.0], odoCov)) )
@@ -100,11 +100,11 @@ X3ptsMean = mean(SpecialEuclidean(3), X3pts)
 # @show X2ptsMean
 # @show X3ptsMean
 
-@test isapprox(X2ptsMean.parts[1], [25,0,0], atol=5.0)
-@test isapprox(X2ptsMean.parts[2], [1 0 0; 0 1 0; 0 0 1], atol=0.5)
+@test isapprox(submanifold_component(X2ptsMean,1), [25,0,0], atol=5.0)
+@test isapprox(submanifold_component(X2ptsMean,2), [1 0 0; 0 1 0; 0 0 1], atol=0.5)
 
-@test isapprox(X3ptsMean.parts[1], [50,0,0], atol=5.0)
-@test isapprox(X3ptsMean.parts[2], [1 0 0; 0 1 0; 0 0 1], atol=0.5)
+@test isapprox(submanifold_component(X3ptsMean,1), [50,0,0], atol=5.0)
+@test isapprox(submanifold_component(X3ptsMean,2), [1 0 0; 0 1 0; 0 0 1], atol=0.5)
 
 tree = solveTree!(fg)
 

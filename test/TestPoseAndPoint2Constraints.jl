@@ -38,8 +38,8 @@ pts = approxConv(fg, :x0x1f1, :x1)
 # pts[3,:] .= TU.wrapRad.(pts[3,:])
 M = getManifold(Pose2)
 @show mv = mean(M, pts)
-@test isapprox(mv.parts[1], [50,0], atol=1)
-@test isapprox(mv.parts[2], [0 -1; 1 0], atol=0.5)
+@test isapprox(submanifold_component(mv,1), [50,0], atol=1)
+@test isapprox(submanifold_component(mv,2), [0 -1; 1 0], atol=0.5)
 
 ##
 
@@ -52,13 +52,13 @@ tree = solveTree!(fg)
 
 # test post evaluation values are correct
 pts = getVal(fg, :x0)
-@test isapprox(M, mean(M, pts), ProductRepr([0,0], [1 0; 0 1]), atol=0.5)
+@test isapprox(M, mean(M, pts), ArrayPartition([0,0], [1 0; 0 1]), atol=0.5)
 
 
 pts = getVal(fg, :x1)
 me_ = mean(M, pts)
-@test isapprox(M.manifold[1], me_.parts[1], [50,0], atol=1.0)
-@test isapprox(M.manifold[2], me_.parts[2], [0 -1; 1 0], atol=0.25)
+@test isapprox(M.manifold[1], submanifold_component(me_,1), [50,0], atol=1.0)
+@test isapprox(M.manifold[2], submanifold_component(me_,2), [0 -1; 1 0], atol=0.25)
 
 # check that yaw is working
 v3 = addVariable!(fg, :x2, Pose2, N=N)
@@ -71,18 +71,18 @@ solveTree!(fg)
 # test post evaluation values are correct
 pts = getVal(fg, :x0)
 me_ = mean(M, pts)
-@test isapprox(M.manifold[1], me_.parts[1], [0,0], atol=0.5)
-@test isapprox(M.manifold[2], me_.parts[2], [1 0; 0 1], atol=0.25)
+@test isapprox(M.manifold[1], submanifold_component(me_,1), [0,0], atol=0.5)
+@test isapprox(M.manifold[2], submanifold_component(me_,2), [1 0; 0 1], atol=0.25)
 
 pts = getVal(fg, :x1)
 mv = mean(M, pts)
-@test isapprox(mv.parts[1], [50,0], atol=3.0)
-@test isapprox(mv.parts[2], [0 -1; 1 0], atol=0.1)
+@test isapprox(submanifold_component(mv,1), [50,0], atol=3.0)
+@test isapprox(submanifold_component(mv,2), [0 -1; 1 0], atol=0.1)
 
 pts = getVal(fg, :x2)
 mv = mean(M, pts)
-@test isapprox(mv.parts[1], [50,50], atol=3.0)
-@test isapprox(mv.parts[2], [0 -1; 1 0], atol=0.1)
+@test isapprox(submanifold_component(mv,1), [50,50], atol=3.0)
+@test isapprox(submanifold_component(mv,2), [0 -1; 1 0], atol=0.1)
 
 println("test bearing range evaluations")
 

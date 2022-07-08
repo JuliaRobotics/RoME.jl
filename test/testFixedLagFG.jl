@@ -112,12 +112,12 @@ tree = solveTree!(fg, tree, verbose=true); # , recordcliqs=ls(fg));
 X5cmp = deepcopy(getVal(fg, :x5))
 X7cmp = deepcopy(getVal(fg, :x7))
 for i in 1:length(X5)
-  @test isapprox(X5[i].parts[1], X5cmp[i].parts[1])  #Frozen
-  @test isapprox(X5[i].parts[2], X5cmp[i].parts[2])  #Frozen
+  @test isapprox(submanifold_component(X5[i],1), submanifold_component(X5cmp[i],1))  #Frozen
+  @test isapprox(submanifold_component(X5[i],2), submanifold_component(X5cmp[i],2))  #Frozen
 end
 for i in 1:length(X7)
-  @test !isapprox(X7[i].parts[1], X7cmp[i].parts[1]) #Recalculated
-  @test !isapprox(X7[i].parts[2], X7cmp[i].parts[2]) #Recalculated
+  @test !isapprox(submanifold_component(X7[i],1), submanifold_component(X7cmp[i],1)) #Recalculated
+  @test !isapprox(submanifold_component(X7[i],2), submanifold_component(X7cmp[i],2)) #Recalculated
 end
 
 ##

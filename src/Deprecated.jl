@@ -1,4 +1,11 @@
 
+##==============================================================================
+## Legacy, remove some time after DFG v0.21
+##==============================================================================
+
+# import AMP: _makeVectorManifold
+# AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(BearingRange_Manifold)} = coords(M, prr)
+
 
 ##==============================================================================
 ## Legacy, remove some time after DFG v0.20

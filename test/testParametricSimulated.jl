@@ -31,8 +31,8 @@ pp2 = Pose2Pose2( MvNormal([0;0;-pi+0.01], diagm(0.03*ones(3)) ))
 
 ##
 
-M = getManifold(Pose2())
-ϵ = getPointIdentity(Pose2())
+M = getManifold(Pose2)
+ϵ = getPointIdentity(Pose2)
 
 X = hat(M, ϵ, [0;0;-pi]) #measurement
 p = ϵ # variable from
@@ -165,7 +165,7 @@ end
 fg = RoME.generateGraph_Honeycomb!()
 
 # check that pose :x3 has rotation near +-pi
-t,m,gn = IIF._checkVariableByReference(fg, :x2, r"x\d+", Pose2, getFactorType(fg, :x2x3f1),destPrefix=:x, srcNumber=2)
+t,m,gn = IIF._checkVariableByReference(fg, :x2, r"x\d+", Pose2, getFactorType(fg, :x2x3f1), destPrefix=:x, srcNumber=2)
 
 @test isapprox( m.suggested[1], 10, atol = 1e-1)
 @test isapprox( m.suggested[2], 17.32, atol = 1e-1)

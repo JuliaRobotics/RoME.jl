@@ -26,14 +26,14 @@ using StaticArrays
 
 # to avoid name conflicts
 import Manifolds
-using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element
+using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component
 
 import Manifolds: project, project!
 
 import Rotations as _Rot
 
 export SpecialOrthogonal, SpecialEuclidean
-
+export submanifold_component
 # using Graphs,  # TODO determine how many parts still require Graphs still directly
 
 

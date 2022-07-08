@@ -27,8 +27,8 @@ end
 function (cfo::CalcFactor{<:Pose2Point2Bearing})(Xc, p, l)
   #embed l in SE2
   M = SpecialEuclidean(2)
-  q = ProductRepr(l, identity_element(SpecialOrthogonal(2), p.parts[2]))
-  x,y = Manifolds.compose(M, inv(M, p), q).parts[1]
+  q = ArrayPartition(l, identity_element(SpecialOrthogonal(2), submanifold_component(p,2)))
+  x,y = submanifold_component(Manifolds.compose(M, inv(M, p), q),1)
   # TODO Xc is a coordinate (ie angle), maybe change to X ϵ so2 
   # m̂ = exp(so{N}(hat(SpecialOrthogonal(N), SO{N}()[], atan(y, x))))
   # distance(m, m̂)/sqrt(2)
