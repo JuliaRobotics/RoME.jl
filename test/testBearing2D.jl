@@ -11,7 +11,7 @@ using Manifolds: hat
 @testset "Testing Bearing2D factor" begin
 ##
 M = SpecialEuclidean(2)
-ϵ = identity_element(M)
+ϵ = getPointIdentity(M)
 ps = [exp(M, ϵ,  hat(M, ϵ, [0.,0,0]))]
 push!(ps, exp(M, ϵ,  hat(M, ϵ, [5.,0,0])))
 push!(ps, exp(M, ϵ,  hat(M, ϵ, [10.,0,0])))
@@ -50,14 +50,14 @@ end
 
 # test sign
 f = Pose2Point2Bearing(Normal(pi/2,0.001))
-xi = ProductRepr([0.,0], [1. 0; 0 1])
+xi = ArrayPartition([0.,0], [1. 0; 0 1])
 xj = [1.,1]
 res = calcFactorResidualTemporary(f, (Pose2, Point2), [], (xi, xj))
 @test isapprox(res, pi/4, atol=0.1) # FIXME, confirm the sign
 
 # test -pi +pi case
 f = Pose2Point2Bearing(Normal(pi,0.001))
-xi = ProductRepr([0.,0], [1. 0; 0 1])
+xi = ArrayPartition([0.,0], [1. 0; 0 1])
 xj = [-1, -0.001]
 res = calcFactorResidualTemporary(f, (Pose2, Point2), [pi], (xi, xj))
 @test isapprox(res, -0.001, atol=1e-3)

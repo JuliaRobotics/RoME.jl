@@ -41,7 +41,7 @@ tree = solveTree!(fg)
 for xx in [:x0; :x1; :x2]
   pts = getVal(fg, xx)
   pts_μ = mean(getManifold(Pose2), pts)
-  isapprox(getManifold(Pose2), pts_μ, ProductRepr([0.,0], [1. 0; 0 1]), atol=0.01)
+  isapprox(getManifold(Pose2), pts_μ, ArrayPartition([0.,0], [1. 0; 0 1]), atol=0.01)
 
 
   Xpts = getCoordinates.(Ref(Pose2), pts) 

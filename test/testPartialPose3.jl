@@ -88,10 +88,10 @@ doautoinit!(fg, :x1)
 X1pts = getVal(fg, :x1)
 # @test sum(isnan.(X1pts)) == 0 
 # ProductRepr does not have a NaN, so testing for ProductRepr instead
-@test all(isa.(X1pts, ProductRepr))
+@test all(isa.(X1pts, ArrayPartition))
 
 ppts = approxConv(fg, :x1x2f1, :x2)
-@test all(isa.(ppts, ProductRepr))
+@test all(isa.(ppts, ArrayPartition))
 
 
 initAll!(fg)
@@ -136,7 +136,7 @@ end
 ##
 
 M = getManifold(Pose3)
-ϵ = identity_element(M)
+ϵ = getPointIdentity(M)
 xi = deepcopy(ϵ)
 xja = deepcopy(ϵ)
 
@@ -151,63 +151,63 @@ Xjb[[1;2;6],1] = mu2
 # Xjb[collect(xyy.partial),1] = mu2
 
 # noisy measurements
-xi = ProductRepr([0;0;0.], collect(RotZ(0)))
+xi = ArrayPartition([0;0;0.], collect(RotZ(0)))
 xjb = exp(M, ϵ, hat(M, ϵ, Xjb))
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xjb))
 @test isapprox(res, [0;0;0], atol=0.15)
 
 # more rotated
-xi = ProductRepr([0;0;0.], collect(RotZ(π/2)))
-xj = ProductRepr([-5;20;0.], [-1 0 0; 0 -1 0; 0 0 1.])
+xi = ArrayPartition([0;0;0.], collect(RotZ(π/2)))
+xj = ArrayPartition([-5;20;0.], [-1 0 0; 0 -1 0; 0 0 1.])
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [0;0;0], atol=0.15)
 
 # add z
-xi = ProductRepr([0;0;100.], collect(RotZ(π/2)))
-xj = ProductRepr([-5;20;-100.], [-1 0 0; 0 -1 0; 0 0 1.])
+xi = ArrayPartition([0;0;100.], collect(RotZ(π/2)))
+xj = ArrayPartition([-5;20;-100.], [-1 0 0; 0 -1 0; 0 0 1.])
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [0;0;0], atol=0.15)
 
 # add pitch without z
-xi = ProductRepr([0;0;0.], collect(RotY(π/4)))
-xj = ProductRepr([20;5;0.], collect(RotZ(π/2)*RotY(π/4)))
-# xj = ProductRepr([14.14213562;5;-14.14213562], [0 -0.707107 0.707107; 1 0 0; 0 0.707107 0.707107] )
+xi = ArrayPartition([0;0;0.], collect(RotY(π/4)))
+xj = ArrayPartition([20;5;0.], collect(RotZ(π/2)*RotY(π/4)))
+# xj = ArrayPartition([14.14213562;5;-14.14213562], [0 -0.707107 0.707107; 1 0 0; 0 0.707107 0.707107] )
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [0;0;0], atol=0.15)
 
 # add pitch with z
-xi = ProductRepr([0;0;10.], collect(RotY(π/4)))
-xj = ProductRepr([20;5;-10.], collect(RotZ(π/2)*RotY(π/4)))
+xi = ArrayPartition([0;0;10.], collect(RotY(π/4)))
+xj = ArrayPartition([20;5;-10.], collect(RotZ(π/2)*RotY(π/4)))
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [0;0;0], atol=0.15)
 
 # add roll without z
-xi = ProductRepr([0;0;0.], collect(RotX(π/4)))
-xj = ProductRepr([20;5;0.], collect(RotZ(π/2)*RotX(π/4)))
+xi = ArrayPartition([0;0;0.], collect(RotX(π/4)))
+xj = ArrayPartition([20;5;0.], collect(RotZ(π/2)*RotX(π/4)))
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [0;0;0], atol=0.15)
 
 # add roll with z
-xi = ProductRepr([0;0;10.], collect(RotX(π/4)))
-xj = ProductRepr([20;5;-10.], collect(RotZ(π/2)*RotX(π/4)))
+xi = ArrayPartition([0;0;10.], collect(RotX(π/4)))
+xj = ArrayPartition([20;5;-10.], collect(RotZ(π/2)*RotX(π/4)))
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [0;0;0], atol=0.15)
 
 # add roll with x
-xi = ProductRepr([10;0;0.], collect(RotX(π/4)))
-xj = ProductRepr([10+20;5;0.], collect(RotZ(π/2)*RotX(π/4)))
+xi = ArrayPartition([10;0;0.], collect(RotX(π/4)))
+xj = ArrayPartition([10+20;5;0.], collect(RotZ(π/2)*RotX(π/4)))
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [0;0;0], atol=0.15)
 
 # add pitch and roll without z
-xi = ProductRepr([0;0;0.], collect(RotY(π/4)*RotX(π/6)))
-xj = ProductRepr([20;5;0.], collect(RotZ(π/2)*RotY(π/4)*RotX(π/6)))
+xi = ArrayPartition([0;0;0.], collect(RotY(π/4)*RotX(π/6)))
+xj = ArrayPartition([20;5;0.], collect(RotZ(π/2)*RotY(π/4)*RotX(π/6)))
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [0;0;0], atol=0.15)
 
 # add pitch and roll with x and z
-xi = ProductRepr([10;0;10.], collect(RotY(π/4)*RotX(π/6)))
-xj = ProductRepr([10+20;5;-10.], collect(RotZ(π/2)*RotY(π/4)*RotX(π/6)))
+xi = ArrayPartition([10;0;10.], collect(RotY(π/4)*RotX(π/6)))
+xj = ArrayPartition([10+20;5;-10.], collect(RotZ(π/2)*RotY(π/4)*RotX(π/6)))
 res = calcFactorResidualTemporary(xyy, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [0;0;0], atol=0.15)
 
@@ -248,16 +248,16 @@ res = calcFactorResidualTemporary(xyy2, (Point2, Point2), [], (xi, xj))
 # Comparing to Point2 for sign only
 mu = [20.0, 5.0, 0.0]
 xyy2 = Pose3Pose3XYYaw(MvNormal( mu, diagm([0.01, 0.01, 0.001].^2)))
-xi = ProductRepr([10;0; 10.], collect(RotZ(0.0)))
-xj = ProductRepr([20;10;-10.], collect(RotZYX(0.0, -pi/4, pi/4)))
+xi = ArrayPartition([10;0; 10.], collect(RotZ(0.0)))
+xj = ArrayPartition([20;10;-10.], collect(RotZYX(0.0, -pi/4, pi/4)))
 res = calcFactorResidualTemporary(xyy2, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [10;-5;0], atol=0.15)
 
 
 mu = [20.0, 5.0, pi/4]
 xyy2 = Pose3Pose3XYYaw(MvNormal( mu, diagm([0.01, 0.01, 0.001].^2)))
-xi = ProductRepr([10;0; 10.], collect(RotZ(pi/2)))
-xj = ProductRepr([20;10;-10.], collect(RotZYX(0.0, -pi/4, pi/4)))
+xi = ArrayPartition([10;0; 10.], collect(RotZ(pi/2)))
+xj = ArrayPartition([20;10;-10.], collect(RotZYX(0.0, -pi/4, pi/4)))
 res = calcFactorResidualTemporary(xyy2, (Pose3, Pose3), [], (xi, xj))
 @test isapprox(res, [-15;10;3pi/4], atol=0.15)
 
@@ -280,16 +280,16 @@ _X2prd = approxConvBelief(fg, :x1x2f1, :x2, N=N)
 
 _X2prd_ = getPoints(_X2prd, false)
 
-@test isapprox(mean(_X2prd, false).parts[1], mean(_X2, false).parts[1], atol=2.0)
-@test isapprox(mean(_X2prd, false).parts[2], mean(_X2, false).parts[2], atol=0.5)
+@test isapprox(submanifold_component(mean(_X2prd, false),1), submanifold_component(mean(_X2, false),1), atol=2.0)
+@test isapprox(submanifold_component(mean(_X2prd, false),2), submanifold_component(mean(_X2, false),2), atol=0.5)
 
-convert(TU.Euler, SO3(mean(_X2prd, false).parts[2])).Y
-convert(TU.Euler, SO3(mean(_X2prd, false).parts[2])).P
-convert(TU.Euler, SO3(mean(_X2prd, false).parts[2])).R
+convert(TU.Euler, SO3(submanifold_component(mean(_X2prd, false),2))).Y
+convert(TU.Euler, SO3(submanifold_component(mean(_X2prd, false),2))).P
+convert(TU.Euler, SO3(submanifold_component(mean(_X2prd, false),2))).R
 
-convert(TU.Euler, SO3(mean(_X2, false).parts[2])).Y
-convert(TU.Euler, SO3(mean(_X2, false).parts[2])).P
-convert(TU.Euler, SO3(mean(_X2, false).parts[2])).R
+convert(TU.Euler, SO3(submanifold_component(mean(_X2, false),2))).Y
+convert(TU.Euler, SO3(submanifold_component(mean(_X2, false),2))).P
+convert(TU.Euler, SO3(submanifold_component(mean(_X2, false),2))).R
 
 
 # pts = collect(pts)
@@ -308,13 +308,13 @@ olddims = setdiff(collect(1:6), newdims)
 i = 1
 for i in 1:N
 
-@test isapprox( _X2prd_[i].parts[1][3], _X2pts_[i].parts[1][3], atol=0.0001 )
+@test isapprox( submanifold_component(_X2prd_[i],1)[3], submanifold_component(_X2pts_[i],1)[3], atol=0.0001 )
 
-@test isapprox( convert(TU.Euler, SO3(_X2prd_[i].parts[2])).R,
-                convert(TU.Euler, SO3(_X2pts_[i].parts[2])).R, atol=0.2 )
+@test isapprox( convert(TU.Euler, SO3(submanifold_component(_X2prd_[i],2))).R,
+                convert(TU.Euler, SO3(submanifold_component(_X2pts_[i],2))).R, atol=0.2 )
 
-@test isapprox( convert(TU.Euler, SO3(_X2prd_[i].parts[2])).P,
-                convert(TU.Euler, SO3(_X2pts_[i].parts[2])).P, atol=0.2 )
+@test isapprox( convert(TU.Euler, SO3(submanifold_component(_X2prd_[i],2))).P,
+                convert(TU.Euler, SO3(submanifold_component(_X2pts_[i],2))).P, atol=0.2 )
 
 end
 
@@ -395,7 +395,7 @@ for xyz_rpy = testsMeasurements_xyz_rpy
 
 @info xyz_rpy
 wTx1 = getPointIdentity(Pose3)
-wTx2 = ProductRepr(xyz_rpy[1:3], RotXYZ(xyz_rpy[4:6]...))
+wTx2 = ArrayPartition(xyz_rpy[1:3], Matrix(RotXYZ(xyz_rpy[4:6]...)))
 
 x1Tx2 = Manifolds.compose(M3, inv(M3, wTx1) , wTx2)
 X = log(M3, ϵ3, x1Tx2)
@@ -467,12 +467,12 @@ M = SpecialEuclidean(3)
 mpts = getPoints(fg[1], :x4)
 mu_fg1 = mean(M, mpts)
 
-@test isapprox(mu_fg1.parts[1], [0,0,4], atol=0.2)
+@test isapprox(submanifold_component(mu_fg1,1), [0,0,4], atol=0.2)
 
 mpts = getPoints(fg[2], :x4)
 mu_fg2 = mean(M, mpts)
 
-@test_broken isapprox(mu_fg2.parts[1], [0,0,4], atol=0.2)
+@test_broken isapprox(submanifold_component(mu_fg2,1), [0,0,4], atol=0.2)
 
 ##
 end

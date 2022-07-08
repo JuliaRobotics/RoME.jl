@@ -11,7 +11,7 @@ using Test
 fg = initfg()
 
 addVariable!(fg, :x0, Pose2)
-u0 = ProductRepr([0;0.0], [1 0; 0 1.])
+u0 = ArrayPartition([0;0.0], [1 0; 0 1.])
 M = getManifold(Pose2) # TODO add better dispatch to simplify
 x0 = [AMP.makePointFromCoords(M,0.01*randn(3),u0) for _ in 1:100];
 X0 = manikde!(M, x0)
@@ -28,8 +28,8 @@ x1_ = getPoints(X1_) .|> x->AMP.makeCoordsFromPoint(M,x)
 μ_x1_ = mean(X1_)
 Σ_x1_ =  cov(M, getPoints(X1_))
 
-@test isapprox( μ_x1_.parts[1], [10; 0], atol=0.2)
-@test isapprox( μ_x1_.parts[2], [-1 0; 0 -1], atol=0.2)
+@test isapprox( submanifold_component(μ_x1_,1), [10; 0], atol=0.2)
+@test isapprox( submanifold_component(μ_x1_,2), [-1 0; 0 -1], atol=0.2)
 
 @test isapprox( Σ_x1_, [0.15 0 0; 0 0.15 0; 0 0 0.15], atol=0.4)
 

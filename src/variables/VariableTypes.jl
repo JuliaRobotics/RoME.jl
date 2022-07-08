@@ -32,7 +32,7 @@ $(TYPEDEF)
 
 Pose2 is a SE(2) mechanization of two Euclidean translations and one Circular rotation, used for general 2D SLAM.
 """
-@defVariable Pose2 SpecialEuclidean(2) ProductRepr([0;0.0],[1 0; 0 1.0])
+@defVariable Pose2 SpecialEuclidean(2) ArrayPartition([0;0.0],[1 0; 0 1.0])
 
 """
 $(TYPEDEF)
@@ -44,7 +44,7 @@ Future:
 - Work in progress on AMP3D for proper non-Euler angle on-manifold operations.
 - TODO the AMP upgrade is aimed at resolving 3D to Quat/SE3/SP3 -- current Euler angles will be replaced
 """
-@defVariable Pose3 SpecialEuclidean(3) ProductRepr([0;0;0.0],[1 0 0; 0 1 0; 0 0 1.0])
+@defVariable Pose3 SpecialEuclidean(3) ArrayPartition([0;0;0.0],[1 0 0; 0 1 0; 0 0 1.0])
 
 """
 $(TYPEDEF)
@@ -63,7 +63,7 @@ Note
 - The `SE2E2_Manifold` definition used currently is a hack to simplify the transition to Manifolds.jl, see #244 
 - Replaced `SE2E2_Manifold` hack with `ProductManifold(SpecialEuclidean(2), TranslationGroup(2))`, confirm if it is correct.
 """
-@defVariable DynPose2 Manifolds.ProductGroup(ProductManifold(SpecialEuclidean(2), TranslationGroup(2))) ProductRepr(ProductRepr([0;0.0],[1 0; 0 1.0]),[0;0.0])
+@defVariable DynPose2 Manifolds.ProductGroup(ProductManifold(SpecialEuclidean(2), TranslationGroup(2))) ArrayPartition(ArrayPartition([0;0.0],[1 0; 0 1.0]),[0;0.0])
 
 
 
@@ -81,7 +81,7 @@ projectCartesian(pose::Union{<:Point2,<:Point3,<:Pose2,<:Pose3,<:DynPoint2,<:Dyn
 
 # Still experimental
 # export BearingRange2
-@defVariable BearingRange2 BearingRange_Manifold ProductRepr(0.0,0.0)
+@defVariable BearingRange2 BearingRange_Manifold ArrayPartition(0.0,0.0)
 
 
 

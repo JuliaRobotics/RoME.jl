@@ -43,12 +43,12 @@ end
 # Assumes X is a tangent vector
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
 
+    q̂ = allocate(q) 
     M = getManifold(Pose2)
-    q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
-    #TODO allocalte for vee! see Manifolds #412, fix for AD
-    # Xc = zeros(3)
-    
-    Xc = vee(M, q, log(M, q, q̂))
+    ϵ0 = getPointIdentity(M)
+    exp!(M, q̂, ϵ0, X)
+    Manifolds.compose!(M, q̂, p, q̂)   
+    Xc = vee(M, q, log!(M, q̂, q, q̂))
     return Xc
 
     # @assert X isa ProductRepr || X isa Manifolds.ArrayPartition "Pose2Pose2 expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"

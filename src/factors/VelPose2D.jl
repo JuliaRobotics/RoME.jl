@@ -47,20 +47,20 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(X, p, q)
   pose_res = Vector{Manifolds.number_eltype(X)}(undef, 3)
   #Pose2 part
   M1 = getManifold(Pose2)
-  X1 = X.parts[1] 
-  p1 = p.parts[1] 
-  q1 = q.parts[1] 
+  X1 = submanifold_component(X,1) 
+  p1 = submanifold_component(p,1) 
+  q1 = submanifold_component(q,1) 
   ϵ1 = identity_element(M1, p1)
   q̂1 = Manifolds.compose(M1, p1, exp(M1, ϵ1, X1))
   vee!(M1, pose_res, q1, log(M1, q1, q̂1))
   
   #velocity part
   dt = Dates.value(cf.metadata.fullvariables[2].nstime - cf.metadata.fullvariables[1].nstime)*1e-9
-  X2 = X.parts[2]
-  p2 = p.parts[2]
-  q2 = q.parts[2]
+  X2 = submanifold_component(X,2)
+  p2 = submanifold_component(p,2)
+  q2 = submanifold_component(q,2)
   # bDXij = TransformUtils.R(-wxi[3])*wDXij
-  bDXij = transpose(p1.parts[2])*(q2 .- p2)
+  bDXij = transpose(submanifold_component(p1,2))*(q2 .- p2)
 
   Xpq = log(M1, ϵ1, Manifolds.compose(M1, Manifolds.inv(M1, p1), q1))
   dx = Vector{Manifolds.number_eltype(X)}(undef, 3)

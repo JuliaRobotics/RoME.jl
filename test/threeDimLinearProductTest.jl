@@ -96,10 +96,10 @@ end
   @test isInitialized(fg, :x1)
   @show muX1 = Statistics.mean(M, getVal(fg,:x1))
   
-  T = muX1.parts[1]
+  T = submanifold_component(muX1,1)
   @test sum(map(Int,abs.(T) .< 0.5)) == 3
   
-  Rc = muX1.parts[2]
+  Rc = submanifold_component(muX1,2)
   @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
   coX1 = getCoordinates.(Pose3, getVal(fg,:x1))
@@ -141,7 +141,7 @@ addFactor!(fg,[:x1;:x2],odoconstr, inflation=0.1)
 # should be all zero
 p = deepcopy(ϵ)
 q = deepcopy(ϵ)
-q.parts[1][1] = 10.0
+submanifold_component(q,1)[1] = 10.0
 X = Manifolds.hat(M, ϵ, [10.,0,0,0,0,0])
 res = calcFactorResidual(fg, :x1x2f1, X, p, q)
 @test norm(res) < 1e-10
@@ -194,15 +194,15 @@ global X2pts = approxConv(fg, :x1x2f1, :x2)
 # X2pts = evalFactor(fg, fg.g.vertices[4], 3)
 
 mu = mean(M, getVal(fg,:x1))
-T = mu.parts[1]
+T = submanifold_component(mu,1)
 @test isapprox(T, [0,0,0], atol=0.5)
-Rc = mu.parts[2]
+Rc = submanifold_component(mu,2)
 @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
 mu = mean(M, getVal(fg,:x2))
-T = mu.parts[1]
+T = submanifold_component(mu,1)
 @test isapprox(T, [10,0,0], atol=1.0)
-Rc = mu.parts[2]
+Rc = submanifold_component(mu,2)
 @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
 
@@ -211,15 +211,15 @@ end
 @testset "Construct Bayes tree and perform inference..." begin
   tree = solveTree!(fg)
   mu = mean(M, getVal(fg,:x1))
-  T = mu.parts[1]
+  T = submanifold_component(mu,1)
   @test isapprox(T, [0,0,0], atol=1.5)
-  Rc = mu.parts[2]
+  Rc = submanifold_component(mu,2)
   @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
   mu = mean(M, getVal(fg,:x2))
-  T = mu.parts[1]
+  T = submanifold_component(mu,1)
   @test isapprox(T, [10,0,0], atol=1.5)
-  Rc = mu.parts[2]
+  Rc = submanifold_component(mu,2)
   @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 end
 

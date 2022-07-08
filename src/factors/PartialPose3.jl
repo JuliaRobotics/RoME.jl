@@ -104,15 +104,15 @@ function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
   #
   M = SpecialEuclidean(2)
 
-  rx = normalize(view(wTp.parts[2],1:2, 1))
+  rx = normalize(view(wTp.x[2],1:2, 1))
   R = SA[rx[1] -rx[2];
          rx[2]  rx[1]]
-  p = ProductRepr(view(wTp.parts[1], 1:2), R)
+  p = ProductRepr(view(wTp.x[1], 1:2), R)
 
-  rx = normalize(view(wTq.parts[2],1:2, 1))
+  rx = normalize(view(wTq.x[2],1:2, 1))
   R = SA[rx[1] -rx[2];
          rx[2]  rx[1]]
-  q = ProductRepr(view(wTq.parts[1], 1:2), R)
+  q = ProductRepr(view(wTq.x[1], 1:2), R)
 
   q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) 
   #TODO allocalte for vee! see Manifolds #412, fix for AD

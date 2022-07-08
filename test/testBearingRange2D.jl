@@ -116,8 +116,8 @@ res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
 @test norm(res) < 1e-14
 
 ##
-x1 = ProductRepr([0.,0], [1. 0; 0 1])
-x2 = ProductRepr([0.,0], [0 -1.; 1 0])
+x1 = ArrayPartition([0.,0], [1. 0; 0 1])
+x2 = ArrayPartition([0.,0], [0 -1.; 1 0])
 
 #measurement setup 1
 meas = (0., 10)
