@@ -19,7 +19,7 @@ using Statistics
     tree = solveTree!(fg)
 
     M = getManifold(Pose2)
-    @test isapprox(M, mean(M, getVal(fg, :x1)), ArrayRepresentation([0,0], [1 0; 0 1]), atol=0.05) 
+    @test isapprox(M, mean(M, getVal(fg, :x1)), ArrayPartition([0,0], [1 0; 0 1]), atol=0.05) 
     @test isapprox(mean(getVal(fg, :l1)), [0,-1], atol = 0.05)
 end
 
