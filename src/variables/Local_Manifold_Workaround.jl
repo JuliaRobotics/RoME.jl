@@ -59,7 +59,7 @@ const BearingRange_Manifold = _CircleEuclid()
 AMP.coords(::Type{<:typeof(BearingRange_Manifold)}, p::ProductRepr) = [p.parts[1][1]; p.parts[2][1]]
 
 function AMP.uncoords(::typeof(BearingRange_Manifold), p::AbstractVector{<:Real})
-  ArrayRepresentation(([p[1];]), ([p[2];]))
+  ArrayPartition(([p[1];]), ([p[2];]))
 end
 
 function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof(BearingRange_Manifold)}
