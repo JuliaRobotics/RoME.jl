@@ -82,8 +82,8 @@ jobs:
       
       - name: Run tests on Upstream Dev
         run: |
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="master"));'
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference",rev="master"));'
+          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="master"));'
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="master"));'
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.test("RoME"; coverage=false)'
         shell: bash
