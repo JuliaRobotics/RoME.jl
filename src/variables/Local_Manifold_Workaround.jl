@@ -5,7 +5,7 @@
 ## ==================================================================================================
 
 
-import ApproxManifoldProducts: coords, uncoords, getPointsManifold
+# import ApproxManifoldProducts: coords, uncoords, getPointsManifold
 
 export SE2E2_Manifold
 
@@ -17,17 +17,17 @@ const SE2E2_Manifold = _SE2E2()
 
 MB.manifold_dimension(::_SE2E2) = 5
 
-AMP.coords(::Type{<:typeof(SE2E2_Manifold)}, p::Manifolds.ProductRepr) = [p.parts[1][1], p.parts[1][2], atan(p.parts[2][2,1],p.parts[2][1,1]), p.parts[3][1], p.parts[3][2]]
+# AMP.coords(::Type{<:typeof(SE2E2_Manifold)}, p::Manifolds.ProductRepr) = [p.parts[1][1], p.parts[1][2], atan(p.parts[2][2,1],p.parts[2][1,1]), p.parts[3][1], p.parts[3][2]]
 
-function AMP.uncoords(::typeof(SE2E2_Manifold), p::AbstractVector{<:Real})
-  α = p[3]
-  Manifolds.ArrayPartition(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
-end
+# function AMP.uncoords(::typeof(SE2E2_Manifold), p::AbstractVector{<:Real})
+#   α = p[3]
+#   Manifolds.ArrayPartition(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
+# end
 
-function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof(SE2E2_Manifold)}
-  data_ = getPoints(mkd.belief)
-  [uncoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
-end
+# function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof(SE2E2_Manifold)}
+#   data_ = getPoints(mkd.belief)
+#   [uncoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
+# end
 
 function Statistics.mean(::typeof(SE2E2_Manifold), pts::AbstractVector)
   se2_ = (d->Manifolds.ArrayPartition(submanifold_component(d, 1), submanifold_component(d, 2))).(pts)
@@ -56,16 +56,16 @@ MB.manifold_dimension(::_CircleEuclid) = 2
 const BearingRange_Manifold = _CircleEuclid()
 # MB.manifold_dimension(::BearingRange_Manifold) = 2
 
-AMP.coords(::Type{<:typeof(BearingRange_Manifold)}, p::ProductRepr) = [p.parts[1][1]; p.parts[2][1]]
+# AMP.coords(::Type{<:typeof(BearingRange_Manifold)}, p::ProductRepr) = [p.parts[1][1]; p.parts[2][1]]
 
-function AMP.uncoords(::typeof(BearingRange_Manifold), p::AbstractVector{<:Real})
-  ArrayPartition(([p[1];]), ([p[2];]))
-end
+# function AMP.uncoords(::typeof(BearingRange_Manifold), p::AbstractVector{<:Real})
+#   ArrayPartition(([p[1];]), ([p[2];]))
+# end
 
-function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof(BearingRange_Manifold)}
-  data_ = getPoints(mkd.belief)
-  [uncoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
-end
+# function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof(BearingRange_Manifold)}
+#   data_ = getPoints(mkd.belief)
+#   [uncoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
+# end
 
 function Statistics.mean(::typeof(BearingRange_Manifold), pts::AbstractVector)
   TensorCast.@cast bearing[i] := pts[i][1]
