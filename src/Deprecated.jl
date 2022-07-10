@@ -195,29 +195,29 @@
 ## Legacy, remove some time after DFG v0.19
 ##==============================================================================
 
-@deprecate generateCanonicalFG_Helix2DSlew!(w...;kw...) generateGraph_Helix2DSlew!(w...;kw...)
-@deprecate generateCanonicalFG_Helix2DSpiral!(w...;kw...) generateGraph_Helix2DSpiral!(w...;kw...)
-@deprecate generateCanonicalFG_Helix2D!(w...;kw...) generateGraph_Helix2D!(w...;kw...)
-@deprecate generateCanonicalFG_Honeycomb!(w...;kw...) generateGraph_Honeycomb!(w...;kw...)
-@deprecate generateCanonicalFG_Beehive!(w...;kw...) generateGraph_Beehive!(w...;kw...)
-@deprecate generateCanonicalFG_TwoPoseOdo(w...;kw...) generateGraph_TwoPoseOdo(w...;kw...)
-@deprecate generateCanonicalFG_Boxes2D!(w...;kw...) generateGraph_Boxes2D!(w...;kw...)
-@deprecate generateCanonicalFG_Hexagonal(w...;kw...) generateGraph_Hexagonal(w...;kw...)
-@deprecate generateCanonicalFG_ZeroPose(w...;kw...) generateGraph_ZeroPose(w...;kw...)
-@deprecate generateCanonicalFG_Circle(w...;kw...) generateGraph_Circle(w...;kw...)
+# @deprecate generateCanonicalFG_Helix2DSlew!(w...;kw...) generateGraph_Helix2DSlew!(w...;kw...)
+# @deprecate generateCanonicalFG_Helix2DSpiral!(w...;kw...) generateGraph_Helix2DSpiral!(w...;kw...)
+# @deprecate generateCanonicalFG_Helix2D!(w...;kw...) generateGraph_Helix2D!(w...;kw...)
+# @deprecate generateCanonicalFG_Honeycomb!(w...;kw...) generateGraph_Honeycomb!(w...;kw...)
+# @deprecate generateCanonicalFG_Beehive!(w...;kw...) generateGraph_Beehive!(w...;kw...)
+# @deprecate generateCanonicalFG_TwoPoseOdo(w...;kw...) generateGraph_TwoPoseOdo(w...;kw...)
+# @deprecate generateCanonicalFG_Boxes2D!(w...;kw...) generateGraph_Boxes2D!(w...;kw...)
+# @deprecate generateCanonicalFG_Hexagonal(w...;kw...) generateGraph_Hexagonal(w...;kw...)
+# @deprecate generateCanonicalFG_ZeroPose(w...;kw...) generateGraph_ZeroPose(w...;kw...)
+# @deprecate generateCanonicalFG_Circle(w...;kw...) generateGraph_Circle(w...;kw...)
 
 
-# getManifold(::IIF.InstanceType{Pose3Point3}) = Point3
-# getManifold(::IIF.InstanceType{Pose2Point2BearingRange}) = BearingRange2 |> getManifold
+# # getManifold(::IIF.InstanceType{Pose3Point3}) = Point3
+# # getManifold(::IIF.InstanceType{Pose2Point2BearingRange}) = BearingRange2 |> getManifold
 
-function Base.getproperty(pp::Pose2Pose2, f::Symbol)
-  if f == :z
-    @warn "Pose2Pose2.z is deprecated, use Pose2Pose2.Z instead" maxlog=10
-    pp.Z
-  else
-    getfield(pp, f)
-  end
-end
+# function Base.getproperty(pp::Pose2Pose2, f::Symbol)
+#   if f == :z
+#     @warn "Pose2Pose2.z is deprecated, use Pose2Pose2.Z instead" maxlog=10
+#     pp.Z
+#   else
+#     getfield(pp, f)
+#   end
+# end
 
 
 ##==============================================================================
