@@ -74,8 +74,8 @@ testfiles = [
 # "testmultiplefeatures.jl"
 
 
-for testf in testfiles
-  println("[TEST] $testf =============================================================")
+for (i,testf) in enumerate(testfiles)
+  println("[TEST $i] $testf =============================================================")
   include(testf)
   println("[SUCCESS] $testf")
   println()
