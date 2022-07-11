@@ -50,19 +50,7 @@ function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
     Manifolds.compose!(M, q̂, p, q̂)   
     Xc = vee(M, q, log!(M, q̂, q, q̂))
     return Xc
-
-    # @assert X isa ProductRepr || X isa Manifolds.ArrayPartition "Pose2Pose2 expects measurement sample X to be a Manifolds tangent vector, not coordinate or point representation.  Got X=$X"
-    # M = cf.cache.manifold # getManifold(Pose2)
-    # ϵ0 = cf.cache.ϵ0
-    # q̂ = cf.cache.q̂
-    
-    # #for groups
-    # Manifolds.compose!(M, q̂, p, exp(M, ϵ0, X)) 
-    # fill!(cf.cache.Xc, 0.0)
-    # vee!(M, cf.cache.Xc, q, log(M, q, q̂))
-    # return cf.cache.Xc
 end
-
 
 
 # NOTE, serialization support -- will be reduced to macro in future

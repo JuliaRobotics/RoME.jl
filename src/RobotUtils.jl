@@ -1,5 +1,5 @@
 
-export getVariablesLabelsWithinRange, enableSolveAllNotDRT!
+export listVariablesLabelsWithinRange, enableSolveAllNotDRT!
 
 """
     $SIGNATURES
@@ -454,7 +454,6 @@ function listVariablesLabelsWithinRange(fg::AbstractDFG,
   saids[mask]
 end
 
-@deprecate getVariablesLabelsWithinRange(fg::AbstractDFG,regexKey::Regex=r"x";from::Int=0, to::Int=(2^(Sys.WORD_SIZE-1)-1),minnei::Int=0) listVariablesLabelsWithinRange(fg,regexKey,from=from,to=to,minnei=minnei)
 
 function get2DSampleMeans(fg::AbstractDFG,
                           regexKey::Regex=r"x";
@@ -466,7 +465,7 @@ function get2DSampleMeans(fg::AbstractDFG,
   Th = Array{Float64,1}()
   LB = String[]
 
-  vsyms = getVariablesLabelsWithinRange(fg, regexKey, from=from, to=to, minnei=minnei)
+  vsyms = listVariablesLabelsWithinRange(fg, regexKey, from=from, to=to, minnei=minnei)
 
   for id in vsyms
     X=[X; Statistics.mean( vec( getVal(fg, id )[1,:] ) )]

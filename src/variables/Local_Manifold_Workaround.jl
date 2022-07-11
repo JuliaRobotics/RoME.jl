@@ -5,7 +5,7 @@
 ## ==================================================================================================
 
 
-import ApproxManifoldProducts: coords, uncoords, getPointsManifold
+import ApproxManifoldProducts: makeCoordsFromPoint, makePointFromCoords, getPoints
 
 export SE2E2_Manifold
 
@@ -17,16 +17,16 @@ const SE2E2_Manifold = _SE2E2()
 
 MB.manifold_dimension(::_SE2E2) = 5
 
-AMP.coords(::Type{<:typeof(SE2E2_Manifold)}, p::Manifolds.ProductRepr) = [p.parts[1][1], p.parts[1][2], atan(p.parts[2][2,1],p.parts[2][1,1]), p.parts[3][1], p.parts[3][2]]
+AMP.makeCoordsFromPoint(::Type{<:typeof(SE2E2_Manifold)}, p::Manifolds.ProductRepr) = [p.parts[1][1], p.parts[1][2], atan(p.parts[2][2,1],p.parts[2][1,1]), p.parts[3][1], p.parts[3][2]]
 
-function AMP.uncoords(::typeof(SE2E2_Manifold), p::AbstractVector{<:Real})
+function AMP.makePointFromCoords(::typeof(SE2E2_Manifold), p::AbstractVector{<:Real})
   α = p[3]
   Manifolds.ArrayPartition(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
 end
 
-function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof(SE2E2_Manifold)}
+function AMP.getPoints(mkd::ManifoldKernelDensity{M}) where {M <: typeof(SE2E2_Manifold)}
   data_ = getPoints(mkd.belief)
-  [uncoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
+  [makePointFromCoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
 end
 
 function Statistics.mean(::typeof(SE2E2_Manifold), pts::AbstractVector)
@@ -56,15 +56,15 @@ MB.manifold_dimension(::_CircleEuclid) = 2
 const BearingRange_Manifold = _CircleEuclid()
 # MB.manifold_dimension(::BearingRange_Manifold) = 2
 
-AMP.coords(::Type{<:typeof(BearingRange_Manifold)}, p::ProductRepr) = [p.parts[1][1]; p.parts[2][1]]
+AMP.makeCoordsFromPoint(::Type{<:typeof(BearingRange_Manifold)}, p::ProductRepr) = [p.parts[1][1]; p.parts[2][1]]
 
-function AMP.uncoords(::typeof(BearingRange_Manifold), p::AbstractVector{<:Real})
+function AMP.makePointFromCoords(::typeof(BearingRange_Manifold), p::AbstractVector{<:Real})
   ArrayPartition(([p[1];]), ([p[2];]))
 end
 
-function AMP.getPointsManifold(mkd::ManifoldKernelDensity{M}) where {M <: typeof(BearingRange_Manifold)}
+function AMP.getPoints(mkd::ManifoldKernelDensity{M}) where {M <: typeof(BearingRange_Manifold)}
   data_ = getPoints(mkd.belief)
-  [uncoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
+  [makePointFromCoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
 end
 
 function Statistics.mean(::typeof(BearingRange_Manifold), pts::AbstractVector)
