@@ -33,7 +33,7 @@ IIF.initParametricFrom!(fg)
 
 vars = ls(fg, r"x") 
 lands = ls(fg, r"l") 
-results = autoinitParametric!.(fg, [vars;lands]; algorithm=NelderMead)
+results = IIF.autoinitParametric!.(fg, [vars;lands])
 
 # pl = plotSLAM2D(fg, solveKey=:parametric, drawContour=false, xmin=-20, xmax=20, ymin=-20, ymax=20)
 
