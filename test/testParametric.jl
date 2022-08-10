@@ -153,7 +153,7 @@ end
 
 ##
 @testset "Test Parametric PriorPoint2 and Pose2Point2BearingRange" begin
-fg = LightDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
+fg = GraphsDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
 
 addVariable!(fg, :x1, Pose2)
 addVariable!(fg, :l1, Point2)

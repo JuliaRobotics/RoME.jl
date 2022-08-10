@@ -41,14 +41,33 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, pp
 end
 
 # Assumes X is a tangent vector
-function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
+function (cf::CalcFactor{<:Pose2Pose2})(_X::AbstractArray{MT}, _p::AbstractArray{PT}, _q::AbstractArray{LT})  where {MT,PT,LT}
+  T = promote_type(MT, PT, LT)
+  X = convert(ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, _X)
+  p = convert(ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, _p)
+  q = convert(ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, _q)
+  return cf(X,p,q)
+end
 
-    q̂ = allocate(q) 
+# function calcPose2Pose2(
+function (cf::CalcFactor{<:Pose2Pose2})(
+              X::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}},
+              p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
+              q::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
+
     M = getManifold(Pose2)
-    ϵ0 = getPointIdentity(M)
-    exp!(M, q̂, ϵ0, X)
-    Manifolds.compose!(M, q̂, p, q̂)   
-    Xc = vee(M, q, log!(M, q̂, q, q̂))
+    ϵ0 = ArrayPartition(zeros(SVector{2,T}), SMatrix{2, 2, T}(I))
+
+    ϵX = exp(M, ϵ0, X)
+    # q̂ = Manifolds.compose(M, p, ϵX)    
+    tp, Rp = Manifolds.submanifold_components(M, p)
+    tq, Rq = Manifolds.submanifold_components(M, ϵX)
+    R = Rp*Rq
+    t = tp + Rp*(tq)
+    q̂ = ArrayPartition(t,R)
+    X = log(M, q, q̂)
+    # Xc = vee(M, q, q̂)
+    Xc = SA[X.x[1][1], X.x[1][2], X.x[2][2]]
     return Xc
 end
 
