@@ -10,12 +10,11 @@ using DistributedFactorGraphs
 using Statistics
 
 
-@error("must restore testG2oParser.jl")
 @error("add test for generateGraph_Beehive!, norm( simulated - default ) < tol")
 
 testfiles = [  
   # known broken tests
-  # "testG2oParser.jl";  # deferred
+  "testG2oParser.jl";  # deferred
 
   # dev test first, for faster issues.
   # ...

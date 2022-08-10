@@ -96,7 +96,7 @@ end
 
 function getVariableListInts!(fct, uniqVarInt, varIntLabel)
   varlist = Int[]
-  for vari in solverData(fct).fncargvID
+  for vari in getVariableOrder(fct)
     if !haskey(varIntLabel, vari)
       uniqVarInt[1] += 1
       varIntLabel[vari] = uniqVarInt[1]
@@ -117,11 +117,11 @@ function stringG2o!(dfg::AbstractDFG,
   # get variable numbers
   varlist = getVariableListInts!(getFactor(dfg,fc), uniqVarInt, varIntLabel)
   # get information matrix
-  INF = 1 ./ sqrt(fnc.z.Σ.mat)
+  INF = 1 ./ sqrt(fnc.Z.Σ.mat)
   INF[INF .== Inf] .= 0
   # get command
   comm = !haskey(overwriteMapping, Pose2Pose2) ? commands[Pose2Pose2] : overwriteMapping[Pose2Pose2]
-  return "$comm $(varlist[1]) $(varlist[2]) $(fnc.z.μ[1]) $(fnc.z.μ[2]) $(fnc.z.μ[3]) $(INF[1,1]) $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[2,2]) $(INF[2,3]) $(INF[2,3]) $(INF[2,3])"
+  return "$comm $(varlist[1]) $(varlist[2]) $(fnc.Z.μ[1]) $(fnc.Z.μ[2]) $(fnc.Z.μ[3]) $(INF[1,1]) $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[2,2]) $(INF[2,3]) $(INF[2,3]) $(INF[2,3])"
 end
 
 function stringG2o!(dfg::AbstractDFG,
