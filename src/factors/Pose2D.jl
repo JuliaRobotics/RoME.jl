@@ -51,9 +51,9 @@ end
 
 # function calcPose2Pose2(
 function (cf::CalcFactor{<:Pose2Pose2})(
-              X::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}},
+              X::ArrayPartition{XT, Tuple{SVector{2, XT}, SMatrix{2, 2, XT, 4}}},
               p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
-              q::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
+              q::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where {XT<:Real,T<:Real}
 
     M = getManifold(Pose2)
     ϵ0 = ArrayPartition(zeros(SVector{2,T}), SMatrix{2, 2, T}(I))
