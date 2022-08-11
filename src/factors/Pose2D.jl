@@ -40,6 +40,14 @@ function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, pp
   (;manifold=M, ϵ0=getPointIdentity(M), Xc=zeros(3), q̂=getPointIdentity(M))
 end
 
+@inline function _vee(::SpecialEuclidean{2}, X::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
+  return SVector{3,T}(X.x[1][1],X.x[1][2],X.x[2][2])
+end
+
+@inline function _compose(::SpecialEuclidean{2}, p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, q::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
+  return ArrayPartition(p.x[1] + p.x[2]*q.x[1], p.x[2]*q.x[2])
+end
+
 # Assumes X is a tangent vector
 function (cf::CalcFactor{<:Pose2Pose2})(_X::AbstractArray{MT}, _p::AbstractArray{PT}, _q::AbstractArray{LT})  where {MT,PT,LT}
   T = promote_type(MT, PT, LT)
@@ -60,14 +68,10 @@ function (cf::CalcFactor{<:Pose2Pose2})(
 
     ϵX = exp(M, ϵ0, X)
     # q̂ = Manifolds.compose(M, p, ϵX)    
-    tp, Rp = Manifolds.submanifold_components(M, p)
-    tq, Rq = Manifolds.submanifold_components(M, ϵX)
-    R = Rp*Rq
-    t = tp + Rp*(tq)
-    q̂ = ArrayPartition(t,R)
-    X = log(M, q, q̂)
-    # Xc = vee(M, q, q̂)
-    Xc = SA[X.x[1][1], X.x[1][2], X.x[2][2]]
+    q̂ = _compose(M, p, ϵX)
+    X_hat = log(M, q, q̂)
+    # Xc = vee(M, q, X_hat)
+    Xc = _vee(M, X_hat)
     return Xc
 end
 
