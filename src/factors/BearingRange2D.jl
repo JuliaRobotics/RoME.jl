@@ -36,20 +36,30 @@ function IIF.getMeasurementParametric(s::Pose2Point2BearingRange{<:Normal, <:Nor
   return meas, iΣ
 end
 
-function (cfo::CalcFactor{<:Pose2Point2BearingRange})(measX, p, l)
-  #
-  M = getManifold(cfo.factor)
+function (cfo::CalcFactor{<:Pose2Point2BearingRange})(_measX::AbstractArray{MT}, _p::AbstractArray{PT}, _l::AbstractArray{LT}) where {MT,PT,LT}
+  T = promote_type(MT, PT, LT)
+  measX = convert(ArrayPartition{T, Tuple{SMatrix{2, 2, T, 4}, SVector{1, T}}}, _measX)
+  p = convert(ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, _p)
+  l = convert(SVector{2, T}, _l)
+  r = cfo(measX, p, l)
+  return r
+end
 
+function (cfo::CalcFactor{<:Pose2Point2BearingRange})(
+                  measX::ArrayPartition{<:Real}, 
+                  p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
+                  l::SVector{2,T}) where T<:Real
+  #
   # wl = l
   # wTp = p
   # pl = pTw*wl
   pl  =  transpose(p.x[2]) * (l - p.x[1])
+  # δθ = mθ - plθ
+  # δr = mr - plr
+  δθ = Manifolds.sym_rem(measX.x[1][2] - atan(pl[2], pl[1]))
+  δr = measX.x[2][1]  - norm(pl)
 
-  mθ,mr = vee(M, Manifolds.Identity(M), measX) 
-  δθ = mθ - atan(pl[2], pl[1])
-  δr = mr - norm(pl)
-
-  return [δθ; δr]
+  return SA[δθ, δr]
 end
 
 # quick check
