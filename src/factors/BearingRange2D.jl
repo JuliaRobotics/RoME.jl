@@ -69,10 +69,10 @@ Base.@kwdef struct PackedPose2Point2BearingRange <: AbstractPackedFactor
     rangstr::PackedSamplableBelief
 end
 
-function convert( ::Type{T} where T<:PackedPose2Point2BearingRange, d::Pose2Point2BearingRange )
+function convert( ::Type{<:PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange )
   return PackedPose2Point2BearingRange( convert(PackedSamplableBelief, d.bearing), convert(PackedSamplableBelief, d.range) )
 end
 
-function convert( ::Type{T} where T<:Pose2Point2BearingRange, d::PackedPose2Point2BearingRange )
+function convert( ::Type{<:Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange )
   Pose2Point2BearingRange( convert(SamplableBelief, d.bearstr), convert(SamplableBelief, d.rangstr) )
 end
