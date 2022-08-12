@@ -62,18 +62,17 @@ end
 
 # Support for database based solving
 
-passTypeThrough(d::FunctionNodeData{Pose2Point2Range}) = d
+passTypeThrough(d::FunctionNodeData{<:Pose2Point2Range}) = d
 
 Base.@kwdef struct PackedPose2Point2BearingRange <: AbstractPackedFactor
     bearstr::PackedSamplableBelief
     rangstr::PackedSamplableBelief
 end
 
-function convert( ::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange )
+function convert( ::Type{<:PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange )
   return PackedPose2Point2BearingRange( convert(PackedSamplableBelief, d.bearing), convert(PackedSamplableBelief, d.range) )
 end
 
-# TODO -- should not be resorting to string, consider specialized code for parametric distribution types and KDEs
-function convert( ::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange )
+function convert( ::Type{<:Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange )
   Pose2Point2BearingRange( convert(SamplableBelief, d.bearstr), convert(SamplableBelief, d.rangstr) )
 end
