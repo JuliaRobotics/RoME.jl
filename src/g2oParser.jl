@@ -53,8 +53,24 @@ end
 Parses a single g2o instruction to add information to factor graph.
 """
 function parseG2oInstruction!(fg::AbstractDFG,
-                              instruction::Array{SubString{String},1})
-    if instruction[1] == "EDGE_SE2"
+                              instruction::Array{SubString{String},1};
+                              initialize::Bool=true)
+    #
+    infoM6 = zeros(6,6)
+
+    if instruction[1] == "VERTEX_SE2"
+          poseId = Symbol("x", instruction[2])
+          x = parse(Float64,instruction[3])
+          y = parse(Float64,instruction[4])
+          θ = parse(Float64,instruction[5])
+          #NOTE just useing some covariance as its not included
+          cov = diagm([1,1,0.1])
+          addVariable!(fg, poseId, Pose2)
+          if initialize
+              # initVariable!(fg, poseId, MvNormal([x,y,θ],cov))
+              initVariable!(fg, poseId, MvNormal([x,y,θ],cov), :parametric)
+          end
+    elseif instruction[1] == "EDGE_SE2"
         # Need to add a relative pose measurement between two variables.
         # Parse all of the variables starting with the symbols.
         from_pose = Symbol("x", instruction[2])
@@ -85,6 +101,52 @@ function parseG2oInstruction!(fg::AbstractDFG,
         # Add a factor between the two poses with the relative measurement.
         measurement = MvNormal([x_state; y_state; theta_state], cov_mat)
         rel_pose_factor = Pose2Pose2(measurement)
+        addFactor!(fg, [from_pose, to_pose], rel_pose_factor)
+    elseif instruction[1] == "EDGE_SE3:QUAT"
+
+        # MU1 = Unitary(1,ℍ)
+        # ϵU1 = identity_element(MU1)
+        MSO3 = SpecialOrthogonal(3)
+        ϵSO3 = identity_element(MSO3)
+
+         # Need to add a relative pose measurement between two variables.
+        # Parse all of the variables starting with the symbols.
+        from_pose = Symbol("x", instruction[2])
+        to_pose = Symbol("x", instruction[3])
+
+        dt = parse.(Float64, instruction[4:6])
+        qvec = parse.(Float64, instruction[[10;7:9]])
+        
+        dR = TU.convert(SO3, TU.Quaternion(qvec[1],qvec[2:4])).R 
+        X = log(MSO3, ϵSO3, dR) 
+        Xc = vee(MSO3, ϵSO3, X)
+
+        a = parse.(Float64, instruction[11:31])
+        for i=1:6
+            vw = view(a, (1+(i−1)*(14−i)÷2):(i*(13-i)÷2))
+            infoM6[i,i:6] = vw 
+            infoM6[i:6,i] = vw
+        end
+        cov_mat = inv(infoM6)
+        # NOTE workaround to ensure cov_mat is Hermitian -- TODO use inf_mat directly for MvNormal
+        cov_mat += cov_mat'
+        cov_mat ./= 2
+        
+        # Make sure both variables are in the FG. Otherwise add them.
+        if (from_pose in ls(fg)) == false
+            addVariable!(fg, from_pose, Pose3)
+        end
+        if (to_pose in ls(fg)) == false
+            addVariable!(fg, to_pose, Pose3)
+        end
+
+        #FIXME conversion between U(1,ℍ) and SO3 covariances?
+        @error "3D covariance from Quaternion is not done yet!" maxlog=1
+        # dq = Manifolds.Quaternion(qvec...)
+
+        # Add a factor between the two poses with the relative measurement.
+        measurement = MvNormal([dt;Xc], cov_mat)
+        rel_pose_factor = Pose3Pose3(measurement)
         addFactor!(fg, [from_pose, to_pose], rel_pose_factor)
     end
     return fg
