@@ -123,7 +123,7 @@ function parseG2oInstruction!(fg::AbstractDFG,
 
         a = parse.(Float64, instruction[11:31])
         for i=1:6
-            vw = view(a, (1+(i−1)*(14−i)÷2):(i*(13-i)÷2))
+            vw = view(a, (1+(i-1)*(14-i)÷2):(i*(13-i)÷2))
             infoM6[i,i:6] = vw 
             infoM6[i:6,i] = vw
         end
