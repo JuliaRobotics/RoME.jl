@@ -16,29 +16,32 @@ end
 
 DFG.getManifold(::InstanceType{PriorPose2}) = getManifold(Pose2) # SpecialEuclidean(2)
 
-function (cf::CalcFactor{<:PriorPose2})(m, p)
-  M = getManifold(Pose2)
-  Xc = vee(M, p, log(M, p, m))
-  return Xc
-
-  # M = getManifold(Pose2)
-  # # X = allocate(p)
-  # # X = ProductRepr(zeros(MVector{2}), zeros(MMatrix{2,2}))
-  # # log!(M, X, p, m)
-  # X = log(M, p, m)
-  # return  SA[X.x[1][1],X.x[1][2],X.x[2][2]]
-
+@inline function _vee(::SpecialEuclidean{2}, X::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
+  return SVector{3,T}(X.x[1][1],X.x[1][2],X.x[2][2])
 end
-# BenchmarkTools.Trial: 10000 samples with 1 evaluation.
-#  Range (min … max):  22.299 μs …  11.920 ms  ┊ GC (min … max): 0.00% … 98.28%
-#  Time  (median):     29.930 μs               ┊ GC (median):    0.00%
-#  Time  (mean ± σ):   40.097 μs ± 171.479 μs  ┊ GC (mean ± σ):  5.60% ±  1.39%
 
-#    ▂▆█▇▆▅▄▃▃▄▃▂        ▂▂▂▂▁                                   ▂
-#   ▆██████████████▆▆▆▄▅▇██████▇▇█▆▇▆▄▅▄▆▆▅▅▅▆▅▅▅▄▅▄▄▄▅▅▅▄▄▄▃▅▄▄ █
-#   22.3 μs       Histogram: log(frequency) by time       127 μs <
+@inline function _compose(::SpecialEuclidean{2}, p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, q::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
+  return ArrayPartition(p.x[1] + p.x[2]*q.x[1], p.x[2]*q.x[2])
+end
 
-#  Memory estimate: 26.88 KiB, allocs estimate: 481.
+function (cf::CalcFactor{<:PriorPose2})(_m::AbstractArray{MT}, _p::AbstractArray{PT})  where {MT<:Real,PT<:Real}
+  T = promote_type(MT, PT)
+  m = convert(ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, _m)
+  p = convert(ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, _p)
+  return cf(m,p)
+end
+
+# TODO the log here looks wrong (for gradients), consider:
+# X = log(p⁻¹ ∘ m) 
+# X = log(M, ϵ, Manifolds.compose(M, inv(M, p), m))
+function (cf::CalcFactor{<:PriorPose2})(
+            m::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
+            p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
+
+  M = getManifold(Pose2)
+  Xc = _vee(M, log(M, p, m))
+  return Xc
+end
 
 #TODO Serialization of reference point p 
 ## Serialization support
