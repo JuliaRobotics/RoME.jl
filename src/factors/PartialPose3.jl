@@ -194,7 +194,7 @@ struct Pose3Pose3Rotation{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
 end
 Pose3Pose3Rotation(z::SamplableBelief) = Pose3Pose3Rotation(z, (4,5,6))
 
-getManifold(::Pose3Pose3Rotation) = SpecialOrthogonal(2)
+getManifold(::Pose3Pose3Rotation) = SpecialOrthogonal(3)
 
 function (cfo::CalcFactor{<:Pose3Pose3Rotation})(Xm, wTp, wTq )
   #
@@ -206,8 +206,10 @@ function (cfo::CalcFactor{<:Pose3Pose3Rotation})(Xm, wTp, wTq )
   X = log(M, p, q)
   Xc = vee(M, p, X)
   
+  Xc_m = vee(M, p, Xm)
+
   #TODO Xm - Xc or Xc - Xm?
-  return Xm - Xc
+  return Xc_m - Xc
 
 end
 
