@@ -179,3 +179,53 @@ end
 
 
 #
+# ------------------------------------------------------------------------------
+# Relative constraint between poses X,Y,YawTo
+# ------------------------------------------------------------------------------
+
+"""
+    $TYPEDEF
+
+Partial rotation only factor between two Pose3 variables.
+"""
+struct Pose3Pose3Rotation{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
+  Z::T
+  partial::Tuple{Int,Int,Int}
+end
+Pose3Pose3Rotation(z::SamplableBelief) = Pose3Pose3Rotation(z, (4,5,6))
+
+getManifold(::Pose3Pose3Rotation) = SpecialOrthogonal(3)
+
+function (cfo::CalcFactor{<:Pose3Pose3Rotation})(Xm, wTp, wTq )
+  #
+  M = SpecialOrthogonal(3)
+
+  p = wTp.x[2]
+  q = wTq.x[2]
+
+  X = log(M, p, q)
+  Xc = vee(M, p, X)
+  
+  Xc_m = vee(M, p, Xm)
+
+  #TODO Xm - Xc or Xc - Xm?
+  return Xc_m - Xc
+
+end
+
+"""
+    $TYPEDEF
+
+Serialization type of Pose3Pose3Rotation.
+"""
+Base.@kwdef struct PackedPose3Pose3Rotation <: AbstractPackedFactor
+  Z::PackedSamplableBelief
+end
+
+function convert(::Type{<:Pose3Pose3Rotation}, d::Pose3Pose3Rotation)
+  return Pose3Pose3Rotation( convert(SamplableBelief, d.Z))
+end
+
+function convert(::Type{Pose3Pose3Rotation}, d::Pose3Pose3Rotation)
+  return Pose3Pose3Rotation( convert(PackedSamplableBelief, d.Z))
+end
