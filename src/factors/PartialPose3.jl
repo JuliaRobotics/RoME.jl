@@ -67,6 +67,7 @@ Prior for vector measurements on Pose3.
 Base.@kwdef struct PriorPose3Ref{T<:SamplableBelief} <: IncrementalInference.AbstractPrior
     Z::T
     ref::SVector{3, Float64}
+    partial::Tuple{Int,Int,Int} = (4,5,6)
 end
 
 getManifold(::PriorPose3Ref) = TranslationGroup(3)
