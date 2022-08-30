@@ -59,6 +59,25 @@ function compare(a::PriorPose3ZRP, b::PriorPose3ZRP; tol::Float64=1e-10)
 end
 
 
+"""
+    $(TYPEDEF)
+
+Prior for vector measurements on Pose3.
+"""
+Base.@kwdef struct PriorPose3Ref{T<:SamplableBelief} <: IncrementalInference.AbstractPrior
+    Z::T
+    ref::SVector{3, Float64}
+end
+
+getManifold(::PriorPose3Ref) = TranslationGroup(3)
+
+function (cf::CalcFactor{<:PriorPose3Ref})(p_m, p)
+    n_r = cf.factor.ref
+    nRp = p.x[2]
+    n_m = nRp * p_m
+    return n_r - n_m
+end
+
 
 ##==============================================================================
 ## Partial Pose3 Pose3 Factors
