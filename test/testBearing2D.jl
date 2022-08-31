@@ -42,7 +42,7 @@ for (i,p) in enumerate(ps)
     # @show p
     r = calcFactorResidualTemporary(f, (Pose2, Point2), m, (p, q))
     # @warn "comp: $(isapprox(r, rs[i], atol=0.001))" a=r b=rs[i]
-    @test isapprox(r, rs[i], atol=0.001) 
+    @test isapprox(r[1], rs[i], atol=0.001) 
 end
 
 @warn "Bearing2D, must still test factor gradients, which will also verify the sign on residual function calculations"
@@ -53,14 +53,14 @@ f = Pose2Point2Bearing(Normal(pi/2,0.001))
 xi = ArrayPartition([0.,0], [1. 0; 0 1])
 xj = [1.,1]
 res = calcFactorResidualTemporary(f, (Pose2, Point2), [], (xi, xj))
-@test isapprox(res, pi/4, atol=0.1) # FIXME, confirm the sign
+@test isapprox(res, [pi/4], atol=0.1) # FIXME, confirm the sign
 
 # test -pi +pi case
 f = Pose2Point2Bearing(Normal(pi,0.001))
 xi = ArrayPartition([0.,0], [1. 0; 0 1])
 xj = [-1, -0.001]
 res = calcFactorResidualTemporary(f, (Pose2, Point2), [pi], (xi, xj))
-@test isapprox(res, -0.001, atol=1e-3)
+@test isapprox(res, [-0.001], atol=1e-3)
 
 ##
 end
@@ -70,6 +70,7 @@ end
 ## new factor graph
 
 fg = initfg()
+fg.solverParams.inflation = 0.0
 
 addVariable!(fg, :x1, Pose2)
 addVariable!(fg, :x2, Pose2)
@@ -105,8 +106,7 @@ points = getPoints(getBelief(fg, :l1))
 @cast pts[j,i] := points[i][j]
 pts = collect(pts)
 #FIXME check test after Bearing2D is fixed
-@test_broken all([80,80] .< sum(abs.(pts) .< [10,10],dims=2) )
-
+@test all([80,80] .< sum(abs.(pts) .< [10,10],dims=2) )
 ##
 end
 
