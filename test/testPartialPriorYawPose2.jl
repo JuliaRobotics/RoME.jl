@@ -53,7 +53,7 @@ tree = solveTree!(fg)
 
 M = getManifold(Pose2)
 me_ = mean(M, getVal(fg, :x))
-@test isapprox(M.manifold[1], submanifold_component(me_,1), [5,10], atol=0.2)
+@test isapprox(M.manifold[1], submanifold_component(me_,1), [5,10], atol=3.0)
 @test isapprox(M.manifold[2], submanifold_component(me_,2), [1 0; 0 1], atol=0.05) 
 @test isapprox(mean(getVal(fg, :l)), [10,10], atol = 0.05)
 
