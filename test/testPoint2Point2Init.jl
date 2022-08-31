@@ -59,23 +59,25 @@ while 0 < i
 ##
   try
     # 
-    @cast l1_vals[j,i] := getVal(fg, :l1)[i][j]
-    
-    @test 5 < sum( 80 .< l1_vals[1,:] .< 120 )
-    @test 5 < sum( -20 .< l1_vals[2,:] .< 20 )
-    
-    @test 5 < sum( -20 .< l1_vals[1,:] .< 20 )
-    @test 5 < sum( 80 .< l1_vals[2,:] .< 120 )
-    
-    @cast x0_vals[j,i] := getVal(fg, :x0)[i][j]
-    
-    @test 80 < sum( 80 .< x0_vals[1,:] .< 120 )
-    @test 80 < sum( -20 .< x0_vals[2,:] .< 20 )
-    
-    @cast x1_vals[j,i] := getVal(fg, :x1)[i][j]
-    
-    @test 80 < sum( -20 .< x1_vals[1,:] .< 20 )
-    @test 80 < sum( 80 .< x1_vals[2,:] .< 120 )
+    @testset "retry $i" begin
+      @cast l1_vals[j,i] := getVal(fg, :l1)[i][j]
+      
+      @test 5 < sum( 80 .< l1_vals[1,:] .< 120 )
+      @test 5 < sum( -20 .< l1_vals[2,:] .< 20 )
+      
+      @test 5 < sum( -20 .< l1_vals[1,:] .< 20 )
+      @test 5 < sum( 80 .< l1_vals[2,:] .< 120 )
+      
+      @cast x0_vals[j,i] := getVal(fg, :x0)[i][j]
+      
+      @test 80 < sum( 80 .< x0_vals[1,:] .< 120 )
+      @test 80 < sum( -20 .< x0_vals[2,:] .< 20 )
+      
+      @cast x1_vals[j,i] := getVal(fg, :x1)[i][j]
+      
+      @test 80 < sum( -20 .< x1_vals[1,:] .< 20 )
+      @test 80 < sum( 80 .< x1_vals[2,:] .< 120 )
+    end
 
     break
     #
