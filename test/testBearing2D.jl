@@ -106,7 +106,7 @@ points = getPoints(getBelief(fg, :l1))
 @cast pts[j,i] := points[i][j]
 pts = collect(pts)
 #FIXME check test after Bearing2D is fixed
-@test all([80,80] .< sum(abs.(pts) .< [10,10],dims=2) )
+@test all([60,60] .< sum(abs.(pts) .< [10,10],dims=2) )
 ##
 end
 
