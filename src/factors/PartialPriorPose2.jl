@@ -14,7 +14,7 @@ function getSample(cf::CalcFactor{<:PartialPriorYawPose2})
     
   Z = cf.factor.Z
   M = getManifold(cf.factor)
-  p = identity_element(M)
+  p = getPointIdentity(M)
   
   Xc = [0,0,rand(Z)]
   
