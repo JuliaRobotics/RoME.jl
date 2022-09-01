@@ -314,12 +314,12 @@ end
 ##
 
 # Start with an empty graph
-N = 1
+N = 75
 fg = initfg()
 
 # Add landmark
 addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
-addFactor!(fg, [:l1], PriorPoint2(MvNormal([20.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))),  graphinit=false ) # could be IIF.Prior
+addFactor!(fg, [:l1], PriorPoint2(MvNormal([20.0;0.0], Matrix(Diagonal([0.1;0.1].^2)))),  graphinit=false ) # could be IIF.Prior
 li = zeros(2); li[1] = 20.0;
 setVal!(fg, :l1, [li])
 
@@ -329,7 +329,7 @@ addVariable!(fg, :x0, Pose2)
 setVal!(fg, :x0, [getPointIdentity(Pose2)])
 
 # Add bearing range measurement between pose and landmark
-p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,0.1))
 addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 
 # there should be just one (the bearingrange) factor connected to :l1
@@ -337,17 +337,24 @@ addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 # writeGraphPdf(fg)
 
 # check the forward convolution is working properly
-_pts, = predictbelief(fg, :x0, ls(fg, :x0), N=75)
+_pts, = predictbelief(fg, :x0, ls(fg, :x0); N)
 p_μ = mean(SpecialEuclidean(2), _pts)
 
 _pts = getCoordinates.(Pose2, _pts)
 @cast pts[j,i] := _pts[i][j]
 
-# pts[3,:] .= TU.wrapRad.(pts[3,:])
-@show abs.(Statistics.mean(pts,dims=2))
-@test sum(abs.(Statistics.mean(pts,dims=2)) .< [2.0; 2.0; 2.0]) == 3
-@show Statistics.std(pts,dims=2)
-@test sum([0.1; 2.0; 0.01] .< Statistics.std(pts,dims=2) .< [5.0; 10.0; 2.0]) == 3
+dists = norm.(eachcol(pts[1:2, :] .- [20,0]))
+@test sum(isapprox.(dists, 20, atol=3)) > N*0.9
+
+# check likelihood at 0,0,0
+#FIXME don't know how this works
+@test_broken getBelief(fg, :x0)([0.0;0.0;0.0;;])[1] < 0.03
+#just testing direction on its own
+pts0 = filter(eachcol(pts)) do p
+    isapprox(p[1:2],[0,0], atol=1)
+end
+theta = mean(getindex.(pts0,3))
+@test isapprox(theta, 0.0, atol=0.1)
 
 ##
 
