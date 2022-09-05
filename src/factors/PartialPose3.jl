@@ -222,10 +222,19 @@ Base.@kwdef struct PackedPose3Pose3Rotation <: AbstractPackedFactor
   Z::PackedSamplableBelief
 end
 
-function convert(::Type{<:Pose3Pose3Rotation}, d::Pose3Pose3Rotation)
+function convert(::Type{<:Pose3Pose3Rotation}, d::PackedPose3Pose3Rotation)
   return Pose3Pose3Rotation( convert(SamplableBelief, d.Z))
 end
 
-function convert(::Type{Pose3Pose3Rotation}, d::Pose3Pose3Rotation)
-  return Pose3Pose3Rotation( convert(PackedSamplableBelief, d.Z))
+function convert(::Type{PackedPose3Pose3Rotation}, d::Pose3Pose3Rotation)
+  return PackedPose3Pose3Rotation( convert(PackedSamplableBelief, d.Z))
 end
+
+
+function compare(a::Pose3Pose3Rotation, b::Pose3Pose3Rotation; tol::Float64=1e-10)
+  TP = true
+  TP = TP && compareDensity(a.Z, b.Z)
+  TP = TP && norm(collect(a.partial)-collect(b.partial)) < tol
+  return TP
+end
+
