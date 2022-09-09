@@ -36,61 +36,32 @@ function IIF.getMeasurementParametric(s::Pose2Point2BearingRange{<:Normal, <:Nor
   return meas, iΣ
 end
 
-function (cfo::CalcFactor{<:Pose2Point2BearingRange})(meas, xi, lm)
-  SE2 = SpecialEuclidean(2)
-  #FIXME fix this factor to work correctly on manifolds
-  if false
+function (cfo::CalcFactor{<:Pose2Point2BearingRange})(_measX::AbstractArray{MT}, _p::AbstractArray{PT}, _l::AbstractArray{LT}) where {MT,PT,LT}
+  T = promote_type(MT, PT, LT)
+  measX = convert(ArrayPartition{T, Tuple{SMatrix{2, 2, T, 4}, SVector{1, T}}}, _measX)
+  p = convert(ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, _p)
+  l = convert(SVector{2, T}, _l)
+  r = cfo(measX, p, l)
+  return r
+end
 
-  Mt = SE2.manifold.manifolds[1]
-  Mr = SE2.manifold.manifolds[2]
+function (cfo::CalcFactor{<:Pose2Point2BearingRange})(
+                  measX::ArrayPartition{<:Real}, 
+                  p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
+                  l::SVector{2,T}) where T<:Real
+  #
+  # wl = l
+  # wTp = p
+  # pl = pTw*wl
+  pl  =  transpose(p.x[2]) * (l - p.x[1])
+  # δθ = mθ - plθ
+  # δr = mr - plr
+  δθ = Manifolds.sym_rem(measX.x[1][2] - atan(pl[2], pl[1]))
+  δr = measX.x[2][1]  - norm(pl)
 
-  # compose rotations
-  rRi = xi.parts[2]
-  rRo = retract(Mr, rRi, meas.parts[1])
+  return SA[δθ, δr]
+end
 
-  # new SE2 objects containing the rotation
-  rTo = ArrayPartition(xi.parts[1], rRo)
-  oTl = ArrayPartition([meas.parts[2];0], identity_element(Mr, rRi))
-
-  # prediction landmark
-  rTo = Manifolds.compose(SE2, rTo, oTl)
-
-  # cartesian difference in predicted and estimated landmark
-  δ_l = Manifolds.compose(Mt, inv(Mt, rTo.parts[1]), lm)
-
-  # find the residuals as though in polar coordinates
-  δθ = atan(δ_l[2], δ_l[1])
-  δr = norm(δ_l)
-
-  return [δθ; δr]
-
-  # FIXME: this is close to the old BR that worked, use to ensure tests are working
-  else
-    Xi = vee(SE2, xi, log(SE2, identity_element(SE2, xi), xi))
-
-    Mmeas = getManifold(cfo.factor)
-    Xmeas = vee(Mmeas, Manifolds.Identity(Mmeas), meas)
-    # 1-bearing
-    # 2-range
-    # world frame
-    meas_θ = Xmeas[1]
-    meas_r = Xmeas[2]
-
-    θ = meas_θ + Xi[3]
-    mx = meas_r*cos(θ)
-    my = meas_r*sin(θ)
-  
-    ex = lm[1] - (mx + Xi[1])
-    ey = lm[2] - (my + Xi[2])
-  
-    # res = [eθ, er]
-    eθ = atan((my + Xi[2]), (mx + Xi[1])) - atan(lm[2], lm[1])  # eθ
-    er= sqrt(ex^2 + ey^2) # some wasted computation here       # er 
-  
-    # return hat(facM, ProductRepr([1. 0;0 1], [0.]), [eθ, er])
-    return [eθ, er]
-  end
-end  
 # quick check
 # pose = (0,0,0),  bear = 0.0,  range = 10.0   ==>  lm = (10,0)
 # pose = (0,0,0),  bear = pi/2,  range = 10.0   ==>  lm = (0,10)
@@ -98,32 +69,20 @@ end
 # pose = (0,0,pi/2),  bear = pi/2,  range = 10.0   ==>  lm = (-10,0)
 
 
-# function (cfo::CalcFactor{<:Pose2Point2BearingRange})(measX, p, q)
-#   #
-#   M = SpecialEuclidean(2)
-#   q_SE = ProductRepr(q, identity_element(SpecialOrthogonal(2), p.parts[2]))
-
-#   X_se2 = log(M, identity_element(M, p), compose(M, inv(M, p), q_SE))
-#   X = X_se2.parts[1]
-#   # NOTE this: `X̂ = log(M, p, q_SE)` wrong for what we want
-#   #go to tangent vector
-#   return measX - X 
-# end
 
 # Support for database based solving
 
-passTypeThrough(d::FunctionNodeData{Pose2Point2Range}) = d
+passTypeThrough(d::FunctionNodeData{<:Pose2Point2Range}) = d
 
 Base.@kwdef struct PackedPose2Point2BearingRange <: AbstractPackedFactor
     bearstr::PackedSamplableBelief
     rangstr::PackedSamplableBelief
 end
 
-function convert( ::Type{PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange )
+function convert( ::Type{<:PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange )
   return PackedPose2Point2BearingRange( convert(PackedSamplableBelief, d.bearing), convert(PackedSamplableBelief, d.range) )
 end
 
-# TODO -- should not be resorting to string, consider specialized code for parametric distribution types and KDEs
-function convert( ::Type{Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange )
+function convert( ::Type{<:Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange )
   Pose2Point2BearingRange( convert(SamplableBelief, d.bearstr), convert(SamplableBelief, d.rangstr) )
 end

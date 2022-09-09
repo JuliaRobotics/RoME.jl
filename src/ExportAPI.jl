@@ -102,6 +102,8 @@ export
   Pose3Pose3XYYaw,
   PackedPose3Pose3XYYaw,
   PackedPriorPose3ZRP,
+  Pose3Pose3Rotation,
+  PackedPose3Pose3Rotation,
   # Various utilities
   passTypeThrough,
   buildGraphChain!,

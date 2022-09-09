@@ -476,3 +476,52 @@ mu_fg2 = mean(M, mpts)
 
 ##
 end
+
+
+@testset "Test Pose3Pose3Rotation factor:" begin
+
+##
+# trivial cases first, orientation based tests below
+M3 = getManifold(Pose3)
+ϵ3 = getPointIdentity(Pose3)
+
+M2 = SpecialOrthogonal(3)
+ϵ2 = getPointIdentity(M2)
+
+ϕ = 0.1
+θ = 0.1
+ψ = 0.1
+
+#
+#NOTE Test is built in a way that only one angle can be non zero at a time
+testsMeasurements_rpy = [
+  [ 0,  0,  0],
+  [ ϕ,  0,  0],
+  [ 0,  θ,  0],
+  [ 0,  0,  ψ],
+  [-ϕ,  0,  0],
+  [ 0, -θ,  0],
+  [ 0,  0, -ψ],
+]
+
+@info "Test Pose3Pose3Rotation cases:"
+rpy = testsMeasurements_rpy[1]
+for rpy = testsMeasurements_rpy
+
+@info rpy
+wTx1 = getPointIdentity(Pose3)
+wTx2 = ArrayPartition([0.,0,0], Matrix(RotXYZ(rpy...)))
+
+# test with Pose3Pose3Rotation
+testppxyh = Pose3Pose3Rotation( MvNormal(rpy, 0.001*diagm([1;1;1])))
+
+meas = hat(M2, ϵ2, rpy)
+res = calcFactorResidualTemporary(testppxyh, (Pose3, Pose3), meas, (wTx1, wTx2))
+
+
+@test norm(res) < 1e-10
+
+end
+##
+
+end

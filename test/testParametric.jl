@@ -1,5 +1,6 @@
 using RoME
 using Test
+using Manifolds
 # using RoMEPlotting
 
 
@@ -28,21 +29,28 @@ for i in 0:3
     addFactor!(fg, [psym;nsym], pp)
 end
 initAll!(fg)
-
 IIF.initParametricFrom!(fg)
+
+vars = ls(fg, r"x") 
+lands = ls(fg, r"l") 
+results = IIF.autoinitParametric!.(fg, [vars;lands])
+
+# pl = plotSLAM2D(fg, solveKey=:parametric, drawContour=false, xmin=-20, xmax=20, ymin=-20, ymax=20)
+
 
 vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
 #TODO test +-pi used pi+1e-5
 #FIXME look if something is wrong with angle bounds [-pi,pi), test failed
+M = getManifold(Pose2)
 # @test isapprox(vardict[:x0].val, [10, 10, -pi], atol = 1e-3)
 # @test isapprox(vardict[:x4].val, [10, 10, -pi], atol = 1e-3)
-
-@test isapprox(vardict[:x0].val, [10, 10, -pi], atol = 1e-3) || isapprox(vardict[:x0].val, [10, 10, pi], atol = 1e-3)
-@test isapprox(vardict[:x1].val, [0, 10, -pi/2], atol = 1e-3)
-@test isapprox(vardict[:x2].val, [0, 0, 0], atol = 1e-3)
-@test isapprox(vardict[:x3].val, [10, 0, pi/2], atol = 1e-3)
-@test isapprox(vardict[:x4].val, [10, 10, -pi], atol = 1e-3) || isapprox(vardict[:x4].val, [10, 10, pi], atol = 1e-3)
+ϵ = getPointIdentity(M)
+@test isapprox(M, vardict[:x0].val, exp(M, ϵ, hat(M,ϵ,[10, 10, -pi])), atol = 1e-3)
+@test isapprox(M, vardict[:x1].val, exp(M, ϵ, hat(M,ϵ,[0, 10, -pi/2])), atol = 1e-3)
+@test isapprox(M, vardict[:x2].val, exp(M, ϵ, hat(M,ϵ,[0, 0, 0])), atol = 1e-3)
+@test isapprox(M, vardict[:x3].val, exp(M, ϵ, hat(M,ϵ,[10, 0, pi/2])), atol = 1e-3)
+@test isapprox(M, vardict[:x4].val, exp(M, ϵ, hat(M,ϵ,[10, 10, -pi])), atol = 1e-3)
 
 # IIF.updateParametricSolution(fg, vardict)
 # pl = plotSLAM2D(fg; lbls=true, solveKey=:parametric, point_size=4pt, drawPoints=false, drawContour=false)
@@ -131,7 +139,10 @@ IIF.initParametricFrom!(fg)
 
 vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
-@test isapprox(vardict[:x1].val, [0, 0, 0], atol = 1e-3)
+M = getManifold(Pose2)
+ϵ = getPointIdentity(M)
+
+@test isapprox(M, vardict[:x1].val, exp(M, ϵ, hat(M,ϵ,[0, 0, 0])), atol = 1e-3)
 @test isapprox(vardict[:l1].val, [1,  1], atol = 1e-3)
 
 # IIF.updateParametricSolution(fg, vardict)
@@ -142,7 +153,7 @@ end
 
 ##
 @testset "Test Parametric PriorPoint2 and Pose2Point2BearingRange" begin
-fg = LightDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
+fg = GraphsDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
 
 addVariable!(fg, :x1, Pose2)
 addVariable!(fg, :l1, Point2)
@@ -160,8 +171,7 @@ IIF.initParametricFrom!(fg)
 
 vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
-x1_res = DFG.getPoint(Pose2, vardict[:x1].val)
-@test isapprox(SpecialEuclidean(2), x1_res, ArrayPartition([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
+@test isapprox(SpecialEuclidean(2), vardict[:x1].val, ArrayPartition([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
 
 @test isapprox(vardict[:l1].val, [1,  1], atol = 1e-3)
 @test isapprox(vardict[:l2].val, [1, -1], atol = 1e-3)

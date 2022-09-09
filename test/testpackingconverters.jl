@@ -253,6 +253,15 @@ end
 
 ##
 
+@testset "test conversions of Pose3Pose3Rotation" begin
+
+p3rot = Pose3Pose3Rotation(MvNormal( [0.1;0.2;0.3], 0.1*diagm([1.0;1;1]) ))
+
+pac = convert(PackedPose3Pose3Rotation, p3rot)
+unp = convert(Pose3Pose3Rotation, p3rot)
+
+@test RoME.compare(p3rot, unp)
+end
 
 
 #
