@@ -23,6 +23,7 @@ using
   ManifoldsBase
 
 using StaticArrays
+using SnoopPrecompile
 
 # to avoid name conflicts
 import Manifolds
@@ -145,6 +146,9 @@ end
 
 # manifold conversions required during transformation
 
-
+@precompile_all_calls begin
+  # In here put "toy workloads" that exercise the code you want to precompile
+  warmUpSolverJIT()
+end
 
 end
