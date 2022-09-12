@@ -55,7 +55,7 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(X, p, q)
   vee!(M1, pose_res, q1, log(M1, q1, q̂1))
   
   #velocity part
-  dt = Dates.value(cf.metadata.fullvariables[2].nstime - cf.metadata.fullvariables[1].nstime)*1e-9
+  dt = Dates.value(cf.fullvariables[2].nstime - cf.fullvariables[1].nstime)*1e-9
   X2 = submanifold_component(X,2)
   p2 = submanifold_component(p,2)
   q2 = submanifold_component(q,2)
@@ -86,7 +86,7 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
   z = meas
   wxi, wxj = Xi, Xj
   # @show z, wxi, wxj
-  dt = Dates.value(cf.metadata.fullvariables[2].nstime - cf.metadata.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
+  dt = Dates.value(cf.fullvariables[2].nstime - cf.fullvariables[1].nstime)*1e-9     # roughly the intended use of userdata
   # fill!(vp2vp2.reuseres[Threads.threadid()], 0.0)
   wXjhat = SE2(wxi[1:3])*SE2(meas[1:3])
   jXjhat = SE2(wxj[1:3]) \ wXjhat
