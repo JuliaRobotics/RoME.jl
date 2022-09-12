@@ -2,6 +2,31 @@
 
 RoME.jl follows semver, with only a few case specific exceptions.  Please see repo's [Milestones](https://github.com/JuliaRobotics/RoME.jl/milestones?state=closed) page for a more complete list of changes.  This NEWS file lists select changes like to produce breaking changes downstream.  Note serious efforts are taken to have both breaking and smaller changes go through a proper deprecation and warning printout cycle, consistent with JuliaLang convention.
 
+## v0.21
+
+- Add `SnoopPrecompile` and Julia v1.8 min compat.
+- Remove `FactorMetadata` and `ConvPerThread` usage as per IIF v0.31.
+
+## v0.20
+
+- Multiple factor upgrades and fixes to Manifolds.jl v0.8.11 and above.
+- Restore parametric batch solving.
+- Convert all Manifolds usage to `ArrayPartition` while removing `ProductRepr`.
+- Various bug fixes.
+
+## v0.19
+
+- Various standardizations and code quality improvements.
+- Expand parametric solving support for `SpecialEuclidean(2)` or `(3)`.
+
+## v0.18
+
+- Various enhancements and maintenance fixes.
+- Better consolidation of factor serialization and clearing deprecations.
+- Maintenance on FluxPose2Pose2 factors to restore tests.
+- Fix various factor bugs in serialization and constructors.
+- Simplify CI testing.
+
 ## v0.17
 
 - Graph generator API changing to `generateGraph_ABC`.
