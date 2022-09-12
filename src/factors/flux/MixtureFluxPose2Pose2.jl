@@ -23,15 +23,15 @@ end
 function IIF.getSample(cfo::CalcFactor{<:MixtureFluxPose2Pose2})
   #
   nfb = cfo.factor
-  fmd = cfo.metadata
+  # fmd = cfo.metadata
 
   # only calculate once after default value of 0
   if nfb.DT[] == 0
     # cache the time difference estimate
-    nfb.DT[] = (getTimestamp(fmd.fullvariables[2]) - getTimestamp(fmd.fullvariables[1])).value * 1e-3
+    nfb.DT[] = (getTimestamp(cfo.fullvariables[2]) - getTimestamp(cfo.fullvariables[1])).value * 1e-3
   end
 
-  cf_ = CalcFactor( cfo.factor.Zij, cfo.metadata, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams, cfo.cache)
+  cf_ = CalcFactor( cfo.factor.Zij, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams, cfo.cache, cfo.fullvariables, cfo.solvefor)
 
   smpl = getSample(cf_)
 
@@ -139,7 +139,7 @@ function (cfo::CalcFactor{<:MixtureFluxPose2Pose2})(meas1, meas2, Xi, Xj)
 
   # calculate the error for that measurement sample as Pose2Pose2
   #TODO, this is constructor in the hot loop is way to expensive.
-  cfZ = CalcFactor( cfo.factor.Z.mechanics, cfo.metadata, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams, cfo.cache)
+  cfZ = CalcFactor( cfo.factor.Z.mechanics, 0, length(cfo._legacyMeas), cfo._legacyMeas, cfo._legacyParams, cfo.cache, cfo.fullvariables, cfo.solvefor)
 
   return  cfZ(meas1, Xi, Xj)
 

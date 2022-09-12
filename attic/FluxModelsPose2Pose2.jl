@@ -81,9 +81,9 @@ end
 function IIF.getSample(cfo::CalcFactor{<:FluxModelsPose2Pose2}, N::Int=1)
   #
   nfb = cfo.factor
-  fmd = cfo.metadata
-  Xi = fmd.fullvariables[1] # X
-  Xj = fmd.fullvariables[2] # A / B
+  # fmd = cfo.metadata
+  Xi = cfo.fullvariables[1] # X
+  Xj = cfo.fullvariables[2] # A / B
 
   # get the naive samples
   # model samples (all for theta at this time)
@@ -146,9 +146,9 @@ function (cfo::CalcFactor{<:FluxModelsPose2Pose2})(meas1,meas2,meas3,Xi,Xj)
             # Xi::AbstractArray{<:Real,2},
             # Xj::AbstractArray{<:Real,2}  )
   #
-  userdata = cfo.metadata
+  # userdata = cfo.metadata
   nfb = cfo.factor
-  fmd = cfo.metadata
+  # fmd = cfo.metadata
   meas = (meas1, meas2, meas3)
 
   ## MAYBE JUST MOVE THIS INTO getSample and be done

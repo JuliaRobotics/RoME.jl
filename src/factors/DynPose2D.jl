@@ -158,7 +158,7 @@ function (cf::CalcFactor{<:DynPose2DynPose2})(meas,
     # se2vee!(res, jXjhat)
   z = meas
   wxi, wxj = wXi, wXj
-  dt = Dates.value(cf.metadata.fullvariables[2].nstime - cf.metadata.fullvariables[1].nstime)*1e-9  
+  dt = Dates.value(cf.fullvariables[2].nstime - cf.fullvariables[1].nstime)*1e-9  
   wpj = ( wxi[1:2]+dt*wxi[4:5] + z[1:2] )
   thetaj = se2vee(SE2([0;0;wxi[3]])*SE2([0;0;z[3]]))[3]
   res13 = se2vee( SE2(wxj[1:3])\SE2([wpj;thetaj]) )
