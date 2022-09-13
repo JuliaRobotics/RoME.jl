@@ -29,12 +29,14 @@ function warmUpSolverJIT(;fg::AbstractDFG=generateGraph_Hexagonal(),
   addVariable!(fg, :x0, Pose3)
   addVariable!(fg, :x1, Pose3)
   addFactor!(fg, [:x0], PriorPose3(MvNormal(zeros(6), diagm(ones(6)))))
-  addFactor!(fg, [:x0;:x1], Pose3Pose3(MvNormal(zeros(6))))
+  addFactor!(fg, [:x0;:x1], Pose3Pose3(MvNormal(zeros(6), diagm(ones(6)))))
   
-  solveGraph!(fg)
+  initAll!(fg)
 
   IIF.initParametricFrom!(fg, :default)
   IIF.solveGraphParametric!(fg)
+
+  solveGraph!(fg)
 
   nothing
 end
