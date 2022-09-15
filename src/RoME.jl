@@ -146,9 +146,21 @@ end
 
 # manifold conversions required during transformation
 
+function _doPrecompileWorkload(;
+  skipCompile::Bool = string(get(ENV,"ROMEJL_SKIP_SNOOPPRECOMPILE","false")) == "true"
+)
+  if skipCompile
+    @warn "ENV variable ROMEJL_SKIP_SNOOPPRECOMPILE exists and set to $(ENV["ROMEJL_SKIP_SNOOPPRECOMPILE"]), so skipping RoME precompilation workload."
+    return nothing
+  end
+
+  # do actual workload
+  warmUpSolverJIT()
+end
+
 @precompile_all_calls begin
   # In here put "toy workloads" that exercise the code you want to precompile
-  warmUpSolverJIT()
+  _doPrecompileWorkload()
 end
 
 end
