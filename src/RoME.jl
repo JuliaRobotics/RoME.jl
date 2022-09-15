@@ -147,7 +147,7 @@ end
 # manifold conversions required during transformation
 
 function _doPrecompileWorkload(;
-  skipCompile::Bool = string(get(ENV,"ROMEJL_SKIP_SNOOPPRECOMPILE","true")) == "true"
+  skipCompile::Bool = string(get(ENV,"ROMEJL_SKIP_SNOOPPRECOMPILE","false")) == "true"
 )
   if skipCompile
     @warn "ENV variable ROMEJL_SKIP_SNOOPPRECOMPILE exists and set to $(ENV["ROMEJL_SKIP_SNOOPPRECOMPILE"]), so skipping RoME precompilation workload."
