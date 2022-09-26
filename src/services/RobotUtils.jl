@@ -1,5 +1,4 @@
 
-export listVariablesLabelsWithinRange, enableSolveAllNotDRT!
 
 """
     $SIGNATURES
@@ -8,6 +7,9 @@ Remove all marginalization and make solvable (=1) all variables and factors that
 
 Notes
 - Dead Reckon Tether (DRT)
+
+DevNotes
+- Legacy, poor implementation, needs to be improved
 
 Related
 
@@ -19,115 +21,6 @@ function enableSolveAllNotDRT!(dfg::AbstractDFG; solvable::Int=1)
   foreach(x->setSolvable!(dfg, x, solvable), lsf(dfg))
   nothing
 end
-
-mutable struct RangeAzimuthElevation
-  range::Float64
-  azimuth::Float64
-  elevation::Union{Nothing,Float64}
-end
-
-function convert(::Type{_Rot.QuatRotation}, q::TransformUtils.Quaternion)
-  _Rot.QuatRotation(q.s, q.v...)
-end
-function convert(::Type{_Rot.QuatRotation}, x::SO3)
-  q = convert(TransformUtils.Quaternion, x)
-  convert(_Rot.QuatRotation, q)
-end
-function convert(::Type{T}, x::SO3) where {T <: CoordinateTransformations.AffineMap}
-  LinearMap( convert(_Rot.QuatRotation, x) )
-end
-
-function convert(::Type{T}, x::SE3) where {T <: CoordinateTransformations.AffineMap}
-  Translation(x.t...) ∘ convert(AffineMap{_Rot.QuatRotation{Float64}}, x.R)
-end
-function convert(::Type{SE3}, x::T) where {T <: CoordinateTransformations.AffineMap{_Rot.QuatRotation{Float64}}}
-  SE3(x.translation[1:3], TransformUtils.Quaternion(x.linear.w, [x.linear.x,x.linear.y,x.linear.z]) )
-end
-
-function convert(::Type{SE3}, t::Tuple{Symbol, Vector{Float64}})
-  if t[1]==:XYZqWXYZ
-    return SE3(t[2][1:3],TransformUtils.Quaternion(t[2][4],t[2][5:7]))
-  else
-    error("Unknown conversion type $(t[1])")
-  end
-end
-
-function convert(::Type{RangeAzimuthElevation}, val::Tuple{Symbol, Vector{Float64}})
-  if val[1] == :rangeazimuth
-    return RangeAzimuthElevation(val[2][1],val[2][2],nothing)
-  elseif val[1] == :rangeazimuthelevation
-    return RangeAzimuthElevation(val[2][1],val[2][2],val[2][3])
-  else
-    error("Unknown conversion from $(val[1]) to RangeAzimuthElevation.")
-  end
-end
-
-# should be deprecated or indicated more clearly
-lsrBR(a) = [a[2,:];a[1,:]]';
-
-
-function \(s::SE3, wTr::CTs.Translation)
-  bTr = s.R.R'*(wTr.v-s.t)
-  Dtr = bTr
-  range = norm(Dtr)
-  azi = atan(Dtr[2], Dtr[1])
-  elev = atan(Dtr[3], Dtr[1])
-  RangeAzimuthElevation(range, azi, elev)
-end
-
-
-
-"""
-    $SIGNATURES
-
-Method to compare current and predicted estimate on a variable, developed for testing a new factor before adding to the factor graph.
-
-Notes
-- `fct` does not have to be in the factor graph -- likely used to test beforehand.
-- function is useful for detecting if `multihypo` should be used.
-- `approxConv` will project the full belief estimate through some factor but must already be in factor graph.
-
-Example
-
-```julia
-# fg already exists containing :x7 and :l3
-pp = Pose2Point2BearingRange(Normal(0,0.1),Normal(10,1.0))
-# possible new measurement from :x7 to :l3
-curr, pred = predictVariableByFactor(fg, :l3, pp, [:x7; :l3])
-# example of naive user defined test on fit score
-fitscore = minkld(curr, pred)
-# `multihypo` can be used as option between existing or new variables
-```
-
-Related
-
-approxConv
-"""
-function predictVariableByFactor( dfg::AbstractDFG,
-                                  targetsym::Symbol,
-                                  fct::Pose2Point2BearingRange,
-                                  prevars::Vector{Symbol}  )
-  #
-  @assert targetsym in prevars
-  curr = getBelief(dfg, targetsym)
-  tfg = initfg()
-  for var in prevars
-    varnode = getVariable(dfg, var)
-    addVariable!(tfg, var, getSofttype(varnode))
-    if var != targetsym
-      @assert isInitialized(varnode)
-      initVariable!(tfg,var,getBelief(varnode))
-    end
-  end
-  addFactor!(tfg, prevars, fct, graphinit=false)
-  fctsym = ls(tfg, targetsym)
-
-  pts, infd = predictbelief(tfg, targetsym, fctsym)
-  pred = manikde!(getManifold(getVariable(dfg, targetsym)), pts)
-  # return current and predicted beliefs
-  return curr, pred
-end
-
 
 
 """
@@ -141,41 +34,6 @@ function getRangeKDEMax2D(fgl::AbstractDFG, vsym1::Symbol, vsym2::Symbol)
   norm(x1[1:2]-x2[1:2])
 end
 
-function measureMeanDist(fg::AbstractDFG, a::AbstractString, b::AbstractString)
-    #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
-    res = zeros(2)
-    A = getVal(fg,a)
-    B = getVal(fg,b)
-    Ax = Statistics.mean(vec(A[1,:]))
-    Ay = Statistics.mean(vec(A[2,:]))
-    Bx = Statistics.mean(vec(B[1,:]))
-    By = Statistics.mean(vec(B[2,:]))
-    dx = Bx - Ax
-    dy = By - Ay
-    b = atan(dy,dx)
-    r = sqrt(dx^2 + dy^2)
-    return r, b
-end
-
-function predictBodyBR(fg::AbstractDFG, a::Symbol, b::Symbol)
-  res = zeros(2)
-  A = getKDEMean(getBelief(getVariable(fg,a)))
-  B = getKDEMean(getBelief(getVariable(fg,b)))
-  Ax = A[1] # Statistics.mean(vec(A[1,:]))
-  Ay = A[2] # Statistics.mean(vec(A[2,:]))
-  Ath = getKDEMax(getBelief(getVariable(fg,a)))[3]
-  Bx = B[1]
-  By = B[2]
-  wL = SE2([Bx;By;0.0])
-  wBb = SE2([Ax;Ay;Ath])
-  bL = se2vee((wBb \ Matrix{Float64}(LinearAlgebra.I, 3,3)) * wL)
-  dx = bL[1] - 0.0
-  dy = bL[2] - 0.0
-  b = (atan(dy,dx))
-  r = sqrt(dx^2 + dy^2)
-  return b, r
-end
-
 
 """
     $SIGNATURES
@@ -184,6 +42,9 @@ Return the last `number::Int` of poses according to `filterLabel::Regex`.
 
 Notes
 - Uses FIFO add history of variables to the distribued factor graph object as search index.
+
+DevNotes
+- TODO consolidate with generic filter by regext on variable labels in IIF instead.
 """
 function getLastPoses(dfg::AbstractDFG;
                       filterLabel::Regex=r"x\d",
@@ -236,84 +97,6 @@ function setSolvableOldPoses!(dfg::AbstractDFG;
   return fullList
 end
 
-"""
-    $(SIGNATURES)
-
-Create a new variable node and insert odometry constraint factor between
-which will automatically increment latest pose symbol x<k+1> for new node new node and
-constraint factor are returned as a tuple.
-"""
-function addOdoFG!(fg::G,
-                   n::Symbol,
-                   DX::Array{Float64,1},
-                   cov::Array{Float64,2};
-                   N::Int=0,
-                   solvable::Int=1,
-                   labels::Vector{<:AbstractString}=String[]  ) where G <: AbstractDFG
-    #
-    prev, X, nextn = getLastPose2D(fg)
-    r,c = size(X)
-    if N==0
-      N = c
-    end
-    sig = diag(cov)
-    XnextInit = zeros(r,c)
-    # increases the number of particles based on the number of modes in the measurement Z
-    for i in 1:c
-        ent = [randn()*sig[1]; randn()*sig[2]; randn()*sig[3]]
-        XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
-    end
-
-    v = addVariable!(fg, n, Pose2, N=N, solvable=solvable, tags=[labels;"POSE"])
-    # v = addVariable!(fg, n, XnextInit, cov, N=N, solvable=solvable, tags=labels)
-    pp = Pose2Pose2(MvNormal(DX, cov)) #[prev;v],
-    f = addFactor!(fg, [prev;v], pp, solvable=solvable, graphinit=true )
-    infor = inv(cov^2)
-    # addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
-    return v, f
-end
-
-function addOdoFG!(fgl::G,
-                   Z::Pose3Pose3;
-                   N::Int=0,
-                   solvable::Int=1,
-                   labels::Vector{<:AbstractString}=String[]  ) where {G <: AbstractDFG}
-  #
-  vprev, X, nextn = getLastPoses(fgl)[1]
-  vnext = addVariable!(fgl, nextn, Pose3, solvable=solvable, tags=labels)
-  fact = addFactor!(fgl, [vprev;vnext], Z, graphinit=true)
-
-  return vnext, fact
-
-  # error("addOdoFG!( , ::Pose3Pose3, ) not currently usable, there were breaking changes. Work in Progress")
-  # addOdoFG(fg, n, DX, cov, N=N, solvable=solvable, tags=labels)
-end
-
-"""
-    $(SIGNATURES)
-
-Create a new variable node and insert odometry constraint factor between
-which will automatically increment latest pose symbol x<k+1> for new node new node and
-constraint factor are returned as a tuple.
-
-"""
-function addOdoFG!(
-        fgl::AbstractDFG,
-        odo::Pose2Pose2;
-        N::Int=0,
-        solvable::Int=1,
-        labels::Vector{<:AbstractString}=String[] ) # where {PP <: RoME.BetweenPoses}
-    #
-    vprev, X, nextn = getLastPose(fgl)
-    if N==0
-      N = size(X,2)
-    end
-    # vnext = addVariable!(fgl, nextn, X⊕odo, ones(1,1), N=N, solvable=solvable, tags=labels)
-    vnext = addVariable!(fgl, nextn, Pose2, N=N, solvable=solvable, tags=labels)
-    fact = addFactor!(fgl, [vprev;vnext], odo, graphinit=true)
-
-    return vnext, fact
-end
 
 
 """
@@ -355,24 +138,32 @@ end
 
 
 
-
-function malahanobisBR(measA, preA, cov::Array{Float64,2})
-    # measure landmark with noise
-    res = measA - preA
-    mala2 = Union{}
-    #Malahanobis distance
-    if false
-      lambda = cov \ Matrix{Float64}(LinearAlgebra.I, 2,2)
-      mala2 = res' * lambda * res
-    else
-      mala2 = res' * (cov \ res)
-    end
-
-    mala = sqrt(mala2)
-    return mala
+function replaceFactorPose3Pose3Mean!(
+  dfg::AbstractDFG,
+  flb::Symbol,
+  H::AbstractMatrix;
+  graphinit=false
+)
+  fct = getFactor(dfg, flb)
+  vars = getVariableOrder(fct)
+  mn, sig = getMeasurementParametric(getFactorType(fct))
+  mn_ = homography_to_coordinates(getManifold(Pose3), float.(H))
+  @info "Replace factor with new mean" string(mn') string(mn_')
+  tags = IIF.getTags(fct) |> collect
+  deleteFactor!(dfg, flb)
+  addFactor!(
+    dfg, 
+    vars, 
+    Pose3Pose3(
+      MvNormal(
+        mn_,
+        sig
+      )
+    );
+    tags,
+    graphinit
+  )
 end
-
-
 
 
 

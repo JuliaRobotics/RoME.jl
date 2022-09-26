@@ -1,5 +1,25 @@
 using RoME
+using Manifolds
 using Test
+
+##
+@testset "test SE(3) coordinates to homography and back" begin
+##
+
+M = getManifold(Pose3)
+
+@test M == Manifolds.SpecialEuclidean(3)
+
+C = randn(6)
+H = coordinates_to_homography(M, C)
+C_ = homography_to_coordinates(M, H)
+
+@test isapprox(C, C_)
+
+##
+end
+
+
 ##
 @testset "Test Basic Pose3 :parametric and :default" begin
 fg = initfg()

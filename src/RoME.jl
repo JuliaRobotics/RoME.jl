@@ -27,7 +27,7 @@ using SnoopPrecompile
 
 # to avoid name conflicts
 import Manifolds
-using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component
+using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component, Identity, affine_matrix
 
 import Manifolds: project, project!
 
@@ -58,10 +58,10 @@ include("ExportAPI.jl")
 
 
 # load the source files
-include("SpecialDefinitions.jl")
+include("entities/SpecialDefinitions.jl")
 
 #uses DFG v0.10.2 @defVariable for above
-include("variables/Local_Manifold_Workaround.jl")
+include("services/FixmeManifolds.jl")
 include("variables/VariableTypes.jl")
 
 ## More factor types
@@ -87,20 +87,24 @@ include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")
 include("factors/MultipleFeaturesConstraint.jl")
 include("factors/InertialPose3.jl")
+# needs maintenance
+include("factors/RangeAzimuthElevation.jl")
 
 # additional tools
-include("FactorGraphAnalysisTools.jl")
+include("services/FactorGraphAnalysisTools.jl")
 
 # tools related to robotics
-include("BayesTracker.jl")
-include("SensorModels.jl")
-include("CameraModel.jl")
-include("Slam.jl")
-include("RobotUtils.jl")
-include("SimulationUtils.jl")
-include("OdometryUtils.jl")
-include("RobotDataTypes.jl")
-include("NavigationSystem.jl")
+include("legacy/BayesTracker.jl")
+include("factors/SensorModels.jl")
+include("legacy/CameraModel.jl")
+include("legacy/Slam.jl")
+include("services/RobotUtils.jl")
+include("services/ManifoldUtils.jl")
+include("services/BearingRangeUtils.jl")
+include("services/SimulationUtils.jl")
+include("services/OdometryUtils.jl")
+include("entities/RobotDataTypes.jl")
+include("legacy/NavigationSystem.jl")
 
 # generate canonical graphs
 include("canonical/GenerateCommon.jl")
@@ -112,8 +116,8 @@ include("canonical/GenerateBeehive.jl")
 include("canonical/GenerateHelix.jl")
 
 # more utils requiring earlier functions
-include("AdditionalUtils.jl")
-include("g2oParser.jl")
+include("services/AdditionalUtils.jl")
+include("services/g2oParser.jl")
 
 # ScalarFields
 include("services/ScalarFields.jl")
