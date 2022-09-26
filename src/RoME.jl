@@ -58,7 +58,7 @@ include("ExportAPI.jl")
 
 
 # load the source files
-include("SpecialDefinitions.jl")
+include("entities/SpecialDefinitions.jl")
 
 #uses DFG v0.10.2 @defVariable for above
 include("services/FixmeManifolds.jl")
@@ -91,11 +91,11 @@ include("factors/InertialPose3.jl")
 include("factors/RangeAzimuthElevation.jl")
 
 # additional tools
-include("FactorGraphAnalysisTools.jl")
+include("services/FactorGraphAnalysisTools.jl")
 
 # tools related to robotics
-include("BayesTracker.jl")
-include("SensorModels.jl")
+include("legacy/BayesTracker.jl")
+include("factors/SensorModels.jl")
 include("legacy/CameraModel.jl")
 include("legacy/Slam.jl")
 include("services/RobotUtils.jl")
@@ -104,7 +104,7 @@ include("services/BearingRangeUtils.jl")
 include("services/SimulationUtils.jl")
 include("services/OdometryUtils.jl")
 include("entities/RobotDataTypes.jl")
-include("NavigationSystem.jl")
+include("legacy/NavigationSystem.jl")
 
 # generate canonical graphs
 include("canonical/GenerateCommon.jl")
