@@ -61,7 +61,7 @@ include("ExportAPI.jl")
 include("SpecialDefinitions.jl")
 
 #uses DFG v0.10.2 @defVariable for above
-include("variables/Local_Manifold_Workaround.jl")
+include("services/FixmeManifolds.jl")
 include("variables/VariableTypes.jl")
 
 ## More factor types
