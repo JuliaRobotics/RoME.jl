@@ -1,4 +1,5 @@
 
+## FIXME, refactor to use JuliaRobotics/CameraModels.jl instead
 mutable struct CameraIntrinsic
   K::Array{Float64,2}
   CameraIntrinsic(::Nothing) = new()
