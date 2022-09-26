@@ -146,7 +146,6 @@ export
   rangeCompAllPoses,
 
   # older features
-  measureMeanDist,
   predictBodyBR,
   calcPosePointBearingRange,
   odomKDE,
@@ -208,12 +207,10 @@ export
   measUpdateTrackers!,
   assocMeasWFeats!,
 
-  lsrBR,
-
   # jld required Features Type
   LaserFeatures
 
-
+export listVariablesLabelsWithinRange, enableSolveAllNotDRT!
 
 # from odometry utils
 export getMeasurementParametric
@@ -235,3 +232,5 @@ export
   PriorInertialPose3,
   PackedPriorInertialPose3,
   compare
+
+export homography_to_coordinates, coordinates_to_homography

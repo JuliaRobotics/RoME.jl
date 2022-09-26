@@ -3,24 +3,6 @@
 # standardize a common front-end design with feature tracking and real-time integration
 # part of DFG discussion
 
-function triggerPose(x, xprev, Tnow, Tprev,
-                    distrule, timerule, yawrule)
-
-  if norm(x[1:2]-xprev[1:2]) >= distrule
-    @show Tnow, round(x,digits=2), round(xprev,digits=2)
-    @show norm(x[1:2]-xprev[1:2])
-    return 1
-  end
-  if abs(x[3]-xprev[3]) >= yawrule
-    @show Tnow, round(x,digits=2), round(xprev,digits=2)
-    @show abs(x[3]-xprev[3])
-    return 2
-  end
-  if Tnow-Tprev > timerule
-    return 3
-  end
-  return 0
-end
 
 mutable struct GenericInSituSystem{T}
   xprev::Array{Float64,1}
@@ -113,7 +95,7 @@ function poseTrigAndAdd!(instSys::InSituSystem, Ts::Float64,
                         distrule::Float64, timerule::Float64, yawrule::Float64;
                         xprev=zeros(3), auxtrig::Bool=false)
 
-  error(" Yeah dehann, do it properly")
+  error(" Yeah, do it properly")
 
 
 end
