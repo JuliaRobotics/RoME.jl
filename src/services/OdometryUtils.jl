@@ -96,6 +96,10 @@ function resetFactor!(mpp::MutablePose2Pose2Gaussian)::Nothing
 end
 
 
+## =======================================================
+## Legacy code below
+## =======================================================
+
 """
     $SIGNATURES
 
@@ -273,6 +277,25 @@ function addOdoFG!(
   fact = addFactor!(fgl, [vprev;vnext], odo, graphinit=true)
 
   return vnext, fact
+end
+
+function triggerPose(x, xprev, Tnow, Tprev,
+                    distrule, timerule, yawrule)
+
+  if norm(x[1:2]-xprev[1:2]) >= distrule
+    @show Tnow, round(x,digits=2), round(xprev,digits=2)
+    @show norm(x[1:2]-xprev[1:2])
+    return 1
+  end
+  if abs(x[3]-xprev[3]) >= yawrule
+    @show Tnow, round(x,digits=2), round(xprev,digits=2)
+    @show abs(x[3]-xprev[3])
+    return 2
+  end
+  if Tnow-Tprev > timerule
+    return 3
+  end
+  return 0
 end
 
 
