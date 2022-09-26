@@ -27,7 +27,7 @@ using SnoopPrecompile
 
 # to avoid name conflicts
 import Manifolds
-using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component
+using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component, Identity, affine_matrix
 
 import Manifolds: project, project!
 

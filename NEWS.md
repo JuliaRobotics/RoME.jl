@@ -6,6 +6,8 @@ RoME.jl follows semver, with only a few case specific exceptions.  Please see re
 
 - Add `SnoopPrecompile` and Julia v1.8 min compat.
 - Remove `FactorMetadata` and `ConvPerThread` usage as per IIF v0.31.
+- Move code and files to subfolders `services`, `entities`, and `legacy`.
+- Added new features `homograph_to_coordinates` and `coordinates_to_homography`.
 
 ## v0.20
 
