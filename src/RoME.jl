@@ -87,6 +87,8 @@ include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")
 include("factors/MultipleFeaturesConstraint.jl")
 include("factors/InertialPose3.jl")
+# needs maintenance
+include("factors/RangeAzimuthElevation.jl")
 
 # additional tools
 include("FactorGraphAnalysisTools.jl")
@@ -97,6 +99,8 @@ include("SensorModels.jl")
 include("CameraModel.jl")
 include("Slam.jl")
 include("RobotUtils.jl")
+include("services/ManifoldUtils.jl")
+include("services/BearingRangeUtils.jl")
 include("SimulationUtils.jl")
 include("OdometryUtils.jl")
 include("RobotDataTypes.jl")

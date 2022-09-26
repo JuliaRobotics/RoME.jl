@@ -190,4 +190,90 @@ function assembleChordsDict(dfg::AbstractDFG,
 end
 
 
+
+
+"""
+    $(SIGNATURES)
+
+Create a new variable node and insert odometry constraint factor between
+which will automatically increment latest pose symbol x<k+1> for new node new node and
+constraint factor are returned as a tuple.
+"""
+function addOdoFG!(
+  fg::AbstractDFG,
+  n::Symbol,
+  DX::Array{Float64,1},
+  cov::Array{Float64,2};
+  N::Int=0,
+  solvable::Int=1,
+  labels::Vector{<:AbstractString}=String[]  
+)
+  #
+  prev, X, nextn = getLastPose2D(fg)
+  r,c = size(X)
+  if N==0
+    N = c
+  end
+  sig = diag(cov)
+  XnextInit = zeros(r,c)
+  # increases the number of particles based on the number of modes in the measurement Z
+  for i in 1:c
+    ent = [randn()*sig[1]; randn()*sig[2]; randn()*sig[3]]
+    XnextInit[:,i] = addPose2Pose2(X[:,i], DX + ent)
+  end
+
+  v = addVariable!(fg, n, Pose2, N=N, solvable=solvable, tags=[labels;"POSE"])
+  # v = addVariable!(fg, n, XnextInit, cov, N=N, solvable=solvable, tags=labels)
+  pp = Pose2Pose2(MvNormal(DX, cov)) #[prev;v],
+  f = addFactor!(fg, [prev;v], pp, solvable=solvable, graphinit=true )
+  infor = inv(cov^2)
+  # addOdoRemote(prev.index,v.index,DX,infor) # this is for remote factor graph ref parametric solution -- skipped internally by global flag variable
+  return v, f
+end
+
+function addOdoFG!(
+  fgl::AbstractDFG,
+  Z::Pose3Pose3;
+  N::Int=0,
+  solvable::Int=1,
+  labels::Vector{<:AbstractString}=String[]  
+)
+  #
+  vprev, X, nextn = getLastPoses(fgl)[1]
+  vnext = addVariable!(fgl, nextn, Pose3, solvable=solvable, tags=labels)
+  fact = addFactor!(fgl, [vprev;vnext], Z, graphinit=true)
+
+  return vnext, fact
+  # error("addOdoFG!( , ::Pose3Pose3, ) not currently usable, there were breaking changes. Work in Progress")
+  # addOdoFG(fg, n, DX, cov, N=N, solvable=solvable, tags=labels)
+end
+
+"""
+    $(SIGNATURES)
+
+Create a new variable node and insert odometry constraint factor between
+which will automatically increment latest pose symbol x<k+1> for new node new node and
+constraint factor are returned as a tuple.
+
+"""
+function addOdoFG!(
+  fgl::AbstractDFG,
+  odo::Pose2Pose2;
+  N::Int=0,
+  solvable::Int=1,
+  labels::Vector{<:AbstractString}=String[] 
+)
+  #
+  vprev, X, nextn = getLastPose(fgl)
+  if N==0
+    N = size(X,2)
+  end
+  # vnext = addVariable!(fgl, nextn, X⊕odo, ones(1,1), N=N, solvable=solvable, tags=labels)
+  vnext = addVariable!(fgl, nextn, Pose2, N=N, solvable=solvable, tags=labels)
+  fact = addFactor!(fgl, [vprev;vnext], odo, graphinit=true)
+
+  return vnext, fact
+end
+
+
 #

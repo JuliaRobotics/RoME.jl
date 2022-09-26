@@ -1,11 +1,33 @@
 
 ##==============================================================================
-## Legacy, remove some time after RoME v0.21
+## Legacy, remove some time after RoME v0.22
 ##==============================================================================
+
+@deprecate homographyToCoordinates(w...;kw...) homography_to_coordinates(w...;kw...)
+
+export measureMeanDist
+function measureMeanDist(fg::AbstractDFG, a::AbstractString, b::AbstractString)
+  @error "RoME.measureMeanDist is obsolete"
+  #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
+  res = zeros(2)
+  A = getVal(fg,a)
+  B = getVal(fg,b)
+  Ax = Statistics.mean(vec(A[1,:]))
+  Ay = Statistics.mean(vec(A[2,:]))
+  Bx = Statistics.mean(vec(B[1,:]))
+  By = Statistics.mean(vec(B[2,:]))
+  dx = Bx - Ax
+  dy = By - Ay
+  b = atan(dy,dx)
+  r = sqrt(dx^2 + dy^2)
+  return r, b
+end
+
+# should be deprecated or indicated more clearly
+@deprecate lsrBR(a) [a[2,:];a[1,:]]'
 
 # import AMP: _makeVectorManifold
 # AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(BearingRange_Manifold)} = coords(M, prr)
-
 
 
 
