@@ -116,8 +116,8 @@ include("canonical/GenerateBeehive.jl")
 include("canonical/GenerateHelix.jl")
 
 # more utils requiring earlier functions
-include("AdditionalUtils.jl")
-include("g2oParser.jl")
+include("services/AdditionalUtils.jl")
+include("services/g2oParser.jl")
 
 # ScalarFields
 include("services/ScalarFields.jl")
