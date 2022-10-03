@@ -183,7 +183,7 @@ function stringG2o!(dfg::AbstractDFG,
   INF[INF .== Inf] .= 0
   # get command
   comm = !haskey(overwriteMapping, Pose2Pose2) ? commands[Pose2Pose2] : overwriteMapping[Pose2Pose2]
-  return "$comm $(varlist[1]) $(varlist[2]) $(fnc.Z.μ[1]) $(fnc.Z.μ[2]) $(fnc.Z.μ[3]) $(INF[1,1]) $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[2,2]) $(INF[2,3]) $(INF[2,3]) $(INF[2,3])"
+  return "$comm $(varlist[1]) $(varlist[2]) $(fnc.Z.μ[1]) $(fnc.Z.μ[2]) $(fnc.Z.μ[3]) $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[2,2]) $(INF[2,3]) $(INF[3,3])"
 end
 
 function stringG2o!(dfg::AbstractDFG,
