@@ -171,7 +171,7 @@ end
 function stringG2o!(dfg::AbstractDFG,
                     fc::Symbol,
                     fnc::Pose2Pose2,
-                    varIntLabel::Dict,
+                    varIntLabel::OrderedDict,
                     uniqVarInt::Vector{Int};
                     overwriteMapping::Dict=Dict())::String
   #
@@ -189,7 +189,7 @@ end
 function stringG2o!(dfg::AbstractDFG,
                     fc::Symbol,
                     fnc::Pose2Point2BearingRange,
-                    varIntLabel::Dict,
+                    varIntLabel::OrderedDict,
                     uniqVarInt::Vector{Int};
                     overwriteMapping::Dict=Dict{Symbol,Symbol}())::String
   #
@@ -206,7 +206,7 @@ end
 function stringG2o!(dfg::AbstractDFG,
                     fc::Symbol,
                     fnc,
-                    varIntLabel::Dict,
+                    varIntLabel::OrderedDict,
                     uniqVarInt::Vector{Int};
                     overwriteMapping::Dict=Dict{Symbol,Symbol}())
   #
@@ -222,15 +222,17 @@ Export a factor graph to g2o file format.
 Note:
 - This funtion only supports Gaussian (i.e. Normal/MvNormal) factors, unpredictable witchcraft is used in other cases such as `AliasingScalarSampler` factor models.
 """
-function exportG2o(dfg::AbstractDFG;
-                   poseRegex::Regex=r"x\d",
-                   solvable::Int=0,
-                   ignorePriors::Bool=true,
-                   filename::AbstractString="/tmp/test.txt",
-                   overwriteMapping::Dict=Dict{Symbol, Symbol}())
+function exportG2o(
+  dfg::AbstractDFG;
+  poseRegex::Regex=r"x\d",
+  solvable::Int=0,
+  ignorePriors::Bool=true,
+  filename::AbstractString="/tmp/test.txt",
+  overwriteMapping::Dict=Dict{Symbol, Symbol}(),
+  varIntLabel::OrderedDict{Symbol, Int} = OrderedDict{Symbol, Int}(),
+)
   #
   uniqVarInt = Int[-1;]
-  varIntLabel = Dict{Symbol, Int}()
   # all variables
   vars = ls(dfg, poseRegex, solvable=solvable) |> sortDFG
   # all factors
