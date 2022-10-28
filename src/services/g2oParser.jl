@@ -230,6 +230,7 @@ function exportG2o(
   filename::AbstractString="/tmp/test.txt",
   overwriteMapping::Dict=Dict{Symbol, Symbol}(),
   varIntLabel::OrderedDict{Symbol, Int} = OrderedDict{Symbol, Int}(),
+  solveKey::Union{Nothing,Symbol}=nothing,
 )
   #
   uniqVarInt = Int[-1;]
@@ -256,6 +257,21 @@ function exportG2o(
     end
   end
   close(io)
+
+  if !isnothing(solveKey)
+    open(filename, "a") do io
+      for (label,i) in pairs(varIntLabel)
+        vartype = getVariableType(dfg, label)
+        if vartype === Pose2()
+          (x,y,θ) = getPPESuggested(dfg, label, solveKey)
+          write(io, "VERTEX_SE2 $i $x $y $θ\n")
+        else
+          #TODO variable type Pose2 Point2 Pose3(VERTEX_SE3:QUAT ID x y z q_x q_y q_z q_w) Point3
+          error("exportG2o does not support $vartype, open an issue if you would like support")
+        end
+      end
+    end
+  end
 
   return filename
 end
