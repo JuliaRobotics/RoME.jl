@@ -49,6 +49,7 @@ import IncrementalInference: InstanceType
 import DistributedFactorGraphs: compare
 import DistributedFactorGraphs: getDimension, getManifold
 
+using OrderedCollections: OrderedDict
 # const AMP = ApproxManifoldProducts
 
 

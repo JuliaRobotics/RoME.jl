@@ -171,7 +171,7 @@ end
 function stringG2o!(dfg::AbstractDFG,
                     fc::Symbol,
                     fnc::Pose2Pose2,
-                    varIntLabel::Dict,
+                    varIntLabel::OrderedDict,
                     uniqVarInt::Vector{Int};
                     overwriteMapping::Dict=Dict())::String
   #
@@ -183,13 +183,13 @@ function stringG2o!(dfg::AbstractDFG,
   INF[INF .== Inf] .= 0
   # get command
   comm = !haskey(overwriteMapping, Pose2Pose2) ? commands[Pose2Pose2] : overwriteMapping[Pose2Pose2]
-  return "$comm $(varlist[1]) $(varlist[2]) $(fnc.Z.μ[1]) $(fnc.Z.μ[2]) $(fnc.Z.μ[3]) $(INF[1,1]) $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[2,2]) $(INF[2,3]) $(INF[2,3]) $(INF[2,3])"
+  return "$comm $(varlist[1]) $(varlist[2]) $(fnc.Z.μ[1]) $(fnc.Z.μ[2]) $(fnc.Z.μ[3]) $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[2,2]) $(INF[2,3]) $(INF[3,3])"
 end
 
 function stringG2o!(dfg::AbstractDFG,
                     fc::Symbol,
                     fnc::Pose2Point2BearingRange,
-                    varIntLabel::Dict,
+                    varIntLabel::OrderedDict,
                     uniqVarInt::Vector{Int};
                     overwriteMapping::Dict=Dict{Symbol,Symbol}())::String
   #
@@ -206,7 +206,7 @@ end
 function stringG2o!(dfg::AbstractDFG,
                     fc::Symbol,
                     fnc,
-                    varIntLabel::Dict,
+                    varIntLabel::OrderedDict,
                     uniqVarInt::Vector{Int};
                     overwriteMapping::Dict=Dict{Symbol,Symbol}())
   #
@@ -222,15 +222,18 @@ Export a factor graph to g2o file format.
 Note:
 - This funtion only supports Gaussian (i.e. Normal/MvNormal) factors, unpredictable witchcraft is used in other cases such as `AliasingScalarSampler` factor models.
 """
-function exportG2o(dfg::AbstractDFG;
-                   poseRegex::Regex=r"x\d",
-                   solvable::Int=0,
-                   ignorePriors::Bool=true,
-                   filename::AbstractString="/tmp/test.txt",
-                   overwriteMapping::Dict=Dict{Symbol, Symbol}())
+function exportG2o(
+  dfg::AbstractDFG;
+  poseRegex::Regex=r"x\d",
+  solvable::Int=0,
+  ignorePriors::Bool=true,
+  filename::AbstractString="/tmp/test.txt",
+  overwriteMapping::Dict=Dict{Symbol, Symbol}(),
+  varIntLabel::OrderedDict{Symbol, Int} = OrderedDict{Symbol, Int}(),
+  solveKey::Union{Nothing,Symbol}=nothing,
+)
   #
   uniqVarInt = Int[-1;]
-  varIntLabel = Dict{Symbol, Int}()
   # all variables
   vars = ls(dfg, poseRegex, solvable=solvable) |> sortDFG
   # all factors
@@ -254,6 +257,21 @@ function exportG2o(dfg::AbstractDFG;
     end
   end
   close(io)
+
+  if !isnothing(solveKey)
+    open(filename, "a") do io
+      for (label,i) in pairs(varIntLabel)
+        vartype = getVariableType(dfg, label)
+        if vartype === Pose2()
+          (x,y,θ) = getPPESuggested(dfg, label, solveKey)
+          write(io, "VERTEX_SE2 $i $x $y $θ\n")
+        else
+          #TODO variable type Pose2 Point2 Pose3(VERTEX_SE3:QUAT ID x y z q_x q_y q_z q_w) Point3
+          error("exportG2o does not support $vartype, open an issue if you would like support")
+        end
+      end
+    end
+  end
 
   return filename
 end
