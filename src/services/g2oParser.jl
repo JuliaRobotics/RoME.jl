@@ -7,7 +7,8 @@ export importG2o, exportG2o, findCommand, parseG2oInstruction!
 
 
 global commands = Dict(Pose2Pose2 => :EDGE_SE2,
-                       Pose2Point2BearingRange => :LANDMARK)
+                       Pose2Point2BearingRange => :LANDMARK,
+                       Pose3Pose3 => Symbol("EDGE_SE3:QUAT"))
 #
 
 """
@@ -205,6 +206,37 @@ end
 
 function stringG2o!(dfg::AbstractDFG,
                     fc::Symbol,
+                    fnc::Pose3Pose3,
+                    varIntLabel::OrderedDict,
+                    uniqVarInt::Vector{Int};
+                    overwriteMapping::Dict=Dict())::String
+  #
+  global commands
+  # get variable numbers
+  varlist = getVariableListInts!(getFactor(dfg,fc), uniqVarInt, varIntLabel)
+  # get information matrix
+  INF = 1 ./ sqrt(fnc.Z.Σ.mat)
+  INF[INF .== Inf] .= 0
+
+  p = DFG.getPoint(Pose3, fnc.Z.μ)
+  R = p.x[2]
+  Q = convert(TU.Quaternion, TU.SO3(R))
+
+  # get command
+  comm = !haskey(overwriteMapping, Pose3Pose3) ? commands[Pose3Pose3] : overwriteMapping[Pose3Pose3]
+  return """$comm $(varlist[1]) $(varlist[2]) \
+  $(fnc.Z.μ[1]) $(fnc.Z.μ[2]) $(fnc.Z.μ[3]) \
+  $(Q.v[1]) $(Q.v[2]) $(Q.v[3]) $(Q.s) \
+  $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[1,4]) $(INF[1,5]) $(INF[1,6]) \
+  $(INF[2,2]) $(INF[2,3]) $(INF[2,4]) $(INF[2,5]) $(INF[2,6]) \
+  $(INF[3,3]) $(INF[3,4]) $(INF[3,5]) $(INF[3,6]) \
+  $(INF[4,4]) $(INF[4,5]) $(INF[4,6]) \
+  $(INF[5,5]) $(INF[5,6]) \
+  $(INF[6,6])"""
+end
+
+function stringG2o!(dfg::AbstractDFG,
+                    fc::Symbol,
                     fnc,
                     varIntLabel::OrderedDict,
                     uniqVarInt::Vector{Int};
@@ -265,6 +297,13 @@ function exportG2o(
         if vartype === Pose2()
           (x,y,θ) = getPPESuggested(dfg, label, solveKey)
           write(io, "VERTEX_SE2 $i $x $y $θ\n")
+        elseif vartype === Pose3()
+          Xc = getPPESuggested(dfg, label, solveKey)
+          p = getPoint(Pose3, Xc)
+          x,y,z = p.x[1]
+          R = p.x[2]
+          Q = convert(TU.Quaternion, TU.SO3(R))
+          write(io, "VERTEX_SE3:QUAT $i $x $y $z $(Q.v[1]) $(Q.v[2]) $(Q.v[3]) $(Q.s)\n")
         else
           #TODO variable type Pose2 Point2 Pose3(VERTEX_SE3:QUAT ID x y z q_x q_y q_z q_w) Point3
           error("exportG2o does not support $vartype, open an issue if you would like support")
