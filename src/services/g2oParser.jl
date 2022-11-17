@@ -246,6 +246,79 @@ function stringG2o!(dfg::AbstractDFG,
   error("unknown factor type $fnc")
 end
 
+# _writeG2oLine(
+#   _, 
+#   io,
+#   dfg::AbstractDFG, 
+#   label, 
+#   i,
+#   solveKey
+# ) = (close(io); error("exportG2o does not support $vartype, open an issue if you would like support"))
+
+function _writeG2oLinePose2(io, dfg::AbstractDFG, label::Symbol, i::Int, solveKey::Symbol)
+  # println("trying VERTEX_SE2")
+  (x,y,θ) = getPPESuggested(dfg, label, solveKey)
+  write(io, "VERTEX_SE2 $i $x $y $θ\n")
+end
+
+function _writeG2oLinePose3(io, dfg::AbstractDFG, label::Symbol, i::Int, solveKey::Symbol)
+  # println("WHAT IS GOING ON")
+  Xc = getPPESuggested(dfg, label, solveKey)
+  p = getPoint(Pose3, Xc)
+  x,y,z = p.x[1]
+  R = p.x[2]
+  Q = convert(TU.Quaternion, TU.SO3(R))
+  write(io, "VERTEX_SE3:QUAT $i $x $y $z $(Q.v[1]) $(Q.v[2]) $(Q.v[3]) $(Q.s)\n")
+  return nothing
+end
+
+function _doG2oLoop(io, dfg, label, i, solveKey)
+  vartype = getVariableType(dfg, label)
+  typename = string(typeof(vartype).name.name)
+  # FIXME, HACK, WTF https://github.com/JuliaLang/julia/issues/46871#issuecomment-1318035929
+  fnc = getfield(RoME, Symbol(:_writeG2oLine, typename))
+  fnc(io, dfg, label, i, solveKey)
+end
+
+function _writeG2oVertexes(
+  io,
+  dfg::AbstractDFG,
+  varIntLabel::OrderedDict,
+  solveKey::Symbol
+)
+  #
+
+  # io = open(filename, "a")
+  for (label,i) in pairs(varIntLabel)
+    _doG2oLoop(io, dfg, label, i, solveKey)
+  end
+  # close(io)
+  return nothing
+end
+
+
+function _writeG2oFactors(io, dfg, vars, fcts, varIntLabel, uniqVarInt, ignorePriors; solvable, overwriteMapping)
+  for vs in vars
+    # assign a unique number
+    # all factors connected to variable
+    vfcs = ls(dfg, vs; solvable)
+    kvfcs = intersect(vfcs, fcts)
+    for fc in kvfcs
+      # ignore priors
+      ignorePriors && isPrior(dfg, fc) ? (filter!(x->x!=fc, fcts); continue) : nothing
+      # only add factors to g2o file once, remove if found
+      !(fc in fcts) ? continue : filter!(x->x!=fc, fcts)
+      # actually add the factor to the file
+      fnc = getFactorType(dfg, fc)
+      pstr = stringG2o!(dfg, fc, fnc, varIntLabel, uniqVarInt; overwriteMapping)
+      println(io, pstr)
+    end
+  end
+  # close(io)
+
+  nothing
+end
+
 """
     $SIGNATURES
 
@@ -267,50 +340,17 @@ function exportG2o(
   #
   uniqVarInt = Int[-1;]
   # all variables
-  vars = ls(dfg, poseRegex, solvable=solvable) |> sortDFG
+  vars = ls(dfg, poseRegex; solvable) |> sortDFG
   # all factors
-  fcts = lsf(dfg, solvable=solvable)
+  fcts = lsf(dfg; solvable)
   # build text file based on factors, using pose variable order as guide
   io = open(filename,"w")
-  for vs in vars
-    # assign a unique number
-    # all factors connected to variable
-    vfcs = ls(dfg, vs, solvable=solvable)
-    kvfcs = intersect(vfcs, fcts)
-    for fc in kvfcs
-      # ignore priors
-      ignorePriors && isPrior(dfg, fc) ? (filter!(x->x!=fc, fcts); continue) : nothing
-      # only add factors to g2o file once, remove if found
-      !(fc in fcts) ? continue : filter!(x->x!=fc, fcts)
-      # actually add the factor to the file
-      fnc = getFactorType(dfg, fc)
-      pstr = stringG2o!(dfg, fc, fnc, varIntLabel, uniqVarInt, overwriteMapping=overwriteMapping)
-      println(io, pstr)
-    end
-  end
-  close(io)
-
+  
   if !isnothing(solveKey)
-    open(filename, "a") do io
-      for (label,i) in pairs(varIntLabel)
-        vartype = getVariableType(dfg, label)
-        if vartype === Pose2()
-          (x,y,θ) = getPPESuggested(dfg, label, solveKey)
-          write(io, "VERTEX_SE2 $i $x $y $θ\n")
-        elseif vartype === Pose3()
-          Xc = getPPESuggested(dfg, label, solveKey)
-          p = getPoint(Pose3, Xc)
-          x,y,z = p.x[1]
-          R = p.x[2]
-          Q = convert(TU.Quaternion, TU.SO3(R))
-          write(io, "VERTEX_SE3:QUAT $i $x $y $z $(Q.v[1]) $(Q.v[2]) $(Q.v[3]) $(Q.s)\n")
-        else
-          #TODO variable type Pose2 Point2 Pose3(VERTEX_SE3:QUAT ID x y z q_x q_y q_z q_w) Point3
-          error("exportG2o does not support $vartype, open an issue if you would like support")
-        end
-      end
-    end
+    _writeG2oVertexes( io,dfg, varIntLabel,solveKey)
   end
+  _writeG2oFactors(io, dfg, vars, fcts, varIntLabel, uniqVarInt, ignorePriors; overwriteMapping, solvable)
+  close(io)
 
   return filename
 end
