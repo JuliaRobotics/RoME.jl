@@ -19,6 +19,7 @@ testfiles = [
   # dev test first, for faster issues.
   # ...
   # "testFluxModelsPose2.jl";
+  "testG2oExportSE3.jl";
 
   #parametric tests
   "testParametric.jl";
