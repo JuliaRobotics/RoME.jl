@@ -180,7 +180,7 @@ function stringG2o!(dfg::AbstractDFG,
   # get variable numbers
   varlist = getVariableListInts!(getFactor(dfg,fc), uniqVarInt, varIntLabel)
   # get information matrix
-  INF = 1 ./ sqrt(fnc.Z.Σ.mat)
+  INF = inv(fnc.Z.Σ.mat) # 1 ./ sqrt(fnc.Z.Σ.mat) # 
   INF[INF .== Inf] .= 0
   # get command
   comm = !haskey(overwriteMapping, Pose2Pose2) ? commands[Pose2Pose2] : overwriteMapping[Pose2Pose2]
