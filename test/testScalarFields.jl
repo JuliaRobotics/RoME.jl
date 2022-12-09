@@ -28,8 +28,7 @@ dem = Interpolations.LinearInterpolation((x,y), img) # interpolated DEM
 elevation(p) = dem(getPPE(fg, p, :simulated).suggested[1:2]'...)
 sigma_e = 0.01 # elevation measurement uncertainty
 
-## test buildDEMSimulated
-
+## test buildDEMSimulated to ensure interpolation matches raw data 
 im = (j->((i->dem(i,j)).(x))).(y);
 @cast im_[i,j] := im[j][i];
 @test norm(im_ - img) < 1e-10
