@@ -198,7 +198,7 @@ function stringG2o!(dfg::AbstractDFG,
   # get variable numbers
   varlist = getVariableListInts!(getFactor(dfg,fc), uniqVarInt, varIntLabel)
   # get information matrix
-  INF = [1/sqrt(fnc.bearing.σ); 0; 1/sqrt(fnc.range.σ)]
+  INF = [1/var(fnc.bearing); 0; 1/var(fnc.range)]
   # get command
   comm = !haskey(overwriteMapping, Pose2Point2BearingRange) ? commands[Pose2Point2BearingRange] : overwriteMapping[Pose2Point2BearingRange]
   return "$comm $(varlist[1]) $(varlist[2]) $(fnc.bearing.μ) $(fnc.range.μ) $(INF[1]) $(INF[2]) $(INF[3])"
@@ -215,7 +215,7 @@ function stringG2o!(dfg::AbstractDFG,
   # get variable numbers
   varlist = getVariableListInts!(getFactor(dfg,fc), uniqVarInt, varIntLabel)
   # get information matrix
-  INF = 1 ./ sqrt(fnc.Z.Σ.mat)
+  INF = invcov(fnc.Z)
   INF[INF .== Inf] .= 0
 
   p = DFG.getPoint(Pose3, fnc.Z.μ)
