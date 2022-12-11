@@ -41,6 +41,7 @@ testfiles = [
   "testpackingconverters.jl";
   "testInflation380.jl";
   "testPoint2Point2.jl";
+  "testParametricCovariances.jl";
   "testParametricSimulated.jl";
   "testBasicPose2Conv.jl";
   "testGraphGenerators.jl";

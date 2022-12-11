@@ -467,12 +467,12 @@ M = SpecialEuclidean(3)
 mpts = getPoints(fg[1], :x4)
 mu_fg1 = mean(M, mpts)
 
-@test isapprox(submanifold_component(mu_fg1,1), [0,0,4], atol=0.2)
+@test isapprox(submanifold_component(mu_fg1,1), [0,0,4], atol=0.3)
 
 mpts = getPoints(fg[2], :x4)
 mu_fg2 = mean(M, mpts)
 
-@test_broken isapprox(submanifold_component(mu_fg2,1), [0,0,4], atol=0.2)
+@test_broken isapprox(submanifold_component(mu_fg2,1), [0,0,4], atol=0.3)
 
 ##
 end
