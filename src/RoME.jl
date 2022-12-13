@@ -154,11 +154,12 @@ end
 function _doPrecompileWorkload(;
   skipCompile::Bool = string(get(ENV,"ROMEJL_SKIP_SNOOPPRECOMPILE","false")) == "true"
 )
+  println("RoME.jl precompilation can be skipped by setting ENV variable ROMEJL_SKIP_SNOOPPRECOMPILE=\"true\"")
   if skipCompile
     @warn "ENV variable ROMEJL_SKIP_SNOOPPRECOMPILE exists and set to $(ENV["ROMEJL_SKIP_SNOOPPRECOMPILE"]), so skipping RoME precompilation workload."
     return nothing
   end
-
+  
   # do actual workload
   warmUpSolverJIT()
 end
