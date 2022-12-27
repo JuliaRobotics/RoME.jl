@@ -34,7 +34,7 @@ TensorCast = "02d47bb6-7ce6-556a-be16-bb1710789e2b"
 TransformUtils = "9b8138ad-1b09-5408-aa39-e87ed6d21b63"
 
 [compat]
-ApproxManifoldProducts = "0.6"
+ApproxManifoldProducts = "0.6.2"
 CoordinateTransformations = "0.5, 0.6"
 DistributedFactorGraphs = "0.18.4"
 Distributions = "0.24, 0.25"

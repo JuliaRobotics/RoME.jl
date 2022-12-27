@@ -28,7 +28,7 @@ f0 = addFactor!(fg, [:x1], PriorPose3(MvNormal([0.0, 5.0, 9.0, 0.1, 0.0, pi/2], 
 prpz = PriorPose3ZRP( Normal(11.0, 1.0), MvNormal( [-0.1, 0.0], diagm([0.1, 0.1].^2) ))
 f1 = addFactor!(fg, [:x1], prpz)
 
-sf = sampleFactor(fg, :x1f2, 100)
+sf = sampleFactor(fg, :x1f2, N)
 mu = getCoordinates(Pose3, mean(M, sf))
 
 solveTree!(fg)
