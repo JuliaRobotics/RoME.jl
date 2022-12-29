@@ -43,6 +43,7 @@ function IIF.getMeasurementParametric(s::DynPose2VelocityPrior{<:MvNormal, <:MvN
 end
 
 function (cf::CalcFactor{<:DynPose2VelocityPrior})(meas, X)
+  # FIXME update Manifolds.jl usage
   #pose part, reused from PriorPose2
   iXihat = SE2(meas[1:3]) \ SE2(X[1:3])	
   res_pose = se2vee(iXihat)	
@@ -69,6 +70,7 @@ function (cf::CalcFactor{<:DynPose2Pose2})( meas,
                                             wXi,
                                             wXj  )
   #
+  # FIXME update to Manifolds.jl usage
   # cf.factor.Zpose(res, meas, wXi, wXj)
   wXjhat = SE2(wXi)*SE2(meas)
   jXjhat = SE2(wXj) \ wXjhat
@@ -152,6 +154,8 @@ function (cf::CalcFactor{<:DynPose2DynPose2})(meas,
                                               wXi,
                                               wXj  )
   #
+  # FIXME update to Manifolds.jl usage
+
   # vp2vp2.Zpose(res, userdata, idx, meas, Xi, Xj)
     # wXjhat = SE2(wxi[1:3,idx])*SE2(meas[1][1:3,idx])
     # jXjhat = SE2(wxj[1:3,idx]) \ wXjhat

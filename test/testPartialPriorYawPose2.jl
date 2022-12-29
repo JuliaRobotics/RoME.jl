@@ -1,6 +1,6 @@
+
 using RoME
 using Test
-# using Manifolds: ProductRepr # only use ArrayPartition
 
 ##
 
@@ -27,7 +27,7 @@ initAll!(fg)
 tree = solveTree!(fg)
 
 me_ = getBelief(fg, :x) |> mean
-# M = getManifold(Pose2)
+M = getManifold(Pose2)
 # me_ = mean(M, getVal(fg, :x))
 #x should form a dounut around 1,1 with yaw close to zero
 @test isapprox(M.manifold[1], submanifold_component(me_,1), [1,1], atol=1.0)
