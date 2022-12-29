@@ -3,7 +3,7 @@ using LinearAlgebra
 using RoME
 # , IncrementalInference, TransformUtils, Distributions
 using Test
-import  IncrementalInference: getSample
+import  IncrementalInference: getSample, getManifold
 using TransformUtils: Euler
 ##
 
@@ -12,6 +12,7 @@ mutable struct RotationTest <: IncrementalInference.AbstractRelativeRoots
 end
 
 getSample(cfo::CalcFactor{<:RotationTest}) = rand(cfo.factor.z)
+getManifold(::RotationTest) = RealCircleGroup()
 
 # 3 dimensional line, z = [a b][x y]' + c
 function (cfo::CalcFactor{<:RotationTest})( meas, 

@@ -1,5 +1,6 @@
 # test partial pose3 constraints and evaluation
 
+# using Revise
 using Statistics
 using RoME
 using Test
@@ -28,8 +29,12 @@ f0 = addFactor!(fg, [:x1], PriorPose3(MvNormal([0.0, 5.0, 9.0, 0.1, 0.0, pi/2], 
 prpz = PriorPose3ZRP( Normal(11.0, 1.0), MvNormal( [-0.1, 0.0], diagm([0.1, 0.1].^2) ))
 f1 = addFactor!(fg, [:x1], prpz)
 
-sf = sampleFactor(fg, :x1f2, 100)
-mu = getCoordinates(Pose3, mean(M, sf))
+sf = sampleFactor(fg, :x1f2, N)
+
+Mzrp = f1 |> getFactorType |> getManifold
+zrp0 = identity_element(Mzrp)
+mu = vee(Mzrp, zrp0, log(Mzrp, zrp0, mean(Mzrp, sf)))
+# mu = getCoordinates(Pose3, mean(Mzrp, sf)) # M # starting to improve partials, getManifold of partial factor returns whatever that manifold is
 
 solveTree!(fg)
 
