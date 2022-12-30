@@ -56,7 +56,7 @@ function (cf::CalcFactor{<:Pose2Pose2})(
               p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
               q::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where {XT<:Real,T<:Real}
 
-    M = getManifold(Pose2)
+    M = cf.manifold # getManifold(Pose2)
     ϵ0 = ArrayPartition(zeros(SVector{2,T}), SMatrix{2, 2, T}(I))
 
     ϵX = exp(M, ϵ0, X)

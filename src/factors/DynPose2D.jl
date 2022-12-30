@@ -16,7 +16,7 @@ function getSample(cf::CalcFactor{<:DynPose2VelocityPrior})
   Zpose = cf.factor.Zpose
   Zvel = cf.factor.Zvel
   p = getPointIdentity(DynPose2())
-  M = getManifold(cf.factor)
+  M = cf.manifold # getManifold(cf.factor)
   
   Xc = [rand(Zpose);rand(Zvel)]
   

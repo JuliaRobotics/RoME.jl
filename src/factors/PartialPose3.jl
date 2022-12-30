@@ -25,7 +25,7 @@ Manifolds.identity_element(::typeof(ProductManifold(TranslationGroup(1),RealCirc
 #FIXME update to also only one measurement
 function getSample(cf::CalcFactor{<:PriorPose3ZRP})
   # working towards producing samples as a point on the manifold of getManifold(::PriorPose3ZRP)
-  Mf = getManifold(Pose3)
+  Mf = getManifold(Pose3) # full Pose3 with partial logic
 
   #Rotation part: from Euler roll and pitch
   r,p = rand(cf.factor.rp)
