@@ -29,7 +29,7 @@ using SnoopPrecompile
 import Manifolds
 using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component, Identity, affine_matrix
 
-import Manifolds: project, project!
+import Manifolds: project, project!, identity_element
 
 import Rotations as _Rot
 

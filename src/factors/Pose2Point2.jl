@@ -20,14 +20,23 @@ Pose2Point2(Z::SamplableBelief) = Pose2Point2(;Z)
 getManifold(::InstanceType{Pose2Point2}) = getManifold(Point2)
 
 # define the conditional probability constraint
-function (cfo::CalcFactor{<:Pose2Point2})(meas,
-                                          wXi,
-                                          wLj )
+function (cfo::CalcFactor{<:Pose2Point2})(p_Xpq,
+                                          w_T_p,
+                                          w_Tl_q )
   #
-  #FIXME upgrade to manifolds 
-  _wXi = getCoordinates(Pose2, wXi)
-  wLj_pred = SE2(_wXi)*SE2([meas;0.0])
-  return  wLj .- se2vee(wLj_pred)[1:2]
+  M = SpecialEuclidean(2)
+
+  p_T_qhat = ArrayPartition(SA[p_Xpq[1];p_Xpq[2]], SMatrix{2,2}([1 0; 0 1.]))
+  _w_T_p = ArrayPartition(SA[w_T_p.x[1]...], SMatrix{2,2}(w_T_p.x[2]))
+  w_H_qhat = affine_matrix(M, _w_T_p) * affine_matrix(M, p_T_qhat)
+  # Issue, this produces ComposedFunction which errors on not having field .x[1]
+  # w_T_qhat = compose(M, _w_T_p, p_T_qhat)
+  return w_Tl_q .- w_H_qhat[1:2,end]
+  
+  # upgraded to manifolds 
+  # w_Cp = getCoordinates(Pose2, w_T_p)
+  # w_Tl_q_pred = SE2(w_Cp)*SE2([p_Xpq;0.0])
+  # return  w_Tl_q .- se2vee(w_Tl_q_pred)[1:2]
 end
 
 
