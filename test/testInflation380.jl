@@ -51,7 +51,10 @@ initVariable!(fg, :x1, X1_)
 
 ##
 
-IIF._getCCW(fg, :x0x1f1).inflation = 50.0
+fct = getFactorType(fg, :x0x1f1)
+deleteFactor!(fg, :x0x1f1)
+addFactor!(fg, [:x0;:x1], fct; inflation=50.)
+# IIF._getCCW(fg, :x0x1f1).inflation = 50.0
 pts = approxConv(fg, :x0x1f1, :x1)
 
 initVariable!(fg, :x1, pts)
