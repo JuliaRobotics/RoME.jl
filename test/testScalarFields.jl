@@ -1,5 +1,6 @@
 # test scalar field
 
+# using Revise
 using Test
 using ImageCore, ImageIO
 using TensorCast
@@ -135,6 +136,9 @@ end
 # Gadfly.set_default_plot_size(35cm,20cm)
 
 # plotSLAM2D_KeyAndRef(fg)
-
+# imshow(img)
 
 ##
+
+
+

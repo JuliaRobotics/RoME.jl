@@ -22,7 +22,7 @@ function generateGraph_Helix2D!(numposes::Integer = 40;
                                 graphinit = nothing,
                                 useMsgLikelihoods = nothing,
                                 solverParams::SolverParams = SolverParams(;graphinit=false),
-                                dfg::AbstractDFG = LightDFG{SolverParams}(;solverParams),
+                                dfg::AbstractDFG = LocalDFG{SolverParams}(;solverParams),
                                 radius::Real = 10,
                                 spine_t = (t)->0 + im*0,
                                 xr_t::Function = (t)->real(spine_t(t)),
@@ -63,7 +63,7 @@ function generateGraph_Helix2D!(numposes::Integer = 40;
   # select the starting point
   _μ0 = μ0
   # @show _μ0 = 1 == bidx ? μ0 : getPPE(dfg, lastpose, refKey).suggested
-  Tμ = SE2(_μ0-[0;0;pi/2])
+  Tμ = SE2(_μ0-[0;0;pi/2]) # TODO update to Manifolds.jl
   
   # current end pose count for number of turns
   eidx = 1
