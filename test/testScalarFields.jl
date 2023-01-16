@@ -82,7 +82,7 @@ end
 # 2. generate trajectory 
 
 μ0 = [-7000;-2000.0;pi/2]
-@time generateGraph_Helix2DSlew!(70, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb) #, slew_x=1/20)
+@time generateGraph_Helix2DSlew!(10, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb) #, slew_x=1/20)
 deleteFactor!(fg, :x0f1)
 
 ##
