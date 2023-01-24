@@ -25,7 +25,7 @@ function solve_batch(total_meas::Integer)
     data_logpath = ENV["HOME"]*"/Documents/wafr/mit-batch-$(total_meas)-$(now())"
 
     # Create initial factor graph with specified logging path.
-    fg = GraphsDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
+    fg = LocalDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
 
     # Add initial variable with a prior measurement to anchor the graph.
     addVariable!(fg, :x0, Pose2)

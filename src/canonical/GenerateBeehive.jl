@@ -19,7 +19,7 @@ See also: [`generateGraph_Honeycomb!`](@ref), [`generateGraph_Hexagonal`](@ref),
 """
 function generateGraph_Beehive!(poseCountTarget::Int=10;
                                 graphinit::Bool = true,
-                                dfg::AbstractDFG = GraphsDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),
+                                dfg::AbstractDFG = LocalDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),
                                 useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
                                 solvable::Int = 1,
                                 refKey::Symbol = :simulated,

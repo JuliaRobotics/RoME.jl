@@ -25,7 +25,7 @@ function go(initial_offset::Integer, final_timestep::Integer, solve_stride::Inte
     # Choose where to save the step's data.
     data_logpath = ENV["HOME"]*"/Documents/wafr/mit-incremental-$(final_timestep)-$(now())"
     # Create initial factor graph with specified logging path.
-    fg = GraphsDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
+    fg = LocalDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
 
     # adding debug
     getSolverParams(fg).dbg = true # store cliqSubFg at critical points during solve.

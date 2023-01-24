@@ -28,7 +28,7 @@ function go_fixedlag(initial_offset::Integer, final_timestep::Integer, qfl_lengt
     data_logpath = "/media/data2/tonio_results/manhattan-comb-qfl$(qfl_length)-$(now())"
 
     # Create initial factor graph with specified logging path.
-    fg = GraphsDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
+    fg = LocalDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
     tree = emptyBayesTree()
 
     # Set up the fixed lag smoothing.
