@@ -377,7 +377,7 @@ end
 #=
 
 
-fg = LightDFG{SolverParams}(solverParams=SolverParams())
+fg = GraphsDFG{SolverParams}(solverParams=SolverParams())
 
 # Add the first pose :x0
 x0 = addVariable!(fg, :x0, Pose2)
@@ -490,7 +490,7 @@ plotSLAM2D(fg)
 
 # Random.seed!(42) # The answer to reproducable noise
 
-fg = LightDFG(solverParams=SolverParams(graphinit=false, gibbsIters=5, spreadNH=5.0))
+fg = GraphsDFG(solverParams=SolverParams(graphinit=false, gibbsIters=5, spreadNH=5.0))
 
 pRight = 0.8
 pWrong = 0.2
