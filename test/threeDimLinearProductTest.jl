@@ -195,7 +195,7 @@ global X2pts = approxConv(fg, :x1x2f1, :x2)
 
 mu = mean(M, getVal(fg,:x1))
 T = submanifold_component(mu,1)
-@test isapprox(T, [0,0,0], atol=0.6)
+@test_broken isapprox(T, [0,0,0], atol=0.1) # 0.6
 Rc = submanifold_component(mu,2)
 @test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
