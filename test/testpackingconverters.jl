@@ -68,8 +68,8 @@ unpackeddata = reconstFactorData(fg, getVariableOrder(f1), IIF.FunctionNodeData{
 @test DFG.compare(DFG.getSolverData(f1), unpackeddata)
 
 # TODO: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/44
-packedv1data = packVariableNodeData(fg, DFG.getSolverData(v1))
-upv1data = unpackVariableNodeData(fg, packedv1data)
+packedv1data = packVariableNodeData(DFG.getSolverData(v1))
+upv1data = unpackVariableNodeData(packedv1data)
 # packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
 # upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 
@@ -163,7 +163,7 @@ global unpackeddata = reconstFactorData(fg, getVariableOrder(f1), IncrementalInf
 
 # TODO -- fix ambibuity in compare function
 @test compareAll(DFG.getSolverData(f1), unpackeddata, skip=[:fnc;])
-@test compareAll(DFG.getSolverData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!;:vartypes])
+@test compareAll(DFG.getSolverData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!;:vartypes;:particleidx;:varidx])
 @test compareAll(DFG.getSolverData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;:Z;:p])
 
 # deprecated p

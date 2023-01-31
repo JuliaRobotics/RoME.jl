@@ -108,7 +108,7 @@ Related
 """
 function generateGraph_Boxes2D!(numposes::Integer=16;
                                 graphinit::Bool=false,
-                                dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),
+                                dfg::AbstractDFG = LocalDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),
                                 useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
                                 length_x::Real=15,
                                 length_y::Real=length_x,

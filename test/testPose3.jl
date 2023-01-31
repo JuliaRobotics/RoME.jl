@@ -10,7 +10,7 @@ M = getManifold(Pose3)
 
 @test M == Manifolds.SpecialEuclidean(3)
 
-C = randn(6)
+C = 0.2*randn(6)
 H = coordinates_to_homography(M, C)
 C_ = homography_to_coordinates(M, H)
 

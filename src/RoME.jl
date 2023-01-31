@@ -29,7 +29,7 @@ using SnoopPrecompile
 import Manifolds
 using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component, Identity, affine_matrix
 
-import Manifolds: project, project!
+import Manifolds: project, project!, identity_element
 
 import Rotations as _Rot
 
@@ -49,6 +49,7 @@ import IncrementalInference: InstanceType
 import DistributedFactorGraphs: compare
 import DistributedFactorGraphs: getDimension, getManifold
 
+using OrderedCollections: OrderedDict
 # const AMP = ApproxManifoldProducts
 
 
@@ -153,11 +154,12 @@ end
 function _doPrecompileWorkload(;
   skipCompile::Bool = string(get(ENV,"ROMEJL_SKIP_SNOOPPRECOMPILE","false")) == "true"
 )
+  println("RoME.jl precompilation can be skipped by setting ENV variable ROMEJL_SKIP_SNOOPPRECOMPILE=\"true\"")
   if skipCompile
     @warn "ENV variable ROMEJL_SKIP_SNOOPPRECOMPILE exists and set to $(ENV["ROMEJL_SKIP_SNOOPPRECOMPILE"]), so skipping RoME precompilation workload."
     return nothing
   end
-
+  
   # do actual workload
   warmUpSolverJIT()
 end

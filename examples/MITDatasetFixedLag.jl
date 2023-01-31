@@ -31,7 +31,7 @@ function go_fixedlag(initial_offset::Integer,
     data_logpath = ENV["HOME"]*"/Documents/wafr/mit-b$(qfl_length)-$(now())"
 
     # Create initial factor graph with specified logging path.
-    fg = LightDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
+    fg = LocalDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
     tree = emptyBayesTree()
 
     # Set up the fixed lag smoothing.

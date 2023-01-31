@@ -19,6 +19,8 @@ testfiles = [
   # dev test first, for faster issues.
   # ...
   # "testFluxModelsPose2.jl";
+  "testPartialRangeCrossCorrelations.jl";
+  "testG2oExportSE3.jl";
 
   #parametric tests
   "testParametric.jl";
@@ -40,6 +42,7 @@ testfiles = [
   "testpackingconverters.jl";
   "testInflation380.jl";
   "testPoint2Point2.jl";
+  "testParametricCovariances.jl";
   "testParametricSimulated.jl";
   "testBasicPose2Conv.jl";
   "testGraphGenerators.jl";
@@ -49,7 +52,6 @@ testfiles = [
   "testDidsonFunctions.jl";
   "testBasicPose2Stationary.jl";
   "TestPoseAndPoint2Constraints.jl";
-  "testPartialRangeCrossCorrelations.jl";
   "testDynPoint2D.jl";
   "testDeltaOdo.jl";
   "testFixedLagFG.jl";

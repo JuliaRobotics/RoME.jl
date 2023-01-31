@@ -62,7 +62,7 @@ end
 ##
 # using Random
 # Random.seed!(42);
-# fg = LightDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
+# fg = LocalDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
 
 # fg.solverParams.graphinit = false
 # pr_noise = [0.01, 0.01, 0.001]
@@ -124,7 +124,7 @@ end
 
 @testset "Test Parametric PriorPose2 and Pose2Point2" begin
 
-fg = LightDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
+fg = LocalDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
 
 addVariable!(fg, :x1, Pose2)
 addVariable!(fg, :l1, Point2)
@@ -185,7 +185,7 @@ end
 
 @test_broken begin
 @warn "Parametric VelPose2 is broken and tests skipped"    
-fg = LightDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
+fg = LocalDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
 
 # add first pose locations
 addVariable!(fg, :x0, DynPose2; nanosecondtime=0)
@@ -213,7 +213,7 @@ end
 
 @testset "Test Parametric PriorPoint2 and Point2Point2Range" begin
 
-fg = LightDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
+fg = LocalDFG( solverParams=SolverParams(algorithms=[:default, :parametric]))
 
 addVariable!(fg, :x1, Point2)
 addVariable!(fg, :l1, Point2)

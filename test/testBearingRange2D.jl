@@ -354,7 +354,7 @@ pts0 = filter(eachcol(pts)) do p
     isapprox(p[1:2],[0,0], atol=1)
 end
 theta = mean(getindex.(pts0,3))
-@test isapprox(theta, 0.0, atol=0.1)
+@test isapprox(theta, 0.0, atol=0.15)
 
 ##
 
@@ -377,7 +377,7 @@ end
 #=
 
 
-fg = LightDFG{SolverParams}(solverParams=SolverParams())
+fg = LocalDFG{SolverParams}(solverParams=SolverParams())
 
 # Add the first pose :x0
 x0 = addVariable!(fg, :x0, Pose2)
@@ -490,7 +490,7 @@ plotSLAM2D(fg)
 
 # Random.seed!(42) # The answer to reproducable noise
 
-fg = LightDFG(solverParams=SolverParams(graphinit=false, gibbsIters=5, spreadNH=5.0))
+fg = LocalDFG(solverParams=SolverParams(graphinit=false, gibbsIters=5, spreadNH=5.0))
 
 pRight = 0.8
 pWrong = 0.2

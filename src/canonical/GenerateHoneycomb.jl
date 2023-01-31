@@ -172,7 +172,7 @@ end
 
 function generateGraph_Honeycomb!(poseCountTarget::Int=36;
                                   graphinit::Bool = false,
-                                  dfg::AbstractDFG = LightDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),  
+                                  dfg::AbstractDFG = LocalDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),  
                                   useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
                                   direction::Symbol = :right,
                                   solvable::Int=1,

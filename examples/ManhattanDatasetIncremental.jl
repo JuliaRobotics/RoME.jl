@@ -25,7 +25,7 @@ function go(initial_offset::Integer, final_timestep::Integer)
     # Choose where to save the step's data.
     data_logpath = "/media/data2/tonio_results/manhattan-$(now())"
     # Create initial factor graph with specified logging path.
-    fg = LightDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
+    fg = LocalDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
 
     # adding debug
     getSolverParams(fg).dbg = true # store cliqSubFg at critical points during solve.

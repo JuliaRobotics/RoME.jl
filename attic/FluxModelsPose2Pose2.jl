@@ -161,8 +161,8 @@ function (cfo::CalcFactor{<:FluxModelsPose2Pose2})(meas1,meas2,meas3,Xi,Xj)
   end
 
   # calculate the error for that measurement sample as Pose2Pose2
-  #TODO
-  cfZij = CalcFactor( nfb.Zij, nothing, 0, 0, (), [])
+  # FIXME, not sure this constructor still works
+  cfZij = CalcFactor( nfb.Zij, nothing, 0, (), [])
   res = cfZij((meas[1],), Xi, Xj)
 
 end

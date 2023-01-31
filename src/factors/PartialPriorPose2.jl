@@ -10,20 +10,21 @@ Base.@kwdef struct PartialPriorYawPose2{T <: IIF.SamplableBelief} <: IIF.Abstrac
 end
 PartialPriorYawPose2(Z::SamplableBelief) = PartialPriorYawPose2(;Z)
 
+getManifold(::PartialPriorYawPose2) = RealCircleGroup() # SpecialEuclidean(2)
+
 function getSample(cf::CalcFactor{<:PartialPriorYawPose2})
     
   Z = cf.factor.Z
-  M = getManifold(cf.factor)
-  p = getPointIdentity(M)
+  return rand(Z,1)
+  # M = getManifold(cf.factor)
+  # p = getPointIdentity(M)
   
-  Xc = [0,0,rand(Z)]
+  # Xc = [0,0,rand(Z)]
   
-  X = hat(M, p, Xc)
-  points = exp(M, p, X)
-  return points
+  # X = hat(M, p, Xc)
+  # points = exp(M, p, X)
+  # return points
 end
-
-getManifold(::PartialPriorYawPose2) = SpecialEuclidean(2)
 
 ## Serialization support
 

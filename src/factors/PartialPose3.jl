@@ -17,19 +17,32 @@ end
 PriorPose3ZRP(z::SamplableBelief,rp::SamplableBelief) = PriorPose3ZRP(;z, rp)
 
 # TODO should be dim 3 manifold
-getManifold(::PriorPose3ZRP) = getManifold(Pose3) # SpecialEuclidean(3)
+getManifold(zrp::PriorPose3ZRP) = ProductManifold(TranslationGroup(1),RealCircleGroup(),RealCircleGroup())
+# DIDNT WORK YET, partials need more attention:  getManifoldPartial(getManifold(Pose3), [zrp.partial...;]) 
+
+Manifolds.identity_element(::typeof(ProductManifold(TranslationGroup(1),RealCircleGroup(),RealCircleGroup())),dummy=nothing) = ArrayPartition([0.], [0.], [0.])
 
 #FIXME update to also only one measurement
 function getSample(cf::CalcFactor{<:PriorPose3ZRP})
+  # working towards producing samples as a point on the manifold of getManifold(::PriorPose3ZRP)
+  Mf = getManifold(Pose3) # full Pose3 with partial logic
 
-  #Rotation part: roll and pitch
+  #Rotation part: from Euler roll and pitch
   r,p = rand(cf.factor.rp)
   R = _Rot.RotYX(p, r) #TODO confirm RotYX(p,r) or RotXY(r,p)
   
   # Translation part: Z
   T = [0; 0; rand(cf.factor.z)]
+  pt = ArrayPartition(T, R)
 
-  return ArrayPartition(T, R)
+  # FIXME, this is probably not quite right
+  # to Lie exponential parameterization, notice world reference
+  w_Cp = vee(Mf, Identity(Mf), log(Mf, Identity(Mf), pt))
+  return ArrayPartition(
+    [w_Cp[cf.factor.partial[1]]], 
+    [w_Cp[cf.factor.partial[2]]], 
+    [w_Cp[cf.factor.partial[3]]] 
+  )
 end
 
 

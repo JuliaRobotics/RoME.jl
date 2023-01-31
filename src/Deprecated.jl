@@ -3,31 +3,31 @@
 ## Legacy, remove some time after RoME v0.22
 ##==============================================================================
 
-@deprecate homographyToCoordinates(w...;kw...) homography_to_coordinates(w...;kw...)
+# @deprecate homographyToCoordinates(w...;kw...) homography_to_coordinates(w...;kw...)
 
-export measureMeanDist
-function measureMeanDist(fg::AbstractDFG, a::AbstractString, b::AbstractString)
-  @error "RoME.measureMeanDist is obsolete"
-  #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
-  res = zeros(2)
-  A = getVal(fg,a)
-  B = getVal(fg,b)
-  Ax = Statistics.mean(vec(A[1,:]))
-  Ay = Statistics.mean(vec(A[2,:]))
-  Bx = Statistics.mean(vec(B[1,:]))
-  By = Statistics.mean(vec(B[2,:]))
-  dx = Bx - Ax
-  dy = By - Ay
-  b = atan(dy,dx)
-  r = sqrt(dx^2 + dy^2)
-  return r, b
-end
+# export measureMeanDist
+# function measureMeanDist(fg::AbstractDFG, a::AbstractString, b::AbstractString)
+#   @error "RoME.measureMeanDist is obsolete"
+#   #bearrang!(residual::Array{Float64,1}, Z::Array{Float64,1}, X::Array{Float64,1}, L::Array{Float64,1})
+#   res = zeros(2)
+#   A = getVal(fg,a)
+#   B = getVal(fg,b)
+#   Ax = Statistics.mean(vec(A[1,:]))
+#   Ay = Statistics.mean(vec(A[2,:]))
+#   Bx = Statistics.mean(vec(B[1,:]))
+#   By = Statistics.mean(vec(B[2,:]))
+#   dx = Bx - Ax
+#   dy = By - Ay
+#   b = atan(dy,dx)
+#   r = sqrt(dx^2 + dy^2)
+#   return r, b
+# end
 
-# should be deprecated or indicated more clearly
-@deprecate lsrBR(a) [a[2,:];a[1,:]]'
+# # should be deprecated or indicated more clearly
+# @deprecate lsrBR(a) [a[2,:];a[1,:]]'
 
-# import AMP: _makeVectorManifold
-# AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(BearingRange_Manifold)} = coords(M, prr)
+# # import AMP: _makeVectorManifold
+# # AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(BearingRange_Manifold)} = coords(M, prr)
 
 
 
@@ -35,14 +35,14 @@ end
 ## Remove as part of Manifolds.jl consolidation, #244
 ##==============================================================================
 
-export veePose3, veePose
+# export veePose3, veePose
 
-function veePose3(s::SE3)
-  TransformUtils.veeEuler(s)
-end
-function veePose(s::SE3)
-  TransformUtils.veeEuler(s)
-end
+# function veePose3(s::SE3)
+#   TransformUtils.veeEuler(s)
+# end
+# function veePose(s::SE3)
+#   TransformUtils.veeEuler(s)
+# end
 
 
 # legacy support, will be deprecated
@@ -53,14 +53,14 @@ Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(BearingRange_Manifold)})
 Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(Manifolds.ProductGroup(ProductManifold(SpecialEuclidean(2), TranslationGroup(2))))}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
 
 
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Point2Point2}) = AMP.Euclid2
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2}) = AMP.Euclid2
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2Bearing}) = AMP.Euclid
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Point2Point2Range}) = AMP.Euclid
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2Range}) = AMP.Euclid
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2BearingRange}) = AMP.Euclid2
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Pose2}) = AMP.SE2_Manifold
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose3Pose3}) = AMP.SE3_Manifold
+# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Point2Point2}) = AMP.Euclid2
+# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2}) = AMP.Euclid2
+# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2Bearing}) = AMP.Euclid
+# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Point2Point2Range}) = AMP.Euclid
+# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2Range}) = AMP.Euclid
+# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Point2BearingRange}) = AMP.Euclid2
+# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Pose2}) = AMP.SE2_Manifold
+# Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose3Pose3}) = AMP.SE3_Manifold
 Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{DynPoint2DynPoint2}) = AMP.Euclid4
 Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{DynPose2DynPose2}) = SE2E2_Manifold
 Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{VelPose2VelPose2}) = SE2E2_Manifold

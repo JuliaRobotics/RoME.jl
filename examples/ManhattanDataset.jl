@@ -28,7 +28,7 @@ function runManhattanStep(step::Integer)
     # Choose where to save the step's data.
     data_logpath = "/tmp/caesar/tonio_results/$(step)-$(now())"
     # Create initial factor graph with specified logging path.
-    fg = LightDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
+    fg = LocalDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
 
     # Add initial variable with a prior measurement to anchor the graph.
     addVariable!(fg, :x0, Pose2)

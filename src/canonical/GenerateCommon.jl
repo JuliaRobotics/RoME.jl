@@ -70,7 +70,7 @@ Notes
 function generateGraph_ZeroPose(; varType::Type{<:InferenceVariable}=Pose2,
                                   graphinit = nothing,
                                   solverParams::SolverParams=SolverParams(),
-                                  dfg::AbstractDFG = LightDFG{SolverParams}(;solverParams),  
+                                  dfg::AbstractDFG = LocalDFG{SolverParams}(;solverParams),  
                                   doRef::Bool=true,
                                   useMsgLikelihoods::Bool=getSolverParams(dfg).useMsgLikelihoods,
                                   label::Symbol=:x0,

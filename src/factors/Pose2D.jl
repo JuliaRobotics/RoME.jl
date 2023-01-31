@@ -31,13 +31,14 @@ Base.@kwdef struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldM
   Z::T = MvNormal(Diagonal([1.0; 1.0; 1.0]))
 end
 
-DFG.getManifold(::InstanceType{Pose2Pose2}) = getManifold(Pose2) # Manifolds.SpecialEuclidean(2)
+DFG.getManifold(::InstanceType{Pose2Pose2}) = Manifolds.SpecialEuclidean(2)
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2()
 
 function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, pp::Pose2Pose2)
   M = getManifold(pp)
-  (;manifold=M, ϵ0=getPointIdentity(M), Xc=zeros(3), q̂=getPointIdentity(M))
+  (M, getPointIdentity(M), zeros(3), getPointIdentity(M))
+  # (;manifold=M, ϵ0=getPointIdentity(M), Xc=zeros(3), q̂=getPointIdentity(M))
 end
 
 # Assumes X is a tangent vector
@@ -55,7 +56,7 @@ function (cf::CalcFactor{<:Pose2Pose2})(
               p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
               q::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where {XT<:Real,T<:Real}
 
-    M = getManifold(Pose2)
+    M = cf.manifold # getManifold(Pose2)
     ϵ0 = ArrayPartition(zeros(SVector{2,T}), SMatrix{2, 2, T}(I))
 
     ϵX = exp(M, ϵ0, X)

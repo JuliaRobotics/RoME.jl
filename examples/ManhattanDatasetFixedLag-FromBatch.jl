@@ -30,7 +30,7 @@ function go_fixedlag_frombatch(qfl_length_arg::Integer)
     data_logpath = ENV["HOME"]*"/Documents/wafr/manhattan-frombatch-b$(qfl_length)-$(now())"
 
     # Instead of creating new graph, load the batch one.
-    fg = LightDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
+    fg = LocalDFG{SolverParams}(solverParams=SolverParams(logpath=data_logpath))
     loadDFG(fg_file, Main, fg)
     tree = emptyBayesTree()
 

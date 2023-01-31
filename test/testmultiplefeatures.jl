@@ -219,7 +219,7 @@ vl3 = addVariable!(fg, :l3, Point2, N=N)
 # doautoinit!(fg, :x1)
 # doautoinit!(fg, :x2)
 
-f2 = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2, threadmodel=SingleThreaded )
+f2 = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2) #, threadmodel=SingleThreaded )
 
 # getVal(fg, :l3)
 #
@@ -227,7 +227,7 @@ f2 = addFactor!(fg, [v1;v2;vl1;vl2;vl3], mm2, threadmodel=SingleThreaded )
 
 data = getData(f2)
 # fieldnames(data.fnc)
-@test data.fnc.threadmodel == SingleThreaded
+# @test data.fnc.threadmodel == SingleThreaded
 
 ef2pts = approxConv(fg, :x1x2l1l2l3f1, :l2)
 # evalFactor(fg, f2, fg.IDs[:l2])
