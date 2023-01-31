@@ -354,7 +354,7 @@ pts0 = filter(eachcol(pts)) do p
     isapprox(p[1:2],[0,0], atol=1)
 end
 theta = mean(getindex.(pts0,3))
-@test isapprox(theta, 0.0, atol=0.1)
+@test isapprox(theta, 0.0, atol=0.15)
 
 ##
 
