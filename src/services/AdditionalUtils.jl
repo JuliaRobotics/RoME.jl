@@ -41,3 +41,25 @@ function warmUpSolverJIT(;fg::AbstractDFG=generateGraph_Hexagonal(),
   nothing
 end
 
+"""
+    $SIGNATURES
+
+Return a PosePose factor type based on input homography matrix.
+"""
+function makePosePoseFromHomography(
+  pHq::AbstractMatrix;
+  covar=diagm([1,1,1,0.1,0.1,0.1].^2)
+)
+  len = size(pHq,1)-1
+  M = SpecialEuclidean(len)
+  e0 = ArrayPartition(SVector(0,0,0.), SMatrix{len,len}(1,0,0,0,1,0,0,0,1.))
+  pTq = ArrayPartition(SVector(pHq[1:len,end]...), SMatrix{len,len}(pHq[1:len,1:len]))
+  e0_Cpq = vee(M, e0, log(M, e0, pTq))
+  if len == 2
+    # use a covariance of 3x3 for Pose2 case
+    covar_ = [covar[1,1] covar[1,2] covar[1,end]; covar[2,1] covar[2,2] covar[2,end]; covar[end,1] covar[end,2] covar[end,end]]
+    Pose2Pose2(MvNormal(e0_Cpq, covar_))
+  else
+    Pose3Pose3(MvNormal(e0_Cpq, covar))
+  end
+end
