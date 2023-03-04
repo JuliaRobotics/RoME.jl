@@ -96,6 +96,7 @@ export
   Pose3,
   Point3,
   PriorPoint3,
+  PackedPriorPoint3,
 
   # partial Pose3
   PriorPose3ZRP,
