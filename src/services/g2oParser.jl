@@ -110,7 +110,7 @@ function parseG2oInstruction!(fg::AbstractDFG,
         MSO3 = SpecialOrthogonal(3)
         ϵSO3 = identity_element(MSO3)
 
-         # Need to add a relative pose measurement between two variables.
+        # Need to add a relative pose measurement between two variables.
         # Parse all of the variables starting with the symbols.
         from_pose = Symbol("x", instruction[2])
         to_pose = Symbol("x", instruction[3])
