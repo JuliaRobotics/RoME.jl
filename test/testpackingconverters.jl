@@ -181,8 +181,8 @@ global unpackeddata = reconstFactorData(fg, getVariableOrder(f1), IncrementalInf
 # @test compareAll(DFG.getSolverData(f1).fnc.threadmodel, unpackeddata.fnc.threadmodel)
 
 # TODO: Ref above
-packedv1data = packVariableNodeData(fg, DFG.getSolverData(v1))
-upv1data = unpackVariableNodeData(fg, packedv1data)
+packedv1data = packVariableNodeData(DFG.getSolverData(v1))
+upv1data = unpackVariableNodeData(packedv1data)
 # global packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
 # global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
 

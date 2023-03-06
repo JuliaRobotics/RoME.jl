@@ -1,6 +1,6 @@
 using RoME
 using Statistics
-using JSON2
+using JSON3
 using TensorCast
 using Test
 
@@ -109,8 +109,21 @@ fg = initfg()
 addVariable!(fg, :x0, Point2)
 addVariable!(fg, :l3, Point2)
 
-point2point2rangeString = "{\"label\":\"x0l3f1\",\"_version\":\"0.18.1\",\"_variableOrderSymbols\":[\"x0\",\"l3\"],\"data\":{\"eliminated\":false,\"potentialused\":false,\"edgeIDs\":[],\"fnc\":{\"Z\":{\"_type\":\"IncrementalInference.PackedNormal\",\"mu\":89.44271909999159,\"sigma\":3.0}},\"multihypo\":[],\"certainhypo\":[1,2],\"nullhypo\":0.0,\"solveInProgress\":0,\"inflation\":5.0},\"tags\":[\"FACTOR\"],\"timestamp\":\"2022-03-26T01:24:44.373-05:00\",\"nstime\":\"0\",\"fnctype\":\"Point2Point2Range\",\"solvable\":1}"
-jback = JSON2.read(point2point2rangeString, Dict{String, Any})
+point2point2rangeString = """
+  {"label":"x0l3f1",\
+  "_version":"0.20.0",\
+  "_variableOrderSymbols":["x0","l3"],\
+  "data":"{\\\"eliminated\\\":false,\\\"potentialused\\\":false,\\\"edgeIDs\\\":[],\
+  \\\"fnc\\\":{\\\"Z\\\":{\\\"_type\\\":\\\"IncrementalInference.PackedNormal\\\",\\\"mu\\\":89.44271909999159,\\\"sigma\\\":3.0}},\
+  \\\"multihypo\\\":[],\\\"certainhypo\\\":[1,2],\\\"nullhypo\\\":0.0,\\\"solveInProgress\\\":0,\\\"inflation\\\":5.0}",\
+  "tags":["FACTOR"],\
+  "timestamp":"2022-03-26T01:24:44.373-05:00",\
+  "nstime":0,\
+  "fnctype":"Point2Point2Range",\
+  "metadata":"e30=",\
+  "solvable":1}\
+  """
+jback = JSON3.read(point2point2rangeString, PackedFactor)
 f = unpackFactor(fg, jback)
 
 
