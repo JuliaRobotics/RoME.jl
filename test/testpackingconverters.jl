@@ -177,7 +177,7 @@ global unpackeddata = reconstFactorData(fg, getVariableOrder(f1), IncrementalInf
 # @test compareAll(DFG.getSolverData(f1).fnc.cpt[1], unpackeddata.fnc.cpt[1], skip=[:factormetadata;:activehypo])
 
 # @test compareAll(DFG.getSolverData(f1).fnc.params, unpackeddata.fnc.params)
-@warn "threadmodel is not defined, fix with DFG"
+@warn "threadmodel is obsolete"
 # @test compareAll(DFG.getSolverData(f1).fnc.threadmodel, unpackeddata.fnc.threadmodel)
 
 # TODO: Ref above
