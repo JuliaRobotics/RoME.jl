@@ -17,7 +17,7 @@ const SE2E2_Manifold = _SE2E2()
 
 MB.manifold_dimension(::_SE2E2) = 5
 
-AMP.makeCoordsFromPoint(::Type{<:typeof(SE2E2_Manifold)}, p::Manifolds.ProductRepr) = [p.parts[1][1], p.parts[1][2], atan(p.parts[2][2,1],p.parts[2][1,1]), p.parts[3][1], p.parts[3][2]]
+AMP.makeCoordsFromPoint(::Type{<:typeof(SE2E2_Manifold)}, p::ArrayPartition) = [p.x[1][1], p.x[1][2], atan(p.x[2][2,1],p.x[2][1,1]), p.x[3][1], p.x[3][2]]
 
 function AMP.makePointFromCoords(::typeof(SE2E2_Manifold), p::AbstractVector{<:Real})
   α = p[3]
@@ -56,7 +56,7 @@ MB.manifold_dimension(::_CircleEuclid) = 2
 const BearingRange_Manifold = _CircleEuclid()
 # MB.manifold_dimension(::BearingRange_Manifold) = 2
 
-AMP.makeCoordsFromPoint(::Type{<:typeof(BearingRange_Manifold)}, p::ProductRepr) = [p.parts[1][1]; p.parts[2][1]]
+AMP.makeCoordsFromPoint(::Type{<:typeof(BearingRange_Manifold)}, p::ArrayPartition) = [p.x[1][1]; p.x[2][1]]
 
 function AMP.makePointFromCoords(::typeof(BearingRange_Manifold), p::AbstractVector{<:Real})
   ArrayPartition(([p[1];]), ([p[2];]))
