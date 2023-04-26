@@ -23,7 +23,7 @@ using
   ManifoldsBase
 
 using StaticArrays
-using SnoopPrecompile
+using PrecompileTools
 
 # to avoid name conflicts
 import Manifolds
@@ -164,7 +164,7 @@ function _doPrecompileWorkload(;
   warmUpSolverJIT()
 end
 
-@precompile_all_calls begin
+@compile_workload begin
   # In here put "toy workloads" that exercise the code you want to precompile
   _doPrecompileWorkload()
 end
