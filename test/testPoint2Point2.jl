@@ -129,7 +129,7 @@ f = unpackFactor(fg, jback)
 # f1 = addFactor!(fg, [:x0, :l3], Point2Point2Range(Normal(89.44271909999159, 3.0)); inflation=5, graphinit=false)
 # pf = DFG.packFactor(fg, f1)
 # jstr = JSON3.write(pf)
-point2point2rangeString = "{\"label\":\"x0l3f1\",\"tags\":[\"FACTOR\"],\"_variableOrderSymbols\":[\"x0\",\"l3\"],\"timestamp\":\"2023-03-10T17:28:37.230-08:00\",\"nstime\":"0",\"fnctype\":\"Point2Point2Range\",\"solvable\":1,\"data\":\"{\\\"eliminated\\\":false,\\\"potentialused\\\":false,\\\"edgeIDs\\\":[],\\\"fnc\\\":{\\\"Z\\\":{\\\"_type\\\":\\\"IncrementalInference.PackedNormal\\\",\\\"mu\\\":89.44271909999159,\\\"sigma\\\":3.0}},\\\"multihypo\\\":[],\\\"certainhypo\\\":[1,2],\\\"nullhypo\\\":0.0,\\\"solveInProgress\\\":0,\\\"inflation\\\":5.0}\",\"metadata\":\"e30=\",\"_version\":\"0.20.0\"}"
+point2point2rangeString = "{\"label\":\"x0l3f1\",\"tags\":[\"FACTOR\"],\"_variableOrderSymbols\":[\"x0\",\"l3\"],\"timestamp\":\"2023-03-10T17:28:37.230-08:00\",\"nstime\":\"0\",\"fnctype\":\"Point2Point2Range\",\"solvable\":1,\"data\":\"{\\\"eliminated\\\":false,\\\"potentialused\\\":false,\\\"edgeIDs\\\":[],\\\"fnc\\\":{\\\"Z\\\":{\\\"_type\\\":\\\"IncrementalInference.PackedNormal\\\",\\\"mu\\\":89.44271909999159,\\\"sigma\\\":3.0}},\\\"multihypo\\\":[],\\\"certainhypo\\\":[1,2],\\\"nullhypo\\\":0.0,\\\"solveInProgress\\\":0,\\\"inflation\\\":5.0}\",\"metadata\":\"e30=\",\"_version\":\"0.20.0\"}"
 
 f_ = JSON3.read(point2point2rangeString, DFG.PackedFactor)
 f = DFG.unpackFactor(fg, f_)
