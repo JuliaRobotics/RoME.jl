@@ -288,13 +288,13 @@ _X2prd_ = getPoints(_X2prd, false)
 @test isapprox(submanifold_component(mean(_X2prd, false),1), submanifold_component(mean(_X2, false),1), atol=2.0)
 @test isapprox(submanifold_component(mean(_X2prd, false),2), submanifold_component(mean(_X2, false),2), atol=0.5)
 
-convert(TU.Euler, SO3(submanifold_component(mean(_X2prd, false),2))).Y
-convert(TU.Euler, SO3(submanifold_component(mean(_X2prd, false),2))).P
-convert(TU.Euler, SO3(submanifold_component(mean(_X2prd, false),2))).R
+convert(TU.Euler, SO3(collect(submanifold_component(mean(_X2prd, false),2)))).Y
+convert(TU.Euler, SO3(collect(submanifold_component(mean(_X2prd, false),2)))).P
+convert(TU.Euler, SO3(collect(submanifold_component(mean(_X2prd, false),2)))).R
 
-convert(TU.Euler, SO3(submanifold_component(mean(_X2, false),2))).Y
-convert(TU.Euler, SO3(submanifold_component(mean(_X2, false),2))).P
-convert(TU.Euler, SO3(submanifold_component(mean(_X2, false),2))).R
+convert(TU.Euler, SO3(collect(submanifold_component(mean(_X2, false),2)))).Y
+convert(TU.Euler, SO3(collect(submanifold_component(mean(_X2, false),2)))).P
+convert(TU.Euler, SO3(collect(submanifold_component(mean(_X2, false),2)))).R
 
 
 # pts = collect(pts)
@@ -315,11 +315,11 @@ for i in 1:N
 
 @test isapprox( submanifold_component(_X2prd_[i],1)[3], submanifold_component(_X2pts_[i],1)[3], atol=0.0001 )
 
-@test isapprox( convert(TU.Euler, SO3(submanifold_component(_X2prd_[i],2))).R,
-                convert(TU.Euler, SO3(submanifold_component(_X2pts_[i],2))).R, atol=0.2 )
+@test isapprox( convert(TU.Euler, SO3(collect(submanifold_component(_X2prd_[i],2)))).R,
+                convert(TU.Euler, SO3(collect(submanifold_component(_X2pts_[i],2)))).R, atol=0.2 )
 
-@test isapprox( convert(TU.Euler, SO3(submanifold_component(_X2prd_[i],2))).P,
-                convert(TU.Euler, SO3(submanifold_component(_X2pts_[i],2))).P, atol=0.2 )
+@test isapprox( convert(TU.Euler, SO3(collect(submanifold_component(_X2prd_[i],2)))).P,
+                convert(TU.Euler, SO3(collect(submanifold_component(_X2pts_[i],2)))).P, atol=0.2 )
 
 end
 
