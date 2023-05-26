@@ -75,28 +75,9 @@ testfiles = [
 # "testCameraFunctions.jl"
 # "testmultiplefeatures.jl"
 
-continueonerror = false
 for (i,testf) in enumerate(testfiles)
   println("[TEST $i] $testf =============================================================")
-  # if i < 1
-  #   println("skipping")
-  #   continue
-  # end
-  try
-    include(testf)
-  catch ex
-    open(@__DIR__()*"/log/test.log","a") do io
-      println(io, ("[TEST $i] $testf ============================================================="))
-      println(io, ex)
-      println(io)
-    end
-    if continueonerror
-      @error ex
-      println("[TEST FAILED] $testf")
-      continue
-    end
-    rethrow(ex)
-  end
+  include(testf)
   println("[SUCCESS] $testf")
   println()
   println()
