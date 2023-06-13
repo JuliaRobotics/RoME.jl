@@ -220,7 +220,7 @@ function stringG2o!(dfg::AbstractDFG,
 
   p = DFG.getPoint(Pose3, fnc.Z.μ)
   R = p.x[2]
-  Q = convert(TU.Quaternion, TU.SO3(R))
+  Q = convert(TU.Quaternion, TU.SO3(collect(R)))
 
   # get command
   comm = !haskey(overwriteMapping, Pose3Pose3) ? commands[Pose3Pose3] : overwriteMapping[Pose3Pose3]
@@ -267,7 +267,7 @@ function _writeG2oLinePose3(io, dfg::AbstractDFG, label::Symbol, i::Int, solveKe
   p = getPoint(Pose3, Xc)
   x,y,z = p.x[1]
   R = p.x[2]
-  Q = convert(TU.Quaternion, TU.SO3(R))
+  Q = convert(TU.Quaternion, TU.SO3(collect(R)))
   write(io, "VERTEX_SE3:QUAT $i $x $y $z $(Q.v[1]) $(Q.v[2]) $(Q.v[3]) $(Q.s)\n")
   return nothing
 end

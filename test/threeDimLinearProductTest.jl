@@ -140,8 +140,9 @@ addFactor!(fg,[:x1;:x2],odoconstr, inflation=0.1)
 
 # should be all zero
 p = deepcopy(ϵ)
-q = deepcopy(ϵ)
-submanifold_component(q,1)[1] = 10.0
+# q = deepcopy(ϵ)
+# submanifold_component(q,1)[1] = 10.0
+q  = ArrayPartition(SA[10.0, 0.0, 0.0], SA[1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0])
 X = Manifolds.hat(M, ϵ, [10.,0,0,0,0,0])
 res = calcFactorResidual(fg, :x1x2f1, X, p, q)
 @test norm(res) < 1e-10
