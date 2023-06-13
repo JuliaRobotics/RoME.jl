@@ -332,7 +332,7 @@ end
 @testset "test predictbelief with two functions" begin
 ##
 
-_val = getCoordinates.(Pose3, predictbelief(fg, :x2, ls(fg, :x2), N=N)[1])
+_val = IIF.getCoordinates.(Pose3, getPoints(propagateBelief(fg, :x2, ls(fg, :x2), N=N)[1]))
 @cast val[j,i] :=  _val[i][j]
 val = copy(val)
 for i in 1:N

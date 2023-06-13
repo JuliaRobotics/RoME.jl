@@ -15,6 +15,8 @@ getSolverParams(fg).graphinit=false
 getSolverParams(fg).treeinit=false
 getSolverParams(fg).useMsgLikelihoods = true
 getSolverParams(fg).gibbsIters = 5
+getSolverParams(fg).N = N
+
 # getSolverParams(fg).inflation = 10.0
 
 

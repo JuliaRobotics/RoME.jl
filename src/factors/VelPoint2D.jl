@@ -6,7 +6,7 @@
 """
 $(TYPEDEF)
 """
-mutable struct VelPoint2VelPoint2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
+mutable struct VelPoint2VelPoint2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize #RelativeMinimize
   Z::T
 end
 

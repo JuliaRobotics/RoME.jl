@@ -32,7 +32,7 @@ testfiles = [
   "testPoint2Point2Init.jl";
   "threeDimLinearProductTest.jl";
   "testPose3Pose3NH.jl";
-  
+
   # recent development work
   "testPartialPose3.jl";
   "testBearingRange2D.jl";
