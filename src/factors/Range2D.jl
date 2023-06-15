@@ -4,7 +4,7 @@
 """
 $(TYPEDEF)
 """
-mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInference.AbstractRelativeMinimize
+mutable struct Point2Point2Range{D <: IIF.SamplableBelief} <: IncrementalInference.AbstractManifoldMinimize # AbstractRelativeMinimize
   Z::D
 end
 
