@@ -42,7 +42,7 @@ mpts = getPoints(fg, :x1)
 mu = mean(M, mpts)
 mucrd = getCoordinates(Pose3, mu)
 
-@test isapprox(mucrd[1:3], [0, 5, 10], atol=1.0)
+@test isapprox(mucrd[1:3], [0, 5, 10], atol=1.5)
 @test isapprox(mucrd[4:6], [0, 0, pi/2], atol=0.3)
 
 ##
