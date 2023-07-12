@@ -270,7 +270,7 @@ addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearA
 setVal!(fg, :x0, [getPointIdentity(Pose2)])
 
 ##----------- sanity check that predictbelief plumbing is doing the right thing
-_pts, = predictbelief(fg, :x0, ls(fg, :x0), N=75)
+_pts = getPoints(propagateBelief(fg, :x0, ls(fg, :x0), N=75)[1])
 @cast pts[j,i] := DFG.getCoordinates.(Pose2, _pts)[i][j]
 @test sum(abs.(Statistics.mean(pts,dims=2)) .< [0.1; 0.1; 0.1]) == 3
 @test sum([0.05; 0.05; 0.05] .< Statistics.std(pts,dims=2) .< [0.15; 0.15; 0.15]) == 3
@@ -291,7 +291,7 @@ addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 # drawGraph(fg, show=true)
 
 # check the forward convolution is working properly
-_pts, = predictbelief(fg, :l1, ls(fg, :l1), N=75)
+_pts = getPoints(propagateBelief(fg, :l1, ls(fg, :l1), N=75)[1])
 @cast pts[j,i] := _pts[i][j]
 @show tp = mean(TranslationGroup(2), _pts)
 @warn "weak test tolerance, suspect partial products need to be upgraded first.  Please see likely AMP #41 and IIF #1010 for known issues likely the root cause."
@@ -337,10 +337,10 @@ addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 # writeGraphPdf(fg)
 
 # check the forward convolution is working properly
-_pts, = predictbelief(fg, :x0, ls(fg, :x0); N)
+_pts = getPoints(propagateBelief(fg, :x0, ls(fg, :x0); N)[1])
 p_μ = mean(SpecialEuclidean(2), _pts)
 
-_pts = getCoordinates.(Pose2, _pts)
+_pts = IIF.getCoordinates.(Pose2, _pts)
 @cast pts[j,i] := _pts[i][j]
 
 dists = norm.(eachcol(pts[1:2, :] .- [20,0]))

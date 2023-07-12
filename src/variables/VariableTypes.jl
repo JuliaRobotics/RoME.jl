@@ -10,7 +10,7 @@ $(TYPEDEF)
 
 XY Euclidean manifold variable node softtype.
 """
-@defVariable Point2 TranslationGroup(2) [0.0;0.0]
+@defVariable Point2 TranslationGroup(2) SA[0.0;0.0]
 
 
 """
@@ -24,7 +24,7 @@ Example
 p3 = Point3()
 ```
 """
-@defVariable Point3 TranslationGroup(3) [0;0;0.0]
+@defVariable Point3 TranslationGroup(3) SA[0;0;0.0]
 
 
 """
@@ -32,7 +32,7 @@ $(TYPEDEF)
 
 Pose2 is a SE(2) mechanization of two Euclidean translations and one Circular rotation, used for general 2D SLAM.
 """
-@defVariable Pose2 SpecialEuclidean(2) ArrayPartition([0;0.0],[1 0; 0 1.0])
+@defVariable Pose2 SpecialEuclidean(2) ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0])
 
 """
 $(TYPEDEF)
@@ -44,7 +44,7 @@ Future:
 - Work in progress on AMP3D for proper non-Euler angle on-manifold operations.
 - TODO the AMP upgrade is aimed at resolving 3D to Quat/SE3/SP3 -- current Euler angles will be replaced
 """
-@defVariable Pose3 SpecialEuclidean(3) ArrayPartition([0;0;0.0],[1 0 0; 0 1 0; 0 0 1.0])
+@defVariable Pose3 SpecialEuclidean(3) ArrayPartition(SA[0;0;0.0],SA[1 0 0; 0 1 0; 0 0 1.0])
 
 """
 $(TYPEDEF)
@@ -52,7 +52,7 @@ $(TYPEDEF)
 Dynamic point in 2D space with velocity components: `x, y, dx/dt, dy/dt`
 
 """
-@defVariable DynPoint2 TranslationGroup(4) zeros(4)
+@defVariable DynPoint2 TranslationGroup(4) zero(SVector{4,Float64})
 
 """
 $(TYPEDEF)
@@ -63,7 +63,7 @@ Note
 - The `SE2E2_Manifold` definition used currently is a hack to simplify the transition to Manifolds.jl, see #244 
 - Replaced `SE2E2_Manifold` hack with `ProductManifold(SpecialEuclidean(2), TranslationGroup(2))`, confirm if it is correct.
 """
-@defVariable DynPose2 Manifolds.ProductGroup(ProductManifold(SpecialEuclidean(2), TranslationGroup(2))) ArrayPartition(ArrayPartition([0;0.0],[1 0; 0 1.0]),[0;0.0])
+@defVariable DynPose2 Manifolds.ProductGroup(ProductManifold(SpecialEuclidean(2), TranslationGroup(2))) ArrayPartition(ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0]),SA[0;0.0])
 
 
 

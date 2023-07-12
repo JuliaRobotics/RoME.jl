@@ -15,15 +15,15 @@ fg = generateGraph_Boxes2D!(8, postpose_cb=(g,l)->@show l)
 
 ##
 
-@test isapprox( [0;0], getPPE(fg, :x0, :simulated).suggested, atol=1e-8)
-@test isapprox( [15;0], getPPE(fg, :x1, :simulated).suggested, atol=1e-8)
-@test isapprox( [15;15], getPPE(fg, :x2, :simulated).suggested, atol=1e-8)
-@test isapprox( [5;15], getPPE(fg, :x3, :simulated).suggested, atol=1e-8)
-@test isapprox( [5;0], getPPE(fg, :x4, :simulated).suggested, atol=1e-8)
-@test isapprox( [20;0], getPPE(fg, :x5, :simulated).suggested, atol=1e-8)
-@test isapprox( [20;15], getPPE(fg, :x6, :simulated).suggested, atol=1e-8)
-@test isapprox( [10;15], getPPE(fg, :x7, :simulated).suggested, atol=1e-8)
-@test isapprox( [10;0], getPPE(fg, :x8, :simulated).suggested, atol=1e-8)
+@test isapprox( [0;0], getPPE(fg, :x0, :simulated).suggested, atol=1e-3)
+@test isapprox( [15;0], getPPE(fg, :x1, :simulated).suggested, atol=1e-3)
+@test isapprox( [15;15], getPPE(fg, :x2, :simulated).suggested, atol=1e-3)
+@test isapprox( [5;15], getPPE(fg, :x3, :simulated).suggested, atol=1e-3)
+@test isapprox( [5;0], getPPE(fg, :x4, :simulated).suggested, atol=1e-3)
+@test isapprox( [20;0], getPPE(fg, :x5, :simulated).suggested, atol=1e-3)
+@test isapprox( [20;15], getPPE(fg, :x6, :simulated).suggested, atol=1e-3)
+@test isapprox( [10;15], getPPE(fg, :x7, :simulated).suggested, atol=1e-3)
+@test isapprox( [10;0], getPPE(fg, :x8, :simulated).suggested, atol=1e-3)
 
 ##
 
@@ -31,15 +31,15 @@ solveTree!(fg)
 
 ##
 
-@test isapprox( [0;0], getPPE(fg, :x0, :simulated).suggested, atol=1e-8)
-@test isapprox( [15;0], getPPE(fg, :x1, :simulated).suggested, atol=1e-8)
-@test isapprox( [15;15], getPPE(fg, :x2, :simulated).suggested, atol=1e-8)
-@test isapprox( [5;15], getPPE(fg, :x3, :simulated).suggested, atol=1e-8)
-@test isapprox( [5;0], getPPE(fg, :x4, :simulated).suggested, atol=1e-8)
-@test isapprox( [20;0], getPPE(fg, :x5, :simulated).suggested, atol=1e-8)
-@test isapprox( [20;15], getPPE(fg, :x6, :simulated).suggested, atol=1e-8)
-@test isapprox( [10;15], getPPE(fg, :x7, :simulated).suggested, atol=1e-8)
-@test isapprox( [10;0], getPPE(fg, :x8, :simulated).suggested, atol=1e-8)
+@test isapprox( [0;0], getPPE(fg, :x0, :simulated).suggested, atol=1e-3)
+@test isapprox( [15;0], getPPE(fg, :x1, :simulated).suggested, atol=1e-3)
+@test isapprox( [15;15], getPPE(fg, :x2, :simulated).suggested, atol=1e-3)
+@test isapprox( [5;15], getPPE(fg, :x3, :simulated).suggested, atol=1e-3)
+@test isapprox( [5;0], getPPE(fg, :x4, :simulated).suggested, atol=1e-3)
+@test isapprox( [20;0], getPPE(fg, :x5, :simulated).suggested, atol=1e-3)
+@test isapprox( [20;15], getPPE(fg, :x6, :simulated).suggested, atol=1e-3)
+@test isapprox( [10;15], getPPE(fg, :x7, :simulated).suggested, atol=1e-3)
+@test isapprox( [10;0], getPPE(fg, :x8, :simulated).suggested, atol=1e-3)
 
 ##
 

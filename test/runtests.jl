@@ -8,6 +8,7 @@ import Manifolds
 using Manifolds: ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element
 using DistributedFactorGraphs
 using Statistics
+using StaticArrays
 
 
 @error("add test for generateGraph_Beehive!, norm( simulated - default ) < tol")
@@ -31,7 +32,7 @@ testfiles = [
   "testPoint2Point2Init.jl";
   "threeDimLinearProductTest.jl";
   "testPose3Pose3NH.jl";
-  
+
   # recent development work
   "testPartialPose3.jl";
   "testBearingRange2D.jl";
@@ -73,7 +74,6 @@ testfiles = [
 # "HexagonalLightGraphs.jl"
 # "testCameraFunctions.jl"
 # "testmultiplefeatures.jl"
-
 
 for (i,testf) in enumerate(testfiles)
   println("[TEST $i] $testf =============================================================")

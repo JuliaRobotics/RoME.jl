@@ -37,10 +37,10 @@ addVariable!(fg, :l2, Point2, tags=[:LANDMARK;])
 addFactor!(fg, [:l1], PriorPoint2(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 addFactor!(fg, [:l2], PriorPoint2(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
 
-val, = predictbelief(fg, :l1, [:l1f1;])
+val = getPoints(propagateBelief(fg, :l1, [:l1f1;])[1])
 setVal!(fg, :l1, val)
 
-val, = predictbelief(fg, :l2, [:l2f1;])
+val = getPoints(propagateBelief(fg, :l2, [:l2f1;])[1])
 setVal!(fg, :l2, val)
 
 
@@ -53,7 +53,7 @@ global p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
 addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
 
 
-predictbelief(fg, :x0, :)
+propagateBelief(fg, :x0, :)
 
 ##
 
@@ -68,7 +68,7 @@ solveTree!(fg);
 
 
 _X0pts = getBelief(fg, :x0) |> getPoints
-@cast cX0pts[j,i] := getCoordinates.(Pose2, _X0pts)[i][j]
+@cast cX0pts[j,i] := IIF.getCoordinates.(Pose2, _X0pts)[i][j]
 global X0pts = copy(cX0pts)
 
 @test size(X0pts,1) == 3
