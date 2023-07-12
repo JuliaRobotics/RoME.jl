@@ -1,9 +1,14 @@
+module ImageIOExt
+
 # ScalarField functions related to Images.jl
 
-@info "Loading RoME.jl tools related to both ImageCore.jl and ImageIO.jl"
+@info "RoME.jl is loading extension functionality related ImageCore.jl and ImageIO.jl"
 
-using .ImageCore
-using .ImageIO
+using ImageIO
+using ImageCore
+
+using DocStringExtensions
+import RoME: generateField_CanyonDEM
 
 export generateField_CanyonDEM
 
@@ -42,4 +47,4 @@ end
 
 
 
-#
+end # module
