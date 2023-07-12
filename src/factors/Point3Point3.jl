@@ -3,7 +3,7 @@
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct Point3Point3{D <: IIF.SamplableBelief} <: AbstractRelativeRoots
+Base.@kwdef struct Point3Point3{D <: IIF.SamplableBelief} <: AbstractRelativeMinimize
     Z::D = MvNormal(zeros(3),diagm([0.1;0.1;0.1]))
 end
 

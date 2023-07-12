@@ -32,7 +32,7 @@ end
 
 Linear offset factor of `IIF.SamplableBelief` between two `Polar` variables.
 """
-Base.@kwdef struct PolarPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.AbstractRelativeRoots
+Base.@kwdef struct PolarPolar{T1<:IIF.SamplableBelief, T2<:IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
   Zrange::T1 = Normal(1,1)
   Zangle::T2 = Normal(0,0.1)
 end

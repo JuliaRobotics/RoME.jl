@@ -163,7 +163,7 @@ global unpackeddata = reconstFactorData(fg, getVariableOrder(f1), IncrementalInf
 
 # TODO -- fix ambibuity in compare function
 @test compareAll(DFG.getSolverData(f1), unpackeddata, skip=[:fnc;])
-@test_broken compareAll(DFG.getSolverData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!;:vartypes;:particleidx;:varidx])
+@test compareAll(DFG.getSolverData(f1).fnc, unpackeddata.fnc, skip=[:params;:threadmodel;:cpt;:usrfnc!;:vartypes;:particleidx;:varidx])
 @test compareAll(DFG.getSolverData(f1).fnc.usrfnc!, unpackeddata.fnc.usrfnc!, skip=[:Zi;:Z;:p])
 
 # deprecated p

@@ -57,7 +57,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct DynPose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeRoots
+mutable struct DynPose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
   Zpose::Pose2Pose2{T} #Zpose::T1
   partial::Tuple{Int,Int,Int}
 end
@@ -141,7 +141,7 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeRoots
+Base.@kwdef struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeMinimize
   Z::T = MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))
 end
 preambleCache(::AbstractDFG, ::AbstractVector{<:DFGVariable}, ::DynPose2DynPose2) = zeros(5)
