@@ -13,7 +13,7 @@ getManifold(::DynPoint2VelocityPrior) = TranslationGroup(4)
 """
 $(TYPEDEF)
 """
-mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractRelativeRoots
+mutable struct DynPoint2DynPoint2{T <: SamplableBelief} <: AbstractManifoldMinimize #RelativeRoots
   Z::T
 end
 
@@ -32,7 +32,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct Point2Point2Velocity{T <: IIF.SamplableBelief} <: IIF.AbstractRelativeMinimize
+mutable struct Point2Point2Velocity{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize # RelativeMinimize
   Z::T
 end
 

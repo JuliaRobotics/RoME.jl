@@ -20,7 +20,7 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct Point2Point2{D <: IIF.SamplableBelief} <: AbstractRelativeRoots
+Base.@kwdef struct Point2Point2{D <: IIF.SamplableBelief} <: AbstractManifoldMinimize #RelativeRoots
     Z::D = MvNormal(zeros(2),LinearAlgebra.diagm([0.1;0.1]))
 end
 
