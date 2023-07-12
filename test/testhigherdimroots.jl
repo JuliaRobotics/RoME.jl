@@ -7,7 +7,7 @@ import  IncrementalInference: getSample, getManifold
 using TransformUtils: Euler
 ##
 
-mutable struct RotationTest <: IncrementalInference.AbstractRelativeRoots
+mutable struct RotationTest <: IncrementalInference.AbstractRelativeMinimize
   z::MvNormal
 end
 

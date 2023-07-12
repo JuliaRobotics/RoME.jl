@@ -8,7 +8,7 @@ import IncrementalInference: getSample
 export MixtureFluxPose2Pose2, PackedMixtureFluxPose2Pose2
 
 
-struct MixtureFluxPose2Pose2{F <: AbstractFactor} <: AbstractRelativeRoots
+struct MixtureFluxPose2Pose2{F <: AbstractFactor} <: AbstractRelativeMinimize
   Z::F
   # delta time between variables
   DT::Base.RefValue{Float64}

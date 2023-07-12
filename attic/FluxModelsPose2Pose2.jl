@@ -26,7 +26,7 @@ import Base: convert
 import IncrementalInference: getSample, calcZDim
 
 
-struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: AbstractRelativeRoots
+struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: AbstractRelativeMinimize
   allPredModels::Vector{P}
   joyVelData::D
   naiveModel::M
@@ -125,7 +125,7 @@ FluxModelsPose2Pose2( allModels::Vector,
                                         Ref(DT),
                                         Ref(shuffle) )
 #
-# struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: AbstractRelativeRoots
+# struct FluxModelsPose2Pose2{P,D<:AbstractArray,M<:SamplableBelief} <: AbstractRelativeMinimize
 #   allPredModels::Vector{P}
 #   joyVelData::D
 #   naiveModel::M
