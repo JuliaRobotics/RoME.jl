@@ -59,6 +59,11 @@ end
 
 # 0. init empty FG w/ datastore
 fg = initfg()
+# ensure specific solve settings
+getSolverParams(fg).useMsgLikelihoods = true
+getSolverParams(fg).graphinit = false
+# getSolverParams(fg).treeinit = true
+
 storeDir = joinLogPath(fg,"data")
 mkpath(storeDir)
 datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir) 
@@ -82,15 +87,10 @@ end
 # 2. generate trajectory 
 
 μ0 = [-7000;-2000.0;pi/2]
-@time generateGraph_Helix2DSlew!(10, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, graphinit=false, postpose_cb=cb) #, slew_x=1/20)
+@time generateGraph_Helix2DSlew!(10, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, postpose_cb=cb) # , graphinit=false , slew_x=1/20)
 deleteFactor!(fg, :x0f1)
 
-##
 
-# ensure specific solve settings
-getSolverParams(fg).useMsgLikelihoods = true
-getSolverParams(fg).graphinit = false
-getSolverParams(fg).treeinit = true
 
 ## optional prior at start
 
