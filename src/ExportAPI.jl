@@ -235,3 +235,7 @@ export
   compare
 
 export homography_to_coordinates, coordinates_to_homography
+
+
+# weakdeps
+export generateField_CanyonDEM
