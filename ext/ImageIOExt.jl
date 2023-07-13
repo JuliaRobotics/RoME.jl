@@ -6,6 +6,7 @@ module ImageIOExt
 
 using ImageIO
 using ImageCore
+using FileIO
 
 using DocStringExtensions
 import RoME: generateField_CanyonDEM
@@ -23,7 +24,7 @@ function generateField_CanyonDEM( scale=1, N=100;
                                   x_min::Real=-9000, x_max::Real=9000,
                                   y_min::Real=-9000, y_max::Real=9000)
   #
-  filepath = joinpath(dirname(dirname(@__DIR__)), "data","CanyonDEM.png")
+  filepath = joinpath(dirname(@__DIR__), "data","CanyonDEM.png")
   img_ = load(filepath) .|> Gray
   img_ = scale.*Float64.(img_)
   
