@@ -125,6 +125,8 @@ include("services/ScalarFields.jl")
 
 include("../ext/WeakdepsPrototypes.jl")
 
+include("entities/MixtureFluxPose2Pose2.jl")
+
 # things on their way out
 include("Deprecated.jl")
 
@@ -133,11 +135,10 @@ using Requires
 
 function __init__()
   # combining neural networks natively into the non-Gaussian  factor graph object
-  @require Flux="587475ba-b771-5e3f-ad9e-33799f191a9c" begin
-    @info "Loading RoME.jl tools related to Flux.jl."
-    include("factors/flux/models/Pose2OdoNN_01.jl") # until a better way is found to deserialize
-    include("factors/flux/MixtureFluxPose2Pose2.jl")
-  end
+  # @require Flux="587475ba-b771-5e3f-ad9e-33799f191a9c" begin
+  #   # include("factors/flux/models/Pose2OdoNN_01.jl") # until a better way is found to deserialize
+  #   # include("factors/flux/MixtureFluxPose2Pose2.jl")
+  # end
 
   # Scalar field specifics
   
