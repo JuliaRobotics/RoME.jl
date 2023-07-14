@@ -1,26 +1,19 @@
+module RoMEFluxExt
 
+@info "RoME.jl is loading extension functionality related to Flux.jl."
 
-using .Flux
+using Flux
 
 import Base: convert
 import IncrementalInference: getSample
 
-export MixtureFluxPose2Pose2, PackedMixtureFluxPose2Pose2
+import RoME: MixtureFluxPose2Pose2, PackedMixtureFluxPose2Pose2, FluxModelsPose2Pose2
 
 
-struct MixtureFluxPose2Pose2{F <: AbstractFactor} <: AbstractRelativeMinimize
-  Z::F
-  # delta time between variables
-  DT::Base.RefValue{Float64}
-end
-
-mutable struct PackedMixtureFluxPose2Pose2 <: AbstractPackedFactor
-  Z::PackedMixture
-  DT::Float64
-end
+include("Pose2OdoNN_01.jl")
 
 
-function IIF.getSample(cfo::CalcFactor{<:MixtureFluxPose2Pose2})
+function getSample(cfo::CalcFactor{<:MixtureFluxPose2Pose2})
   #
   nfb = cfo.factor
   # fmd = cfo.metadata
@@ -154,24 +147,24 @@ end
 ## ============================================================================================
 
 
-export FluxModelsPose2Pose2
-
-
 # Convenience function to help call the right constuctor
-FluxModelsPose2Pose2( allModels::Vector{P},
-                      jvd::D,
-                      naiveModel::M,
-                      naiveFrac::Real=0.5,
-                      DT::Real=0.0,
-                      shuffle::Bool=true ) where {P, M <: SamplableBelief, D <: AbstractMatrix} = MixtureFluxPose2Pose2(
-                                        allModels,
-                                        (25,4),
-                                        jvd,
-                                        (3,),
-                                        [naiveModel;],
-                                        [1-naiveFrac;naiveFrac],
-                                        DT=DT,
-                                        shuffle=shuffle )
+FluxModelsPose2Pose2( 
+  allModels::Vector{P},
+  jvd::D,
+  naiveModel::M,
+  naiveFrac::Real=0.5,
+  DT::Real=0.0,
+  shuffle::Bool=true 
+) where {P, M <: SamplableBelief, D <: AbstractMatrix} = MixtureFluxPose2Pose2(
+    allModels,
+    (25,4),
+    jvd,
+    (3,),
+    [naiveModel;],
+    [1-naiveFrac;naiveFrac],
+    DT=DT,
+    shuffle=shuffle 
+  )
 #
 
 

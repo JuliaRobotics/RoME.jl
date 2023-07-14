@@ -239,3 +239,7 @@ export homography_to_coordinates, coordinates_to_homography
 
 # weakdeps
 export generateField_CanyonDEM
+
+# Flux.jl
+export MixtureFluxPose2Pose2, PackedMixtureFluxPose2Pose2
+export FluxModelsPose2Pose2
