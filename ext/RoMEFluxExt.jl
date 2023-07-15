@@ -5,6 +5,8 @@ module RoMEFluxExt
 using Flux
 
 import Base: convert
+
+import IncrementalInference: CalcFactor, SamplableBelief, AbstractFactor, AbstractPackedFactor
 import IncrementalInference: getSample
 
 import RoME: MixtureFluxPose2Pose2, PackedMixtureFluxPose2Pose2, FluxModelsPose2Pose2
@@ -204,5 +206,6 @@ FluxModelsPose2Pose2(
 
 
 
+end # module
 
 #
