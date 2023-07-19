@@ -41,13 +41,13 @@ ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
 [extensions]
 RoMECameraModelsExt = "CameraModels"
 RoMEFluxExt = "Flux"
-ImageIOExt = "ImageIO"
+RoMEImageIOExt = "ImageIO"
 
 [compat]
 ApproxManifoldProducts = "0.7"
 CoordinateTransformations = "0.5, 0.6"
 DelimitedFiles = "1"
-DistributedFactorGraphs = "0.22, 0.23"
+DistributedFactorGraphs = "0.23"
 Distributions = "0.24, 0.25"
 DocStringExtensions = "0.8, 0.9"
 FileIO = "1"

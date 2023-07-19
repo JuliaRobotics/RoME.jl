@@ -1,4 +1,4 @@
-module ImageIOExt
+module RoMEImageIOExt
 
 # ScalarField functions related to Images.jl
 
