@@ -12,7 +12,7 @@ import IncrementalInference: getSample
 import RoME: MixtureFluxPose2Pose2, PackedMixtureFluxPose2Pose2, FluxModelsPose2Pose2
 
 
-include("Pose2OdoNN_01.jl")
+include("services/Pose2OdoNN_01.jl")
 
 
 function getSample(cfo::CalcFactor{<:MixtureFluxPose2Pose2})

@@ -124,8 +124,9 @@ include("services/g2oParser.jl")
 include("services/ScalarFields.jl")
 
 include("../ext/WeakdepsPrototypes.jl")
+include("../ext/factors/GenericProjection.jl")
+include("../ext/factors/MixtureFluxPose2Pose2.jl")
 
-include("entities/MixtureFluxPose2Pose2.jl")
 
 # things on their way out
 include("Deprecated.jl")
