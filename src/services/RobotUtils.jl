@@ -187,7 +187,7 @@ function get2DSamples(fg::AbstractDFG;
     vertlbl = string(id)
     val = parse(Int,split(vertlbl[2:end],'_')[1])
     if from <= val && val <= to
-      if length( DFG.getNeighbors(fg, id ) ) >= minnei
+      if length( listNeighbors(fg, id ) ) >= minnei
         # if length(out_neighbors(fg.v[id[2]],fg.g)) >= minnei
         M = getManifold(getVariable(fg, id))
         pts = getPoints(fg, id)
@@ -226,7 +226,7 @@ function listVariablesLabelsWithinRange(fg::AbstractDFG,
   count = 0
   for id in saids
     count += 1
-    if length( DFG.getNeighbors(fg, id) ) >= minnei
+    if length( listNeighbors(fg, id) ) >= minnei
       mask[count] = true
     end
     if occursin(regexKey, string(id)) && (from != 0 || to != (2^(Sys.WORD_SIZE-1)-1))
