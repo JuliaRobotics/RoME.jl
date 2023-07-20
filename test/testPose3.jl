@@ -104,7 +104,7 @@ for i=1:4
     addFactor!(fg, [f, t, :bRa], RoME.Pose3Pose3RotOffset(odo_distribution))
 end
 
-addFactor!(fg, [:x2], RoME.PriorPoint3(MvNormal(SA[1.0, 0, 1], diagm(SA[0.1, 0.1, 0.1]).^2)))
+addFactor!(fg, [:x1], RoME.PriorPoint3(MvNormal(SA[1.0, 0, 1], diagm(SA[0.1, 0.1, 0.1]).^2)))
 
 initAll!(fg)
 
