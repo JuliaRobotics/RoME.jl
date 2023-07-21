@@ -169,6 +169,26 @@ function getVariableListInts!(fct, uniqVarInt, varIntLabel)
   varlist
 end
 
+const PriorPose3XYZ = PriorPoint3
+
+function stringG2o!(dfg::AbstractDFG,
+                    fc::Symbol,
+                    fnc::PriorPose3XYZ,
+                    varIntLabel::OrderedDict,
+                    uniqVarInt::Vector{Int};
+                    overwriteMapping::Dict=Dict{Symbol,Symbol}())
+  #
+  global commands
+  # get variable numbers
+  varlist = getVariableListInts!(getFactor(dfg,fc), uniqVarInt, varIntLabel)
+  # get information matrix
+  INF = invcov(fnc.Z) # 1 ./ sqrt(fnc.Z.Σ.mat) # 
+  INF[INF .== Inf] .= 0
+  # get command
+  comm = "EDGE_SE3_XYZ_PRIOR"
+  return "$comm $(varlist[1]) $(fnc.Z.μ[1]) $(fnc.Z.μ[2]) $(fnc.Z.μ[3]) $(INF[1,1]) $(INF[1,2]) $(INF[1,3]) $(INF[2,2]) $(INF[2,3]) $(INF[3,3])"
+end
+
 function stringG2o!(dfg::AbstractDFG,
                     fc::Symbol,
                     fnc::Pose2Pose2,
