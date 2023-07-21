@@ -71,8 +71,7 @@ function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
     M = cf.manifold
     # measurement in frame a, input is tangent, can also use vector transport 
     a_m = exp(M, getPointIdentity(M), aX)
-    b_m = ArrayPartition(a_m.x[1], a_m.x[2]) 
-    # b_m = ArrayPartition(a_m.x[1], bRa * a_m.x[2]) 
+    b_m = ArrayPartition(a_m.x[1], bRa * a_m.x[2]) 
 
     q̂ = Manifolds.compose(M, p, b_m)
     return vee(M, q, log(M, q, q̂)) # coordinates
