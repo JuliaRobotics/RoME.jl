@@ -34,6 +34,7 @@ testfiles = [
   "testPose3Pose3NH.jl";
 
   # recent development work
+  "testPartialPose2.jl";
   "testPartialPose3.jl";
   "testBearingRange2D.jl";
   "testBearing2D.jl";

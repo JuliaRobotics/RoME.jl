@@ -12,6 +12,24 @@ using Rotations
 
 ##
 
+
+@testset "Test (partial) priors on Pose3" begin
+## there was a problem with partials and staticarrays where asigning PriorPoint3 to Pose3 stopped working, here is an explicit test
+
+fg = initfg()
+getSolverParams(fg).graphinit = false
+
+addVariable!(fg, :x0, Pose3)
+
+mv3 = MvNormal(SA[0.0; 0.0; 0.0], SMatrix{3,3}(1,0,0,0,1,0,0,0,1.))
+f = addFactor!(fg, [:x0;], PriorPoint3(mv3))
+
+approxConvBelief(fg, getLabel(f), :x0)
+
+##
+end
+
+
 @testset "Testing basic PriorPose3ZRP" begin
 ##
 
