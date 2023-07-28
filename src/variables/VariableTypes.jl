@@ -46,6 +46,10 @@ Future:
 """
 @defVariable Pose3 SpecialEuclidean(3) ArrayPartition(SA[0;0;0.0],SA[1 0 0; 0 1 0; 0 0 1.0])
 
+
+@defVariable Rotation3 SpecialOrthogonal(3) SA[1 0 0; 0 1 0; 0 0 1.0]
+
+
 """
 $(TYPEDEF)
 

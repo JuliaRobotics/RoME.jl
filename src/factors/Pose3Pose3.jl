@@ -21,12 +21,17 @@ function (cf::CalcFactor{<:Pose3Pose3})(X, p, q)
     # Xc = zeros(6)
     # vee!(M, Xc, q, log(M, q, q̂))
 
-    # FIXME, should be tangent vector not coordinates -- likely part of ManOpt upgrade
     Xc = vee(M, q, log(M, q, q̂))
     return Xc
 end
 
-
+# function (cf::CalcFactor{<:Pose3Pose3})(X, p, q)  
+#   M = cf.manifold # getManifold(Pose3)
+#   ϵX = exp(M, getPointIdentity(M), X)
+#   q̂ = ArrayPartition(p.x[2]*ϵX.x[1] + p.x[1], p.x[2]*ϵX.x[2])
+#   Xc = vee(M, q, log(M, q, q̂))
+#   return Xc
+# end
 
 #TODO Serialization
 
@@ -49,3 +54,25 @@ end
 
 
 #
+
+##
+Base.@kwdef struct Pose3Pose3RotOffset{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+  Z::T = MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)]))
+end
+
+getManifold(::InstanceType{Pose3Pose3RotOffset}) = getManifold(Pose3) # Manifolds.SpecialEuclidean(3)
+
+
+# measurement is in frame a, for example imu frame
+# p and q is in frame b, for example body frame
+# bRa is the rotation to get a in the b frame 
+# measurement in frame a is converted to frame b and used to calculate the error
+function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
+    M = cf.manifold
+    # measurement in frame a, input is tangent, can also use vector transport 
+    a_m = exp(M, getPointIdentity(M), aX)
+    b_m = ArrayPartition(a_m.x[1], bRa * a_m.x[2]) 
+
+    q̂ = Manifolds.compose(M, p, b_m)
+    return vee(M, q, log(M, q, q̂)) # coordinates
+end
