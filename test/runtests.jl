@@ -51,6 +51,7 @@ testfiles = [
   "testTreeInitCommonMsg_IIF913.jl";
   "testHexagonal2D_CliqByCliq.jl";      # special case debugging
   "testhigherdimroots.jl";
+  "testGenericProjection.jl";
   "testDidsonFunctions.jl";
   "testBasicPose2Stationary.jl";
   "TestPoseAndPoint2Constraints.jl";

@@ -21,9 +21,13 @@ gp = GenericProjection{
 )
 ```
 """
-@kwdef struct GenericProjection{SRC<:InferenceVariable,TRG<:InferenceVariable,C,D}
+@kwdef struct GenericProjection{SRC<:InferenceVariable,TRG<:InferenceVariable,C,D} <: AbstractManifoldMinimize
+  cam::C
   Z::D
-  calib::C
 end
 
+GenericProjection{SRC,TRG}(cam::C, Z::D) where {SRC<:InferenceVariable,TRG<:InferenceVariable,C,D} = GenericProjection{SRC,TRG,C,D}(;cam,Z)
+
+
 getManifold(gp::GenericProjection{S,T}) where {S, T} = TranslationGroup(getDimension(gp.Z))
+
