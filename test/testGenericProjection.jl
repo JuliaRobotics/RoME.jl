@@ -94,7 +94,6 @@ addFactor!(
 @error "TODO Work in progress for solving GenericProjection factors via solveGraphParametric!"
 # IIF.solveGraphParametric!(fg)
 
-
 ##
 
 # using test development function
@@ -107,6 +106,18 @@ w_P3 = solveMultiviewLandmark!(fg, :w_Ph)
 @test isapprox([10.56;0;0], w_P3; atol=1e-3)
 
 
+##
+
+filepath = joinpath(tempdir(), "testgeneric.tar.gz")
+saveDFG(filepath, fg)
+fg_ = loadDFG!(initfg(), filepath)
+
+Base.rm(filepath)
+
+##
+
+w_P3 = solveMultiviewLandmark!(fg_, :w_Ph)
+@test isapprox([10.56;0;0], w_P3; atol=1e-3)
 
 ##
 end
