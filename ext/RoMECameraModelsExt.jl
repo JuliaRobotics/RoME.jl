@@ -8,8 +8,20 @@ using Manifolds
 using DocStringExtensions
 using Optim
 
+import Base: convert
 import IncrementalInference: AbstractDFG, getFactorType, getVariable, getSolverData, CalcFactor, ls
 import RoME: GenericProjection, solveMultiviewLandmark!
+
+
+function Base.convert(::Type{<:CameraCalibration}, dict::Dict)
+  CameraModels.CameraCalibration(;
+    height = dict[:height],
+    width = dict[:width],
+    kc = SVector{5,Float64}(dict[:kc]...),
+    K = SMatrix{3,3,Float64}(reshape(dict[:K],3,3)),
+    Ki = SMatrix{3,3,Float64}(reshape(dict[:Ki],3,3)),
+  )
+end
 
 
 function projectPointFrom(cam, c_H_w, w_Ph)

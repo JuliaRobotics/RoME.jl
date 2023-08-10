@@ -241,7 +241,8 @@ export homography_to_coordinates, coordinates_to_homography
 export generateField_CanyonDEM
 
 # CameraModels
-export GenericProjection, solveMultiviewLandmark!
+export GenericProjection, PackedGenericProjection
+export solveMultiviewLandmark!
 
 # Flux.jl
 export MixtureFluxPose2Pose2, PackedMixtureFluxPose2Pose2
