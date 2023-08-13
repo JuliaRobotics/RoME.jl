@@ -18,7 +18,7 @@ using Test
 # addFactor!(fg, [:x2;:x3], Pose3Pose3(MvNormal([1;0;0;0;0;0.],diagm(0.1*ones(6)))); graphinit=false)
 # saveDFG(joinpath(@__DIR__,"testdata","g2otest.tar.gz"), fg)
 
-fg = loadDFG(joinpath(@__DIR__,"testdata","g2otest.tar.gz"))
+fg = loadDFG!(initfg(), joinpath(@__DIR__,"testdata","g2otest.tar.gz"))
 
 setPPE!.(fg, ls(fg), :parametric)
 g2ofile = joinpath("/tmp", "caesar", "export.g2o")
