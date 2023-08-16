@@ -48,7 +48,7 @@ function (cf::CalcFactor{<:GenericProjection{S,T}})(
   # κ*(abs(pred.depth) - pred.depth)^2 + (c_X[1]-pred[1])^2 + (c_X[2]-pred[2])^2
 
   frontPenalty = κ*(abs(pred.depth) - pred.depth)^2
-  res = SVector{3,Float64}(
+  res = SVector{2,Float64}(
     frontPenalty + (c_X[1]-pred[1]),
     frontPenalty + (c_X[2]-pred[2]),
   )
