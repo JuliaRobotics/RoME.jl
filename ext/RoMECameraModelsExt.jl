@@ -35,7 +35,7 @@ function (cf::CalcFactor{<:GenericProjection{S,T}})(
   w_P_o
 ) where {S,T}
   
-  κ = 1000
+  κ = 0.001
   M = SpecialEuclidean(3)
 
   w_Ph = SVector{4,Float64}(w_P_o..., 1.0)
@@ -47,10 +47,10 @@ function (cf::CalcFactor{<:GenericProjection{S,T}})(
   # experimental cost function to try force bad reprojects in front of the camera during optimization
   # κ*(abs(pred.depth) - pred.depth)^2 + (c_X[1]-pred[1])^2 + (c_X[2]-pred[2])^2
 
+  frontPenalty = κ*(abs(pred.depth) - pred.depth)^2
   res = SVector{3,Float64}(
-    c_X[1]-pred[1],
-    c_X[2]-pred[2],
-    κ*(abs(pred.depth) - pred.depth)
+    frontPenalty + (c_X[1]-pred[1]),
+    frontPenalty + (c_X[2]-pred[2]),
   )
 
   # error vs measured projection
