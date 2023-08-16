@@ -77,7 +77,8 @@ function solveMultiviewLandmark!(
   dfg::AbstractDFG, 
   lmlb::Symbol;
   cam = CameraModels.CameraCalibration(),
-  retry::Int = 100
+  retry::Int = 100,
+  _undistort::Function = (c,p) -> CameraModels.undistortPoint(cam,p)
 )
   # assume to find 
   M = SpecialEuclidean(3)
@@ -118,7 +119,10 @@ function solveMultiviewLandmark!(
       [vl;],
     )
     
-    obs = CameraModels.PixelIndex(getFactorType(dfg, fl).Z.μ...)
+    # TODO apply camera intrinsic calibration
+    obs_ = _undistort(cam, getFactorType(dfg, fl).Z.μ)
+    obs = CameraModels.PixelIndex(obs_...)
+    # obs = CameraModels.PixelIndex(getFactorType(dfg, fl).Z.μ...)
     push!(_c_Xi, obs)
   end
   cost_(w_Lh) = cost(cam, _c_Xi, _w_P_ci, SVector(w_Lh...))
