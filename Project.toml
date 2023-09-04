@@ -44,7 +44,7 @@ RoMEFluxExt = "Flux"
 RoMEImageIOExt = "ImageIO"
 
 [compat]
-ApproxManifoldProducts = "0.7"
+ApproxManifoldProducts = "0.7, 0.8"
 CoordinateTransformations = "0.5, 0.6"
 DelimitedFiles = "1"
 DistributedFactorGraphs = "0.23"
