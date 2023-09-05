@@ -44,7 +44,7 @@ RoMEFluxExt = "Flux"
 RoMEImageIOExt = "ImageIO"
 
 [compat]
-ApproxManifoldProducts = "0.7"
+ApproxManifoldProducts = "0.7, 0.8"
 CoordinateTransformations = "0.5, 0.6"
 DelimitedFiles = "1"
 DistributedFactorGraphs = "0.23"
@@ -74,4 +74,4 @@ JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Flux", "ImageIO", "Interpolations", "JSON3", "Test"]
+test = ["CameraModels", "Flux", "ImageIO", "Interpolations", "JSON3", "Test"]

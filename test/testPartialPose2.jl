@@ -31,6 +31,8 @@ p0 = getVal(fg, :x0, solveKey=:parametric)[1]
 p1 = getVal(fg, :x1, solveKey=:parametric)[1]
 p2 = getVal(fg, :x2, solveKey=:parametric)[1]
 
+M = getManifold(Pose2)
+
 # driving east to west (along +y in world), therefore all headings = pi/2
 @test isapprox(M, p0, ArrayPartition([0, 0.0], [0 -1.0; 1.0 0]), atol=1e-6)
 @test isapprox(M, p1, ArrayPartition([0, 1.0], [0 -1.0; 1.0 0]), atol=1e-6)
