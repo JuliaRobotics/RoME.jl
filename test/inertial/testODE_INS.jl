@@ -42,11 +42,11 @@ function insKinematic!(dstate, state, u, t)
 
   # attitude computer
   w_R_b = state.x[2] # Rotation element
-  w_R_b = w_R_b
+  i_R_b = w_R_b
   # assume body-frame := imu-frame
   b_Ωbi = hat(Mr, Identity(Mr), u[].gyro(t)) # so(3): skew symmetric Lie algebra element
   # assume perfect measurement, i.e. `i` here means measured against native inertial (no coriolis, transport rate, error corrections)
-  i_Ṙ_b = w_R_b * b_Ωbi
+  i_Ṙ_b = i_R_b * b_Ωbi
   # assume world-frame := inertial-frame
   w_Ṙ_b = i_Ṙ_b
   # tie back to the ODE solver
@@ -58,7 +58,7 @@ function insKinematic!(dstate, state, u, t)
   # measured inertial acceleration
   b_Abi = u[].accel(t) # already a tangent vector
   # inertial (i.e. world) velocity-dot (accel) by compensating (i.e. removing) expected gravity measurement
-  i_V̇ = w_R_b * b_Abi - i_G
+  i_V̇ = i_R_b * b_Abi - i_G
   # assume world is inertial frame
   w_V̇ = i_V̇
   dstate.x[3] .= w_V̇ # velocity state
