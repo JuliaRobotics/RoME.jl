@@ -151,7 +151,7 @@ tstForce(t) = 0
 fg = initfg()
 # the starting points and "0 seconds"
 # `accurate_time = trunc(getDatetime(var), Second) + (1e-9*getNstime(var) % 1)`
-addVariable!(fg, :x0, Pose3, timestamp=DateTime(2000,1,1,0,0,0)) 
+addVariable!(fg, :x0, VelPose3, timestamp=DateTime(2000,1,1,0,0,0)) 
 # pin with a simple prior
 addFactor!(fg, [:x0], Prior(Normal(1,0.01)))
 
