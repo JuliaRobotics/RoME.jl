@@ -3,6 +3,8 @@
 
 using Test
 using DifferentialEquations
+using RoME
+using Interpolations
 using IncrementalInference
 using Dates
 using Statistics
@@ -23,52 +25,51 @@ using TensorCast
 # a user specified ODE in standard form
 # inplace `xdot = f(x, u, t)`
 # if linear, `xdot = F*x(t) + G*u(t)`
-function firstOrder!(dstate, state, u, t)
+function insKinematic!(dstate, state, u, t)
   # x is a VelPose3 point (assumed ArrayPartition)
   # u is IMU input (assumed [rate; accel])
   Mt = TranslationGroup(3)
   Mr = SpecialOrthogonal(3)
-  
   # convention
   # b is real time body
   # b1 is one discete timestep in the past, equivalent to `r_Sk = r_Sk1 + r_dSk := r_S{k-1} + r_dSk`
 
-  
   # Using robotics frame fwd-std-dwn <==> North-East-Down
   # ODE cross check taken from Farrell 2008, section 11.2.1, p.388
   # NOTE, Farrell 2008 has gravity logic flipped in some of his equations.
   # WE TAKE gravity as up is positive (think a pendulum hanging back during acceleration)
   # expected gravity in FSD frame (akin to NED).  This is a model of gravity we expect to measure.
-  i_G = SA[0; 0; -9.81] 
+  i_G = [0; 0; -9.81] 
 
   # attitude computer
   w_R_b = state.x[2] # Rotation element
   i_R_b = w_R_b
   # assume body-frame := imu-frame
-  b_Ωbi = hat(Mr, Identity(Mr), u.gyro) # so(3): skew symmetric Lie algebra element
+  b_Ωbi = hat(Mr, Identity(Mr), u[].gyro(t)) # so(3): skew symmetric Lie algebra element
   # assume perfect measurement, i.e. `i` here means measured against native inertial (no coriolis, transport rate, error corrections)
   i_Ṙ_b = i_R_b * b_Ωbi
   # assume world-frame := inertial-frame
   w_Ṙ_b = i_Ṙ_b
   # tie back to the ODE solver
-  dstate[2] = w_Ṙ_b
+
+  dstate.x[2] .= w_Ṙ_b
   # Note closed form post integration result (remember exp is solution to first order diff equation)
   # w_R_b = exp(Mr, w_R_b1, b_Ωbi)
   
   # measured inertial acceleration
-  b_Abi = u.accel # already a tangent vector
+  b_Abi = u[].accel(t) # already a tangent vector
   # inertial (i.e. world) velocity-dot (accel) by compensating (i.e. removing) expected gravity measurement
   i_V̇ = i_R_b * b_Abi - i_G
   # assume world is inertial frame
   w_V̇ = i_V̇
-  dstate[3] = w_V̇ # velocity state
+  dstate.x[3] .= w_V̇ # velocity state
   
   # position-dot (velocity)
-  w_V = state[2]
+  w_V = state.x[3]
   i_V = w_V
   i_Ṗ = i_V
   w_Ṗ = i_Ṗ
-  dstate[1] = w_Ṗ
+  dstate.x[1] .= w_Ṗ
   
   # TODO add biases, see RoME.InertialPose
   # state[4] := gyro bias
@@ -76,6 +77,69 @@ function firstOrder!(dstate, state, u, t)
 
   nothing
 end
+
+dt = 0.01
+N = 101
+gyros = [[0.01, 0.0, 0.0] for _ = 1:N]
+a0 = [0, 0, -9.81]
+accels = [a0]
+w_R_b = [1. 0 0; 0 1 0; 0 0 1]
+M = SpecialOrthogonal(3)
+for g in gyros[1:end-1]
+  X = hat(M, Identity(M), g)
+  exp!(M, w_R_b, w_R_b, X*dt)
+  push!(accels, w_R_b' * a0)
+end
+
+gyros_t = linear_interpolation(range(0; step=dt, length=N), gyros)
+accels_t = linear_interpolation(range(0; step=dt, length=N), accels)
+
+p = (gyro=gyros_t, accel=accels_t)
+
+p.accel(0.9)
+
+u0 = ArrayPartition([0.0,0,0], Matrix(getPointIdentity(SpecialOrthogonal(3))), [0.,0,0])
+tspan = (0.0, 1.0)
+
+prob = ODEProblem(insKinematic!, u0, tspan, Ref(p))
+
+sol = solve(prob)
+last(sol)
+
+
+@test isapprox(last(sol).x[1], [0,0,0]; atol=0.001)
+@test isapprox(M, last(sol).x[2], w_R_b; atol=0.001)
+@test isapprox(last(sol).x[3], [0,0,0]; atol=0.001)
+
+
+##
+
+
+##
+
+# function insTangentFrame!(dstate, state, u, t)
+#   Mt = TranslationGroup(3)
+#   Mr = SpecialOrthogonal(3)
+  
+#   #FIXME
+#   t_v = [0.,0,0]
+#   b_Ωie =  hat(Mr, Identity(Mr), [0.,0,0])
+
+#   t_g = [0; 0; -9.81] 
+
+#   t_R_b = state.x[2] # Rotation element
+#   b_Ωib = hat(Mr, Identity(Mr), u[].gyro(t)) # so(3): skew symmetric Lie algebra element
+#   t_Ṙ_b = t_R_b * (b_Ωib - b_Ωie)
+#   dstate.x[2] .= t_Ṙ_b
+#   b_Aib = u[].accel(t) # already a tangent vector
+#   t_V̇e = t_R_b * b_Aib - t_g - 2*b_Ωie*t_v
+#   dstate.x[3] .= t_V̇e # accel state
+#   t_Ve = state.x[3]
+#   t_Ṗ = t_Ve
+#   dstate.x[1] .= t_Ṗ
+#   nothing
+# end
+
 
 @error("WIP BELOW")
 
@@ -88,7 +152,7 @@ tstForce(t) = 0
 fg = initfg()
 # the starting points and "0 seconds"
 # `accurate_time = trunc(getDatetime(var), Second) + (1e-9*getNstime(var) % 1)`
-addVariable!(fg, :x0, Position{1}, timestamp=DateTime(2000,1,1,0,0,0)) 
+addVariable!(fg, :x0, VelPose3, timestamp=DateTime(2000,1,1,0,0,0)) 
 # pin with a simple prior
 addFactor!(fg, [:x0], Prior(Normal(1,0.01)))
 
