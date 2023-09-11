@@ -3,6 +3,8 @@
 
 using Test
 using DifferentialEquations
+using RoME
+using Interpolations
 using IncrementalInference
 using Dates
 using Statistics
@@ -31,7 +33,6 @@ function insKinematic!(dstate, state, u, t)
   # convention
   # b is real time body
   # b1 is one discete timestep in the past, equivalent to `r_Sk = r_Sk1 + r_dSk := r_S{k-1} + r_dSk`
-
 
   # Using robotics frame fwd-std-dwn <==> North-East-Down
   # ODE cross check taken from Farrell 2008, section 11.2.1, p.388
