@@ -18,7 +18,7 @@ using TensorCast
 
 ##
 
-# @testset "First order DERelative" begin
+@testset "First order DERelative" begin
 
 ##
 
