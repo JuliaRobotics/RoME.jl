@@ -2,6 +2,9 @@ using Manifolds
 using StaticArrays
 using Rotations
 using LinearAlgebra
+using DistributedFactorGraphs
+using RoME
+using Dates
 
 function skew(v::SVector{3,T}) where T<:Real
     return SMatrix{3,3,T}(
@@ -27,9 +30,16 @@ struct IMUDeltaManifold <: AbstractManifold{ℝ} end
 #TODO 
 # also see SE₂(3) 
 
+# todo update order to VelPose3=Velocity x Position x Rotation
+@defVariable RotVelPos Manifolds.ProductGroup(ProductManifold(SpecialOrthogonal(3), TranslationGroup(3), TranslationGroup(3))) ArrayPartition(SA[1 0 0; 0 1 0; 0 0 1.0], SA[0; 0; 0.0], SA[0;0;0.0])
+Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(getManifold(RotVelPos))}) = 
+    (:Circular,:Circular,:Circular,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid)
+
 const IMUDeltaGroup = GroupManifold{ℝ, IMUDeltaManifold, MultiplicationOperation}
 
 IMUDeltaGroup() = GroupManifold(IMUDeltaManifold(), MultiplicationOperation())
+
+Manifolds.manifold_dimension(::IMUDeltaManifold) = 9
 
 # Affine representation 
 # Δ = [ΔR Δv Δp;
@@ -50,6 +60,8 @@ function Manifolds.identity_element(M::IMUDeltaGroup) # was #SMatrix{5,5,Float64
     )
 end
 
+DFG.getPointIdentity(M::IMUDeltaGroup) = identity_element(M)
+
 function Manifolds.affine_matrix(G::IMUDeltaGroup, p::ArrayPartition{T}) where T<:Real
     return SMatrix{5,5,T}([
         p.x[1]  p.x[2]  p.x[3];
@@ -58,7 +70,7 @@ function Manifolds.affine_matrix(G::IMUDeltaGroup, p::ArrayPartition{T}) where T
     ])
 end
 
-function Manifolds.inv(M::IMUDeltaGroup, p) where T<:Real
+function Manifolds.inv(M::IMUDeltaGroup, p)
     ΔR = p.x[1]
     Δv = p.x[2]
     Δp = p.x[3]
@@ -197,7 +209,7 @@ end
 
 # compute the expected delta from p to q on the IMUDeltaGroup
 # ⊟ = boxminus
-function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,-9.81]) 
+function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,9.81]) 
     Rᵢ = p.x[1]
     vᵢ = p.x[2]
     pᵢ = p.x[3]
@@ -288,17 +300,33 @@ Base.@kwdef struct IMUDeltaFactor{T <: SamplableBelief} <: AbstractManifoldMinim
     Δ::ArrayPartition{Float64, Tuple{SMatrix{3, 3, Float64, 9}, SVector{3, Float64}, SVector{3, Float64}, Float64}}
     Σ::SMatrix{10,10,Float64}
     J_b::SMatrix{10,6,Float64} = zeros(SMatrix{10,6,Float64})
+    # accelerometer bias, gyroscope bias 
     b::SVector{6, Float64} = zeros(SVector{6, Float64})
+    #optional raw measurements
+    accelerometer::Vector{SVector{3,Float64}} = SVector{3,Float64}[]
+    gyroscope::Vector{SVector{3,Float64}} = SVector{3,Float64}
+    timestamps::Vector{Float64} = Float64[]
 end
 
 function IIF.getSample(cf::CalcFactor{<:IMUDeltaFactor})
-    return hat(IMUDeltaGroup(), SA[rand(Z)..., cf.Δt])
+    return exp(IMUDeltaGroup(), hat(IMUDeltaGroup(), SA[rand(cf.factor.Z)..., cf.factor.Δt]))
+end
+
+function IIF.getMeasurementParametric(f::IMUDeltaFactor)
+    iΣ = invcov(f.Z)
+    return f.Δ, iΣ
+end
+
+IIF.getManifold(::IMUDeltaFactor) = IMUDeltaGroup()
+
+function IIF.preambleCache(fg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, ::IMUDeltaFactor)
+    (timestams=(vars[1].nstime,vars[2].nstime),)
 end
 
 # factor residual
 
 function (cf::CalcFactor{<:IMUDeltaFactor})(
-    Δmeas, # on IMUDeltaGroup
+    Δmeas, # point on IMUDeltaGroup
     p::ArrayPartition{T, Tuple{SMatrix{3, 3, T, 9}, SVector{3, T}, SVector{3, T}, T}}, 
     q::ArrayPartition{T, Tuple{SMatrix{3, 3, T, 9}, SVector{3, T}, SVector{3, T}, T}},
     b::SVector{6,T} = zeros(SVector{6,T})
@@ -306,7 +334,7 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     #
     M = IMUDeltaGroup()
     # imu measurment Delta, corrected for bias with # b̄ = cf.factor.b
-    Δi = compose(M, Δmeas, exp(M, cf.factor.Jb * (b - cf.factor.b)))
+    Δi = compose(M, Δmeas, exp(M, hat(M, cf.factor.J_b * (b - cf.factor.b))))
     # expected delta from p to q
     Δhat = boxminus(M, p, q)
     # residual 
@@ -316,18 +344,31 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
 end
 
 function (cf::CalcFactor{<:IMUDeltaFactor})(
+    Δmeas, # point on IMUDeltaGroup
+    _p::ArrayPartition{T, Tuple{SMatrix{3, 3, T, 9}, SVector{3, T}, SVector{3, T}}}, 
+    _q::ArrayPartition{T, Tuple{SMatrix{3, 3, T, 9}, SVector{3, T}, SVector{3, T}}},
+    b::SVector{6,T} = zeros(SVector{6,Float64})
+) where T <: Real
+    p_t = Dates.value(cf.cache.timestams[1])*1e-9
+    q_t = Dates.value(cf.cache.timestams[2])*1e-9
+    p = ArrayPartition(_p.x[1], _p.x[2], _p.x[3], p_t)
+    q = ArrayPartition(_q.x[1], _q.x[2], _q.x[3], q_t)
+    return cf(Δmeas, p, q, b)
+end
+
+function (cf::CalcFactor{<:IMUDeltaFactor})(
     X, 
     p_SE3,
     p_vel, 
     q_SE3,
     q_vel,
-    b::SVector{6,T} = zeros(SVector{6,T})
+    b::SVector{6,T} = zeros(SVector{6,Float64})
 ) where T <: Real
-    p_t = cf.fullvariables[1].nstime*1e-9
-    q_t = cf.fullvariables[1].nstime*1e-9
+    p_t = Dates.value(cf.cache.timestams[1])*1e-9
+    q_t = Dates.value(cf.cache.timestams[2])*1e-9
     p = ArrayPartition(p_SE3.x[2], p_vel, p_SE3.x[1], p_t)
     q = ArrayPartition(q_SE3.x[2], q_vel, q_SE3.x[1], q_t)
-    return cf(X, p, q)
+    return cf(X, p, q, b)
 end
 
 function _τδt(δt)
@@ -404,10 +445,9 @@ function IMUDeltaFactor(
     if !isnothing(ch)
         @warn "IMU Covar check" ch
         S = (S + S') / 2
+        S = S + diagm((diag(S) .== 0)*1e-15)
         ch = check_point(SM, S)
-        !isnothing(ch) && @warn "IMU Covar check" ch
-        # S = S + diagm([zeros(8); 1e-15])
-        S = S + diagm(ones(9)*1e-15)
+        !isnothing(ch) && @error "IMU Covar check" ch
     end
 
     Z = MvNormal(Xc[1:9], S)
@@ -419,9 +459,14 @@ function IMUDeltaFactor(
         SMatrix{10,10,Float64}(Σ),
         J_b,
         SA[a_b...; ω_b...],
+        accels,
+        gyros,
+        timestamps,
     )
 end
 
+
+##
 #TODO convert to tests
 if false
 
@@ -471,93 +516,48 @@ q = ArrayPartition(SMatrix{3,3}(1.0I), SA[1.,0,0], SA[0.1,0,0], 0.1)
 Δpq.x[3]
 Δpq.x[4]
 
-
-
-
-
-
 end
-
-
-
-## 
-
-using Interpolations
-using DifferentialEquations
-
-function imuDeltaKinematic!(du, u, p, t)
-    # p is IMU input (assumed [.gyro; .accel])
-    M = SpecialOrthogonal(3)
-
-    R = u.x[1] # Rotation
-    V = u.x[2] # Velocity 
-    # P = u.x[3] # Position unused here
-
-    Ω = hat(M, Identity(M), p[].gyro(t))
-    Ṙ = R * Ω
-
-    A = p[].accel(t)
-    V̇ = R * A
-    Ṗ = V
-
-    du.x[1] .= Ṙ
-    du.x[2] .= V̇
-    du.x[3] .= Ṗ
-
-    nothing
-end
-
-
 ##
-begin
-
+# generate dataset
 dt = 0.01
 N = 1001
 tspan = (0.0, 10.0)
 timestamps = range(0; step=dt, length=N)
 
-gyros = [[0.0, 0.0, pi/2] for _ = 1:N]
+gn = MvNormal(diagm(ones(3)*1e-3^2))
+gyros = [[0.0, 0.0, pi/2] + rand(gn) for _ = 1:N]
 
-a0 = [0.0, 0, 0]
+a0 = [0.0, 0, -9.81]
 accels = [a0]
 w_R_b = [1. 0 0; 0 1 0; 0 0 1]
 M = SpecialOrthogonal(3)
 
 # b_a = [0.1, 0, 0]
+an = MvNormal(diagm(ones(3)*1e-3^2))
 b_a = [0.0, pi/2*10, 0]
 for g in gyros[1:end-1]
   X = hat(M, Identity(M), g)
   exp!(M, w_R_b, w_R_b, X*dt)
-  push!(accels, b_a .+ w_R_b * a0)
+  push!(accels, b_a .+ w_R_b * a0 + rand(an))
 end
 
-gyros_t = linear_interpolation(timestamps, gyros)
-accels_t = linear_interpolation(timestamps, accels)
-
-# end
-
-u0 = ArrayPartition(Matrix(getPointIdentity(SpecialOrthogonal(3))), [10.,0,0], [0.0,0,0])
-prob = ODEProblem(imuDeltaKinematic!, u0, tspan, Ref((gyro=gyros_t, accel=accels_t)))
-
-@time sol = solve(prob)
-last(sol)
-
-
-v = map(sol) do s
-    Point2f(s.x[2][1:2])
-end
-p = map(sol) do s
-    Point2f(s.x[3][1:2])
+pidx = range(1; step=50, stop=length(timestamps))
+preints = map(zip(pidx[1:end-1], pidx[2:end])) do (fr,to)
+    r = range(fr,to)
+    Δ, Σ, J_b = preintegrateIMU(accels[r], gyros[r], timestamps[r], Σy, a_b, ω_b)
+    Σ
 end
 
-lines(p)
+lines(getindex.(preints,1))
+
+
+
+
 end
-lines!(v)
+
 
 ##
-
-
-
+begin
 
 ##
 linewidth = 0.05
