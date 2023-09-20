@@ -3,10 +3,9 @@ using StaticArrays
 using Rotations
 using LinearAlgebra
 using DistributedFactorGraphs
-using RoME
 using Dates
 
-function skew(v::SVector{3,T}) where T<:Real
+function TransformUtils.skew(v::SVector{3,T}) where T<:Real
     return SMatrix{3,3,T}(
             0,
          v[3],
@@ -29,11 +28,6 @@ struct IMUDeltaManifold <: AbstractManifold{ℝ} end
 
 #TODO 
 # also see SE₂(3) 
-
-# todo update order to VelPose3=Velocity x Position x Rotation
-@defVariable RotVelPos Manifolds.ProductGroup(ProductManifold(SpecialOrthogonal(3), TranslationGroup(3), TranslationGroup(3))) ArrayPartition(SA[1 0 0; 0 1 0; 0 0 1.0], SA[0; 0; 0.0], SA[0;0;0.0])
-Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(getManifold(RotVelPos))}) = 
-    (:Circular,:Circular,:Circular,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid)
 
 const IMUDeltaGroup = GroupManifold{ℝ, IMUDeltaManifold, MultiplicationOperation}
 
@@ -177,7 +171,7 @@ end
 
 function Manifolds.exp(M::IMUDeltaGroup, p::ArrayPartition{T}, X::ArrayPartition{T}) where T<:Real
     q = exp(M, X)
-    return compose(M, p, q)
+    return Manifolds.compose(M, p, q)
 end
 
 function Manifolds.log(M::IMUDeltaGroup, p)
@@ -203,7 +197,7 @@ end
 
 # TODO consolidate with Manifolds notation 
 # function Manifolds.log(M::IMUDeltaGroup, p::SMatrix{5,5,T}, q::SMatrix{5,5,T})
-#     qinvp = compose(M, inv(M, q), p)
+#     qinvp = Manifolds.compose(M, inv(M, q), p)
 #     .....
 # end
 
@@ -235,7 +229,7 @@ function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,9.81])
 end
 
 function ominus(M::IMUDeltaGroup, p, q)
-    log(M, compose(M, inv(M, q), p))
+    log(M, Manifolds.compose(M, inv(M, q), p))
 end
 
 # small adjoint ad
@@ -293,6 +287,12 @@ end
 ## ======================================================================================
 ## IMU DELTA FACTOR 
 ## ======================================================================================
+struct IMUMeasurements
+    accelerometer::Vector{SVector{3,Float64}}
+    gyroscope::Vector{SVector{3,Float64}}
+    timestamps::Vector{Float64}
+    Σy::SMatrix{6,6,Float64}
+end
 
 Base.@kwdef struct IMUDeltaFactor{T <: SamplableBelief} <: AbstractManifoldMinimize
     Z::T # NOTE dim is 9 as Δt is not included in covariance
@@ -303,9 +303,7 @@ Base.@kwdef struct IMUDeltaFactor{T <: SamplableBelief} <: AbstractManifoldMinim
     # accelerometer bias, gyroscope bias 
     b::SVector{6, Float64} = zeros(SVector{6, Float64})
     #optional raw measurements
-    accelerometer::Vector{SVector{3,Float64}} = SVector{3,Float64}[]
-    gyroscope::Vector{SVector{3,Float64}} = SVector{3,Float64}
-    timestamps::Vector{Float64} = Float64[]
+    raw_measurements::Union{Nothing,IMUMeasurements} = nothing
 end
 
 function IIF.getSample(cf::CalcFactor{<:IMUDeltaFactor})
@@ -334,11 +332,11 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     #
     M = IMUDeltaGroup()
     # imu measurment Delta, corrected for bias with # b̄ = cf.factor.b
-    Δi = compose(M, Δmeas, exp(M, hat(M, cf.factor.J_b * (b - cf.factor.b))))
+    Δi = Manifolds.compose(M, Δmeas, exp(M, hat(M, cf.factor.J_b * (b - cf.factor.b))))
     # expected delta from p to q
     Δhat = boxminus(M, p, q)
     # residual 
-    Xhat = log(M, compose(M, inv(M, Δi), Δhat))
+    Xhat = log(M, Manifolds.compose(M, inv(M, Δi), Δhat))
     # should not include Δt only 1:9
     return vee(M, Xhat)[SOneTo(9)]
 end
@@ -357,7 +355,7 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
 end
 
 function (cf::CalcFactor{<:IMUDeltaFactor})(
-    X, 
+    Δmeas, 
     p_SE3,
     p_vel, 
     q_SE3,
@@ -368,7 +366,7 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     q_t = Dates.value(cf.cache.timestams[2])*1e-9
     p = ArrayPartition(p_SE3.x[2], p_vel, p_SE3.x[1], p_t)
     q = ArrayPartition(q_SE3.x[2], q_vel, q_SE3.x[1], q_t)
-    return cf(X, p, q, b)
+    return cf(Δmeas, p, q, b)
 end
 
 function _τδt(δt)
@@ -388,7 +386,7 @@ function integrateIMUDelta(Δij, Σij, Δij_J_b, a, ω, a_b, ω_b, δt, Σy)
     X = hat(M, Xc)
     δjk = exp(M, X)
 
-    Δik = compose(M, Δij, δjk)
+    Δik = Manifolds.compose(M, Δij, δjk)
     # TODO Integrate Jacobian wrt the biases Δ_J_b
     
     # Jacobians
@@ -459,132 +457,11 @@ function IMUDeltaFactor(
         SMatrix{10,10,Float64}(Σ),
         J_b,
         SA[a_b...; ω_b...],
-        accels,
-        gyros,
-        timestamps,
+        IMUMeasurements(
+            accels,
+            gyros,
+            timestamps,
+            Σy
+        )
     )
 end
-
-
-##
-#TODO convert to tests
-if false
-
-Σy  = diagm(ones(6)*0.01^2)
-a_b = SA[0.,0,0]
-ω_b = SA[0.,0,0]
-Δ, Σ, J_b = preintegrateIMU(accels[1:100], gyros[1:100], timestamps[1:100], Σy, a_b, ω_b)
-Σ = Σ[SOneTo(9),SOneTo(9)]
-
-Σy  = diagm(ones(6)*0.01^2)
-f1 = IMUDeltaFactor(accels[1:100], gyros[1:100], timestamps[1:100], Σy, a_b, ω_b)
-f2 = IMUDeltaFactor(accels[100:200], gyros[100:200], timestamps[100:200], Σy, a_b, ω_b)
-
-using Test
-M = SpecialOrthogonal(3)
-ΔR = exp(M, Identity(M), hat(M, Identity(M), [0.1,0.,0.]))
-a = RotationVec(ΔR)
-b = Rotations.AngleAxis(ΔR)
-
-
-M = IMUDeltaGroup()
-ϵ = identity_element(M)
-@test inv(M, ϵ) == ϵ
-
-# vΔt, aΔt, ωΔt, Δt
-X = hat(M, SA[0.0,0,0, 0,0,0, 0,0,1, 1] * 0.001)
-p = exp(M, ϵ, X)
-@test log(M, p) ≈ X
-
-A = zeros(5,5)
-A[3:4,5] .= 0.001 
-exp(A)
-
-affine_matrix(M, p)
-
-Xc = SA[0.01, 0.02, 0.03,   0, 0, 0,   0.1, 0.2, 0.3,   1] * 0.001
-X = hat(M, Xc)
-p = exp(M, ϵ, X)
-@test log(M, p) ≈ X
-vee(M, log(M, p)) ≈ Xc
-
-p = ArrayPartition(SMatrix{3,3}(1.0I), SA[1.,0,0], SA[0.,0,0], 0.0)
-q = ArrayPartition(SMatrix{3,3}(1.0I), SA[1.,0,0], SA[0.1,0,0], 0.1)
-Δpq = boxminus(M, p, q)
-Δpq.x[1]
-Δpq.x[2]
-Δpq.x[3]
-Δpq.x[4]
-
-end
-##
-# generate dataset
-dt = 0.01
-N = 1001
-tspan = (0.0, 10.0)
-timestamps = range(0; step=dt, length=N)
-
-gn = MvNormal(diagm(ones(3)*1e-3^2))
-gyros = [[0.0, 0.0, pi/2] + rand(gn) for _ = 1:N]
-
-a0 = [0.0, 0, -9.81]
-accels = [a0]
-w_R_b = [1. 0 0; 0 1 0; 0 0 1]
-M = SpecialOrthogonal(3)
-
-# b_a = [0.1, 0, 0]
-an = MvNormal(diagm(ones(3)*1e-3^2))
-b_a = [0.0, pi/2*10, 0]
-for g in gyros[1:end-1]
-  X = hat(M, Identity(M), g)
-  exp!(M, w_R_b, w_R_b, X*dt)
-  push!(accels, b_a .+ w_R_b * a0 + rand(an))
-end
-
-pidx = range(1; step=50, stop=length(timestamps))
-preints = map(zip(pidx[1:end-1], pidx[2:end])) do (fr,to)
-    r = range(fr,to)
-    Δ, Σ, J_b = preintegrateIMU(accels[r], gyros[r], timestamps[r], Σy, a_b, ω_b)
-    Σ
-end
-
-lines(getindex.(preints,1))
-
-
-
-
-end
-
-
-##
-begin
-
-##
-linewidth = 0.05
-lengthscale=0.9f0
-arrowsize = Vec3f(0.1, 0.1, 0.1)
-
-
-ps = map(sol) do s
-    Point3f(s.x[3][1:3])
-end
-nxs = map(sol) do s
-    Point3f(s.x[1][:,1])
-end
-nys = map(sol) do s
-    Point3f(s.x[1][:,2])
-end
-nzs = map(sol) do s
-    Point3f(s.x[1][:,3])
-end
-
-fig = Makie.arrows(ps, nxs; color=:red, linewidth, lengthscale, arrowsize)
-Makie.arrows!(ps, nys; color=:green, linewidth, lengthscale, arrowsize)
-Makie.arrows!(ps, nzs; color=:blue , linewidth, lengthscale, arrowsize)
-
-lines!(ps)
-fig
-
-
-##
-
