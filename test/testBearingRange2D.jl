@@ -260,14 +260,16 @@ end
 ##
 
 # Start with an empty graph
-N = 1
+# N = 1
 fg = initfg()
 
 #add pose with partial constraint
 addVariable!(fg, :x0, Pose2)
 addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))), graphinit=false)
 # force particular initialization
-setVal!(fg, :x0, [getPointIdentity(Pose2)])
+u0 = getPointIdentity(Pose2)
+arr = push!(Vector{typeof(u0)}(), u0)
+setVal!(fg, :x0, arr)
 
 ##----------- sanity check that predictbelief plumbing is doing the right thing
 _pts = getPoints(propagateBelief(fg, :x0, ls(fg, :x0), N=75)[1])
