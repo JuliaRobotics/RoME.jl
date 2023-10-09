@@ -104,6 +104,9 @@ p2 = getVal(fg, :x2, solveKey=:parametric)[1]
 R = getVal(fg, :bRa, solveKey=:parametric)[1]
 
 @test isapprox(M, p0, ArrayPartition([0, 0.0, 0], [0 -1 0; 1 0 0; 0 0 1.0]), atol=1e-6)
+
+# sometimes finds alternate solution:
+#    Evaluated: isapprox(SpecialEuclidean(3), ArrayPartition{Float64, Tuple{SVector{3, Float64}, SMatrix{3, 3, Float64, 9}}}(([3.788256914144681e-13, 1.0000000000003577, 5.503104173515299e-13], [-2.604583215770617e-13 0.9999999999999999 2.1828771760367925e-14; 0.9999999999999999 2.6068036618198676e-13 -3.428875244265361e-13; -3.4288752442654184e-13 2.1828771760278563e-14 -0.9999999999999998])), ArrayPartition{Float64, Tuple{Vector{Float64}, Matrix{Float64}}}(([0.0, 1.0, 0.0], [0.0 -1.0 0.0; 1.0 0.0 0.0; 0.0 0.0 1.0])); atol = 1.0e-6)
 @test isapprox(M, p1, ArrayPartition([0, 1.0, 0], [0 -1 0; 1 0 0; 0 0 1.0]), atol=1e-6)
 @test isapprox(M, p2, ArrayPartition([0, 2.0, 0], [0 -1 0; 1 0 0; 0 0 1.0]), atol=1e-6)
 @test isapprox(getPPESuggested(fg, :bRa, :parametric), [0,0,-0.1], atol=1e-6)
