@@ -205,7 +205,7 @@ end
 
 # compute the expected delta from p to q on the IMUDeltaGroup
 # ⊟ = boxminus
-function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,9.81]) 
+function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,-9.81]) 
     Rᵢ = p.x[1]
     vᵢ = p.x[2]
     pᵢ = p.x[3]
@@ -279,7 +279,7 @@ function AdjointMatrix(::IMUDeltaGroup, p::ArrayPartition{T}) where T
 end
 
 # right Jacobian
-function Jr(M::IMUDeltaGroup, X; order=3)
+function Jr(M::IMUDeltaGroup, X; order=5)
     adx = adjointMatrix(M, X)
     mapreduce(+, 1:order) do i
         (-adx)^i / factorial(i + 1)
@@ -389,8 +389,7 @@ function integrateIMUDelta(Δij, Σij, Δij_J_b, a, ω, a_b, ω_b, δt, Σy)
     δjk = exp(M, X)
 
     Δik = Manifolds.compose(M, Δij, δjk)
-    # TODO Integrate Jacobian wrt the biases Δ_J_b
-    
+
     # Jacobians
     τ_J_y = _τδt(δt)
     τ_J_b = -_τδt(δt)
