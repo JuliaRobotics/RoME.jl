@@ -130,8 +130,9 @@ function _Q(θ⃗)
         u = θ⃗/θ
         sθ, cθ = sincos(θ)
         uₓ = skew(u)
-        #TODO possible mistake in source here with ^2 --- (θ - sθ)/θ^2 vs (θ - sθ)/θ
-        return SMatrix{3,3,T}(I) + (1 - cθ)/θ * uₓ + (θ - sθ)/θ^2 * uₓ^2
+        # NOTE difference in references here --- (θ - sθ)/θ^2 vs (θ - sθ)/θ
+        # with no ^2 looking correct when compared to exp of SE3
+        return SMatrix{3,3,T}(I) + (1 - cθ)/θ * uₓ + (θ - sθ)/θ * uₓ^2
     end
 end
 
