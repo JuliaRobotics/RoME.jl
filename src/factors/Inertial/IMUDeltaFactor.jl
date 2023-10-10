@@ -57,11 +57,11 @@ end
 DFG.getPointIdentity(M::IMUDeltaGroup) = identity_element(M)
 
 function Manifolds.affine_matrix(G::IMUDeltaGroup, p::ArrayPartition{T}) where T<:Real
-    return SMatrix{5,5,T}([
-        p.x[1]  p.x[2]  p.x[3];
-        0 0 0        1  p.x[4];
-        0 0 0        0       1
-    ])
+    return vcat(
+        hcat(p.x[1], p.x[2], p.x[3]), 
+        @SMatrix [0 0 0 1 p.x[4];
+                  0 0 0 0 1]
+    )
 end
 
 function Manifolds.inv(M::IMUDeltaGroup, p)
@@ -160,8 +160,9 @@ function Manifolds.exp(M::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
     P = _P(θ⃗)
     Q = _Q(θ⃗)
 
+    M_SO3 = SpecialOrthogonal(3)
     q = ArrayPartition(
-        exp(θ⃗ₓ),
+        exp(M_SO3, getPointIdentity(M_SO3), θ⃗ₓ),
         Q*ν,
         Q*ρ + P*ν*Δt,
         Δt,
@@ -310,8 +311,8 @@ function IIF.getSample(cf::CalcFactor{<:IMUDeltaFactor})
     return exp(IMUDeltaGroup(), hat(IMUDeltaGroup(), SA[rand(cf.factor.Z)..., cf.factor.Δt]))
 end
 
-function IIF.getMeasurementParametric(f::IMUDeltaFactor)
-    iΣ = invcov(f.Z)
+function IIF.getFactorMeasurementParametric(f::IMUDeltaFactor)
+    iΣ = convert(SMatrix{9,9,Float64,81}, invcov(f.Z))
     return f.Δ, iΣ
 end
 
