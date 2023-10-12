@@ -15,13 +15,10 @@ getManifold(::InstanceType{Pose3Pose3}) = getManifold(Pose3) # Manifolds.Special
 Pose3Pose3(::UniformScaling) = Pose3Pose3()
 
 function (cf::CalcFactor{<:Pose3Pose3})(X, p, q)
-    M = cf.manifold # getManifold(Pose3)
-    q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
-    #TODO allocalte for vee! see Manifolds #412, fix for AD
-    # Xc = zeros(6)
-    # vee!(M, Xc, q, log(M, q, q̂))
+    M = getManifold(Pose3)
+    q̂ = Manifolds.compose(M, p, exp(M, getPointIdentity(M), X))
 
-    Xc = vee(M, q, log(M, q, q̂))
+    Xc = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
     return Xc
 end
 
@@ -68,7 +65,7 @@ getManifold(::InstanceType{Pose3Pose3RotOffset}) = getManifold(Pose3) # Manifold
 # bRa is the rotation to get a in the b frame 
 # measurement in frame a is converted to frame b and used to calculate the error
 function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
-    M = cf.manifold
+    M = getManifold(cf.factor)
     # measurement in frame a, input is tangent, can also use vector transport 
     a_m = exp(M, getPointIdentity(M), aX)
     b_m = ArrayPartition(a_m.x[1], bRa * a_m.x[2]) 

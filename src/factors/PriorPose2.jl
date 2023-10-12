@@ -38,8 +38,11 @@ function (cf::CalcFactor{<:PriorPose2})(
             m::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
             p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
 
-  M = cf.manifold # getManifold(Pose2)
+  M = getManifold(Pose2)
+  ϵ = getPointIdentity(M)
   Xc = _vee(M, log(M, p, m))
+  # X = log(M, ϵ, Manifolds.compose(M, inv(M, p), m))
+  # Xc = vee(M, ϵ, X)
   return Xc
 end
 

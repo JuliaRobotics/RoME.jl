@@ -46,9 +46,10 @@ function (cfo::CalcFactor{<:Pose2Point2BearingRange})(_measX::AbstractArray{MT},
 end
 
 function (cfo::CalcFactor{<:Pose2Point2BearingRange})(
-                  measX::ArrayPartition{<:Real}, 
-                  p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
-                  l::SVector{2,T}) where T<:Real
+    measX::ArrayPartition{<:Real}, 
+    p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
+    l::SVector{2,T}
+) where T<:Real
   #
   # wl = l
   # wTp = p
@@ -67,8 +68,6 @@ end
 # pose = (0,0,0),  bear = pi/2,  range = 10.0   ==>  lm = (0,10)
 # pose = (0,0,pi/2),  bear = 0.0,  range = 10.0   ==>  lm = (0,10)
 # pose = (0,0,pi/2),  bear = pi/2,  range = 10.0   ==>  lm = (-10,0)
-
-
 
 # Support for database based solving
 
