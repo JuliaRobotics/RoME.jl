@@ -71,6 +71,23 @@ function parseG2oInstruction!(fg::AbstractDFG,
               # initVariable!(fg, poseId, MvNormal([x,y,θ],cov))
               initVariable!(fg, poseId, MvNormal([x,y,θ],cov), :parametric)
           end
+    elseif instruction[1] == "VERTEX_SE3:QUAT"
+          poseId = Symbol("x", instruction[2])
+          t = SVector{3,Float64}(parse.(Float64, instruction[3:5]))
+          qvec = parse.(Float64, instruction[[9;6:8]])
+          R = SMatrix{3,3,Float64}(TU.convert(SO3, TU.Quaternion(qvec[1],qvec[2:4])).R)
+
+          p = ArrayPartition(t, R)
+
+          #NOTE just useing some covariance as its not included
+          cov = diagm([1,1,1,0.1,0.1,0.1])
+          variable = addVariable!(fg, poseId, Pose3)
+          if initialize
+              # initVariable!(fg, poseId, MvNormal(p, cov), :parametric)
+              vnd = getSolverData(variable, :parametric)
+              vnd.val[1] = p
+              vnd.bw .= cov
+          end
     elseif instruction[1] == "EDGE_SE2"
         # Need to add a relative pose measurement between two variables.
         # Parse all of the variables starting with the symbols.
