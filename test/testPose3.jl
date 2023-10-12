@@ -92,7 +92,8 @@ end
 prior_distribution = PriorPose3( MvNormal(SA[0, 2.0, 0, 0, 0, pi/2], diagm(SA[0.1, 0.1, 0.1, 0.01, 0.01, 0.01]).^2))
 prior = addFactor!(fg, [:x2], prior_distribution) 
 
-IIF.autoinitParametric!(fg)
+#FIXME manopt parametric cannot init this graph
+# IIF.autoinitParametric!(fg)
 
 r = IIF.solveGraphParametric!(fg)
 
