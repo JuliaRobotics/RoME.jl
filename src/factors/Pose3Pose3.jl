@@ -65,7 +65,7 @@ getManifold(::InstanceType{Pose3Pose3RotOffset}) = getManifold(Pose3) # Manifold
 # bRa is the rotation to get a in the b frame 
 # measurement in frame a is converted to frame b and used to calculate the error
 function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
-    M = getManifold(cf.factor)
+    M = getManifold(Pose3Pose3RotOffset)
     # measurement in frame a, input is tangent, can also use vector transport 
     a_m = exp(M, getPointIdentity(M), aX)
     b_m = ArrayPartition(a_m.x[1], bRa * a_m.x[2]) 

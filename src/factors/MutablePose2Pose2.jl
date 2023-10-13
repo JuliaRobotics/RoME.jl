@@ -27,7 +27,7 @@ Related
 Pose2Pose2, Pose3Pose3, InertialPose3, DynPose2Pose2, Point2Point2, VelPoint2VelPoint2
 """
 function (cf::CalcFactor{<:MutablePose2Pose2Gaussian})(X, p, q)
-  M = cf.manifold # getManifold(Pose2)
+  M = getManifold(Pose2)
   q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
   #TODO allocalte for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
