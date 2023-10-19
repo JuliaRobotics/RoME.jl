@@ -38,7 +38,7 @@ results = IIF.autoinitParametric!.(fg, [vars;lands])
 # pl = plotSLAM2D(fg, solveKey=:parametric, drawContour=false, xmin=-20, xmax=20, ymin=-20, ymax=20)
 
 
-vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
+PM, varLabels, r, Σ = IIF.solveGraphParametric!(fg) #autodiff=:finite)
 
 #TODO test +-pi used pi+1e-5
 #FIXME look if something is wrong with angle bounds [-pi,pi), test failed
@@ -46,11 +46,11 @@ M = getManifold(Pose2)
 # @test isapprox(vardict[:x0].val, [10, 10, -pi], atol = 1e-3)
 # @test isapprox(vardict[:x4].val, [10, 10, -pi], atol = 1e-3)
 ϵ = getPointIdentity(M)
-@test isapprox(M, vardict[:x0].val, exp(M, ϵ, hat(M,ϵ,[10, 10, -pi])), atol = 1e-3)
-@test isapprox(M, vardict[:x1].val, exp(M, ϵ, hat(M,ϵ,[0, 10, -pi/2])), atol = 1e-3)
-@test isapprox(M, vardict[:x2].val, exp(M, ϵ, hat(M,ϵ,[0, 0, 0])), atol = 1e-3)
-@test isapprox(M, vardict[:x3].val, exp(M, ϵ, hat(M,ϵ,[10, 0, pi/2])), atol = 1e-3)
-@test isapprox(M, vardict[:x4].val, exp(M, ϵ, hat(M,ϵ,[10, 10, -pi])), atol = 1e-3)
+@test isapprox(M, r[1], exp(M, ϵ, hat(M,ϵ,[10, 10, -pi])), atol = 1e-3)
+@test isapprox(M, r[2], exp(M, ϵ, hat(M,ϵ,[0, 10, -pi/2])), atol = 1e-3)
+@test isapprox(M, r[3], exp(M, ϵ, hat(M,ϵ,[0, 0, 0])), atol = 1e-3)
+@test isapprox(M, r[4], exp(M, ϵ, hat(M,ϵ,[10, 0, pi/2])), atol = 1e-3)
+@test isapprox(M, r[5], exp(M, ϵ, hat(M,ϵ,[10, 10, -pi])), atol = 1e-3)
 
 # IIF.updateParametricSolution(fg, vardict)
 # pl = plotSLAM2D(fg; lbls=true, solveKey=:parametric, point_size=4pt, drawPoints=false, drawContour=false)
@@ -137,13 +137,13 @@ initAll!(fg)
 
 IIF.initParametricFrom!(fg)
 
-vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
+PM, varLabels, r, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
 M = getManifold(Pose2)
 ϵ = getPointIdentity(M)
 
-@test isapprox(M, vardict[:x1].val, exp(M, ϵ, hat(M,ϵ,[0, 0, 0])), atol = 1e-3)
-@test isapprox(vardict[:l1].val, [1,  1], atol = 1e-3)
+@test isapprox(M, r[1], exp(M, ϵ, hat(M,ϵ,[0, 0, 0])), atol = 1e-3)
+@test isapprox(r[2], [1,  1], atol = 1e-3)
 
 # IIF.updateParametricSolution(fg, vardict)
 # pl = plotSLAM2D(fg; lbls=true, solveKey=:parametric, point_size=4pt, drawPoints=false, drawContour=false)
@@ -169,12 +169,12 @@ initAll!(fg)
 
 IIF.initParametricFrom!(fg)
 
-vardict, result, varIds, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
+PM, varLabels, r, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
-@test isapprox(SpecialEuclidean(2), vardict[:x1].val, ArrayPartition([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
+@test isapprox(SpecialEuclidean(2), r[1], ArrayPartition([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
 
-@test isapprox(vardict[:l1].val, [1,  1], atol = 1e-3)
-@test isapprox(vardict[:l2].val, [1, -1], atol = 1e-3)
+@test isapprox(r[2], [1,  1], atol = 1e-3)
+@test isapprox(r[3], [1, -1], atol = 1e-3)
 
 # IIF.updateParametricSolution(fg, vardict)
 # pl = plotSLAM2D(fg; lbls=true, solveKey=:parametric, point_size=4pt, drawPoints=false, drawContour=false)
@@ -202,10 +202,10 @@ addFactor!(fg, [:x0;:x1], dp2dp2)
 
 initAll!(fg)
 
-vardict, result, varIds, Σ = IIF.solveGraphParametric!(fg)
+PM, varLabels, r, Σ = IIF.solveGraphParametric!(fg)
 
-@test isapprox(vardict[:x0].val, [0, 0, 0, 10, 0], atol = 1e-3)
-@test isapprox(vardict[:x1].val, [10, 0, 0, 10, 0], atol = 1e-3)
+@test isapprox(r[1], [0, 0, 0, 10, 0], atol = 1e-3)
+@test isapprox(r[2], [10, 0, 0, 10, 0], atol = 1e-3)
 end
 
 end
@@ -228,13 +228,8 @@ addFactor!(fg, [:x1; :l1], Point2Point2Range(Normal(sqrt(2), 0.1)))
 addFactor!(fg, [:x1; :l2], Point2Point2Range(Normal(1.0, 0.1)))
 addFactor!(fg, [:x1; :l3], Point2Point2Range(Normal(1.0, 0.1)))
 
-# initAll!(fg)
-#FIXME needs initializaiton from non-parametric to converge
-solveTree!(fg)
-IIF.initParametricFrom!(fg)
+PM, varLabels, r, Σ = IIF.solveGraphParametric(fg)
 
-vardict, result, varIds, Σ = IIF.solveGraphParametric(fg)
-
-@test isapprox(vardict[:x1].val, [1, 1], atol = 1e-3)
+@test isapprox(r[1], [1, 1], atol = 1e-3)
 
 end

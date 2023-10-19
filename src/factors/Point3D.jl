@@ -11,10 +11,17 @@ end
 
 getManifold(::InstanceType{PriorPoint3}) = getManifold(Point3)
 
-function (cf::CalcFactor{<:PriorPoint3})(meas, X1)	
-#	
-  return meas[1:3] .- X1[1:3] 	
+# PriorPoint3 aka PriorPose3XYZ
+function (cf::CalcFactor{<:PriorPoint3})(meas, X1::ArrayPartition)	
+  Xc::SVector{3} = meas - X1.x[1]
+  return Xc
 end
+
+function (cf::CalcFactor{<:PriorPoint3})(meas, X1::AbstractVector)
+  # return meas[1:3] .- X1[1:3] 	
+  return meas - X1
+end
+
 
 ## Serialized packing type and converters
 

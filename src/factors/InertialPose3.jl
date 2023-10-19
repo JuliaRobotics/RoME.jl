@@ -107,10 +107,12 @@ function constructC1(posei::InertialPose3Container, pido::T, Dt::Float64) where 
 end
 
 function preintMeas(pido::T) where {T <: PreintContainer}
+  # logmap = Manifoldvee(log())
   return [logmap(SO3(pido.rRp)); pido.pBw; pido.rVelp; pido.rPosp; pido.pBa]
   # return [logmap(SO3(pido.iRj));zeros(3);pido.iDvj;pido.iDppj;zeros(3)] # temporarily suppressing bias updates
 end
 
+# eq. 4.22
 function predictDeltaXij(pido::T, posei::InertialPose3Container, posej::InertialPose3Container; rGrav=[0.0;0.0;9.81]) where {T <: PreintContainer}
   zet = zetaEmbedding(posei, posej, rGrav=rGrav)
   Dt = Float64(posej.rnTime - posei.rnTime)*1e-9
@@ -119,6 +121,7 @@ function predictDeltaXij(pido::T, posei::InertialPose3Container, posej::Inertial
   return (L-C1)*zet #-0.5*C2*zet.^2
 end
 
+# eq. 4.21
 function residual!(res::Vector{Float64},
         pioc::InertialPose3Container,
         picg::PreintegralCompensationGradients,
@@ -157,14 +160,13 @@ end
 
 
 
-function (ip3::InertialPose3)(
-            res::Vector{Float64},
-            userdata ,
-            idx::Int,
-            meas::Tuple,
-            wIPi::Array{Float64,2},
-            wIPj::Array{Float64,2}  )
+function (cf::CalcFactor{<:InertialPose3})(
+    meas,
+    wIPi::Array{Float64,2},
+    wIPj::Array{Float64,2}
+)
   #
+  ip3 = cf.factor
   # Function can be massively improved. Just getting it all wired at first.
   # get pointer to memory, local to this thread
   posei, posej, ENT = ip3.reuse[Threads.threadid()]
@@ -179,11 +181,11 @@ function (ip3::InertialPose3)(
   posei.pBa = wIPi[13:15, idx]
 
   # repoint to existing load values for second pose
-  posei.rRp[1:3,1:3] = convert(SO3, Euler(wIPj[4:6, idx]...)).R
-  posei.rPosp = wIPj[1:3, idx]
-  posei.rVelp = wIPj[7:9, idx]
-  posei.pBw = wIPj[10:12, idx]
-  posei.pBa = wIPj[13:15, idx]
+  posej.rRp[1:3,1:3] = convert(SO3, Euler(wIPj[4:6, idx]...)).R
+  posej.rPosp = wIPj[1:3, idx]
+  posej.rVelp = wIPj[7:9, idx]
+  posej.pBw = wIPj[10:12, idx]
+  posej.pBa = wIPj[13:15, idx]
 
   # repoint to existing load values for second pose
   ENT.rRp[1:3,1:3] = convert(SO3, so3(meas[1][4:6, idx])).R

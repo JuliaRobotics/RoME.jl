@@ -13,7 +13,7 @@ end
 getManifold(::InstanceType{PriorPose3}) = getManifold(Pose3) # SpecialEuclidean(3)
 
 function (cf::CalcFactor{<:PriorPose3})(m, p)
-  M = cf.manifold # getManifold(cf.factor)
+  M = getManifold(Pose3)
   Xc = vee(M, p, log(M, p, m))
   return Xc
 end

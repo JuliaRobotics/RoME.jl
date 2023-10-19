@@ -29,9 +29,9 @@ end
 
 function IIF.getMeasurementParametric(s::VelPose2VelPose2{<:MvNormal, <:MvNormal}) 
 
-  meas = [mean(s.Zpose.z); mean(s.Zvel)]
+  meas = [mean(s.Zpose.Z); mean(s.Zvel)]
 
-  iΣp = invcov(s.Zpose.z)
+  iΣp = invcov(s.Zpose.Z)
   iΣv = invcov(s.Zvel)
 
   iΣ = zeros(eltype(iΣp), 5,5)

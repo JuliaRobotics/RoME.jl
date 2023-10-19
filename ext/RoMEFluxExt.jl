@@ -26,7 +26,7 @@ function getSample(cfo::CalcFactor{<:MixtureFluxPose2Pose2})
     nfb.DT[] = (getTimestamp(cfo.fullvariables[2]) - getTimestamp(cfo.fullvariables[1])).value * 1e-3
   end
 
-  cf_ = CalcFactor( cfo.factor.Zij, 0, cfo._legacyParams, cfo.cache, cfo.fullvariables, cfo.solvefor, cfo.manifold)
+  cf_ = CalcFactorNormSq( cfo.factor.Zij, 0, cfo._legacyParams, cfo.cache, cfo.fullvariables, cfo.solvefor, cfo.manifold)
 
   smpl = getSample(cf_)
 
@@ -134,7 +134,7 @@ function (cfo::CalcFactor{<:MixtureFluxPose2Pose2})(meas1, meas2, Xi, Xj)
 
   # calculate the error for that measurement sample as Pose2Pose2
   #TODO, this is constructor in the hot loop is way to expensive.
-  cfZ = CalcFactor( cfo.factor.Z.mechanics, 0, cfo._legacyParams, cfo.cache, cfo.fullvariables, cfo.solvefor, cfo.manifold)
+  cfZ = CalcFactorNormSq( cfo.factor.Z.mechanics, 0, cfo._legacyParams, cfo.cache, cfo.fullvariables, cfo.solvefor, cfo.manifold)
 
   return  cfZ(meas1, Xi, Xj)
 
