@@ -13,7 +13,8 @@ getManifold(::InstanceType{PriorPoint3}) = getManifold(Point3)
 
 # PriorPoint3 aka PriorPose3XYZ
 function (cf::CalcFactor{<:PriorPoint3})(meas, X1::ArrayPartition)	
-  return meas - X1.x[1]	
+  Xc::SVector{3} = meas - X1.x[1]
+  return Xc
 end
 
 function (cf::CalcFactor{<:PriorPoint3})(meas, X1::AbstractVector)

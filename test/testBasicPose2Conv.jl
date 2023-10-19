@@ -53,7 +53,7 @@ X12_ = manikde!(M, pts)
 
 # check that deconv is good
 
-@test_broken mmd(M, pts, meas) < 0.001
+@test mmd(M, pts, meas) < 0.001
 
 ##
 end

@@ -35,11 +35,6 @@ DFG.getManifold(::InstanceType{Pose2Pose2}) = Manifolds.SpecialEuclidean(2)
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2()
 
-function preambleCache(dfg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, pp::Pose2Pose2)
-  M = getManifold(pp)
-  (M, getPointIdentity(M), zeros(3), getPointIdentity(M))
-  # (;manifold=M, ϵ0=getPointIdentity(M), Xc=zeros(3), q̂=getPointIdentity(M))
-end
 
 # Assumes X is a tangent vector
 function (cf::CalcFactor{<:Pose2Pose2})(_X::AbstractArray{MT}, _p::AbstractArray{PT}, _q::AbstractArray{LT})  where {MT,PT,LT}
