@@ -52,10 +52,10 @@ function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi::Manifolds.ArrayPartition
   # Basically `EuclidDistance`
   return rho .- norm(lm .- xi.x[1])
 end
-function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi::ProductRepr, lm)
-  # Basically `EuclidDistance`
-  return rho .- norm(lm .- xi.parts[1])
-end
+# function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi::ProductRepr, lm)
+#   # Basically `EuclidDistance`
+#   return rho .- norm(lm .- xi.parts[1])
+# end
 
 
 Base.@kwdef struct PackedPose2Point2Range  <: AbstractPackedFactor

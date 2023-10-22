@@ -8,7 +8,7 @@ export projectCartesian
 """
 $(TYPEDEF)
 
-XY Euclidean manifold variable node softtype.
+XY Euclidean manifold variable type.
 """
 @defVariable Point2 TranslationGroup(2) SA[0.0;0.0]
 
@@ -16,7 +16,7 @@ XY Euclidean manifold variable node softtype.
 """
 $(TYPEDEF)
 
-XYZ Euclidean manifold variable node softtype.
+XYZ Euclidean manifold variable type.
 
 Example
 -------
@@ -25,6 +25,23 @@ p3 = Point3()
 ```
 """
 @defVariable Point3 TranslationGroup(3) SA[0;0;0.0]
+
+
+"""
+$(TYPEDEF)
+
+Homogeneous XYZ projective manifold variable type.
+
+NOTE, NOT WORKING AS A GROUP SINCE RECONCILIATION WITH MANIFOLDS EXMAP STILL TBD
+- see https://github.com/JuliaRobotics/RoME.jl/issues/661
+
+Example
+-------
+```julia
+p3 = Point3()
+```
+"""
+@defVariable Point3h ProjectiveSpace(3) MVector{4,Float64}(0,0,0,1.)
 
 
 """
