@@ -28,12 +28,6 @@ X = hat(M, SA[0.0,0,0, 0,0,0, 0,0,1, 1] * 0.001)
 p = exp(M, ϵ, X)
 @test log(M, p) ≈ X
 
-A = zeros(5,5)
-A[3:4,5] .= 0.001 
-exp(A)
-
-affine_matrix(M, p)
-
 Xc = SA[0.1, 0.2, 0.3,  0.4, 0.5, 0.6,  0.7, 0.8, 0.9,  1] * 0.1
 X = hat(M, Xc)
 p = affine_matrix(M, exp(M, X))
@@ -61,14 +55,14 @@ p = exp(M, ϵ, X)
 
 p = ArrayPartition(SMatrix{3,3}(1.0I), SA[1.,0,0], SA[0.,0,0], 0.0)
 q = ArrayPartition(SMatrix{3,3}(1.0I), SA[1.,0,0], SA[0.1,0,0], 0.1)
-# z-up (gravity positive) so free falling in negative z direction.
+# z-up (gravity positive)
 Δpq = RoME.boxminus(M, p, q;  g⃗ = SA[0,0,9.81])
 @test Δpq.x[1] ≈ SMatrix{3,3}(1.0I)
 @test Δpq.x[2] ≈ [0, 0, 9.81*0.1]
 @test Δpq.x[3] ≈ [0, 0, 0.5*9.81*0.1^2] 
 @test Δpq.x[4] == 0.1
 
-# z-down (gravity negative) so free falling in positive z direction.
+# z-down (gravity negative)
 Δpq = RoME.boxminus(M, p, q;  g⃗ = SA[0,0,-9.81])
 @test Δpq.x[1] ≈ SMatrix{3,3}(1.0I)
 @test Δpq.x[2] ≈ [0, 0, -9.81*0.1]
@@ -125,6 +119,10 @@ ad = RoME.adjointMatrix(M, X)
 @test isapprox(exp(ad), Adₚ)
 
 
+X = hat(M, SA[0.1, 0.2, 0.3,  0.4, 0.5, 0.6,  0.7, 0.8, 0.9,  1] * 0.1)
+ad = RoME.adjointMatrix(M, X)
+Adₚ = RoME.AdjointMatrix(M, exp(M, X))
+@test isapprox(exp(ad), Adₚ)
 
 
 θ=asin(0.1)*10 # for precicely 0.1

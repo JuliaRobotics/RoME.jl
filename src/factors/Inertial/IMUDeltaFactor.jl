@@ -157,6 +157,7 @@ function _P(θ⃗)
     end
 end
 
+#TODO rename to exp_lie?
 function Manifolds.exp(M::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
     θ⃗ₓ = X.x[1] # ωΔt
     
@@ -206,6 +207,12 @@ function Manifolds.log(M::IMUDeltaGroup, p)
         Δt
     )
 end
+
+#TODO TEST 
+function Manifolds.log(M::IMUDeltaGroup, p, q)
+    return log(M, Manifolds.compose(M, inv(M, p), q))
+end
+
 
 # TODO consolidate with Manifolds notation 
 # function Manifolds.log(M::IMUDeltaGroup, p::SMatrix{5,5,T}, q::SMatrix{5,5,T})
@@ -412,7 +419,7 @@ function integrateIMUDelta(Δij, Σij, Δij_J_b, a, ω, a_b, ω_b, δt, Σy)
     Δik_J_δjk = I #TODO dims?
 
     # Propagate Covariance
-    Δik_J_y = Δik_J_Δij * δ_J_τ * τ_J_y
+    Δik_J_y = Δik_J_δjk * δ_J_τ * τ_J_y
     Σik = Δik_J_Δij * Σij * Δik_J_Δij' + Δik_J_y * Σy * Δik_J_y'
 
     # Jacobian wrt biases
