@@ -34,7 +34,26 @@ exp(A)
 
 affine_matrix(M, p)
 
+Xc = SA[0.1, 0.2, 0.3,  0.4, 0.5, 0.6,  0.7, 0.8, 0.9,  1] * 0.1
+X = hat(M, Xc)
+p = affine_matrix(M, exp(M, X))
+affine_matrix(M, log(M, exp(M, X)))
+
+X_af = RoME.vector_affine_matrix(M, X)
+p_af = exp(X_af)
+log(p_af)
+
+@test isapprox(p, p_af)
+
+# Xc = SVector{10,Float64}(vcat([0., 0, 0], aδt, ωδt, δt))
+
 Xc = SA[0.01, 0.02, 0.03,   0, 0, 0,   0.1, 0.2, 0.3,   1] * 0.001
+X = hat(M, Xc)
+p = exp(M, ϵ, X)
+@test log(M, p) ≈ X
+@test vee(M, log(M, p)) ≈ Xc
+
+Xc = SA[0, 0, 0,  0.01, 0.02, 0.03,  0.1, 0.2, 0.3,   1] * 0.001
 X = hat(M, Xc)
 p = exp(M, ϵ, X)
 @test log(M, p) ≈ X
@@ -45,15 +64,15 @@ q = ArrayPartition(SMatrix{3,3}(1.0I), SA[1.,0,0], SA[0.1,0,0], 0.1)
 # z-up (gravity positive) so free falling in negative z direction.
 Δpq = RoME.boxminus(M, p, q;  g⃗ = SA[0,0,9.81])
 @test Δpq.x[1] ≈ SMatrix{3,3}(1.0I)
-@test Δpq.x[2] ≈ [0, 0, -9.81*0.1]
-@test Δpq.x[3] ≈ [0, 0, -0.5*9.81*0.1^2] 
+@test Δpq.x[2] ≈ [0, 0, 9.81*0.1]
+@test Δpq.x[3] ≈ [0, 0, 0.5*9.81*0.1^2] 
 @test Δpq.x[4] == 0.1
 
 # z-down (gravity negative) so free falling in positive z direction.
 Δpq = RoME.boxminus(M, p, q;  g⃗ = SA[0,0,-9.81])
 @test Δpq.x[1] ≈ SMatrix{3,3}(1.0I)
-@test Δpq.x[2] ≈ [0, 0, 9.81*0.1]
-@test Δpq.x[3] ≈ [0, 0, 0.5*9.81*0.1^2] 
+@test Δpq.x[2] ≈ [0, 0, -9.81*0.1]
+@test Δpq.x[3] ≈ [0, 0, -0.5*9.81*0.1^2] 
 @test Δpq.x[4] == 0.1
 
 
@@ -61,6 +80,52 @@ q = ArrayPartition(SMatrix{3,3}(1.0I), SA[1.,0,0], SA[0.1,0,0], 0.1)
 X = hat(M, SA[0,0,0, 0,0,1.0, 0,0,0.5, 1] * 0.01)
 p = exp(M, ϵ, X)
 @test isapprox(p, ArrayPartition([1 -0.005 0.0; 0.005 1 0.0; 0 0 1], [0, 0, 0.01], [0, 0, 5.0e-5], 0.01), atol=1e-4)
+X_af = RoME.vector_affine_matrix(M, X)
+p_af = exp(X_af)
+@test isapprox(affine_matrix(M, p), p_af, atol=1e-4)
+
+
+# vΔt, aΔt, ωΔt, Δt
+X = hat(M, SA[0,0,0, 1,0,0.0, 0,0,00, 1] * 0.01)
+p = exp(M, ϵ, X)
+@test isapprox(p, ArrayPartition([1.0 0 0; 0 1 0; 0 0 1], [0.01, 0, 0], [5e-5, 0, 0], 0.01), atol=1e-4)
+X_af = RoME.vector_affine_matrix(M, X)
+p_af = exp(X_af)
+@test isapprox(affine_matrix(M, p), p_af, atol=1e-4)
+
+
+X = hat(M, SA[1,0,0, 1,0,0.0, 0,0,0.01, 1])
+p = exp(M, ϵ, X)
+q = compose(M, p, exp(M, ϵ, X))
+isapprox(compose(M, p, exp(M, ϵ, X)), exp(M, p, X))
+
+RoME.adjointMatrix(M, X) * vee(M,X)
+
+X_af = RoME.vector_affine_matrix(M, X)
+p_af = affine_matrix(M, p)
+
+Y = p_af*X_af*inv(p_af)
+vee(M, ArrayPartition(Y[1:3,1:3], Y[1:3,4], Y[1:3,5], Y[4,5]))
+
+#testing adjoint matrix with properties
+Adₚ = RoME.AdjointMatrix(M, p)
+
+q1 = compose(M, p, exp(M, X))
+q2 = compose(M, exp(M, hat(M, Adₚ*vee(M, X))), p)
+@test isapprox(q1, q2)
+
+@test isapprox(RoME.AdjointMatrix(M, inv(M, p)), inv(Adₚ))
+
+@test isapprox(
+    RoME.vector_affine_matrix(M, hat(M, Adₚ*vee(M, X))),
+    affine_matrix(M, p) * RoME.vector_affine_matrix(M, X) * affine_matrix(M, inv(M, p))
+)
+
+ad = RoME.adjointMatrix(M, X)
+@test isapprox(exp(ad), Adₚ)
+
+
+
 
 θ=asin(0.1)*10 # for precicely 0.1
 X = hat(M, SA[1,0,0, 0,0,0, 0,0,θ, 1] * 0.1)
@@ -114,12 +179,56 @@ end
 p = ArrayPartition(SMatrix{3,3}(1.0I), SA[0.,0,0], SA[1.,0,0], 0.0)
 q = ArrayPartition(SMatrix{3,3}(ΔR),   SA[0.,0,-1], SA[1.,0,-0.5], 1.0)
 # z-down (gravity acc negative) so free falling in positive z direction.
-Δpq = RoME.boxminus(RoME.IMUDeltaGroup(), p, q; g⃗ = SA[0,0,-9.81])
+Δpq = RoME.boxminus(RoME.IMUDeltaGroup(), p, q; g⃗ = SA[0,0,9.81])
 #TODO confirm gravity sign
 @test Δpq.x[1] ≈ ΔR
 @test Δpq.x[2] ≈ [0, 0, 8.81]
 @test Δpq.x[3] ≈ [0, 0, 8.81/2] 
 @test Δpq.x[4] == 1.0
 
+Σy  = diagm(ones(6)*0.1^2)
+a_b = SA[0.,0,0]
+ω_b = SA[0.,0,0]
+
+dt = 0.01
+N = 11
+dT = (N-1)*dt
+gyros = [SA[0, 0, 0.1] for _ = 1:N]
+accels = [SA[0, 0, 9.81] for _ = 1:N]
+timestamps = collect(range(0; step=dt, length=N))
+
+Δ, Σ, J_b = RoME.preintegrateIMU(accels, gyros, timestamps, Σy, a_b, ω_b)
+Σ = Σ[SOneTo(9),SOneTo(9)]
+
+@test Δ.x[1] ≈ RotZ(0.1*dT)
+@test Δ.x[2] ≈ [0, 0, 9.81*dT]
+@test Δ.x[3] ≈ [0, 0, 0.5*9.81*dT^2] 
+@test Δ.x[4] == dT
+
+##
+gyros = [SA[0.01, 0, 0] for _ = 1:N]
+accels = [SA[0, 0, 9.81] for _ = 1:N]
+timestamps = collect(range(0; step=dt, length=N))
+
+Δ, Σ, J_b = RoME.preintegrateIMU(accels, gyros, timestamps, Σy, a_b, ω_b)
+
+@test Δ.x[1] ≈ RotX(0.01*dT)
+#just checking sign
+@test Δ.x[2][2] < 0
+@test Δ.x[3][2] < 0
+
+##
+gyros = [SA[0, 0.01, 0] for _ = 1:N]
+accels = [SA[0, 0, 9.81] for _ = 1:N]
+timestamps = collect(range(0; step=dt, length=N))
+
+Δ, Σ, J_b = RoME.preintegrateIMU(accels, gyros, timestamps, Σy, a_b, ω_b)
+
+@test Δ.x[1] ≈ RotY(0.01*dT)
+#just checking sign
+@test Δ.x[2][1] > 0
+@test Δ.x[3][1] > 0
+
 end
 
+##

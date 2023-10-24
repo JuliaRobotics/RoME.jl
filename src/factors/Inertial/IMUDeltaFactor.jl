@@ -64,6 +64,14 @@ function Manifolds.affine_matrix(G::IMUDeltaGroup, p::ArrayPartition{T}) where T
     )
 end
 
+function vector_affine_matrix(G::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
+    return vcat(
+        hcat(X.x[1], X.x[2], X.x[3]), 
+        @SMatrix [0 0 0 0 X.x[4];
+                  0 0 0 0 0]
+    )
+end
+
 function Manifolds.inv(M::IMUDeltaGroup, p)
     ΔR = p.x[1]
     Δv = p.x[2]
@@ -100,16 +108,16 @@ end
 function Manifolds.hat(M::IMUDeltaGroup, Xⁱ::SVector{10, T}) where T<:Real
     return ArrayPartition(
         skew(Xⁱ[SA[7:9...]]), # θ ωΔt
-        Xⁱ[SA[1:3...]],       # ρ vΔt
         Xⁱ[SA[4:6...]],       # ν aΔt
+        Xⁱ[SA[1:3...]],       # ρ vΔt
         Xⁱ[10],               # Δt
     )
 end
 
 function Manifolds.vee(M::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
     return SVector{10,T}(
-        X.x[2]...,   # ρ vΔt 1:3
         X.x[3]...,   # ν aΔt 4:6
+        X.x[2]...,   # ρ vΔt 1:3
         X.x[1][3,2], # θ⃗ₓ[3,2] 7
         X.x[1][1,3], # θ⃗ₓ[1,3] 8 
         X.x[1][2,1], # θ⃗ₓ[2,1] 9
@@ -151,8 +159,10 @@ end
 
 function Manifolds.exp(M::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
     θ⃗ₓ = X.x[1] # ωΔt
-    ρ = X.x[2]  # vΔt
-    ν = X.x[3]  # aΔt
+    
+    ν = X.x[2]  # aΔt
+    ρ = X.x[3]  # vΔt
+
     Δt = X.x[4]
 
     # ωΔt = vee(θ⃗ₓ)
@@ -191,8 +201,8 @@ function Manifolds.log(M::IMUDeltaGroup, p)
     
     return ArrayPartition(
         log_lie(SpecialOrthogonal(3), ΔR), # θ⃗ₓ
-        iQ*(Δp - P*iQ*Δv*Δt), # ρ 
-        iQ*Δv, # ν
+        iQ*Δv, # ν aΔt
+        iQ*(Δp - P*iQ*Δv*Δt), # ρ vΔt 
         Δt
     )
 end
@@ -205,7 +215,7 @@ end
 
 # compute the expected delta from p to q on the IMUDeltaGroup
 # ⊟ = boxminus
-function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,-9.81]) 
+function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,9.81]) 
     Rᵢ = p.x[1]
     vᵢ = p.x[2]
     pᵢ = p.x[3]
@@ -218,9 +228,9 @@ function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,-9.81])
 
     Δt = tⱼ - tᵢ
     ΔR = Rᵢ'Rⱼ
-    #TODO another possible mistake in paper as it does not include pᵢ
-    Δp = Rᵢ' * (pⱼ - pᵢ - vᵢ * Δt - 1/2 * g⃗ * Δt^2)
-    Δv = Rᵢ' * (vⱼ - vᵢ - g⃗ * Δt)
+
+    Δp = Rᵢ' * (pⱼ - pᵢ - vᵢ * Δt + 1/2 * g⃗ * Δt^2)
+    Δv = Rᵢ' * (vⱼ - vᵢ + g⃗ * Δt)
 
     return ArrayPartition(
         ΔR,
@@ -230,15 +240,18 @@ function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,-9.81])
     )
 end
 
-function ominus(M::IMUDeltaGroup, p, q)
-    log(M, Manifolds.compose(M, inv(M, q), p))
+#TODO test, unused, likeley to be replaced because of ambiguity
+# right-⊖ : Xₚ = q ⊖ p = log(p⁻¹∘q)
+function ominus(M::IMUDeltaGroup, q, p)
+    log(M, Manifolds.compose(M, inv(M, p), q))
 end
 
 # small adjoint ad
 function adjointMatrix(::IMUDeltaGroup, X::ArrayPartition{T}) where T
-    θ⃗ₓ = X.x[1]
-    ρ = X.x[2]
-    ν = X.x[3]
+    θ⃗ₓ = X.x[1] # ωΔt
+    ν = X.x[2]  # aΔt
+    ρ = X.x[3]  # vΔt
+
     IΔt = SMatrix{3,3,T}(X.x[4]*I)
 
     ρₓ = skew(ρ)
