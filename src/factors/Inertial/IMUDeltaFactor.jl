@@ -21,13 +21,8 @@ end
 
 struct IMUDeltaManifold <: AbstractManifold{ℝ} end
 
-# TODO maybe define the manifold like this
-# M = ProductManifold(TranslationGroup(3), TranslationGroup(3), SpecialOrthogonal(3), Euclidean(1))
-# M = ProductManifold(SpecialOrthogonal(3), TranslationGroup(3), TranslationGroup(3), Euclidean(1))
-# G = GroupManifold(M, MultiplicationOperation())
-
-#TODO 
-# also see SE₂(3) 
+# NOTE Manifold in not defined as a ProductManifold since we do not use the product metric. #701
+# also see related SE₂(3) 
 
 const IMUDeltaGroup = GroupManifold{ℝ, IMUDeltaManifold, MultiplicationOperation}
 
@@ -42,8 +37,6 @@ Manifolds.manifold_dimension(::IMUDeltaManifold) = 9
 
 #  ArrayPartition representation (TODO maybe swop order to [Δp; Δv; ΔR; Δt])
 # Δ = [ΔR; Δv; Δp; Δt] 
-
-# TODO is SemidirectProductGroup possible, Translation(3), Translation(3), SO(3), WhatAction?, Δt?
 
 function Manifolds.identity_element(M::IMUDeltaGroup) # was #SMatrix{5,5,Float64}(I)
     ArrayPartition(
