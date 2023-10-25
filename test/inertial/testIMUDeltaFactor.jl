@@ -80,7 +80,7 @@ p_af = exp(X_af)
 
 
 # vΔt, aΔt, ωΔt, Δt
-X = hat(M, SA[0,0,0, 1,0,0.0, 0,0,00, 1] * 0.01)
+X = hat(M, SA[0,0,0, 1,0,0.0, 0,0,0, 1] * 0.01)
 p = exp(M, ϵ, X)
 @test isapprox(p, ArrayPartition([1.0 0 0; 0 1 0; 0 0 1], [0.01, 0, 0], [5e-5, 0, 0], 0.01), atol=1e-4)
 X_af = RoME.vector_affine_matrix(M, X)

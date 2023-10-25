@@ -301,7 +301,7 @@ end
 # right Jacobian
 function Jr(M::IMUDeltaGroup, X; order=5)
     adx = adjointMatrix(M, X)
-    mapreduce(+, 1:order) do i
+    mapreduce(+, 0:order) do i
         (-adx)^i / factorial(i + 1)
     end
 end
@@ -416,7 +416,8 @@ function integrateIMUDelta(Δij, Σij, Δij_J_b, a, ω, a_b, ω_b, δt, Σy)
     δ_J_τ = Jr(M, X)
 
     Δik_J_Δij = inv(AdjointMatrix(M, δjk))
-    Δik_J_δjk = I #TODO dims?
+    #? Δik_J_Δij = AdjointMatrix(M, inv(M, δjk))
+    Δik_J_δjk = I # 10x10
 
     # Propagate Covariance
     Δik_J_y = Δik_J_δjk * δ_J_τ * τ_J_y
