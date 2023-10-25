@@ -16,11 +16,11 @@ end
 
 DFG.getManifold(::InstanceType{PriorPose2}) = getManifold(Pose2) # SpecialEuclidean(2)
 
-@inline function _vee(::SpecialEuclidean{2}, X::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
+@inline function _vee(::typeof(SpecialEuclidean(2)), X::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
   return SVector{3,T}(X.x[1][1],X.x[1][2],X.x[2][2])
 end
 
-@inline function _compose(::SpecialEuclidean{2}, p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, q::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
+@inline function _compose(::typeof(SpecialEuclidean(2)), p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, q::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
   return ArrayPartition(p.x[1] + p.x[2]*q.x[1], p.x[2]*q.x[2])
 end
 
