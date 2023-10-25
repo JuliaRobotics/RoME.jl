@@ -40,6 +40,9 @@ testfiles = [
   "testBearing2D.jl";
   "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
 
+  # Inertial
+  "inertial/testIMUDeltaFactor.jl";
+
   # regular tests expected to pass
   "testpackingconverters.jl";
   "testInflation380.jl";
