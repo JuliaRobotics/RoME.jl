@@ -5,7 +5,7 @@ using RoME
 using Test
 using TensorCast
 import Manifolds
-using Manifolds: ProductManifold, SpecialEuclidean, ProductRepr, SpecialOrthogonal, TranslationGroup, identity_element
+using Manifolds: ProductManifold, SpecialEuclidean, SpecialOrthogonal, TranslationGroup, identity_element
 using DistributedFactorGraphs
 using Statistics
 using StaticArrays

@@ -4,7 +4,7 @@
 using Statistics
 using RoME
 using Test
-using Manifolds: ProductRepr, hat, vee, identity_element, SpecialOrthogonal, SpecialEuclidean
+using Manifolds: hat, vee, identity_element, SpecialOrthogonal, SpecialEuclidean
 import Manifolds
 using TensorCast
 using DistributedFactorGraphs
