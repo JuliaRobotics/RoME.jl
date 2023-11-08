@@ -13,17 +13,9 @@ using StaticArrays
 using Manifolds
 import Base: convert
 
-
-## plotting functions
-
-# using Plots
-# using Cairo, RoMEPlotting
-# Gadfly.set_default_plot_size(25cm,20cm)
-
 ##
 
-@testset "First order DERelative" begin
-
+@testset "DERelative INS Kinematic tests" begin
 ##
 
 # a user specified ODE in standard form
@@ -115,50 +107,14 @@ last(sol)
 @test isapprox(M, last(sol).x[2], w_R_b; atol=0.001)
 @test isapprox(last(sol).x[3], [0,0,0]; atol=0.001)
 
+##
+end
 
+
+@testset "DERelative IMU Kinematic tests" begin
 ##
 
-
-##
-
-# function insTangentFrame!(dstate, state, u, t)
-#   Mt = TranslationGroup(3)
-#   Mr = SpecialOrthogonal(3)
-  
-#   #FIXME
-#   t_v = [0.,0,0]
-#   b_Ωie =  hat(Mr, Identity(Mr), [0.,0,0])
-
-#   t_g = [0; 0; -9.81] 
-
-#   t_R_b = state.x[2] # Rotation element
-#   b_Ωib = hat(Mr, Identity(Mr), u[].gyro(t)) # so(3): skew symmetric Lie algebra element
-#   t_Ṙ_b = t_R_b * (b_Ωib - b_Ωie)
-#   dstate.x[2] .= t_Ṙ_b
-#   b_Aib = u[].accel(t) # already a tangent vector
-#   t_V̇e = t_R_b * b_Aib - t_g - 2*b_Ωie*t_v
-#   dstate.x[3] .= t_V̇e # accel state
-#   t_Ve = state.x[3]
-#   t_Ṗ = t_Ve
-#   dstate.x[1] .= t_Ṗ
-#   nothing
-# end
-
-
-##
-
-
-DFG.@defVariable RotVelPos Manifolds.ProductGroup(ProductManifold(SpecialOrthogonal(3), TranslationGroup(3), TranslationGroup(3))) ArrayPartition(SA[1 0 0; 0 1 0; 0 0 1.0], SA[0; 0; 0.0], SA[0;0;0.0])
-Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(getManifold(RotVelPos))}) =
-    (:Circular,:Circular,:Circular,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid)
-
-# @defVariable VelPose3 Manifolds.ProductGroup(ProductManifold(TranslationGroup(3), TranslationGroup(3), SpecialOrthogonal(3))) ArrayPartition(SA[0; 0; 0.0], SA[0;0;0.0], SA[1 0 0; 0 1 0; 0 0 1.0])
-# Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(getManifold(VelPose3))}) =
-#     (:Euclid,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid, :Circular,:Circular,:Circular,)
-
-
-##
-
+## TODO consolidate inside module as RoME.imuKinematic
 function imuKinematic!(du, u, p, t)
   # p is IMU input (assumed [.gyro; .accel])
   M = SpecialOrthogonal(3)
@@ -184,6 +140,7 @@ function imuKinematic!(du, u, p, t)
   nothing
 end
 
+
 dt = 0.01
 # N = 1001
 N = 401
@@ -204,16 +161,30 @@ for g in gyros[1:end-1]
   push!(accels, b_a .+ w_R_b * a0)
 end
 
-
 ##
 
-
 fg = initfg()
-# the starting points and "0 seconds"
-# `accurate_time = trunc(getDatetime(var), Second) + (1e-9*getNstime(var) % 1)`
 
+# the starting points and "0 seconds"
 v0 = addVariable!(fg, :w_P0, RotVelPos, timestamp=DateTime(2000,1,1,0,0,0)) 
 v1 = addVariable!(fg, :w_P1, RotVelPos, timestamp=DateTime(2000,1,1,0,0,dt*(N-1))) 
+# `accurate_time = trunc(getDatetime(var), Second) + (1e-9*getNstime(var) % 1)`
+
+mp = ManifoldPrior(
+  getManifold(RotVelPos),
+  ArrayPartition(
+    SA[ 1.0 0.0 0.0; 
+        0.0 1.0 0.0; 
+        0.0 0.0 1.0], 
+    SA[0.0, 0.0, 0.0], 
+    SA[0.0, 0.0, 0.0]
+  ),
+  MvNormal(diagm(SVector{9}(ones(9)*1e-3)))
+)
+
+addFactor!(fg, [:w_P0;], mp)
+
+##
 
 
 tst = getTimestamp(v0) |> DateTime |> datetime2unix
@@ -226,16 +197,14 @@ accels_t = linear_interpolation(timestamps, accels)
 imuForce = Ref((gyro=gyros_t, accel=accels_t))
 
 
-
-
 oder = DERelative(
   fg, 
   [:w_P0; :w_P1], 
   RotVelPos, 
   imuKinematic!,
   imuForce;
-  state0=allocate(getPointIdentity(RotVelPos)),
-  state1=allocate(getPointIdentity(RotVelPos)),
+  # state0=allocate(getPointIdentity(RotVelPos)),
+  # state1=allocate(getPointIdentity(RotVelPos)),
   dt, 
   problemType=ODEProblem 
 );
@@ -255,6 +224,8 @@ addFactor!( fg, [:w_P0; :w_P1], oder; graphinit=false );
 
 @error("WIP testODE_INS.jl")
 
+
+P1 = approxConvBelief(fg, :w_P0w_P1f1, :w_P1)
 
 
 # ## basic sample test

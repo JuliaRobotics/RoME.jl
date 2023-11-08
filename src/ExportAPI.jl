@@ -17,7 +17,7 @@ export
   pol2cart,
 
   # Didson model
-  evalPotential,
+  # evalPotential,
   LinearRangeBearingElevation,
   project!,
   project,
@@ -41,9 +41,9 @@ export
   PriorPoint2,
   PackedPriorPoint2,
   Pose2Point2BearingRange,
-  Pose2Point2BearingRangeMH,
+  # Pose2Point2BearingRangeMH,
   PackedPose2Point2BearingRange,
-  PackedPose2Point2BearingRangeMH,
+  # PackedPose2Point2BearingRangeMH,
   Pose2Point2Bearing,
   PackedPose2Point2Bearing,
   Pose2Point2Range,
@@ -63,6 +63,8 @@ export
   Point3,
   Point3Point3,
   PackedPoint3Point3,
+
+  RotVelPos,
 
   # likely to be deprecated
   solveLandm,
