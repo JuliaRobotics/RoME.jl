@@ -42,6 +42,7 @@ testfiles = [
 
   # Inertial
   "inertial/testIMUDeltaFactor.jl";
+  "inertial/testODE_INS.jl";
 
   # regular tests expected to pass
   "testpackingconverters.jl";
