@@ -369,6 +369,20 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     return cf(Δmeas, p, q, b)
 end
 
+# ArrayPartition{Float64, Tuple{MMatrix{3, 3, Float64, 9}, MVector{3, Float64}, MVector{3, Float64}}}
+function (cf::CalcFactor{<:IMUDeltaFactor})(
+    Δmeas, # point on IMUDeltaGroup
+    _p::ArrayPartition{Float64, Tuple{MMatrix{3, 3, Float64, 9}, MVector{3, Float64}, MVector{3, Float64}}}, 
+    _q::ArrayPartition{Float64, Tuple{MMatrix{3, 3, Float64, 9}, MVector{3, Float64}, MVector{3, Float64}}},
+    b::AbstractVector = zeros(SVector{6,Float64})
+)
+    p_t = Dates.value(cf.cache.timestams[1])*1e-9
+    q_t = Dates.value(cf.cache.timestams[2])*1e-9
+    p = ArrayPartition(SMatrix{3,3,Float64,9}(_p.x[1]), SVector{3}(_p.x[2]), SVector{3}(_p.x[3]), p_t)
+    q = ArrayPartition(SMatrix{3,3,Float64,9}(_q.x[1]), SVector{3}(_q.x[2]), SVector{3}(_q.x[3]), q_t)
+    return cf(Δmeas, p, q, SVector{6}(b))
+end
+
 function (cf::CalcFactor{<:IMUDeltaFactor})(
     Δmeas, 
     p_SE3,

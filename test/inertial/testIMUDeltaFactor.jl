@@ -7,6 +7,7 @@ using DistributedFactorGraphs
 using RoME
 using RoME: IMUDeltaGroup
 using Dates
+using StaticArrays
 # using ManifoldDiff
 
 ##
@@ -129,6 +130,11 @@ Y = hat(M, SA[0.9, 0.8, 0.7,  0.6, 0.5, 0.4,  0.3, 0.2, 0.1,  1] * 0.1)
 #TODO test Jr with something like
 # Z1 = ManifoldDiff.differential_exp_argument_lie_approx(M, p, X, Y)
 Z2 = RoME.Jr(M, X) * vee(M, Y)
+
+#test right jacobian with [Ad(g)] = Jl*Jr⁻¹ - Chirikjian p29
+jr = RoME.Jr(M, X)
+jl = RoME.Jr(M, -X)
+@test isapprox(jl*inv(jr), Adₚ)
 
 θ=asin(0.1)*10 # for precicely 0.1
 X = hat(M, SA[1,0,0, 0,0,0, 0,0,θ, 1] * 0.1)
