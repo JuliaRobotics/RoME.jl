@@ -7,6 +7,7 @@ using DistributedFactorGraphs
 using RoME
 using RoME: IMUDeltaGroup
 using Dates
+using StaticArrays
 # using ManifoldDiff
 
 ##
@@ -130,6 +131,11 @@ Y = hat(M, SA[0.9, 0.8, 0.7,  0.6, 0.5, 0.4,  0.3, 0.2, 0.1,  1] * 0.1)
 # Z1 = ManifoldDiff.differential_exp_argument_lie_approx(M, p, X, Y)
 Z2 = RoME.Jr(M, X) * vee(M, Y)
 
+#test right jacobian with [Ad(g)] = Jl*Jr⁻¹ - Chirikjian p29
+jr = RoME.Jr(M, X)
+jl = RoME.Jr(M, -X)
+@test isapprox(jl*inv(jr), Adₚ)
+
 θ=asin(0.1)*10 # for precicely 0.1
 X = hat(M, SA[1,0,0, 0,0,0, 0,0,θ, 1] * 0.1)
 p = exp(M, ϵ, X)
@@ -192,6 +198,38 @@ q = ArrayPartition(SMatrix{3,3}(ΔR),   SA[0.,0,-1], SA[1.,0,-0.5], 1.0)
 Σy  = diagm(ones(6)*0.1^2)
 a_b = SA[0.,0,0]
 ω_b = SA[0.,0,0]
+
+@defVariable RotVelPos Manifolds.ProductGroup(ProductManifold(SpecialOrthogonal(3), TranslationGroup(3), TranslationGroup(3))) ArrayPartition(SA[1 0 0; 0 1 0; 0 0 1.0], SA[0; 0; 0.0], SA[0;0;0.0])
+Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(getManifold(RotVelPos))}) = (:Circular,:Circular,:Circular,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid)
+
+fg = initfg()
+fg.solverParams.graphinit = false
+
+foreach(enumerate(Nanosecond.(timestamps[[1,end]] * 10^9))) do (i, nanosecondtime)
+    addVariable!(fg, Symbol("x",i-1), RotVelPos; nanosecondtime)
+end
+
+addFactor!(
+    fg,
+    [:x0],
+    ManifoldPrior(
+        getManifold(RotVelPos),
+        ArrayPartition(SA[1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0], SA[10.0, 0.0, 0.0], SA[0.0, 0.0, 0.0]),
+        MvNormal(diagm(ones(9)*1e-3))
+    )
+)
+
+addFactor!(fg, [:x0, :x1], fac)
+
+@time IIF.solveGraphParametric!(fg; is_sparse=false, damping_term_min=1e-12, expect_zero_residual=true);
+# @time IIF.solveGraphParametric!(fg; stopping_criterion, debug, is_sparse=false, damping_term_min=1e-12, expect_zero_residual=true);
+
+getVariableSolverData(fg, :x0, :parametric).val[1] ≈ ArrayPartition(SA[1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0], SA[10.0, 0.0, 0.0], SA[0.0, 0.0, 0.0])
+x1 = getVariableSolverData(fg, :x1, :parametric).val[1]
+@test isapprox(SpecialOrthogonal(3), x1.x[1], ΔR, atol=1e-5)
+@test isapprox(x1.x[2], [10, 0, -1], atol=1e-3)
+@test isapprox(x1.x[3], [10, 0, -0.5], atol=1e-3)
+
 
 dt = 0.01
 N = 11
