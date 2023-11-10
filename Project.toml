@@ -15,6 +15,7 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
+Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 IncrementalInference = "904591bb-b899-562f-9e6f-b8df64c7d480"
 KernelDensityEstimate = "2472808a-b354-52ea-a80e-1658a3c6056d"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -34,11 +35,13 @@ TransformUtils = "9b8138ad-1b09-5408-aa39-e87ed6d21b63"
 
 [weakdeps]
 CameraModels = "0d57b887-6120-40e6-8b8c-29d3116bc0c1"
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
 
 [extensions]
 RoMECameraModelsExt = "CameraModels"
+RoMEDifferentialEquationsExt = "DifferentialEquations"
 RoMEFluxExt = "Flux"
 RoMEImageIOExt = "ImageIO"
 
@@ -73,9 +76,8 @@ julia = "1.9"
 
 [extras]
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
-Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["CameraModels", "DifferentialEquations", "Flux", "ImageIO", "Interpolations", "JSON3", "Test"]
+test = ["CameraModels", "DifferentialEquations", "Flux", "ImageIO", "JSON3", "Test"]

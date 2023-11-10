@@ -64,8 +64,6 @@ export
   Point3Point3,
   PackedPoint3Point3,
 
-  RotVelPos,
-
   # likely to be deprecated
   solveLandm,
   solvePose2,
@@ -107,6 +105,10 @@ export
   PackedPriorPose3ZRP,
   Pose3Pose3Rotation,
   PackedPose3Pose3Rotation,
+
+  RotVelPos,
+  InertialDynamic,
+
   # Various utilities
   passTypeThrough,
   buildGraphChain!,
