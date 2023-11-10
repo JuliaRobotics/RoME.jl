@@ -199,9 +199,6 @@ q = ArrayPartition(SMatrix{3,3}(ΔR),   SA[0.,0,-1], SA[1.,0,-0.5], 1.0)
 a_b = SA[0.,0,0]
 ω_b = SA[0.,0,0]
 
-@defVariable RotVelPos Manifolds.ProductGroup(ProductManifold(SpecialOrthogonal(3), TranslationGroup(3), TranslationGroup(3))) ArrayPartition(SA[1 0 0; 0 1 0; 0 0 1.0], SA[0; 0; 0.0], SA[0;0;0.0])
-Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(getManifold(RotVelPos))}) = (:Circular,:Circular,:Circular,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid,:Euclid)
-
 fg = initfg()
 fg.solverParams.graphinit = false
 

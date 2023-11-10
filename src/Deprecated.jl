@@ -1,5 +1,20 @@
 
 ##==============================================================================
+## Legacy, remove once AMP #41 is resolved
+##==============================================================================
+
+
+Base.convert(
+  ::Type{<:Tuple}, 
+  ::IIF.InstanceType{typeof(getManifold(RotVelPos))}
+) = (
+  :Circular,:Circular,:Circular,
+  :Euclid,:Euclid,:Euclid,
+  :Euclid,:Euclid,:Euclid
+)
+
+
+##==============================================================================
 ## Legacy, remove some time after RoME v0.22
 ##==============================================================================
 
