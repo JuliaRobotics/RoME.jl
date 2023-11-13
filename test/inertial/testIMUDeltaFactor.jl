@@ -16,8 +16,9 @@ M = SpecialOrthogonal(3)
 a = RotationVec(ΔR)
 b = Rotations.AngleAxis(ΔR)
 
-
+##
 @testset "IMUDeltaFactor spot checks" begin
+##
 
 M = IMUDeltaGroup()
 ϵ = identity_element(M)
@@ -146,6 +147,7 @@ p_SE3 = exp_lie(M_SE3, X_SE3)
 @test isapprox(p.x[3], p_SE3.x[1])
 
 ## test factor with rotation around z axis and initial velocity up
+# DUPLICATED IN testInertialDynamic.jl
 dt = 0.1
 σ_a = 1e-4#0.16e-3*9.81  # noise density m/s²/√Hz
 σ_ω = deg2rad(0.0001)  # noise density rad/√Hz
@@ -267,6 +269,7 @@ timestamps = collect(range(0; step=dt, length=N))
 @test Δ.x[2][1] > 0
 @test Δ.x[3][1] > 0
 
+##
 end
 
 ##
