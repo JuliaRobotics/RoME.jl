@@ -8,7 +8,7 @@ getManifold(::InertialDynamic) = getManifold(RotVelPos)
 
 
 ## TODO consolidate inside module as RoME.imuKinematic
-function imuKinematic!(du, u, p, t; g=[0, 0, 9.81])
+function imuKinematic!(du, u, p, t; g=SA[0; 0; 9.81])
   # p is IMU input (assumed [.gyro; .accel])
   M = SpecialOrthogonal(3)
 
