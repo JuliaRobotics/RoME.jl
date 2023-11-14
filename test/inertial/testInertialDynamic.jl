@@ -19,7 +19,7 @@ N = 11
 
 σ_a = 1e-4 #0.16e-3*9.81  # noise density m/s²/√Hz
 σ_ω = deg2rad(0.0001)  # noise density rad/√Hz
-imu = RoME.generateField_InertialMeasurement_RateZ_noise(; dt, N, σ_a, σ_ω)
+imu = RoME.generateField_InertialMeasurement_noise(; dt, N, rate=SA[0, 0, 0.001], accel0=SA[0, 0, 9.81-1], σ_a, σ_ω)
 
 tst = now(localzone())
 tsp = tst + Second(imu.tspan[2]-imu.tspan[1])

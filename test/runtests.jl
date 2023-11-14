@@ -18,7 +18,11 @@ testfiles = [
   "testG2oParser.jl";  # deferred
   
   # dev test first, for faster issues.
+  # Inertial
   "inertial/testODE_INS.jl";
+  "inertial/testIMUDeltaFactor.jl";
+  "inertial/testInertialDynamic.jl";
+  
   # ...
   # "testFluxModelsPose2.jl";
   "testPartialRangeCrossCorrelations.jl";
@@ -40,10 +44,6 @@ testfiles = [
   "testBearingRange2D.jl";
   "testBearing2D.jl";
   "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
-
-  # Inertial
-  "inertial/testIMUDeltaFactor.jl";
-  "inertial/testInertialDynamic.jl";
 
   # regular tests expected to pass
   "testpackingconverters.jl";

@@ -207,7 +207,7 @@ end
 
 Simulates IMU measurements from body frame rates and desired world frame accelerations.
 """
-function generateField_InertialMeasurement_RateZ(;
+function generateField_InertialMeasurement(;
   dt = 0.01,
   N = 401,
   rate = [0.0, 0.0, pi/2],
@@ -223,6 +223,8 @@ function generateField_InertialMeasurement_RateZ(;
   gn = norm(σ_ω) < 1e-14 ? ()->[0, 0, 0] : ()->rand(MvNormal(diagm(ones(3)*σ_ω^2 * 1/dt)))
   an = norm(σ_a) < 1e-14 ? ()->[0, 0, 0] : ()->rand(MvNormal(diagm(ones(3)*σ_a^2 * 1/dt)))
 
+  Σy  = diagm([ones(3)*σ_a^2; ones(3)*σ_ω^2])
+
   gyros = [rate + gn() for _ = 1:N]
   
   accels = Vector{typeof(accel0)}()
@@ -237,12 +239,18 @@ function generateField_InertialMeasurement_RateZ(;
     push!(accels, (b_a .+ an()) + w_R_b' * accel0)
   end
 
-  (;tspan,gyros,accels)
+  (;tspan,gyros,accels,Σy)
 end
 
+generateField_InertialMeasurement_RateZ(;
+  dt = 0.01,
+  N = 401,
+  rate = [0.0, 0.0, pi/2],
+  kw...
+) = generateField_InertialMeasurement(;dt,N,rate,kw...)
 
 
-generateField_InertialMeasurement_RateZ_noise(;
+generateField_InertialMeasurement_noise(;
   dt = 0.1,
   N = 11,
   rate = [0, 0, 0.001],
@@ -250,7 +258,7 @@ generateField_InertialMeasurement_RateZ_noise(;
   accel0 = [0, 0, -1.0] + gravity,
   σ_a = 1e-4,             # 0.16e-3*9.81  # noise density m/s²/√Hz
   σ_ω = deg2rad(0.0001),  # noise density rad/√Hz
-) = generateField_InertialMeasurement_RateZ(;
+) = generateField_InertialMeasurement(;
   dt, 
   N, 
   rate, 
