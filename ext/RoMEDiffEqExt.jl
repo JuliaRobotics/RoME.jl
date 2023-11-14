@@ -1,4 +1,4 @@
-module RoMEDifferentialEquationsExt
+module RoMEDiffEqExt
 
 using DifferentialEquations
 using Manifolds
