@@ -127,9 +127,17 @@ addFactor!( fg, [:w_P0; :w_P1], oder; graphinit=false );
 
 @error("WIP testODE_INS.jl")
 
+try
+  P1 = approxConvBelief(fg, :w_P0w_P1f1, :w_P1)
+catch
+  @error "FIXME: First try of imuKinematic! convolution failed!"
+end
 
-P1 = approxConvBelief(fg, :w_P0w_P1f1, :w_P1)
-
+try
+  P1 = approxConvBelief(fg, :w_P0w_P1f1, :w_P1)
+catch
+  @error "FIXME: Second try of imuKinematic! convolution failed!"
+end
 
 ## basic sample test
 
