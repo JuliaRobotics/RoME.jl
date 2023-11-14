@@ -202,6 +202,66 @@ function generateGraph_TwoPoseOdo(; solverParams::SolverParams = SolverParams(),
   return dfg
 end
 
+"""
+    $SIGNATURES
+
+Simulates IMU measurements from body frame rates and desired world frame accelerations.
+"""
+function generateField_InertialMeasurement_RateZ(;
+  dt = 0.01,
+  N = 401,
+  rate = [0.0, 0.0, pi/2],
+  w_R_b = [1. 0 0; 0 1 0; 0 0 1],
+  gravity = [0.0, 0, 0],
+  accel0 = [0.0, 0, 0] + gravity,
+  b_a = SA[0.0, 0, 0], # [0.0, pi/2*10, 0],
+  σ_a = 0.0, # 1e-4, #0.16e-3*9.81  # noise density m/s²/√Hz
+  σ_ω = 0.0, # deg2rad(0.0001),  # noise density rad/√Hz
+)
+  tspan = (0.0, dt*(N-1))
+  
+  gn = norm(σ_ω) < 1e-14 ? ()->[0, 0, 0] : ()->rand(MvNormal(diagm(ones(3)*σ_ω^2 * 1/dt)))
+  an = norm(σ_a) < 1e-14 ? ()->[0, 0, 0] : ()->rand(MvNormal(diagm(ones(3)*σ_a^2 * 1/dt)))
+
+  gyros = [rate + gn() for _ = 1:N]
+  
+  accels = Vector{typeof(accel0)}()
+  push!(accels, deepcopy(accel0) + an())
+  # accels = [deepcopy(accel0) + an()]
+  M = SpecialOrthogonal(3)
+
+  # b_a = [0.1, 0, 0]
+  for g in gyros[1:end-1]
+    X = hat(M, Identity(M), g)
+    exp!(M, w_R_b, w_R_b, X*dt)
+    push!(accels, (b_a .+ an()) + w_R_b' * accel0)
+  end
+
+  (;tspan,gyros,accels)
+end
+
+
+
+generateField_InertialMeasurement_RateZ_noise(;
+  dt = 0.1,
+  N = 11,
+  rate = [0, 0, 0.001],
+  gravity = SA[0, 0, 9.81],
+  accel0 = [0, 0, -1.0] + gravity,
+  σ_a = 1e-4,             # 0.16e-3*9.81  # noise density m/s²/√Hz
+  σ_ω = deg2rad(0.0001),  # noise density rad/√Hz
+) = generateField_InertialMeasurement_RateZ(;
+  dt, 
+  N, 
+  rate, 
+  gravity, 
+  accel0, 
+  σ_a, 
+  σ_ω
+)
+
+
+
 
 
 #

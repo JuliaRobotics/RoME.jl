@@ -16,8 +16,9 @@ using StaticArrays
 testfiles = [  
   # known broken tests
   "testG2oParser.jl";  # deferred
-
+  
   # dev test first, for faster issues.
+  "inertial/testODE_INS.jl";
   # ...
   # "testFluxModelsPose2.jl";
   "testPartialRangeCrossCorrelations.jl";
@@ -42,7 +43,7 @@ testfiles = [
 
   # Inertial
   "inertial/testIMUDeltaFactor.jl";
-  "inertial/testODE_INS.jl";
+  "inertial/testInertialDynamic.jl";
 
   # regular tests expected to pass
   "testpackingconverters.jl";
