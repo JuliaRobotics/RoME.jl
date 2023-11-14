@@ -211,7 +211,7 @@ function generateField_InertialMeasurement_RateZ(;
   dt = 0.01,
   N = 401,
   rate = [0.0, 0.0, pi/2],
-  w_R_b0 = [1. 0 0; 0 1 0; 0 0 1],
+  w_R_b = [1. 0 0; 0 1 0; 0 0 1],
   gravity = [0.0, 0, 0],
   accel0 = [0.0, 0, 0] + gravity,
   b_a = SA[0.0, 0, 0], # [0.0, pi/2*10, 0],
@@ -225,7 +225,6 @@ function generateField_InertialMeasurement_RateZ(;
 
   gyros = [rate + gn() for _ = 1:N]
   
-  w_R_b = deepcopy(w_R_b0)
   accels = Vector{typeof(accel0)}()
   push!(accels, deepcopy(accel0) + an())
   # accels = [deepcopy(accel0) + an()]

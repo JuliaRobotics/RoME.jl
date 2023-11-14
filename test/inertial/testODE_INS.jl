@@ -23,15 +23,17 @@ using Test
 
 dt = 0.01
 N = 101
+w_R_b = [1. 0 0; 0 1 0; 0 0 1]
 imu = RoME.generateField_InertialMeasurement_RateZ(;
   dt,
   N,
   rate = [0.01, 0, 0],
   accel0 = [0, 0, -9.81], #WHY NEGATIVE, LEGACY, FIX TO +!  DISCREP BETWEEN insKinematic and imuKinematic
+  w_R_b
 )
 
-gyros_t = linear_interpolation(range(0; step=dt, length=N), gyros)
-accels_t = linear_interpolation(range(0; step=dt, length=N), accels)
+gyros_t = linear_interpolation(range(0; step=dt, length=N), imu.gyros)
+accels_t = linear_interpolation(range(0; step=dt, length=N), imu.accels)
 
 p = (gyro=gyros_t, accel=accels_t)
 
@@ -45,7 +47,7 @@ prob = ODEProblem(RoME.insKinematic!, u0, tspan, Ref(p))
 sol = solve(prob)
 last(sol)
 
-
+M = SpecialOrthogonal(3)
 @test isapprox(last(sol).x[1], [0,0,0]; atol=0.001)
 @test isapprox(M, last(sol).x[2], w_R_b; atol=0.001)
 @test isapprox(last(sol).x[3], [0,0,0]; atol=0.001)
