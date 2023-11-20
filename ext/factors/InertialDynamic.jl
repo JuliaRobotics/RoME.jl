@@ -11,7 +11,7 @@ getManifold(::InertialDynamic) = getManifold(RotVelPos)
 
 ## TODO consolidate inside module as RoME.imuKinematic
 ## du = f(u, params, t) # then solve ODE
-function imuKinematic!(du, u, p, t; i_G=SA[0; 0; 9.81], g=i_G)
+function imuKinematic!(du, u, p, t; g=SA[0; 0; 9.81])
   # p is IMU input (assumed [.gyro; .accel])
   M = SpecialOrthogonal(3)
 
@@ -45,7 +45,7 @@ end
 # a user specified ODE in standard form
 # inplace `xdot = f(x, u, t)`
 # if linear, `xdot = F*x(t) + G*u(t)`
-function insKinematic!(dstate, state, u, t)
+function insKinematic!(dstate, state, u, t; i_G = SA[0; 0; -9.81])
   # x is a VelPose3 point (assumed ArrayPartition)
   # u is IMU input (assumed [rate; accel])
 
@@ -57,7 +57,7 @@ function insKinematic!(dstate, state, u, t)
   # NOTE, Farrell 2008 has gravity logic flipped in some of his equations.
   # WE TAKE gravity as up is positive (think a pendulum hanging back during acceleration)
   # expected gravity in FSD frame (akin to NED).  This is a model of gravity we expect to measure.
-  return imuKinematic!(dstate_, state_, u, t; i_G = SA[0; 0; -9.81])
+  return imuKinematic!(dstate_, state_, u, t; g = i_G)
 end
 # Mt = TranslationGroup(3)
 # Mr = SpecialOrthogonal(3)

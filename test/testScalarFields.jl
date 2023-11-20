@@ -38,7 +38,7 @@ im = (j->((i->dem(i,j)).(x))).(y);
 ##
 
 
-function cb(fg_, lastpose)
+function postpose_cb(fg_, lastpose)
   global dem, img
   
   # query DEM at ground truth
@@ -87,7 +87,7 @@ end
 # 2. generate trajectory 
 
 μ0 = [-7000;-2000.0;pi/2]
-@time generateGraph_Helix2DSlew!(10, posesperturn=30, radius=1500, dfg=fg, μ0=μ0, postpose_cb=cb) # , graphinit=false , slew_x=1/20)
+@time generateGraph_Helix2DSlew!(10, posesperturn=30, radius=1500, dfg=fg, postpose_cb, μ0=μ0) # , graphinit=false , slew_x=1/20)
 deleteFactor!(fg, :x0f1)
 
 
