@@ -36,7 +36,7 @@ function warmUpSolverJIT(;fg::AbstractDFG=generateGraph_Hexagonal(),
   IIF.initParametricFrom!(fg, :default)
   IIF.solveGraphParametric!(fg)
 
-  solveGraph!(fg)
+  solveGraph!(fg; multithread=true)
 
   nothing
 end
