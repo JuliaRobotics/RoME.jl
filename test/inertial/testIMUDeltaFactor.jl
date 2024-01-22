@@ -7,6 +7,7 @@ using DistributedFactorGraphs
 using RoME
 using RoME: IMUDeltaGroup
 using Dates
+using StaticArrays
 # using ManifoldDiff
 
 ##
@@ -15,8 +16,9 @@ M = SpecialOrthogonal(3)
 a = RotationVec(ΔR)
 b = Rotations.AngleAxis(ΔR)
 
-
+##
 @testset "IMUDeltaFactor spot checks" begin
+##
 
 M = IMUDeltaGroup()
 ϵ = identity_element(M)
@@ -130,6 +132,11 @@ Y = hat(M, SA[0.9, 0.8, 0.7,  0.6, 0.5, 0.4,  0.3, 0.2, 0.1,  1] * 0.1)
 # Z1 = ManifoldDiff.differential_exp_argument_lie_approx(M, p, X, Y)
 Z2 = RoME.Jr(M, X) * vee(M, Y)
 
+#test right jacobian with [Ad(g)] = Jl*Jr⁻¹ - Chirikjian p29
+jr = RoME.Jr(M, X)
+jl = RoME.Jr(M, -X)
+@test isapprox(jl*inv(jr), Adₚ)
+
 θ=asin(0.1)*10 # for precicely 0.1
 X = hat(M, SA[1,0,0, 0,0,0, 0,0,θ, 1] * 0.1)
 p = exp(M, ϵ, X)
@@ -140,25 +147,24 @@ p_SE3 = exp_lie(M_SE3, X_SE3)
 @test isapprox(p.x[3], p_SE3.x[1])
 
 ## test factor with rotation around z axis and initial velocity up
+# DUPLICATED IN testInertialDynamic.jl
 dt = 0.1
-σ_a = 1e-4#0.16e-3*9.81  # noise density m/s²/√Hz
-σ_ω = deg2rad(0.0001)  # noise density rad/√Hz
-gn = MvNormal(diagm(ones(3)*σ_ω^2 * 1/dt))
-an = MvNormal(diagm(ones(3)*σ_a^2 * 1/dt))
+N = 11
 
-Σy  = diagm([ones(3)*σ_a^2; ones(3)*σ_ω^2])
-gyros = [SA[0, 0, 0.001] + rand(gn) for _ = 1:11]
-accels = [SA[0, 0, 9.81 - 1] + rand(an) for _ = 1:11]
-timestamps = collect(range(0; step=dt, length=11))
+σ_a = 1e-4 #0.16e-3*9.81  # noise density m/s²/√Hz
+σ_ω = deg2rad(0.0001)  # noise density rad/√Hz
+imu = RoME.generateField_InertialMeasurement_noise(; dt, N, rate=SA[0, 0, 0.001], accel0=SA[0, 0, 9.81-1], σ_a, σ_ω)
+
+timestamps = collect(range(0; step=dt, length=N))
 
 a_b = SA[0.,0,0]
 ω_b = SA[0.,0,0]
 
 fac = RoME.IMUDeltaFactor(
-    accels,
-    gyros,
+    imu.accels,
+    imu.gyros,
     timestamps,
-    Σy,
+    imu.Σy,
     a_b,
     ω_b
 )
@@ -166,7 +172,7 @@ fac = RoME.IMUDeltaFactor(
 # Rotation part
 M_SO3 = SpecialOrthogonal(3)
 ΔR = identity_element(M_SO3)
-for g in gyros[1:end-1]
+for g in imu.gyros[1:end-1]
     exp!(M_SO3, ΔR, ΔR, hat(M_SO3, Identity(M_SO3), g*dt))
 end
 #TODO I would have expected these 2 to be exactly the same
@@ -193,14 +199,50 @@ q = ArrayPartition(SMatrix{3,3}(ΔR),   SA[0.,0,-1], SA[1.,0,-0.5], 1.0)
 a_b = SA[0.,0,0]
 ω_b = SA[0.,0,0]
 
+fg = initfg()
+fg.solverParams.graphinit = false
+
+foreach(enumerate(Nanosecond.(timestamps[[1,end]] * 10^9))) do (i, nanosecondtime)
+    addVariable!(fg, Symbol("x",i-1), RotVelPos; nanosecondtime)
+end
+
+addFactor!(
+    fg,
+    [:x0],
+    ManifoldPrior(
+        getManifold(RotVelPos),
+        ArrayPartition(
+            SA[ 1.0 0.0 0.0; 
+                0.0 1.0 0.0; 
+                0.0 0.0 1.0], 
+            SA[10.0, 0.0, 0.0], 
+            SA[0.0, 0.0, 0.0]
+        ),
+        MvNormal(diagm(ones(9)*1e-3))
+    )
+)
+
+addFactor!(fg, [:x0, :x1], fac)
+
+@time IIF.solveGraphParametric!(fg; is_sparse=false, damping_term_min=1e-12, expect_zero_residual=true);
+# @time IIF.solveGraphParametric!(fg; stopping_criterion, debug, is_sparse=false, damping_term_min=1e-12, expect_zero_residual=true);
+
+getVariableSolverData(fg, :x0, :parametric).val[1] ≈ ArrayPartition(SA[1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0], SA[10.0, 0.0, 0.0], SA[0.0, 0.0, 0.0])
+x1 = getVariableSolverData(fg, :x1, :parametric).val[1]
+@test isapprox(SpecialOrthogonal(3), x1.x[1], ΔR, atol=1e-5)
+@test isapprox(x1.x[2], [10, 0, -1], atol=1e-3)
+@test isapprox(x1.x[3], [10, 0, -0.5], atol=1e-3)
+
+
 dt = 0.01
 N = 11
 dT = (N-1)*dt
-gyros = [SA[0, 0, 0.1] for _ = 1:N]
-accels = [SA[0, 0, 9.81] for _ = 1:N]
+imu = RoME.generateField_InertialMeasurement(;dt,N,accel0=SA[0, 0, 9.81],rate=SA[0, 0, 0.1])
+# gyros = [SA[0, 0, 0.1] for _ = 1:N]
+# accels = [SA[0, 0, 9.81] for _ = 1:N]
 timestamps = collect(range(0; step=dt, length=N))
 
-Δ, Σ, J_b = RoME.preintegrateIMU(accels, gyros, timestamps, Σy, a_b, ω_b)
+Δ, Σ, J_b = RoME.preintegrateIMU(imu.accels, imu.gyros, timestamps, Σy, a_b, ω_b)
 Σ = Σ[SOneTo(9),SOneTo(9)]
 
 @test Δ.x[1] ≈ RotZ(0.1*dT)
@@ -209,6 +251,7 @@ timestamps = collect(range(0; step=dt, length=N))
 @test Δ.x[4] == dT
 
 ##
+# imu = RoME.generateField_InertialMeasurement(;dt,N,accel0=SA[0, 0, 9.81],rate=SA[0.01, 0, 0])
 gyros = [SA[0.01, 0, 0] for _ = 1:N]
 accels = [SA[0, 0, 9.81] for _ = 1:N]
 timestamps = collect(range(0; step=dt, length=N))
@@ -221,6 +264,7 @@ timestamps = collect(range(0; step=dt, length=N))
 @test Δ.x[3][2] < 0
 
 ##
+# imu = RoME.generateField_InertialMeasurement(;dt,N,accel0=SA[0, 0, 9.81],rate=SA[0, 0.01, 0])
 gyros = [SA[0, 0.01, 0] for _ = 1:N]
 accels = [SA[0, 0, 9.81] for _ = 1:N]
 timestamps = collect(range(0; step=dt, length=N))
@@ -232,6 +276,7 @@ timestamps = collect(range(0; step=dt, length=N))
 @test Δ.x[2][1] > 0
 @test Δ.x[3][1] > 0
 
+##
 end
 
 ##

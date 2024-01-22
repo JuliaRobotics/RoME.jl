@@ -126,6 +126,7 @@ include("services/ScalarFields.jl")
 
 include("../ext/WeakdepsPrototypes.jl")
 include("../ext/factors/GenericProjection.jl")
+include("../ext/factors/InertialDynamic.jl")
 include("../ext/factors/MixtureFluxPose2Pose2.jl")
 
 

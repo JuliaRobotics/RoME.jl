@@ -17,7 +17,7 @@ export
   pol2cart,
 
   # Didson model
-  evalPotential,
+  # evalPotential,
   LinearRangeBearingElevation,
   project!,
   project,
@@ -41,9 +41,9 @@ export
   PriorPoint2,
   PackedPriorPoint2,
   Pose2Point2BearingRange,
-  Pose2Point2BearingRangeMH,
+  # Pose2Point2BearingRangeMH,
   PackedPose2Point2BearingRange,
-  PackedPose2Point2BearingRangeMH,
+  # PackedPose2Point2BearingRangeMH,
   Pose2Point2Bearing,
   PackedPose2Point2Bearing,
   Pose2Point2Range,
@@ -105,6 +105,10 @@ export
   PackedPriorPose3ZRP,
   Pose3Pose3Rotation,
   PackedPose3Pose3Rotation,
+
+  RotVelPos,
+  InertialDynamic,
+
   # Various utilities
   passTypeThrough,
   buildGraphChain!,
