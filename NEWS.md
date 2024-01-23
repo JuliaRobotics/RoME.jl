@@ -4,7 +4,7 @@ RoME.jl follows semver, with only a few case specific exceptions.  Please see re
 
 ## v0.24
 
-- Manifolds based inertial odometry (preintegration).  Replaces previous 2016-2016 generation `InertialPose3` variables and factors.
+- Manifolds based inertial odometry (preintegration).  Replaces previous 2015-2016 generation `InertialPose3` variables and factors.
 - Testing enhancements and fixes to restore tests for RoMEPlotting and Caesar Docs.
 - Minor code updates for standardized usage of new PyCaesar.jl.
 
