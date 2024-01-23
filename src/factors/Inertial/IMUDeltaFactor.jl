@@ -309,6 +309,11 @@ struct IMUMeasurements
     Σy::SMatrix{6,6,Float64}
 end
 
+"""
+$TYPEDEF
+
+Factor type for inertial odometry (preintegration).
+"""
 Base.@kwdef struct IMUDeltaFactor{T <: SamplableBelief} <: AbstractManifoldMinimize
     Z::T # NOTE dim is 9 as Δt is not included in covariance
     Δt::Float64
