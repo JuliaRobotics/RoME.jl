@@ -170,6 +170,13 @@ function _offsetHexLeg( fgl::AbstractDFG,
 end
 
 
+"""
+    $SIGNATURES
+
+Generate a graph with predetermined honeycomb structure.
+
+See also: [`generateGraph_Beehive!`](@ref), [`generateGraph_Hexagonal`](@ref)
+"""
 function generateGraph_Honeycomb!(poseCountTarget::Int=36;
                                   graphinit::Bool = false,
                                   dfg::AbstractDFG = LocalDFG{SolverParams}(solverParams=SolverParams(graphinit=graphinit)),  
