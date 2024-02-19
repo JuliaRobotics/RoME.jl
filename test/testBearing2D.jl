@@ -34,7 +34,8 @@ rs = [0, -pi/4, -pi/2, -3pi/4, -pi, 3pi/4, pi/2, pi/4, pi/4, -pi/4]
 push!(rs, pi/4 - atan(3,4))
 
 q = [5., 5]
-m = [pi/4]
+SO2 = SpecialOrthogonal(2)
+m = hat(SO2, getPointIdentity(SO2), [pi/4])
 
 f = Pose2Point2Bearing(Normal(pi/4,0.05))
 
@@ -59,7 +60,9 @@ res = calcFactorResidualTemporary(f, (Pose2, Point2), [], (xi, xj))
 f = Pose2Point2Bearing(Normal(pi,0.001))
 xi = ArrayPartition([0.,0], [1. 0; 0 1])
 xj = [-1, -0.001]
-res = calcFactorResidualTemporary(f, (Pose2, Point2), [pi], (xi, xj))
+
+m = hat(SO2, getPointIdentity(SO2), [pi])
+res = calcFactorResidualTemporary(f, (Pose2, Point2), m, (xi, xj))
 @test isapprox(res, [-0.001], atol=1e-3)
 
 ##
@@ -200,9 +203,9 @@ lmp_noise = Matrix(Diagonal([0.01;0.01].^2))
 fg = initfg()
 
 # landmarks
-addVariable!(fg, :l1, Point2)
-addVariable!(fg, :l2, Point2)
-addVariable!(fg, :l3, Point2)
+addVariable!(fg, :l1, RoME.Point2)
+addVariable!(fg, :l2, RoME.Point2)
+addVariable!(fg, :l3, RoME.Point2)
 
 addFactor!(fg, [:l1], PriorPoint2(MvNormal([-10.0;1.0-10.0],lmp_noise)), graphinit=false)
 addFactor!(fg, [:l2], PriorPoint2(MvNormal([-10.0+sqrt(3)/2;-0.5-10.0],lmp_noise)), graphinit=false)

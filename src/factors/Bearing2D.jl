@@ -19,18 +19,14 @@ preambleCache(::AbstractDFG, ::AbstractVector{<:DFGVariable}, ::Pose2Point2Beari
 
 getManifold(::Pose2Point2Bearing) = SpecialOrthogonal(2)
 # Pose2Point2Bearing(x1::B) where {B <: IIF.SamplableBelief} = Pose2Point2Bearing{B}(x1)
-# FIXME, there might be something wrong with the sign here
-function getSample(cfo::CalcFactor{<:Pose2Point2Bearing})
-  return rand(cfo.factor.Z)
-end
 
-function (cfo::CalcFactor{<:Pose2Point2Bearing})(Xc, p, l)
+function (cfo::CalcFactor{<:Pose2Point2Bearing})(X, p, l)
   # wl = l
   # wTp = p
   # pl = pTw*wl
   pl  =  transpose(p.x[2]) * (l - p.x[1])
   # δθ = mθ - plθ
-  δθ = Manifolds.sym_rem(Xc[1] - atan(pl[2], pl[1]))
+  δθ = Manifolds.sym_rem(X[2] - atan(pl[2], pl[1]))
   return [δθ]
 end
 
