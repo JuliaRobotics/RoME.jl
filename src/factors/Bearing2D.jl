@@ -24,9 +24,10 @@ function (cfo::CalcFactor{<:Pose2Point2Bearing})(X, p, l)
   # wl = l
   # wTp = p
   # pl = pTw*wl
+
   pl  =  transpose(p.x[2]) * (l - p.x[1])
-  # δθ = mθ - plθ
-  δθ = Manifolds.sym_rem(X[2] - atan(pl[2], pl[1]))
+  # δθ = mθ - plθ  # X[2,1] because we store [measurement tangent as 2x2 matrix (Lie algebra, so(2))](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.exp_lie-Tuple{Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}},%20%E2%84%9D},%20Any})
+  δθ = Manifolds.sym_rem(X[2,1] - atan(pl[2], pl[1])) 
   return [δθ]
 end
 
