@@ -2,7 +2,7 @@
 
 # using Revise
 using Test
-using ImageCore, ImageIO
+using ImageCore, ImageIO, ImageFiltering
 using TensorCast
 using Interpolations
 using RoME
@@ -21,35 +21,70 @@ y_min, y_max = -9000, 9000
 global img
 x, y, img = RoME.generateField_CanyonDEM(1, 100, x_is_north=false, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
 
+# remember for Github CI to use something near N=10000 (24Q1)
+global N = 100000
 
+# https://docs.juliadsp.org/stable/convolutions/
 
 ## modify to generate elevation measurements (data/smallData as in Boxy) and priors
 
+# elevation model
 dem = Interpolations.LinearInterpolation((x,y), img) # interpolated DEM
 elevation(p) = dem(getPPE(fg, p, :simulated).suggested[1:2]'...)
 sigma_e = 0.01 # elevation measurement uncertainty
+@test 0.46 < dem(0.0, 0.0) < 0.48
 
 ## test buildDEMSimulated to ensure interpolation matches raw data 
 im = (j->((i->dem(i,j)).(x))).(y);
 @cast im_[i,j] := im[j][i];
 @test norm(im_ - img) < 1e-10
 
+# magnitude of slope model
+# dz/dx = z(x_{k+1}) - z(x_{k-1}) / (x_{k+1} - x_{k-1})
+dimg = imgradients(img, KernelFactors.ando3) # dimg = gx, gy
+mag = sqrt.(dimg[1].^2 .+ dimg[2].^2)        # gradient magnitude 
+dsm = Interpolations.LinearInterpolation((x,y), mag)    # interpolated DEM
+slope(p) = dsm(getPPE(fg, p, :simulated).suggested[1:2]'...)
+sigma_m = 1e-3  # slope measurement uncertainty (based on slopes under 6e-2)
+@test 0 < dsm(0.0, 0.0) < 0.07
+
+# direction of slope as cos(grad) and sin(grad)
+gimg = complex.(dimg[1], dimg[2])
+gimgh = gimg ./ norm.(gimg)
+gimg_cos = real.(gimgh)
+gimg_sin = imag.(gimgh)
+dsc = Interpolations.LinearInterpolation((x,y), gimg_cos)    # interpolated cos(grad)
+dss = Interpolations.LinearInterpolation((x,y), gimg_sin)    # interpolated sin(grad)
+direction_cos(p) = dsc(getPPE(fg, p, :simulated).suggested[1:2]'...)
+direction_sin(p) = dss(getPPE(fg, p, :simulated).suggested[1:2]'...)
+sigma_s = 0.05
+
 
 ##
 
-
 function postpose_cb(fg_, lastpose)
-  global dem, img
+  global dem, img, N
   
   # query DEM at ground truth
   z_e = elevation(lastpose)
+  z_m = slope(lastpose)
+  z_cg = direction_cos(lastpose)
+  z_sg = direction_sin(lastpose)
   
   # generate noisy measurement
   @info "Callback for DEM LevelSet priors" lastpose ls(fg_, lastpose) z_e
   
   # create prior
-  hmd = LevelSetGridNormal(img, (x,y), z_e, sigma_e, N=10000, sigma_scale=1)
-  pr = PartialPriorPassThrough(hmd, (1,2))
+  lse = LevelSetGridNormal(img, (x,y), z_e, sigma_e; N, sigma_scale=1)
+  lsm = LevelSetGridNormal(mag, (x,y), z_m, sigma_m; N, sigma_scale=1)  # elevation measurement
+  ls_cg = LevelSetGridNormal(gimg_cos, (x,y), z_cg, sigma_s; N, sigma_scale=1)
+  ls_sg = LevelSetGridNormal(gimg_sin, (x,y), z_sg, sigma_s; N, sigma_scale=1)
+
+  hm_em_data = lse.heatmap.data .* lsm.heatmap.data .* ls_cg.heatmap.data .* ls_sg.heatmap.data
+  σ_em = sqrt(sigma_e^2 + sigma_m^2 + sigma_s^2 + sigma_s^2)
+  ls_em = LevelSetGridNormal(hm_em_data, (x,y), z_e*z_m*z_cg*z_sg, σ_em; N, sigma_scale=1)
+  
+  pr = PartialPriorPassThrough(ls_em, (1,2))
   addFactor!(fg_, [lastpose], pr, tags=[:DEM;], graphinit=false, nullhypo=0.1)
   nothing
 end
@@ -87,10 +122,10 @@ end
 # 2. generate trajectory 
 
 μ0 = [-7000;-2000.0;pi/2]
-@time generateGraph_Helix2DSlew!(10; posesperturn=30, radius=1500, dfg=fg, postpose_cb, μ0) # , graphinit=false , slew_x=1/20)
+@time generateGraph_Helix2DSlew!(1; posesperturn=30, radius=1500, dfg=fg, postpose_cb, μ0) # , graphinit=false , slew_x=1/20)
+# @time generateGraph_Helix2DSlew!(10; posesperturn=30, radius=1500, dfg=fg, postpose_cb, μ0) # , graphinit=false , slew_x=1/20)
+# @time generateGraph_Helix2DSlew!(20; posesperturn=30, radius=1500, dfg=fg, postpose_cb, μ0) # , graphinit=false , slew_x=1/20)
 deleteFactor!(fg, :x0f1)
-
-
 
 ## optional prior at start
 
@@ -98,9 +133,22 @@ mu0 = getPPE(fg, :x0, :simulated).suggested
 pr0 = PriorPose2(MvNormal(mu0, 0.01.*[1;1;1;]))
 addFactor!(fg, [:x0], pr0)
 
+
+## EXPLORE MODEL
+
+# just add, solve, repeat (set to max 6 for Github CI 24Q1)
+for i in 41:60
+  @info "Solving" i
+  generateGraph_Helix2DSlew!(i; posesperturn=30, radius=1500, dfg=fg, postpose_cb, μ0) # , graphinit=false , slew_x=1/20)
+  if 0 == (i % 2)
+    solveGraph!(fg; multithread=true, storeOld=true);
+  end
+end
+
 ##
 
-tree = solveTree!(fg);
+# tree = solveGraph!(fg; multithread=true, storeOld=true);
+# [ solveGraph!(fg; multithread=true, storeOld=true) for _ in 1:5];
 
 ## check at least the first five poses
 
@@ -135,10 +183,17 @@ end
 # using Cairo, RoMEPlotting
 # Gadfly.set_default_plot_size(35cm,20cm)
 
-# plotSLAM2D_KeyAndRef(fg)
+plotSLAM2D_KeyAndRef(fg)
 # imshow(img)
 
 ##
+
+# using ImageView
+
+##
+
+
+
 
 
 
