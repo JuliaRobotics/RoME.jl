@@ -16,6 +16,12 @@ Pose3Pose3(::UniformScaling) = Pose3Pose3()
 
 function (cf::CalcFactor{<:Pose3Pose3})(X, p::ArrayPartition{T}, q) where T
     M = getManifold(Pose3)
+    # X: p_Xq̂
+    # p: w_H_p
+    # q: w_H_q
+    # ̂q: w_H_̂q = w_H_p * exp_0(p_Xq̂)
+    # w_H_̂q = Manifolds.compose(M, w_H_p, exp(M, getPointIdentity(M), p_Xq̂))
+
     q̂ = Manifolds.compose(M, p, exp(M, getPointIdentity(M), X))
 
     Xc::SVector{6,T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())

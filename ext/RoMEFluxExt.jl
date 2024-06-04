@@ -1,6 +1,6 @@
 module RoMEFluxExt
 
-@info "RoME.jl is loading extension functionality related to Flux.jl."
+# @info "RoME.jl is loading extension functionality related to Flux.jl."
 
 using Flux
 
