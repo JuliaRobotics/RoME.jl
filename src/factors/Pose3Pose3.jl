@@ -92,3 +92,13 @@ function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) whe
     Xc::SVector{6,T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
     return SVector{6,T}(normalize(Xc[1:3])..., Xc[4:6]...)
 end
+
+Base.@kwdef struct PackedPose3Pose3UnitTrans <: AbstractPackedFactor
+  Z::PackedSamplableBelief
+end
+function convert(::Type{Pose3Pose3UnitTrans}, packed::PackedPose3Pose3UnitTrans)
+  return Pose3Pose3UnitTrans( convert(SamplableBelief, packed.Z) )
+end
+function convert(::Type{PackedPose3Pose3UnitTrans}, obj::Pose3Pose3UnitTrans)
+  return PackedPose3Pose3UnitTrans( convert(PackedSamplableBelief, obj.Z) )
+end
