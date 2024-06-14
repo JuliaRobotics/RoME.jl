@@ -71,6 +71,9 @@ function generateGraph_Helix2D!(numposes::Integer = 40;
     eidx += posesperturn
     # skip out early if extending a previous existing graph
     eidx = minimum( [eidx, length(tmp[1])] )
+    if eidx < bidx
+      continue
+    end
     # tmp_ = _calcHelix2DApprox(N_ppt=posesperturn, radius=radius, runback=runback)
     tmp_ = hcat(tmp[2][bidx:eidx,:],tmp[3][bidx:eidx])'
     # adjust for turn progression in x
