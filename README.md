@@ -9,7 +9,7 @@
 
 Robot Motion Estimate (RoME.jl) is part of the overall [Caesar.jl][cjl-url] and provides a set of graph variables, factors, and utility features for robotics-related navigation, tracking, and mapping (i.e. SLAM).  RoME.jl helps build front-ends using the [Multi-modal iSAM] backend solver which is implemented over at [IncrementalInference.jl][iif-url].  See [the related references of interest here](http://www.juliarobotics.org/Caesar.jl/latest/refs/literature/).  Most notably, this package provides common navigation-type variables and factors to be included in more general [DistributedFactorGraphs.jl](https://github.com/JuliaRobotics/DistributedFactorGraphs.jl) graph objects.
 
-[NavAbility.io](http://www.navability.io) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@navability.io) or via the caesarjl Slack badge-link above.
+[NavAbility(TM) by WhereWhen.ai](http://www.wherewhen.ai) helps the with administration and support of the Caesar.jl community, please reach out for any additional information (info@wherewhen.ai) or via the caesarjl Slack badge-link above.
 ## Installation
 
 You can directly install with:

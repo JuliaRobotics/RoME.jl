@@ -16,6 +16,12 @@ Pose3Pose3(::UniformScaling) = Pose3Pose3()
 
 function (cf::CalcFactor{<:Pose3Pose3})(X, p::ArrayPartition{T}, q) where T
     M = getManifold(Pose3)
+    # X: p_Xq̂
+    # p: w_H_p
+    # q: w_H_q
+    # ̂q: w_H_̂q = w_H_p * exp_0(p_Xq̂)
+    # w_H_̂q = Manifolds.compose(M, w_H_p, exp(M, getPointIdentity(M), p_Xq̂))
+
     q̂ = Manifolds.compose(M, p, exp(M, getPointIdentity(M), X))
 
     Xc::SVector{6,T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
@@ -85,4 +91,14 @@ function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) whe
     q̂ = Manifolds.compose(M, p, exp(M, getPointIdentity(M), X))
     Xc::SVector{6,T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
     return SVector{6,T}(normalize(Xc[1:3])..., Xc[4:6]...)
+end
+
+Base.@kwdef struct PackedPose3Pose3UnitTrans <: AbstractPackedFactor
+  Z::PackedSamplableBelief
+end
+function convert(::Type{Pose3Pose3UnitTrans}, packed::PackedPose3Pose3UnitTrans)
+  return Pose3Pose3UnitTrans( convert(SamplableBelief, packed.Z) )
+end
+function convert(::Type{PackedPose3Pose3UnitTrans}, obj::Pose3Pose3UnitTrans)
+  return PackedPose3Pose3UnitTrans( convert(PackedSamplableBelief, obj.Z) )
 end
