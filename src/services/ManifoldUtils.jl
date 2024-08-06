@@ -1,4 +1,10 @@
 
+
+## =============================================
+## Explicit conversions
+## =============================================
+
+
 function homography_to_coordinates(
   M::typeof(SpecialEuclidean(3)),
   pHq::AbstractMatrix{<:Real}

@@ -47,7 +47,7 @@ import IncrementalInference: getMeasurementParametric
 import IncrementalInference: preambleCache
 import IncrementalInference: InstanceType
 # not sure why this is gives import error
-import DistributedFactorGraphs: compare
+import DistributedFactorGraphs: compare, @defVariable
 import DistributedFactorGraphs: getDimension, getManifold
 
 using OrderedCollections: OrderedDict
