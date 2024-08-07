@@ -5,6 +5,7 @@ using LinearAlgebra
 using DistributedFactorGraphs
 using Dates
 
+# FIXME use ApproxManifoldsProducts version instead
 function TransformUtils.skew(v::SVector{3,T}) where T<:Real
     return SMatrix{3,3,T}(
             0,
@@ -292,6 +293,7 @@ function AdjointMatrix(::IMUDeltaGroup, p::ArrayPartition{T}) where T
 end
 
 # right Jacobian
+# FIXME moving general Lie Group Jacobian up to ApproxManifoldProducts
 function Jr(M::IMUDeltaGroup, X; order=5)
     adx = adjointMatrix(M, X)
     mapreduce(+, 0:order) do i

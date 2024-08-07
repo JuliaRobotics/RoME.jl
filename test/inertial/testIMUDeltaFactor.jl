@@ -137,7 +137,7 @@ jr = RoME.Jr(M, X)
 jl = RoME.Jr(M, -X)
 @test isapprox(jl*inv(jr), Adₚ)
 
-θ=asin(0.1)*10 # for precicely 0.1
+θ=asin(0.1)*10 # for precisely 0.1
 X = hat(M, SA[1,0,0, 0,0,0, 0,0,θ, 1] * 0.1)
 p = exp(M, ϵ, X)
 

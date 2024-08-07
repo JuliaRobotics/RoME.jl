@@ -16,6 +16,12 @@ Pose3Pose3(::UniformScaling) = Pose3Pose3()
 
 function (cf::CalcFactor{<:Pose3Pose3})(X, p::ArrayPartition{T}, q) where T
     M = getManifold(Pose3)
+    # X: p_Xq̂
+    # p: w_H_p
+    # q: w_H_q
+    # ̂q: w_H_̂q = w_H_p * exp_0(p_Xq̂)
+    # w_H_̂q = Manifolds.compose(M, w_H_p, exp(M, getPointIdentity(M), p_Xq̂))
+
     q̂ = Manifolds.compose(M, p, exp(M, getPointIdentity(M), X))
 
     Xc::SVector{6,T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
@@ -69,24 +75,6 @@ function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
     return vee(M, q, log(M, q, q̂)) # coordinates
 end
 
-## Pose3Pose3UnitTrans Factor 
-"""
-  $(TYPEDEF)
-Pose3Pose3 factor where the translation scale is not known, ie. Pose3Pose3 with unit (normalized) translation.
-"""
-Base.@kwdef struct Pose3Pose3UnitTrans{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-  Z::T = MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)]))
-end
-
-getManifold(::InstanceType{Pose3Pose3UnitTrans}) = getManifold(Pose3) # Manifolds.SpecialEuclidean(3)
-
-function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) where T
-    M = getManifold(Pose3)
-    q̂ = Manifolds.compose(M, p, exp(M, getPointIdentity(M), X))
-    Xc::SVector{6,T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
-    return SVector{6,T}(normalize(Xc[1:3])..., Xc[4:6]...)
-end
-
 
 ##
 Base.@kwdef struct Pose3Pose3Transform{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
@@ -106,3 +94,34 @@ function (cf::CalcFactor{<:Pose3Pose3Transform})(p_NX, p, q, Δ)
     Xc::SVector{6,T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
     return Xc
 end
+
+## ====================================
+## Pose3Pose3UnitTrans Factor 
+
+"""
+  $(TYPEDEF)
+Pose3Pose3 factor where the translation scale is not known, ie. Pose3Pose3 with unit (normalized) translation.
+"""
+Base.@kwdef struct Pose3Pose3UnitTrans{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+  Z::T = MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)]))
+end
+
+getManifold(::InstanceType{Pose3Pose3UnitTrans}) = getManifold(Pose3) # Manifolds.SpecialEuclidean(3)
+
+function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) where T
+    M = getManifold(Pose3)
+    q̂ = Manifolds.compose(M, p, exp(M, getPointIdentity(M), X))
+    Xc::SVector{6,T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
+    return SVector{6,T}(normalize(Xc[1:3])..., Xc[4:6]...)
+end
+        
+Base.@kwdef struct PackedPose3Pose3UnitTrans <: AbstractPackedFactor
+  Z::PackedSamplableBelief
+end
+function convert(::Type{Pose3Pose3UnitTrans}, packed::PackedPose3Pose3UnitTrans)
+  return Pose3Pose3UnitTrans( convert(SamplableBelief, packed.Z) )
+end
+function convert(::Type{PackedPose3Pose3UnitTrans}, obj::Pose3Pose3UnitTrans)
+  return PackedPose3Pose3UnitTrans( convert(PackedSamplableBelief, obj.Z) )
+end
+

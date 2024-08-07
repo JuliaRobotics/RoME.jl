@@ -32,6 +32,7 @@ using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, SpecialOr
 import Manifolds: project, project!, identity_element
 
 import Rotations as _Rot
+import Rotations: ⊕, ⊖ # TODO deprecate
 
 export SpecialOrthogonal, SpecialEuclidean
 export submanifold_component
@@ -46,7 +47,7 @@ import IncrementalInference: getMeasurementParametric
 import IncrementalInference: preambleCache
 import IncrementalInference: InstanceType
 # not sure why this is gives import error
-import DistributedFactorGraphs: compare
+import DistributedFactorGraphs: compare, @defVariable
 import DistributedFactorGraphs: getDimension, getManifold
 
 using OrderedCollections: OrderedDict

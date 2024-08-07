@@ -2,7 +2,7 @@ module RoMEImageIOExt
 
 # ScalarField functions related to Images.jl
 
-@info "RoME.jl is loading extension functionality related ImageCore.jl and ImageIO.jl"
+# @info "RoME.jl is loading extension functionality related ImageCore.jl and ImageIO.jl"
 
 using ImageIO
 using ImageCore
