@@ -75,7 +75,29 @@ function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
     return vee(M, q, log(M, q, q̂)) # coordinates
 end
 
+
+##
+Base.@kwdef struct Pose3Pose3Transform{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
+  Z::T = MvNormal(zeros(6),LinearAlgebra.diagm([0.01*ones(3);0.0001*ones(3)]))
+end
+
+getManifold(::InstanceType{Pose3Pose3Transform}) = getManifold(Pose3) # Manifolds.SpecialEuclidean(3)
+
+function (cf::CalcFactor{<:Pose3Pose3Transform})(p_NX, p, q, Δ)
+
+    M = getManifold(Pose3Pose3Transform)
+    ε = getPointIdentity(M)
+    
+    Δn = compose(M, Δ, exp(M, ε, p_NX))
+    q̂ = Manifolds.compose(M, p, Δn)
+
+    Xc::SVector{6,T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
+    return Xc
+end
+
+## ====================================
 ## Pose3Pose3UnitTrans Factor 
+
 """
   $(TYPEDEF)
 Pose3Pose3 factor where the translation scale is not known, ie. Pose3Pose3 with unit (normalized) translation.
@@ -92,7 +114,7 @@ function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) whe
     Xc::SVector{6,T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
     return SVector{6,T}(normalize(Xc[1:3])..., Xc[4:6]...)
 end
-
+        
 Base.@kwdef struct PackedPose3Pose3UnitTrans <: AbstractPackedFactor
   Z::PackedSamplableBelief
 end
@@ -102,3 +124,4 @@ end
 function convert(::Type{PackedPose3Pose3UnitTrans}, obj::Pose3Pose3UnitTrans)
   return PackedPose3Pose3UnitTrans( convert(PackedSamplableBelief, obj.Z) )
 end
+
