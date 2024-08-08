@@ -5,20 +5,6 @@ using LinearAlgebra
 using DistributedFactorGraphs
 using Dates
 
-# FIXME use ApproxManifoldsProducts version instead
-function TransformUtils.skew(v::SVector{3,T}) where T<:Real
-    return SMatrix{3,3,T}(
-            0,
-         v[3],
-        -v[2],
-        -v[3],  
-            0,  
-         v[1],
-         v[2],
-        -v[1],
-            0
-    )
-end
 
 struct IMUDeltaManifold <: AbstractManifold{ℝ} end
 
@@ -101,7 +87,7 @@ end
 
 function Manifolds.hat(M::IMUDeltaGroup, Xⁱ::SVector{10, T}) where T<:Real
     return ArrayPartition(
-        skew(Xⁱ[SA[7:9...]]), # θ ωΔt
+        ApproxManifoldProducts.skew(Xⁱ[SA[7:9...]]), # θ ωΔt
         Xⁱ[SA[4:6...]],       # ν aΔt
         Xⁱ[SA[1:3...]],       # ρ vΔt
         Xⁱ[10],               # Δt
@@ -131,7 +117,7 @@ function _Q(θ⃗)
     else
         u = θ⃗/θ
         sθ, cθ = sincos(θ)
-        uₓ = skew(u)
+        uₓ = ApproxManifoldProducts.skew(u)
         # NOTE difference in references here --- (θ - sθ)/θ^2 vs (θ - sθ)/θ
         # with no ^2 looking correct when compared to exp of SE3
         return SMatrix{3,3,T}(I) + (1 - cθ)/θ * uₓ + (θ - sθ)/θ * uₓ^2
@@ -146,7 +132,7 @@ function _P(θ⃗)
     else
         u = θ⃗/θ
         sθ, cθ = sincos(θ)
-        uₓ = skew(u)
+        uₓ = ApproxManifoldProducts.skew(u)
         return 1/2*SMatrix{3,3,T}(I) + (θ - sθ)/θ^2 * uₓ + (cθ + 1/2*θ^2 - 1)/θ^2 * uₓ^2
     end
 end
@@ -255,8 +241,8 @@ function adjointMatrix(::IMUDeltaGroup, X::ArrayPartition{T}) where T
 
     IΔt = SMatrix{3,3,T}(X.x[4]*I)
 
-    ρₓ = skew(ρ)
-    νₓ = skew(ν)
+    ρₓ = ApproxManifoldProducts.skew(ρ)
+    νₓ = ApproxManifoldProducts.skew(ν)
     
     m0 = zeros(3,3) 
     v0 = zeros(3)
@@ -277,8 +263,8 @@ function AdjointMatrix(::IMUDeltaGroup, p::ArrayPartition{T}) where T
     Δp = p.x[3]
     Δt = p.x[4]
 
-    Δvₓ = skew(Δv)
-    pmvtₓ = skew(Δp - Δv*Δt)
+    Δvₓ = ApproxManifoldProducts.skew(Δv)
+    pmvtₓ = ApproxManifoldProducts.skew(Δp - Δv*Δt)
 
     m0 = zeros(3,3) 
     v0 = zeros(3)
@@ -324,7 +310,7 @@ Base.@kwdef struct IMUDeltaFactor{T <: SamplableBelief} <: AbstractManifoldMinim
     J_b::SMatrix{10,6,Float64} = zeros(SMatrix{10,6,Float64})
     # accelerometer bias, gyroscope bias 
     b::SVector{6, Float64} = zeros(SVector{6, Float64})
-    #optional raw measurements
+    #optional raw measurements, FIXME replace with BlobEntry -- dont do abstract types here, or raw data if not needed in hotloop 
     raw_measurements::Union{Nothing,IMUMeasurements} = nothing
 end
 
@@ -340,6 +326,9 @@ end
 IIF.getManifold(::IMUDeltaFactor) = IMUDeltaGroup()
 
 function IIF.preambleCache(fg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, ::IMUDeltaFactor)
+    # FIXME, nsec should only contain fractional second information, i.e. < 1.0s.  Use together with `trunc(timestamp) + 1e-9*nsec`
+        # pt = floor(Float64, datetime2unix(getTimestamp(vars[1]))) + (1e-9*vars[1].nstime % 1.0)
+        # qt = floor(Float64, datetime2unix(getTimestamp(vars[2]))) + (1e-9*vars[2].nstime % 1.0)
     (timestams=(vars[1].nstime,vars[2].nstime),)
 end
 
