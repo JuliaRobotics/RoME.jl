@@ -326,7 +326,7 @@ end
 IIF.getManifold(::IMUDeltaFactor) = IMUDeltaGroup()
 
 function IIF.preambleCache(fg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, ::IMUDeltaFactor)
-    # FIXME, nsec should only contain fractional second information, i.e. < 1.0s.  Use together with `trunc(timestamp) + 1e-9*nsec`
+    # FIXME, change to `.missionnanosec` which can be used together with `trunc(timestamp) + 1e-9*nsec`.  See DFG #1087
         # pt = floor(Float64, datetime2unix(getTimestamp(vars[1]))) + (1e-9*vars[1].nstime % 1.0)
         # qt = floor(Float64, datetime2unix(getTimestamp(vars[2]))) + (1e-9*vars[2].nstime % 1.0)
     (timestams=(vars[1].nstime,vars[2].nstime),)
