@@ -47,7 +47,7 @@ RoMEFluxExt = "Flux"
 RoMEImageIOExt = "ImageIO"
 
 [compat]
-ApproxManifoldProducts = "0.8"
+ApproxManifoldProducts = "0.8.5"
 CameraModels = "0.2"
 CoordinateTransformations = "0.5, 0.6"
 Dates = "1.10"
