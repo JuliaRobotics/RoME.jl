@@ -226,6 +226,7 @@ export assembleChordsDict
 
 export DynPose2, DynPose2VelocityPrior, PackedDynPose2VelocityPrior, DynPose2Pose2, PackedDynPose2Pose2
 
+export PriorVelPos3, PackedPriorVelPos3
 export VelPosRotVelPos, PackedVelPosRotVelPos
 
 # InertialPose3
