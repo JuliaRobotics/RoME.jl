@@ -495,34 +495,62 @@ end
 
 ## serde
 
-Base.@kwdef struct PackedIMUDeltaFactor{T <: PackedSamplableBelief} <: AbstractPackedFactor
+struct PackedIMUDeltaFactor{T <: PackedSamplableBelief} <: AbstractPackedFactor
     Z::T # NOTE dim is 9 as Δt is not included in covariance
     dt::Float64
     D::Vector{Float64}
     Sigma::Vector{Float64} #SMatrix{10,10,Float64}
     # J_b::SMatrix{10,6,Float64} = zeros(SMatrix{10,6,Float64})
     # accelerometer bias, gyroscope bias 
-    b::Vector{Float64} = zeros(6)
+    b::Vector{Float64}
+end
+
+function PackedIMUDeltaFactor(;
+    Z,
+    dt,
+    D,
+    Sigma,
+    b
+)
+    _gettype(zt::PackedSamplableBelief) = zt
+    _gettype(zt) = DistributedFactorGraphs.getTypeFromSerializationModule(zt["_type"])(; zt...)
+
+    _Z = _gettype(Z)
+    # _Z = ZT(; Z...)
+    _dt = Float64(dt)
+    _D = Float64.(D)
+    _Sigma = Float64.(Sigma)
+    _b = Float64.(b)
+    PackedIMUDeltaFactor(
+        _Z,
+        _dt,
+        _D,
+        _Sigma,
+        _b
+    )
 end
 
 
 function convert(::Type{<:PackedIMUDeltaFactor}, d::IMUDeltaFactor)
+    Z = convert(PackedSamplableBelief, d.Z)
     return PackedIMUDeltaFactor(;
-        Z = convert(PackedSamplableBelief, d.Z),
+        Z,
         dt = d.Δt,
-        D = vcat(collect(d.Δ.x[1][:]), collect(d.Δ.x[2]), collect(d.Δ.x[3])),
-        Sigma = collect(d.Σ[:])
+        D = vcat(collect(d.Δ.x[1][:]), collect(d.Δ.x[2]), collect(d.Δ.x[3]), d.Δ.x[4]),
+        Sigma = collect(d.Σ[:]),
+        b = collect(d.b),
     )
 end
 function convert(::Type{<:IMUDeltaFactor}, d::PackedIMUDeltaFactor)
-    15 == length(d.D) && @error("Deserializing a PackedIMUDeltaFactor has wrong length .D = $(length(d.D))")
+    16 !== length(d.D) && @error("Deserializing a PackedIMUDeltaFactor not 16 in length, .D = $(length(d.D))")
     return IMUDeltaFactor(;
         Z = convert(SamplableBelief, d.Z),
         Δt = d.dt,
         Δ = ArrayPartition(
             SMatrix{3,3,Float64}(reshape(d.D[1:9],3,3)),
             SVector{3,Float64}(d.D[10:12]),
-            SVector{3,Float64}(d.D[13:15])
+            SVector{3,Float64}(d.D[13:15]),
+            Float64(d.D[16])
         ),
         Σ = SMatrix{10,10,Float64}(reshape(d.Sigma, 10,10)),
     )
