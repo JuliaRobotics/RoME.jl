@@ -32,8 +32,7 @@ function (
 )
   M = getManifold(PriorIMUBias)
   # TODO, Lie Group for now, expand to Riemannian
-  ε = getPointIdentity(M)
-  Xc = vee(M, ε, log(M, p, m))
+  Xc = m .- p
   return Xc
 end
 
