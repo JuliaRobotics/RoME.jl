@@ -224,7 +224,11 @@ export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extract
 export odomKDE
 export assembleChordsDict
 
-export   DynPose2, DynPose2VelocityPrior, PackedDynPose2VelocityPrior, DynPose2Pose2, PackedDynPose2Pose2
+export DynPose2, DynPose2VelocityPrior, PackedDynPose2VelocityPrior, DynPose2Pose2, PackedDynPose2Pose2
+
+export PriorIMUBias, PackedPriorIMUBias
+export PriorVelPos3, PackedPriorVelPos3
+export VelPosRotVelPos, PackedVelPosRotVelPos
 
 # InertialPose3
 export
