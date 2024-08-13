@@ -93,6 +93,7 @@ include("factors/MultipleFeaturesConstraint.jl")
 include("factors/InertialPose3.jl")
 # needs maintenance
 include("factors/RangeAzimuthElevation.jl")
+include("factors/Inertial/PriorIMUBias.jl")
 include("factors/Inertial/IMUDeltaFactor.jl")
 
 # additional tools

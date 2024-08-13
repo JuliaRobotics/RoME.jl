@@ -501,3 +501,40 @@ function IMUDeltaFactor(
         )
     )
 end
+
+
+
+## serde
+
+Base.@kwdef struct PackedIMUDeltaFactor{T <: PackedSamplableBelief} <: AbstractPackedFactor
+    Z::T # NOTE dim is 9 as Δt is not included in covariance
+    dt::Float64
+    D::Vector{Float64}
+    Sigma::Vector{Float64} #SMatrix{10,10,Float64}
+    # J_b::SMatrix{10,6,Float64} = zeros(SMatrix{10,6,Float64})
+    # accelerometer bias, gyroscope bias 
+    b::Vector{Float64} = zeros(6)
+end
+
+
+function convert(::Type{<:PackedIMUDeltaFactor}, d::IMUDeltaFactor)
+    return PackedIMUDeltaFactor(;
+        Z = convert(PackedSamplableBelief, d.Z),
+        dt = d.Δt,
+        D = vcat(collect(d.Δ.x[1][:]), collect(d.Δ.x[2]), collect(d.Δ.x[3])),
+        Sigma = collect(d.Σ[:])
+    )
+end
+function convert(::Type{<:IMUDeltaFactor}, d::PackedIMUDeltaFactor)
+    15 == length(d.D) && @error("Deserializing a PackedIMUDeltaFactor has wrong length .D = $(length(d.D))")
+    return IMUDeltaFactor(;
+        Z = convert(SamplableBelief, d.Z),
+        Δt = d.dt,
+        Δ = ArrayPartition(
+            SMatrix{3,3,Float64}(reshape(d.D[1:9],3,3)),
+            SVector{3,Float64}(d.D[10:12]),
+            SVector{3,Float64}(d.D[13:15])
+        ),
+        Σ = SMatrix{10,10,Float64}(reshape(d.Sigma, 10,10)),
+    )
+end
