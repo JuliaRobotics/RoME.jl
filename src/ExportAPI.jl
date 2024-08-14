@@ -229,6 +229,7 @@ export DynPose2, DynPose2VelocityPrior, PackedDynPose2VelocityPrior, DynPose2Pos
 export PriorIMUBias, PackedPriorIMUBias
 export PriorVelPos3, PackedPriorVelPos3
 export VelPosRotVelPos, PackedVelPosRotVelPos
+export VelAlign, PackedVelAlign
 export IMUDeltaFactor, PackedIMUDeltaFactor
 
 # InertialPose3
