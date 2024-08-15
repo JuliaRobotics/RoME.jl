@@ -47,7 +47,7 @@ import IncrementalInference: getMeasurementParametric
 import IncrementalInference: preambleCache
 import IncrementalInference: InstanceType
 # not sure why this is gives import error
-import DistributedFactorGraphs: compare
+import DistributedFactorGraphs: compare, @defVariable
 import DistributedFactorGraphs: getDimension, getManifold
 
 using OrderedCollections: OrderedDict
@@ -73,6 +73,7 @@ include("factors/Range2D.jl")
 include("factors/Bearing2D.jl")
 include("factors/BearingRange2D.jl")
 include("factors/Polar.jl")
+include("factors/PriorVelPos3.jl")
 include("factors/PriorPose2.jl")
 include("factors/PartialPriorPose2.jl")
 include("factors/Pose2D.jl")
@@ -80,8 +81,10 @@ include("factors/Pose2Point2.jl")
 include("factors/MutablePose2Pose2.jl")
 include("factors/DynPoint2D.jl")
 include("factors/VelPoint2D.jl")
+include("factors/VelPosRotVelPos.jl")
 include("factors/DynPose2D.jl")
 include("factors/VelPose2D.jl")
+include("factors/VelAlign.jl")
 include("factors/Point3D.jl")
 include("factors/Point3Point3.jl")
 include("factors/Pose3D.jl")
@@ -91,6 +94,7 @@ include("factors/MultipleFeaturesConstraint.jl")
 include("factors/InertialPose3.jl")
 # needs maintenance
 include("factors/RangeAzimuthElevation.jl")
+include("factors/Inertial/PriorIMUBias.jl")
 include("factors/Inertial/IMUDeltaFactor.jl")
 
 # additional tools

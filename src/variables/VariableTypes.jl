@@ -50,7 +50,7 @@ Future:
 @defVariable Rotation3 SpecialOrthogonal(3) SA[1 0 0; 0 1 0; 0 0 1.0]
 
 
-DFG.@defVariable(
+@defVariable(
   RotVelPos,
   Manifolds.ProductGroup(
     ProductManifold(
@@ -62,10 +62,25 @@ DFG.@defVariable(
   ArrayPartition(
     SA[1 0 0; 0 1 0; 0 0 1.0], 
     SA[0; 0; 0.0], 
-    SA[0;0;0.0]
+    SA[0; 0; 0.0]
   )
 )
 
+
+# 3 translations and 3 velocity in graph-base-frame
+@defVariable(
+  VelPos3,
+  Manifolds.ProductGroup(
+    ProductManifold(
+      TranslationGroup(3),
+      TranslationGroup(3)
+    )
+  ),
+  ArrayPartition(
+    SA[0; 0; 0.0], 
+    SA[0; 0; 0.0]
+  )
+)
 
 # @defVariable VelPose3 Manifolds.ProductGroup(ProductManifold(TranslationGroup(3), TranslationGroup(3), SpecialOrthogonal(3))) ArrayPartition(SA[0; 0; 0.0], SA[0;0;0.0], SA[1 0 0; 0 1 0; 0 0 1.0])
 # Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(getManifold(VelPose3))}) =

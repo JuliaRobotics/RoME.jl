@@ -5,19 +5,6 @@ using LinearAlgebra
 using DistributedFactorGraphs
 using Dates
 
-function TransformUtils.skew(v::SVector{3,T}) where T<:Real
-    return SMatrix{3,3,T}(
-            0,
-         v[3],
-        -v[2],
-        -v[3],  
-            0,  
-         v[1],
-         v[2],
-        -v[1],
-            0
-    )
-end
 
 struct IMUDeltaManifold <: AbstractManifold{ℝ} end
 
@@ -100,7 +87,7 @@ end
 
 function Manifolds.hat(M::IMUDeltaGroup, Xⁱ::SVector{10, T}) where T<:Real
     return ArrayPartition(
-        skew(Xⁱ[SA[7:9...]]), # θ ωΔt
+        ApproxManifoldProducts.skew(Xⁱ[SA[7:9...]]), # θ ωΔt
         Xⁱ[SA[4:6...]],       # ν aΔt
         Xⁱ[SA[1:3...]],       # ρ vΔt
         Xⁱ[10],               # Δt
@@ -130,7 +117,7 @@ function _Q(θ⃗)
     else
         u = θ⃗/θ
         sθ, cθ = sincos(θ)
-        uₓ = skew(u)
+        uₓ = ApproxManifoldProducts.skew(u)
         # NOTE difference in references here --- (θ - sθ)/θ^2 vs (θ - sθ)/θ
         # with no ^2 looking correct when compared to exp of SE3
         return SMatrix{3,3,T}(I) + (1 - cθ)/θ * uₓ + (θ - sθ)/θ * uₓ^2
@@ -145,7 +132,7 @@ function _P(θ⃗)
     else
         u = θ⃗/θ
         sθ, cθ = sincos(θ)
-        uₓ = skew(u)
+        uₓ = ApproxManifoldProducts.skew(u)
         return 1/2*SMatrix{3,3,T}(I) + (θ - sθ)/θ^2 * uₓ + (cθ + 1/2*θ^2 - 1)/θ^2 * uₓ^2
     end
 end
@@ -254,8 +241,8 @@ function adjointMatrix(::IMUDeltaGroup, X::ArrayPartition{T}) where T
 
     IΔt = SMatrix{3,3,T}(X.x[4]*I)
 
-    ρₓ = skew(ρ)
-    νₓ = skew(ν)
+    ρₓ = ApproxManifoldProducts.skew(ρ)
+    νₓ = ApproxManifoldProducts.skew(ν)
     
     m0 = zeros(3,3) 
     v0 = zeros(3)
@@ -276,8 +263,8 @@ function AdjointMatrix(::IMUDeltaGroup, p::ArrayPartition{T}) where T
     Δp = p.x[3]
     Δt = p.x[4]
 
-    Δvₓ = skew(Δv)
-    pmvtₓ = skew(Δp - Δv*Δt)
+    Δvₓ = ApproxManifoldProducts.skew(Δv)
+    pmvtₓ = ApproxManifoldProducts.skew(Δp - Δv*Δt)
 
     m0 = zeros(3,3) 
     v0 = zeros(3)
@@ -292,6 +279,7 @@ function AdjointMatrix(::IMUDeltaGroup, p::ArrayPartition{T}) where T
 end
 
 # right Jacobian
+# FIXME moving general Lie Group Jacobian up to ApproxManifoldProducts
 function Jr(M::IMUDeltaGroup, X; order=5)
     adx = adjointMatrix(M, X)
     mapreduce(+, 0:order) do i
@@ -322,7 +310,7 @@ Base.@kwdef struct IMUDeltaFactor{T <: SamplableBelief} <: AbstractManifoldMinim
     J_b::SMatrix{10,6,Float64} = zeros(SMatrix{10,6,Float64})
     # accelerometer bias, gyroscope bias 
     b::SVector{6, Float64} = zeros(SVector{6, Float64})
-    #optional raw measurements
+    #optional raw measurements, FIXME replace with BlobEntry -- dont do abstract types here, or raw data if not needed in hotloop 
     raw_measurements::Union{Nothing,IMUMeasurements} = nothing
 end
 
@@ -338,6 +326,9 @@ end
 IIF.getManifold(::IMUDeltaFactor) = IMUDeltaGroup()
 
 function IIF.preambleCache(fg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, ::IMUDeltaFactor)
+    # FIXME, change to `.missionnanosec` which can be used together with `trunc(timestamp) + 1e-9*nsec`.  See DFG #1087
+        # pt = floor(Float64, datetime2unix(getTimestamp(vars[1]))) + (1e-9*vars[1].nstime % 1.0)
+        # qt = floor(Float64, datetime2unix(getTimestamp(vars[2]))) + (1e-9*vars[2].nstime % 1.0)
     (timestams=(vars[1].nstime,vars[2].nstime),)
 end
 
@@ -497,5 +488,70 @@ function IMUDeltaFactor(
             timestamps,
             Σy
         )
+    )
+end
+
+
+
+## serde
+
+struct PackedIMUDeltaFactor{T <: PackedSamplableBelief} <: AbstractPackedFactor
+    Z::T # NOTE dim is 9 as Δt is not included in covariance
+    dt::Float64
+    D::Vector{Float64}
+    Sigma::Vector{Float64} #SMatrix{10,10,Float64}
+    # J_b::SMatrix{10,6,Float64} = zeros(SMatrix{10,6,Float64})
+    # accelerometer bias, gyroscope bias 
+    b::Vector{Float64}
+end
+
+function PackedIMUDeltaFactor(;
+    Z,
+    dt,
+    D,
+    Sigma,
+    b
+)
+    _gettype(zt::PackedSamplableBelief) = zt
+    _gettype(zt) = DistributedFactorGraphs.getTypeFromSerializationModule(zt["_type"])(; zt...)
+
+    _Z = _gettype(Z)
+    # _Z = ZT(; Z...)
+    _dt = Float64(dt)
+    _D = Float64.(D)
+    _Sigma = Float64.(Sigma)
+    _b = Float64.(b)
+    PackedIMUDeltaFactor(
+        _Z,
+        _dt,
+        _D,
+        _Sigma,
+        _b
+    )
+end
+
+
+function convert(::Type{<:PackedIMUDeltaFactor}, d::IMUDeltaFactor)
+    Z = convert(PackedSamplableBelief, d.Z)
+    return PackedIMUDeltaFactor(;
+        Z,
+        dt = d.Δt,
+        D = vcat(collect(d.Δ.x[1][:]), collect(d.Δ.x[2]), collect(d.Δ.x[3]), d.Δ.x[4]),
+        Sigma = collect(d.Σ[:]),
+        b = collect(d.b),
+    )
+end
+function convert(::Type{<:IMUDeltaFactor}, d::PackedIMUDeltaFactor)
+    16 !== length(d.D) && @error("Deserializing a PackedIMUDeltaFactor not 16 in length, .D = $(length(d.D))")
+    return IMUDeltaFactor(;
+        Z = convert(SamplableBelief, d.Z),
+        Δt = d.dt,
+        Δ = ArrayPartition(
+            SMatrix{3,3,Float64}(reshape(d.D[1:9],3,3)),
+            SVector{3,Float64}(d.D[10:12]),
+            SVector{3,Float64}(d.D[13:15]),
+            Float64(d.D[16])
+        ),
+        Σ = SMatrix{10,10,Float64}(reshape(d.Sigma, 10,10)),
     )
 end

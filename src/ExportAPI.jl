@@ -131,6 +131,7 @@ export generateGraph_Helix2D!, generateGraph_Helix2DSlew!, generateGraph_Helix2D
 
 export warmUpSolverJIT
 
+export @defVariable
 
 export
   # camera model -- TODO --separate out
@@ -223,7 +224,13 @@ export accumulateDiscreteLocalFrame!, duplicateToStandardFactorVariable, extract
 export odomKDE
 export assembleChordsDict
 
-export   DynPose2, DynPose2VelocityPrior, PackedDynPose2VelocityPrior, DynPose2Pose2, PackedDynPose2Pose2
+export DynPose2, DynPose2VelocityPrior, PackedDynPose2VelocityPrior, DynPose2Pose2, PackedDynPose2Pose2
+
+export PriorIMUBias, PackedPriorIMUBias
+export PriorVelPos3, PackedPriorVelPos3
+export VelPosRotVelPos, PackedVelPosRotVelPos
+export VelAlign, PackedVelAlign
+export IMUDeltaFactor, PackedIMUDeltaFactor
 
 # InertialPose3
 export
