@@ -35,6 +35,7 @@ function (cf::CalcFactor{<:VelAlign})(
   p_R_q
 )
   # body velocity scaled by real speed
+  # FIXME align directions and adaptively weight by speed (i.e. slow is less important)
   p_V = norm(cf.cache.p_vel(w_T_p)) .* X_v
   q_V = cf.cache.q_rot(w_T_q)' * cf.cache.q_vel(w_T_q)
   p_V - p_R_q * q_V
