@@ -1,0 +1,18 @@
+name = "RoMETypes"
+uuid = "298dcef3-e3bd-403a-988f-2dd5ca311a3f"
+authors = ["Johannes Terblanche <Affie@users.noreply.github.com>"]
+version = "0.1.0"
+
+[deps]
+DistributedFactorGraphs = "b5cc3c7e-6572-11e9-2517-99fb8daf2f04"
+DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
+RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[compat]
+DistributedFactorGraphs = "0.24.0"
+DocStringExtensions = "0.9.3"
+Manifolds = "0.9.20"
+RecursiveArrayTools = "3.27.0"
+StaticArrays = "1.9.7"

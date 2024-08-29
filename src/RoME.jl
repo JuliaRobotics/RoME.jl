@@ -56,6 +56,8 @@ using OrderedCollections: OrderedDict
 # const AMP = ApproxManifoldProducts
 
 
+include("../RoMETypes/src/RoMETypes.jl")
+using ..RoMETypes
 
 # export the API
 include("ExportAPI.jl")
