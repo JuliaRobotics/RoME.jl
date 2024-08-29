@@ -1,10 +1,3 @@
-# TODO integration underway with Manifolds.jl, see RoME #244, also see IIF #467 regarding consolidation effort.
-
-import DistributedFactorGraphs: getVariableType
-
-export projectCartesian
-
-
 """
 $(TYPEDEF)
 
@@ -119,12 +112,3 @@ projectCartesian(pose::Union{<:Point2,<:Point3,<:Pose2,<:Pose3,<:DynPoint2,<:Dyn
 #
 
 
-
-# Still experimental
-# export BearingRange2
-@defVariable BearingRange2 BearingRange_Manifold ArrayPartition(0.0,0.0)
-
-
-
-
-#

@@ -32,7 +32,7 @@ using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, SpecialOr
 import Manifolds: project, project!, identity_element
 
 import Rotations as _Rot
-import Rotations: ⊕, ⊖ # TODO deprecate
+# import Rotations: ⊕, ⊖ # TODO deprecate
 
 export SpecialOrthogonal, SpecialEuclidean
 export submanifold_component
@@ -54,6 +54,8 @@ using OrderedCollections: OrderedDict
 # const AMP = ApproxManifoldProducts
 
 
+include("../RoMETypes/src/RoMETypes.jl")
+using ..RoMETypes
 
 # export the API
 include("ExportAPI.jl")
@@ -64,7 +66,6 @@ include("entities/SpecialDefinitions.jl")
 
 #uses DFG v0.10.2 @defVariable for above
 include("services/FixmeManifolds.jl")
-include("variables/VariableTypes.jl")
 
 ## More factor types
 # RoME internal factors (FYI outside factors are easy, see Caesar documentation)
