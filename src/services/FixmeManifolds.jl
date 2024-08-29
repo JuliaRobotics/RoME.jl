@@ -76,6 +76,9 @@ function Statistics.mean(::typeof(BearingRange_Manifold), pts::AbstractVector)
   return [mc; mr]
 end
 
+# Still experimental
+# export BearingRange2
+@defVariable BearingRange2 BearingRange_Manifold ArrayPartition(0.0,0.0)
 
 
 
