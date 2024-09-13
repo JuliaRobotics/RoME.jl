@@ -48,7 +48,7 @@ Pose2Point2Range(Z::T) where {T <: IIF.SamplableBelief} = Pose2Point2Range(;Z)
 getManifold(::Pose2Point2Range) = TranslationGroup(1)
 
 
-function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi::Manifolds.ArrayPartition, lm)
+function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi::ArrayPartition, lm)
   # Basically `EuclidDistance`
   return rho .- norm(lm .- xi.x[1])
 end

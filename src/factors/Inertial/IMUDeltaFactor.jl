@@ -13,7 +13,7 @@ struct IMUDeltaManifold <: AbstractManifold{ℝ} end
 
 const IMUDeltaGroup = GroupManifold{ℝ, IMUDeltaManifold, MultiplicationOperation}
 
-IMUDeltaGroup() = GroupManifold(IMUDeltaManifold(), MultiplicationOperation())
+IMUDeltaGroup() = GroupManifold(IMUDeltaManifold(), MultiplicationOperation(), LeftInvariantRepresentation())
 
 Manifolds.manifold_dimension(::IMUDeltaManifold) = 9
 
@@ -44,7 +44,7 @@ function Manifolds.affine_matrix(G::IMUDeltaGroup, p::ArrayPartition{T}) where T
     )
 end
 
-function vector_affine_matrix(G::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
+function Manifolds.screw_matrix(G::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
     return vcat(
         hcat(X.x[1], X.x[2], X.x[3]), 
         @SMatrix [0 0 0 0 X.x[4];
@@ -387,10 +387,8 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     q_vel,
     b::SVector{6,T} = zeros(SVector{6,Float64})
 ) where T <: Real
-    p_t = Dates.value(cf.cache.timestams[1])*1e-9
-    q_t = Dates.value(cf.cache.timestams[2])*1e-9
-    p = ArrayPartition(p_SE3.x[2], p_vel, p_SE3.x[1], p_t)
-    q = ArrayPartition(q_SE3.x[2], q_vel, q_SE3.x[1], q_t)
+    p = ArrayPartition(p_SE3.x[2], p_vel, p_SE3.x[1])
+    q = ArrayPartition(q_SE3.x[2], q_vel, q_SE3.x[1])
     return cf(Δmeas, p, q, b)
 end
 
@@ -466,7 +464,7 @@ function IMUDeltaFactor(
     S = Σ[1:9,1:9]
     ch = check_point(SM, S; atol = 1e-9) 
     if !isnothing(ch)
-        @warn "IMU Covar check" ch
+        @warn "IMU Covar check" ch maxlog=1
         S = (S + S') / 2
         S = S + diagm((diag(S) .== 0)*1e-15)
         ch = check_point(SM, S)
@@ -480,7 +478,7 @@ function IMUDeltaFactor(
         Δt,
         Δ,
         SMatrix{10,10,Float64}(Σ),
-        J_b,
+        SMatrix{10,6,Float64}(J_b),
         SA[a_b...; ω_b...],
         IMUMeasurements(
             accels,
