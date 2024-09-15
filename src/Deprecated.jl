@@ -64,6 +64,8 @@ Base.convert(
 Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(AMP.SE2_Manifold)}) = (:Euclid, :Euclid, :Circular)
 Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(SE2E2_Manifold)}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
 Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(BearingRange_Manifold)}) = (:Circular,:Euclid)
+Base.convert(::Type{<:Tuple}, ::IIF.InstanceType{typeof(getManifold(DynPose2))}) = (:Euclid,:Euclid,:Circular,:Euclid,:Euclid)
+
 
 Base.convert(
   ::Type{<:Tuple},
@@ -80,8 +82,8 @@ Base.convert(
 # Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose2Pose2}) = AMP.SE2_Manifold
 # Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{Pose3Pose3}) = AMP.SE3_Manifold
 Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{DynPoint2DynPoint2}) = AMP.Euclid4
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{DynPose2DynPose2}) = SE2E2_Manifold
-Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{VelPose2VelPose2}) = SE2E2_Manifold
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{DynPose2DynPose2}) = begin @warn("FIXME"); SE2E2_Manifold end
+Base.convert(::Type{<:ManifoldsBase.AbstractManifold}, ::IIF.InstanceType{VelPose2VelPose2}) = begin @warn("FIXME"); SE2E2_Manifold end
 
 
 
