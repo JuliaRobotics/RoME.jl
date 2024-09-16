@@ -10,20 +10,28 @@ struct IMUDeltaManifold <: AbstractManifold{ℝ} end
 
 # NOTE Manifold in not defined as a ProductManifold since we do not use the product metric. #701
 # also see related SE₂(3) 
+"""
+    IMUDeltaGroup
 
+#TODO SpecialGalileanGroup(3)
+References: 
+- https://hal.science/hal-02183498/document
+- TODO new reference: https://arxiv.org/pdf/2312.07555
+
+Affine representation 
+Δ = [ΔR Δv Δp;
+     0   1 Δt;
+     0   0  1] ⊂ ℝ⁵ˣ⁵
+
+ArrayPartition representation (TODO maybe swop order to [Δp; Δv; ΔR; Δt])
+Δ = [ΔR; Δv; Δp; Δt] 
+"""
 const IMUDeltaGroup = GroupManifold{ℝ, IMUDeltaManifold, MultiplicationOperation}
 
 IMUDeltaGroup() = GroupManifold(IMUDeltaManifold(), MultiplicationOperation(), LeftInvariantRepresentation())
 
 Manifolds.manifold_dimension(::IMUDeltaManifold) = 9
 
-# Affine representation 
-# Δ = [ΔR Δv Δp;
-#      0   1 Δt;
-#      0   0  1] ⊂ \R^5x5
-
-#  ArrayPartition representation (TODO maybe swop order to [Δp; Δv; ΔR; Δt])
-# Δ = [ΔR; Δv; Δp; Δt] 
 
 function Manifolds.identity_element(M::IMUDeltaGroup) # was #SMatrix{5,5,Float64}(I)
     ArrayPartition(
