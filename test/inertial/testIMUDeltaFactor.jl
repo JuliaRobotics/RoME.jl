@@ -36,7 +36,7 @@ X = hat(M, Xc)
 p = affine_matrix(M, exp(M, X))
 affine_matrix(M, log(M, exp(M, X)))
 
-X_af = RoME.screw_matrix(M, X)
+X_af = RoME.vector_affine_matrix(M, X)
 p_af = exp(X_af)
 log(p_af)
 
@@ -77,7 +77,7 @@ q = ArrayPartition(SMatrix{3,3}(1.0I), SA[1.,0,0], SA[0.1,0,0], 0.1)
 X = hat(M, SA[0,0,0, 0,0,1.0, 0,0,0.5, 1] * 0.01)
 p = exp(M, ϵ, X)
 @test isapprox(p, ArrayPartition([1 -0.005 0.0; 0.005 1 0.0; 0 0 1], [0, 0, 0.01], [0, 0, 5.0e-5], 0.01), atol=1e-4)
-X_af = RoME.screw_matrix(M, X)
+X_af = RoME.vector_affine_matrix(M, X)
 p_af = exp(X_af)
 @test isapprox(affine_matrix(M, p), p_af, atol=1e-4)
 
@@ -86,7 +86,7 @@ p_af = exp(X_af)
 X = hat(M, SA[0,0,0, 1,0,0.0, 0,0,0, 1] * 0.01)
 p = exp(M, ϵ, X)
 @test isapprox(p, ArrayPartition([1.0 0 0; 0 1 0; 0 0 1], [0.01, 0, 0], [5e-5, 0, 0], 0.01), atol=1e-4)
-X_af = RoME.screw_matrix(M, X)
+X_af = RoME.vector_affine_matrix(M, X)
 p_af = exp(X_af)
 @test isapprox(affine_matrix(M, p), p_af, atol=1e-4)
 
@@ -98,7 +98,7 @@ isapprox(compose(M, p, exp(M, ϵ, X)), exp(M, p, X))
 
 RoME.adjointMatrix(M, X) * vee(M,X)
 
-X_af = RoME.screw_matrix(M, X)
+X_af = RoME.vector_affine_matrix(M, X)
 p_af = affine_matrix(M, p)
 
 Y = p_af*X_af*inv(p_af)
@@ -114,8 +114,8 @@ q2 = compose(M, exp(M, hat(M, Adₚ*vee(M, X))), p)
 @test isapprox(RoME.AdjointMatrix(M, inv(M, p)), inv(Adₚ))
 
 @test isapprox(
-    RoME.screw_matrix(M, hat(M, Adₚ*vee(M, X))),
-    affine_matrix(M, p) * RoME.Manifolds.screw_matrix(M, X) * affine_matrix(M, inv(M, p))
+    RoME.vector_affine_matrix(M, hat(M, Adₚ*vee(M, X))),
+    affine_matrix(M, p) * RoME.vector_affine_matrix(M, X) * affine_matrix(M, inv(M, p))
 )
 
 ad = RoME.adjointMatrix(M, X)

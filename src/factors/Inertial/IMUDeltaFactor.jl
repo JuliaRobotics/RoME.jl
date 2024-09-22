@@ -52,7 +52,7 @@ function Manifolds.affine_matrix(G::IMUDeltaGroup, p::ArrayPartition{T}) where T
     )
 end
 
-function Manifolds.screw_matrix(G::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
+function vector_affine_matrix(G::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
     return vcat(
         hcat(X.x[1], X.x[2], X.x[3]), 
         @SMatrix [0 0 0 0 X.x[4];
