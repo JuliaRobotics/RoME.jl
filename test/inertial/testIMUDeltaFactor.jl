@@ -16,6 +16,25 @@ M = SpecialOrthogonal(3)
 a = RotationVec(ΔR)
 b = Rotations.AngleAxis(ΔR)
 
+function uniform_integrate_check(gyros, accels, dt)
+    M_SO3 = SpecialOrthogonal(3)
+    w_R_b = identity_element(M_SO3)
+    w_v = zeros(3)
+    w_r = zeros(3)
+    for (b_g, b_a) in zip(gyros[2:end], accels[2:end])
+
+        exp!(M_SO3, w_R_b, w_R_b, hat(M_SO3, Identity(M_SO3), b_g*dt))
+
+        δw_v = w_R_b * b_a*dt
+        δw_r = w_v*dt + 0.5*δw_v*dt
+
+        w_r += δw_r
+        w_v += δw_v
+    end
+
+    return w_R_b, w_v, w_r
+end
+
 ##
 @testset "IMUDeltaFactor spot checks" begin
 ##
@@ -261,10 +280,10 @@ timestamps = collect(range(0; step=dt, length=N))
 
 Δ, Σ, J_b = RoME.preintegrateIMU(accels, gyros, timestamps, Σy, a_b, ω_b)
 
-@test Δ.x[1] ≈ RotX(0.01*dT)
-#just checking sign
-@test Δ.x[2][2] < 0
-@test Δ.x[3][2] < 0
+R,v,r = uniform_integrate_check(gyros, accels, dt)
+@test Δ.x[1] ≈ R
+@test isapprox(Δ.x[2], v, rtol=1e-3)
+@test isapprox(Δ.x[3], r, rtol=1e-3)
 
 ##
 # imu = RoME.generateField_InertialMeasurement(;dt,N,accel0=SA[0, 0, 9.81],rate=SA[0, 0.01, 0])
@@ -274,10 +293,10 @@ timestamps = collect(range(0; step=dt, length=N))
 
 Δ, Σ, J_b = RoME.preintegrateIMU(accels, gyros, timestamps, Σy, a_b, ω_b)
 
-@test Δ.x[1] ≈ RotY(0.01*dT)
-#just checking sign
-@test Δ.x[2][1] > 0
-@test Δ.x[3][1] > 0
+R,v,r = uniform_integrate_check(gyros, accels, dt)
+@test Δ.x[1] ≈ R
+@test isapprox(Δ.x[2], v, rtol=1e-3)
+@test isapprox(Δ.x[3], r, rtol=1e-3)
 
 ##
 end
