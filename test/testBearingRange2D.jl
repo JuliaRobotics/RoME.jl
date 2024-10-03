@@ -340,7 +340,7 @@ addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 
 # check the forward convolution is working properly
 _pts = getPoints(propagateBelief(fg, :x0, ls(fg, :x0); N)[1])
-p_μ = mean(SpecialEuclidean(2), _pts)
+p_μ = mean(SpecialEuclidean(2; vectors=HybridTangentRepresentation()), _pts)
 
 _pts = IIF.getCoordinates.(Pose2, _pts)
 @cast pts[j,i] := _pts[i][j]

@@ -31,7 +31,7 @@ Base.@kwdef struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldM
   Z::T = MvNormal(Diagonal([1.0; 1.0; 1.0]))
 end
 
-DFG.getManifold(::InstanceType{Pose2Pose2}) = Manifolds.SpecialEuclidean(2)
+DFG.getManifold(::InstanceType{Pose2Pose2}) = Manifolds.SpecialEuclidean(2; vectors=HybridTangentRepresentation())
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2()
 

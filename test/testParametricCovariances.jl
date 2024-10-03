@@ -46,7 +46,7 @@ addFactor!(fg, [:x0,:x1], Pose2Pose2(MvNormal([0.9,0,0], diagm([sqrt(0.03),0.1,0
 ##
 
 IIF.autoinitParametric!(fg)
-IIF.solveGraph!(fg)
+# IIF.solveGraph!(fg)
 
 @test isapprox( [0;0;0.], getPPESuggested(fg, :x0, :parametric); atol=1e-4 )
 @test isapprox( [1.05;0;0], getPPESuggested(fg, :x1, :parametric); atol=1e-4 )

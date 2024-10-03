@@ -20,11 +20,12 @@ using
   DocStringExtensions,
   DistributedFactorGraphs,
   TensorCast,
-  ManifoldsBase
+  ManifoldsBase,
+  Manifolds
 
 using StaticArrays
 using PrecompileTools
-
+using RecursiveArrayTools
 # to avoid name conflicts
 import Manifolds
 using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component, Identity, affine_matrix

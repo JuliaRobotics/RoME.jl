@@ -171,7 +171,7 @@ IIF.initParametricFrom!(fg)
 
 PM, varLabels, r, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
-@test isapprox(SpecialEuclidean(2), r[1], ArrayPartition([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
+@test isapprox(SpecialEuclidean(2; vectors=HybridTangentRepresentation()), r[1], ArrayPartition([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
 
 @test isapprox(r[2], [1,  1], atol = 1e-3)
 @test isapprox(r[3], [1, -1], atol = 1e-3)

@@ -141,7 +141,7 @@ jl = RoME.Jr(M, -X)
 X = hat(M, SA[1,0,0, 0,0,0, 0,0,θ, 1] * 0.1)
 p = exp(M, ϵ, X)
 
-M_SE3 = SpecialEuclidean(3)
+M_SE3 = SpecialEuclidean(3; vectors=HybridTangentRepresentation())
 X_SE3 = hat(M_SE3, getPointIdentity(M_SE3), SA[1,0,0, 0,0,θ] * 0.1)
 p_SE3 = exp_lie(M_SE3, X_SE3)
 @test isapprox(p.x[3], p_SE3.x[1])
@@ -172,11 +172,14 @@ fac = RoME.IMUDeltaFactor(
 # Rotation part
 M_SO3 = SpecialOrthogonal(3)
 ΔR = identity_element(M_SO3)
-for g in imu.gyros[1:end-1]
+#NOTE internally integration is done from 2:end
+# at t₀, we start at identity
+# - the measurement at t₀ is from t₋₁ to t₀ and therefore part of the previous factor
+# - the measurement at t₁ is from t₀ to t₁ with the time dt of t₁ - t₀
+for g in imu.gyros[2:end]
     exp!(M_SO3, ΔR, ΔR, hat(M_SO3, Identity(M_SO3), g*dt))
 end
-#TODO I would have expected these 2 to be exactly the same
-@test isapprox(M_SO3, fac.Δ.x[1], ΔR; atol=1e-5)
+@test isapprox(M_SO3, fac.Δ.x[1], ΔR)
 # Velocity part
 @test isapprox(fac.Δ.x[2], [0,0,8.81], atol=1e-3) # after 1 second at 9.81 m/s
 # position part

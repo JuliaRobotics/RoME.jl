@@ -21,7 +21,7 @@ MB.manifold_dimension(::_SE2E2) = 5
 
 function AMP.makePointFromCoords(::typeof(SE2E2_Manifold), p::AbstractVector{<:Real})
   α = p[3]
-  Manifolds.ArrayPartition(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
+  ArrayPartition(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
 end
 
 function AMP.getPoints(mkd::ManifoldKernelDensity{M}) where {M <: typeof(SE2E2_Manifold)}
@@ -30,11 +30,11 @@ function AMP.getPoints(mkd::ManifoldKernelDensity{M}) where {M <: typeof(SE2E2_M
 end
 
 function Statistics.mean(::typeof(SE2E2_Manifold), pts::AbstractVector)
-  se2_ = (d->Manifolds.ArrayPartition(submanifold_component(d, 1), submanifold_component(d, 2))).(pts)
-  mse2 = mean(Manifolds.SpecialEuclidean(2), se2_)
-  e2_ = (d->Manifolds.ArrayPartition(submanifold_component(d, 3))).(pts)
+  se2_ = (d->ArrayPartition(submanifold_component(d, 1), submanifold_component(d, 2))).(pts)
+  mse2 = mean(Manifolds.SpecialEuclidean(2; vectors=HybridTangentRepresentation()), se2_)
+  e2_ = (d->ArrayPartition(submanifold_component(d, 3))).(pts)
   me2 = mean(Euclidean(2), e2_)
-  Manifolds.ArrayPartition(submanifold_component(mse2, 1), submanifold_component(mse2, 2), submanifold_component(me2, 1))
+  ArrayPartition(submanifold_component(mse2, 1), submanifold_component(mse2, 2), submanifold_component(me2, 1))
 end
 
 # AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(SE2E2_Manifold)} = coords(M, prr)

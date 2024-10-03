@@ -147,7 +147,7 @@ end
 preambleCache(::AbstractDFG, ::AbstractVector{<:DFGVariable}, ::DynPose2DynPose2) = zeros(5)
 
 # FIXME ON FIRE, must update to new Manifolds style factors
-getManifold(::DynPose2DynPose2) = SE2E2_Manifold # not fully impl manifold yet
+getManifold(::DynPose2DynPose2) = getManifold(DynPose2)
 # FIXME, should produce tangents, not coordinates.
 getSample(cf::CalcFactor{<:DynPose2DynPose2}) = rand(cf.factor.Z)
 function (cf::CalcFactor{<:DynPose2DynPose2})(meas,

@@ -51,7 +51,7 @@ function makePosePoseFromHomography(
   covar=diagm([1,1,1,0.1,0.1,0.1].^2)
 )
   len = size(pHq,1)-1
-  M = SpecialEuclidean(len)
+  M = SpecialEuclidean(len; vectors=HybridTangentRepresentation())
   e0 = ArrayPartition(SVector(0,0,0.), SMatrix{len,len}(1,0,0,0,1,0,0,0,1.))
   pTq = ArrayPartition(SVector(pHq[1:len,end]...), SMatrix{len,len}(pHq[1:len,1:len]))
   e0_Cpq = vee(M, e0, log(M, e0, pTq))
