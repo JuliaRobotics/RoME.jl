@@ -180,7 +180,6 @@ for g in imu.gyros[2:end]
     exp!(M_SO3, ΔR, ΔR, hat(M_SO3, Identity(M_SO3), g*dt))
 end
 @test isapprox(M_SO3, fac.Δ.x[1], ΔR)
-#TODO The velocity and position parts might be off from expected because of the connection/metric of the group
 # Velocity part
 @test isapprox(fac.Δ.x[2], [0,0,8.81], atol=1e-3) # after 1 second at 9.81 m/s
 # position part
