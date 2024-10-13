@@ -298,10 +298,10 @@ end
 ## ======================================================================================
 ## IMU DELTA FACTOR 
 ## ======================================================================================
-struct IMUMeasurements
-    accelerometer::Vector{SVector{3,Float64}}
-    gyroscope::Vector{SVector{3,Float64}}
-    timestamps::Vector{Float64}
+struct IMUMeasurement
+    accelerometer::SVector{3,Float64}
+    gyroscope::SVector{3,Float64}
+    deltatime::Float64
     Σy::SMatrix{6,6,Float64}
 end
 
@@ -318,8 +318,8 @@ Base.@kwdef struct IMUDeltaFactor{T <: SamplableBelief} <: AbstractManifoldMinim
     J_b::SMatrix{10,6,Float64} = zeros(SMatrix{10,6,Float64})
     # accelerometer bias, gyroscope bias 
     b::SVector{6, Float64} = zeros(SVector{6, Float64})
-    #optional raw measurements, FIXME replace with BlobEntry -- dont do abstract types here, or raw data if not needed in hotloop 
-    raw_measurements::Union{Nothing,IMUMeasurements} = nothing
+    #optional raw measurements, NOTE used for development and may be removed in the future
+    raw_measurements::Vector{IMUMeasurement} = IMUMeasurement[]
 end
 
 function IIF.getSample(cf::CalcFactor{<:IMUDeltaFactor})
@@ -422,33 +422,36 @@ function integrateIMUDelta(Δij, Σij, Δij_J_b, a, ω, a_b, ω_b, δt, Σy)
     # Jacobians
     τ_J_y = _τδt(δt)
     τ_J_b = -_τδt(δt)
-    δ_J_τ = Jr(M, X)
+    δ_J_τ = Jr(M, X) #  jacobian(δjk=exp(X) wrt X=τ) = right jacobian
 
+    # Σik = Δik_J_Δij * Σij * Δik_J_Δij'
+    # this is jacobian(Δik = Δij ∘ δjk) wrt Δij = inv(Ad(δjk))
+    # we can maybe test with
+    # differentiate Δij∘δjk with respect to Δij in the direction X (tangent at Δij)
+    # translate_diff(G, δjk, Δij, X, Manifolds.RightBackwardAction())
+    # X will be the basis vectors to build up the jacobian
     Δik_J_Δij = inv(AdjointMatrix(M, δjk))
     #? Δik_J_Δij = AdjointMatrix(M, inv(M, δjk))
-    Δik_J_δjk = I # 10x10
+    Δik_J_δjk = I # 10x10 jacobian(Δik = Δij ∘ δjk) wrt δjk = I
 
     # Propagate Covariance
     Δik_J_y = Δik_J_δjk * δ_J_τ * τ_J_y
-    Σik = Δik_J_Δij * Σij * Δik_J_Δij' + Δik_J_y * Σy * Δik_J_y'
+    Σik = Δik_J_Δij * Σij * Δik_J_Δij'  +  Δik_J_y * Σy * Δik_J_y'
 
     # Jacobian wrt biases
-    Δik_J_b = Δik_J_Δij * Δij_J_b  + Δik_J_δjk * δ_J_τ * τ_J_b
+    Δik_J_b = Δik_J_Δij * Δij_J_b  +  Δik_J_δjk * δ_J_τ * τ_J_b
 
     return Δik, Σik, Δik_J_b
 end
 
 #assuming accels and gyros same rate here
-function preintegrateIMU(accels, gyros, timestamps, Σy, a_b, ω_b)
+function preintegrateIMU(accels, gyros, deltatimes, Σy, a_b, ω_b)
     M = IMUDeltaGroup()
     Δ   = identity_element(M)
     Σ   = zeros(10,10)
     J_b = zeros(10,6)
     
-    for i in eachindex(timestamps)[2:end]
-        a = accels[i]
-        ω = gyros[i]    
-        dt = timestamps[i] - timestamps[i-1]
+    for (a, ω, dt) in zip(accels, gyros, deltatimes)
         Δ, Σ, J_b = integrateIMUDelta(Δ, Σ, J_b, a, ω, a_b, ω_b, dt, Σy)
     end
     Δ, Σ, J_b
@@ -457,13 +460,13 @@ end
 function IMUDeltaFactor(
     accels::AbstractVector,
     gyros::AbstractVector,
-    timestamps::AbstractVector,
+    deltatimes::AbstractVector,
     Σy,
     a_b = SA[0.,0,0],
     ω_b = SA[0.,0,0],
 )
     M = IMUDeltaGroup()
-    Δ, Σ, J_b = preintegrateIMU(accels, gyros, timestamps, Σy, a_b, ω_b)
+    Δ, Σ, J_b = preintegrateIMU(accels, gyros, deltatimes, Σy, a_b, ω_b)
     Δt = Δ.x[4]
     
     Xc = vee(M, log(M, Δ))
@@ -488,12 +491,7 @@ function IMUDeltaFactor(
         SMatrix{10,10,Float64}(Σ),
         SMatrix{10,6,Float64}(J_b),
         SA[a_b...; ω_b...],
-        IMUMeasurements(
-            accels,
-            gyros,
-            timestamps,
-            Σy
-        )
+        IMUMeasurement[]
     )
 end
 

@@ -21,7 +21,7 @@ function uniform_integrate_check(gyros, accels, dt)
     w_R_b = identity_element(M_SO3)
     w_v = zeros(3)
     w_r = zeros(3)
-    for (b_g, b_a) in zip(gyros[2:end], accels[2:end])
+    for (b_g, b_a) in zip(gyros, accels)
 
         exp!(M_SO3, w_R_b, w_R_b, hat(M_SO3, Identity(M_SO3), b_g*dt))
 
@@ -168,13 +168,13 @@ p_SE3 = exp_lie(M_SE3, X_SE3)
 ## test factor with rotation around z axis and initial velocity up
 # DUPLICATED IN testInertialDynamic.jl
 dt = 0.1
-N = 11
+N = 10
 
 σ_a = 1e-4 #0.16e-3*9.81  # noise density m/s²/√Hz
 σ_ω = deg2rad(0.0001)  # noise density rad/√Hz
 imu = RoME.generateField_InertialMeasurement_noise(; dt, N, rate=SA[0, 0, 0.001], accel0=SA[0, 0, 9.81-1], σ_a, σ_ω)
 
-timestamps = collect(range(0; step=dt, length=N))
+deltatimes = ones(N)*dt
 
 a_b = SA[0.,0,0]
 ω_b = SA[0.,0,0]
@@ -182,7 +182,7 @@ a_b = SA[0.,0,0]
 fac = RoME.IMUDeltaFactor(
     imu.accels,
     imu.gyros,
-    timestamps,
+    deltatimes,
     imu.Σy,
     a_b,
     ω_b
@@ -191,11 +191,11 @@ fac = RoME.IMUDeltaFactor(
 # Rotation part
 M_SO3 = SpecialOrthogonal(3)
 ΔR = identity_element(M_SO3)
-#NOTE internally integration is done from 2:end
+#NOTE internally integration is done over all measurements
 # at t₀, we start at identity
 # - the measurement at t₀ is from t₋₁ to t₀ and therefore part of the previous factor
 # - the measurement at t₁ is from t₀ to t₁ with the time dt of t₁ - t₀
-for g in imu.gyros[2:end]
+for g in imu.gyros
     exp!(M_SO3, ΔR, ΔR, hat(M_SO3, Identity(M_SO3), g*dt))
 end
 @test isapprox(M_SO3, fac.Δ.x[1], ΔR)
@@ -205,6 +205,11 @@ end
 @test isapprox(fac.Δ.x[3], [0,0,8.81/2], atol=1e-3) # after 1 second at 1/2*9.81*1^2 m
 # Δt part
 @test isapprox(fac.Δ.x[4], 1.0) 
+
+R,v,r = uniform_integrate_check(imu.gyros, imu.accels, dt)
+@test isapprox(M_SO3, fac.Δ.x[1], R)
+@test isapprox(fac.Δ.x[2], v, rtol=1e-5)
+@test isapprox(fac.Δ.x[3], r, rtol=1e-5)
 
 #Same for delta variables 
 p = ArrayPartition(SMatrix{3,3}(1.0I), SA[0.,0,0], SA[1.,0,0], 0.0)
@@ -224,6 +229,7 @@ a_b = SA[0.,0,0]
 fg = initfg()
 fg.solverParams.graphinit = false
 
+timestamps = collect(range(0; step=dt, length=N+1))
 foreach(enumerate(Nanosecond.(timestamps[[1,end]] * 10^9))) do (i, nanosecondtime)
     addVariable!(fg, Symbol("x",i-1), RotVelPos; nanosecondtime)
 end
@@ -257,28 +263,29 @@ x1 = getVariableSolverData(fg, :x1, :parametric).val[1]
 
 
 dt = 0.01
-N = 11
-dT = (N-1)*dt
+N = 10
+dT = N*dt
 imu = RoME.generateField_InertialMeasurement(;dt,N,accel0=SA[0, 0, 9.81],rate=SA[0, 0, 0.1])
 # gyros = [SA[0, 0, 0.1] for _ = 1:N]
 # accels = [SA[0, 0, 9.81] for _ = 1:N]
-timestamps = collect(range(0; step=dt, length=N))
+timestamps = collect(range(0; step=dt, length=N+1))
+deltatimes = ones(N)*dt
 
-Δ, Σ, J_b = RoME.preintegrateIMU(imu.accels, imu.gyros, timestamps, Σy, a_b, ω_b)
+Δ, Σ, J_b = RoME.preintegrateIMU(imu.accels, imu.gyros, deltatimes, Σy, a_b, ω_b)
 Σ = Σ[SOneTo(9),SOneTo(9)]
 
 @test Δ.x[1] ≈ RotZ(0.1*dT)
 @test Δ.x[2] ≈ [0, 0, 9.81*dT]
 @test Δ.x[3] ≈ [0, 0, 0.5*9.81*dT^2] 
-@test Δ.x[4] == dT
+@test Δ.x[4] ≈ dT
 
 ##
 # imu = RoME.generateField_InertialMeasurement(;dt,N,accel0=SA[0, 0, 9.81],rate=SA[0.01, 0, 0])
 gyros = [SA[0.01, 0, 0] for _ = 1:N]
 accels = [SA[0, 0, 9.81] for _ = 1:N]
-timestamps = collect(range(0; step=dt, length=N))
+deltatimes = ones(N)*dt
 
-Δ, Σ, J_b = RoME.preintegrateIMU(accels, gyros, timestamps, Σy, a_b, ω_b)
+Δ, Σ, J_b = RoME.preintegrateIMU(accels, gyros, deltatimes, Σy, a_b, ω_b)
 
 R,v,r = uniform_integrate_check(gyros, accels, dt)
 @test Δ.x[1] ≈ R
@@ -289,9 +296,8 @@ R,v,r = uniform_integrate_check(gyros, accels, dt)
 # imu = RoME.generateField_InertialMeasurement(;dt,N,accel0=SA[0, 0, 9.81],rate=SA[0, 0.01, 0])
 gyros = [SA[0, 0.01, 0] for _ = 1:N]
 accels = [SA[0, 0, 9.81] for _ = 1:N]
-timestamps = collect(range(0; step=dt, length=N))
 
-Δ, Σ, J_b = RoME.preintegrateIMU(accels, gyros, timestamps, Σy, a_b, ω_b)
+Δ, Σ, J_b = RoME.preintegrateIMU(accels, gyros, deltatimes, Σy, a_b, ω_b)
 
 R,v,r = uniform_integrate_check(gyros, accels, dt)
 @test Δ.x[1] ≈ R
