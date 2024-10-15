@@ -6,14 +6,13 @@ using DistributedFactorGraphs
 using Dates
 
 
-struct IMUDeltaManifold <: AbstractManifold{ℝ} end
+struct SpecialGalileanManifold <: AbstractManifold{ℝ} end
 
 # NOTE Manifold in not defined as a ProductManifold since we do not use the product metric. #701
 # also see related SE₂(3) 
 """
-    IMUDeltaGroup
+    SpecialGalileanGroup
 
-#TODO SpecialGalileanGroup(3)
 References: 
 - https://hal.science/hal-02183498/document
 - TODO new reference: https://arxiv.org/pdf/2312.07555
@@ -26,14 +25,14 @@ Affine representation
 ArrayPartition representation (TODO maybe swop order to [Δp; Δv; ΔR; Δt])
 Δ = [ΔR; Δv; Δp; Δt] 
 """
-const IMUDeltaGroup = GroupManifold{ℝ, IMUDeltaManifold, MultiplicationOperation}
+const SpecialGalileanGroup = GroupManifold{ℝ, SpecialGalileanManifold, MultiplicationOperation}
 
-IMUDeltaGroup() = GroupManifold(IMUDeltaManifold(), MultiplicationOperation(), LeftInvariantRepresentation())
+SpecialGalileanGroup() = GroupManifold(SpecialGalileanManifold(), MultiplicationOperation(), LeftInvariantRepresentation())
 
-Manifolds.manifold_dimension(::IMUDeltaManifold) = 9
+Manifolds.manifold_dimension(::SpecialGalileanManifold) = 9
 
 
-function Manifolds.identity_element(M::IMUDeltaGroup) # was #SMatrix{5,5,Float64}(I)
+function Manifolds.identity_element(M::SpecialGalileanGroup) # was #SMatrix{5,5,Float64}(I)
     ArrayPartition(
         SMatrix{3,3,Float64}(I), # ΔR
         @SVector(zeros(3)),      # Δv
@@ -42,9 +41,9 @@ function Manifolds.identity_element(M::IMUDeltaGroup) # was #SMatrix{5,5,Float64
     )
 end
 
-DFG.getPointIdentity(M::IMUDeltaGroup) = identity_element(M)
+DFG.getPointIdentity(M::SpecialGalileanGroup) = identity_element(M)
 
-function Manifolds.affine_matrix(G::IMUDeltaGroup, p::ArrayPartition{T}) where T<:Real
+function Manifolds.affine_matrix(G::SpecialGalileanGroup, p::ArrayPartition{T}) where T<:Real
     return vcat(
         hcat(p.x[1], p.x[2], p.x[3]), 
         @SMatrix [0 0 0 1 p.x[4];
@@ -52,7 +51,7 @@ function Manifolds.affine_matrix(G::IMUDeltaGroup, p::ArrayPartition{T}) where T
     )
 end
 
-function vector_affine_matrix(G::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
+function vector_affine_matrix(G::SpecialGalileanGroup, X::ArrayPartition{T}) where T<:Real
     return vcat(
         hcat(X.x[1], X.x[2], X.x[3]), 
         @SMatrix [0 0 0 0 X.x[4];
@@ -60,7 +59,7 @@ function vector_affine_matrix(G::IMUDeltaGroup, X::ArrayPartition{T}) where T<:R
     )
 end
 
-function Manifolds.inv(M::IMUDeltaGroup, p)
+function Manifolds.inv(M::SpecialGalileanGroup, p)
     ΔR = p.x[1]
     Δv = p.x[2]
     Δp = p.x[3]
@@ -74,7 +73,7 @@ function Manifolds.inv(M::IMUDeltaGroup, p)
     )
 end
 
-function Manifolds.compose(M::IMUDeltaGroup, p, q)
+function Manifolds.compose(M::SpecialGalileanGroup, p, q)
     ΔR = p.x[1]
     Δv = p.x[2]
     Δp = p.x[3]
@@ -93,7 +92,7 @@ function Manifolds.compose(M::IMUDeltaGroup, p, q)
     )
 end
 
-function Manifolds.hat(M::IMUDeltaGroup, Xⁱ::SVector{10, T}) where T<:Real
+function Manifolds.hat(M::SpecialGalileanGroup, Xⁱ::SVector{10, T}) where T<:Real
     return ArrayPartition(
         ApproxManifoldProducts.skew(Xⁱ[SA[7:9...]]), # θ ωΔt
         Xⁱ[SA[4:6...]],       # ν aΔt
@@ -102,7 +101,7 @@ function Manifolds.hat(M::IMUDeltaGroup, Xⁱ::SVector{10, T}) where T<:Real
     )
 end
 
-function Manifolds.vee(M::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
+function Manifolds.vee(M::SpecialGalileanGroup, X::ArrayPartition{T}) where T<:Real
     return SVector{10,T}(
         X.x[3]...,   # ν aΔt 4:6
         X.x[2]...,   # ρ vΔt 1:3
@@ -146,7 +145,8 @@ function _P(θ⃗)
 end
 
 #TODO rename to exp_lie?
-function Manifolds.exp(M::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
+Manifolds.exp(M::SpecialGalileanGroup, X::ArrayPartition{T}) where T<:Real = error("use exp_lie instead")
+function Manifolds.exp_lie(M::SpecialGalileanGroup, X::ArrayPartition{T}) where T<:Real
     θ⃗ₓ = X.x[1] # ωΔt
     
     ν = X.x[2]  # aΔt
@@ -170,12 +170,14 @@ function Manifolds.exp(M::IMUDeltaGroup, X::ArrayPartition{T}) where T<:Real
     return q
 end
 
-function Manifolds.exp(M::IMUDeltaGroup, p::ArrayPartition{T}, X::ArrayPartition{T}) where T<:Real
-    q = exp(M, X)
+#TODO is this now exp_inv? to fit with Manifold.jl (until LieGroups.jl is done)
+function Manifolds.exp(M::SpecialGalileanGroup, p::ArrayPartition{T}, X::ArrayPartition{T}) where T<:Real
+    q = exp_lie(M, X)
     return Manifolds.compose(M, p, q)
 end
 
-function Manifolds.log(M::IMUDeltaGroup, p)
+Manifolds.log(M::SpecialGalileanGroup, p::ArrayPartition{T}) where T<:Real = error("use log_lie instead")
+function Manifolds.log_lie(M::SpecialGalileanGroup, p)
     ΔR = p.x[1]
     Δv = p.x[2]
     Δp = p.x[3]
@@ -197,20 +199,15 @@ function Manifolds.log(M::IMUDeltaGroup, p)
 end
 
 #TODO TEST 
-function Manifolds.log(M::IMUDeltaGroup, p, q)
-    return log(M, Manifolds.compose(M, inv(M, p), q))
+#TODO is this now log_inv? to fit with Manifold.jl (until LieGroups.jl is done)
+# right-⊖ : Xₚ = q ⊖ p = log(p⁻¹∘q)
+function Manifolds.log(M::SpecialGalileanGroup, p, q)
+    return log_lie(M, Manifolds.compose(M, inv(M, p), q))
 end
 
-
-# TODO consolidate with Manifolds notation 
-# function Manifolds.log(M::IMUDeltaGroup, p::SMatrix{5,5,T}, q::SMatrix{5,5,T})
-#     qinvp = Manifolds.compose(M, inv(M, q), p)
-#     .....
-# end
-
-# compute the expected delta from p to q on the IMUDeltaGroup
+# compute the expected delta from p to q on the SpecialGalileanGroup
 # ⊟ = boxminus
-function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,9.81]) 
+function boxminus(::SpecialGalileanGroup, p, q; g⃗ = SA[0,0,9.81]) 
     Rᵢ = p.x[1]
     vᵢ = p.x[2]
     pᵢ = p.x[3]
@@ -235,14 +232,8 @@ function boxminus(::IMUDeltaGroup, p, q; g⃗ = SA[0,0,9.81])
     )
 end
 
-#TODO test, unused, likeley to be replaced because of ambiguity
-# right-⊖ : Xₚ = q ⊖ p = log(p⁻¹∘q)
-function ominus(M::IMUDeltaGroup, q, p)
-    log(M, Manifolds.compose(M, inv(M, p), q))
-end
-
 # small adjoint ad
-function adjointMatrix(::IMUDeltaGroup, X::ArrayPartition{T}) where T
+function adjointMatrix(::SpecialGalileanGroup, X::ArrayPartition{T}) where T
     θ⃗ₓ = X.x[1] # ωΔt
     ν = X.x[2]  # aΔt
     ρ = X.x[3]  # vΔt
@@ -265,7 +256,7 @@ function adjointMatrix(::IMUDeltaGroup, X::ArrayPartition{T}) where T
 end
 
 # Adjoint Ad
-function AdjointMatrix(::IMUDeltaGroup, p::ArrayPartition{T}) where T
+function AdjointMatrix(::SpecialGalileanGroup, p::ArrayPartition{T}) where T
     ΔR = p.x[1]
     Δv = p.x[2]
     Δp = p.x[3]
@@ -288,7 +279,7 @@ end
 
 # right Jacobian
 # FIXME moving general Lie Group Jacobian up to ApproxManifoldProducts
-function Jr(M::IMUDeltaGroup, X; order=5)
+function Jr(M::SpecialGalileanGroup, X; order=5)
     adx = adjointMatrix(M, X)
     mapreduce(+, 0:order) do i
         (-adx)^i / factorial(i + 1)
@@ -323,7 +314,7 @@ Base.@kwdef struct IMUDeltaFactor{T <: SamplableBelief} <: AbstractManifoldMinim
 end
 
 function IIF.getSample(cf::CalcFactor{<:IMUDeltaFactor})
-    return exp(IMUDeltaGroup(), hat(IMUDeltaGroup(), SA[rand(cf.factor.Z)..., cf.factor.Δt]))
+    return exp_lie(SpecialGalileanGroup(), hat(SpecialGalileanGroup(), SA[rand(cf.factor.Z)..., cf.factor.Δt]))
 end
 
 function IIF.getFactorMeasurementParametric(f::IMUDeltaFactor)
@@ -331,37 +322,42 @@ function IIF.getFactorMeasurementParametric(f::IMUDeltaFactor)
     return f.Δ, iΣ
 end
 
-IIF.getManifold(::IMUDeltaFactor) = IMUDeltaGroup()
+IIF.getManifold(::IMUDeltaFactor) = SpecialGalileanGroup()
 
 function IIF.preambleCache(fg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, ::IMUDeltaFactor)
-    # FIXME, change to `.missionnanosec` which can be used together with `trunc(timestamp) + 1e-9*nsec`.  See DFG #1087
-        # pt = floor(Float64, datetime2unix(getTimestamp(vars[1]))) + (1e-9*vars[1].nstime % 1.0)
-        # qt = floor(Float64, datetime2unix(getTimestamp(vars[2]))) + (1e-9*vars[2].nstime % 1.0)
-    (timestams=(vars[1].nstime,vars[2].nstime),)
+    if vars[1] isa DFGVariable{<:Pose3}
+        (timestams = (vars[1].nstime, vars[3].nstime),)
+    else
+        (timestams = (vars[1].nstime, vars[2].nstime),)
+    end
+
 end
 
 # factor residual
 
 function (cf::CalcFactor{<:IMUDeltaFactor})(
-    Δmeas, # point on IMUDeltaGroup
+    Δmeas, # point on SpecialGalileanGroup
     p::ArrayPartition{T, Tuple{SMatrix{3, 3, T, 9}, SVector{3, T}, SVector{3, T}, T}}, 
     q::ArrayPartition{T, Tuple{SMatrix{3, 3, T, 9}, SVector{3, T}, SVector{3, T}, T}},
     b::SVector{6,T} = zeros(SVector{6,T})
 ) where T <: Real
     #
-    M = IMUDeltaGroup()
-    # imu measurment Delta, corrected for bias with # b̄ = cf.factor.b
-    Δi = Manifolds.compose(M, Δmeas, exp(M, hat(M, cf.factor.J_b * (b - cf.factor.b))))
+    M = SpecialGalileanGroup()
+    # imu measurment Delta, corrected for bias with # b̄ = cf.factor.b #TODO check if (b - cf.factor.b) is correct
+    Δi = Manifolds.compose(M, Δmeas, exp_lie(M, hat(M, cf.factor.J_b * (b - cf.factor.b))))
     # expected delta from p to q
     Δhat = boxminus(M, p, q)
     # residual 
-    Xhat = log(M, Manifolds.compose(M, inv(M, Δi), Δhat))
+    Xhat = log_lie(M, Manifolds.compose(M, inv(M, Δi), Δhat))
+
+    Xc_hat = vee(M, Xhat)
+    @assert isapprox(Δi.x[4], Δhat.x[4], atol=1e-6) "Time descrepancy in IMUDeltaFactor: Δt = $(Xc_hat[10])"
     # should not include Δt only 1:9
-    return vee(M, Xhat)[SOneTo(9)]
+    return Xc_hat[SOneTo(9)]
 end
 
 function (cf::CalcFactor{<:IMUDeltaFactor})(
-    Δmeas, # point on IMUDeltaGroup
+    Δmeas, # point on SpecialGalileanGroup
     _p::ArrayPartition{T, Tuple{SMatrix{3, 3, T, 9}, SVector{3, T}, SVector{3, T}}}, 
     _q::ArrayPartition{T, Tuple{SMatrix{3, 3, T, 9}, SVector{3, T}, SVector{3, T}}},
     b::SVector{6,T} = zeros(SVector{6,Float64})
@@ -375,7 +371,7 @@ end
 
 # ArrayPartition{Float64, Tuple{MMatrix{3, 3, Float64, 9}, MVector{3, Float64}, MVector{3, Float64}}}
 function (cf::CalcFactor{<:IMUDeltaFactor})(
-    Δmeas, # point on IMUDeltaGroup
+    Δmeas, # point on SpecialGalileanGroup
     _p::ArrayPartition{Float64, Tuple{MMatrix{3, 3, Float64, 9}, MVector{3, Float64}, MVector{3, Float64}}}, 
     _q::ArrayPartition{Float64, Tuple{MMatrix{3, 3, Float64, 9}, MVector{3, Float64}, MVector{3, Float64}}},
     b::AbstractVector = zeros(SVector{6,Float64})
@@ -393,7 +389,7 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     p_vel, 
     q_SE3,
     q_vel,
-    b::SVector{6,T} = zeros(SVector{6,Float64})
+    b = zeros(SVector{6,Float64})
 ) where T <: Real
     p = ArrayPartition(p_SE3.x[2], p_vel, p_SE3.x[1])
     q = ArrayPartition(q_SE3.x[2], q_vel, q_SE3.x[1])
@@ -409,13 +405,13 @@ function _τδt(δt)
 end
 
 function integrateIMUDelta(Δij, Σij, Δij_J_b, a, ω, a_b, ω_b, δt, Σy)
-    M = IMUDeltaGroup()
+    M = SpecialGalileanGroup()
     ωδt = (ω - ω_b) * δt
     aδt = (a - a_b) * δt
     Xc = SVector{10,Float64}(vcat([0., 0, 0], aδt, ωδt, δt))
 
     X = hat(M, Xc)
-    δjk = exp(M, X)
+    δjk = exp_lie(M, X)
 
     Δik = Manifolds.compose(M, Δij, δjk)
 
@@ -446,7 +442,7 @@ end
 
 #assuming accels and gyros same rate here
 function preintegrateIMU(accels, gyros, deltatimes, Σy, a_b, ω_b)
-    M = IMUDeltaGroup()
+    M = SpecialGalileanGroup()
     Δ   = identity_element(M)
     Σ   = zeros(10,10)
     J_b = zeros(10,6)
@@ -465,11 +461,11 @@ function IMUDeltaFactor(
     a_b = SA[0.,0,0],
     ω_b = SA[0.,0,0],
 )
-    M = IMUDeltaGroup()
+    M = SpecialGalileanGroup()
     Δ, Σ, J_b = preintegrateIMU(accels, gyros, deltatimes, Σy, a_b, ω_b)
     Δt = Δ.x[4]
     
-    Xc = vee(M, log(M, Δ))
+    Xc = vee(M, log_lie(M, Δ))
     
     SM = SymmetricPositiveDefinite(9)
     S = Σ[1:9,1:9]
