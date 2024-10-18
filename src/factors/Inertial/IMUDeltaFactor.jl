@@ -10,12 +10,16 @@ struct SpecialGalileanManifold <: AbstractManifold{ℝ} end
 
 # NOTE Manifold in not defined as a ProductManifold since we do not use the product metric. #701
 # also see related SE₂(3) 
+# SemidirectProductGroup(SpecialEuclidean(N), (ProductGroup(TranslationGroup(N), TranslationGroup(1))))
+# (SO(n) ⋉ ℝⁿ) ⋉ (ℝⁿ × ℝ)
+
 """
     SpecialGalileanGroup
 
 References: 
 - https://hal.science/hal-02183498/document
 - TODO new reference: https://arxiv.org/pdf/2312.07555
+- TODO new reference: https://arxiv.org/pdf/2409.14276
 
 Affine representation 
 Δ = [ΔR Δv Δp;
@@ -500,7 +504,7 @@ struct PackedIMUDeltaFactor{T <: PackedSamplableBelief} <: AbstractPackedFactor
     dt::Float64
     D::Vector{Float64}
     Sigma::Vector{Float64} #SMatrix{10,10,Float64}
-    # J_b::SMatrix{10,6,Float64} = zeros(SMatrix{10,6,Float64})
+    J_b::Vector{Float64} # SMatrix{10,6,Float64}
     # accelerometer bias, gyroscope bias 
     b::Vector{Float64}
 end
@@ -510,6 +514,7 @@ function PackedIMUDeltaFactor(;
     dt,
     D,
     Sigma,
+    J_b,
     b
 )
     _gettype(zt::PackedSamplableBelief) = zt
@@ -520,38 +525,44 @@ function PackedIMUDeltaFactor(;
     _dt = Float64(dt)
     _D = Float64.(D)
     _Sigma = Float64.(Sigma)
+    _J_b = Float64.(J_b)
     _b = Float64.(b)
     PackedIMUDeltaFactor(
         _Z,
         _dt,
         _D,
         _Sigma,
+        _J_b,
         _b
     )
 end
-
 
 function convert(::Type{<:PackedIMUDeltaFactor}, d::IMUDeltaFactor)
     Z = convert(PackedSamplableBelief, d.Z)
     return PackedIMUDeltaFactor(;
         Z,
         dt = d.Δt,
-        D = vcat(collect(d.Δ.x[1][:]), collect(d.Δ.x[2]), collect(d.Δ.x[3]), d.Δ.x[4]),
+        D = d.Δ[1:end],
         Sigma = collect(d.Σ[:]),
+        J_b = collect(d.J_b[:]),
         b = collect(d.b),
     )
 end
+
 function convert(::Type{<:IMUDeltaFactor}, d::PackedIMUDeltaFactor)
-    16 !== length(d.D) && @error("Deserializing a PackedIMUDeltaFactor not 16 in length, .D = $(length(d.D))")
-    return IMUDeltaFactor(;
-        Z = convert(SamplableBelief, d.Z),
-        Δt = d.dt,
-        Δ = ArrayPartition(
-            SMatrix{3,3,Float64}(reshape(d.D[1:9],3,3)),
-            SVector{3,Float64}(d.D[10:12]),
-            SVector{3,Float64}(d.D[13:15]),
+    @assert 16 == length(d.D) "Deserializing a PackedIMUDeltaFactor not 16 in length, .D = $(length(d.D))"
+    return IMUDeltaFactor(
+        convert(SamplableBelief, d.Z),
+        Float64(d.dt),
+        ArrayPartition(
+            SMatrix{3, 3, Float64, 9}(d.D[1:9]),
+            SVector{3, Float64}(d.D[10:12]),
+            SVector{3, Float64}(d.D[13:15]),
             Float64(d.D[16])
         ),
-        Σ = SMatrix{10,10,Float64}(reshape(d.Sigma, 10,10)),
+        SMatrix{10, 10, Float64}(d.Sigma),
+        SMatrix{10,6,Float64}(d.J_b),
+        SVector{6, Float64}(d.b),
+        IMUMeasurement[],
     )
 end
