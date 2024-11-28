@@ -355,7 +355,7 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     Xhat = log_lie(M, Manifolds.compose(M, inv(M, Δi), Δhat))
 
     Xc_hat = vee(M, Xhat)
-    @assert isapprox(Δi.x[4], Δhat.x[4], atol=2e-6) "Time descrepancy in IMUDeltaFactor: Δt = $(Xc_hat[10]), $(Δi.x[4]), $(Δhat.x[4])"
+    @assert isapprox(Δi.x[4], Δhat.x[4], atol=1e-6) "Time descrepancy in IMUDeltaFactor: Δt = $(Xc_hat[10]), $(Δi.x[4]), $(Δhat.x[4])"
     # should not include Δt only 1:9
     return Xc_hat[SOneTo(9)]
 end
