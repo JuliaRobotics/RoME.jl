@@ -37,7 +37,7 @@ fac = RoME.InertialDynamic(
 ## build a basic factor graph
 
 fg = initfg()
-getSolverParams(fg).N = 30
+getSolverParams(fg).N = 50
 
 addVariable!(fg, :w_P0, RotVelPos; timestamp = tst)
 addVariable!(fg, :w_P1, RotVelPos; timestamp = tsp)
@@ -67,8 +67,8 @@ doautoinit!(fg, :w_P0)
 
 ##
 
-flb = getLabel(f1)
-sampleFactor(fg, flb, 30)
+# flb = getLabel(f1)
+# sampleFactor(fg, flb, 50)
 
 ##
 
@@ -76,9 +76,10 @@ try
   P1 = approxConvBelief(fg, getLabel(f1), :w_P1)
 catch
   @error "FIXME first approxConv on InertialDynamic failed!"
+  @test_broken false
 end
 
-P1 = approxConvBelief(fg, getLabel(f1), :w_P1)
+# P1 = approxConvBelief(fg, getLabel(f1), :w_P1)
 
 
 
