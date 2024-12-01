@@ -229,7 +229,7 @@ a_b = SA[0.,0,0]
 fg = initfg()
 fg.solverParams.graphinit = false
 
-timestamps = collect(range(0; step=dt+1e-7, length=N+1))
+timestamps = collect(range(0; step=dt, length=N+1))
 foreach(enumerate(Nanosecond.(round.(Int, timestamps[[1,end]] * 10^9)))) do (i, nanosecondtime)
     addVariable!(fg, Symbol("x",i-1), RotVelPos; nanosecondtime)
 end
