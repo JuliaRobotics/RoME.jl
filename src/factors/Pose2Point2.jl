@@ -24,7 +24,7 @@ function (cfo::CalcFactor{<:Pose2Point2})(p_Xpq,
                                           w_T_p,
                                           w_Tl_q )
   #
-  M = SpecialEuclidean(2)
+  M = SpecialEuclidean(2; vectors=HybridTangentRepresentation())
 
   p_T_qhat = ArrayPartition(SA[p_Xpq[1];p_Xpq[2]], SMatrix{2,2}([1 0; 0 1.]))
   _w_T_p = ArrayPartition(SA[w_T_p.x[1]...], SMatrix{2,2}(w_T_p.x[2]))

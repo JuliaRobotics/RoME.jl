@@ -19,9 +19,9 @@ testfiles = [
   
   # dev test first, for faster issues.
   # Inertial
+  "inertial/testInertialDynamic.jl";
   "inertial/testODE_INS.jl";
   "inertial/testIMUDeltaFactor.jl";
-  "inertial/testInertialDynamic.jl";
   
   # ...
   # "testFluxModelsPose2.jl";

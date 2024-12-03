@@ -6,7 +6,7 @@
 
 
 function homography_to_coordinates(
-  M::typeof(SpecialEuclidean(3)),
+  M::typeof(SpecialEuclidean(3; vectors=HybridTangentRepresentation())),
   pHq::AbstractMatrix{<:Real}
 )
   Mr = M.manifold[2]
@@ -15,7 +15,7 @@ function homography_to_coordinates(
 end
 
 function coordinates_to_homography(
-  M::typeof(SpecialEuclidean(3)),
+  M::typeof(SpecialEuclidean(3; vectors=HybridTangentRepresentation())),
   pCq::AbstractVector
 )
   e0 = Identity(M)

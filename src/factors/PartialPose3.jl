@@ -109,13 +109,13 @@ Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) = error("Pose3Pose3XY
 # Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,4,5,6))   # (1,2,6))
 Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,6))
 
-getManifold(::Pose3Pose3XYYaw) = SpecialEuclidean(2)
+getManifold(::Pose3Pose3XYYaw) = SpecialEuclidean(2; vectors=HybridTangentRepresentation())
 
 
 ## NOTE, Yaw only works if you assume a preordained global reference point, such as identity_element(Pose3)
 function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
   #
-  M = SpecialEuclidean(2)
+  M = SpecialEuclidean(2; vectors=HybridTangentRepresentation())
 
   rx = normalize(view(wTp.x[2],1:2, 1))
   R = SA[rx[1] -rx[2];

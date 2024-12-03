@@ -35,7 +35,7 @@ end
 
 fg = initfg()
 
-M=SpecialEuclidean(3)
+M=SpecialEuclidean(3; vectors=HybridTangentRepresentation())
 N = 100
 fg.solverParams.N = N
 fg.solverParams.graphinit = false
@@ -486,7 +486,7 @@ end
 
 
 ##
-M = SpecialEuclidean(3)
+M = SpecialEuclidean(3; vectors=HybridTangentRepresentation())
 mpts = getPoints(fg[1], :x4)
 mu_fg1 = mean(M, mpts)
 

@@ -32,7 +32,7 @@ $(TYPEDEF)
 
 Pose2 is a SE(2) mechanization of two Euclidean translations and one Circular rotation, used for general 2D SLAM.
 """
-@defVariable Pose2 SpecialEuclidean(2) ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0])
+@defVariable Pose2 SpecialEuclidean(2; vectors=HybridTangentRepresentation()) ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0])
 
 """
 $(TYPEDEF)
@@ -44,7 +44,7 @@ Future:
 - Work in progress on AMP3D for proper non-Euler angle on-manifold operations.
 - TODO the AMP upgrade is aimed at resolving 3D to Quat/SE3/SP3 -- current Euler angles will be replaced
 """
-@defVariable Pose3 SpecialEuclidean(3) ArrayPartition(SA[0;0;0.0],SA[1 0 0; 0 1 0; 0 0 1.0])
+@defVariable Pose3 SpecialEuclidean(3; vectors=HybridTangentRepresentation()) ArrayPartition(SA[0;0;0.0],SA[1 0 0; 0 1 0; 0 0 1.0])
 
 
 @defVariable Rotation3 SpecialOrthogonal(3) SA[1 0 0; 0 1 0; 0 0 1.0]
@@ -57,7 +57,8 @@ Future:
       SpecialOrthogonal(3), 
       TranslationGroup(3), 
       TranslationGroup(3)
-    )
+    ),
+    LeftInvariantRepresentation()
   ),
   ArrayPartition(
     SA[1 0 0; 0 1 0; 0 0 1.0], 
@@ -74,7 +75,8 @@ Future:
     ProductManifold(
       TranslationGroup(3),
       TranslationGroup(3)
-    )
+    ),
+    LeftInvariantRepresentation()
   ),
   ArrayPartition(
     SA[0; 0; 0.0], 
@@ -104,7 +106,14 @@ Note
 - The `SE2E2_Manifold` definition used currently is a hack to simplify the transition to Manifolds.jl, see #244 
 - Replaced `SE2E2_Manifold` hack with `ProductManifold(SpecialEuclidean(2), TranslationGroup(2))`, confirm if it is correct.
 """
-@defVariable DynPose2 Manifolds.ProductGroup(ProductManifold(SpecialEuclidean(2), TranslationGroup(2))) ArrayPartition(ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0]),SA[0;0.0])
+@defVariable(
+  DynPose2,
+  Manifolds.ProductGroup(
+    ProductManifold(SpecialEuclidean(2; vectors=HybridTangentRepresentation()), TranslationGroup(2)),
+    LeftInvariantRepresentation()
+  ),
+  ArrayPartition(ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0]),SA[0;0.0])
+)
 
 
 

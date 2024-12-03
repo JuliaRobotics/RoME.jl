@@ -7,6 +7,7 @@ using StaticArrays
 using Manifolds
 using DocStringExtensions
 using Optim
+using RecursiveArrayTools: ArrayPartition
 
 import Base: convert
 import IncrementalInference: AbstractDFG, getFactorType, getVariable, getSolverData, CalcFactor, ls

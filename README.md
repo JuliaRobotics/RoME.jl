@@ -37,7 +37,7 @@ Please don't hesitate to open issues or suggestions in line with [JuliaRobotics 
 [rjl-cov-img]: https://codecov.io/github/JuliaRobotics/RoME.jl/coverage.svg?branch=master
 [rjl-cov-url]: https://codecov.io/github/JuliaRobotics/RoME.jl?branch=master
 [rjl-ci-dev-img]: https://github.com/JuliaRobotics/RoME.jl/actions/workflows/ci.yml/badge.svg
-[rjl-ci-dev-url]: https://github.com/JuliaRobotics/RoME.jl/actions/workflows/ci.yml
+[rjl-ci-dev-url]: https://github.com/JuliaRobotics/RoME.jl/actions/workflows/ci.yml?query=branch%3Amaster
 [rjl-ver-img]: https://juliahub.com/docs/RoME/version.svg
 [rjl-milestones]: https://github.com/JuliaRobotics/RoME.jl/milestones
 [rjl-releases]: https://github.com/JuliaRobotics/RoME.jl/releases
