@@ -3,7 +3,6 @@ on:
   pull_request:
   push:
     branches:
-      - master
       - develop
       - release**
   workflow_dispatch:
@@ -79,7 +78,7 @@ jobs:
       - name: Run tests on Upstream Dev
         run: |
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference",rev="develop"));'
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="master"));'
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="master"));'
+          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="develop"));'
+          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="develop"));'
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.test("RoME"; coverage=false)'
         shell: bash
