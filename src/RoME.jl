@@ -142,9 +142,9 @@ include("Deprecated.jl")
 
 # manifold conversions required during transformation
 
-@compile_workload begin
-  # In here put "toy workloads" that exercise the code you want to precompile
-  warmUpSolverJIT()
-end
+# @compile_workload begin
+#   # In here put "toy workloads" that exercise the code you want to precompile
+#   warmUpSolverJIT()
+# end
 
 end
