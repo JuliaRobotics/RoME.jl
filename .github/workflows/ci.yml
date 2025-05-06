@@ -3,7 +3,6 @@ on:
   pull_request:
   push:
     branches:
-      - master
       - develop
       - release**
   workflow_dispatch:
@@ -16,16 +15,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        julia-version: ['1.10', 'nightly']
+        julia-version: ['1.11', 'nightly']
         os: [ubuntu-latest]
         arch: [x64]
     steps:
       - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:
@@ -56,12 +55,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
           version: '1.10'
           arch: x64
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:
@@ -79,7 +78,7 @@ jobs:
       - name: Run tests on Upstream Dev
         run: |
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="IncrementalInference",rev="develop"));'
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="master"));'
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="master"));'
+          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="develop"));'
+          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="develop"));'
           julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.test("RoME"; coverage=false)'
         shell: bash
