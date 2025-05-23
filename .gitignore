@@ -1,4 +1,4 @@
-/dev
+dev
 Manifest.toml
 *.so
 *.cov

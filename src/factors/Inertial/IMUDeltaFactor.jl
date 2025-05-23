@@ -394,7 +394,7 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     q_SE3,
     q_vel,
     b = zeros(SVector{6,Float64})
-) where T <: Real
+)
     p = ArrayPartition(p_SE3.x[2], p_vel, p_SE3.x[1])
     q = ArrayPartition(q_SE3.x[2], q_vel, q_SE3.x[1])
     return cf(Δmeas, p, q, b)

@@ -32,7 +32,7 @@ $(TYPEDEF)
 
 Pose2 is a SE(2) mechanization of two Euclidean translations and one Circular rotation, used for general 2D SLAM.
 """
-@defVariable Pose2 SpecialEuclidean(2; vectors=HybridTangentRepresentation()) ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0])
+@defVariable Pose2 SpecialEuclideanGroup(2; variant=:right) ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0])
 
 """
 $(TYPEDEF)

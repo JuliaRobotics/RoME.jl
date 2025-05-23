@@ -21,7 +21,8 @@ using
   DistributedFactorGraphs,
   TensorCast,
   ManifoldsBase,
-  Manifolds
+  Manifolds,
+  LieGroups
 
 using StaticArrays
 using PrecompileTools
@@ -33,7 +34,7 @@ using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, SpecialOr
 import Manifolds: project, project!, identity_element
 
 import Rotations as _Rot
-import Rotations: ⊕, ⊖ # TODO deprecate
+# import Rotations: ⊕, ⊖ # TODO deprecate
 
 export SpecialOrthogonal, SpecialEuclidean
 export submanifold_component
