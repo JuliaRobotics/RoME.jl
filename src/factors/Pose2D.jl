@@ -36,7 +36,7 @@ Pose2Pose2(::UniformScaling) = Pose2Pose2()
 
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
   G = getManifold(Pose2)
-  X̂ = log(base_manifold(G), getPointIdentity(G), compose(G, inv(G, p), q))
+  X̂ = log(base_manifold(G), getPointIdentity(G), LieGroups.compose(G, inv(G, p), q))
   return vee(LieAlgebra(G), X - X̂)
 end
 

@@ -39,11 +39,11 @@ function (cf::CalcFactor{<:PriorPose2})(
             p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
 
   M = getManifold(Pose2)
-  ϵ = getPointIdentity(M)
-  Xc = _vee(M, log(M, p, m))
-  # X = log(M, ϵ, Manifolds.compose(M, inv(M, p), m))
-  # Xc = vee(M, ϵ, X)
-  return Xc
+  ϵ = getPointIdentity(Pose2)
+  # Xc = _vee(M, log(M, p, m))
+  # X = log(M, p, m)
+  X = log(base_manifold(M), ϵ, LieGroups.compose(M, inv(M, p), m))
+  return vee(LieAlgebra(M), X)
 end
 
 #TODO Serialization of reference point p 
