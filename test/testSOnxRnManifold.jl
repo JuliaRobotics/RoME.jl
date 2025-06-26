@@ -12,19 +12,16 @@ SOnxRnManifold(n) = MetricManifold(SpecialEuclideanGroup(n; variant=:right), Lef
 
 SOnxRnManifoldType = Union{typeof(SOnxRnManifold(2)), typeof(SOnxRnManifold(3))}
 
-Manifolds.identity_element(::typeof(SOnxRnManifold(2))) = ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0])
-Manifolds.identity_element(::typeof(SOnxRnManifold(3))) = ArrayPartition(SA[0,0,0.0],SA[1 0 0; 0 1 0; 0 0 1.0])
-
 # geodesics for metric (61) are the same as geodesics on the product manifold SO(3)×IR3
 function Manifolds.exp(M::SOnxRnManifoldType, p, X)
     G = base_manifold(M)
-    ε = identity_element(M)
+    ε = identity_element(M, typeof(p))
     return compose(G, p, exp(base_manifold(G), ε, X))
 end
 
 function Manifolds.log(M::SOnxRnManifoldType, p, q)
     G = base_manifold(M)
-    ε = identity_element(M)
+    ε = identity_element(M, typeof(p))
     X = log(base_manifold(G), ε, compose(G, inv(G, p), q))
     return X
 end
