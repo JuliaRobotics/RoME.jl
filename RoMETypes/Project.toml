@@ -11,8 +11,8 @@ RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-DistributedFactorGraphs = "0.24.0"
+DistributedFactorGraphs = "0.27.0"
 DocStringExtensions = "0.9.3"
-Manifolds = "0.9.20"
+Manifolds = "0.10"
 RecursiveArrayTools = "3.27.0"
 StaticArrays = "1.9.7"

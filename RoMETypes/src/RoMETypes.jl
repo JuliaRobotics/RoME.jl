@@ -20,6 +20,17 @@ export
     DynPose2,
     projectCartesian
 
+export 
+    PriorPoint2,
+    PackedPriorPoint2,
+    PriorPoint3,
+    PackedPriorPoint3,
+    Pose2Pose2,
+    PackedPose2Pose2,
+    Pose3Pose3,
+    PackedPose3Pose3
+
 include("variables/VariableTypes.jl")
+include("factors/FactorTypes.jl")
 
 end # module RoMETypes
