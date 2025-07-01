@@ -66,6 +66,8 @@ include("entities/SpecialDefinitions.jl")
 
 #uses DFG v0.10.2 @defVariable for above
 include("services/FixmeManifolds.jl")
+include("manifolds/SOnxRn_MetricManifold.jl")
+
 include("variables/VariableTypes.jl")
 
 ## More factor types
