@@ -83,7 +83,7 @@ end
 Manifolds.identity_element(::typeof(SOnxRn_MetricManifold(2))) = ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0])
 Manifolds.identity_element(::typeof(SOnxRn_MetricManifold(3))) = ArrayPartition(SA[0,0,0.0],SA[1 0 0; 0 1 0; 0 0 1.0])
 
-
+#FIXME remove, only temporary workaround as first signiture is used in many places
 @deprecate LieGroups.identity_element(G::LieGroup, p)  identity_element(G, typeof(p)) false
 
 # FIXME why is this still needed, hopefully can be removed soon 🐛💥
