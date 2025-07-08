@@ -7,12 +7,12 @@ $(TYPEDEF)
 
 Direction observation information of a `Point3` variable.
 """
-DFG.@defFactorType PriorPoint3 DFG.AbstractPrior Manifolds.TranslationGroup(3)
-DFG.@defFactorType Point3Point3 AbstractManifoldMinimize Manifolds.TranslationGroup(3)
+DFG.@defObservationType PriorPoint3 DFG.AbstractPrior Manifolds.TranslationGroup(3)
+DFG.@defObservationType Point3Point3 AbstractManifoldMinimize Manifolds.TranslationGroup(3)
 
 
-DFG.@defFactorType Point2Point2 AbstractManifoldMinimize Manifolds.TranslationGroup(2)
-DFG.@defFactorType PriorPoint2 DFG.AbstractPrior Manifolds.TranslationGroup(2)
+DFG.@defObservationType Point2Point2 AbstractManifoldMinimize Manifolds.TranslationGroup(2)
+DFG.@defObservationType PriorPoint2 DFG.AbstractPrior Manifolds.TranslationGroup(2)
 
 # ========================================================================================
 # Pose
@@ -45,7 +45,7 @@ Related
 
 [`Pose3Pose3`](@ref), [`Point2Point2`](@ref), [`MutablePose2Pose2Gaussian`](@ref), [`DynPose2`](@ref), [`IMUDeltaFactor`](@ref)
 """
-DFG.@defFactorType Pose2Pose2 AbstractManifoldMinimize Manifolds.SpecialEuclidean(2; vectors=HybridTangentRepresentation())
+DFG.@defObservationType Pose2Pose2 AbstractManifoldMinimize Manifolds.SpecialEuclidean(2; vectors=HybridTangentRepresentation())
 
 """
 $(TYPEDEF)
@@ -58,7 +58,7 @@ Example:
 PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
-DFG.@defFactorType PriorPose2 AbstractPrior Manifolds.SpecialEuclidean(2; vectors=HybridTangentRepresentation())
+DFG.@defObservationType PriorPose2 AbstractPrior Manifolds.SpecialEuclidean(2; vectors=HybridTangentRepresentation())
 
-DFG.@defFactorType Pose3Pose3 AbstractManifoldMinimize Manifolds.SpecialEuclidean(3; vectors=HybridTangentRepresentation())
-DFG.@defFactorType PriorPose3 AbstractPrior Manifolds.SpecialEuclidean(3; vectors=HybridTangentRepresentation())
+DFG.@defObservationType Pose3Pose3 AbstractManifoldMinimize Manifolds.SpecialEuclidean(3; vectors=HybridTangentRepresentation())
+DFG.@defObservationType PriorPose3 AbstractPrior Manifolds.SpecialEuclidean(3; vectors=HybridTangentRepresentation())

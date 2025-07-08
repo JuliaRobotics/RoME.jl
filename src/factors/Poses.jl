@@ -117,7 +117,7 @@ end
 
 ##
 #TODO is this manifold not SO3
-DFG.@defFactorType Pose3Pose3RotOffset AbstractManifoldMinimize Manifolds.SpecialEuclidean(3; vectors = HybridTangentRepresentation())
+DFG.@defObservationType Pose3Pose3RotOffset AbstractManifoldMinimize Manifolds.SpecialEuclidean(3; vectors = HybridTangentRepresentation())
 
 # measurement is in frame a, for example imu frame
 # p and q is in frame b, for example body frame
@@ -134,7 +134,7 @@ function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
 end
 
 ##
-DFG.@defFactorType Pose3Pose3Transform AbstractManifoldMinimize Manifolds.SpecialEuclidean(3; vectors = HybridTangentRepresentation())
+DFG.@defObservationType Pose3Pose3Transform AbstractManifoldMinimize Manifolds.SpecialEuclidean(3; vectors = HybridTangentRepresentation())
 
 function (cf::CalcFactor{<:Pose3Pose3Transform})(p_NX, p, q, Δ)
     M = getManifold(Pose3Pose3Transform)
@@ -154,7 +154,7 @@ end
   $(TYPEDEF)
 Pose3Pose3 factor where the translation scale is not known, ie. Pose3Pose3 with unit (normalized) translation.
 """
-DFG.@defFactorType Pose3Pose3UnitTrans AbstractManifoldMinimize Manifolds.SpecialEuclidean(3; vectors = HybridTangentRepresentation())
+DFG.@defObservationType Pose3Pose3UnitTrans AbstractManifoldMinimize Manifolds.SpecialEuclidean(3; vectors = HybridTangentRepresentation())
 
 function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) where {T}
     M = getManifold(Pose3)
