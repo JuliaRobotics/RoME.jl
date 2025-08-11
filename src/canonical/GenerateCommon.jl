@@ -230,11 +230,11 @@ function generateField_InertialMeasurement(;
   accels = Vector{typeof(accel0)}()
   push!(accels, deepcopy(accel0) + an())
   # accels = [deepcopy(accel0) + an()]
-  M = SpecialOrthogonal(3)
+  M = SpecialOrthogonalGroup(3)
 
   # b_a = [0.1, 0, 0]
   for g in gyros[1:end-1]
-    X = hat(M, Identity(M), g)
+    X = hat(LieAlgebra(M), g)
     exp!(M, w_R_b, w_R_b, X*dt)
     push!(accels, (b_a .+ an()) + w_R_b' * accel0)
   end

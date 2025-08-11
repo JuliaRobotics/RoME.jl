@@ -25,7 +25,11 @@ $(TYPEDEF)
 
 Pose2 is a SE(2) mechanization of two Euclidean translations and one Circular rotation, used for general 2D SLAM.
 """
-@defVariable Pose2 SOnxRn_MetricManifold(2) ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0])
+@defVariable(
+  Pose2,
+  TranslationGroup(2) × SpecialOrthogonalGroup(2), #TODO look at using SOnxRn_MetricManifold(2) 
+  ArrayPartition(SA[0;0.0], SA[1 0; 0 1.0]) 
+)
 
 """
 $(TYPEDEF)
@@ -37,22 +41,17 @@ Future:
 - Work in progress on AMP3D for proper non-Euler angle on-manifold operations.
 - TODO the AMP upgrade is aimed at resolving 3D to Quat/SE3/SP3 -- current Euler angles will be replaced
 """
-@defVariable Pose3 SpecialEuclidean(3; vectors=HybridTangentRepresentation()) ArrayPartition(SA[0;0;0.0],SA[1 0 0; 0 1 0; 0 0 1.0])
+@defVariable(
+  Pose3,
+  TranslationGroup(3) × SpecialOrthogonalGroup(3), #TODO look at using SOnxRn_MetricManifold(3) 
+  ArrayPartition(SA[0;0;0.0],SA[1 0 0; 0 1 0; 0 0 1.0])
+)
 
-
-@defVariable Rotation3 SpecialOrthogonal(3) SA[1 0 0; 0 1 0; 0 0 1.0]
-
+@defVariable Rotation3 SpecialOrthogonalGroup(3) SA[1 0 0; 0 1 0; 0 0 1.0]
 
 @defVariable(
   RotVelPos,
-  Manifolds.ProductGroup(
-    ProductManifold(
-      SpecialOrthogonal(3), 
-      TranslationGroup(3), 
-      TranslationGroup(3)
-    ),
-    LeftInvariantRepresentation()
-  ),
+  SpecialOrthogonalGroup(3) × TranslationGroup(3) × TranslationGroup(3),
   ArrayPartition(
     SA[1 0 0; 0 1 0; 0 0 1.0], 
     SA[0; 0; 0.0], 
@@ -64,13 +63,7 @@ Future:
 # 3 translations and 3 velocity in graph-base-frame
 @defVariable(
   VelPos3,
-  Manifolds.ProductGroup(
-    ProductManifold(
-      TranslationGroup(3),
-      TranslationGroup(3)
-    ),
-    LeftInvariantRepresentation()
-  ),
+  TranslationGroup(3) × TranslationGroup(3),
   ArrayPartition(
     SA[0; 0; 0.0], 
     SA[0; 0; 0.0]
@@ -101,10 +94,7 @@ Note
 """
 @defVariable(
   DynPose2,
-  Manifolds.ProductGroup(
-    ProductManifold(SpecialEuclidean(2; vectors=HybridTangentRepresentation()), TranslationGroup(2)),
-    LeftInvariantRepresentation()
-  ),
+  TranslationGroup(3) × SpecialOrthogonalGroup(3) × TranslationGroup(2), #FIXME SOnxRn(2) or SE(2)
   ArrayPartition(ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0]),SA[0;0.0])
 )
 

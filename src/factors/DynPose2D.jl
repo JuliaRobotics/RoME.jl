@@ -21,7 +21,7 @@ function getSample(cf::CalcFactor{<:DynPose2VelocityPrior})
   Xc = [rand(Zpose);rand(Zvel)]
   
   # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
-  X = hat(M, p, Xc)
+  X = hat(LieAlgebra(M), Xc)
   points = exp(M, p, X)
 
   return points
@@ -144,7 +144,7 @@ $(TYPEDEF)
 Base.@kwdef struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeMinimize
   Z::T = MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))
 end
-preambleCache(::AbstractDFG, ::AbstractVector{<:DFGVariable}, ::DynPose2DynPose2) = zeros(5)
+preambleCache(::AbstractDFG, ::AbstractVector{<:VariableCompute}, ::DynPose2DynPose2) = zeros(5)
 
 # FIXME ON FIRE, must update to new Manifolds style factors
 getManifold(::DynPose2DynPose2) = getManifold(DynPose2)

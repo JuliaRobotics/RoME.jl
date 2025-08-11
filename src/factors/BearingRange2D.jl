@@ -12,7 +12,7 @@ mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.Sampla
   range::R
 end
 
-getManifold(::IIF.InstanceType{<:Pose2Point2BearingRange}) = ProductGroup(ProductManifold(SpecialOrthogonal(2), TranslationGroup(1)), LeftInvariantRepresentation())
+getManifold(::IIF.InstanceType{<:Pose2Point2BearingRange}) = SpecialOrthogonalGroup(2) × TranslationGroup(1)
 
 function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange})
   # defaults, TODO better reuse

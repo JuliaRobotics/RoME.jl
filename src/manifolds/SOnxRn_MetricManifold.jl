@@ -1,4 +1,6 @@
 
+using Manifolds: RiemannianMetric, MetricManifold, AbstractBasis
+using ManifoldsBase: submanifold_components
 
 # Left Invariant Rigid Body Kinematics Metric CrokeKumar eq 61.
 # A family of left invariant metrics:
@@ -84,78 +86,15 @@ Manifolds.identity_element(::typeof(SOnxRn_MetricManifold(2))) = ArrayPartition(
 Manifolds.identity_element(::typeof(SOnxRn_MetricManifold(3))) = ArrayPartition(SA[0,0,0.0],SA[1 0 0; 0 1 0; 0 0 1.0])
 
 #FIXME remove, only temporary workaround as first signiture is used in many places
-@deprecate LieGroups.identity_element(G::LieGroup, p)  identity_element(G, typeof(p)) false
+# @deprecate LieGroups.identity_element(G::AbstractLieGroup, p)  identity_element(G, typeof(p)) false
 
 # FIXME why is this still needed, hopefully can be removed soon 🐛💥
-Base.convert(::Type{<:Tuple}, ::typeof(SOnxRn_MetricManifold(2))) = (:Euclid,:Euclid,:Circular)
+# Base.convert(::Type{<:Tuple}, ::typeof(SOnxRn_MetricManifold(2))) = (:Euclid,:Euclid,:Circular)
+AMP._manifoldtuple(::typeof(SOnxRn_MetricManifold(2))) = (:Euclid,:Euclid,:Circular)
+AMP._manifoldtuple(::typeof(SOnxRn_MetricManifold(3))) = (:Euclid,:Euclid,:Euclid,:Circular,:Circular,:Circular)
 
+#FIXME
+DFG.getPointIdentity(::typeof(SOnxRn_MetricManifold(2))) = ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0])
+DFG.getPointIdentity(::typeof(SOnxRn_MetricManifold(3))) = ArrayPartition(SA[0,0,0.0],SA[1 0 0; 0 1 0; 0 0 1.0])
 
-## =======================================================================================
-## SE2 + metric
-## TODO move to test file
-if false
-M = SOnxRn_MetricManifold(2)
-G = base_manifold(M)
-ε = identity_element(M)
-T = typeof(identity_element(M)) 
-Xⁱ = [10, 1, pi/4]
-X = hat(LieAlgebra(G), Xⁱ, T)
-p = exp(base_manifold(G), ε, X)
-q = compose(G, p, exp(base_manifold(G), ε, X))
-
-q ≈ exp(M, p, X)
-X ≈ log(M, p, q)
-
-
-Xⁱ = [1, 1, 1]
-X = hat(LieAlgebra(G), Xⁱ, T)
-p = exp(base_manifold(G), ε, X)
-
-W = diagm([1,1,2])
-
-XX = hat(LieAlgebra(G), Xⁱ)
-0.5*tr(XX*W*XX')
-inner(M, p, X, X)
-inner(base_manifold(G), p, X, X)
-
-Manifolds.distance(M, ε, p)
-Manifolds.distance(base_manifold(G), ε, p)
-
-## SE3 + metric
-
-M = SOnxRn_MetricManifold(3)
-G = base_manifold(M)
-ε = identity_element(M)
-T = typeof(identity_element(M)) 
-Xⁱ = [10, 1, 0, 0, 0, pi/4]
-X = hat(LieAlgebra(G), Xⁱ, T)
-p = exp(base_manifold(G), ε, X)
-q = compose(G, p, exp(base_manifold(G), ε, X))
-
-q ≈ exp(M, p, X)
-X ≈ log(M, p, q)
-
-
-Xⁱ = [0, 0, 0, 0, 1, 1]
-X = hat(LieAlgebra(G), Xⁱ, T)
-p = exp(base_manifold(G), ε, X)
-
-0.5*tr(X.x[2]*X.x[2]')
-dot(X.x[2], X.x[2])
-
-inner(M, p, X, X)
-inner(base_manifold(G), p, X, X)
-
-Manifolds.distance(M, ε, p)
-Manifolds.distance(base_manifold(G), ε, p)
-
-Xⁱ = [1, 1, 0, 0, 1, 1]
-W = diagm([1,1,1,2])
-X = hat(LieAlgebra(G), Xⁱ, T)
-XX = hat(LieAlgebra(G), Xⁱ)
-0.5*tr(XX*W*XX')
-inner(M, p, X, X)
-inner(base_manifold(G), p, X, X)
-
-
-end
+LieGroups.LieAlgebra(G::SOnxRn_MetricManifoldType) = LieAlgebra(base_manifold(G))
