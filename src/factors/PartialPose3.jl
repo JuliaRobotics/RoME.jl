@@ -17,10 +17,11 @@ end
 PriorPose3ZRP(z::SamplableBelief,rp::SamplableBelief) = PriorPose3ZRP(;z, rp)
 
 # TODO should be dim 3 manifold
-getManifold(zrp::PriorPose3ZRP) = ProductManifold(TranslationGroup(1),RealCircleGroup(),RealCircleGroup())
+DFG.getManifold(zrp::Type{<:PriorPose3ZRP}) = TranslationGroup(1) × CircleGroup(ℝ) × CircleGroup(ℝ)
 # DIDNT WORK YET, partials need more attention:  getManifoldPartial(getManifold(Pose3), [zrp.partial...;]) 
 
-Manifolds.identity_element(::typeof(ProductManifold(TranslationGroup(1),RealCircleGroup(),RealCircleGroup())),dummy=nothing) = ArrayPartition([0.], [0.], [0.])
+#FIXME why was the type piracy needed here?
+# Manifolds.identity_element(::typeof(ProductManifold(TranslationGroup(1),CircleGroup(ℝ),CircleGroup(ℝ))),dummy=nothing) = ArrayPartition([0.], [0.], [0.])
 
 #FIXME update to also only one measurement
 function getSample(cf::CalcFactor{<:PriorPose3ZRP})
@@ -37,7 +38,7 @@ function getSample(cf::CalcFactor{<:PriorPose3ZRP})
 
   # FIXME, this is probably not quite right
   # to Lie exponential parameterization, notice world reference
-  w_Cp = vee(Mf, Identity(Mf), log(Mf, Identity(Mf), pt))
+  w_Cp = vee(LieAlgebra(Mf), log(Mf, pt))
   return ArrayPartition(
     [w_Cp[cf.factor.partial[1]]], 
     [w_Cp[cf.factor.partial[2]]], 
@@ -55,10 +56,10 @@ Base.@kwdef struct PackedPriorPose3ZRP <: AbstractPackedFactor
   zdata::PackedSamplableBelief
   rpdata::PackedSamplableBelief
 end
-function convert(::Type{PriorPose3ZRP}, d::PackedPriorPose3ZRP)
+function DFG.unpack(d::PackedPriorPose3ZRP)
   PriorPose3ZRP( convert(SamplableBelief, d.zdata), convert(SamplableBelief, d.rpdata)  )
 end
-function convert(::Type{PackedPriorPose3ZRP}, d::PriorPose3ZRP)
+function DFG.pack(d::PriorPose3ZRP)
   PackedPriorPose3ZRP( convert(PackedSamplableBelief, d.z), convert(PackedSamplableBelief, d.rp) )
 end
 
@@ -109,13 +110,13 @@ Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) = error("Pose3Pose3XY
 # Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,4,5,6))   # (1,2,6))
 Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,6))
 
-getManifold(::Pose3Pose3XYYaw) = SpecialEuclidean(2; vectors=HybridTangentRepresentation())
+DFG.getManifold(::Type{<:Pose3Pose3XYYaw}) = SOnxRn_MetricManifold(2)
 
 
 ## NOTE, Yaw only works if you assume a preordained global reference point, such as identity_element(Pose3)
 function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
   #
-  M = SpecialEuclidean(2; vectors=HybridTangentRepresentation())
+  M = SOnxRn_MetricManifold(2)
 
   rx = normalize(view(wTp.x[2],1:2, 1))
   R = SA[rx[1] -rx[2];
@@ -127,10 +128,10 @@ function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
          rx[2]  rx[1]]
   q = ArrayPartition(view(wTq.x[1], 1:2), R)
 
-  q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) 
+  q̂ = exp(M, p, X) 
   #TODO allocalte for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
-  vee!(M, Xc, q, log(M, q, q̂))
+  vee!(LieAlgebra(M), Xc, log(M, q, q̂))
   return Xc
 
 end
@@ -173,11 +174,11 @@ Base.@kwdef struct PackedPose3Pose3XYYaw <: AbstractPackedFactor
   Z::PackedSamplableBelief
 end
 
-function convert(::Type{<:Pose3Pose3XYYaw}, d::PackedPose3Pose3XYYaw)
+function DFG.unpack(d::PackedPose3Pose3XYYaw)
   return Pose3Pose3XYYaw( convert(SamplableBelief, d.Z))
 end
 
-function convert(::Type{PackedPose3Pose3XYYaw}, d::Pose3Pose3XYYaw)
+function DFG.pack(d::Pose3Pose3XYYaw)
   return PackedPose3Pose3XYYaw( convert(PackedSamplableBelief, d.Z))
 end
 
@@ -207,7 +208,7 @@ struct Pose3Pose3Rotation{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
 end
 Pose3Pose3Rotation(z::SamplableBelief) = Pose3Pose3Rotation(z, (4,5,6))
 
-getManifold(::Pose3Pose3Rotation) = SpecialOrthogonalGroup(3)
+DFG.getManifold(::Type{<:Pose3Pose3Rotation}) = SpecialOrthogonalGroup(3)
 
 function (cfo::CalcFactor{<:Pose3Pose3Rotation})(Xm, wTp, wTq )
   #
@@ -235,11 +236,11 @@ Base.@kwdef struct PackedPose3Pose3Rotation <: AbstractPackedFactor
   Z::PackedSamplableBelief
 end
 
-function convert(::Type{<:Pose3Pose3Rotation}, d::PackedPose3Pose3Rotation)
+function DFG.unpack(d::PackedPose3Pose3Rotation)
   return Pose3Pose3Rotation( convert(SamplableBelief, d.Z))
 end
 
-function convert(::Type{PackedPose3Pose3Rotation}, d::Pose3Pose3Rotation)
+function DFG.pack(d::Pose3Pose3Rotation)
   return PackedPose3Pose3Rotation( convert(PackedSamplableBelief, d.Z))
 end
 

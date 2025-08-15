@@ -1,6 +1,5 @@
-using Manifolds
 using StaticArrays
-using Rotations
+using Rotations: RotationVec
 using LinearAlgebra
 using DistributedFactorGraphs
 using Dates
@@ -29,14 +28,18 @@ Affine representation
 ArrayPartition representation (TODO maybe swop order to [Δp; Δv; ΔR; Δt])
 Δ = [ΔR; Δv; Δp; Δt] 
 """
-const SpecialGalileanGroup = GroupManifold{ℝ, SpecialGalileanManifold, MultiplicationOperation}
-
-SpecialGalileanGroup() = GroupManifold(SpecialGalileanManifold(), MultiplicationOperation(), LeftInvariantRepresentation())
+const SpecialGalileanGroup = LieGroup{ℝ, MatrixMultiplicationGroupOperation, SpecialGalileanManifold}#GroupManifold{ℝ, SpecialGalileanManifold, MultiplicationOperation}
+SpecialGalileanGroup() = LieGroup(SpecialGalileanManifold(), MatrixMultiplicationGroupOperation())
 
 Manifolds.manifold_dimension(::SpecialGalileanManifold) = 9
 
 
-function Manifolds.identity_element(M::SpecialGalileanGroup) # was #SMatrix{5,5,Float64}(I)
+# SGalProductPoint
+# SGalMatrixPoint
+# SGalProductTangentVector
+# SGalMatrixTangentVector
+
+function LieGroups.identity_element(M::SpecialGalileanGroup) # was #SMatrix{5,5,Float64}(I)
     ArrayPartition(
         SMatrix{3,3,Float64}(I), # ΔR
         @SVector(zeros(3)),      # Δv
@@ -47,7 +50,7 @@ end
 
 DFG.getPointIdentity(M::SpecialGalileanGroup) = identity_element(M)
 
-function Manifolds.affine_matrix(G::SpecialGalileanGroup, p::ArrayPartition{T}) where T<:Real
+function affine_matrix(G::SpecialGalileanGroup, p::ArrayPartition{T}) where T<:Real
     return vcat(
         hcat(p.x[1], p.x[2], p.x[3]), 
         @SMatrix [0 0 0 1 p.x[4];
@@ -63,7 +66,7 @@ function vector_affine_matrix(G::SpecialGalileanGroup, X::ArrayPartition{T}) whe
     )
 end
 
-function Manifolds.inv(M::SpecialGalileanGroup, p)
+function LieGroups.inv(M::SpecialGalileanGroup, p)
     ΔR = p.x[1]
     Δv = p.x[2]
     Δp = p.x[3]
@@ -77,7 +80,7 @@ function Manifolds.inv(M::SpecialGalileanGroup, p)
     )
 end
 
-function Manifolds.compose(M::SpecialGalileanGroup, p, q)
+function LieGroups.compose(M::SpecialGalileanGroup, p, q)
     ΔR = p.x[1]
     Δv = p.x[2]
     Δp = p.x[3]
@@ -96,7 +99,10 @@ function Manifolds.compose(M::SpecialGalileanGroup, p, q)
     )
 end
 
-function Manifolds.hat(M::SpecialGalileanGroup, Xⁱ::SVector{10, T}) where T<:Real
+function LieGroups.hat(
+    M::Union{<:SpecialGalileanGroup, <:typeof(LieAlgebra(SpecialGalileanGroup()))},
+    Xⁱ::SVector{10, T}
+) where T<:Real
     return ArrayPartition(
         ApproxManifoldProducts.skew(Xⁱ[SA[7:9...]]), # θ ωΔt
         Xⁱ[SA[4:6...]],       # ν aΔt
@@ -105,7 +111,10 @@ function Manifolds.hat(M::SpecialGalileanGroup, Xⁱ::SVector{10, T}) where T<:R
     )
 end
 
-function Manifolds.vee(M::SpecialGalileanGroup, X::ArrayPartition{T}) where T<:Real
+function LieGroups.vee(
+    M::Union{<:SpecialGalileanGroup, <:typeof(LieAlgebra(SpecialGalileanGroup()))},
+    X::ArrayPartition{T}
+) where T<:Real
     return SVector{10,T}(
         X.x[3]...,   # ν aΔt 4:6
         X.x[2]...,   # ρ vΔt 1:3
@@ -148,9 +157,7 @@ function _P(θ⃗)
     end
 end
 
-#TODO rename to exp_lie?
-Manifolds.exp(M::SpecialGalileanGroup, X::ArrayPartition{T}) where T<:Real = error("use exp_lie instead")
-function Manifolds.exp_lie(M::SpecialGalileanGroup, X::ArrayPartition{T}) where T<:Real
+function LieGroups.exp(M::SpecialGalileanGroup, X::ArrayPartition{T}) where T<:Real
     θ⃗ₓ = X.x[1] # ωΔt
     
     ν = X.x[2]  # aΔt
@@ -164,7 +171,7 @@ function Manifolds.exp_lie(M::SpecialGalileanGroup, X::ArrayPartition{T}) where 
     P = _P(θ⃗)
     Q = _Q(θ⃗)
 
-    M_SO3 = SpecialOrthogonal(3)
+    M_SO3 = SpecialOrthogonalGroup(3)
     q = ArrayPartition(
         exp(M_SO3, getPointIdentity(M_SO3), θ⃗ₓ),
         Q*ν,
@@ -174,14 +181,12 @@ function Manifolds.exp_lie(M::SpecialGalileanGroup, X::ArrayPartition{T}) where 
     return q
 end
 
-#TODO is this now exp_inv? to fit with Manifold.jl (until LieGroups.jl is done)
-function Manifolds.exp(M::SpecialGalileanGroup, p::ArrayPartition{T}, X::ArrayPartition{T}) where T<:Real
-    q = exp_lie(M, X)
-    return Manifolds.compose(M, p, q)
+function LieGroups.exp(M::SpecialGalileanGroup, p::ArrayPartition{T}, X::ArrayPartition{T}) where T<:Real
+    q = exp(M, X)
+    return LieGroups.compose(M, p, q)
 end
 
-Manifolds.log(M::SpecialGalileanGroup, p::ArrayPartition{T}) where T<:Real = error("use log_lie instead")
-function Manifolds.log_lie(M::SpecialGalileanGroup, p)
+function LieGroups.log(M::SpecialGalileanGroup, p)
     ΔR = p.x[1]
     Δv = p.x[2]
     Δp = p.x[3]
@@ -195,7 +200,7 @@ function Manifolds.log_lie(M::SpecialGalileanGroup, p)
     iQ = inv(Q)
     
     return ArrayPartition(
-        log_lie(SpecialOrthogonal(3), ΔR), # θ⃗ₓ
+        log(SpecialOrthogonalGroup(3), ΔR), # θ⃗ₓ
         iQ*Δv, # ν aΔt
         iQ*(Δp - P*iQ*Δv*Δt), # ρ vΔt 
         Δt
@@ -205,8 +210,8 @@ end
 #TODO TEST 
 #TODO is this now log_inv? to fit with Manifold.jl (until LieGroups.jl is done)
 # right-⊖ : Xₚ = q ⊖ p = log(p⁻¹∘q)
-function Manifolds.log(M::SpecialGalileanGroup, p, q)
-    return log_lie(M, Manifolds.compose(M, inv(M, p), q))
+function LieGroups.log(M::SpecialGalileanGroup, p, q)
+    return log(M, LieGroups.compose(M, inv(M, p), q))
 end
 
 # compute the expected delta from p to q on the SpecialGalileanGroup
@@ -318,7 +323,7 @@ Base.@kwdef struct IMUDeltaFactor{T <: SamplableBelief} <: AbstractManifoldMinim
 end
 
 function IIF.getSample(cf::CalcFactor{<:IMUDeltaFactor})
-    return exp_lie(SpecialGalileanGroup(), hat(SpecialGalileanGroup(), SA[rand(cf.factor.Z)..., cf.factor.Δt]))
+    return exp(SpecialGalileanGroup(), hat(SpecialGalileanGroup(), SA[rand(cf.factor.Z)..., cf.factor.Δt]))
 end
 
 function IIF.getFactorMeasurementParametric(f::IMUDeltaFactor)
@@ -326,10 +331,10 @@ function IIF.getFactorMeasurementParametric(f::IMUDeltaFactor)
     return f.Δ, iΣ
 end
 
-IIF.getManifold(::IMUDeltaFactor) = SpecialGalileanGroup()
+IIF.getManifold(::Type{<:IMUDeltaFactor}) = SpecialGalileanGroup()
 
-function IIF.preambleCache(fg::AbstractDFG, vars::AbstractVector{<:DFGVariable}, ::IMUDeltaFactor)
-    if vars[1] isa DFGVariable{<:Pose3}
+function IIF.preambleCache(fg::AbstractDFG, vars::AbstractVector{<:VariableCompute}, ::IMUDeltaFactor)
+    if vars[1] isa VariableCompute{<:Pose3}
         (timestams = (vars[1].nstime, vars[3].nstime),)
     else
         (timestams = (vars[1].nstime, vars[2].nstime),)
@@ -348,11 +353,11 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     #
     M = SpecialGalileanGroup()
     # imu measurment Delta, corrected for bias with # b̄ = cf.factor.b #TODO check if (b - cf.factor.b) is correct
-    Δi = Manifolds.compose(M, Δmeas, exp_lie(M, hat(M, cf.factor.J_b * (b - cf.factor.b))))
+    Δi = LieGroups.compose(M, Δmeas, exp(M, hat(M, cf.factor.J_b * (b - cf.factor.b))))
     # expected delta from p to q
     Δhat = boxminus(M, p, q)
     # residual 
-    Xhat = log_lie(M, Manifolds.compose(M, inv(M, Δi), Δhat))
+    Xhat = log(M, LieGroups.compose(M, inv(M, Δi), Δhat))
 
     Xc_hat = vee(M, Xhat)
     @assert isapprox(Δi.x[4], Δhat.x[4], atol=1e-6) "Time descrepancy in IMUDeltaFactor: Δt = $(Xc_hat[10]), $(Δi.x[4]), $(Δhat.x[4])"
@@ -415,9 +420,9 @@ function integrateIMUDelta(Δij, Σij, Δij_J_b, a, ω, a_b, ω_b, δt, Σy)
     Xc = SVector{10,Float64}(vcat([0., 0, 0], aδt, ωδt, δt))
 
     X = hat(M, Xc)
-    δjk = exp_lie(M, X)
+    δjk = exp(M, X)
 
-    Δik = Manifolds.compose(M, Δij, δjk)
+    Δik = LieGroups.compose(M, Δij, δjk)
 
     # Jacobians
     τ_J_y = _τδt(δt)
@@ -469,7 +474,7 @@ function IMUDeltaFactor(
     Δ, Σ, J_b = preintegrateIMU(accels, gyros, deltatimes, Σy, a_b, ω_b)
     Δt = Δ.x[4]
     
-    Xc = vee(M, log_lie(M, Δ))
+    Xc = vee(M, log(M, Δ))
     
     SM = SymmetricPositiveDefinite(9)
     S = Σ[1:9,1:9]

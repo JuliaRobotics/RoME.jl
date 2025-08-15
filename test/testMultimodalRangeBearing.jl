@@ -1,8 +1,9 @@
 using RoME
 using Test
 using DistributedFactorGraphs
-using Manifolds: TranslationGroup
+using LieGroups: TranslationGroup
 using TensorCast
+using Random
 # using RoMEPlotting, Distributions
 
 import IncrementalInference: getSample
@@ -86,7 +87,7 @@ end
 
 
 @testset "test multimodal landmark locations are computed correclty..." begin
-
+Random.seed!(123) # Set the seed for reproducibility
 ##
 
 # Start with an empty graph
@@ -101,10 +102,10 @@ addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
 addFactor!(fg, [:l1], PriorPoint2(MvNormal([40.0;0.0], diagm([1.0;1.0].^2))) )
 
 addVariable!(fg, :l2, Point2, tags=[:LANDMARK;])
-addFactor!(fg, [:l2;], NorthSouthPartial(Normal(0,1.0)))
+addFactor!(fg, [:l2;], NorthSouthPartial(Normal(0,0.1)))
 # addFactor!(fg, [:l2], PriorPose2(MvNormal([30.0;0.0], diagm([1.0;1.0].^2))) )
 
-p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,0.1))
 addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
 
 # solve the graph

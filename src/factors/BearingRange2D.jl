@@ -12,7 +12,7 @@ mutable struct Pose2Point2BearingRange{B <: IIF.SamplableBelief, R <: IIF.Sampla
   range::R
 end
 
-getManifold(::IIF.InstanceType{<:Pose2Point2BearingRange}) = SpecialOrthogonalGroup(2) × TranslationGroup(1)
+DFG.getManifold(::IIF.InstanceType{<:Pose2Point2BearingRange}) = SpecialOrthogonalGroup(2) × TranslationGroup(1)
 
 function getSample(cfo::CalcFactor{<:Pose2Point2BearingRange})
   # defaults, TODO better reuse
@@ -78,10 +78,10 @@ Base.@kwdef struct PackedPose2Point2BearingRange <: AbstractPackedFactor
     rangstr::PackedSamplableBelief
 end
 
-function convert( ::Type{<:PackedPose2Point2BearingRange}, d::Pose2Point2BearingRange )
+function DFG.pack(d::Pose2Point2BearingRange )
   return PackedPose2Point2BearingRange( convert(PackedSamplableBelief, d.bearing), convert(PackedSamplableBelief, d.range) )
 end
 
-function convert( ::Type{<:Pose2Point2BearingRange}, d::PackedPose2Point2BearingRange )
-  Pose2Point2BearingRange( convert(SamplableBelief, d.bearstr), convert(SamplableBelief, d.rangstr) )
+function DFG.unpack(d::PackedPose2Point2BearingRange )
+  return Pose2Point2BearingRange( convert(SamplableBelief, d.bearstr), convert(SamplableBelief, d.rangstr) )
 end

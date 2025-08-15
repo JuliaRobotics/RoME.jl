@@ -4,6 +4,7 @@ using TransformUtils
 using Statistics
 using Test
 using StaticArrays
+using LieGroups
 using Manifolds
 
 
@@ -104,7 +105,7 @@ T = submanifold_component(muX1,1)
 @test sum(map(Int,abs.(T) .< 0.5)) == 3
 
 Rc = submanifold_component(muX1,2)
-@test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
+@test isapprox(SpecialOrthogonalGroup(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
 coX1 = IIF.getCoordinates.(Pose3, getVal(fg,:x1))
 @show stdX1 = Statistics.std(coX1)
@@ -136,9 +137,7 @@ end
 ##
 
 N
-odo = SE3([10;0;0], Quaternion(0))
-# pts0X2 = projectParticles(getVal(fg,:x1), MvNormal(veeEuler(odo), odoCov) )
-odoconstr = Pose3Pose3( MvNormal(veeEuler(odo), odoCov) )
+odoconstr = Pose3Pose3( MvNormal([10.0, 0, 0, 0, 0, 0], odoCov) )
 v2 = addVariable!(fg,:x2, Pose3, N=N) # pts0X2
 addFactor!(fg,[:x1;:x2],odoconstr, inflation=0.1)
 # @test !isInitialized(fg, :x2)
@@ -146,25 +145,43 @@ addFactor!(fg,[:x1;:x2],odoconstr, inflation=0.1)
 
 ## test opposites
 
-# should be all zero
-p = deepcopy(ϵ)
-# q = deepcopy(ϵ)
-# submanifold_component(q,1)[1] = 10.0
-q  = ArrayPartition(SA[10.0, 0.0, 0.0], SA[1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0])
-X = Manifolds.hat(M, ϵ, [10.,0,0,0,0,0])
-res = calcFactorResidual(fg, :x1x2f1, X, p, q)
-@test norm(res) < 1e-10
+#test factor :x1x2f1 residuals (zero) at a few points
+G = getManifold(getFactor(fg, :x1x2f1))
 
-# trivial fail case
-# res = calcFactorResidual(fg, :x1x2f1, [10;0;0;0;0;0.0], zeros(6), [10;0;0;pi;pi;pi])
-@warn "suppressing trivial Pose3 fail case until RoME.jl #244 has been completed."
-#TODO is this the case for the warn?
-p = deepcopy(ϵ)
-q = IIF.getPoint(Pose3, [10;0;0;pi;pi;pi])
-X = Manifolds.hat(M, ϵ, [10.,0,0,pi,pi,pi])
+points = [
+    deepcopy(ϵ),
+    exp(G, hat(G, ϵ, [10.;0;0;normalize([1,1,1])*2pi/3]))
+]
 
+meas_coords = [
+    SA[10.,0,0,0,0,0],
+    SA[10.,0,0,0,0,pi-0.01],
+    SVector{6}([10.;0;0;normalize([1,1,1])*(pi-1e-3)]),
+]
+
+for p in points, c in meas_coords
+    X = hat(LieAlgebra(G), c, typeof(p))
+    q = exp(G, p, X)
+    res = calcFactorResidual(fg, :x1x2f1, X, p, q)
+    @test norm(res) < 1e-9
+end
+
+p = points[2]
+# the measurement
+X = hat(LieAlgebra(G), SA[1, -2, 3, 0.1, -0.2, 0.3], typeof(p))
+# the state
+X̂ = hat(LieAlgebra(G), SA[1.1, -2.1, 2.9, 0.11, -0.21, 0.29], typeof(p))
+q = exp(G, p, X̂)
 res = calcFactorResidual(fg, :x1x2f1, X, p, q)
-@test norm(res) < 1e-10
+@test all(isapprox.(res, vee(LieAlgebra(G), X - X̂)))
+
+#FIXME add injection radius assertions to factor observations (measurements)
+# X here is not within the injectivity radius of G, therefore the log will not be valid and the results wrong
+# p = deepcopy(ϵ)
+# q = IIF.getPoint(Pose3, [10;0;0;pi;pi;pi])
+# X = Manifolds.hat(G, ϵ, [10.,0,0,pi,pi,pi])
+# res = calcFactorResidual(fg, :x1x2f1, X, p, q)
+# @test norm(res) < 1e-10
 
 
 ## test following introduction of inflation, see IIF #1051
@@ -207,13 +224,13 @@ T = submanifold_component(mu,1)
 # slightly lax bound
 @test isapprox(T, [0,0,0], atol=0.3) # 0.6
 Rc = submanifold_component(mu,2)
-@test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
+@test isapprox(SpecialOrthogonalGroup(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
 mu = mean(M, getVal(fg,:x2))
 T = submanifold_component(mu,1)
 @test isapprox(T, [10,0,0], atol=1.0)
 Rc = submanifold_component(mu,2)
-@test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
+@test isapprox(SpecialOrthogonalGroup(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
 
 end
@@ -226,13 +243,13 @@ mu = mean(M, getVal(fg,:x1))
 T = submanifold_component(mu,1)
 @test isapprox(T, [0,0,0], atol=1.5)
 Rc = submanifold_component(mu,2)
-@test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
+@test isapprox(SpecialOrthogonalGroup(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
 mu = mean(M, getVal(fg,:x2))
 T = submanifold_component(mu,1)
 @test isapprox(T, [10,0,0], atol=1.5)
 Rc = submanifold_component(mu,2)
-@test isapprox(SpecialOrthogonal(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
+@test isapprox(SpecialOrthogonalGroup(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol=0.25)
 
 ##
 end

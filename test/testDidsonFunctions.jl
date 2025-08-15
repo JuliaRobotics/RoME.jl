@@ -3,7 +3,7 @@
 using RoME
 using DistributedFactorGraphs
 using Distributions
-using Manifolds: TranslationGroup
+using LieGroups: TranslationGroup
 using Test
 ##
 
@@ -51,7 +51,7 @@ addFactor!(fg, [:x0;:x1], meas, graphinit=false)
 pts = approxConv(fg, :x0x1f1, :x0)
 
 
-p2 = manikde!(SpecialEuclidean(3; vectors=HybridTangentRepresentation()), pts);
+p2 = manikde!(SOnxRn_MetricManifold(3), pts);
 
 
 end

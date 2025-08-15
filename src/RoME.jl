@@ -21,7 +21,7 @@ using
   DistributedFactorGraphs,
   TensorCast,
   ManifoldsBase,
-  Manifolds,
+  # Manifolds,
   LieGroups
 
 using StaticArrays
@@ -29,20 +29,22 @@ using PrecompileTools
 using RecursiveArrayTools
 # to avoid name conflicts
 import Manifolds
-using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component, Identity, affine_matrix
+# using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component, Identity, affine_matrix
 
-import Manifolds: project, project!, identity_element
+using ManifoldsBase: check_point, submanifold_component, submanifold_components
+using Manifolds: SymmetricPositiveDefinite
+# import Manifolds: project, project!, identity_element
 
 import Rotations as _Rot
 # import Rotations: ⊕, ⊖ # TODO deprecate
 
-export SpecialOrthogonal, SpecialEuclidean
+export SpecialOrthogonalGroup, SpecialEuclidean
 export submanifold_component
 # using Graphs,  # TODO determine how many parts still require Graphs still directly
 
 
 import Base: +, \, convert
-import TransformUtils: ⊖, ⊕, convert, ominus, veeQuaternion
+import TransformUtils: ⊕, convert, ominus, veeQuaternion
 import IncrementalInference: MB
 import IncrementalInference: convert, getSample, reshapeVec2Mat, DFG
 import IncrementalInference: getMeasurementParametric
@@ -68,9 +70,6 @@ include("entities/SpecialDefinitions.jl")
 
 #uses DFG v0.10.2 @defVariable for above
 include("services/FixmeManifolds.jl")
-include("manifolds/SOnxRn_MetricManifold.jl")
-
-include("variables/VariableTypes.jl")
 
 ## More factor types
 # RoME internal factors (FYI outside factors are easy, see Caesar documentation)

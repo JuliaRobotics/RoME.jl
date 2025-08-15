@@ -14,7 +14,7 @@ Base.@kwdef mutable struct MutablePose2Pose2Gaussian  <: IIF.AbstractManifoldMin
 end
 MutablePose2Pose2Gaussian(Z::MvNormal) = MutablePose2Pose2Gaussian(;Z)
 
-DFG.getManifold(::MutablePose2Pose2Gaussian) = getManifold(Pose2) # Manifolds.SpecialEuclidean(2)
+DFG.getManifold(::Type{<:MutablePose2Pose2Gaussian}) = getManifold(Pose2) # Manifolds.SpecialEuclidean(2)
 
 
 """

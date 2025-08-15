@@ -27,9 +27,9 @@ function (cf::CalcFactor{<:PriorPose2})(
             m::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
             p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
 
-  M = getManifold(Pose2)
-  X = log(M, p, m) # Currently X ∈ TₚM, #TODO should it be TₘM?
-  return vee(M, p, X)
+  M = getManifold(PriorPose2)
+  X = log(M, p, m) # Currently X ∈ TₚM, #TODO should it be TₘM? Also update the rest if this is wrong.
+  return vee(LieAlgebra(M), X)
 end
 
 #TODO Serialization of reference point p 
@@ -41,11 +41,11 @@ $(TYPEDEF)
 Base.@kwdef struct PackedPriorPose2  <: AbstractPackedFactor
     Z::PackedSamplableBelief
 end
-function convert(::Type{PackedPriorPose2}, d::PriorPose2)
-  return PackedPriorPose2(convert(PackedSamplableBelief, d.Z))
+function DFG.pack(d::PriorPose2)
+  return PackedPriorPose2(packDistribution(d.Z))
 end
-function convert(::Type{PriorPose2}, d::PackedPriorPose2)
-  return PriorPose2(convert(SamplableBelief, d.Z))
+function DFG.unpack(d::PackedPriorPose2)
+  return PriorPose2(unpackDistribution(d.Z))
 end
 
 

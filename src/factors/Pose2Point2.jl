@@ -17,18 +17,20 @@ end
 Pose2Point2(Z::SamplableBelief) = Pose2Point2(;Z)
 
 # TODO verify this is right for partial factor
-getManifold(::InstanceType{Pose2Point2}) = getManifold(Point2)
+DFG.getManifold(::InstanceType{Pose2Point2}) = getManifold(Point2)
 
 # define the conditional probability constraint
 function (cfo::CalcFactor{<:Pose2Point2})(p_Xpq,
                                           w_T_p,
                                           w_Tl_q )
   #
-  M = SpecialEuclidean(2; vectors=HybridTangentRepresentation())
+  M = SOnxRn_MetricManifold(2)
 
   p_T_qhat = ArrayPartition(SA[p_Xpq[1];p_Xpq[2]], SMatrix{2,2}([1 0; 0 1.]))
   _w_T_p = ArrayPartition(SA[w_T_p.x[1]...], SMatrix{2,2}(w_T_p.x[2]))
-  w_H_qhat = affine_matrix(M, _w_T_p) * affine_matrix(M, p_T_qhat)
+  # w_H_qhat = affine_matrix(M, _w_T_p) * affine_matrix(M, p_T_qhat) #FIXME check this
+  w_H_qhat = LieGroups.compose(M, _w_T_p, p_T_qhat)
+
   # Issue, this produces ComposedFunction which errors on not having field .x[1]
   # w_T_qhat = compose(M, _w_T_p, p_T_qhat)
   return w_Tl_q .- w_H_qhat[1:2,end]
@@ -46,11 +48,11 @@ Base.@kwdef struct PackedPose2Point2 <: AbstractPackedFactor
     Z::PackedSamplableBelief
 end
 
-function convert(::Type{PackedPose2Point2}, obj::Pose2Point2{T}) where {T <: IIF.SamplableBelief}
+function DFG.pack(obj::Pose2Point2)
   return PackedPose2Point2(convert(PackedSamplableBelief, obj.Z))
 end
 
 # TODO -- should not be resorting to string, consider specialized code for parametric distribution types and KDEs
-function convert(::Type{Pose2Point2}, packed::PackedPose2Point2)
+function DFG.unpack(packed::PackedPose2Point2)
   Pose2Point2(convert(SamplableBelief, packed.Z))
 end

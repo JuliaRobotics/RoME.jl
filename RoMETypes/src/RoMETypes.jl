@@ -2,11 +2,16 @@ module RoMETypes
 
 using DistributedFactorGraphs
 using DocStringExtensions
-using Manifolds
+using LieGroups
 using RecursiveArrayTools
 using StaticArrays
+using LinearAlgebra
 
-import DistributedFactorGraphs: getVariableType, AbstractManifoldMinimize
+using ManifoldsBase: submanifold_components, TangentSpaceType, AbstractBasis, RiemannianMetric
+using Manifolds: MetricManifold
+
+import ManifoldsBase
+import Manifolds 
 
 export 
     Point2,
@@ -38,6 +43,9 @@ export
     PriorPose2,
     PackedPriorPose2
 
+export SOnxRn_MetricManifold
+
+include("manifolds/SOnxRn_MetricManifold.jl")
 include("variables/VariableTypes.jl")
 include("factors/FactorTypes.jl")
 

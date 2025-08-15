@@ -8,7 +8,7 @@ struct Polar <: IIF.InferenceVariable
   dims::Int
 end
 
-getManifold(::InstanceType{Polar}) = BearingRange_Manifold
+DFG.getManifold(::InstanceType{Polar}) = BearingRange_Manifold
 
 """
     $TYPEDEF

@@ -8,7 +8,7 @@ export
   DFG
 
 # from Manifolds
-export SpecialEuclidean
+export SpecialEuclideanGroup
 
 
 export

@@ -10,19 +10,16 @@ mutable struct DynPose2VelocityPrior{T1,T2} <: IncrementalInference.AbstractPrio
 end
 DynPose2VelocityPrior(z1::T1,z2::T2) where {T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} = DynPose2VelocityPrior{T1,T2}(z1,z2)
 
-DFG.getManifold(::DynPose2VelocityPrior) = getManifold(DynPose2)
+DFG.getManifold(::Type{<:DynPose2VelocityPrior}) = getManifold(DynPose2)
 
 function getSample(cf::CalcFactor{<:DynPose2VelocityPrior})
   Zpose = cf.factor.Zpose
   Zvel = cf.factor.Zvel
-  p = getPointIdentity(DynPose2())
   M = getManifold(cf)
-  
   Xc = [rand(Zpose);rand(Zvel)]
-  
   # X = get_vector.(Ref(M), Ref(p), Xc, Ref(DefaultOrthogonalBasis()))
   X = hat(LieAlgebra(M), Xc)
-  points = exp(M, p, X)
+  points = exp(M, X)
 
   return points
 end
@@ -141,13 +138,12 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct DynPose2DynPose2{T <: IIF.SamplableBelief} <: AbstractRelativeMinimize
-  Z::T = MvNormal(zeros(5), diagm([0.01;0.01;0.001;0.1;0.1].^2))
-end
+DFG.@defObservationType DynPose2DynPose2 RelativeObservation getManifold(DynPose2)
+
 preambleCache(::AbstractDFG, ::AbstractVector{<:VariableCompute}, ::DynPose2DynPose2) = zeros(5)
 
 # FIXME ON FIRE, must update to new Manifolds style factors
-getManifold(::DynPose2DynPose2) = getManifold(DynPose2)
+# DFG.getManifold(::Type{<:DynPose2DynPose2}) = getManifold(DynPose2)
 # FIXME, should produce tangents, not coordinates.
 getSample(cf::CalcFactor{<:DynPose2DynPose2}) = rand(cf.factor.Z)
 function (cf::CalcFactor{<:DynPose2DynPose2})(meas,
@@ -179,24 +175,3 @@ function compare(a::DynPose2DynPose2, b::DynPose2DynPose2; tol::Float64=1e-10)::
   # TP = TP && norm(a.reuseres - b.reuseres) < tol
   return TP
 end
-
-
-"""
-$(TYPEDEF)
-"""
-Base.@kwdef struct PackedDynPose2DynPose2 <: AbstractPackedFactor
-  Z::PackedSamplableBelief
-end
-
-function convert(::Type{PackedDynPose2DynPose2}, d::DynPose2DynPose2)
-  return PackedDynPose2DynPose2(convert(PackedSamplableBelief, d.Z))
-end
-function convert(::Type{DynPose2DynPose2}, d::PackedDynPose2DynPose2)
-  return DynPose2DynPose2(convert(SamplableBelief, d.Z))
-end
-
-
-
-
-
-#

@@ -30,13 +30,13 @@ Base.@kwdef struct Pose2Pose2{T<:IIF.SamplableBelief} <: IIF.AbstractManifoldMin
   Z::T = MvNormal(Diagonal([1.0; 1.0; 1.0]))
 end
 
-DFG.getManifold(::InstanceType{Pose2Pose2}) = Manifolds.SpecialEuclidean(2; vectors=HybridTangentRepresentation())
+DFG.getManifold(::InstanceType{Pose2Pose2}) = SOnxRn_MetricManifold(2)
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2()
 
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
   # X ∈ TₚM, X̂ ∈ TₚM, p,q ∈ M
-  M = getManifold(Pose2)
+  M = getManifold(Pose2Pose2)
   X̂ = log(M, p, q)
   return vee(M, p, X - X̂) # TODO check sign
 end

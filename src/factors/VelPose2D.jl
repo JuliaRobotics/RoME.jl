@@ -9,21 +9,16 @@ struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: 
 end
 VelPose2VelPose2(z1::SamplableBelief, z2::SamplableBelief) = VelPose2VelPose2(Pose2Pose2(z1), z2)
 
-getManifold(::InstanceType{VelPose2VelPose2}) = getManifold(DynPose2)
+DFG.getManifold(::InstanceType{VelPose2VelPose2}) = getManifold(DynPose2)
 
 preableCache(::AbstractDFG, ::AbstractVector{Symbol}, ::VelPose2VelPose2) = zeros(3)
 
 function getSample(cf::CalcFactor{<:VelPose2VelPose2})
     #Pose2 part
-    Xc = rand(cf.factor.Zpose.Z)
-    M = getManifold(Pose2)
-    ϵ = getPointIdentity(Pose2)
-    # ϵ = Manifolds.Identity(M)
-    Xpose = hat(M, ϵ, Xc)
-    #velocity part
-    Xvel = rand(cf.factor.Zvel)
-
-    return ArrayPartition(Xpose, Xvel)
+    Xc = [rand(cf.factor.Zpose.Z); rand(cf.factor.Zvel)]
+    M = getManifold(VelPose2VelPose2)
+    X = hat(LieAlgebra(M), Xc)
+    return exp(M, X)
 end
 
 
@@ -46,19 +41,19 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(X, p, q)
   #
   pose_res = Vector{Manifolds.number_eltype(X)}(undef, 3)
   #Pose2 part
-  M1 = getManifold(Pose2)
-  X1 = submanifold_component(X,1) 
-  p1 = submanifold_component(p,1) 
-  q1 = submanifold_component(q,1) 
-  ϵ1 = identity_element(M1, p1)
-  q̂1 = Manifolds.compose(M1, p1, exp(M1, ϵ1, X1))
+  M1 = getManifold(Pose2Pose2)
+  X1 = ArrayPartition(X.x[1], X.x[2])#submanifold_component(X,1)
+  p1 = ArrayPartition(p.x[1], p.x[2])#submanifold_component(p,1) 
+  q1 = ArrayPartition(q.x[1], q.x[2])#submanifold_component(q,1)
+  ϵ1 = getPointIdentity(M1)
+  q̂1 = exp(M1, p1, X1)
   vee!(M1, pose_res, q1, log(M1, q1, q̂1))
   
   #velocity part
   dt = Dates.value(cf.fullvariables[2].nstime - cf.fullvariables[1].nstime)*1e-9
-  X2 = submanifold_component(X,2)
-  p2 = submanifold_component(p,2)
-  q2 = submanifold_component(q,2)
+  X2 = submanifold_component(X,3)
+  p2 = submanifold_component(p,3)
+  q2 = submanifold_component(q,3)
   # bDXij = TransformUtils.R(-wxi[3])*wDXij
   bDXij = transpose(submanifold_component(p1,2))*(q2 .- p2)
 

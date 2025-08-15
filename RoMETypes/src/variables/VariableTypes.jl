@@ -94,8 +94,10 @@ Note
 """
 @defVariable(
   DynPose2,
-  TranslationGroup(3) × SpecialOrthogonalGroup(3) × TranslationGroup(2), #FIXME SOnxRn(2) or SE(2)
-  ArrayPartition(ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0]),SA[0;0.0])
+  # SOnxRn_MetricManifold(2) × TranslationGroup(2), #FIXME SOnxRn(2) or SE(2)
+  # ArrayPartition(ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0]),SA[0;0.0])
+  TranslationGroup(2) × SpecialOrthogonalGroup(2) × TranslationGroup(2),
+  ArrayPartition(SA[0;0.0], SA[1 0; 0 1.0], SA[0;0.0])
 )
 
 

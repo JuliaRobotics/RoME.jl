@@ -1,12 +1,20 @@
+# NOTE we follow `residual = measurement - prediction` as a convention
+
+# NOTE ON PRIORS ON MANIFOLDS:
+# For prior factors, we compute the residual as log(M, p, m), which gives a tangent vector at the current state estimate p
+# pointing toward the measurement m. This means the residual lives in the tangent space at p (TₚM).
+#
+# - The optimizer linearizes and updates in the tangent space at the current estimate p.
+
+# Note on injectivity_radius
+# If the measurement is outside the injectivity radius of the manifold, the log will not be valid.
+# even if we use Xq = log(M, q, q̂), we need to transport Xq to Xp, parallel_transport_to still uses the log map.
 
 function (cf::CalcFactor{<:PriorPose2})(m, p)
     M = getManifold(PriorPose2)
-    X = log(M, p, m) # Currently X ∈ TₚM, #TODO should it be TₘM? Also update the rest if this is wrong.
+    X = log(M, p, m) # the residual is calculated at the current state estimate p, ie. X ∈ TₚM
     return vee(LieAlgebra(M), X)
 end
-
-## NOTE likely deprecated comparitors, see DFG compareFields, compareAll instead
-compare(a::PriorPose2, b::PriorPose2; tol::Float64 = 1e-10) = compareDensity(a.Z, b.Z)
 
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
   # X ∈ TₚM, X̂ ∈ TₚM, p,q ∈ M
@@ -14,9 +22,6 @@ function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
   X̂ = log(M, p, q)
   return vee(LieAlgebra(M), X - X̂)
 end
-
-# FIXME, rather have separate compareDensity functions
-compare(a::Pose2Pose2, b::Pose2Pose2; tol::Float64 = 1e-10) = compareDensity(a.Z, b.Z)
 
 function (cf::CalcFactor{<:PriorPose3})(m, p)
     M = getManifold(PriorPose3)
@@ -29,6 +34,11 @@ function (cf::CalcFactor{<:Pose3Pose3})(X, p::ArrayPartition{T}, q) where {T}
     Xc::SVector{6, T} = vee(LieAlgebra(M), X - X̂)
     return Xc
 end
+
+# FIXME, rather have separate compareDensity functions
+compare(a::Pose2Pose2, b::Pose2Pose2; tol::Float64 = 1e-10) = compareDensity(a.Z, b.Z)
+## NOTE likely deprecated comparitors, see DFG compareFields, compareAll instead
+compare(a::PriorPose2, b::PriorPose2; tol::Float64 = 1e-10) = compareDensity(a.Z, b.Z)
 
 ##
 #TODO is this manifold not SO3
@@ -77,3 +87,9 @@ function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) whe
     Xc::SVector{6, T} = vee(LieAlgebra(M), log(M, q, q̂))
     return SVector{6, T}(normalize(Xc[1:3])..., Xc[4:6]...)
 end
+
+
+#  FIXME needed until AMP#41 is done hopefully can be removed soon 🐛💥
+# Base.convert(::Type{<:Tuple}, ::typeof(SOnxRn_MetricManifold(2))) = (:Euclid,:Euclid,:Circular)
+AMP._manifoldtuple(::typeof(SOnxRn_MetricManifold(2))) = (:Euclid,:Euclid,:Circular)
+AMP._manifoldtuple(::typeof(SOnxRn_MetricManifold(3))) = (:Euclid,:Euclid,:Euclid,:Circular,:Circular,:Circular)
