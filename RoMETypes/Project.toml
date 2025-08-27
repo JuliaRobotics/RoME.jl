@@ -1,6 +1,6 @@
 name = "RoMETypes"
 uuid = "298dcef3-e3bd-403a-988f-2dd5ca311a3f"
-authors = ["Johannes Terblanche <Affie@users.noreply.github.com>"]
+authors = ["NavAbility(TM) Contributors <info@wherewhen.ai>"]
 version = "0.1.0"
 
 [deps]
