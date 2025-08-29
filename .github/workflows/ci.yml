@@ -60,14 +60,14 @@ jobs:
           arch: x64
       - uses: julia-actions/cache@v2
       - name: Dev dependencies
-        shell: julia --project=monorepo {0}
+        shell: julia --color=yes --project=monorepo {0}
         run: |
           using Pkg;
           Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="develop"))
           Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="develop"))
           Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInferenceTypes"))
           Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInference"))
-          Pkg.develop(PackageSpec(path="."))
+          Pkg.develop([PackageSpec(path="RoMETypes"), PackageSpec(path="RoME")])
       - name: Run tests
         env:
           IIF_TEST_GROUP: 'basic_functional_group'

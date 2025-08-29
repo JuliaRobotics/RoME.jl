@@ -24,6 +24,7 @@ using
   # Manifolds,
   LieGroups
 
+using RoMETypes
 using StaticArrays
 using PrecompileTools
 using RecursiveArrayTools
@@ -56,10 +57,6 @@ import DistributedFactorGraphs: getDimension, getManifold
 
 using OrderedCollections: OrderedDict
 # const AMP = ApproxManifoldProducts
-
-
-include("../RoMETypes/src/RoMETypes.jl")
-using ..RoMETypes
 
 # export the API
 include("ExportAPI.jl")
