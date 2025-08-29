@@ -7,8 +7,11 @@ using PackageCompiler
 
 cd(@__DIR__)
 
-create_sysimage([:RoME,:RoMEPlotting], sysimage_path="RoMEPlottingSysimage.so", precompile_execution_file="precompile_triggers_plotting.jl")
-
+create_sysimage(
+    [:RoME, :RoMEPlotting];
+    sysimage_path = "RoMEPlottingSysimage.so",
+    precompile_execution_file = "precompile_triggers_plotting.jl",
+)
 
 ## to use RoME and RoMEPlotting with the newly created sysimage, start julia with:
 # julia -J RoMEPlottingSysimage.so

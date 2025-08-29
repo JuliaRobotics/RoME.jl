@@ -4,11 +4,9 @@
 ##   https://juliamanifolds.github.io/Manifolds.jl/stable/examples/manifold.html#manifold-tutorial
 ## ==================================================================================================
 
-
 import ApproxManifoldProducts: makeCoordsFromPoint, makePointFromCoords, getPoints
 
 export SE2E2_Manifold
-
 
 # this is a hack and not fully implemented as per: 
 struct _SE2E2 <: MB.AbstractManifold{MB.ℝ} end
@@ -20,34 +18,37 @@ MB.manifold_dimension(::_SE2E2) = 5
 # AMP.makeCoordsFromPoint(::Type{<:typeof(SE2E2_Manifold)}, p::Manifolds.ProductRepr) = [p.parts[1][1], p.parts[1][2], atan(p.parts[2][2,1],p.parts[2][1,1]), p.parts[3][1], p.parts[3][2]]
 
 function AMP.makePointFromCoords(::typeof(SE2E2_Manifold), p::AbstractVector{<:Real})
-  α = p[3]
-  ArrayPartition(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
+    α = p[3]
+    return ArrayPartition(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
 end
 
 function AMP.getPoints(mkd::ManifoldKernelDensity{M}) where {M <: typeof(SE2E2_Manifold)}
-  data_ = getPoints(mkd.belief)
-  [makePointFromCoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
+    data_ = getPoints(mkd.belief)
+    return [makePointFromCoords(mkd.manifold, view(data_, :, i)) for i = 1:size(data_, 2)]
 end
 
 function Statistics.mean(::typeof(SE2E2_Manifold), pts::AbstractVector)
-  se2_ = (d->ArrayPartition(submanifold_component(d, 1), submanifold_component(d, 2))).(pts)
-  mse2 = mean(SOnxRn_MetricManifold(2), se2_)
-  e2_ = (d->ArrayPartition(submanifold_component(d, 3))).(pts)
-  me2 = mean(Euclidean(2), e2_)
-  ArrayPartition(submanifold_component(mse2, 1), submanifold_component(mse2, 2), submanifold_component(me2, 1))
+    se2_ =
+        (
+            d -> ArrayPartition(submanifold_component(d, 1), submanifold_component(d, 2))
+        ).(pts)
+    mse2 = mean(SOnxRn_MetricManifold(2), se2_)
+    e2_ = (d -> ArrayPartition(submanifold_component(d, 3))).(pts)
+    me2 = mean(Euclidean(2), e2_)
+    return ArrayPartition(
+        submanifold_component(mse2, 1),
+        submanifold_component(mse2, 2),
+        submanifold_component(me2, 1),
+    )
 end
 
 # AMP._makeVectorManifold(::M, prr::ProductRepr) where {M <: typeof(SE2E2_Manifold)} = coords(M, prr)
-
-
-
 
 ## =============================================================================
 ## Needs a home
 ## =============================================================================
 
 export BearingRange_Manifold
-
 
 struct _CircleEuclid <: MB.AbstractManifold{MB.ℝ} end
 
@@ -59,27 +60,27 @@ const BearingRange_Manifold = _CircleEuclid()
 # AMP.makeCoordsFromPoint(::Type{<:typeof(BearingRange_Manifold)}, p::ProductRepr) = [p.parts[1][1]; p.parts[2][1]]
 
 function AMP.makePointFromCoords(::typeof(BearingRange_Manifold), p::AbstractVector{<:Real})
-  ArrayPartition(([p[1];]), ([p[2];]))
+    return ArrayPartition(([p[1];]), ([p[2];]))
 end
 
-function AMP.getPoints(mkd::ManifoldKernelDensity{M}) where {M <: typeof(BearingRange_Manifold)}
-  data_ = getPoints(mkd.belief)
-  [makePointFromCoords(mkd.manifold, view(data_, :, i)) for i in 1:size(data_,2)]
+function AMP.getPoints(
+    mkd::ManifoldKernelDensity{M},
+) where {M <: typeof(BearingRange_Manifold)}
+    data_ = getPoints(mkd.belief)
+    return [makePointFromCoords(mkd.manifold, view(data_, :, i)) for i = 1:size(data_, 2)]
 end
 
 function Statistics.mean(::typeof(BearingRange_Manifold), pts::AbstractVector)
-  TensorCast.@cast bearing[i] := pts[i][1]
-  TensorCast.@cast range_[i] := pts[i][2]
-  mc = mean(Circle(), bearing)
-  mr = mean(range_)
+    TensorCast.@cast bearing[i] := pts[i][1]
+    TensorCast.@cast range_[i] := pts[i][2]
+    mc = mean(Circle(), bearing)
+    mr = mean(range_)
 
-  return [mc; mr]
+    return [mc; mr]
 end
 
 # Still experimental
 # export BearingRange2
-@defVariable BearingRange2 BearingRange_Manifold ArrayPartition(0.0,0.0)
-
-
+@defVariable BearingRange2 BearingRange_Manifold ArrayPartition(0.0, 0.0)
 
 ## ==================================================================================================

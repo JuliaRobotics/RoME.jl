@@ -1,13 +1,15 @@
 
-
 """
 $(TYPEDEF)
 """
-struct VelPose2VelPose2{T1 <: IIF.SamplableBelief,T2 <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-  Zpose::Pose2Pose2{T1}
-  Zvel::T2
+struct VelPose2VelPose2{T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} <:
+       IIF.AbstractManifoldMinimize
+    Zpose::Pose2Pose2{T1}
+    Zvel::T2
 end
-VelPose2VelPose2(z1::SamplableBelief, z2::SamplableBelief) = VelPose2VelPose2(Pose2Pose2(z1), z2)
+function VelPose2VelPose2(z1::SamplableBelief, z2::SamplableBelief)
+    return VelPose2VelPose2(Pose2Pose2(z1), z2)
+end
 
 DFG.getManifold(::InstanceType{VelPose2VelPose2}) = getManifold(DynPose2)
 
@@ -21,50 +23,48 @@ function getSample(cf::CalcFactor{<:VelPose2VelPose2})
     return exp(M, X)
 end
 
+function IIF.getMeasurementParametric(s::VelPose2VelPose2{<:MvNormal, <:MvNormal})
+    meas = [mean(s.Zpose.Z); mean(s.Zvel)]
 
-function IIF.getMeasurementParametric(s::VelPose2VelPose2{<:MvNormal, <:MvNormal}) 
+    iΣp = invcov(s.Zpose.Z)
+    iΣv = invcov(s.Zvel)
 
-  meas = [mean(s.Zpose.Z); mean(s.Zvel)]
+    iΣ = zeros(eltype(iΣp), 5, 5)
 
-  iΣp = invcov(s.Zpose.Z)
-  iΣv = invcov(s.Zvel)
+    iΣ[1:3, 1:3] .= iΣp
+    iΣ[4:5, 4:5] .= iΣv
 
-  iΣ = zeros(eltype(iΣp), 5,5)
-
-  iΣ[1:3,1:3] .= iΣp
-  iΣ[4:5,4:5] .= iΣv
-
-  return meas, iΣ
+    return meas, iΣ
 end
 
 function (cf::CalcFactor{<:VelPose2VelPose2})(X, p, q)
-  #
-  pose_res = Vector{Manifolds.number_eltype(X)}(undef, 3)
-  #Pose2 part
-  M1 = getManifold(Pose2Pose2)
-  X1 = ArrayPartition(X.x[1], X.x[2])#submanifold_component(X,1)
-  p1 = ArrayPartition(p.x[1], p.x[2])#submanifold_component(p,1) 
-  q1 = ArrayPartition(q.x[1], q.x[2])#submanifold_component(q,1)
-  ϵ1 = getPointIdentity(M1)
-  q̂1 = exp(M1, p1, X1)
-  vee!(M1, pose_res, q1, log(M1, q1, q̂1))
-  
-  #velocity part
-  dt = Dates.value(cf.fullvariables[2].nstime - cf.fullvariables[1].nstime)*1e-9
-  X2 = submanifold_component(X,3)
-  p2 = submanifold_component(p,3)
-  q2 = submanifold_component(q,3)
-  # bDXij = TransformUtils.R(-wxi[3])*wDXij
-  bDXij = transpose(submanifold_component(p1,2))*(q2 .- p2)
+    #
+    pose_res = Vector{Manifolds.number_eltype(X)}(undef, 3)
+    #Pose2 part
+    M1 = getManifold(Pose2Pose2)
+    X1 = ArrayPartition(X.x[1], X.x[2])#submanifold_component(X,1)
+    p1 = ArrayPartition(p.x[1], p.x[2])#submanifold_component(p,1) 
+    q1 = ArrayPartition(q.x[1], q.x[2])#submanifold_component(q,1)
+    ϵ1 = getPointIdentity(M1)
+    q̂1 = exp(M1, p1, X1)
+    vee!(M1, pose_res, q1, log(M1, q1, q̂1))
 
-  Xpq = log(M1, ϵ1, Manifolds.compose(M1, Manifolds.inv(M1, p1), q1))
-  dx = Vector{Manifolds.number_eltype(X)}(undef, 3)
-  vee!(M1, dx, ϵ1, Xpq)
-  # calculate the residual
-  res_vel = (X2 .- bDXij).^2 .+ (view(dx, 1:2)/dt .- 0.5*(p2 .+ q2)).^2
-  res_vel = sqrt.(res_vel)
+    #velocity part
+    dt = Dates.value(cf.fullvariables[2].nstime - cf.fullvariables[1].nstime) * 1e-9
+    X2 = submanifold_component(X, 3)
+    p2 = submanifold_component(p, 3)
+    q2 = submanifold_component(q, 3)
+    # bDXij = TransformUtils.R(-wxi[3])*wDXij
+    bDXij = transpose(submanifold_component(p1, 2)) * (q2 .- p2)
 
-  return [pose_res; res_vel]
+    Xpq = log(M1, ϵ1, Manifolds.compose(M1, Manifolds.inv(M1, p1), q1))
+    dx = Vector{Manifolds.number_eltype(X)}(undef, 3)
+    vee!(M1, dx, ϵ1, Xpq)
+    # calculate the residual
+    res_vel = (X2 .- bDXij) .^ 2 .+ (view(dx, 1:2) / dt .- 0.5 * (p2 .+ q2)) .^ 2
+    res_vel = sqrt.(res_vel)
+
+    return [pose_res; res_vel]
 end
 #=
 function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
@@ -77,7 +77,7 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
 
   #FIXME JT - Createing new res for simplicity, it may not hold up well though
   res = Vector{eltype(Xi)}(undef, 5)
-  
+
   z = meas
   wxi, wxj = Xi, Xj
   # @show z, wxi, wxj
@@ -95,7 +95,7 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
 
   wDXij = (wxj[4:5]-wxi[4:5])
   bDXij = TransformUtils.R(-wxi[3])*wDXij
-  
+
   # calculate the residual
   dx = se2vee(SE2(wxi[1:3]) \ SE2(wxj[1:3]))
   #FIXME cf.factor.reuseres has type issues with parametric
@@ -114,30 +114,30 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(meas,
 end
 =#
 
-
-function compare(a::VelPose2VelPose2, b::VelPose2VelPose2; tol::Float64=1e-10)::Bool
-  TP = true
-  TP = TP && RoME.compare(a.Zpose, b.Zpose)
-  TP = TP && RoME.compareDensity(a.Zvel, b.Zvel)
-  # TP = TP && norm(a.reuseres - b.reuseres) < tol
-  return TP
+function compare(a::VelPose2VelPose2, b::VelPose2VelPose2; tol::Float64 = 1e-10)::Bool
+    TP = true
+    TP = TP && RoME.compare(a.Zpose, b.Zpose)
+    TP = TP && RoME.compareDensity(a.Zvel, b.Zvel)
+    # TP = TP && norm(a.reuseres - b.reuseres) < tol
+    return TP
 end
-
 
 """
 $(TYPEDEF)
 """
 Base.@kwdef struct PackedVelPose2VelPose2 <: AbstractPackedFactor
-  Zpose::PackedSamplableBelief
-  Zvel::PackedSamplableBelief
+    Zpose::PackedSamplableBelief
+    Zvel::PackedSamplableBelief
 end
 
 function convert(::Type{PackedVelPose2VelPose2}, d::VelPose2VelPose2)
-  return PackedVelPose2VelPose2(convert(PackedSamplableBelief, d.Zpose.Z),
-                                convert(PackedSamplableBelief, d.Zvel))
+    return PackedVelPose2VelPose2(
+        convert(PackedSamplableBelief, d.Zpose.Z),
+        convert(PackedSamplableBelief, d.Zvel),
+    )
 end
 function convert(::Type{VelPose2VelPose2}, d::PackedVelPose2VelPose2)
-  posediZ = convert(SamplableBelief, d.Zpose)
-  veldiZ = convert(SamplableBelief, d.Zvel)
-  return VelPose2VelPose2(posediZ, veldiZ)
+    posediZ = convert(SamplableBelief, d.Zpose)
+    veldiZ = convert(SamplableBelief, d.Zvel)
+    return VelPose2VelPose2(posediZ, veldiZ)
 end

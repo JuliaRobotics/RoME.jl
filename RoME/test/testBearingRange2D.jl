@@ -12,373 +12,379 @@ using LinearAlgebra
 
 @testset "test sampling from BearingRange factor..." begin
 
-##
+    ##
 
-p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+    p2br = Pose2Point2BearingRange(Normal(0, 0.1), Normal(20.0, 1.0))
 
-fg = initfg()
-addVariable!(fg, :x0, Pose2)
-addVariable!(fg, :x1, Point2)
-addFactor!(fg, [:x0;:x1], p2br, graphinit=false)
+    fg = initfg()
+    addVariable!(fg, :x0, Pose2)
+    addVariable!(fg, :x1, Point2)
+    addFactor!(fg, [:x0; :x1], p2br; graphinit = false)
 
-meas = sampleFactor(IIF._getCCW(fg, :x0x1f1), 100)
-##
+    meas = sampleFactor(IIF._getCCW(fg, :x0x1f1), 100)
+    ##
 
-# meas = getSample(p2br, 100)
-M = getManifold(p2br)
-mcords = vee.(Ref(M), Ref(identity_element(M)), meas)
+    # meas = getSample(p2br, 100)
+    M = getManifold(p2br)
+    mcords = vee.(Ref(M), Ref(identity_element(M)), meas)
 
-mu = Statistics.mean(mcords)
-sigma = Statistics.std(mcords)
+    mu = Statistics.mean(mcords)
+    sigma = Statistics.std(mcords)
 
-@test abs(mu[1]) < 0.1
-@test 0.05 < abs(sigma[1]) < 0.2
+    @test abs(mu[1]) < 0.1
+    @test 0.05 < abs(sigma[1]) < 0.2
 
-@test abs(mu[2] - 20.0) < 1.0
-@test 0.5 < abs(sigma[2]) < 1.5
+    @test abs(mu[2] - 20.0) < 1.0
+    @test 0.5 < abs(sigma[2]) < 1.5
 
-##
+    ##
 
 end
-
 
 @testset "test BearingRange factor residual function..." begin
 
-##
+    ##
 
-# dummy variables
-fg = initfg()
-X0 = addVariable!(fg, :x0, Pose2)
-X1 = addVariable!(fg, :x1, Point2)
+    # dummy variables
+    fg = initfg()
+    X0 = addVariable!(fg, :x0, Pose2)
+    X1 = addVariable!(fg, :x1, Point2)
 
-##
+    ##
 
-p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+    p2br = Pose2Point2BearingRange(Normal(0, 0.1), Normal(20.0, 1.0))
 
-xi = getPointIdentity(Pose2)
-li = zeros(2); li[1] = 20.0;
+    xi = getPointIdentity(Pose2)
+    li = zeros(2)
+    li[1] = 20.0
 
-M = getManifold(p2br)
-_zi = [0,20.0]
-zi = Manifolds.hat(M, getPointIdentity(M), _zi)
+    M = getManifold(p2br)
+    _zi = [0, 20.0]
+    zi = Manifolds.hat(M, getPointIdentity(M), _zi)
 
-res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li)) 
-#
-# calcFactorResidualTemporary(p2br, zi, (Pose2, xi), (Point2, li))
+    res = calcFactorResidualTemporary(p2br, (Pose2, Point2), zi, (xi, li))
+    #
+    # calcFactorResidualTemporary(p2br, zi, (Pose2, xi), (Point2, li))
 
-@show res
-@test norm(res) < 1e-14
+    @show res
+    @test norm(res) < 1e-14
 
-##
+    ##
 
-xi = getPointIdentity(Pose2)
-li = zeros(2); li[2] = 20.0;
-_zi = [pi/2,20.0]
-zi = Manifolds.hat(M, getPointIdentity(M), _zi)
-# idx = 1
-# res = zeros(2)
-# p2br(res, fmd, idx, zi, xi, li)
+    xi = getPointIdentity(Pose2)
+    li = zeros(2)
+    li[2] = 20.0
+    _zi = [pi / 2, 20.0]
+    zi = Manifolds.hat(M, getPointIdentity(M), _zi)
+    # idx = 1
+    # res = zeros(2)
+    # p2br(res, fmd, idx, zi, xi, li)
 
-res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li)) 
+    res = calcFactorResidualTemporary(p2br, (Pose2, Point2), zi, (xi, li))
 
-@show res
-@test norm( res ) < 1e-14
+    @show res
+    @test norm(res) < 1e-14
 
-##
+    ##
 
-Xi = zeros(3); Xi[3] = pi/2
-xi = getPoint(Pose2, Xi) 
-li = zeros(2); li[2] = 20.0;
-_zi = [0.0,20.0]
-zi = Manifolds.hat(M, getPointIdentity(M), _zi)
+    Xi = zeros(3)
+    Xi[3] = pi / 2
+    xi = getPoint(Pose2, Xi)
+    li = zeros(2)
+    li[2] = 20.0
+    _zi = [0.0, 20.0]
+    zi = Manifolds.hat(M, getPointIdentity(M), _zi)
 
-res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
+    res = calcFactorResidualTemporary(p2br, (Pose2, Point2), zi, (xi, li))
 
-#
-@show res
-@test norm(res) < 1e-14
+    #
+    @show res
+    @test norm(res) < 1e-14
 
-##
+    ##
 
-Xi = zeros(3); Xi[3] = -pi/2
-xi = getPoint(Pose2, Xi) 
-li = zeros(2); li[1] = 20.0;
-# zi = ([0.0;pi/2],[0.0;20.0],)
-_zi = [pi/2,20.0]
-zi = Manifolds.hat(M, getPointIdentity(M), _zi)
-# idx = 2
-# res = zeros(2)
-# p2br(res, fmd, idx, zi, xi, li)
+    Xi = zeros(3)
+    Xi[3] = -pi / 2
+    xi = getPoint(Pose2, Xi)
+    li = zeros(2)
+    li[1] = 20.0
+    # zi = ([0.0;pi/2],[0.0;20.0],)
+    _zi = [pi / 2, 20.0]
+    zi = Manifolds.hat(M, getPointIdentity(M), _zi)
+    # idx = 2
+    # res = zeros(2)
+    # p2br(res, fmd, idx, zi, xi, li)
 
-res = calcFactorResidualTemporary( p2br, (Pose2, Point2), zi, (xi, li))
+    res = calcFactorResidualTemporary(p2br, (Pose2, Point2), zi, (xi, li))
 
+    @show res
+    @test norm(res) < 1e-14
 
-@show res
-@test norm(res) < 1e-14
+    ##
+    x1 = ArrayPartition([0.0, 0], [1.0 0; 0 1])
+    x2 = ArrayPartition([0.0, 0], [0 -1.0; 1 0])
 
-##
-x1 = ArrayPartition([0.,0], [1. 0; 0 1])
-x2 = ArrayPartition([0.,0], [0 -1.; 1 0])
+    #measurement setup 1
+    meas = (0.0, 10)
+    f = Pose2Point2BearingRange(Normal(meas[1], 1), Normal(meas[2], 1))
+    X = hat(M, getPointIdentity(M), [meas[1], meas[2]])
+    # x1
+    p = x1
+    q = [10.0, 0]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, 0], atol = 1e-9)
+    # x2
+    p = x2
+    q = [0.0, 10]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, 0], atol = 1e-9)
 
-#measurement setup 1
-meas = (0., 10)
-f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
-X = hat(M, getPointIdentity(M), [meas[1],meas[2]])
-# x1
-p = x1
-q = [10.,0]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,0], atol = 1e-9)
-# x2
-p = x2
-q = [0., 10]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,0], atol = 1e-9)
+    meas = (pi / 2.0, 10)
+    f = Pose2Point2BearingRange(Normal(meas[1], 1), Normal(meas[2], 1))
+    X = hat(M, getPointIdentity(M), [meas[1], meas[2]])
+    # x1
+    p = x1
+    q = [0.0, 10]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, 0], atol = 1e-9)
+    # x2
+    p = x2
+    q = [-10.0, 0]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, 0], atol = 1e-9)
 
+    meas = (pi, 10.0)
+    f = Pose2Point2BearingRange(Normal(meas[1], 1), Normal(meas[2], 1))
+    X = hat(M, getPointIdentity(M), [meas[1], meas[2]])
+    # x1
+    p = x1
+    q = [-10.0, 0]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, 0], atol = 1e-9)
+    # x2
+    p = x2
+    q = [0.0, -10]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, 0], atol = 1e-9)
 
-meas = (pi/2., 10)
-f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
-X = hat(M, getPointIdentity(M), [meas[1],meas[2]])
-# x1
-p = x1
-q = [0.,10]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,0], atol = 1e-9)
-# x2
-p = x2
-q = [-10., 0]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,0], atol = 1e-9)
+    meas = (-pi / 2.0, 10.0)
+    f = Pose2Point2BearingRange(Normal(meas[1], 1), Normal(meas[2], 1))
+    X = hat(M, getPointIdentity(M), [meas[1], meas[2]])
+    # x1
+    p = x1
+    q = [0.0, -10]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, 0], atol = 1e-9)
+    # x2
+    p = x2
+    q = [10.0, 0]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, 0], atol = 1e-9)
 
+    ##
+    # testing non zero errors on range
+    #FIXME BR range sign is broken, needed for gradients
 
-meas = (pi, 10.)
-f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
-X = hat(M, getPointIdentity(M), [meas[1],meas[2]])
-# x1
-p = x1
-q = [-10.,0]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,0], atol = 1e-9)
-# x2
-p = x2
-q = [0., -10]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,0], atol = 1e-9)
+    meas = (0.0, 10)
+    f = Pose2Point2BearingRange(Normal(meas[1], 1), Normal(meas[2], 1))
+    X = hat(M, getPointIdentity(M), [meas[1], meas[2]])
+    # x1
+    p = x1
+    q = [11.0, 0]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, -1], atol = 1e-9)
+    # x2
+    p = x2
+    q = [0.0, 11]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, -1], atol = 1e-9)
 
+    meas = (0.0, 10)
+    f = Pose2Point2BearingRange(Normal(meas[1], 1), Normal(meas[2], 1))
+    X = hat(M, getPointIdentity(M), [meas[1], meas[2]])
+    # x1
+    p = x1
+    q = [9.0, 0]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, 1], atol = 1e-9)
+    # x2
+    p = x2
+    q = [0.0, 9]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [0, 1], atol = 1e-9)
 
-meas = (-pi/2., 10.)
-f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
-X = hat(M, getPointIdentity(M), [meas[1],meas[2]])
-# x1
-p = x1
-q = [0.,-10]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,0], atol = 1e-9)
-# x2
-p = x2
-q = [10., 0]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,0], atol = 1e-9)
+    # on small angles also
+    s, c = 10 .* sincos(0.001)
+    meas = (0.0, 10)
+    f = Pose2Point2BearingRange(Normal(meas[1], 1), Normal(meas[2], 1))
+    X = hat(M, getPointIdentity(M), [meas[1], meas[2]])
+    # x1
+    p = x1
+    q = [c, s]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res[1], -0.001, atol = 1e-9)
+    #FIXME ?
+    @test isapprox(res[2], 0, atol = 0.1)
+    # x2
+    p = x2
+    q = [s, c]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res[1], 0.001, atol = 1e-9)
+    #FIXME ?
+    @test isapprox(res[2], 0, atol = 0.1)
 
-##
-# testing non zero errors on range
-#FIXME BR range sign is broken, needed for gradients
+    # WIP testing non zero errors
+    # I don't know if this test is needed or even possible
+    r2 = 10 / sqrt(2)
+    meas = (0.0, 10)
+    f = Pose2Point2BearingRange(Normal(meas[1], 1), Normal(meas[2], 1))
+    X = hat(M, getPointIdentity(M), [meas[1], meas[2]])
+    # x1
+    p = x1
+    q = [r2, r2]
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [-pi / 4, 0], atol = 1e-9)
+    # x2
+    p = x2
+    res = calcFactorResidualTemporary(f, (Pose2, Point2), X, (p, q))
+    @test isapprox(res, [pi / 4, 0], atol = 1e-9)
 
-meas = (0., 10)
-f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
-X = hat(M, getPointIdentity(M), [meas[1],meas[2]])
-# x1
-p = x1
-q = [11., 0]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,-1], atol = 1e-9)
-# x2
-p = x2
-q = [0., 11]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,-1], atol = 1e-9)
-
-
-meas = (0., 10)
-f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
-X = hat(M, getPointIdentity(M), [meas[1],meas[2]])
-# x1
-p = x1
-q = [9., 0]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,1], atol = 1e-9)
-# x2
-p = x2
-q = [0., 9]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [0,1], atol = 1e-9)
-
-# on small angles also
-s,c = 10 .* sincos(0.001)
-meas = (0., 10)
-f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
-X = hat(M, getPointIdentity(M), [meas[1],meas[2]])
-# x1
-p = x1
-q = [c, s]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res[1], -0.001, atol = 1e-9)
-#FIXME ?
-@test isapprox(res[2], 0, atol = 0.1)
-# x2
-p = x2
-q = [s, c]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res[1], 0.001, atol = 1e-9)
-#FIXME ?
-@test isapprox(res[2], 0, atol = 0.1)
-
-
-# WIP testing non zero errors
-# I don't know if this test is needed or even possible
-r2 = 10/sqrt(2)
-meas = (0., 10)
-f = Pose2Point2BearingRange(Normal(meas[1],1), Normal(meas[2],1))
-X = hat(M, getPointIdentity(M), [meas[1],meas[2]])
-# x1
-p = x1
-q = [r2, r2]
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [-pi/4,0], atol = 1e-9)
-# x2
-p = x2
-res = calcFactorResidualTemporary( f, (Pose2, Point2), X, (p, q))
-@test isapprox(res, [pi/4,0], atol = 1e-9)
-
-##
+    ##
 end
-
-
-
 
 @testset "test unimodal bearing range factor, solve for landmark..." begin
 
-##
+    ##
 
-# Start with an empty graph
-# N = 1
-fg = initfg()
+    # Start with an empty graph
+    # N = 1
+    fg = initfg()
 
-#add pose with partial constraint
-addVariable!(fg, :x0, Pose2)
-addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))), graphinit=false)
-# force particular initialization
-u0 = getPointIdentity(Pose2)
-arr = push!(Vector{typeof(u0)}(), u0)
-setVal!(fg, :x0, arr)
+    #add pose with partial constraint
+    addVariable!(fg, :x0, Pose2)
+    addFactor!(
+        fg,
+        [:x0],
+        PriorPose2(MvNormal(zeros(3), 0.01 * Matrix{Float64}(LinearAlgebra.I, 3, 3)));
+        graphinit = false,
+    )
+    # force particular initialization
+    u0 = getPointIdentity(Pose2)
+    arr = push!(Vector{typeof(u0)}(), u0)
+    setVal!(fg, :x0, arr)
 
-##----------- sanity check that predictbelief plumbing is doing the right thing
-_pts = getPoints(propagateBelief(fg, :x0, ls(fg, :x0), N=75)[1])
-@cast pts[j,i] := DFG.getCoordinates.(Pose2, _pts)[i][j]
-@test sum(abs.(Statistics.mean(pts,dims=2)) .< [0.1; 0.1; 0.1]) == 3
-@test sum([0.05; 0.05; 0.05] .< Statistics.std(pts,dims=2) .< [0.15; 0.15; 0.15]) == 3
-#------------
+    ##----------- sanity check that predictbelief plumbing is doing the right thing
+    _pts = getPoints(propagateBelief(fg, :x0, ls(fg, :x0); N = 75)[1])
+    @cast pts[j, i] := DFG.getCoordinates.(Pose2, _pts)[i][j]
+    @test sum(abs.(Statistics.mean(pts; dims = 2)) .< [0.1; 0.1; 0.1]) == 3
+    @test sum([0.05; 0.05; 0.05] .< Statistics.std(pts; dims = 2) .< [0.15; 0.15; 0.15]) ==
+          3
+    #------------
 
-# Add landmark
-addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
-li = zeros(2); li[1] = 20.0;
-setVal!(fg, :l1, [li])
+    # Add landmark
+    addVariable!(fg, :l1, Point2; tags = [:LANDMARK;])
+    li = zeros(2)
+    li[1] = 20.0
+    setVal!(fg, :l1, [li])
 
+    # Add bearing range measurement between pose and landmark
+    p2br = Pose2Point2BearingRange(Normal(0, 0.1), Normal(20.0, 1.0))
+    addFactor!(fg, [:x0; :l1], p2br; graphinit = false)
 
-# Add bearing range measurement between pose and landmark
-p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
+    # there should be just one (the bearingrange) factor connected to :l1
+    @test length(ls(fg, :l1)) == 1
+    # drawGraph(fg, show=true)
 
-# there should be just one (the bearingrange) factor connected to :l1
-@test length(ls(fg, :l1)) == 1
-# drawGraph(fg, show=true)
+    # check the forward convolution is working properly
+    _pts = getPoints(propagateBelief(fg, :l1, ls(fg, :l1); N = 75)[1])
+    @cast pts[j, i] := _pts[i][j]
+    @show tp = mean(TranslationGroup(2), _pts)
+    @warn "weak test tolerance, suspect partial products need to be upgraded first.  Please see likely AMP #41 and IIF #1010 for known issues likely the root cause."
+    @test isapprox(tp, [20.0; 0.0], atol = 5.0)
+    @test sum([0.1; 0.1] .< Statistics.std(pts; dims = 2) .< [3.0; 3.0]) == 2
 
-# check the forward convolution is working properly
-_pts = getPoints(propagateBelief(fg, :l1, ls(fg, :l1), N=75)[1])
-@cast pts[j,i] := _pts[i][j]
-@show tp = mean(TranslationGroup(2), _pts)
-@warn "weak test tolerance, suspect partial products need to be upgraded first.  Please see likely AMP #41 and IIF #1010 for known issues likely the root cause."
-@test isapprox( tp, [20.0; 0.0], atol=5.0 )
-@test sum([0.1; 0.1] .< Statistics.std(pts,dims=2) .< [3.0; 3.0]) == 2
+    # using Gadfly, KernelDensityEstimate, KernelDensityEstimatePlotting
+    #
+    # pl = plotKDE(kde!(pts))
+    # pl.coord = Coord.Cartesian(xmin=-5,xmax=25, ymin=-10.0,ymax=10)
+    # pl
 
-# using Gadfly, KernelDensityEstimate, KernelDensityEstimatePlotting
-#
-# pl = plotKDE(kde!(pts))
-# pl.coord = Coord.Cartesian(xmin=-5,xmax=25, ymin=-10.0,ymax=10)
-# pl
-
-##
+    ##
 
 end
-
 
 @testset "test unimodal bearing range factor, solve for pose..." begin
 
-##
+    ##
 
-# Start with an empty graph
-N = 75
-fg = initfg()
+    # Start with an empty graph
+    N = 75
+    fg = initfg()
 
-# Add landmark
-addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
-addFactor!(fg, [:l1], PriorPoint2(MvNormal([20.0;0.0], Matrix(Diagonal([0.1;0.1].^2)))),  graphinit=false ) # could be IIF.Prior
-li = zeros(2); li[1] = 20.0;
-setVal!(fg, :l1, [li])
+    # Add landmark
+    addVariable!(fg, :l1, Point2; tags = [:LANDMARK;])
+    addFactor!(
+        fg,
+        [:l1],
+        PriorPoint2(MvNormal([20.0; 0.0], Matrix(Diagonal([0.1; 0.1] .^ 2))));
+        graphinit = false,
+    ) # could be IIF.Prior
+    li = zeros(2)
+    li[1] = 20.0
+    setVal!(fg, :l1, [li])
 
-#add pose with partial constraint
-addVariable!(fg, :x0, Pose2)
-# force particular initialization
-setVal!(fg, :x0, [getPointIdentity(Pose2)])
+    #add pose with partial constraint
+    addVariable!(fg, :x0, Pose2)
+    # force particular initialization
+    setVal!(fg, :x0, [getPointIdentity(Pose2)])
 
-# Add bearing range measurement between pose and landmark
-p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,0.1))
-addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
+    # Add bearing range measurement between pose and landmark
+    p2br = Pose2Point2BearingRange(Normal(0, 0.1), Normal(20.0, 0.1))
+    addFactor!(fg, [:x0; :l1], p2br; graphinit = false)
 
-# there should be just one (the bearingrange) factor connected to :l1
-@test length(ls(fg, :x0)) == 1
-# writeGraphPdf(fg)
+    # there should be just one (the bearingrange) factor connected to :l1
+    @test length(ls(fg, :x0)) == 1
+    # writeGraphPdf(fg)
 
-# check the forward convolution is working properly
-_pts = getPoints(propagateBelief(fg, :x0, ls(fg, :x0); N)[1])
-p_μ = mean(SOnxRn_MetricManifold(2), _pts)
+    # check the forward convolution is working properly
+    _pts = getPoints(propagateBelief(fg, :x0, ls(fg, :x0); N)[1])
+    p_μ = mean(SOnxRn_MetricManifold(2), _pts)
 
-_pts = IIF.getCoordinates.(Pose2, _pts)
-@cast pts[j,i] := _pts[i][j]
+    _pts = IIF.getCoordinates.(Pose2, _pts)
+    @cast pts[j, i] := _pts[i][j]
 
-dists = norm.(eachcol(pts[1:2, :] .- [20,0]))
-@test sum(isapprox.(dists, 20, atol=3)) > N*0.9
+    dists = norm.(eachcol(pts[1:2, :] .- [20, 0]))
+    @test sum(isapprox.(dists, 20, atol = 3)) > N * 0.9
 
-# check likelihood at 0,0,0
-#FIXME don't know how this works
-@test_broken getBelief(fg, :x0)([0.0;0.0;0.0;;])[1] < 0.03
-#just testing direction on its own
-pts0 = filter(eachcol(pts)) do p
-    isapprox(p[1:2],[0,0], atol=1)
-end
-theta = mean(getindex.(pts0,3))
-@test isapprox(theta, 0.0, atol=0.15)
+    # check likelihood at 0,0,0
+    #FIXME don't know how this works
+    @test_broken getBelief(fg, :x0)([0.0; 0.0; 0.0;;])[1] < 0.03
+    #just testing direction on its own
+    pts0 = filter(eachcol(pts)) do p
+        return isapprox(p[1:2], [0, 0]; atol = 1)
+    end
+    theta = mean(getindex.(pts0, 3))
+    @test isapprox(theta, 0.0, atol = 0.15)
 
-##
+    ##
 
 end
 
 @testset "Testing Pose2Point2Bearing Initialization and Packing" begin
 
-##
+    ##
 
-p2p2b = Pose2Point2Bearing( MvNormal([0.2,0.2,0.2], [1.0 0 0;0 1 0;0 0 1]) )
-packed = pack(p2p2b)
-p2p2bTest = unpack(packed)
-@test p2p2b.Z.μ == p2p2bTest.Z.μ
-@test p2p2b.Z.Σ.mat == p2p2bTest.Z.Σ.mat
+    p2p2b = Pose2Point2Bearing(MvNormal([0.2, 0.2, 0.2], [1.0 0 0; 0 1 0; 0 0 1]))
+    packed = pack(p2p2b)
+    p2p2bTest = unpack(packed)
+    @test p2p2b.Z.μ == p2p2bTest.Z.μ
+    @test p2p2b.Z.Σ.mat == p2p2bTest.Z.Σ.mat
 
-##
+    ##
 
 end
 
 #=
-
 
 fg = LocalDFG{SolverParams}(solverParams=SolverParams())
 
@@ -388,7 +394,6 @@ x0 = addVariable!(fg, :x0, Pose2)
 p = getPoint(Pose2, [10; 10; -pi])
 
 prior = addFactor!(fg, [:x0], PriorPose2( MvNormal([0.1,0.1,0.05]), p ) )
-
 
 for i in 0:5
     psym = Symbol("x$i")
@@ -408,8 +413,6 @@ addFactor!(fg, [:x6; :l1], p2br)
 smtasks = Task[]
 solveTree!(fg; smtasks)
 #add bearing range
-
-
 
 ## ================================================================================================
 ## Other tests
@@ -477,7 +480,6 @@ p2ln = MvNormal([-1, -1, pi], lm_noise)
 p2p = Pose2Pose2(MvNormal(rand(p2ln), lm_noise))
 addFactor!(fg, [:x2; :l2; :l1], p2p, multihypo = [1.0, pRight, pWrong])
 
-
 ##
 
 fg.solverParams.inflation=0.1
@@ -485,9 +487,6 @@ fg.solverParams.spreadNH=0.1
 solveTree!(fg)
 
 plotSLAM2D(fg)
-
-
-
 
 ##
 
@@ -552,7 +551,6 @@ fg.solverParams.dbg = true
 smtasks = Task[]
 tree, _, = solveTree!(fg; smtasks, eliminationOrder=eo) #, smtasks=smtasks, recordcliqs=ls(fg));
 
-
 # hists = fetchCliqHistoryAll!(smtasks)
 
 plotKDE(fg, ls(fg))
@@ -569,7 +567,5 @@ L2_ = manikde!(ContinuousScalar, 2 .+ 0.1*randn(size(getPoints(L2),2)))
 # test that there is at least a mode present
 mmd(L2_, L2, ContinuousScalar)
 @test isapprox(DFG.getPPESuggested(fg, :l2)[], 2, atol = 0.2) 
-
-
 
 =#

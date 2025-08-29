@@ -1,21 +1,19 @@
 
-
 function sendCmd(cl::TCPSocket, cmd::String)
-  println(cl, cmd)
-  cmd == "QUIT" ?  close(cl) : readline(cl)
+    println(cl, cmd)
+    return cmd == "QUIT" ? close(cl) : readline(cl)
 end
 
 function getParticles(cl::TCPSocket, lbl::String)
-  res = sendCmd(cl, "GETPARTICLES $(lbl)")
-  rows = split(res[1:(end-1)],';')
-  V = readdlm(IOBuffer(rows[1]),',')
-  for i in 2:length(rows)
-    v = readdlm(IOBuffer(rows[i]),',')
-    V = [V;v]
-  end
-  return V
+    res = sendCmd(cl, "GETPARTICLES $(lbl)")
+    rows = split(res[1:(end - 1)], ';')
+    V = readdlm(IOBuffer(rows[1]), ',')
+    for i = 2:length(rows)
+        v = readdlm(IOBuffer(rows[i]), ',')
+        V = [V; v]
+    end
+    return V
 end
-
 
 cl = connect(60001)
 println("connected")
@@ -30,7 +28,6 @@ sendCmd(cl, "LANDMBR 3 4 $(pi/2) 10.0 0.01 0 0.5")
 sendCmd(cl, "BATCHSOLVE")
 l1 = getParticles(cl, "l1");
 @show size(l1)
-
 
 sendCmd(cl, "QUIT")
 close(cl)

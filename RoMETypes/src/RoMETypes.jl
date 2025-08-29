@@ -7,14 +7,14 @@ using RecursiveArrayTools
 using StaticArrays
 using LinearAlgebra
 
-using ManifoldsBase: submanifold_components, TangentSpaceType, AbstractBasis, RiemannianMetric
+using ManifoldsBase:
+    submanifold_components, TangentSpaceType, AbstractBasis, RiemannianMetric
 using Manifolds: MetricManifold
 
 import ManifoldsBase
-import Manifolds 
+import Manifolds
 
-export 
-    Point2,
+export Point2,
     Point3,
     Pose2,
     Pose3,
@@ -25,8 +25,7 @@ export
     DynPose2,
     projectCartesian
 
-export 
-    PriorPoint2,
+export PriorPoint2,
     PackedPriorPoint2,
     PriorPoint3,
     PackedPriorPoint3,
@@ -35,7 +34,7 @@ export
     Pose3Pose3,
     PackedPose3Pose3,
     PriorPose3,
-    PackedPriorPose3,    
+    PackedPriorPose3,
     Point3Point3,
     PackedPoint3Point3,
     Point2Point2,

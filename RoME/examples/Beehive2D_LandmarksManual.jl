@@ -12,38 +12,35 @@ using RoMEPlotting
 # using Cairo, Fontconfig
 # using Gadfly
 
-
-function driveHex(fgl, posecount::Int; steps::Int=5)
+function driveHex(fgl, posecount::Int; steps::Int = 5)
     # Drive around in a hexagon
-    for i in (posecount-1):(posecount-1+steps)
+    for i = (posecount - 1):(posecount - 1 + steps)
         psym = Symbol("x$i")
         posecount += 1
         nsym = Symbol("x$(i+1)")
         addVariable!(fgl, nsym, Pose2)
-        pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
-        addFactor!(fgl, [psym;nsym], pp, graphinit=false )
+        pp = Pose2Pose2(MvNormal([10.0; 0; pi / 3], Matrix(Diagonal([0.1; 0.1; 0.1] .^ 2))))
+        addFactor!(fgl, [psym; nsym], pp; graphinit = false)
     end
 
     return posecount
 end
 
-
-function offsetHexLeg(dfg::G, posecount::Int; direction=:right) where G <: AbstractDFG
+function offsetHexLeg(dfg::G, posecount::Int; direction = :right) where {G <: AbstractDFG}
     psym = Symbol("x$(posecount-1)")
     nsym = Symbol("x$(posecount)")
     posecount += 1
     addVariable!(dfg, nsym, Pose2)
     pp = nothing
     if direction == :right
-        pp = Pose2Pose2(MvNormal([10.0;0;-pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+        pp =
+            Pose2Pose2(MvNormal([10.0; 0; -pi / 3], Matrix(Diagonal([0.1; 0.1; 0.1] .^ 2))))
     elseif direction == :left
-        pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal([0.1;0.1;0.1].^2))))
+        pp = Pose2Pose2(MvNormal([10.0; 0; pi / 3], Matrix(Diagonal([0.1; 0.1; 0.1] .^ 2))))
     end
-    addFactor!(dfg, [psym; nsym], pp, graphinit=false )
+    addFactor!(dfg, [psym; nsym], pp; graphinit = false)
     return posecount
 end
-
-
 
 ## start with an empty factor graph object
 fg = initfg()
@@ -57,26 +54,26 @@ posecount = 0
 addVariable!(fg, :x0, Pose2)
 posecount += 1
 
-
 # Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
-addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0],
-                                           Matrix(Diagonal([0.1;0.1;0.05].^2))) ), graphinit=false )
+addFactor!(
+    fg,
+    [:x0],
+    PriorPose2(MvNormal([0.0; 0.0; 0.0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2))));
+    graphinit = false,
+)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x0; :l1], p2br, graphinit=false )
-
-
+addVariable!(fg, :l1, Point2; tags = [:LANDMARK;])
+p2br = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x0; :l1], p2br; graphinit = false)
 
 ## hex 1
 
 posecount = driveHex(fg, posecount)
 
 # Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
-
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2; graphinit = false)
 
 # writeGraphPdf(fg,engine="neato")
 
@@ -85,51 +82,39 @@ getSolverParams(fg).showtree = true
 getSolverParams(fg).downsolve = false
 getSolverParams(fg).multiproc = false
 
-
-tree = solveTree!(fg, recordcliqs=ls(fg))
-
+tree = solveTree!(fg; recordcliqs = ls(fg))
 
 # hist = getCliqSolveHistory(tree, :x1)
 
-
-Gadfly.set_default_plot_size(35cm,25cm)
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
+Gadfly.set_default_plot_size(35cm, 25cm)
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf");
+@async run(`evince /tmp/test.pdf`);
 # tree = wipeBuildNewTree!(fg)
 # drawTree(tree, imgs=true)
 
-
-
-
 ## hex 2
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = offsetHexLeg(fg, posecount; direction = :right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l2, Point2, tags=[:LANDMARK])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, graphinit=false )
+addVariable!(fg, :l2, Point2; tags = [:LANDMARK])
+p2br = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br; graphinit = false)
 
-
-posecount = driveHex(fg, posecount, steps=5)
-
-
+posecount = driveHex(fg, posecount; steps = 5)
 
 # Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, graphinit=false )
-
-
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2; graphinit = false)
 
 # fg.solverParams.async = true
 
 tree = solveTree!(fg, tree)
 
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf");
+@async run(`evince /tmp/test.pdf`);
 
-
-plotTreeProductUp(fg,tree,:x13,:x13)
-
-
+plotTreeProductUp(fg, tree, :x13, :x13)
 
 #
 # cliq = getClique(tree, :x10)
@@ -137,8 +122,6 @@ plotTreeProductUp(fg,tree,:x13,:x13)
 #
 # prnt = getParent(tree, cliq)[1]
 # dwinmsgs = prepCliqInitMsgsDown!(fg, tree, prnt)
-
-
 
 #
 # # Add landmarks with Bearing range measurements
@@ -148,217 +131,152 @@ plotTreeProductUp(fg,tree,:x13,:x13)
 
 ## hex 3
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = offsetHexLeg(fg, posecount; direction = :right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l3, Point2, tags=[:LANDMARK])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br, graphinit=false )
-
+addVariable!(fg, :l3, Point2; tags = [:LANDMARK])
+p2br = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br; graphinit = false)
 
 posecount = driveHex(fg, posecount)
 
-
-
-
-
-
 tree = solveTree!(fg, tree)
-
 
 # solve
 #
 # tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
 # tree = tree2
 
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
-
-
-
-
-
-
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf");
+@async run(`evince /tmp/test.pdf`);
 
 ## closures
 
 # Add landmarks with Bearing range measurements
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2, graphinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l3], p2br2; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x18; :l1], p2br2, graphinit=false )
-
-
-
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x18; :l1], p2br2; graphinit = false)
 
 # new sighting
 
-addVariable!(fg, :l0, Point2, tags=[:LANDMARK])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x5; :l0], p2br, graphinit=false )
+addVariable!(fg, :l0, Point2; tags = [:LANDMARK])
+p2br = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x5; :l0], p2br; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x12; :l0], p2br2, graphinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x12; :l0], p2br2; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x19; :l0], p2br2, graphinit=false )
-
-
-
-
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x19; :l0], p2br2; graphinit = false)
 
 tree = solveTree!(fg, tree)
-
 
 # tree2, smtasks = batchSolve!(fg, tree, dbg=true, drawpdf=true, show=true, incremental=true)
 # tree=tree2
 
-
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf");
+@async run(`evince /tmp/test.pdf`);
 # drawTree(tree, show=true)
-
-
-
-
 
 ## hex 4
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
-
+posecount = offsetHexLeg(fg, posecount; direction = :right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l4, Point2, tags=[:LANDMARK])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l4], p2br, graphinit=false )
-
-
+addVariable!(fg, :l4, Point2; tags = [:LANDMARK])
+p2br = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l4], p2br; graphinit = false)
 
 posecount = driveHex(fg, posecount)
 
-
 # writeGraphPdf(fg)
-
 
 tree = solveTree!(fg, tree)
 
 # tree2, smtasks = batchSolve!(fg, tree, dbg=true, drawpdf=true, show=true, incremental=true)
 # tree=tree2
 
-
-
-
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); @async run(`evince /tmp/test.pdf`)
-
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf");
+@async run(`evince /tmp/test.pdf`);
 
 0
 
-
-
 # Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x27; :l4], p2br2, graphinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x27; :l4], p2br2; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x25; :l2], p2br2, graphinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x25; :l2], p2br2; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x26; :l0], p2br2, graphinit=false )
-
-
-
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x26; :l0], p2br2; graphinit = false)
 
 tree = solveTree!(fg, tree)
-
-
 
 # tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
 # tree = tree2
 
-
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
-
-
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf");
+@async run(`evince /tmp/test.pdf`);
 
 ls(fg, :l4)
 
-
-
 ## hex 5
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = offsetHexLeg(fg, posecount; direction = :right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l5, Point2, tags=[:LANDMARK])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l5], p2br, graphinit=false )
-
+addVariable!(fg, :l5, Point2; tags = [:LANDMARK])
+p2br = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l5], p2br; graphinit = false)
 
 posecount = driveHex(fg, posecount)
 
-
-
-
-
 tree = solveTree!(fg, tree)
-
-
 
 # tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
 # tree = tree2
 
-
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 # drawTree(tree, imgs=true)
-
 
 ls(fg, :l5)
 
-
 # Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x34; :l5], p2br2, graphinit=false )
-
-
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x34; :l5], p2br2; graphinit = false)
 
 ## Add more loop closures signthings
 
 # THIS IS WRONG
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x4; :l5], p2br2, graphinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x4; :l5], p2br2; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x32; :l3], p2br2, graphinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x32; :l3], p2br2; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x33; :l0], p2br2, graphinit=false )
-
-
-
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x33; :l0], p2br2; graphinit = false)
 
 tree = solveTree!(fg, tree)
-
-
 
 # tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
 # tree = tree2
 
-
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
-
-
-
-
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf");
+@async run(`evince /tmp/test.pdf`);
 
 ## hex 6
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+posecount = offsetHexLeg(fg, posecount; direction = :right)
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l6, Point2, tags=[:LANDMARK])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br, graphinit=false )
-
+addVariable!(fg, :l6, Point2; tags = [:LANDMARK])
+p2br = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br; graphinit = false)
 
 posecount = driveHex(fg, posecount)
 
@@ -372,81 +290,56 @@ posecount = driveHex(fg, posecount)
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 # addFactor!(fg, [:x39; :l4], p2br2, graphinit=false )
 
-
-
-
-tree = solveTree!( fg, tree )
-
+tree = solveTree!(fg, tree)
 
 # tree2, smtasks = batchSolve!(fg, tree, incremental=true, dbg=true, drawpdf=true, show=true)
 # tree = tree2
 
-
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
-
-
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 ls(fg, :x19)
 
-
-
 # Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x40; :l0], p2br2, graphinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x40; :l0], p2br2; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br2, graphinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [Symbol("x$(posecount-1)"); :l6], p2br2; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x11; :l6], p2br2, graphinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x11; :l6], p2br2; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x39; :l4], p2br2, graphinit=false )
-
-
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x39; :l4], p2br2; graphinit = false)
 
 tree = solveTree!(fg, tree)
 
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)|
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)|
 
-
-
-drawTree(tree, imgs=true)
-
-
-
+drawTree(tree; imgs = true)
 
 ## hex 7
 
-posecount = offsetHexLeg(fg, posecount, direction=:left)
-posecount = offsetHexLeg(fg, posecount, direction=:right)
-
+posecount = offsetHexLeg(fg, posecount; direction = :left)
+posecount = offsetHexLeg(fg, posecount; direction = :right)
 
 posecount = driveHex(fg, posecount)
 
-
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l7, Point2, tags=[:LANDMARK])
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x49; :l7], p2br2, graphinit=false )
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x2; :l7], p2br2, graphinit=false )
-
-
+addVariable!(fg, :l7, Point2; tags = [:LANDMARK])
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x49; :l7], p2br2; graphinit = false)
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x2; :l7], p2br2; graphinit = false)
 
 # writeGraphPdf(fg)
 
-recordcliqs = [:x29;:x44;:x38;:x47;:x49]
+recordcliqs = [:x29; :x44; :x38; :x47; :x49]
 
-
-tree = solveTree!(fg, tree, recordcliqs=recordcliqs)
+tree = solveTree!(fg, tree; recordcliqs = recordcliqs)
 0
 
-
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
-
-
-
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 # hist = getCliqSolveHistory(tree, :x38)
 # printCliqHistorySummary(tree, :x38)
@@ -460,62 +353,38 @@ drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince 
 # sandboxCliqResolveStep(tree,:x38,41)
 #
 
-
-
 ## hex 8
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
-
+posecount = offsetHexLeg(fg, posecount; direction = :right)
 
 posecount = driveHex(fg, posecount)
 
-
-
 tree = solveTree!(fg, tree)
 
-
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
-
-
-
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 ## add sightings
-addVariable!(fg, :l8, Point2, tags=[:LANDMARK])
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x2; :l8], p2br2, graphinit=false )
+addVariable!(fg, :l8, Point2; tags = [:LANDMARK])
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x2; :l8], p2br2; graphinit = false)
 
-
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x49; :l8], p2br2, graphinit=false )
-
-
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x49; :l8], p2br2; graphinit = false)
 
 ## more resightings
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x47; :l5], p2br2, graphinit=false )
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x47; :l5], p2br2; graphinit = false)
 
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x48; :l6], p2br2; graphinit = false)
 
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x48; :l6], p2br2, graphinit=false )
-
-
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x55; :l6], p2br2, graphinit=false )
-
-
-
+p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+addFactor!(fg, [:x55; :l6], p2br2; graphinit = false)
 
 tree = solveTree!(fg, tree)
 
-
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
-
-
-
-
-
-
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf"); # @async run(`evince /tmp/test.pdf`)
 
 # dontMarginalizeVariablesAll!(fg)
 
@@ -523,29 +392,20 @@ plotPose(fg, :x22);
 
 ## hex 9
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
-
+posecount = offsetHexLeg(fg, posecount; direction = :right)
 
 posecount = driveHex(fg, posecount)
 
 # # Add landmarks with Bearing range measurements
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 # addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
-
-
 
 tree = solveTree!(fg, tree)
 
-
-
-
-
-
 ## hex 10
 
-posecount = offsetHexLeg(fg, posecount, direction=:left)
-posecount = offsetHexLeg(fg, posecount, direction=:right)
-
+posecount = offsetHexLeg(fg, posecount; direction = :left)
+posecount = offsetHexLeg(fg, posecount; direction = :right)
 
 posecount = driveHex(fg, posecount)
 
@@ -553,27 +413,11 @@ posecount = driveHex(fg, posecount)
 # p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
 # addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
 
-
-
-
-
-
-
-
 0
-
-
-
-
-
 
 using RoMEPlotting
 
-
-drawPosesLandms(fg, meanmax=:max) |> PDF("/tmp/test.pdf") || @async run(`evince /tmp/test.pdf`)
-
-
-
-
+drawPosesLandms(fg; meanmax = :max) |> PDF("/tmp/test.pdf") ||
+    @async run(`evince /tmp/test.pdf`)
 
 #

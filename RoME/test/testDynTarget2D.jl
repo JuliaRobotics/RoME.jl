@@ -2,33 +2,50 @@ using Caesar
 
 fg = initfg()
 
-cvf = VelPoint2VelPoint2(MvNormal([0.0;0;0;0], Matrix(Diagonal([7.0;7.0;0.1;0.1].^2))))
+cvf = VelPoint2VelPoint2(
+    MvNormal([0.0; 0; 0; 0], Matrix(Diagonal([7.0; 7.0; 0.1; 0.1] .^ 2))),
+)
 # cvf = DynPoint2DynPoint2(MvNormal([0.0;0;0;0], Matrix(Diagonal([7.0;7.0;0.1;0.1].^2))))
-br = Pose2Point2BearingRange(Normal(pi/2, 0.05), Normal(50.0, 1.0))
+br = Pose2Point2BearingRange(Normal(pi / 2, 0.05), Normal(50.0, 1.0))
 
 addVariable!(fg, :x1, Pose2)
-addFactor!(fg, [:x1], PriorPose2(MvNormal([0.0;0;0],Matrix(Diagonal([0.1;0.1;0.05].^2)))))
-addVariable!(fg, :l1, DynPoint2; nanosecondtime=0)
-addFactor!(fg, [:x1;:l1], br)
+addFactor!(
+    fg,
+    [:x1],
+    PriorPose2(MvNormal([0.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
+)
+addVariable!(fg, :l1, DynPoint2; nanosecondtime = 0)
+addFactor!(fg, [:x1; :l1], br)
 
 addVariable!(fg, :x2, Pose2)
-addFactor!(fg, [:x2], PriorPose2(MvNormal([10.0;0;0],Matrix(Diagonal([0.1;0.1;0.05].^2)))))
-addVariable!(fg, :l2, DynPoint2;  nanosecondtime=1_000_000_000)
-addFactor!(fg, [:l1;:l2], cvf)
-addFactor!(fg, [:x2;:l2], br)
+addFactor!(
+    fg,
+    [:x2],
+    PriorPose2(MvNormal([10.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
+)
+addVariable!(fg, :l2, DynPoint2; nanosecondtime = 1_000_000_000)
+addFactor!(fg, [:l1; :l2], cvf)
+addFactor!(fg, [:x2; :l2], br)
 
 addVariable!(fg, :x3, Pose2)
-addFactor!(fg, [:x3], PriorPose2(MvNormal([20.0;0;0],Matrix(Diagonal([0.1;0.1;0.05].^2)))))
-addVariable!(fg, :l3, DynPoint2;  nanosecondtime=2_000_000_000)
-addFactor!(fg, [:l2;:l3], cvf)
-addFactor!(fg, [:x3;:l3], br)
+addFactor!(
+    fg,
+    [:x3],
+    PriorPose2(MvNormal([20.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
+)
+addVariable!(fg, :l3, DynPoint2; nanosecondtime = 2_000_000_000)
+addFactor!(fg, [:l2; :l3], cvf)
+addFactor!(fg, [:x3; :l3], br)
 
 addVariable!(fg, :x4, Pose2)
-addFactor!(fg, [:x4], PriorPose2(MvNormal([30.0;0;0],Matrix(Diagonal([0.1;0.1;0.05].^2)))))
-addVariable!(fg, :l4, DynPoint2;  nanosecondtime=3_000_000_000)
-addFactor!(fg, [:l3;:l4], cvf)
-addFactor!(fg, [:x4;:l4], br)
-
+addFactor!(
+    fg,
+    [:x4],
+    PriorPose2(MvNormal([30.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
+)
+addVariable!(fg, :l4, DynPoint2; nanosecondtime = 3_000_000_000)
+addFactor!(fg, [:l3; :l4], cvf)
+addFactor!(fg, [:x4; :l4], br)
 
 # specific parameters
 getSolverParams(fg).drawtree = true
@@ -36,55 +53,59 @@ getSolverParams(fg).drawtree = true
 # and solve
 tree = solveTree!(fg)
 
-
-
 ## and plot
 using RoMEPlotting
-Gadfly.set_default_plot_size(40cm,25cm)
+Gadfly.set_default_plot_size(40cm, 25cm)
 
+plotKDE(fg, sort(union(ls(fg, r"x"), ls(fg, r"l"))); dims = [1; 2], title = "Positions")
 
-
-plotKDE(fg, sort(union(ls(fg,r"x"),ls(fg,r"l"))), dims=[1;2], title="Positions")
-
-plotKDE(fg, sort(ls(fg,r"l")), dims=[3;4], title="velocities")
-
-
-
-
-
-
-
-
-
+plotKDE(fg, sort(ls(fg, r"l")); dims = [3; 4], title = "velocities")
 
 fg = initfg()
 
-cvf = DynPoint2DynPoint2(MvNormal([0.0;0;0;0], Matrix(Diagonal([7.0;7.0;0.1;0.1].^2))))
-br = Pose2Point2BearingRange(Normal(-pi/4, 0.05), Normal(20.0, 1.0))
+cvf = DynPoint2DynPoint2(
+    MvNormal([0.0; 0; 0; 0], Matrix(Diagonal([7.0; 7.0; 0.1; 0.1] .^ 2))),
+)
+br = Pose2Point2BearingRange(Normal(-pi / 4, 0.05), Normal(20.0, 1.0))
 
 addVariable!(fg, :x1, Pose2)
-addFactor!(fg, [:x1], PriorPose2(MvNormal([0.0;0;0],Matrix(Diagonal([0.1;0.1;0.05].^2)))))
-addVariable!(fg, :l1, DynPoint2; nanosecondtime=0)
-addFactor!(fg, [:x1;:l1], br)
+addFactor!(
+    fg,
+    [:x1],
+    PriorPose2(MvNormal([0.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
+)
+addVariable!(fg, :l1, DynPoint2; nanosecondtime = 0)
+addFactor!(fg, [:x1; :l1], br)
 
 addVariable!(fg, :x2, Pose2)
-addFactor!(fg, [:x2], PriorPose2(MvNormal([10.0;0;0],Matrix(Diagonal([0.1;0.1;0.05].^2)))))
-addVariable!(fg, :l2, DynPoint2; nanosecondtime=1_000_000_000)
-addFactor!(fg, [:l1;:l2], cvf)
-addFactor!(fg, [:x2;:l2], br)
+addFactor!(
+    fg,
+    [:x2],
+    PriorPose2(MvNormal([10.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
+)
+addVariable!(fg, :l2, DynPoint2; nanosecondtime = 1_000_000_000)
+addFactor!(fg, [:l1; :l2], cvf)
+addFactor!(fg, [:x2; :l2], br)
 
 addVariable!(fg, :x3, Pose2)
-addFactor!(fg, [:x3], PriorPose2(MvNormal([20.0;0;0],Matrix(Diagonal([0.1;0.1;0.05].^2)))))
-addVariable!(fg, :l3, DynPoint2; nanosecondtime=2_000_000_000)
-addFactor!(fg, [:l2;:l3], cvf)
-addFactor!(fg, [:x3;:l3], br)
+addFactor!(
+    fg,
+    [:x3],
+    PriorPose2(MvNormal([20.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
+)
+addVariable!(fg, :l3, DynPoint2; nanosecondtime = 2_000_000_000)
+addFactor!(fg, [:l2; :l3], cvf)
+addFactor!(fg, [:x3; :l3], br)
 
 addVariable!(fg, :x4, Pose2)
-addFactor!(fg, [:x4], PriorPose2(MvNormal([30.0;0;0],Matrix(Diagonal([0.1;0.1;0.05].^2)))))
-addVariable!(fg, :l4, DynPoint2; nanosecondtime=3_000_000_000)
-addFactor!(fg, [:l3;:l4], cvf)
-addFactor!(fg, [:x4;:l4], br)
-
+addFactor!(
+    fg,
+    [:x4],
+    PriorPose2(MvNormal([30.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
+)
+addVariable!(fg, :l4, DynPoint2; nanosecondtime = 3_000_000_000)
+addFactor!(fg, [:l3; :l4], cvf)
+addFactor!(fg, [:x4; :l4], br)
 
 # specific parameters
 getSolverParams(fg).drawtree = true
@@ -92,29 +113,13 @@ getSolverParams(fg).drawtree = true
 # and solve
 tree = solveTree!(fg)
 
-
-
 ## and plot
 using RoMEPlotting
-Gadfly.set_default_plot_size(40cm,25cm)
+Gadfly.set_default_plot_size(40cm, 25cm)
 
+plotKDE(fg, sort(union(ls(fg, r"x"), ls(fg, r"l"))); dims = [1; 2], title = "Positions")
 
-
-plotKDE(fg, sort(union(ls(fg,r"x"),ls(fg,r"l"))), dims=[1;2], title="Positions")
-
-plotKDE(fg, sort(ls(fg,r"l")), dims=[3;4], title="velocities")
-
-
-
-
-
-
-
-
-
-
-
-
+plotKDE(fg, sort(ls(fg, r"l")); dims = [3; 4], title = "velocities")
 
 #
 #
@@ -176,7 +181,5 @@ plotKDE(fg, sort(ls(fg,r"l")), dims=[3;4], title="velocities")
 # end
 #
 #
-
-
 
 #

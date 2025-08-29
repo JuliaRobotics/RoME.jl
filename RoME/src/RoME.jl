@@ -8,21 +8,20 @@ using Reexport
 @reexport using KernelDensityEstimate
 @reexport using ApproxManifoldProducts
 
-using
-  Dates,
-  FileIO,
-  Distributed,
-  LinearAlgebra,
-  Statistics,
-  CoordinateTransformations,
-  # JLD2,
-  ProgressMeter,
-  DocStringExtensions,
-  DistributedFactorGraphs,
-  TensorCast,
-  ManifoldsBase,
-  # Manifolds,
-  LieGroups
+using Dates,
+    FileIO,
+    Distributed,
+    LinearAlgebra,
+    Statistics,
+    CoordinateTransformations,
+    # JLD2,
+    ProgressMeter,
+    DocStringExtensions,
+    DistributedFactorGraphs,
+    TensorCast,
+    ManifoldsBase,
+    # Manifolds,
+    LieGroups
 
 using RoMETypes
 using StaticArrays
@@ -43,7 +42,6 @@ export SpecialOrthogonalGroup, SpecialEuclidean
 export submanifold_component
 # using Graphs,  # TODO determine how many parts still require Graphs still directly
 
-
 import Base: +, \, convert
 import TransformUtils: ⊕, convert, ominus, veeQuaternion
 import IncrementalInference: MB
@@ -60,7 +58,6 @@ using OrderedCollections: OrderedDict
 
 # export the API
 include("ExportAPI.jl")
-
 
 # load the source files
 include("entities/SpecialDefinitions.jl")
@@ -131,16 +128,14 @@ include("../ext/factors/GenericProjection.jl")
 include("../ext/factors/InertialDynamic.jl")
 include("../ext/factors/MixtureFluxPose2Pose2.jl")
 
-
 # things on their way out
 include("Deprecated.jl")
-
 
 # manifold conversions required during transformation
 
 @compile_workload begin
-  # In here put "toy workloads" that exercise the code you want to precompile
-  warmUpSolverJIT()
+    # In here put "toy workloads" that exercise the code you want to precompile
+    warmUpSolverJIT()
 end
 
 end

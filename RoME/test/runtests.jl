@@ -18,83 +18,83 @@ using ManifoldsBase: submanifold_component
 
 @error("add test for generateGraph_Beehive!, norm( simulated - default ) < tol")
 
-testfiles = [  
-  # known broken tests
-  "testG2oParser.jl";  # deferred
-  
-  # dev test first, for faster issues.
-  # Inertial
-  "inertial/testInertialDynamic.jl";
-  "inertial/testODE_INS.jl";
-  "inertial/testIMUDeltaFactor.jl"; #FIXME slow
-  
-  # ...
-  # "testFluxModelsPose2.jl";
-  "testPartialRangeCrossCorrelations.jl";
-  "testG2oExportSE3.jl";
+testfiles = [
+    # known broken tests
+    "testG2oParser.jl"  # deferred
 
-  #parametric tests
-  "testParametric.jl";
-  "testPose3.jl";
-  "testVelPos3.jl";
+    # dev test first, for faster issues.
+    # Inertial
+    "inertial/testInertialDynamic.jl"
+    "inertial/testODE_INS.jl"
+    "inertial/testIMUDeltaFactor.jl" #FIXME slow
 
-  # tests most likely to fail on numerics
-  "testScalarFields.jl"; #FIXME slow
-  "testPoint2Point2Init.jl";
-  "threeDimLinearProductTest.jl";
-  "testPose3Pose3NH.jl";
+    # ...
+    # "testFluxModelsPose2.jl";
+    "testPartialRangeCrossCorrelations.jl"
+    "testG2oExportSE3.jl"
 
-  # recent development work
-  "testPartialPose2.jl";
-  "testPartialPose3.jl";
-  "testBearingRange2D.jl";
-  "testBearing2D.jl";
-  "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
+    #parametric tests
+    "testParametric.jl"
+    "testPose3.jl"
+    "testVelPos3.jl"
 
-  # regular tests expected to pass
-  "testpackingconverters.jl"; #FIXME for new DFG deprecations
-  "testInflation380.jl";
-  "testPoint2Point2.jl";
-  "testParametricCovariances.jl";
-  "testParametricSimulated.jl";
-  "testBasicPose2Conv.jl";
-  "testGraphGenerators.jl";
-  "testTreeInitCommonMsg_IIF913.jl";
-  "testHexagonal2D_CliqByCliq.jl";      # special case debugging
-  "testhigherdimroots.jl";
-  "testGenericProjection.jl";
-  "testDidsonFunctions.jl";
-  "testBasicPose2Stationary.jl";
-  "TestPoseAndPoint2Constraints.jl";
-  "testDynPoint2D.jl";
-  "testDeltaOdo.jl"; #FIXME slow
-  "testFixedLagFG.jl";
-  "testDynPose2D.jl"; #FIXME slow
-  "testPartialPriorYawPose2.jl";
-  "TestDefaultFGInitialization.jl";
-  "testAccumulateFactors.jl";
-  "testDeadReckoningTether.jl"; 
-  "testGenerateHelix.jl";
+    # tests most likely to fail on numerics
+    "testScalarFields.jl" #FIXME slow
+    "testPoint2Point2Init.jl"
+    "threeDimLinearProductTest.jl"
+    "testPose3Pose3NH.jl"
 
+    # recent development work
+    "testPartialPose2.jl"
+    "testPartialPose3.jl"
+    "testBearingRange2D.jl"
+    "testBearing2D.jl"
+    "testMultimodalRangeBearing.jl" # restore after Bearing factors are fixed
 
-  # starts multiprocess.
-  # don't move up, special factors defined in other test files are not added to multiprocess (Distributed.jl)
-  "testBeehiveGrow.jl"; # also starts multiprocess
+    # regular tests expected to pass
+    "testpackingconverters.jl" #FIXME for new DFG deprecations
+    "testInflation380.jl"
+    "testPoint2Point2.jl"
+    "testParametricCovariances.jl"
+    "testParametricSimulated.jl"
+    "testBasicPose2Conv.jl"
+    "testGraphGenerators.jl"
+    "testTreeInitCommonMsg_IIF913.jl"
+    "testHexagonal2D_CliqByCliq.jl"      # special case debugging
+    "testhigherdimroots.jl"
+    "testGenericProjection.jl"
+    "testDidsonFunctions.jl"
+    "testBasicPose2Stationary.jl"
+    "TestPoseAndPoint2Constraints.jl"
+    "testDynPoint2D.jl"
+    "testDeltaOdo.jl" #FIXME slow
+    "testFixedLagFG.jl"
+    "testDynPose2D.jl" #FIXME slow
+    "testPartialPriorYawPose2.jl"
+    "TestDefaultFGInitialization.jl"
+    "testAccumulateFactors.jl"
+    "testDeadReckoningTether.jl"
+    "testGenerateHelix.jl"
+
+    # starts multiprocess.
+    # don't move up, special factors defined in other test files are not added to multiprocess (Distributed.jl)
+    "testBeehiveGrow.jl" # also starts multiprocess
 ]
-
 
 ## Tests not ready yet
 # "HexagonalLightGraphs.jl"
 # "testCameraFunctions.jl"
 # "testmultiplefeatures.jl"
 @testset "RoME tests" begin
-for (i,testf) in enumerate(testfiles)
-  @testset "[TEST $i] $testf" begin
-    println("[TEST $i] $testf =============================================================")
-    include(testf)
-  end
-  println()
-  println()
-  println()
-end
+    for (i, testf) in enumerate(testfiles)
+        @testset "[TEST $i] $testf" begin
+            println(
+                "[TEST $i] $testf =============================================================",
+            )
+            include(testf)
+        end
+        println()
+        println()
+        println()
+    end
 end

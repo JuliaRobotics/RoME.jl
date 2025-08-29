@@ -9,15 +9,18 @@
 
 Partial prior belief on Z, Roll, and Pitch of a `Pose3`.
 """
-Base.@kwdef struct PriorPose3ZRP{T1<:SamplableBelief,T2<:SamplableBelief} <: IncrementalInference.AbstractPrior
-  z::T1
-  rp::T2
-  partial::Tuple{Int,Int,Int} = (3,4,5)
+Base.@kwdef struct PriorPose3ZRP{T1 <: SamplableBelief, T2 <: SamplableBelief} <:
+                   IncrementalInference.AbstractPrior
+    z::T1
+    rp::T2
+    partial::Tuple{Int, Int, Int} = (3, 4, 5)
 end
-PriorPose3ZRP(z::SamplableBelief,rp::SamplableBelief) = PriorPose3ZRP(;z, rp)
+PriorPose3ZRP(z::SamplableBelief, rp::SamplableBelief) = PriorPose3ZRP(; z, rp)
 
 # TODO should be dim 3 manifold
-DFG.getManifold(zrp::Type{<:PriorPose3ZRP}) = TranslationGroup(1) × CircleGroup(ℝ) × CircleGroup(ℝ)
+function DFG.getManifold(zrp::Type{<:PriorPose3ZRP})
+    return TranslationGroup(1) × CircleGroup(ℝ) × CircleGroup(ℝ)
+end
 # DIDNT WORK YET, partials need more attention:  getManifoldPartial(getManifold(Pose3), [zrp.partial...;]) 
 
 #FIXME why was the type piracy needed here?
@@ -25,27 +28,26 @@ DFG.getManifold(zrp::Type{<:PriorPose3ZRP}) = TranslationGroup(1) × CircleGroup
 
 #FIXME update to also only one measurement
 function getSample(cf::CalcFactor{<:PriorPose3ZRP})
-  # working towards producing samples as a point on the manifold of getManifold(::PriorPose3ZRP)
-  Mf = getManifold(Pose3) # full Pose3 with partial logic
+    # working towards producing samples as a point on the manifold of getManifold(::PriorPose3ZRP)
+    Mf = getManifold(Pose3) # full Pose3 with partial logic
 
-  #Rotation part: from Euler roll and pitch
-  r,p = rand(cf.factor.rp)
-  R = _Rot.RotYX(p, r) #TODO confirm RotYX(p,r) or RotXY(r,p)
-  
-  # Translation part: Z
-  T = [0; 0; rand(cf.factor.z)]
-  pt = ArrayPartition(T, R)
+    #Rotation part: from Euler roll and pitch
+    r, p = rand(cf.factor.rp)
+    R = _Rot.RotYX(p, r) #TODO confirm RotYX(p,r) or RotXY(r,p)
 
-  # FIXME, this is probably not quite right
-  # to Lie exponential parameterization, notice world reference
-  w_Cp = vee(LieAlgebra(Mf), log(Mf, pt))
-  return ArrayPartition(
-    [w_Cp[cf.factor.partial[1]]], 
-    [w_Cp[cf.factor.partial[2]]], 
-    [w_Cp[cf.factor.partial[3]]] 
-  )
+    # Translation part: Z
+    T = [0; 0; rand(cf.factor.z)]
+    pt = ArrayPartition(T, R)
+
+    # FIXME, this is probably not quite right
+    # to Lie exponential parameterization, notice world reference
+    w_Cp = vee(LieAlgebra(Mf), log(Mf, pt))
+    return ArrayPartition(
+        [w_Cp[cf.factor.partial[1]]],
+        [w_Cp[cf.factor.partial[2]]],
+        [w_Cp[cf.factor.partial[3]]],
+    )
 end
-
 
 """
     $TYPEDEF
@@ -53,26 +55,29 @@ end
 Serialization type of `PriorPose3ZRP`.
 """
 Base.@kwdef struct PackedPriorPose3ZRP <: AbstractPackedFactor
-  zdata::PackedSamplableBelief
-  rpdata::PackedSamplableBelief
+    zdata::PackedSamplableBelief
+    rpdata::PackedSamplableBelief
 end
 function DFG.unpack(d::PackedPriorPose3ZRP)
-  PriorPose3ZRP( convert(SamplableBelief, d.zdata), convert(SamplableBelief, d.rpdata)  )
+    return PriorPose3ZRP(
+        convert(SamplableBelief, d.zdata),
+        convert(SamplableBelief, d.rpdata),
+    )
 end
 function DFG.pack(d::PriorPose3ZRP)
-  PackedPriorPose3ZRP( convert(PackedSamplableBelief, d.z), convert(PackedSamplableBelief, d.rp) )
+    return PackedPriorPose3ZRP(
+        convert(PackedSamplableBelief, d.z),
+        convert(PackedSamplableBelief, d.rp),
+    )
 end
 
-
-function compare(a::PriorPose3ZRP, b::PriorPose3ZRP; tol::Float64=1e-10)
-  TP = true
-  TP = TP && compareDensity(a.rp, b.rp)
-  TP = TP && compareDensity(a.z, b.z)
-  TP = TP && norm(collect(a.partial)-collect(b.partial)) < tol
-  return TP
+function compare(a::PriorPose3ZRP, b::PriorPose3ZRP; tol::Float64 = 1e-10)
+    TP = true
+    TP = TP && compareDensity(a.rp, b.rp)
+    TP = TP && compareDensity(a.z, b.z)
+    TP = TP && norm(collect(a.partial) - collect(b.partial)) < tol
+    return TP
 end
-
-
 
 ##==============================================================================
 ## Partial Pose3 Pose3 Factors
@@ -100,70 +105,75 @@ p0 = identity_element(M)
 
 """
 struct Pose3Pose3XYYaw{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
-  Z::T
-  # partial::Tuple{Int,Int,Int,Int,Int}
-  partial::Tuple{Int,Int,Int}
+    Z::T
+    # partial::Tuple{Int,Int,Int,Int,Int}
+    partial::Tuple{Int, Int, Int}
 end
-Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) = error("Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) where {T1 <: , T2 <: IIF.SamplableBelief} is deprecated, use one belief")
+function Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief)
+    return error(
+        "Pose3Pose3XYYaw(xy::SamplableBelief, yaw::SamplableBelief) where {T1 <: , T2 <: IIF.SamplableBelief} is deprecated, use one belief",
+    )
+end
 
 # Lie exponentials (pqr) are all three affected by changes in Yaw
 # Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,4,5,6))   # (1,2,6))
-Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,6))
+Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1, 2, 6))
 
 DFG.getManifold(::Type{<:Pose3Pose3XYYaw}) = SOnxRn_MetricManifold(2)
 
-
 ## NOTE, Yaw only works if you assume a preordained global reference point, such as identity_element(Pose3)
-function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq )
-  #
-  M = SOnxRn_MetricManifold(2)
+function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq)
+    #
+    M = SOnxRn_MetricManifold(2)
 
-  rx = normalize(view(wTp.x[2],1:2, 1))
-  R = SA[rx[1] -rx[2];
-         rx[2]  rx[1]]
-  p = ArrayPartition(view(wTp.x[1], 1:2), R)
+    rx = normalize(view(wTp.x[2], 1:2, 1))
+    R = SA[
+        rx[1] -rx[2]
+        rx[2] rx[1]
+    ]
+    p = ArrayPartition(view(wTp.x[1], 1:2), R)
 
-  rx = normalize(view(wTq.x[2],1:2, 1))
-  R = SA[rx[1] -rx[2];
-         rx[2]  rx[1]]
-  q = ArrayPartition(view(wTq.x[1], 1:2), R)
+    rx = normalize(view(wTq.x[2], 1:2, 1))
+    R = SA[
+        rx[1] -rx[2]
+        rx[2] rx[1]
+    ]
+    q = ArrayPartition(view(wTq.x[1], 1:2), R)
 
-  q̂ = exp(M, p, X) 
-  #TODO allocalte for vee! see Manifolds #412, fix for AD
-  Xc = zeros(3)
-  vee!(LieAlgebra(M), Xc, log(M, q, q̂))
-  return Xc
-
+    q̂ = exp(M, p, X)
+    #TODO allocalte for vee! see Manifolds #412, fix for AD
+    Xc = zeros(3)
+    vee!(LieAlgebra(M), Xc, log(M, q, q̂))
+    return Xc
 end
 
 ## Old code and other ideas:
-  # # Yaw is around the positive z axis
-  # ##
-  # # new Manifolds code (tests failing)
-  # M3 = SpecialEuclidean(3)
-  # M2 = SpecialEuclidean(2)
-  
-  # e3 = identity_element(M3, wTp)
-  # e2 = identity_element(M2)
+# # Yaw is around the positive z axis
+# ##
+# # new Manifolds code (tests failing)
+# M3 = SpecialEuclidean(3)
+# M2 = SpecialEuclidean(2)
 
+# e3 = identity_element(M3, wTp)
+# e2 = identity_element(M2)
 
-  # wRpψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTp.parts[2])).Y )[1:2,1:2]
-  # wTp_2  = ProductRepr(wTp.parts[1][1:2],   wRpψ_2)
-  # wTqhat = Manifolds.compose(M2, wTp_2, exp(M2, e2, X))
+# wRpψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTp.parts[2])).Y )[1:2,1:2]
+# wTp_2  = ProductRepr(wTp.parts[1][1:2],   wRpψ_2)
+# wTqhat = Manifolds.compose(M2, wTp_2, exp(M2, e2, X))
 
-  # wRqψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTq.parts[2])).Y )[1:2,1:2]
-  # wTq_2  = ProductRepr(wTq.parts[1][1:2],   wRqψ_2)
-  # qhatTq = Manifolds.compose(M2, inv(M2, wTqhat), wTq_2)
-  
-  # #TODO allocate for vee! see Manifolds #412, fix for AD
-  # Xc = zeros(3)
-  # vee!(M2, Xc, e2, log(M2, e2, qhatTq))
-  # return Xc
+# wRqψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTq.parts[2])).Y )[1:2,1:2]
+# wTq_2  = ProductRepr(wTq.parts[1][1:2],   wRqψ_2)
+# qhatTq = Manifolds.compose(M2, inv(M2, wTqhat), wTq_2)
 
-  # Old YPR coordinate code, < v"0.16"
-  # wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
-  # jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
-  # return se2vee(jXjhat)
+# #TODO allocate for vee! see Manifolds #412, fix for AD
+# Xc = zeros(3)
+# vee!(M2, Xc, e2, log(M2, e2, qhatTq))
+# return Xc
+
+# Old YPR coordinate code, < v"0.16"
+# wXjhat = SE2(wXi[[1;2;6]]) * SE2(meas[1:3])
+# jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
+# return se2vee(jXjhat)
 
 """
     $TYPEDEF
@@ -171,26 +181,23 @@ end
 Serialization type of Pose3Pose3XYYaw.
 """
 Base.@kwdef struct PackedPose3Pose3XYYaw <: AbstractPackedFactor
-  Z::PackedSamplableBelief
+    Z::PackedSamplableBelief
 end
 
 function DFG.unpack(d::PackedPose3Pose3XYYaw)
-  return Pose3Pose3XYYaw( convert(SamplableBelief, d.Z))
+    return Pose3Pose3XYYaw(convert(SamplableBelief, d.Z))
 end
 
 function DFG.pack(d::Pose3Pose3XYYaw)
-  return PackedPose3Pose3XYYaw( convert(PackedSamplableBelief, d.Z))
+    return PackedPose3Pose3XYYaw(convert(PackedSamplableBelief, d.Z))
 end
 
-function compare(a::Pose3Pose3XYYaw, b::Pose3Pose3XYYaw; tol::Float64=1e-10)
-  TP = true
-  TP = TP && compareDensity(a.Z, b.Z)
-  TP = TP && norm(collect(a.partial)-collect(b.partial)) < tol
-  return TP
+function compare(a::Pose3Pose3XYYaw, b::Pose3Pose3XYYaw; tol::Float64 = 1e-10)
+    TP = true
+    TP = TP && compareDensity(a.Z, b.Z)
+    TP = TP && norm(collect(a.partial) - collect(b.partial)) < tol
+    return TP
 end
-
-
-
 
 #
 # ------------------------------------------------------------------------------
@@ -203,28 +210,27 @@ end
 Partial rotation only factor between two Pose3 variables.
 """
 struct Pose3Pose3Rotation{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
-  Z::T
-  partial::Tuple{Int,Int,Int}
+    Z::T
+    partial::Tuple{Int, Int, Int}
 end
-Pose3Pose3Rotation(z::SamplableBelief) = Pose3Pose3Rotation(z, (4,5,6))
+Pose3Pose3Rotation(z::SamplableBelief) = Pose3Pose3Rotation(z, (4, 5, 6))
 
 DFG.getManifold(::Type{<:Pose3Pose3Rotation}) = SpecialOrthogonalGroup(3)
 
-function (cfo::CalcFactor{<:Pose3Pose3Rotation})(Xm, wTp, wTq )
-  #
-  G = SpecialOrthogonalGroup(3)
-  𝔤 = LieAlgebra(G)
-  p = wTp.x[2]
-  q = wTq.x[2]
+function (cfo::CalcFactor{<:Pose3Pose3Rotation})(Xm, wTp, wTq)
+    #
+    G = SpecialOrthogonalGroup(3)
+    𝔤 = LieAlgebra(G)
+    p = wTp.x[2]
+    q = wTq.x[2]
 
-  X = log(G, p, q)
-  Xc = vee(𝔤, X)
+    X = log(G, p, q)
+    Xc = vee(𝔤, X)
 
-  Xc_m = vee(𝔤, Xm)
+    Xc_m = vee(𝔤, Xm)
 
-  #TODO Xm - Xc or Xc - Xm?
-  return Xc_m - Xc
-
+    #TODO Xm - Xc or Xc - Xm?
+    return Xc_m - Xc
 end
 
 """
@@ -233,22 +239,20 @@ end
 Serialization type of Pose3Pose3Rotation.
 """
 Base.@kwdef struct PackedPose3Pose3Rotation <: AbstractPackedFactor
-  Z::PackedSamplableBelief
+    Z::PackedSamplableBelief
 end
 
 function DFG.unpack(d::PackedPose3Pose3Rotation)
-  return Pose3Pose3Rotation( convert(SamplableBelief, d.Z))
+    return Pose3Pose3Rotation(convert(SamplableBelief, d.Z))
 end
 
 function DFG.pack(d::Pose3Pose3Rotation)
-  return PackedPose3Pose3Rotation( convert(PackedSamplableBelief, d.Z))
+    return PackedPose3Pose3Rotation(convert(PackedSamplableBelief, d.Z))
 end
 
-
-function compare(a::Pose3Pose3Rotation, b::Pose3Pose3Rotation; tol::Float64=1e-10)
-  TP = true
-  TP = TP && compareDensity(a.Z, b.Z)
-  TP = TP && norm(collect(a.partial)-collect(b.partial)) < tol
-  return TP
+function compare(a::Pose3Pose3Rotation, b::Pose3Pose3Rotation; tol::Float64 = 1e-10)
+    TP = true
+    TP = TP && compareDensity(a.Z, b.Z)
+    TP = TP && norm(collect(a.partial) - collect(b.partial)) < tol
+    return TP
 end
-

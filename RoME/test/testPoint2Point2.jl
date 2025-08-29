@@ -7,22 +7,28 @@ using Test
 ##
 
 @testset "basic Point2Point2 test" begin
+    fg = initfg()
 
-fg = initfg()
+    addVariable!(fg, :x0, Point2)
+    addFactor!(
+        fg,
+        [:x0],
+        PriorPoint2(MvNormal(zeros(2), Matrix{Float64}(LinearAlgebra.I, 2, 2))),
+    )
 
-addVariable!(fg, :x0, Point2)
-addFactor!(fg, [:x0], PriorPoint2(MvNormal(zeros(2), Matrix{Float64}(LinearAlgebra.I, 2,2))))
+    addVariable!(fg, :x1, Point2)
+    addFactor!(
+        fg,
+        [:x0; :x1],
+        Point2Point2(MvNormal([10; 0.0], Matrix{Float64}(LinearAlgebra.I, 2, 2))),
+    )
 
-addVariable!(fg, :x1, Point2)
-addFactor!(fg, [:x0;:x1], Point2Point2(MvNormal([10;0.0], Matrix{Float64}(LinearAlgebra.I, 2,2))))
+    tree = solveTree!(fg)
+    # tree = wipeBuildNewTree!(fg)
+    # inferOverTree!(fg, tree)
 
-tree = solveTree!(fg)
-# tree = wipeBuildNewTree!(fg)
-# inferOverTree!(fg, tree)
-
-@test isapprox(mean(getVal(fg, :x0)), [0,0], atol=1.0)
-@test isapprox(mean(getVal(fg, :x1)), [10,0], atol=1.0)
-
+    @test isapprox(mean(getVal(fg, :x0)), [0, 0], atol = 1.0)
+    @test isapprox(mean(getVal(fg, :x1)), [10, 0], atol = 1.0)
 end
 
 ##
@@ -40,107 +46,117 @@ end
 # # drawLandms(fg) #, regexLandmark=r"x") |> PDF("/tmp/test.pdf")
 # plotKDE(fg, ls(fg))
 
-
 @testset "test Point2Point2Range..." begin
 
-##
+    ##
 
-N=100 # return to 200
-fg = initfg()
-# getSolverParams(fg).inflation = 50.0
-getSolverParams(fg).graphinit = false
+    N = 100 # return to 200
+    fg = initfg()
+    # getSolverParams(fg).inflation = 50.0
+    getSolverParams(fg).graphinit = false
 
-addVariable!(fg, :x0, Point2, N=N)
-addFactor!(fg, [:x0], PriorPoint2(MvNormal([100.0;0], diagm(ones(2)) )), graphinit=false)
+    addVariable!(fg, :x0, Point2; N = N)
+    addFactor!(
+        fg,
+        [:x0],
+        PriorPoint2(MvNormal([100.0; 0], diagm(ones(2))));
+        graphinit = false,
+    )
 
-addVariable!(fg, :x1, Point2, N=N)
-addFactor!(fg, [:x1], PriorPoint2(MvNormal([0.0;100.0], diagm(ones(2)) )), graphinit=false)
+    addVariable!(fg, :x1, Point2; N = N)
+    addFactor!(
+        fg,
+        [:x1],
+        PriorPoint2(MvNormal([0.0; 100.0], diagm(ones(2))));
+        graphinit = false,
+    )
 
-addVariable!(fg, :l1, Point2, N=N)
-addFactor!(fg, [:x0;:l1], Point2Point2Range(Normal(100.0, 1.0)) , graphinit=false)
-addFactor!(fg, [:x1;:l1], Point2Point2Range(Normal(100.0, 1.0)) , graphinit=false)
+    addVariable!(fg, :l1, Point2; N = N)
+    addFactor!(fg, [:x0; :l1], Point2Point2Range(Normal(100.0, 1.0)); graphinit = false)
+    addFactor!(fg, [:x1; :l1], Point2Point2Range(Normal(100.0, 1.0)); graphinit = false)
 
+    ##
 
-##
+    @warn("Point2Point2 range 2 mode, allow 3 attempts until IIF #1010 is completed")
+    TP = false
+    for ic = 1:3
+        tree = solveTree!(fg)
 
-@warn("Point2Point2 range 2 mode, allow 3 attempts until IIF #1010 is completed")
-TP = false
-for ic in 1:3
-  tree = solveTree!(fg)
+        # mode 1
+        @cast l1_val[j, i] := getVal(fg, :l1)[i][j]
+        @show T1 = (
+            0.05 * N < sum(90 .< l1_val[1, :] .< 110) &&
+            0.05 * N < sum(90 .< l1_val[2, :] .< 110)
+        )
+        # mode 2
+        @show T2 = (
+            0.05 * N < sum(-10 .< l1_val[1, :] .< 10) &&
+            0.05 * N < sum(-10 .< l1_val[2, :] .< 10)
+        )
+        TP |= T1 && T2
+        TP && break
+    end
 
-  # mode 1
-  @cast l1_val[j,i] := getVal(fg, :l1)[i][j]
-  @show T1 = (0.05*N < sum( 90 .< l1_val[1,:] .< 110 ) && 0.05*N < sum( 90 .< l1_val[2,:] .< 110 ))
-  # mode 2
-  @show T2 = (0.05*N < sum( -10 .< l1_val[1,:] .< 10 ) && 0.05*N < sum( -10 .< l1_val[2,:] .< 10 ))
-  TP |= T1 && T2
-  TP && break
+    @test TP
+
+    # @test 0.05*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
+    # @test 0.05*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
+
+    # @test 0.05*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
+    # @test 0.05*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
+    @cast l1_val[j, i] := getVal(fg, :l1)[i][j]
+
+    voidsel1 = 10.0 .< l1_val[1, :]
+    @test sum(l1_val[2, voidsel1] .< 70) < 0.35 * N
+
+    voidsel2 = 10.0 .< l1_val[2, :]
+    @test sum(l1_val[1, voidsel2] .< 70) < 0.35 * N
+
+    @test sum(120 .< abs.(l1_val[1, :])) < 0.35 * N
+    @test sum(120 .< abs.(l1_val[2, :])) < 0.35 * N
+
+    ##
+
 end
-
-@test TP
-
-# @test 0.05*N < sum( 90 .< getVal(fg, :l1)[1,:] .< 110 )
-# @test 0.05*N < sum( -10 .< getVal(fg, :l1)[2,:] .< 10 )
-
-# @test 0.05*N < sum( -10 .< getVal(fg, :l1)[1,:] .< 10 )
-# @test 0.05*N < sum( 90 .< getVal(fg, :l1)[2,:] .< 110 )
-@cast l1_val[j,i] := getVal(fg, :l1)[i][j]
-
-voidsel1 =  10.0 .< l1_val[1,:]
-@test sum( l1_val[2,voidsel1] .< 70 ) < 0.35*N
-
-voidsel2 =  10.0 .< l1_val[2,:]
-@test sum( l1_val[1,voidsel2] .< 70 ) < 0.35*N
-
-@test sum( 120 .< abs.(l1_val[1,:]) ) < 0.35*N
-@test sum( 120 .< abs.(l1_val[2,:]) ) < 0.35*N
-
-##
-
-end
-
 
 ##
 @testset "Unpack of Point2Point2Range, #563" begin
-##
+    ##
 
-fg = initfg()
+    fg = initfg()
 
-addVariable!(fg, :x0, Point2)
-addVariable!(fg, :l3, Point2)
+    addVariable!(fg, :x0, Point2)
+    addVariable!(fg, :l3, Point2)
 
-point2point2rangeString = """
-  {"label":"x0l3f1",\
-  "_version":"0.20.0",\
-  "_variableOrderSymbols":["x0","l3"],\
-  "data":"{\\\"eliminated\\\":false,\\\"potentialused\\\":false,\\\"edgeIDs\\\":[],\
-  \\\"fnc\\\":{\\\"Z\\\":{\\\"_type\\\":\\\"IncrementalInference.PackedNormal\\\",\\\"mu\\\":89.44271909999159,\\\"sigma\\\":3.0}},\
-  \\\"multihypo\\\":[],\\\"certainhypo\\\":[1,2],\\\"nullhypo\\\":0.0,\\\"solveInProgress\\\":0,\\\"inflation\\\":5.0}",\
-  "tags":["FACTOR"],\
-  "timestamp":"2022-03-26T01:24:44.373-05:00",\
-  "nstime":"0",\
-  "fnctype":"Point2Point2Range",\
-  "metadata":"e30=",\
-  "solvable":1}\
-  """
-jback = JSON3.read(point2point2rangeString, PackedFactor)
-f = unpackFactor(fg, jback)
+    point2point2rangeString = """
+      {"label":"x0l3f1",\
+      "_version":"0.20.0",\
+      "_variableOrderSymbols":["x0","l3"],\
+      "data":"{\\\"eliminated\\\":false,\\\"potentialused\\\":false,\\\"edgeIDs\\\":[],\
+      \\\"fnc\\\":{\\\"Z\\\":{\\\"_type\\\":\\\"IncrementalInference.PackedNormal\\\",\\\"mu\\\":89.44271909999159,\\\"sigma\\\":3.0}},\
+      \\\"multihypo\\\":[],\\\"certainhypo\\\":[1,2],\\\"nullhypo\\\":0.0,\\\"solveInProgress\\\":0,\\\"inflation\\\":5.0}",\
+      "tags":["FACTOR"],\
+      "timestamp":"2022-03-26T01:24:44.373-05:00",\
+      "nstime":"0",\
+      "fnctype":"Point2Point2Range",\
+      "metadata":"e30=",\
+      "solvable":1}\
+      """
+    jback = JSON3.read(point2point2rangeString, PackedFactor)
+    f = unpackFactor(fg, jback)
 
-# f1 = addFactor!(fg, [:x0, :l3], Point2Point2Range(Normal(89.44271909999159, 3.0)); inflation=5, graphinit=false)
-# pf = DFG.packFactor(fg, f1)
-# jstr = JSON3.write(pf)
-point2point2rangeString = "{\"label\":\"x0l3f1\",\"tags\":[\"FACTOR\"],\"_variableOrderSymbols\":[\"x0\",\"l3\"],\"timestamp\":\"2023-03-10T17:28:37.230-08:00\",\"nstime\":\"0\",\"fnctype\":\"Point2Point2Range\",\"solvable\":1,\"data\":\"{\\\"eliminated\\\":false,\\\"potentialused\\\":false,\\\"edgeIDs\\\":[],\\\"fnc\\\":{\\\"Z\\\":{\\\"_type\\\":\\\"IncrementalInference.PackedNormal\\\",\\\"mu\\\":89.44271909999159,\\\"sigma\\\":3.0}},\\\"multihypo\\\":[],\\\"certainhypo\\\":[1,2],\\\"nullhypo\\\":0.0,\\\"solveInProgress\\\":0,\\\"inflation\\\":5.0}\",\"metadata\":\"e30=\",\"_version\":\"0.20.0\"}"
+    # f1 = addFactor!(fg, [:x0, :l3], Point2Point2Range(Normal(89.44271909999159, 3.0)); inflation=5, graphinit=false)
+    # pf = DFG.packFactor(fg, f1)
+    # jstr = JSON3.write(pf)
+    point2point2rangeString = "{\"label\":\"x0l3f1\",\"tags\":[\"FACTOR\"],\"_variableOrderSymbols\":[\"x0\",\"l3\"],\"timestamp\":\"2023-03-10T17:28:37.230-08:00\",\"nstime\":\"0\",\"fnctype\":\"Point2Point2Range\",\"solvable\":1,\"data\":\"{\\\"eliminated\\\":false,\\\"potentialused\\\":false,\\\"edgeIDs\\\":[],\\\"fnc\\\":{\\\"Z\\\":{\\\"_type\\\":\\\"IncrementalInference.PackedNormal\\\",\\\"mu\\\":89.44271909999159,\\\"sigma\\\":3.0}},\\\"multihypo\\\":[],\\\"certainhypo\\\":[1,2],\\\"nullhypo\\\":0.0,\\\"solveInProgress\\\":0,\\\"inflation\\\":5.0}\",\"metadata\":\"e30=\",\"_version\":\"0.20.0\"}"
 
-f_ = JSON3.read(point2point2rangeString, DFG.PackedFactor)
-f = DFG.unpackFactor(fg, f_)
+    f_ = JSON3.read(point2point2rangeString, DFG.PackedFactor)
+    f = DFG.unpackFactor(fg, f_)
 
-addFactor!(fg, f)
+    addFactor!(fg, f)
 
-##
+    ##
 end
-
-
-
 
 #
 #
@@ -164,16 +180,11 @@ end
 #
 # plotKDE([KDE.kde!(pts1); KDE.kde!(pts2)])
 
-
-
-
 # #
 # #
 # #
 #
 # #
-
-
 
 # using RoMEPlotting, KernelDensityEstimatePlotting
 #
@@ -183,12 +194,5 @@ end
 # stuff
 #
 # plotKDE(stuff[2], levels=3, c=["red";"cyan"])
-
-
-
-
-
-
-
 
 ##
