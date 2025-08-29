@@ -4,11 +4,11 @@
 using Statistics
 using RoME
 using Test
-using Manifolds: hat, vee, identity_element, SpecialOrthogonal, SpecialEuclidean
+# using Manifolds: hat, vee, identity_element, SpecialOrthogonal, SpecialEuclidean
 import Manifolds
 using TensorCast
 using DistributedFactorGraphs
-using Rotations
+using Rotations: RotX, RotY, RotZ, RotZYX, RotXYZ
 
 ##
 
@@ -35,7 +35,7 @@ end
 
 fg = initfg()
 
-M=SpecialEuclidean(3; vectors=HybridTangentRepresentation())
+M=SOnxRn_MetricManifold(3)
 N = 100
 fg.solverParams.N = N
 fg.solverParams.graphinit = false
@@ -360,7 +360,7 @@ end
 @test size(val, 1) == 6
 @test size(val, 2) == N
 
-estmu1mean = Statistics.mean(val[collect(DFG.getSolverData(f1).fnc.usrfnc!.partial),:],dims=2)
+estmu1mean = Statistics.mean(val[collect(DFG.getObservation(f1).partial),:],dims=2)
 # estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.partial),:],dims=2)
 estmu2mean = Statistics.mean(val[[1,2,6],:],dims=2)
 
@@ -486,7 +486,7 @@ end
 
 
 ##
-M = SpecialEuclidean(3; vectors=HybridTangentRepresentation())
+M = SOnxRn_MetricManifold(3)
 mpts = getPoints(fg[1], :x4)
 mu_fg1 = mean(M, mpts)
 
@@ -508,7 +508,7 @@ end
 M3 = getManifold(Pose3)
 ϵ3 = getPointIdentity(Pose3)
 
-M2 = SpecialOrthogonal(3)
+M2 = SpecialOrthogonalGroup(3)
 ϵ2 = getPointIdentity(M2)
 
 ϕ = 0.1

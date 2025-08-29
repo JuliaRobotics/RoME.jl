@@ -16,14 +16,6 @@ end
 
 DFG.getManifold(::InstanceType{PriorPose2}) = getManifold(Pose2) # SpecialEuclidean(2)
 
-@inline function _vee(::typeof(SpecialEuclidean(2; vectors=HybridTangentRepresentation())), X::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
-  return SVector{3,T}(X.x[1][1],X.x[1][2],X.x[2][2])
-end
-
-@inline function _compose(::typeof(SpecialEuclidean(2; vectors=HybridTangentRepresentation())), p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, q::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
-  return ArrayPartition(p.x[1] + p.x[2]*q.x[1], p.x[2]*q.x[2])
-end
-
 function (cf::CalcFactor{<:PriorPose2})(_m::AbstractArray{MT}, _p::AbstractArray{PT})  where {MT<:Real,PT<:Real}
   T = promote_type(MT, PT)
   m = convert(ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, _m)
@@ -31,19 +23,13 @@ function (cf::CalcFactor{<:PriorPose2})(_m::AbstractArray{MT}, _p::AbstractArray
   return cf(m,p)
 end
 
-# TODO the log here looks wrong (for gradients), consider:
-# X = log(p⁻¹ ∘ m) 
-# X = log(M, ϵ, Manifolds.compose(M, inv(M, p), m))
 function (cf::CalcFactor{<:PriorPose2})(
             m::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}, 
             p::ArrayPartition{T, Tuple{SVector{2, T}, SMatrix{2, 2, T, 4}}}) where T<:Real
 
-  M = getManifold(Pose2)
-  ϵ = getPointIdentity(M)
-  Xc = _vee(M, log(M, p, m))
-  # X = log(M, ϵ, Manifolds.compose(M, inv(M, p), m))
-  # Xc = vee(M, ϵ, X)
-  return Xc
+  M = getManifold(PriorPose2)
+  X = log(M, p, m) # Currently X ∈ TₚM, #TODO should it be TₘM? Also update the rest if this is wrong.
+  return vee(LieAlgebra(M), X)
 end
 
 #TODO Serialization of reference point p 
@@ -55,11 +41,11 @@ $(TYPEDEF)
 Base.@kwdef struct PackedPriorPose2  <: AbstractPackedFactor
     Z::PackedSamplableBelief
 end
-function convert(::Type{PackedPriorPose2}, d::PriorPose2)
-  return PackedPriorPose2(convert(PackedSamplableBelief, d.Z))
+function DFG.pack(d::PriorPose2)
+  return PackedPriorPose2(packDistribution(d.Z))
 end
-function convert(::Type{PriorPose2}, d::PackedPriorPose2)
-  return PriorPose2(convert(SamplableBelief, d.Z))
+function DFG.unpack(d::PackedPriorPose2)
+  return PriorPose2(unpackDistribution(d.Z))
 end
 
 

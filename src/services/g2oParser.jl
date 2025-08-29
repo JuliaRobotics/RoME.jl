@@ -124,7 +124,7 @@ function parseG2oInstruction!(fg::AbstractDFG,
 
         # MU1 = Unitary(1,ℍ)
         # ϵU1 = identity_element(MU1)
-        MSO3 = SpecialOrthogonal(3)
+        MSO3 = SpecialOrthogonalGroup(3)
         ϵSO3 = identity_element(MSO3)
 
         # Need to add a relative pose measurement between two variables.

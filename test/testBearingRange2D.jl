@@ -1,11 +1,12 @@
 using RoME
 using Statistics
-using Manifolds
+# using Manifolds
 # , Distributions
 using Test
 using DistributedFactorGraphs
 using TensorCast
 import Base: convert
+using LinearAlgebra
 
 ##
 
@@ -340,7 +341,7 @@ addFactor!(fg, [:x0; :l1], p2br, graphinit=false)
 
 # check the forward convolution is working properly
 _pts = getPoints(propagateBelief(fg, :x0, ls(fg, :x0); N)[1])
-p_μ = mean(SpecialEuclidean(2; vectors=HybridTangentRepresentation()), _pts)
+p_μ = mean(SOnxRn_MetricManifold(2), _pts)
 
 _pts = IIF.getCoordinates.(Pose2, _pts)
 @cast pts[j,i] := _pts[i][j]
@@ -367,8 +368,8 @@ end
 ##
 
 p2p2b = Pose2Point2Bearing( MvNormal([0.2,0.2,0.2], [1.0 0 0;0 1 0;0 0 1]) )
-packed = convert(PackedPose2Point2Bearing, p2p2b)
-p2p2bTest = convert(Pose2Point2Bearing, packed)
+packed = pack(p2p2b)
+p2p2bTest = unpack(packed)
 @test p2p2b.Z.μ == p2p2bTest.Z.μ
 @test p2p2b.Z.Σ.mat == p2p2bTest.Z.Σ.mat
 

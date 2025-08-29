@@ -55,7 +55,7 @@ M = getManifold(Pose2())
 # @test 35 < sum(-0.3 .< cs[3,:] .< 0.3)
 μ = mean(M, getPoints(getBelief(fg, :x3)))
 @test isapprox(submanifold_component(μ,1), [11; 17.5], atol=3.0)
-@test isapprox(SpecialOrthogonal(2), submanifold_component(μ,2), [-1 0; 0 -1], atol=0.5)
+@test isapprox(SpecialOrthogonalGroup(2), submanifold_component(μ,2), [-1 0; 0 -1], atol=0.5)
 Σ = cov(getManifold(Pose2()), getPoints(getBelief(fg, :x3)))
 @test all(diag(Σ) .< [5,5,1].^2) #TODO smaller
 

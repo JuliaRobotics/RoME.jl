@@ -7,7 +7,7 @@ using Dates
 using Statistics
 using TensorCast
 using StaticArrays
-using Manifolds
+# using Manifolds
 
 using IncrementalInference
 using RoME
@@ -24,7 +24,7 @@ using Test
 dt = 0.01
 N = 101
 w_R_b = [1. 0 0; 0 1 0; 0 0 1]
-imu = RoME.generateField_InertialMeasurement_RateZ(;
+imu = RoME.generateField_InertialMeasurement(;
   dt,
   N,
   rate = [0.01, 0, 0],
@@ -39,7 +39,7 @@ p = (gyro=gyros_t, accel=accels_t)
 
 p.accel(0.9)
 
-u0 = ArrayPartition([0.0,0,0], Matrix(getPointIdentity(SpecialOrthogonal(3))), [0.,0,0])
+u0 = ArrayPartition([0.0,0,0], Matrix(getPointIdentity(SpecialOrthogonalGroup(3))), [0.,0,0])
 tspan = (0.0, 1.0)
 
 prob = ODEProblem(RoME.insKinematic!, u0, tspan, Ref(p))
@@ -47,7 +47,7 @@ prob = ODEProblem(RoME.insKinematic!, u0, tspan, Ref(p))
 sol = solve(prob)
 last(sol)
 
-M = SpecialOrthogonal(3)
+M = SpecialOrthogonalGroup(3)
 @test isapprox(last(sol).x[1], [0,0,0]; atol=0.001)
 @test isapprox(M, last(sol).x[2], w_R_b; atol=0.001)
 @test isapprox(last(sol).x[3], [0,0,0]; atol=0.001)

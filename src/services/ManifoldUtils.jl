@@ -6,20 +6,25 @@
 
 
 function homography_to_coordinates(
-  M::typeof(SpecialEuclidean(3; vectors=HybridTangentRepresentation())),
-  pHq::AbstractMatrix{<:Real}
+  ::typeof(SpecialEuclideanGroup(3; variant=:right)),
+  H::AbstractMatrix{<:Real}
 )
-  Mr = M.manifold[2]
-  e0 = Identity(Mr)
-  [pHq[1:3,4]; vee(Mr, e0, log(Mr, e0, pHq[1:3,1:3]))]
+  @warn "TODO: maybe deprecate homography_to_coordinates"
+  G = SpecialOrthogonalGroup(3)
+  [H[1:3,4]; vee(LieAlgebra(G), log(G, H[1:3,1:3]))]
 end
 
 function coordinates_to_homography(
-  M::typeof(SpecialEuclidean(3; vectors=HybridTangentRepresentation())),
-  pCq::AbstractVector
+  ::typeof(SpecialEuclideanGroup(3; variant=:right)),
+  c::AbstractVector
 )
-  e0 = Identity(M)
-  affine_matrix(M, exp(M,e0,hat(M,e0,pCq)))
+  @warn "TODO: maybe deprecate coordinates_to_homography"
+  G = SpecialOrthogonalGroup(3)
+  H = zeros(4, 4)
+  H[1:3, 1:3] .= exp(G, hat(LieAlgebra(G), c[4:6]))
+  H[1:3, 4] = c[1:3]
+  H[4, 4] = 1.0
+  return H
 end
 
 

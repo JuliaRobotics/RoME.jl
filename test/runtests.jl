@@ -5,11 +5,16 @@ using RoME
 using Test
 using TensorCast
 import Manifolds
-using Manifolds: ProductManifold, SpecialEuclidean, SpecialOrthogonal, TranslationGroup, identity_element
+using LieGroups
+# using Manifolds: ProductManifold, SpecialEuclidean, SpecialOrthogonal, TranslationGroup, identity_element
 using DistributedFactorGraphs
 using Statistics
+using LinearAlgebra
+using Random
 using StaticArrays
 
+using RoME: SOnxRn_MetricManifold
+using ManifoldsBase: submanifold_component
 
 @error("add test for generateGraph_Beehive!, norm( simulated - default ) < tol")
 
@@ -21,7 +26,7 @@ testfiles = [
   # Inertial
   "inertial/testInertialDynamic.jl";
   "inertial/testODE_INS.jl";
-  "inertial/testIMUDeltaFactor.jl";
+  "inertial/testIMUDeltaFactor.jl"; #FIXME slow
   
   # ...
   # "testFluxModelsPose2.jl";
@@ -34,7 +39,7 @@ testfiles = [
   "testVelPos3.jl";
 
   # tests most likely to fail on numerics
-  "testScalarFields.jl";
+  "testScalarFields.jl"; #FIXME slow
   "testPoint2Point2Init.jl";
   "threeDimLinearProductTest.jl";
   "testPose3Pose3NH.jl";
@@ -47,7 +52,7 @@ testfiles = [
   "testMultimodalRangeBearing.jl"; # restore after Bearing factors are fixed
 
   # regular tests expected to pass
-  "testpackingconverters.jl";
+  "testpackingconverters.jl"; #FIXME for new DFG deprecations
   "testInflation380.jl";
   "testPoint2Point2.jl";
   "testParametricCovariances.jl";
@@ -62,9 +67,9 @@ testfiles = [
   "testBasicPose2Stationary.jl";
   "TestPoseAndPoint2Constraints.jl";
   "testDynPoint2D.jl";
-  "testDeltaOdo.jl";
+  "testDeltaOdo.jl"; #FIXME slow
   "testFixedLagFG.jl";
-  "testDynPose2D.jl";
+  "testDynPose2D.jl"; #FIXME slow
   "testPartialPriorYawPose2.jl";
   "TestDefaultFGInitialization.jl";
   "testAccumulateFactors.jl";
@@ -82,15 +87,14 @@ testfiles = [
 # "HexagonalLightGraphs.jl"
 # "testCameraFunctions.jl"
 # "testmultiplefeatures.jl"
-
+@testset "RoME tests" begin
 for (i,testf) in enumerate(testfiles)
-  println("[TEST $i] $testf =============================================================")
-  include(testf)
-  println("[SUCCESS] $testf")
+  @testset "[TEST $i] $testf" begin
+    println("[TEST $i] $testf =============================================================")
+    include(testf)
+  end
   println()
   println()
   println()
 end
-
-
-#
+end

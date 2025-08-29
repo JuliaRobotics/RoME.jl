@@ -21,27 +21,30 @@ using
   DistributedFactorGraphs,
   TensorCast,
   ManifoldsBase,
-  Manifolds
+  # Manifolds,
+  LieGroups
 
 using StaticArrays
 using PrecompileTools
 using RecursiveArrayTools
 # to avoid name conflicts
 import Manifolds
-using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component, Identity, affine_matrix
+# using Manifolds: hat, ProductGroup, ProductManifold, SpecialEuclidean, SpecialOrthogonal, TranslationGroup, identity_element, submanifold_component, Identity, affine_matrix
 
-import Manifolds: project, project!, identity_element
+using ManifoldsBase: check_point, submanifold_component, submanifold_components
+using Manifolds: SymmetricPositiveDefinite
+# import Manifolds: project, project!, identity_element
 
 import Rotations as _Rot
-import Rotations: ⊕, ⊖ # TODO deprecate
+# import Rotations: ⊕, ⊖ # TODO deprecate
 
-export SpecialOrthogonal, SpecialEuclidean
+export SpecialOrthogonalGroup, SpecialEuclidean
 export submanifold_component
 # using Graphs,  # TODO determine how many parts still require Graphs still directly
 
 
 import Base: +, \, convert
-import TransformUtils: ⊖, ⊕, convert, ominus, veeQuaternion
+import TransformUtils: ⊕, convert, ominus, veeQuaternion
 import IncrementalInference: MB
 import IncrementalInference: convert, getSample, reshapeVec2Mat, DFG
 import IncrementalInference: getMeasurementParametric
@@ -55,6 +58,8 @@ using OrderedCollections: OrderedDict
 # const AMP = ApproxManifoldProducts
 
 
+include("../RoMETypes/src/RoMETypes.jl")
+using ..RoMETypes
 
 # export the API
 include("ExportAPI.jl")
@@ -65,19 +70,17 @@ include("entities/SpecialDefinitions.jl")
 
 #uses DFG v0.10.2 @defVariable for above
 include("services/FixmeManifolds.jl")
-include("variables/VariableTypes.jl")
 
 ## More factor types
 # RoME internal factors (FYI outside factors are easy, see Caesar documentation)
-include("factors/Point2D.jl")
+include("factors/Points.jl")
+include("factors/Poses.jl")
 include("factors/Range2D.jl")
 include("factors/Bearing2D.jl")
 include("factors/BearingRange2D.jl")
 include("factors/Polar.jl")
 include("factors/PriorVelPos3.jl")
-include("factors/PriorPose2.jl")
 include("factors/PartialPriorPose2.jl")
-include("factors/Pose2D.jl")
 include("factors/Pose2Point2.jl")
 include("factors/MutablePose2Pose2.jl")
 include("factors/DynPoint2D.jl")
@@ -86,10 +89,6 @@ include("factors/VelPosRotVelPos.jl")
 include("factors/DynPose2D.jl")
 include("factors/VelPose2D.jl")
 include("factors/VelAlign.jl")
-include("factors/Point3D.jl")
-include("factors/Point3Point3.jl")
-include("factors/Pose3D.jl")
-include("factors/Pose3Pose3.jl")
 include("factors/PartialPose3.jl")
 include("factors/MultipleFeaturesConstraint.jl")
 include("factors/InertialPose3.jl")

@@ -1,6 +1,6 @@
 # using Revise
 using RoME
-using Manifolds
+using LieGroups
 using StaticArrays
 using Test
 using StaticArrays
@@ -9,9 +9,7 @@ using StaticArrays
 @testset "test SE(3) coordinates to homography and back" begin
 ##
 
-M = getManifold(Pose3)
-
-@test M == Manifolds.SpecialEuclidean(3; vectors=HybridTangentRepresentation())
+M = SpecialEuclideanGroup(3; variant=:right)
 
 C = 0.2*randn(6)
 H = coordinates_to_homography(M, C)

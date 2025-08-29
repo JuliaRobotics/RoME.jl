@@ -1,19 +1,10 @@
-
-@kwdef struct InertialDynamic{D<:SamplableBelief} <: AbstractManifoldMinimize
-  Z::D
-end
-
-getManifold(::InertialDynamic) = getManifold(RotVelPos)
-
-
-
-
+DFG.@defObservationType InertialDynamic RelativeObservation getManifold(RotVelPos)
 
 ## TODO consolidate inside module as RoME.imuKinematic
 ## du = f(u, params, t) # then solve ODE
 function imuKinematic!(du, u, p, t; g=SA[0; 0; 9.81])
   # p is IMU input (assumed [.gyro; .accel])
-  M = SpecialOrthogonal(3)
+  M = SpecialOrthogonalGroup(3)
 
   R = u.x[1]     # i_R_b = w_R_b Rotation
   V = u.x[2]     # Velocity 
@@ -22,7 +13,7 @@ function imuKinematic!(du, u, p, t; g=SA[0; 0; 9.81])
   # A_b = u.x[5] # Accelerometer bias
 
   ω_m = p[].gyro(t)
-  Ω = hat(M, Identity(M), ω_m) # + ω_b) # b_Ωbi skew symmetric (Lie algebra element)
+  Ω = hat(LieAlgebra(M), ω_m) # + ω_b) # b_Ωbi skew symmetric (Lie algebra element)
   Ṙ = R * Ω          # w_Ṙ_b = i_Ṙ_b = d/dt R = d/dt exp(Ω*Δt) => Ṙ = exp(ΩΔt)*d(ΩΔt)/dt = exp(ΩΔt)*Ω
 
   A_m = p[].accel(t) # b_Abi

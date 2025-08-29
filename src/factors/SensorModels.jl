@@ -28,7 +28,7 @@ mutable struct LinearRangeBearingElevation <: IIF.AbstractManifoldMinimize
   LinearRangeBearingElevation( r::Tuple{Float64,Float64}, b::Tuple{Float64,Float64}; elev=Uniform(-0.25133,0.25133)) = new(Normal(r...),Normal(b...),elev, reuseLBRA[reuseLBRA(0) for i in 1:Threads.nthreads()] )
 end
 
-getManifold(::LinearRangeBearingElevation) = Euclidean(3)#FIXME
+DFG.getManifold(::Type{<:LinearRangeBearingElevation}) = Euclidean(3)#FIXME
 
 function (cfo::CalcFactor{<:LinearRangeBearingElevation})(meas, _pose, _landm)
   #FIXME update to manifolds, quick fix convert for now

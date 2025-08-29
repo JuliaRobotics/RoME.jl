@@ -35,7 +35,7 @@ function InertialDynamic(
   bproblem = problemType(imuKinematic!, state1, (tspan[2], tspan[1]), data; dt = -dt)
 
   # build the IIF recognizable object
-  return DERelative(domain, fproblem, bproblem, data)
+  return DERelative(domain, fproblem, bproblem, data, nothing)
 end
 
 # function InertialDynamic(

@@ -5,6 +5,7 @@ using RoME
 using Test
 import  IncrementalInference: getSample, getManifold
 using TransformUtils: Euler
+using LieGroups: CircleGroup
 ##
 
 mutable struct RotationTest <: IncrementalInference.AbstractRelativeMinimize
@@ -12,7 +13,7 @@ mutable struct RotationTest <: IncrementalInference.AbstractRelativeMinimize
 end
 
 getSample(cfo::CalcFactor{<:RotationTest}) = rand(cfo.factor.z)
-getManifold(::RotationTest) = RealCircleGroup()
+DFG.getManifold(::RotationTest) = CircleGroup(ℝ)
 
 # 3 dimensional line, z = [a b][x y]' + c
 function (cfo::CalcFactor{<:RotationTest})( meas, 

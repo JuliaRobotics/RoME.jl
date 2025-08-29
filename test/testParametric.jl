@@ -1,6 +1,6 @@
 using RoME
 using Test
-using Manifolds
+using LieGroups
 # using RoMEPlotting
 
 
@@ -46,11 +46,11 @@ M = getManifold(Pose2)
 # @test isapprox(vardict[:x0].val, [10, 10, -pi], atol = 1e-3)
 # @test isapprox(vardict[:x4].val, [10, 10, -pi], atol = 1e-3)
 ϵ = getPointIdentity(M)
-@test isapprox(M, r[1], exp(M, ϵ, hat(M,ϵ,[10, 10, -pi])), atol = 1e-3)
-@test isapprox(M, r[2], exp(M, ϵ, hat(M,ϵ,[0, 10, -pi/2])), atol = 1e-3)
-@test isapprox(M, r[3], exp(M, ϵ, hat(M,ϵ,[0, 0, 0])), atol = 1e-3)
-@test isapprox(M, r[4], exp(M, ϵ, hat(M,ϵ,[10, 0, pi/2])), atol = 1e-3)
-@test isapprox(M, r[5], exp(M, ϵ, hat(M,ϵ,[10, 10, -pi])), atol = 1e-3)
+@test isapprox(M, r[1], exp(M, ϵ, hat(LieAlgebra(M), [10, 10, -pi])), atol = 1e-3)
+@test isapprox(M, r[2], exp(M, ϵ, hat(LieAlgebra(M), [0, 10, -pi/2])), atol = 1e-3)
+@test isapprox(M, r[3], exp(M, ϵ, hat(LieAlgebra(M), [0, 0, 0])), atol = 1e-3)
+@test isapprox(M, r[4], exp(M, ϵ, hat(LieAlgebra(M), [10, 0, pi/2])), atol = 1e-3)
+@test isapprox(M, r[5], exp(M, ϵ, hat(LieAlgebra(M), [10, 10, -pi])), atol = 1e-3)
 
 # IIF.updateParametricSolution(fg, vardict)
 # pl = plotSLAM2D(fg; lbls=true, solveKey=:parametric, point_size=4pt, drawPoints=false, drawContour=false)
@@ -171,7 +171,7 @@ IIF.initParametricFrom!(fg)
 
 PM, varLabels, r, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
-@test isapprox(SpecialEuclidean(2; vectors=HybridTangentRepresentation()), r[1], ArrayPartition([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
+@test isapprox(RoME.SOnxRn_MetricManifold(2), r[1], ArrayPartition([2, 0.], [0 -1; 1 0.]), atol = 1e-3)
 
 @test isapprox(r[2], [1,  1], atol = 1e-3)
 @test isapprox(r[3], [1, -1], atol = 1e-3)

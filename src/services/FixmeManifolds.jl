@@ -31,7 +31,7 @@ end
 
 function Statistics.mean(::typeof(SE2E2_Manifold), pts::AbstractVector)
   se2_ = (d->ArrayPartition(submanifold_component(d, 1), submanifold_component(d, 2))).(pts)
-  mse2 = mean(Manifolds.SpecialEuclidean(2; vectors=HybridTangentRepresentation()), se2_)
+  mse2 = mean(SOnxRn_MetricManifold(2), se2_)
   e2_ = (d->ArrayPartition(submanifold_component(d, 3))).(pts)
   me2 = mean(Euclidean(2), e2_)
   ArrayPartition(submanifold_component(mse2, 1), submanifold_component(mse2, 2), submanifold_component(me2, 1))
@@ -76,6 +76,9 @@ function Statistics.mean(::typeof(BearingRange_Manifold), pts::AbstractVector)
   return [mc; mr]
 end
 
+# Still experimental
+# export BearingRange2
+@defVariable BearingRange2 BearingRange_Manifold ArrayPartition(0.0,0.0)
 
 
 

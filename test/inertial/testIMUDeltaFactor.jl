@@ -1,7 +1,7 @@
 using Test
-using Manifolds
 using StaticArrays
-using Rotations
+import Rotations as ROT
+using Rotations: RotationVec, AngleAxis, RotZ
 using LinearAlgebra
 using DistributedFactorGraphs
 using RoME
@@ -11,19 +11,19 @@ using StaticArrays
 # using ManifoldDiff
 
 ##
-M = SpecialOrthogonal(3)
-ΔR = exp(M, Identity(M), hat(M, Identity(M), [0.1, 0.2, 0.3]))
+M = SpecialOrthogonalGroup(3)
+ΔR = exp(M, hat(LieAlgebra(M), [0.1, 0.2, 0.3]))
 a = RotationVec(ΔR)
-b = Rotations.AngleAxis(ΔR)
+b = AngleAxis(ΔR)
 
 function uniform_integrate_check(gyros, accels, dt)
-    M_SO3 = SpecialOrthogonal(3)
+    M_SO3 = SpecialOrthogonalGroup(3)
     w_R_b = identity_element(M_SO3)
     w_v = zeros(3)
     w_r = zeros(3)
     for (b_g, b_a) in zip(gyros, accels)
 
-        exp!(M_SO3, w_R_b, w_R_b, hat(M_SO3, Identity(M_SO3), b_g*dt))
+        exp!(M_SO3, w_R_b, w_R_b, hat(LieAlgebra(M_SO3), b_g*dt))
 
         δw_v = w_R_b * b_a*dt
         δw_r = w_v*dt + 0.5*δw_v*dt
@@ -48,12 +48,12 @@ M = SpecialGalileanGroup()
 # vΔt, aΔt, ωΔt, Δt
 X = hat(M, SA[0.0,0,0, 0,0,0, 0,0,1, 1] * 0.001)
 p = exp(M, ϵ, X)
-@test log_lie(M, p) ≈ X
+@test log(M, p) ≈ X
 
 Xc = SA[0.1, 0.2, 0.3,  0.4, 0.5, 0.6,  0.7, 0.8, 0.9,  1] * 0.1
 X = hat(M, Xc)
-p = affine_matrix(M, exp_lie(M, X))
-affine_matrix(M, log_lie(M, exp_lie(M, X)))
+p = RoME.affine_matrix(M, exp(M, X))
+RoME.affine_matrix(M, log(M, exp(M, X)))
 
 X_af = RoME.vector_affine_matrix(M, X)
 p_af = exp(X_af)
@@ -66,14 +66,14 @@ log(p_af)
 Xc = SA[0.01, 0.02, 0.03,   0, 0, 0,   0.1, 0.2, 0.3,   1] * 0.001
 X = hat(M, Xc)
 p = exp(M, ϵ, X)
-@test log_lie(M, p) ≈ X
-@test vee(M, log_lie(M, p)) ≈ Xc
+@test log(M, p) ≈ X
+@test vee(M, log(M, p)) ≈ Xc
 
 Xc = SA[0, 0, 0,  0.01, 0.02, 0.03,  0.1, 0.2, 0.3,   1] * 0.001
 X = hat(M, Xc)
 p = exp(M, ϵ, X)
-@test log_lie(M, p) ≈ X
-@test vee(M, log_lie(M, p)) ≈ Xc
+@test log(M, p) ≈ X
+@test vee(M, log(M, p)) ≈ Xc
 
 p = ArrayPartition(SMatrix{3,3}(1.0I), SA[1.,0,0], SA[0.,0,0], 0.0)
 q = ArrayPartition(SMatrix{3,3}(1.0I), SA[1.,0,0], SA[0.1,0,0], 0.1)
@@ -98,7 +98,7 @@ p = exp(M, ϵ, X)
 @test isapprox(p, ArrayPartition([1 -0.005 0.0; 0.005 1 0.0; 0 0 1], [0, 0, 0.01], [0, 0, 5.0e-5], 0.01), atol=1e-4)
 X_af = RoME.vector_affine_matrix(M, X)
 p_af = exp(X_af)
-@test isapprox(affine_matrix(M, p), p_af, atol=1e-4)
+@test isapprox(RoME.affine_matrix(M, p), p_af, atol=1e-4)
 
 
 # vΔt, aΔt, ωΔt, Δt
@@ -107,7 +107,7 @@ p = exp(M, ϵ, X)
 @test isapprox(p, ArrayPartition([1.0 0 0; 0 1 0; 0 0 1], [0.01, 0, 0], [5e-5, 0, 0], 0.01), atol=1e-4)
 X_af = RoME.vector_affine_matrix(M, X)
 p_af = exp(X_af)
-@test isapprox(affine_matrix(M, p), p_af, atol=1e-4)
+@test isapprox(RoME.affine_matrix(M, p), p_af, atol=1e-4)
 
 
 X = hat(M, SA[1,0,0, 1,0,0.0, 0,0,0.01, 1])
@@ -118,7 +118,7 @@ isapprox(compose(M, p, exp(M, ϵ, X)), exp(M, p, X))
 RoME.adjointMatrix(M, X) * vee(M,X)
 
 X_af = RoME.vector_affine_matrix(M, X)
-p_af = affine_matrix(M, p)
+p_af = RoME.affine_matrix(M, p)
 
 Y = p_af*X_af*inv(p_af)
 vee(M, ArrayPartition(Y[1:3,1:3], Y[1:3,4], Y[1:3,5], Y[4,5]))
@@ -126,15 +126,15 @@ vee(M, ArrayPartition(Y[1:3,1:3], Y[1:3,4], Y[1:3,5], Y[4,5]))
 #testing adjoint matrix with properties
 Adₚ = RoME.AdjointMatrix(M, p)
 
-q1 = compose(M, p, exp_lie(M, X))
-q2 = compose(M, exp_lie(M, hat(M, Adₚ*vee(M, X))), p)
+q1 = compose(M, p, exp(M, X))
+q2 = compose(M, exp(M, hat(M, Adₚ*vee(M, X))), p)
 @test isapprox(q1, q2)
 
 @test isapprox(RoME.AdjointMatrix(M, inv(M, p)), inv(Adₚ))
 
 @test isapprox(
     RoME.vector_affine_matrix(M, hat(M, Adₚ*vee(M, X))),
-    affine_matrix(M, p) * RoME.vector_affine_matrix(M, X) * affine_matrix(M, inv(M, p))
+    RoME.affine_matrix(M, p) * RoME.vector_affine_matrix(M, X) * RoME.affine_matrix(M, inv(M, p))
 )
 
 ad = RoME.adjointMatrix(M, X)
@@ -143,7 +143,7 @@ ad = RoME.adjointMatrix(M, X)
 
 X = hat(M, SA[0.1, 0.2, 0.3,  0.4, 0.5, 0.6,  0.7, 0.8, 0.9,  1] * 0.1)
 ad = RoME.adjointMatrix(M, X)
-Adₚ = RoME.AdjointMatrix(M, exp_lie(M, X))
+Adₚ = RoME.AdjointMatrix(M, exp(M, X))
 @test isapprox(exp(ad), Adₚ)
 
 Y = hat(M, SA[0.9, 0.8, 0.7,  0.6, 0.5, 0.4,  0.3, 0.2, 0.1,  1] * 0.1)
@@ -160,9 +160,9 @@ jl = RoME.Jr(M, -X)
 X = hat(M, SA[1,0,0, 0,0,0, 0,0,θ, 1] * 0.1)
 p = exp(M, ϵ, X)
 
-M_SE3 = SpecialEuclidean(3; vectors=HybridTangentRepresentation())
+M_SE3 = SpecialEuclideanGroup(3; variant=:right)
 X_SE3 = hat(M_SE3, getPointIdentity(M_SE3), SA[1,0,0, 0,0,θ] * 0.1)
-p_SE3 = exp_lie(M_SE3, X_SE3)
+p_SE3 = exp(M_SE3, X_SE3)
 @test isapprox(p.x[3], p_SE3.x[1])
 
 ## test factor with rotation around z axis and initial velocity up
@@ -189,14 +189,14 @@ fac = RoME.IMUDeltaFactor(
 )
 
 # Rotation part
-M_SO3 = SpecialOrthogonal(3)
+M_SO3 = SpecialOrthogonalGroup(3)
 ΔR = identity_element(M_SO3)
 #NOTE internally integration is done over all measurements
 # at t₀, we start at identity
 # - the measurement at t₀ is from t₋₁ to t₀ and therefore part of the previous factor
 # - the measurement at t₁ is from t₀ to t₁ with the time dt of t₁ - t₀
 for g in imu.gyros
-    exp!(M_SO3, ΔR, ΔR, hat(M_SO3, Identity(M_SO3), g*dt))
+    exp!(M_SO3, ΔR, ΔR, hat(LieAlgebra(M_SO3), g*dt))
 end
 @test isapprox(M_SO3, fac.Δ.x[1], ΔR)
 # Velocity part
@@ -257,7 +257,7 @@ addFactor!(fg, [:x0, :x1], fac)
 
 getVariableSolverData(fg, :x0, :parametric).val[1] ≈ ArrayPartition(SA[1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0], SA[10.0, 0.0, 0.0], SA[0.0, 0.0, 0.0])
 x1 = getVariableSolverData(fg, :x1, :parametric).val[1]
-@test isapprox(SpecialOrthogonal(3), x1.x[1], ΔR, atol=1e-5)
+@test isapprox(SpecialOrthogonalGroup(3), x1.x[1], ΔR, atol=1e-5)
 @test isapprox(x1.x[2], [10, 0, -1], atol=1e-3)
 @test isapprox(x1.x[3], [10, 0, -0.5], atol=1e-3)
 

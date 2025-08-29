@@ -4,7 +4,7 @@ module RoMECameraModelsExt
 
 using CameraModels
 using StaticArrays
-using Manifolds
+using LieGroups
 using DocStringExtensions
 using Optim
 using RecursiveArrayTools: ArrayPartition
@@ -37,10 +37,10 @@ function (cf::CalcFactor{<:GenericProjection{S,T}})(
 ) where {S,T}
   
   κ = 0.001
-  M = SpecialEuclidean(3)
+  M = SpecialEuclideanGroup(3)
 
   w_Ph = SVector{4,Float64}(w_P_o..., 1.0)
-  c_H_w = inv(affine_matrix(M, w_P_c))
+  c_H_w = inv(M, convert(AbstractMatrix, SpecialEuclideanProductPoint(w_P_c)))
 
   # predicted projection
   # c_Xhat = project(S, T, w_P_c, w_P_o)
@@ -82,7 +82,7 @@ function solveMultiviewLandmark!(
   _undistort::Function = (c,p) -> CameraModels.undistortPoint(cam,p)
 )
   # assume to find 
-  M = SpecialEuclidean(3)
+  M = SpecialEuclideanGroup(3)
   flbs = ls(dfg, lmlb)
   # fcs = getFactor.(dfg, flbs)
   # fcd = getFactorType.(fcs)
@@ -93,7 +93,8 @@ function solveMultiviewLandmark!(
   end
   
   function cameraResidual(cam, meas, M, w_T_c, w_Ph, κ=1000)
-    pred = projectPointFrom(cam, inv(affine_matrix(M,w_T_c)), w_Ph)
+    c_H_w = inv(M, convert(AbstractMatrix, SpecialEuclideanProductPoint(w_T_c)))
+    pred = projectPointFrom(cam, c_H_w, w_Ph)
     # experimental cost function to try force bad reprojects in front of the camera during optimization
     κ*(abs(pred.depth) - pred.depth)^2 + (meas[1]-pred[1])^2 + (meas[2]-pred[2])^2
   end
@@ -149,13 +150,14 @@ function solveMultiviewLandmark!(
     # check depth okay
     w_Ph = [w_P3...; 1.0]
     depthok = true
-    for w_T_c in _w_P_ci 
-      pred = projectPointFrom(cam, inv(affine_matrix(M, w_T_c)), w_Ph)
+    for w_T_c in _w_P_ci
+      c_H_w = inv(M, convert(AbstractMatrix, SpecialEuclideanProductPoint(w_T_c)))
+      pred = projectPointFrom(cam, c_H_w, w_Ph)
       if pred.depth < 0
         depthok = false
       end
     end
-    if w_Res.ls_success && depthok
+    if Optim.converged(w_Res) && depthok
       break
     end
     if retry <= i 

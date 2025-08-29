@@ -10,7 +10,7 @@ using Manifolds: hat
 
 @testset "Testing Bearing2D factor" begin
 ##
-M = SpecialEuclidean(2; vectors=HybridTangentRepresentation())
+M = RoME.SOnxRn_MetricManifold(2)
 ϵ = getPointIdentity(M)
 ps = [exp(M, ϵ,  hat(M, ϵ, [0.,0,0]))]
 push!(ps, exp(M, ϵ,  hat(M, ϵ, [5.,0,0])))
@@ -34,7 +34,7 @@ rs = [0, -pi/4, -pi/2, -3pi/4, -pi, 3pi/4, pi/2, pi/4, pi/4, -pi/4]
 push!(rs, pi/4 - atan(3,4))
 
 q = [5., 5]
-SO2 = SpecialOrthogonal(2)
+SO2 = SpecialOrthogonalGroup(2)
 m = hat(SO2, getPointIdentity(SO2), [pi/4])
 
 f = Pose2Point2Bearing(Normal(pi/4,0.05))

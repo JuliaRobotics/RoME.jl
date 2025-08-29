@@ -14,7 +14,7 @@ Base.@kwdef mutable struct MutablePose2Pose2Gaussian  <: IIF.AbstractManifoldMin
 end
 MutablePose2Pose2Gaussian(Z::MvNormal) = MutablePose2Pose2Gaussian(;Z)
 
-DFG.getManifold(::MutablePose2Pose2Gaussian) = getManifold(Pose2) # Manifolds.SpecialEuclidean(2)
+DFG.getManifold(::Type{<:MutablePose2Pose2Gaussian}) = getManifold(Pose2) # Manifolds.SpecialEuclidean(2)
 
 
 """
@@ -28,7 +28,7 @@ Pose2Pose2, Pose3Pose3, InertialPose3, DynPose2Pose2, Point2Point2, VelPoint2Vel
 """
 function (cf::CalcFactor{<:MutablePose2Pose2Gaussian})(X, p, q)
   M = getManifold(Pose2)
-  q̂ = Manifolds.compose(M, p, exp(M, identity_element(M, p), X)) #for groups
+  q̂ = LieGroups.compose(M, p, exp(M, X)) #for groups
   #TODO allocalte for vee! see Manifolds #412, fix for AD
   Xc = zeros(3)
   vee!(M, Xc, q, log(M, q, q̂))

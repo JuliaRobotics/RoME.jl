@@ -162,8 +162,8 @@ addFactor!(fg, [:x0], PriorPose2(MvNormal(rand(prpo), pr_noise)))
 
 addVariable!(fg, :l1, Point2, tags=[:LANDMARK])
 addVariable!(fg, :l2, Point2, tags=[:LANDMARK])
-p2br = Pose2Point2BearingRange(Normal(pi/4 + rand(Normal(0,σ_bearing)), σ_bearing),
-                                Normal(sqrt(2) + rand(Normal(0,σ_range)), σ_range))
+p2br = Pose2Point2BearingRange(Normal(rand(Normal(pi/4,σ_bearing)), σ_bearing),
+                                Normal(rand(Normal(sqrt(2),σ_range)), σ_range))
 addFactor!(fg, [:x0; :l1], p2br)
 
 addVariable!(fg, :x1, Pose2)
@@ -198,6 +198,7 @@ addFactor!(fg, [:x2; :l2], p2br)
 solveGraph!(fg);
 
 # parametric solution
+IIF.autoinitParametric!(fg)
 IIF.solveGraphParametric!(fg)
 
 

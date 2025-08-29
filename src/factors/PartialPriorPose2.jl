@@ -10,7 +10,7 @@ Base.@kwdef struct PartialPriorYawPose2{T <: IIF.SamplableBelief} <: IIF.Abstrac
 end
 PartialPriorYawPose2(Z::SamplableBelief) = PartialPriorYawPose2(;Z)
 
-getManifold(::PartialPriorYawPose2) = RealCircleGroup() # SpecialEuclidean(2)
+DFG.getManifold(::Type{<:PartialPriorYawPose2}) = CircleGroup(ℝ) # SpecialEuclidean(2)
 
 function getSample(cf::CalcFactor{<:PartialPriorYawPose2})
     

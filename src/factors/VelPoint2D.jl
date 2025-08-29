@@ -6,11 +6,7 @@
 """
 $(TYPEDEF)
 """
-mutable struct VelPoint2VelPoint2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize #RelativeMinimize
-  Z::T
-end
-
-getManifold(::InstanceType{VelPoint2VelPoint2}) = TranslationGroup(4)
+DFG.@defObservationType VelPoint2VelPoint2 RelativeObservation TranslationGroup(4)
 
 function (cfo::CalcFactor{<:VelPoint2VelPoint2})(z, xi, xj)
   #
@@ -55,18 +51,3 @@ function (cfo::CalcFactor{<:VelPoint2VelPoint2})(z, xi, xj)
   # return residual
 end
 
-
-
-"""
-$(TYPEDEF)
-"""
-Base.@kwdef struct PackedVelPoint2VelPoint2 <: AbstractPackedFactor
-  Z::PackedSamplableBelief
-end
-
-function convert(::Type{PackedVelPoint2VelPoint2}, d::VelPoint2VelPoint2)
-  return PackedVelPoint2VelPoint2(convert(PackedSamplableBelief, d.Z))
-end
-function convert(::Type{VelPoint2VelPoint2}, d::PackedVelPoint2VelPoint2)
-  return VelPoint2VelPoint2(convert(SamplableBelief, d.Z))
-end
