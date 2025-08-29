@@ -46,40 +46,31 @@ jobs:
         with:
           file: lcov.info
 
-  test-masters:
+  upstream-dev:
     #if: github.ref != 'refs/heads/release**'
     name: Upstream Dev
     runs-on: ubuntu-latest
     env:
       JULIA_PKG_SERVER: ""
     steps:
-      - uses: actions/checkout@v2
-
+      - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
-          version: '1.10'
+          version: '1'
           arch: x64
-
-      - uses: actions/cache@v4
-        env:
-          cache-name: cache-artifacts
-        with:
-          path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
-
-      - run: |
-          git config --global user.name Tester
-          git config --global user.email te@st.er
-      
-      - name: Run tests on Upstream Dev
+      - uses: julia-actions/cache@v2
+      - name: Dev dependencies
+        shell: julia --project=monorepo {0}
         run: |
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="develop"));'
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="develop"));'
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInferenceTypes"));'    
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInference"));'
-          julia --project=@. --check-bounds=yes -e 'using Pkg; Pkg.test("RoME"; coverage=true)'
-        shell: bash
+          using Pkg;
+          Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="develop"))
+          Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="develop"))
+          Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInferenceTypes"))
+          Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInference"))
+          Pkg.develop(PackageSpec(path="."))
+      - name: Run tests
+        env:
+          IIF_TEST_GROUP: 'basic_functional_group'
+        run: >
+          julia --color=yes --project=monorepo -e 'using Pkg; Pkg.test("RoME")'
+
