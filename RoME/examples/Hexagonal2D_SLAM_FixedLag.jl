@@ -1,6 +1,6 @@
 # add more julia processes
 using Distributed
-nprocs() < 2 ? addprocs(2-nprocs()) : nothing
+nprocs() < 2 ? addprocs(2 - nprocs()) : nothing
 
 # tell Julia that you want to use these modules/namespaces
 using RoME, Distributions
@@ -12,36 +12,43 @@ using Gadfly
 # Using for capturing data.
 using DataFrames
 
-
 numVariables = 300
 solveEveryNVariables = 20
 lagLength = 30
 
 # Standard Hexagonal example for totalIterations - solve every iterationsPerSolve iterations.
-function runHexagonalExample(fg::AbstractDFG, totalIterations::Int, iterationsPerSolve::Int)::DataFrame
+function runHexagonalExample(
+    fg::AbstractDFG,
+    totalIterations::Int,
+    iterationsPerSolve::Int,
+)::DataFrame
     # Add the first pose :x0
     addVariable!(fg, :x0, Pose2)
 
     # Add at a fixed location PriorPose2 to pin :x0 to a starting location
-    addFactor!(fg, [:x0], PriorPose2(MvNormal(zeros(3), 0.01*Matrix{Float64}(LinearAlgebra.I, 3,3))))
+    addFactor!(
+        fg,
+        [:x0],
+        PriorPose2(MvNormal(zeros(3), 0.01 * Matrix{Float64}(LinearAlgebra.I, 3, 3))),
+    )
 
     # Add a landmark l1
-    addVariable!(fg, :l1, Point2, tags=["LANDMARK"])
+    addVariable!(fg, :l1, Point2; tags = ["LANDMARK"])
 
     # Drive around in a hexagon a number of times
-    solveTimes = DataFrame(GraphSize = [], TimeBuildBayesTree = [], TimeSolveGraph = [])
-    for i in 0:totalIterations
+    solveTimes = DataFrame(; GraphSize = [], TimeBuildBayesTree = [], TimeSolveGraph = [])
+    for i = 0:totalIterations
         psym = Symbol("x$i")
         nsym = Symbol("x$(i+1)")
         @info "Adding pose $nsym..."
         addVariable!(fg, nsym, Pose2)
-        pp = Pose2Pose2(MvNormal([10.0;0;pi/3], Matrix(Diagonal( [0.1;0.1;0.1].^2 ) )))
+        pp = Pose2Pose2(MvNormal([10.0; 0; pi / 3], Matrix(Diagonal([0.1; 0.1; 0.1] .^ 2))))
         @info "Adding odometry factor between $psym -> $nsym..."
-        addFactor!(fg, [psym;nsym], pp )
+        addFactor!(fg, [psym; nsym], pp)
 
         if i % 6 == 0
             @info "Creating factor between $psym and l1..."
-            p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
+            p2br = Pose2Point2BearingRange(Normal(0, 0.1), Normal(20.0, 1.0))
             addFactor!(fg, [psym; :l1], p2br)
         end
         if i % iterationsPerSolve == 0 && i != 0
@@ -51,7 +58,7 @@ function runHexagonalExample(fg::AbstractDFG, totalIterations::Int, iterationsPe
                 fifoFreeze!(fg)
             end
             tBuild = @timed tree = wipeBuildNewTree!(fg)
-            tInfer = @timed inferOverTree!(fg, tree, N=100)
+            tInfer = @timed inferOverTree!(fg, tree, N = 100)
             graphSize = length([ls(fg)[1]..., ls(fg)[2]...])
             push!(solveTimes, (graphSize, tBuild[2], tInfer[2]))
         end
@@ -92,9 +99,17 @@ using Colors
 using CSV
 
 # Make a clean dataset
-rename!(solverTimesForBatch, :TimeBuildBayesTree => :Batch_BayedBuild, :TimeSolveGraph => :Batch_SolveGraph);
-rename!(solverTimesFixedLag, :TimeBuildBayesTree => :FixedLag_BayedBuild, :TimeSolveGraph => :FixedLag_SolveGraph);
-timingMerged = DataFrames.join(solverTimesForBatch, solverTimesFixedLag, on=:GraphSize)
+rename!(
+    solverTimesForBatch,
+    :TimeBuildBayesTree => :Batch_BayedBuild,
+    :TimeSolveGraph => :Batch_SolveGraph,
+);
+rename!(
+    solverTimesFixedLag,
+    :TimeBuildBayesTree => :FixedLag_BayedBuild,
+    :TimeSolveGraph => :FixedLag_SolveGraph,
+);
+timingMerged = DataFrames.join(solverTimesForBatch, solverTimesFixedLag; on = :GraphSize)
 CSV.write("timing_comparison.csv", timingMerged)
 
 # PP = []
@@ -107,7 +122,6 @@ CSV.write("timing_comparison.csv", timingMerged)
 #     Guide.ylabel("Solving Time (seconds)"),
 #     Guide.manual_color_key("Legend", ["fixed", "batch"], ["green", "magenta"]))
 # Gadfly.draw(PNG("results_comparison.png", 12cm, 15cm), plt)
-
 
 #### EXPORT the data
 using JLD2, FileIO

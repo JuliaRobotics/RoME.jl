@@ -13,20 +13,24 @@ fg = initfg()
 loadDFG(fg_file, Main, fg)
 
 # Draw some pretty plots.
-pl1 = drawPoses(fg, spscale=0.6, lbls=false)
+pl1 = drawPoses(fg; spscale = 0.6, lbls = false)
 pl1 |> PDF(joinpath(fg_dir, "poses.pdf"), 20cm, 10cm)
 
 # Useful functions to deal with sorting symbols.
 
 # For crying out loud, find a way to lexicographically sort the symbols.
 function natural(x, y)
-    k(x) = [occursin(r"\d+", s) ? parse(Int, s) : s
-            for s in split(replace(x, r"\d+" => s->" $s "))]
-    A = k(x); B= k(y)
+    function k(x)
+        return [
+            occursin(r"\d+", s) ? parse(Int, s) : s for
+            s in split(replace(x, r"\d+" => s -> " $s "))
+        ]
+    end
+    A = k(x)
+    B = k(y)
     for (a, b) in zip(A, B)
         if !isequal(a, b)
-            return typeof(a) <: typeof(b) ? isless(a, b) :
-                   isa(a,Int) ? true : false
+            return typeof(a) <: typeof(b) ? isless(a, b) : isa(a, Int) ? true : false
         end
     end
     return length(A) < length(B)
@@ -39,7 +43,7 @@ function getSortedSymbols(fg::AbstractDFG, lexsortfxn)
     for sym in sort(ls(fg))
         push!(stringsyms, "$(sym)")
     end
-    sort!(stringsyms, lt=lexsortfxn)
+    sort!(stringsyms; lt = lexsortfxn)
 
     # Now transform sorted string array into sorted symbols array.
     sortedsyms = []
@@ -49,20 +53,21 @@ function getSortedSymbols(fg::AbstractDFG, lexsortfxn)
     return sortedsyms
 end
 
-
 # Output ground truth to file.
 sortedsyms = getSortedSymbols(fg, natural)
 fid = open(joinpath(fg_dir, "ground-truth.txt"), "w")
-for i in 1:length(sortedsyms)
+for i = 1:length(sortedsyms)
     @show i
     @show sortedsyms[i]
     @show getVariablePPE(fg, sortedsyms[i]).suggested
     x_hat = getVariablePPE(fg, sortedsyms[i]).suggested
-    quat = normalize([0; 0; sin(x_hat[3]/2); cos(x_hat[3]/2)])
-    println(fid, "$(i-1) $(x_hat[1]) $(x_hat[2]) 0.0 $(quat[1]) $(quat[2]) $(quat[3]) $(quat[4])")
+    quat = normalize([0; 0; sin(x_hat[3] / 2); cos(x_hat[3] / 2)])
+    println(
+        fid,
+        "$(i-1) $(x_hat[1]) $(x_hat[2]) 0.0 $(quat[1]) $(quat[2]) $(quat[3]) $(quat[4])",
+    )
 end
 close(fid)
-
 
 # Encapsulate all of this into a function:
 # Where `lexsort` is a function to sort lexicographically (e.g., `natural`).
@@ -72,18 +77,34 @@ function exportTrajEstimatesToFile(fg_path::String, lexsort)
     loadDFG(fg_path, Main, fg)
 
     # Draw some pretty plots.
-    pl1 = drawPoses(fg, spscale=0.6, lbls=false)
-    pl1 |> PDF(joinpath(dirname(fg_path), "trajectory-estimates-$(basename(dirname(fg_path))).pdf"), 20cm, 10cm)
+    pl1 = drawPoses(fg; spscale = 0.6, lbls = false)
+    pl1 |> PDF(
+        joinpath(
+            dirname(fg_path),
+            "trajectory-estimates-$(basename(dirname(fg_path))).pdf",
+        ),
+        20cm,
+        10cm,
+    )
 
     # Output ground truth to file.
     sortedsyms = getSortedSymbols(fg, lexsort)
-    fid = open(joinpath(dirname(fg_path), "trajectory-estimates-$(basename(dirname(fg_path))).txt"), "w")
-    for i in 1:length(sortedsyms)
+    fid = open(
+        joinpath(
+            dirname(fg_path),
+            "trajectory-estimates-$(basename(dirname(fg_path))).txt",
+        ),
+        "w",
+    )
+    for i = 1:length(sortedsyms)
         x_hat = getVariablePPE(fg, sortedsyms[i]).suggested
-        quat = normalize([0; 0; sin(x_hat[3]/2); cos(x_hat[3]/2)])
-        println(fid, "$(i-1) $(x_hat[1]) $(x_hat[2]) 0.0 $(quat[1]) $(quat[2]) $(quat[3]) $(quat[4])")
+        quat = normalize([0; 0; sin(x_hat[3] / 2); cos(x_hat[3] / 2)])
+        println(
+            fid,
+            "$(i-1) $(x_hat[1]) $(x_hat[2]) 0.0 $(quat[1]) $(quat[2]) $(quat[3]) $(quat[4])",
+        )
     end
-    close(fid)
+    return close(fid)
 end
 
 # Now run this for all of our runs:

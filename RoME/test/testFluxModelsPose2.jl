@@ -7,46 +7,42 @@ using RoME
 
 @testset "Basic funtionality tests on FluxModelsPose2Pose2" begin
 
+    ##
 
-##
+    mdls = [
+        RoME.buildPose2OdoNN_01_FromElements(
+            randn(4, 8),
+            randn(8),
+            randn(8, 48),
+            randn(8),
+            randn(2, 8),
+            randn(2),
+        ) for i = 1:10
+    ]
 
-mdls = [RoME.buildPose2OdoNN_01_FromElements( randn(4,8),
-                                              randn(8),
-                                              randn(8,48),
-                                              randn(8),
-                                              randn(2,8),
-                                              randn(2)) for i in 1:10];
+    ##
 
+    # start with a basic factor graph
 
-##
+    mvnNaive = MvNormal(zeros(3), diagm([1.0; 1.0; 0.01]))
 
-# start with a basic factor graph
+    jvd = zeros(25, 4)
+    pp = FluxModelsPose2Pose2(mdls, jvd, mvnNaive, 0.5)
 
-mvnNaive = MvNormal(zeros(3), diagm([1.0;1.0;0.01]))
+    ##
 
-jvd = zeros(25,4)
-pp = FluxModelsPose2Pose2(mdls, jvd, mvnNaive, 0.5)
+    fg = generateGraph_ZeroPose(; varType = Pose2)
+    addVariable!(fg, :x1, Pose2)
 
-##
+    @test_broken begin
+        addFactor!(fg, [:x0; :x1], pp)
 
+        ##
 
-fg = generateGraph_ZeroPose(varType=Pose2)
-addVariable!(fg, :x1, Pose2)
+        pts = approxConv(fg, :x0x1f1, :x1)
 
-@test_broken begin
+        true
+    end
+    #
 
-addFactor!(fg, [:x0;:x1], pp)
-
-##
-
-pts = approxConv(fg, :x0x1f1, :x1)
-
-true
 end
-#
-
-
-end
-
-
-

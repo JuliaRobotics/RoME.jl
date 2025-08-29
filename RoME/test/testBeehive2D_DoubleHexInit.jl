@@ -8,166 +8,146 @@ using RoME
 
 using Test
 
-
-include(joinpath(@__DIR__,"BeehiveTestUtils.jl"))
-
+include(joinpath(@__DIR__, "BeehiveTestUtils.jl"))
 
 @testset "sanity check on Hex example" begin
 
-## start with an empty factor graph object
-fg = initfg()
+    ## start with an empty factor graph object
+    fg = initfg()
 
-# fg.solverParams
-# fg.solverParams.isfixedlag = true
-# fg.solverParams.qfl = 20
-posecount = 0
+    # fg.solverParams
+    # fg.solverParams.isfixedlag = true
+    # fg.solverParams.qfl = 20
+    posecount = 0
 
-# Add the first pose :x0
-addVariable!(fg, :x0, Pose2)
-posecount += 1
+    # Add the first pose :x0
+    addVariable!(fg, :x0, Pose2)
+    posecount += 1
 
+    # Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
+    addFactor!(
+        fg,
+        [:x0],
+        PriorPose2(MvNormal([0.0; 0.0; 0.0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2))));
+        graphinit = false,
+    )
 
-# Add at a fixed location PriorPose2 to pin :x0 to a starting location (10,10, pi/4)
-addFactor!(fg, [:x0], PriorPose2( MvNormal([0.0; 0.0; 0.0],
-                                           Matrix(Diagonal([0.1;0.1;0.05].^2))) ), graphinit=false )
+    # Add landmarks with Bearing range measurements
+    addVariable!(fg, :l1, Point2; tags = [:LANDMARK;])
+    p2br = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+    addFactor!(fg, [:x0; :l1], p2br; graphinit = false)
 
-# Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, tags=[:LANDMARK;])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [:x0; :l1], p2br, graphinit=false )
+    ## hex 1
 
+    posecount = driveHex(fg, posecount)
 
+    # Add landmarks with Bearing range measurements
+    p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+    addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2; graphinit = false)
 
-## hex 1
+    ## hex 2
 
-posecount = driveHex(fg, posecount)
+    posecount = offsetHexLeg(fg, posecount; direction = :right)
 
-# Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l1], p2br2, graphinit=false )
+    # Add landmarks with Bearing range measurements
+    addVariable!(fg, :l2, Point2; tags = [:LANDMARK])
+    p2br = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+    addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br; graphinit = false)
 
+    posecount = driveHex(fg, posecount; steps = 5)
 
+    # Add landmarks with Bearing range measurements
+    p2br2 = Pose2Point2BearingRange(Normal(0, 0.03), Normal(20.0, 0.5))
+    addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2; graphinit = false)
 
-## hex 2
+    # writeGraphPdf(fg,engine="neato")
 
-posecount = offsetHexLeg(fg, posecount, direction=:right)
+    getSolverParams(fg).drawtree = true
+    getSolverParams(fg).showtree = true
+    # getSolverParams(fg).downsolve = false
+    getSolverParams(fg).multiproc = false
 
-# Add landmarks with Bearing range measurements
-addVariable!(fg, :l2, Point2, tags=[:LANDMARK])
-p2br = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br, graphinit=false )
+    getSolverParams(fg).graphinit = false
+    getSolverParams(fg).treeinit = true
+    getSolverParams(fg).useMsgLikelihoods = true
+    # fg.solverParams.async = true
 
+    # solve
+    tree, smt, chi = solveTree!(fg; recordcliqs = ls(fg))
 
-posecount = driveHex(fg, posecount, steps=5)
+    ## See visualization
 
+    # hist = getCliqSolveHistory(tree, :x1)
 
-# Add landmarks with Bearing range measurements
-p2br2 = Pose2Point2BearingRange(Normal(0,0.03),Normal(20.0,0.5))
-addFactor!(fg, [Symbol("x$(posecount-1)"); :l2], p2br2, graphinit=false )
+    ##  Do some plotting
+    # using RoMEPlotting
+    # Gadfly.set_default_plot_size(35cm,25cm)
+    # drawPosesLandms(fg, meanmax=:mean) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
 
+    ## check outcome on first hex
 
+    @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x0))[1, :] .< 3.0)
+    @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x0))[2, :] .< 3.0)
+    @test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x0))[3, :] .< 0.3)
 
-# writeGraphPdf(fg,engine="neato")
+    @test 80 < sum(7.0 .< getPoints(getBelief(fg, :x1))[1, :] .< 13.0)
+    @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x1))[2, :] .< 3.0)
+    @test 80 < sum(0.7 .< getPoints(getBelief(fg, :x1))[3, :] .< 1.3)
 
-getSolverParams(fg).drawtree = true
-getSolverParams(fg).showtree = true
-# getSolverParams(fg).downsolve = false
-getSolverParams(fg).multiproc = false
+    @test 80 < sum(12.0 .< getPoints(getBelief(fg, :x2))[1, :] .< 18.0)
+    @test 80 < sum(6.0 .< getPoints(getBelief(fg, :x2))[2, :] .< 11.0)
+    @test 80 < sum(1.8 .< getPoints(getBelief(fg, :x2))[3, :] .< 2.4)
 
-getSolverParams(fg).graphinit = false
-getSolverParams(fg).treeinit = true
-getSolverParams(fg).useMsgLikelihoods = true
-# fg.solverParams.async = true
+    @test 80 < sum(7.0 .< getPoints(getBelief(fg, :x3))[1, :] .< 13.0)
+    @test 80 < sum(15.0 .< getPoints(getBelief(fg, :x3))[2, :] .< 20.0)
+    # @test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x3))[3,:] .< 0.3)
 
-# solve
-tree, smt, chi = solveTree!(fg, recordcliqs=ls(fg));
+    @test 80 < sum(-4.0 .< getPoints(getBelief(fg, :x4))[1, :] .< 4.0)
+    @test 80 < sum(15.0 .< getPoints(getBelief(fg, :x4))[2, :] .< 20.0)
+    @test 80 < sum(-2.4 .< getPoints(getBelief(fg, :x4))[3, :] .< -1.8)
 
+    @test 80 < sum(-8.0 .< getPoints(getBelief(fg, :x5))[1, :] .< -2.0)
+    @test 80 < sum(6.0 .< getPoints(getBelief(fg, :x5))[2, :] .< 11.0)
+    @test 80 < sum(-1.3 .< getPoints(getBelief(fg, :x5))[3, :] .< -0.7)
 
+    @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x6))[1, :] .< 3.0)
+    @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x6))[2, :] .< 3.0)
+    @test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x6))[3, :] .< 0.3)
 
+    @test 80 < sum(17.0 .< getPoints(getBelief(fg, :l1))[1, :] .< 23.0)
+    @test 80 < sum(-5.0 .< getPoints(getBelief(fg, :l1))[2, :] .< 5.0)
 
-## See visualization
+    # check outcome on second hex
 
-# hist = getCliqSolveHistory(tree, :x1)
-
-##  Do some plotting
-# using RoMEPlotting
-# Gadfly.set_default_plot_size(35cm,25cm)
-# drawPosesLandms(fg, meanmax=:mean) |> PDF("/tmp/test.pdf");  @async run(`evince /tmp/test.pdf`)
-
-
-
-
-## check outcome on first hex
-
-@test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x0))[1,:] .< 3.0)
-@test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x0))[2,:] .< 3.0)
-@test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x0))[3,:] .< 0.3)
-
-@test 80 < sum(7.0 .< getPoints(getBelief(fg, :x1))[1,:] .< 13.0)
-@test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x1))[2,:] .< 3.0)
-@test 80 < sum(0.7 .< getPoints(getBelief(fg, :x1))[3,:] .< 1.3)
-
-@test 80 < sum(12.0 .< getPoints(getBelief(fg, :x2))[1,:] .< 18.0)
-@test 80 < sum(6.0 .< getPoints(getBelief(fg, :x2))[2,:] .< 11.0)
-@test 80 < sum(1.8 .< getPoints(getBelief(fg, :x2))[3,:] .< 2.4)
-
-@test 80 < sum(7.0 .< getPoints(getBelief(fg, :x3))[1,:] .< 13.0)
-@test 80 < sum(15.0 .< getPoints(getBelief(fg, :x3))[2,:] .< 20.0)
-# @test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x3))[3,:] .< 0.3)
-
-@test 80 < sum(-4.0 .< getPoints(getBelief(fg, :x4))[1,:] .< 4.0)
-@test 80 < sum(15.0 .< getPoints(getBelief(fg, :x4))[2,:] .< 20.0)
-@test 80 < sum(-2.4 .< getPoints(getBelief(fg, :x4))[3,:] .< -1.8)
-
-@test 80 < sum(-8.0 .< getPoints(getBelief(fg, :x5))[1,:] .< -2.0)
-@test 80 < sum(6.0 .< getPoints(getBelief(fg, :x5))[2,:] .< 11.0)
-@test 80 < sum(-1.3 .< getPoints(getBelief(fg, :x5))[3,:] .< -0.7)
-
-@test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x6))[1,:] .< 3.0)
-@test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x6))[2,:] .< 3.0)
-@test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x6))[3,:] .< 0.3)
-
-@test 80 < sum(17.0 .< getPoints(getBelief(fg, :l1))[1,:] .< 23.0)
-@test 80 < sum(-5.0 .< getPoints(getBelief(fg, :l1))[2,:] .< 5.0)
-
-
-
-# check outcome on second hex
-
-
-
-# @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x0))[1,:] .< 3.0)
-# @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x0))[2,:] .< 3.0)
-# @test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x0))[3,:] .< 0.3)
-#
-# @test 80 < sum(7.0 .< getPoints(getBelief(fg, :x1))[1,:] .< 13.0)
-# @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x1))[2,:] .< 3.0)
-# @test 80 < sum(0.7 .< getPoints(getBelief(fg, :x1))[3,:] .< 1.3)
-#
-# @test 80 < sum(12.0 .< getPoints(getBelief(fg, :x2))[1,:] .< 18.0)
-# @test 80 < sum(6.0 .< getPoints(getBelief(fg, :x2))[2,:] .< 11.0)
-# @test 80 < sum(1.8 .< getPoints(getBelief(fg, :x2))[3,:] .< 2.4)
-#
-# @test 80 < sum(7.0 .< getPoints(getBelief(fg, :x3))[1,:] .< 13.0)
-# @test 80 < sum(15.0 .< getPoints(getBelief(fg, :x3))[2,:] .< 20.0)
-# # @test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x3))[3,:] .< 0.3)
-#
-# @test 80 < sum(-4.0 .< getPoints(getBelief(fg, :x4))[1,:] .< 4.0)
-# @test 80 < sum(15.0 .< getPoints(getBelief(fg, :x4))[2,:] .< 20.0)
-# @test 80 < sum(-2.4 .< getPoints(getBelief(fg, :x4))[3,:] .< -1.8)
-#
-# @test 80 < sum(-8.0 .< getPoints(getBelief(fg, :x5))[1,:] .< -2.0)
-# @test 80 < sum(6.0 .< getPoints(getBelief(fg, :x5))[2,:] .< 11.0)
-# @test 80 < sum(-1.3 .< getPoints(getBelief(fg, :x5))[3,:] .< -0.7)
-#
-# @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x6))[1,:] .< 3.0)
-# @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x6))[2,:] .< 3.0)
-# @test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x6))[3,:] .< 0.3)
-#
-# @test 80 < sum(17.0 .< getPoints(getBelief(fg, :l1))[1,:] .< 23.0)
-# @test 80 < sum(-5.0 .< getPoints(getBelief(fg, :l1))[2,:] .< 5.0)
-
-
-
+    # @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x0))[1,:] .< 3.0)
+    # @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x0))[2,:] .< 3.0)
+    # @test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x0))[3,:] .< 0.3)
+    #
+    # @test 80 < sum(7.0 .< getPoints(getBelief(fg, :x1))[1,:] .< 13.0)
+    # @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x1))[2,:] .< 3.0)
+    # @test 80 < sum(0.7 .< getPoints(getBelief(fg, :x1))[3,:] .< 1.3)
+    #
+    # @test 80 < sum(12.0 .< getPoints(getBelief(fg, :x2))[1,:] .< 18.0)
+    # @test 80 < sum(6.0 .< getPoints(getBelief(fg, :x2))[2,:] .< 11.0)
+    # @test 80 < sum(1.8 .< getPoints(getBelief(fg, :x2))[3,:] .< 2.4)
+    #
+    # @test 80 < sum(7.0 .< getPoints(getBelief(fg, :x3))[1,:] .< 13.0)
+    # @test 80 < sum(15.0 .< getPoints(getBelief(fg, :x3))[2,:] .< 20.0)
+    # # @test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x3))[3,:] .< 0.3)
+    #
+    # @test 80 < sum(-4.0 .< getPoints(getBelief(fg, :x4))[1,:] .< 4.0)
+    # @test 80 < sum(15.0 .< getPoints(getBelief(fg, :x4))[2,:] .< 20.0)
+    # @test 80 < sum(-2.4 .< getPoints(getBelief(fg, :x4))[3,:] .< -1.8)
+    #
+    # @test 80 < sum(-8.0 .< getPoints(getBelief(fg, :x5))[1,:] .< -2.0)
+    # @test 80 < sum(6.0 .< getPoints(getBelief(fg, :x5))[2,:] .< 11.0)
+    # @test 80 < sum(-1.3 .< getPoints(getBelief(fg, :x5))[3,:] .< -0.7)
+    #
+    # @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x6))[1,:] .< 3.0)
+    # @test 80 < sum(-3.0 .< getPoints(getBelief(fg, :x6))[2,:] .< 3.0)
+    # @test 80 < sum(-0.3 .< getPoints(getBelief(fg, :x6))[3,:] .< 0.3)
+    #
+    # @test 80 < sum(17.0 .< getPoints(getBelief(fg, :l1))[1,:] .< 23.0)
+    # @test 80 < sum(-5.0 .< getPoints(getBelief(fg, :l1))[2,:] .< 5.0)
 
 end # testset

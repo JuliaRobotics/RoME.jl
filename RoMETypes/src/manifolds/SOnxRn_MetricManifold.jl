@@ -10,16 +10,23 @@ struct MetricLieGroup{
 end
 
 ManifoldsBase.base_manifold(G::MetricLieGroup) = G.lie_group
-ManifoldsBase.submanifold_component(G::MetricLieGroup, args...) = submanifold_component(G.lie_group, args...)
-ManifoldsBase.submanifold_components(G::MetricLieGroup, args...) = submanifold_components(G.lie_group, args...)
+function ManifoldsBase.submanifold_component(G::MetricLieGroup, args...)
+    return submanifold_component(G.lie_group, args...)
+end
+function ManifoldsBase.submanifold_components(G::MetricLieGroup, args...)
+    return submanifold_components(G.lie_group, args...)
+end
 LieGroups.LieAlgebra(G::MetricLieGroup) = LieAlgebra(base_manifold(G))
 LieGroups.inv!(G::MetricLieGroup, args...) = inv!(base_manifold(G), args...)
 LieGroups.inv(G::MetricLieGroup, args...) = inv(base_manifold(G), args...)
 LieGroups.compose!(G::MetricLieGroup, args...) = compose!(base_manifold(G), args...)
 LieGroups.compose(G::MetricLieGroup, args...) = compose(base_manifold(G), args...)
-LieGroups.identity_element(G::MetricLieGroup, args...) = identity_element(base_manifold(G), args...)
-LieGroups.identity_element!(G::MetricLieGroup, args...) = identity_element!(base_manifold(G), args...)
-
+function LieGroups.identity_element(G::MetricLieGroup, args...)
+    return identity_element(base_manifold(G), args...)
+end
+function LieGroups.identity_element!(G::MetricLieGroup, args...)
+    return identity_element!(base_manifold(G), args...)
+end
 
 # Left Invariant Rigid Body Kinematics Metric CrokeKumar eq 61.
 # A family of left invariant metrics:
@@ -30,7 +37,7 @@ LieGroups.identity_element!(G::MetricLieGroup, args...) = identity_element!(base
 struct LeftInvariantKinematicMetric <: RiemannianMetric end
 
 function SOnxRn_MetricManifold(n)
-    MetricLieGroup(
+    return MetricLieGroup(
         SpecialEuclideanGroup(n; variant = :right),
         LeftInvariantKinematicMetric(),
     )
@@ -76,12 +83,11 @@ function Manifolds.inner(M::SOnxRn_MetricManifoldType, p, X, Y)
     return dot(Xtr, Ytr) + dot(XRo, YRo) / 2
 end
 
-
 function DFG.getPointIdentity(::typeof(SOnxRn_MetricManifold(2)))
-    ArrayPartition(SA[0; 0.0], SA[1 0; 0 1.0])
+    return ArrayPartition(SA[0; 0.0], SA[1 0; 0 1.0])
 end
 function DFG.getPointIdentity(::typeof(SOnxRn_MetricManifold(3)))
-    ArrayPartition(SA[0, 0, 0.0], SA[1 0 0; 0 1 0; 0 0 1.0])
+    return ArrayPartition(SA[0, 0, 0.0], SA[1 0 0; 0 1 0; 0 0 1.0])
 end
 
 # LieGroups.LieAlgebra(G::SOnxRn_MetricManifoldType) = LieAlgebra(base_manifold(G))

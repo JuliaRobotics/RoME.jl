@@ -4,45 +4,40 @@ using RoME, Distributions
 import IncrementalInference: getSample
 
 mutable struct NorthSouthPartial{T} <: AbstractPrior
-  Z::T
-  partial::Tuple{Int}
-  NorthSouthPartial() = new()
-  NorthSouthPartial(Z::D) where {D <: Distribution} = new{D}(Z, (2,))
+    Z::T
+    partial::Tuple{Int}
+    NorthSouthPartial() = new()
+    NorthSouthPartial(Z::D) where {D <: Distribution} = new{D}(Z, (2,))
 end
-getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int=1) = (reshape(rand(cfo.factor.Z, N),1,N),)
-
+function getSample(cfo::CalcFactor{<:NorthSouthPartial}, N::Int = 1)
+    return (reshape(rand(cfo.factor.Z, N), 1, N),)
+end
 
 # Start with an empty graph
-fg = initfg(sessionname="MULTIMODAL_2D_TUTORIAL")
-
+fg = initfg(; sessionname = "MULTIMODAL_2D_TUTORIAL")
 
 # Add landmarks with Bearing range measurements
-addVariable!(fg, :l1, Point2, tags=[:LANDMARK])
-addVariable!(fg, :l2, Point2, tags=[:LANDMARK])
+addVariable!(fg, :l1, Point2; tags = [:LANDMARK])
+addVariable!(fg, :l2, Point2; tags = [:LANDMARK])
 
-addFactor!(fg, [:l1], Prior(MvNormal([10.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
-addFactor!(fg, [:l2], Prior(MvNormal([30.0;0.0], Matrix(Diagonal([1.0;1.0].^2)))) )
+addFactor!(fg, [:l1], Prior(MvNormal([10.0; 0.0], Matrix(Diagonal([1.0; 1.0] .^ 2)))))
+addFactor!(fg, [:l2], Prior(MvNormal([30.0; 0.0], Matrix(Diagonal([1.0; 1.0] .^ 2)))))
 
-setVal!(getVert(fg, :l2), zeros(2,100))
+setVal!(getVert(fg, :l2), zeros(2, 100))
 
 addVariable!(fg, :x0, Pose2)
 # addFactor!(fg, [:x0], Prior(MvNormal([0.0;0.0;0], Matrix(Diagonal([1.0;1.0;0.01].^2)))) )
 
+p2br = Pose2Point2BearingRange(Normal(0, 0.1), Normal(20.0, 1.0))
+addFactor!(fg, [:x0; :l1; :l2], p2br; multihypo = [1.0; 0.5; 0.5])
 
-p2br = Pose2Point2BearingRange(Normal(0,0.1),Normal(20.0,1.0))
-addFactor!(fg, [:x0; :l1; :l2], p2br, multihypo=[1.0; 0.5; 0.5])
-
-addFactor!(fg, [:x0;], NorthSouthPartial(Normal(0,1.0)))
+addFactor!(fg, [:x0;], NorthSouthPartial(Normal(0, 1.0)))
 
 # writeGraphPdf(fg)
 
 initAll!(fg)
 
-
-[solveTree!(fg) for i in 1:4]
-
-
-
+[solveTree!(fg) for i = 1:4]
 
 # L1 = getVal(fg, :l1)
 # L2 = getVal(fg, :l2)
@@ -50,16 +45,16 @@ X0 = getBelief(fg, :x0)
 
 # plot(X0, dims=[1;2])
 
-
 X0pts = getPoints(X0)
 
-
-@test sum([0 < sum(-20 .< X0pts[1,:] .< 0);
-           0 < sum(  0 .< X0pts[1,:] .< 20);
-           0 < sum( 20 .< X0pts[1,:] .< 40);
-           0 < sum( 40 .< X0pts[1,:] .< 60)]) > 2
-
-
+@test sum(
+    [
+        0 < sum(-20 .< X0pts[1, :] .< 0)
+        0 < sum(0 .< X0pts[1, :] .< 20)
+        0 < sum(20 .< X0pts[1, :] .< 40)
+        0 < sum(40 .< X0pts[1, :] .< 60)
+    ],
+) > 2
 
 # # Drive around in a hexagon
 # for i in 0:5

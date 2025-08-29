@@ -17,10 +17,10 @@ function (cf::CalcFactor{<:PriorPose2})(m, p)
 end
 
 function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
-  # X ∈ TₚM, X̂ ∈ TₚM, p,q ∈ M
-  M = getManifold(Pose2Pose2)
-  X̂ = log(M, p, q)
-  return vee(LieAlgebra(M), X - X̂)
+    # X ∈ TₚM, X̂ ∈ TₚM, p,q ∈ M
+    M = getManifold(Pose2Pose2)
+    X̂ = log(M, p, q)
+    return vee(LieAlgebra(M), X - X̂)
 end
 
 function (cf::CalcFactor{<:PriorPose3})(m, p)
@@ -42,7 +42,9 @@ compare(a::PriorPose2, b::PriorPose2; tol::Float64 = 1e-10) = compareDensity(a.Z
 
 ##
 #TODO is this manifold not SO3
-DFG.@defObservationType Pose3Pose3RotOffset AbstractManifoldMinimize SOnxRn_MetricManifold(3)
+DFG.@defObservationType Pose3Pose3RotOffset AbstractManifoldMinimize SOnxRn_MetricManifold(
+    3,
+)
 
 # measurement is in frame a, for example imu frame
 # p and q is in frame b, for example body frame
@@ -59,7 +61,9 @@ function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
 end
 
 ##
-DFG.@defObservationType Pose3Pose3Transform AbstractManifoldMinimize SOnxRn_MetricManifold(3)
+DFG.@defObservationType Pose3Pose3Transform AbstractManifoldMinimize SOnxRn_MetricManifold(
+    3,
+)
 
 function (cf::CalcFactor{<:Pose3Pose3Transform})(p_NX, p, q, Δ)
     M = getManifold(Pose3Pose3Transform)
@@ -79,7 +83,9 @@ end
   $(TYPEDEF)
 Pose3Pose3 factor where the translation scale is not known, ie. Pose3Pose3 with unit (normalized) translation.
 """
-DFG.@defObservationType Pose3Pose3UnitTrans AbstractManifoldMinimize SOnxRn_MetricManifold(3)
+DFG.@defObservationType Pose3Pose3UnitTrans AbstractManifoldMinimize SOnxRn_MetricManifold(
+    3,
+)
 
 function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) where {T}
     M = getManifold(Pose3Pose3UnitTrans)
@@ -88,8 +94,9 @@ function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) whe
     return SVector{6, T}(normalize(Xc[1:3])..., Xc[4:6]...)
 end
 
-
 #  FIXME needed until AMP#41 is done hopefully can be removed soon 🐛💥
 # Base.convert(::Type{<:Tuple}, ::typeof(SOnxRn_MetricManifold(2))) = (:Euclid,:Euclid,:Circular)
-AMP._manifoldtuple(::typeof(SOnxRn_MetricManifold(2))) = (:Euclid,:Euclid,:Circular)
-AMP._manifoldtuple(::typeof(SOnxRn_MetricManifold(3))) = (:Euclid,:Euclid,:Euclid,:Circular,:Circular,:Circular)
+AMP._manifoldtuple(::typeof(SOnxRn_MetricManifold(2))) = (:Euclid, :Euclid, :Circular)
+function AMP._manifoldtuple(::typeof(SOnxRn_MetricManifold(3)))
+    return (:Euclid, :Euclid, :Euclid, :Circular, :Circular, :Circular)
+end

@@ -3,54 +3,44 @@
 
 using RoME
 
-
 fg = initfg()
 getSolverParams(fg).drawtree = true
 getSolverParams(fg).showtree = true
 getSolverParams(fg).dbg = true
 
-
-defaultFixedLagOnTree!(fg, 5, limitfixeddown=true)
-
+defaultFixedLagOnTree!(fg, 5; limitfixeddown = true)
 
 tree = BayesTree()
 
-generateGraph_Circle(6, fg=fg, offsetPoses=0, stopEarly=3, cyclePoses=6)
-tree = solveTree!(fg, tree, recordcliqs=ls(fg));
-drawTree(tree,filepath=joinLogPath(fg,"tree3.pdf"))
+generateGraph_Circle(6; fg = fg, offsetPoses = 0, stopEarly = 3, cyclePoses = 6)
+tree = solveTree!(fg, tree; recordcliqs = ls(fg));
+drawTree(tree; filepath = joinLogPath(fg, "tree3.pdf"))
 
-
-generateGraph_Circle(6, fg=fg, offsetPoses=3, stopEarly=6, cyclePoses=6)
+generateGraph_Circle(6; fg = fg, offsetPoses = 3, stopEarly = 6, cyclePoses = 6)
 tree = solveTree!(fg, tree);
-drawTree(tree,filepath=joinLogPath(fg,"tree6.pdf"))
+drawTree(tree; filepath = joinLogPath(fg, "tree6.pdf"))
 
-
-generateGraph_Circle(12, fg=fg, offsetPoses=6, stopEarly=9, cyclePoses=6)
+generateGraph_Circle(12; fg = fg, offsetPoses = 6, stopEarly = 9, cyclePoses = 6)
 tree = solveTree!(fg, tree);
-drawTree(tree,filepath=joinLogPath(fg,"tree9.pdf"))
+drawTree(tree; filepath = joinLogPath(fg, "tree9.pdf"))
 
-
-generateGraph_Circle(12, fg=fg, offsetPoses=9, stopEarly=12, cyclePoses=6)
+generateGraph_Circle(12; fg = fg, offsetPoses = 9, stopEarly = 12, cyclePoses = 6)
 tree = solveTree!(fg, tree);
-drawTree(tree,filepath=joinLogPath(fg,"tree12.pdf"))
+drawTree(tree; filepath = joinLogPath(fg, "tree12.pdf"))
 
-
-generateGraph_Circle(18, fg=fg, offsetPoses=12, stopEarly=15, cyclePoses=6)
+generateGraph_Circle(18; fg = fg, offsetPoses = 12, stopEarly = 15, cyclePoses = 6)
 tree = solveTree!(fg, tree);
-drawTree(tree,filepath=joinLogPath(fg,"tree15.pdf"))
+drawTree(tree; filepath = joinLogPath(fg, "tree15.pdf"))
 
-
-generateGraph_Circle(18, fg=fg, offsetPoses=15, stopEarly=18, cyclePoses=6)
+generateGraph_Circle(18; fg = fg, offsetPoses = 15, stopEarly = 18, cyclePoses = 6)
 tree = solveTree!(fg, tree);
-drawTree(tree,filepath=joinLogPath(fg,"tree18.pdf"))
+drawTree(tree; filepath = joinLogPath(fg, "tree18.pdf"))
 
-
-drawGraph(fg, show=true)
-
+drawGraph(fg; show = true)
 
 ## visualization of numerical results
 
 using RoMEPlotting
 
-Gadfly.set_default_plot_size(35cm,20cm)
+Gadfly.set_default_plot_size(35cm, 20cm)
 plotSLAM2D(fg)

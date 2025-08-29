@@ -10,7 +10,6 @@ Direction observation information of a `Point3` variable.
 DFG.@defObservationType PriorPoint3 PriorObservation LieGroups.TranslationGroup(3)
 DFG.@defObservationType Point3Point3 RelativeObservation LieGroups.TranslationGroup(3)
 
-
 DFG.@defObservationType Point2Point2 RelativeObservation LieGroups.TranslationGroup(2)
 DFG.@defObservationType PriorPoint2 PriorObservation LieGroups.TranslationGroup(2)
 
@@ -58,7 +57,9 @@ Example:
 PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
-DFG.@defObservationType PriorPose2 PriorObservation TranslationGroup(2) × SpecialOrthogonalGroup(2)
+DFG.@defObservationType PriorPose2 PriorObservation TranslationGroup(2) ×
+                                                    SpecialOrthogonalGroup(2)
 
 DFG.@defObservationType Pose3Pose3 RelativeObservation SOnxRn_MetricManifold(3)
-DFG.@defObservationType PriorPose3 PriorObservation TranslationGroup(3) × SpecialOrthogonalGroup(3)
+DFG.@defObservationType PriorPose3 PriorObservation TranslationGroup(3) ×
+                                                    SpecialOrthogonalGroup(3)

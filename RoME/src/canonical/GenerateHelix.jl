@@ -1,6 +1,4 @@
 
-
-
 """
     $SIGNATURES
 
@@ -17,88 +15,118 @@ Notes
 
 See also: [`generateGraph_Helix2DSlew!`](@ref), [`generateGraph_Helix2DSpiral!`](@ref), [`generateGraph_Beehive!`](@ref)
 """
-function generateGraph_Helix2D!(numposes::Integer = 40;
-                                posesperturn::Integer = 20,
-                                graphinit = nothing,
-                                useMsgLikelihoods = nothing,
-                                solverParams::SolverParams = SolverParams(;graphinit=false),
-                                dfg::AbstractDFG = LocalDFG{SolverParams}(;solverParams),
-                                radius::Real = 10,
-                                spine_t = (t)->0 + im*0,
-                                xr_t::Function = (t)->real(spine_t(t)),
-                                yr_t::Function = (t)->imag(spine_t(t)),
-                                poseRegex::Regex = r"x\d+",
-                                μ0 = [0;0;pi/2],
-                                refKey::Symbol = :simulated,
-                                Qd::AbstractMatrix{<:Real} = diagm( [0.1;0.1;0.05].^2 ),
-                                postpose_cb::Function = (fg_,latestpose)->()   )
-  #
-  (graphinit isa Nothing) ? nothing : @error("generateGraph_Helix2D! keyword graphinit obsolete, use solverParams=SolverParams(graphinit=..) instead.")
-  (useMsgLikelihoods isa Nothing) ? nothing : @error("generateGraph_Helix2D! keyword useMsgLikelihoods obsolete, use solverParams=SolverParams(useMsgLikelihoods=..) instead.")
-  
-  # add first pose if not already exists
-  _initpose = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, 0)
-  if !exists( dfg, _initpose )
-    generateGraph_ZeroPose(;dfg, μ0, solverParams, postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
-    # getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
-    # reference ppe on :x0
-    ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
-    setPPE!(dfg[:x0], refKey, DFG.MeanMaxPPE, ppe)
-  end
-  
-  # start from existsing poses
-  _poses = ls(dfg, poseRegex) |> sortDFG
-  # what is the last pose and posecount number
-  lastpose = _poses[end]
-  posecount = match(r"\d+", string(lastpose)).match |> x->parse(Int,x)    
-  # init how many poses at the beginning of a new turn
-  bidx = length(_poses) # 1
-  
-  # fractional number of turns to make in total (after all graph generation is done)
-  turns = numposes/posesperturn
-  # generate helix pattern algebraically
-  tmp = calcHelix_T(0, turns, posesperturn, radius=radius, spine_t=spine_t, xr_t=xr_t, yr_t=yr_t)
-  # TODO, dont always start from 0 -- i.e. chop first repeat elements from deterministic helix
-  
-  # select the starting point
-  _μ0 = μ0
-  # @show _μ0 = 1 == bidx ? μ0 : getPPE(dfg, lastpose, refKey).suggested
-  Tμ = SE2(_μ0-[0;0;pi/2]) # TODO update to Manifolds.jl
-  
-  # current end pose count for number of turns
-  eidx = 1
-  for tn in 0:(ceil(Int, turns)-1)
-    eidx += posesperturn
-    # skip out early if extending a previous existing graph
-    eidx = minimum( [eidx, length(tmp[1])] )
-    # tmp_ = _calcHelix2DApprox(N_ppt=posesperturn, radius=radius, runback=runback)
-    tmp_ = hcat(tmp[2][bidx:eidx,:],tmp[3][bidx:eidx])'
-    # adjust for turn progression in x
-    # tmp_[1,:] .+= tn*(2radius*(1-runback))
-    oldpose = Tμ*SE2(tmp_[:,1])
-    eidx < bidx ? continue : nothing
-    
-    # add each new pose (skippin the first element)
-    for ps in 2:size(tmp_,2)
-      # check exit condition
-      numposes-1 <= posecount && break
-      # add a new pose
-      newpose = Tμ*TU.SE2(tmp_[:,ps])
-      deltaodo = se2vee(oldpose \ newpose)
-      factor = Pose2Pose2( MvNormal(deltaodo, Qd) )
-      posecount += 1
-      v_n = _addPoseCanonical!(dfg, lastpose, posecount, factor, poseRegex=poseRegex, refKey=refKey, overridePPE=se2vee(newpose), postpose_cb=postpose_cb)
-      lastpose = getLabel(v_n)
-      oldpose = newpose
+function generateGraph_Helix2D!(
+    numposes::Integer = 40;
+    posesperturn::Integer = 20,
+    graphinit = nothing,
+    useMsgLikelihoods = nothing,
+    solverParams::SolverParams = SolverParams(; graphinit = false),
+    dfg::AbstractDFG = LocalDFG{SolverParams}(; solverParams),
+    radius::Real = 10,
+    spine_t = (t) -> 0 + im * 0,
+    xr_t::Function = (t) -> real(spine_t(t)),
+    yr_t::Function = (t) -> imag(spine_t(t)),
+    poseRegex::Regex = r"x\d+",
+    μ0 = [0; 0; pi / 2],
+    refKey::Symbol = :simulated,
+    Qd::AbstractMatrix{<:Real} = diagm([0.1; 0.1; 0.05] .^ 2),
+    postpose_cb::Function = (fg_, latestpose) -> (),
+)
+    #
+    if (graphinit isa Nothing)
+        nothing
+    else
+        @error(
+            "generateGraph_Helix2D! keyword graphinit obsolete, use solverParams=SolverParams(graphinit=..) instead."
+        )
+    end
+    if (useMsgLikelihoods isa Nothing)
+        nothing
+    else
+        @error(
+            "generateGraph_Helix2D! keyword useMsgLikelihoods obsolete, use solverParams=SolverParams(useMsgLikelihoods=..) instead."
+        )
     end
 
-    bidx = eidx
-  end
-  
-  # 
-  return dfg
-end
+    # add first pose if not already exists
+    _initpose = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, 0)
+    if !exists(dfg, _initpose)
+        generateGraph_ZeroPose(; dfg, μ0, solverParams, postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
+        # getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
+        # reference ppe on :x0
+        ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
+        setPPE!(dfg[:x0], refKey, DFG.MeanMaxPPE, ppe)
+    end
 
+    # start from existsing poses
+    _poses = ls(dfg, poseRegex) |> sortDFG
+    # what is the last pose and posecount number
+    lastpose = _poses[end]
+    posecount = match(r"\d+", string(lastpose)).match |> x -> parse(Int, x)
+    # init how many poses at the beginning of a new turn
+    bidx = length(_poses) # 1
+
+    # fractional number of turns to make in total (after all graph generation is done)
+    turns = numposes / posesperturn
+    # generate helix pattern algebraically
+    tmp = calcHelix_T(
+        0,
+        turns,
+        posesperturn;
+        radius = radius,
+        spine_t = spine_t,
+        xr_t = xr_t,
+        yr_t = yr_t,
+    )
+    # TODO, dont always start from 0 -- i.e. chop first repeat elements from deterministic helix
+
+    # select the starting point
+    _μ0 = μ0
+    # @show _μ0 = 1 == bidx ? μ0 : getPPE(dfg, lastpose, refKey).suggested
+    Tμ = SE2(_μ0 - [0; 0; pi / 2]) # TODO update to Manifolds.jl
+
+    # current end pose count for number of turns
+    eidx = 1
+    for tn = 0:(ceil(Int, turns) - 1)
+        eidx += posesperturn
+        # skip out early if extending a previous existing graph
+        eidx = minimum([eidx, length(tmp[1])])
+        # tmp_ = _calcHelix2DApprox(N_ppt=posesperturn, radius=radius, runback=runback)
+        tmp_ = hcat(tmp[2][bidx:eidx, :], tmp[3][bidx:eidx])'
+        # adjust for turn progression in x
+        # tmp_[1,:] .+= tn*(2radius*(1-runback))
+        oldpose = Tμ * SE2(tmp_[:, 1])
+        eidx < bidx ? continue : nothing
+
+        # add each new pose (skippin the first element)
+        for ps = 2:size(tmp_, 2)
+            # check exit condition
+            numposes - 1 <= posecount && break
+            # add a new pose
+            newpose = Tμ * TU.SE2(tmp_[:, ps])
+            deltaodo = se2vee(oldpose \ newpose)
+            factor = Pose2Pose2(MvNormal(deltaodo, Qd))
+            posecount += 1
+            v_n = _addPoseCanonical!(
+                dfg,
+                lastpose,
+                posecount,
+                factor;
+                poseRegex = poseRegex,
+                refKey = refKey,
+                overridePPE = se2vee(newpose),
+                postpose_cb = postpose_cb,
+            )
+            lastpose = getLabel(v_n)
+            oldpose = newpose
+        end
+
+        bidx = eidx
+    end
+
+    # 
+    return dfg
+end
 
 """
     $SIGNATURES
@@ -114,11 +142,13 @@ Related
 
 [`generateGraph_Helix2D!`](@ref), [`generateGraph_Helix2DSpiral!`](@ref)
 """
-generateGraph_Helix2DSlew!( numposes::Integer=40;
-                            slew_x::Real=2/3,
-                            slew_y::Real=0,
-                            spine_t=(t)->slew_x*t + im*slew_y*t,
-                            kwargs...  ) = generateGraph_Helix2D!(numposes; spine_t=spine_t, kwargs...)
+generateGraph_Helix2DSlew!(
+    numposes::Integer = 40;
+    slew_x::Real = 2 / 3,
+    slew_y::Real = 0,
+    spine_t = (t) -> slew_x * t + im * slew_y * t,
+    kwargs...,
+) = generateGraph_Helix2D!(numposes; spine_t = spine_t, kwargs...)
 #
 
 """
@@ -136,12 +166,13 @@ Related
 
 [`generateGraph_Helix2D!`](@ref), [`generateGraph_Helix2DSlew!`](@ref)
 """
-generateGraph_Helix2DSpiral!( numposes::Integer=100;
-                              rate_r=0.6,
-                              rate_a=6,
-                              spine_t=(t)->rate_r*(t^0.5)*cis(rate_a*(t^0.4)),
-                              kwargs...  ) = generateGraph_Helix2D!(numposes; spine_t=spine_t, kwargs...)
+generateGraph_Helix2DSpiral!(
+    numposes::Integer = 100;
+    rate_r = 0.6,
+    rate_a = 6,
+    spine_t = (t) -> rate_r * (t^0.5) * cis(rate_a * (t^0.4)),
+    kwargs...,
+) = generateGraph_Helix2D!(numposes; spine_t = spine_t, kwargs...)
 #
-
 
 #

@@ -8,75 +8,69 @@ using TensorCast
 
 ##
 
-
 @testset "Test correlation induced by partials" begin
 
-##
+    ##
 
-# start with an empty factor graph object
-N = 200
-fg = initfg()
-getSolverParams(fg).N = N
+    # start with an empty factor graph object
+    N = 200
+    fg = initfg()
+    getSolverParams(fg).N = N
 
-getSolverParams(fg).useMsgLikelihoods = true
+    getSolverParams(fg).useMsgLikelihoods = true
 
-addVariable!(fg, :x0, Pose2)
-addVariable!(fg, :l1, Point2)
-addFactor!(fg, [:x0], PriorPose2( MvNormal([0; 0; 0], diagm([0.3;0.3;0.3].^2)) ))
-ppr = Pose2Point2Range(MvNormal([7.3], diagm([0.3].^2)))
-addFactor!(fg, [:x0; :l1], ppr )
+    addVariable!(fg, :x0, Pose2)
+    addVariable!(fg, :l1, Point2)
+    addFactor!(fg, [:x0], PriorPose2(MvNormal([0; 0; 0], diagm([0.3; 0.3; 0.3] .^ 2))))
+    ppr = Pose2Point2Range(MvNormal([7.3], diagm([0.3] .^ 2)))
+    addFactor!(fg, [:x0; :l1], ppr)
 
-addVariable!(fg, :x1, Pose2)
-pp = Pose2Pose2(MvNormal([9.8;0;0.8], diagm([0.3;0.3;0.05].^2)))
-ppr = Pose2Point2Range(MvNormal([6.78], diagm([0.3].^2)))
-addFactor!(fg, [:x0; :x1], pp )
-addFactor!(fg, [:x1; :l1], ppr )
+    addVariable!(fg, :x1, Pose2)
+    pp = Pose2Pose2(MvNormal([9.8; 0; 0.8], diagm([0.3; 0.3; 0.05] .^ 2)))
+    ppr = Pose2Point2Range(MvNormal([6.78], diagm([0.3] .^ 2)))
+    addFactor!(fg, [:x0; :x1], pp)
+    addFactor!(fg, [:x1; :l1], ppr)
 
+    ##
 
-##
+    tree = solveTree!(fg)
 
-tree = solveTree!(fg)
+    ## check that stuff is where it should be
 
+    L1 = getPoints(getBelief(fg, :l1))
+    @cast L1_[j, i] := L1[i][j]
 
-## check that stuff is where it should be
+    @test 0.3 * N < sum(L1_[2, :] .< 0)
+    @test 0.3 * N < sum(0 .< L1_[2, :])
 
-L1 = getPoints(getBelief(fg, :l1))
-@cast L1_[j,i] := L1[i][j]
+    L1_n = L1_[:, L1_[2, :] .< 0]
+    L1_p = L1_[:, 0 .< L1_[2, :]]
 
-@test 0.3*N < sum(L1_[2,:] .< 0)
-@test 0.3*N < sum(0 .< L1_[2,:])
+    mvn = fit(MvNormal, L1_n)
+    mvp = fit(MvNormal, L1_p)
 
-L1_n = L1_[:, L1_[2,:] .< 0]
-L1_p = L1_[:, 0 .< L1_[2,:]]
+    # check diagonal structure for correlation
+    @test isapprox(mvn.Σ.mat[1, 1], 4.0, atol = 3.6)
+    @test isapprox(mvn.Σ.mat[2, 2], 3.4, atol = 3.0)
+    @test isapprox(mvn.Σ.mat[1, 2], 2.0, atol = 1.75)
 
-mvn = fit(MvNormal, L1_n)
-mvp = fit(MvNormal, L1_p)
+    @test isapprox(mvp.Σ.mat[1, 1], 4.0, atol = 3.6)
+    @test isapprox(mvp.Σ.mat[2, 2], 3.4, atol = 3.0)
+    @test isapprox(mvp.Σ.mat[1, 2], -2.0, atol = 1.75)
 
-# check diagonal structure for correlation
-@test isapprox(mvn.Σ.mat[1,1], 4.0, atol=3.6)
-@test isapprox(mvn.Σ.mat[2,2], 3.4, atol=3.0)
-@test isapprox(mvn.Σ.mat[1,2], 2.0, atol=1.75)
+    # sanity check for symmetry
+    @test mvn.Σ.mat - mvn.Σ.mat' |> norm < 0.01
 
-@test isapprox(mvp.Σ.mat[1,1], 4.0, atol=3.6)
-@test isapprox(mvp.Σ.mat[2,2], 3.4, atol=3.0)
-@test isapprox(mvp.Σ.mat[1,2], -2.0, atol=1.75)
+    # test means in the right location
+    @test isapprox(mvn.μ[1], 5.4, atol = 2.0)
+    @test isapprox(mvn.μ[2], -4.2, atol = 2.0)
 
-# sanity check for symmetry
-@test mvn.Σ.mat - mvn.Σ.mat' |> norm < 0.01
+    @test isapprox(mvp.μ[1], 5.4, atol = 2.0)
+    @test isapprox(mvp.μ[2], 4.2, atol = 2.0)
 
-# test means in the right location
-@test isapprox(mvn.μ[1], 5.4, atol=2.0)
-@test isapprox(mvn.μ[2], -4.2, atol=2.0)
-
-@test isapprox(mvp.μ[1], 5.4, atol=2.0)
-@test isapprox(mvp.μ[2], 4.2, atol=2.0)
-
-##
-
-
+    ##
 
 end
-
 
 ##
 
