@@ -105,16 +105,13 @@ using RoME
 
     filepath = joinpath(tempdir(), "testgeneric.tar.gz")
     saveDFG(filepath, fg)
-    @test_broken begin
-        fg_ = loadDFG!(initfg(), filepath)
 
-        Base.rm(filepath)
+    fg_ = loadDFG!(initfg(), filepath)
 
-        ##
+    Base.rm(filepath)
 
-        w_P3 = solveMultiviewLandmark!(fg_, :w_Ph)
-        @test isapprox([10.56; 0; 0], w_P3; atol = 1e-3)
-    end
+    w_P3 = solveMultiviewLandmark!(fg_, :w_Ph)
+    @test isapprox([10.56; 0; 0], w_P3; atol = 1e-3)
     ##
 end
 
