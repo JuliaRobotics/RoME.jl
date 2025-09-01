@@ -8,7 +8,9 @@ using RoME
 using RoME: SpecialGalileanGroup
 using Dates
 using StaticArrays
+using LieGroups
 # using ManifoldDiff
+using Random
 
 ##
 M = SpecialOrthogonalGroup(3)
@@ -37,7 +39,7 @@ end
 ##
 @testset "IMUDeltaFactor spot checks" begin
     ##
-
+    Random.seed!(545)
     M = SpecialGalileanGroup()
     ϵ = identity_element(M)
     @test ϵ == getPointIdentity(M)
