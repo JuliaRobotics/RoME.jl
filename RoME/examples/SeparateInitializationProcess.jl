@@ -21,7 +21,7 @@ addprocs(3)
     #   Point2() = new(2)
     # end
 
-    struct Prior{T} <: IncrementalInference.AbstractPrior where {T <: Distribution}
+    struct Prior{T} <: IncrementalInference.AbstractPriorObservation where {T <: Distribution}
         z::T
     end
     getSample(s::Prior, N::Int = 1) = (rand(s.z, N),)

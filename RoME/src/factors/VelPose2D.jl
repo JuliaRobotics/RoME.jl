@@ -125,7 +125,7 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct PackedVelPose2VelPose2 <: AbstractPackedFactor
+Base.@kwdef struct PackedVelPose2VelPose2 <: AbstractPackedObservation
     Zpose::PackedSamplableBelief
     Zvel::PackedSamplableBelief
 end

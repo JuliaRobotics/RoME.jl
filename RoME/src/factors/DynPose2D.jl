@@ -3,7 +3,7 @@
 """
 $(TYPEDEF)
 """
-mutable struct DynPose2VelocityPrior{T1, T2} <: IncrementalInference.AbstractPrior where {
+mutable struct DynPose2VelocityPrior{T1, T2} <: IncrementalInference.AbstractPriorObservation where {
     T1 <: IIF.SamplableBelief,
     T2 <: IIF.SamplableBelief,
 }
@@ -96,7 +96,7 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct PackedDynPose2VelocityPrior <: AbstractPackedFactor
+Base.@kwdef struct PackedDynPose2VelocityPrior <: AbstractPackedObservation
     strpose::PackedSamplableBelief
     strvel::PackedSamplableBelief
 end
@@ -116,7 +116,7 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct PackedDynPose2Pose2 <: AbstractPackedFactor
+Base.@kwdef struct PackedDynPose2Pose2 <: AbstractPackedObservation
     Z::PackedSamplableBelief
 end
 

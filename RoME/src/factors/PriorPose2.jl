@@ -10,7 +10,7 @@ Example:
 PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
-Base.@kwdef struct PriorPose2{T <: SamplableBelief} <: IIF.AbstractPrior
+Base.@kwdef struct PriorPose2{T <: SamplableBelief} <: IIF.AbstractPriorObservation
     Z::T = MvNormal(zeros(3), diagm([1; 1; 0.1]))
 end
 
@@ -41,7 +41,7 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct PackedPriorPose2 <: AbstractPackedFactor
+Base.@kwdef struct PackedPriorPose2 <: AbstractPackedObservation
     Z::PackedSamplableBelief
 end
 function DFG.pack(d::PriorPose2)

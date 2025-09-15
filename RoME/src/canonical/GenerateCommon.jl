@@ -17,7 +17,7 @@ function _addPoseCanonical!(
     fg::AbstractDFG,
     prevLabel::Symbol,
     posecount::Int, # can be overriden with genLabel
-    factor::AbstractFactor;
+    factor::AbstractObservation;
     poseRegex::Regex = r"x\d+",
     genLabel = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, posecount),
     srcType::Type{<:InferenceVariable} = getVariableType(fg, prevLabel) |> typeof,
@@ -47,8 +47,8 @@ function _addPoseCanonical!(
     )
 
     # dispatch on prior or binary factor
-    _getlabels(fact::AbstractPrior) = [genLabel;]
-    _getlabels(fact::AbstractRelative) = [prevLabel; genLabel]
+    _getlabels(fact::AbstractPriorObservation) = [genLabel;]
+    _getlabels(fact::AbstractRelativeObservation) = [prevLabel; genLabel]
 
     # add new pose variable
     v_n = addVariable!(fg, genLabel, poseType; solvable, tags = variableTags)
@@ -91,7 +91,7 @@ function generateGraph_ZeroPose(;
     doRef::Bool = true,
     useMsgLikelihoods::Bool = getSolverParams(dfg).useMsgLikelihoods,
     label::Symbol = :x0,
-    priorType::Type{<:AbstractPrior} = DFG._getPriorType(varType),
+    priorType::Type{<:AbstractPriorObservation} = DFG._getPriorType(varType),
     μ0::AbstractVector{<:Real} = zeros(getDimension(varType)),
     Σ0::AbstractMatrix{<:Real} = diagm(0.01 * ones(getDimension(varType))),
     priorArgs::Tuple = (MvNormal(μ0, Σ0),),
@@ -150,7 +150,7 @@ DevNotes
 """
 function buildGraphChain!(
     fctData::AbstractVector = [MvNormal([10; 0; 0.0], diagm(0.1 .* ones(3))) for _ = 1:3],
-    fctType::Type{<:AbstractRelative} = Pose2Pose2,
+    fctType::Type{<:AbstractRelativeObservation} = Pose2Pose2,
     preFct_args_cb::Function = (fg_, data) -> (data.currData,);
     stopAfter::Integer = 2^(Sys.WORD_SIZE - 1) - 1,
     varType::IIF.InstanceType{InferenceVariable} = Pose2,

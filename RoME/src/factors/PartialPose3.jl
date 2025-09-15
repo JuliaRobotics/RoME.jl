@@ -10,7 +10,7 @@
 Partial prior belief on Z, Roll, and Pitch of a `Pose3`.
 """
 Base.@kwdef struct PriorPose3ZRP{T1 <: SamplableBelief, T2 <: SamplableBelief} <:
-                   IncrementalInference.AbstractPrior
+                   IncrementalInference.AbstractPriorObservation
     z::T1
     rp::T2
     partial::Tuple{Int, Int, Int} = (3, 4, 5)
@@ -54,7 +54,7 @@ end
 
 Serialization type of `PriorPose3ZRP`.
 """
-Base.@kwdef struct PackedPriorPose3ZRP <: AbstractPackedFactor
+Base.@kwdef struct PackedPriorPose3ZRP <: AbstractPackedObservation
     zdata::PackedSamplableBelief
     rpdata::PackedSamplableBelief
 end
@@ -180,7 +180,7 @@ end
 
 Serialization type of Pose3Pose3XYYaw.
 """
-Base.@kwdef struct PackedPose3Pose3XYYaw <: AbstractPackedFactor
+Base.@kwdef struct PackedPose3Pose3XYYaw <: AbstractPackedObservation
     Z::PackedSamplableBelief
 end
 
@@ -238,7 +238,7 @@ end
 
 Serialization type of Pose3Pose3Rotation.
 """
-Base.@kwdef struct PackedPose3Pose3Rotation <: AbstractPackedFactor
+Base.@kwdef struct PackedPose3Pose3Rotation <: AbstractPackedObservation
     Z::PackedSamplableBelief
 end
 

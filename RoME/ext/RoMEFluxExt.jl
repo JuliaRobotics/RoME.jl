@@ -7,7 +7,7 @@ using Flux
 import Base: convert
 
 import IncrementalInference:
-    CalcFactor, SamplableBelief, AbstractFactor, AbstractPackedFactor
+    CalcFactor, SamplableBelief, AbstractObservation, AbstractPackedObservation
 import IncrementalInference: getSample
 
 import RoME: MixtureFluxPose2Pose2, PackedMixtureFluxPose2Pose2, FluxModelsPose2Pose2
@@ -73,7 +73,7 @@ function MixtureFluxPose2Pose2(
 end
 
 function Base.convert(
-    ::Union{Type{<:AbstractPackedFactor}, Type{<:PackedMixtureFluxPose2Pose2}},
+    ::Union{Type{<:AbstractPackedObservation}, Type{<:PackedMixtureFluxPose2Pose2}},
     obj::MixtureFluxPose2Pose2,
 )
     #
@@ -81,7 +81,7 @@ function Base.convert(
 end
 
 function Base.convert(
-    ::Union{Type{<:AbstractFactor}, Type{<:MixtureFluxPose2Pose2}},
+    ::Union{Type{<:AbstractObservation}, Type{<:MixtureFluxPose2Pose2}},
     obj::PackedMixtureFluxPose2Pose2,
 )
     #
@@ -188,7 +188,7 @@ function FluxModelsPose2Pose2(
 end
 #
 
-# struct MixtureFlux{N,F<:AbstractFactor,S,T}
+# struct MixtureFlux{N,F<:AbstractObservation,S,T}
 #   mixture::Mixture{N,F,S,T}
 #   # special keyword field name used to invoke 'specialSampler' logic
 #   specialSampler::Function 
@@ -206,7 +206,7 @@ end
 
 # # const _IIFListTypes = Union{<:AbstractVector, <:Tuple, <:NTuple}
 
-# function MixtureFlux( F_::AbstractFactor, 
+# function MixtureFlux( F_::AbstractObservation, 
 #                       compList::_IIFListTypes, 
 #                       diversity::Union{<:AbstractVector, <:NTuple, <:DiscreteNonParametric}) 
 #   #
@@ -215,7 +215,7 @@ end
 #   return _populateMixture(mix)
 # end
 
-# MixtureFlux(::Type{F}, w...;kw...) where F <: AbstractFactor = MixtureFlux(F(LA.I), w...;kw...)
+# MixtureFlux(::Type{F}, w...;kw...) where F <: AbstractObservation = MixtureFlux(F(LA.I), w...;kw...)
 
 end # module
 

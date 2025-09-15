@@ -31,7 +31,7 @@ function (cfo::CalcFactor{<:Pose2Point2Range})(rho, xi::ArrayPartition, lm)
     return rho .- norm(lm .- xi.x[1])
 end
 
-Base.@kwdef struct PackedPose2Point2Range <: AbstractPackedFactor
+Base.@kwdef struct PackedPose2Point2Range <: AbstractPackedObservation
     Z::PackedSamplableBelief
 end
 function DFG.pack(d::Pose2Point2Range)

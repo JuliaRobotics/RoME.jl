@@ -41,7 +41,7 @@ end
 
 ## Serialization support
 
-Base.@kwdef struct PackedPose2Point2 <: AbstractPackedFactor
+Base.@kwdef struct PackedPose2Point2 <: AbstractPackedObservation
     Z::PackedSamplableBelief
 end
 

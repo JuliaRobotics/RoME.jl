@@ -46,7 +46,7 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct PackedPose2Pose2 <: AbstractPackedFactor
+Base.@kwdef struct PackedPose2Pose2 <: AbstractPackedObservation
     Z::PackedSamplableBelief
 end
 function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)
