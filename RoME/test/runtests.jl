@@ -9,6 +9,7 @@ using LieGroups
 using LieGroups: TranslationGroup
 # using Manifolds: ProductManifold, SpecialEuclidean, SpecialOrthogonal, TranslationGroup, identity_element
 using DistributedFactorGraphs
+DFG.@usingDFG true
 using Statistics
 using LinearAlgebra
 using Random
