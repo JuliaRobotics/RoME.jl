@@ -1,11 +1,12 @@
 #addprocs(2)
 #@show nprocs()
-
+using RoMETypes
 using RoME
 using Test
 using TensorCast
 import Manifolds
 using LieGroups
+using LieGroups: TranslationGroup
 # using Manifolds: ProductManifold, SpecialEuclidean, SpecialOrthogonal, TranslationGroup, identity_element
 using DistributedFactorGraphs
 using Statistics

@@ -12,14 +12,14 @@ using IncrementalInference
 using RoME
 # import RoME: imuKinematic!
 # import Base: convert
-
+using Random
 using Test
 
 ##
 
 @testset "DERelative INS Kinematic tests" begin
     ##
-
+    Random.seed!(53)
     dt = 0.01
     N = 101
     w_R_b = [1.0 0 0; 0 1 0; 0 0 1]
