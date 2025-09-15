@@ -124,7 +124,7 @@ export generateGraph_Helix2D!, generateGraph_Helix2DSlew!, generateGraph_Helix2D
 
 export warmUpSolverJIT
 
-export @defVariable
+export @defStateType
 
 export
     # camera model -- TODO --separate out

@@ -81,6 +81,6 @@ end
 
 # Still experimental
 # export BearingRange2
-@defVariable BearingRange2 BearingRange_Manifold ArrayPartition(0.0, 0.0)
+@defStateType BearingRange2 BearingRange_Manifold ArrayPartition(0.0, 0.0)
 
 ## ==================================================================================================
