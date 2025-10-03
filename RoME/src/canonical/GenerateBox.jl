@@ -37,7 +37,7 @@ function driveLeg!(
     direction::Symbol;
     graphinit::Bool = true,
     Qd::AbstractArray{<:Real} = [1.0; 1.0],
-    factor::AbstractRelative = Point2Point2(MvNormal(odo, Qd)),
+    factor::AbstractRelativeObservation = Point2Point2(MvNormal(odo, Qd)),
     overridePPE = nothing,
     postpose_cb::Function = (fg_, latestpose) -> (),
 )

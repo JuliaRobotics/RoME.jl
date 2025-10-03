@@ -241,7 +241,7 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef mutable struct PackedInertialPose3 <: AbstractPackedFactor
+Base.@kwdef mutable struct PackedInertialPose3 <: AbstractPackedObservation
     Z::PackedSamplableBelief
     # vecZij::Array{Float64,1} # 3translations, 3rotation, 3 velocities
     # vecCov::Array{Float64,1}
@@ -311,7 +311,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PriorInertialPose3 <: IncrementalInference.AbstractPrior
+mutable struct PriorInertialPose3 <: IncrementalInference.AbstractPriorObservation
     Zi::Distribution
 end
 function getSample(prip3::PriorInertialPose3, N::Int = 1)
@@ -321,7 +321,7 @@ end
 """
 $(TYPEDEF)
 """
-mutable struct PackedPriorInertialPose3 <: AbstractPackedFactor
+mutable struct PackedPriorInertialPose3 <: AbstractPackedObservation
     vecZi::Array{Float64, 1} # 3translations, 3rotation, 3 velocities
     vecCov::Array{Float64, 1}
     dimc::Int

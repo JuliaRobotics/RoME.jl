@@ -38,7 +38,7 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct PackedMutablePose2Pose2Gaussian <: AbstractPackedFactor
+Base.@kwdef struct PackedMutablePose2Pose2Gaussian <: AbstractPackedObservation
     Z::PackedSamplableBelief
     timestamp::Int64 # serialized in millisecond
 end

@@ -40,7 +40,7 @@ $(TYPEDEF)
 
 Serialization type for `GenericProjection`.
 """
-Base.@kwdef struct PackedGenericProjection <: AbstractPackedFactor
+Base.@kwdef struct PackedGenericProjection <: AbstractPackedObservation
     fromtype::String
     totype::String
     cam::Dict{Symbol, Any}

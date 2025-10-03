@@ -50,8 +50,10 @@ import IncrementalInference: getMeasurementParametric
 import IncrementalInference: preambleCache
 import IncrementalInference: InstanceType
 # not sure why this is gives import error
-import DistributedFactorGraphs: compare, @defVariable
+import DistributedFactorGraphs: compare, @defStateType
 import DistributedFactorGraphs: getDimension, getManifold
+
+DFG.@usingDFG true
 
 using OrderedCollections: OrderedDict
 # const AMP = ApproxManifoldProducts
@@ -62,7 +64,7 @@ include("ExportAPI.jl")
 # load the source files
 include("entities/SpecialDefinitions.jl")
 
-#uses DFG v0.10.2 @defVariable for above
+#uses DFG v0.10.2 @defStateType for above
 include("services/FixmeManifolds.jl")
 
 ## More factor types

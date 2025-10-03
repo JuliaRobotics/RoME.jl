@@ -3,7 +3,7 @@ using RoME, Distributions
 
 import IncrementalInference: getSample
 
-mutable struct NorthSouthPartial{T} <: AbstractPrior
+mutable struct NorthSouthPartial{T} <: AbstractPriorObservation
     Z::T
     partial::Tuple{Int}
     NorthSouthPartial() = new()

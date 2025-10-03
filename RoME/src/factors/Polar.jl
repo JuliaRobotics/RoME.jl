@@ -16,7 +16,7 @@ DFG.getManifold(::InstanceType{Polar}) = BearingRange_Manifold
 Prior belief on any Polar related variable.
 """
 Base.@kwdef struct PriorPolar{T1 <: IIF.SamplableBelief, T2 <: IIF.SamplableBelief} <:
-                   IIF.AbstractPrior
+                   IIF.AbstractPriorObservation
     Zrange::T1 = Normal(1, 1)
     Zangle::T2 = Normal(0, 0.1)
 end

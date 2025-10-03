@@ -520,7 +520,7 @@ end
 
 ## serde
 
-struct PackedIMUDeltaFactor{T <: PackedSamplableBelief} <: AbstractPackedFactor
+struct PackedIMUDeltaFactor{T <: PackedSamplableBelief} <: AbstractPackedObservation
     Z::T # NOTE dim is 9 as Δt is not included in covariance
     dt::Float64
     D::Vector{Float64}

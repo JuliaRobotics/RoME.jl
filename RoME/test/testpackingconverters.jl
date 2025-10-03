@@ -156,7 +156,7 @@ if false
         packedv1data = packVariableNodeData(DFG.getSolverData(v1))
         upv1data = unpackVariableNodeData(packedv1data)
         # packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
-        # upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
+        # upv1data = convert(IncrementalInference.State, packedv1data)
 
         @test compareAll(DFG.getSolverData(v1), upv1data, skip = [:variableType; :val])
         @test all(isapprox.(DFG.getState(v1).val, upv1data.val))
@@ -310,7 +310,7 @@ if false
         packedv1data = packVariableNodeData(DFG.getSolverData(v1))
         upv1data = unpackVariableNodeData(packedv1data)
         # global packedv1data = convert(IncrementalInference.PackedVariableNodeData, DFG.getSolverData(v1))
-        # global upv1data = convert(IncrementalInference.VariableNodeData, packedv1data)
+        # global upv1data = convert(IncrementalInference.State, packedv1data)
 
         @test compareAll(DFG.getSolverData(v1), upv1data, skip = [:variableType; :val])
         @test all(isapprox.(DFG.getSolverData(v1).val, upv1data.val))
