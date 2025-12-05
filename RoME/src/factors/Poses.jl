@@ -56,7 +56,7 @@ function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
     a_m = exp(M, getPointIdentity(M), aX)
     b_m = ArrayPartition(a_m.x[1], bRa * a_m.x[2])
 
-    q̂ = Manifolds.compose(M, p, b_m)
+    q̂ = LieGroups.compose(M, p, b_m)
     return vee(M, q, log(M, q, q̂)) # coordinates
 end
 
@@ -70,7 +70,7 @@ function (cf::CalcFactor{<:Pose3Pose3Transform})(p_NX, p, q, Δ)
     ε = getPointIdentity(M)
 
     Δn = compose(M, Δ, exp(M, ε, p_NX))
-    q̂ = Manifolds.compose(M, p, Δn)
+    q̂ = LieGroups.compose(M, p, Δn)
 
     Xc::SVector{6, T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
     return Xc

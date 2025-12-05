@@ -50,14 +50,14 @@ function (cf::CalcFactor{<:VelPose2VelPose2})(X, p, q)
     vee!(M1, pose_res, q1, log(M1, q1, q̂1))
 
     #velocity part
-    dt = Dates.value(cf.fullvariables[2].nstime - cf.fullvariables[1].nstime) * 1e-9
+    dt = DFG.calcDeltatime(cf.fullvariables[1], cf.fullvariables[2])
     X2 = submanifold_component(X, 3)
     p2 = submanifold_component(p, 3)
     q2 = submanifold_component(q, 3)
     # bDXij = TransformUtils.R(-wxi[3])*wDXij
     bDXij = transpose(submanifold_component(p1, 2)) * (q2 .- p2)
 
-    Xpq = log(M1, ϵ1, Manifolds.compose(M1, Manifolds.inv(M1, p1), q1))
+    Xpq = log(M1, ϵ1, LieGroups.compose(M1, LieGroups.inv(M1, p1), q1))
     dx = Vector{Manifolds.number_eltype(X)}(undef, 3)
     vee!(M1, dx, ϵ1, Xpq)
     # calculate the residual

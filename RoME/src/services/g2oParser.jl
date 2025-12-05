@@ -334,7 +334,7 @@ function _writeG2oLinePose3(io, dfg::AbstractDFG, label::Symbol, i::Int, solveKe
 end
 
 function _doG2oLoop(io, dfg, label, i, solveKey)
-    vartype = getVariableType(dfg, label)
+    vartype = getStateKind(dfg, label)
     typename = string(typeof(vartype).name.name)
     # FIXME, HACK, WTF https://github.com/JuliaLang/julia/issues/46871#issuecomment-1318035929
     fnc = getfield(RoME, Symbol(:_writeG2oLine, typename))
@@ -378,7 +378,7 @@ function _writeG2oFactors(
             # only add factors to g2o file once, remove if found
             !(fc in fcts) ? continue : filter!(x -> x != fc, fcts)
             # actually add the factor to the file
-            fnc = getFactorType(dfg, fc)
+            fnc = getObservation(dfg, fc)
             pstr = stringG2o!(dfg, fc, fnc, varIntLabel, uniqVarInt; overwriteMapping)
             println(io, pstr)
         end

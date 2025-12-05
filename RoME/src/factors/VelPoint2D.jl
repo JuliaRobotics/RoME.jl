@@ -10,7 +10,7 @@ function (cfo::CalcFactor{<:VelPoint2VelPoint2})(z, xi, xj)
     res = Vector{eltype(xi)}(undef, 4)
 
     # change in time from microseconds with DynPoint2(ut=1_000_000) to seconds
-    dt = Dates.value(cfo.fullvariables[2].nstime - cfo.fullvariables[1].nstime) * 1e-9     # roughly the intended use of userdata
+    dt = DFG.calcDeltatime(cfo.fullvariables[1], cfo.fullvariables[2])
     # change in psoition Xi \ Xj
     dp = (xj[1:2] .- xi[1:2])
     # change in velocity Xi \ Xj

@@ -338,9 +338,9 @@ function IIF.preambleCache(
     ::IMUDeltaFactor,
 )
     if vars[1] isa VariableCompute{<:Pose3}
-        (timestams = (vars[1].nstime, vars[3].nstime),)
+        (timestamps = (vars[1].nstime, vars[3].nstime),)
     else
-        (timestams = (vars[1].nstime, vars[2].nstime),)
+        (timestamps = (vars[1].nstime, vars[2].nstime),)
     end
 end
 
@@ -373,8 +373,8 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     _q::ArrayPartition{T, Tuple{SMatrix{3, 3, T, 9}, SVector{3, T}, SVector{3, T}}},
     b::SVector{6, T} = zeros(SVector{6, Float64}),
 ) where {T <: Real}
-    p_t = Dates.value(cf.cache.timestams[1]) * 1e-9
-    q_t = Dates.value(cf.cache.timestams[2]) * 1e-9
+    p_t = Dates.value(cf.cache.timestamps[1]) * 1e-9
+    q_t = Dates.value(cf.cache.timestamps[2]) * 1e-9
     p = ArrayPartition(_p.x[1], _p.x[2], _p.x[3], p_t)
     q = ArrayPartition(_q.x[1], _q.x[2], _q.x[3], q_t)
     return cf(Δmeas, p, q, b)
@@ -393,8 +393,8 @@ function (cf::CalcFactor{<:IMUDeltaFactor})(
     },
     b::AbstractVector = zeros(SVector{6, Float64}),
 )
-    p_t = Dates.value(cf.cache.timestams[1]) * 1e-9
-    q_t = Dates.value(cf.cache.timestams[2]) * 1e-9
+    p_t = Dates.value(cf.cache.timestamps[1]) * 1e-9
+    q_t = Dates.value(cf.cache.timestamps[2]) * 1e-9
     p = ArrayPartition(
         SMatrix{3, 3, Float64, 9}(_p.x[1]),
         SVector{3}(_p.x[2]),

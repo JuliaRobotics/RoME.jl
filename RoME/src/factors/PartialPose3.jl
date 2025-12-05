@@ -104,8 +104,8 @@ p0 = identity_element(M)
 ```
 
 """
-struct Pose3Pose3XYYaw{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
-    Z::T
+@tags struct Pose3Pose3XYYaw{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
+    Z::T & DFG.@packed
     # partial::Tuple{Int,Int,Int,Int,Int}
     partial::Tuple{Int, Int, Int}
 end
@@ -159,11 +159,11 @@ end
 
 # wRpψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTp.parts[2])).Y )[1:2,1:2]
 # wTp_2  = ProductRepr(wTp.parts[1][1:2],   wRpψ_2)
-# wTqhat = Manifolds.compose(M2, wTp_2, exp(M2, e2, X))
+# wTqhat = LieGroups.compose(M2, wTp_2, exp(M2, e2, X))
 
 # wRqψ_2  = Rotations.RotZ( TU.convert(Euler,  TU.SO3(wTq.parts[2])).Y )[1:2,1:2]
 # wTq_2  = ProductRepr(wTq.parts[1][1:2],   wRqψ_2)
-# qhatTq = Manifolds.compose(M2, inv(M2, wTqhat), wTq_2)
+# qhatTq = LieGroups.compose(M2, inv(M2, wTqhat), wTq_2)
 
 # #TODO allocate for vee! see Manifolds #412, fix for AD
 # Xc = zeros(3)
@@ -175,22 +175,22 @@ end
 # jXjhat = SE2(wXj[[1;2;6]]) \ wXjhat
 # return se2vee(jXjhat)
 
-"""
-    $TYPEDEF
+# """
+#     $TYPEDEF
 
-Serialization type of Pose3Pose3XYYaw.
-"""
-Base.@kwdef struct PackedPose3Pose3XYYaw <: AbstractPackedObservation
-    Z::PackedSamplableBelief
-end
+# Serialization type of Pose3Pose3XYYaw.
+# """
+# Base.@kwdef struct PackedPose3Pose3XYYaw <: AbstractPackedObservation
+#     Z::PackedSamplableBelief
+# end
 
-function DFG.unpack(d::PackedPose3Pose3XYYaw)
-    return Pose3Pose3XYYaw(convert(SamplableBelief, d.Z))
-end
+# function DFG.unpack(d::PackedPose3Pose3XYYaw)
+#     return Pose3Pose3XYYaw(convert(SamplableBelief, d.Z))
+# end
 
-function DFG.pack(d::Pose3Pose3XYYaw)
-    return PackedPose3Pose3XYYaw(convert(PackedSamplableBelief, d.Z))
-end
+# function DFG.pack(d::Pose3Pose3XYYaw)
+#     return PackedPose3Pose3XYYaw(convert(PackedSamplableBelief, d.Z))
+# end
 
 function compare(a::Pose3Pose3XYYaw, b::Pose3Pose3XYYaw; tol::Float64 = 1e-10)
     TP = true
@@ -209,8 +209,8 @@ end
 
 Partial rotation only factor between two Pose3 variables.
 """
-struct Pose3Pose3Rotation{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
-    Z::T
+@tags struct Pose3Pose3Rotation{T <: SamplableBelief} <: IIF.AbstractManifoldMinimize
+    Z::T & DFG.@packed
     partial::Tuple{Int, Int, Int}
 end
 Pose3Pose3Rotation(z::SamplableBelief) = Pose3Pose3Rotation(z, (4, 5, 6))
@@ -233,22 +233,22 @@ function (cfo::CalcFactor{<:Pose3Pose3Rotation})(Xm, wTp, wTq)
     return Xc_m - Xc
 end
 
-"""
-    $TYPEDEF
+# """
+#     $TYPEDEF
 
-Serialization type of Pose3Pose3Rotation.
-"""
-Base.@kwdef struct PackedPose3Pose3Rotation <: AbstractPackedObservation
-    Z::PackedSamplableBelief
-end
+# Serialization type of Pose3Pose3Rotation.
+# """
+# Base.@kwdef struct PackedPose3Pose3Rotation <: AbstractPackedObservation
+#     Z::PackedSamplableBelief
+# end
 
-function DFG.unpack(d::PackedPose3Pose3Rotation)
-    return Pose3Pose3Rotation(convert(SamplableBelief, d.Z))
-end
+# function DFG.unpack(d::PackedPose3Pose3Rotation)
+#     return Pose3Pose3Rotation(convert(SamplableBelief, d.Z))
+# end
 
-function DFG.pack(d::Pose3Pose3Rotation)
-    return PackedPose3Pose3Rotation(convert(PackedSamplableBelief, d.Z))
-end
+# function DFG.pack(d::Pose3Pose3Rotation)
+#     return PackedPose3Pose3Rotation(convert(PackedSamplableBelief, d.Z))
+# end
 
 function compare(a::Pose3Pose3Rotation, b::Pose3Pose3Rotation; tol::Float64 = 1e-10)
     TP = true

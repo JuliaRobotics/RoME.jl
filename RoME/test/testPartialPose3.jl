@@ -56,7 +56,7 @@ end
 
     sf = sampleFactor(fg, :x1f2, N)
 
-    Mzrp = f1 |> getFactorType |> getManifold
+    Mzrp = f1 |> getObservation |> getManifold
     zrp0 = identity_element(Mzrp)
     mu = vee(Mzrp, zrp0, log(Mzrp, zrp0, mean(Mzrp, sf)))
     # mu = getCoordinates(Pose3, mean(Mzrp, sf)) # M # starting to improve partials, getManifold of partial factor returns whatever that manifold is
@@ -440,7 +440,7 @@ end
         wTx1 = getPointIdentity(Pose3)
         wTx2 = ArrayPartition(xyz_rpy[1:3], Matrix(RotXYZ(xyz_rpy[4:6]...)))
 
-        x1Tx2 = Manifolds.compose(M3, inv(M3, wTx1), wTx2)
+        x1Tx2 = LieGroups.compose(M3, inv(M3, wTx1), wTx2)
         X = log(M3, ϵ3, x1Tx2)
         Xc = vee(M3, ϵ3, X)
 

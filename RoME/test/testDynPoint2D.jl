@@ -2,6 +2,7 @@
 
 using RoME
 using Test
+using Dates
 # using RoMEPlotting,
 # , IncrementalInference, Distributions
 # using KernelDensityEstimate #, KernelDensityEstimatePlotting
@@ -12,9 +13,9 @@ using Test
     global fg = initfg()
 
     # add two point locations
-    global v0 = addVariable!(fg, :x0, DynPoint2; nanosecondtime = 0)
-
-    global v1 = addVariable!(fg, :x1, DynPoint2; nanosecondtime = 10^9)
+    global v0 = addVariable!(fg, :x0, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(0)))
+    
+    global v1 = addVariable!(fg, :x1, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(10^9)))
 
     # Prior factor as boundary condition
     global pp0 = DynPoint2VelocityPrior(
@@ -52,9 +53,9 @@ end
     global fg = initfg()
 
     # add two point locations
-    global v0 = addVariable!(fg, :x0, DynPoint2; nanosecondtime = 0)
-    global v1 = addVariable!(fg, :x1, DynPoint2; nanosecondtime = 10^9)
-    global v2 = addVariable!(fg, :x2, DynPoint2; nanosecondtime = 2 * 10^9)
+    global v0 = addVariable!(fg, :x0, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(0)))
+    global v1 = addVariable!(fg, :x1, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(10^9)))
+    global v2 = addVariable!(fg, :x2, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(2 * 10^9)))
 
     # Prior factor as boundary condition
     global pp0 = DynPoint2VelocityPrior(
@@ -106,13 +107,13 @@ end
 
     global fg = initfg()
 
-    addVariable!(fg, :x1, DynPoint2; nanosecondtime = 0)
+    addVariable!(fg, :x1, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(0)))
     global pp = DynPoint2VelocityPrior(MvNormal(pμ, pσ))
     addFactor!(fg, [:x1;], pp; graphinit = false)
 
     initAll!(fg)
 
-    addVariable!(fg, :x2, DynPoint2; nanosecondtime = 1_000_000_000)
+    addVariable!(fg, :x2, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(1_000_000_000)))
     global dpμ = [10.0; 0; 0; 0]
     global dpσ = Matrix(Diagonal([1.0; 1; 0.5; 0.01] .^ 2))
     global vp = VelPoint2VelPoint2(MvNormal(dpμ, dpσ))

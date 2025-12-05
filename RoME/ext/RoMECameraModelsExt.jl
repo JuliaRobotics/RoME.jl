@@ -11,7 +11,7 @@ using RecursiveArrayTools: ArrayPartition
 
 import Base: convert
 import IncrementalInference:
-    AbstractDFG, getFactorType, getVariable, getSolverData, CalcFactor, ls
+    AbstractDFG, getObservation, getVariable, getSolverData, CalcFactor, ls
 import RoME: GenericProjection, solveMultiviewLandmark!
 
 function Base.convert(::Type{<:CameraCalibration}, dict::Dict)
@@ -73,7 +73,7 @@ function solveMultiviewLandmark!(
     M = SpecialEuclideanGroup(3)
     flbs = ls(dfg, lmlb)
     # fcs = getFactor.(dfg, flbs)
-    # fcd = getFactorType.(fcs)
+    # fcd = getObservation.(fcs)
 
     function projectPointFrom(cam, c_H_w, w_Ph)
         c_Ph = c_H_w * w_Ph |> SVector{4}
@@ -108,9 +108,9 @@ function solveMultiviewLandmark!(
         union!(vlbs, [vl;])
 
         # TODO apply camera intrinsic calibration
-        obs_ = _undistort(cam, getFactorType(dfg, fl).Z.μ)
+        obs_ = _undistort(cam, getObservation(dfg, fl).Z.μ)
         obs = CameraModels.PixelIndex(obs_...)
-        # obs = CameraModels.PixelIndex(getFactorType(dfg, fl).Z.μ...)
+        # obs = CameraModels.PixelIndex(getObservation(dfg, fl).Z.μ...)
         push!(_c_Xi, obs)
     end
     cost_(w_Lh) = cost(cam, _c_Xi, _w_P_ci, SVector(w_Lh...))

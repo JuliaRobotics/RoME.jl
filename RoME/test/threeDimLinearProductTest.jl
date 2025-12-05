@@ -177,7 +177,7 @@ end
     # X here is not within the injectivity radius of G, therefore the log will not be valid and the results wrong
     # p = deepcopy(ϵ)
     # q = IIF.getPoint(Pose3, [10;0;0;pi;pi;pi])
-    # X = Manifolds.hat(G, ϵ, [10.,0,0,pi,pi,pi])
+    # X = LieGroups.hat(G, ϵ, [10.,0,0,pi,pi,pi])
     # res = calcFactorResidual(fg, :x1x2f1, X, p, q)
     # @test norm(res) < 1e-10
 

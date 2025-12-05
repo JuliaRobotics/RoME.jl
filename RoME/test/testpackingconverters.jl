@@ -1,8 +1,10 @@
 # test packing functions
 
 using RoME
+using RoMETypes
 using Test
 using DistributedFactorGraphs
+using JSON
 # import DistributedFactorGraphs: packVariableNodeData, unpackVariableNodeData
 
 prior_types = [
@@ -62,18 +64,18 @@ observation_types = [prior_types; relative_types]
 
 function test_packing(T)
     try
-        d = getDimension(getManifold(T)) > 0
+        d = getDimension(getManifold(T))
 
         Z = MvNormal(zeros(d), diagm(ones(d)))
-        # create a factor
-        f = T(Z)
-        # pack it
-        packed = pack(f)
-        # unpack it
-        unpacked = unpack(packed)
+        # create a observation
+        observation = T(Z)
 
+        from_fac = FactorDFG((:x1, :x2), observation)
+        jstr = JSON.json(from_fac; style = DFG.DFGJSONStyle())
+        to_fac = JSON.parse(jstr, FactorDFG; style = DFG.DFGJSONStyle())
+        
         # check if the original and unpacked are equal
-        return ==(f, unpacked)
+        return from_fac == to_fac
     catch e
         return e
     end

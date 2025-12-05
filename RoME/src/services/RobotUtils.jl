@@ -50,7 +50,7 @@ function getLastPoses(
 )::Vector{Symbol}
     #
     # filter according to pose label
-    syms = filter(l -> occursin(filterLabel, string(l)), getAddHistory(dfg))
+    syms = filter(l -> occursin(filterLabel, string(l)), DFG.getAddHistory(dfg))
 
     # return the last segment of syms
     len = length(syms)
@@ -158,10 +158,10 @@ function replaceFactorPose3Pose3Mean!(
 )
     fct = getFactor(dfg, flb)
     vars = getVariableOrder(fct)
-    mn, sig = getMeasurementParametric(getFactorType(fct))
+    mn, sig = getMeasurementParametric(getObservation(fct))
     mn_ = homography_to_coordinates(getManifold(Pose3), float.(H))
     @info "Replace factor with new mean" string(mn') string(mn_')
-    tags = IIF.getTags(fct) |> collect
+    tags = DFG.listTags(fct)
     deleteFactor!(dfg, flb)
     return addFactor!(dfg, vars, Pose3Pose3(MvNormal(mn_, sig)); tags, graphinit)
 end

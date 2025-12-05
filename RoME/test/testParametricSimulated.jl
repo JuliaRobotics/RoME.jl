@@ -177,7 +177,7 @@ end
         :x2,
         r"x\d+",
         Pose2,
-        getFactorType(fg, :x2x3f1);
+        getObservation(fg, :x2x3f1);
         destPrefix = :x,
         srcNumber = 2,
     )
