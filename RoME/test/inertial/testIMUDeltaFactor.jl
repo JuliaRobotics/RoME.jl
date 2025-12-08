@@ -245,7 +245,7 @@ end
     foreach(
         enumerate(Nanosecond.(round.(Int, timestamps[[1, end]] * 10^9))),
     ) do (i, nanosecondtime)
-        return addVariable!(fg, Symbol("x", i - 1), RotVelPos; nanosecondtime)
+        return addVariable!(fg, Symbol("x", i - 1), RotVelPos; timestamp = DFG.Timestamp(nanosecondtime))
     end
 
     addFactor!(

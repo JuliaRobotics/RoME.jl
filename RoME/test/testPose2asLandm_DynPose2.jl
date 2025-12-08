@@ -49,7 +49,7 @@ mkdir(imgdir)
 global N = 100
 global fg = initfg()
 
-addVariable!(fg, :x0, DynPose2; nanosecondtime = 0)
+addVariable!(fg, :x0, DynPose2; timestamp = DFG.Timestamp(Nanosecond(0)))
 addFactor!(
     fg,
     [:x0],
@@ -91,7 +91,7 @@ global pl = drawPosesLandms(fg; spscale = 0.1)#,   meanmax=:mean,xmin=-3,xmax=3,
 Gadfly.draw(PNG(joinpath(imgdir, "hist_x$(psid).png"), 30cm, 25cm), pl)
 
 # pose :x1
-addVariable!(fg, :x1, DynPose2; nanosecondtime = 1000_000_000)
+addVariable!(fg, :x1, DynPose2; timestamp = DFG.Timestamp(Nanosecond(1000_000_000)))
 addFactor!(
     fg,
     [:x0; :x1],
@@ -143,7 +143,7 @@ global pl = drawPosesLandms(fg; spscale = 0.1)#,   meanmax=:mean,xmin=-3,xmax=3,
 Gadfly.draw(PNG(joinpath(imgdir, "hist_x$(psid).png"), 30cm, 25cm), pl)
 
 # pose :x2
-addVariable!(fg, :x2, DynPose2; nanosecondtime = 2000_000_000)
+addVariable!(fg, :x2, DynPose2; timestamp = DFG.Timestamp(Nanosecond(2000_000_000)))
 addFactor!(
     fg,
     [:x1; :x2],
@@ -183,7 +183,7 @@ global pl = drawPosesLandms(fg; spscale = 0.1)#,   meanmax=:mean,xmin=-3,xmax=3,
 Gadfly.draw(PNG(joinpath(imgdir, "hist_x$(psid).png"), 30cm, 25cm), pl)
 
 # gtp[:x3] = [2.0;0;0]
-addVariable!(fg, :x3, DynPose2; nanosecondtime = 3000_000_000)
+addVariable!(fg, :x3, DynPose2; timestamp = DFG.Timestamp(Nanosecond(3000_000_000)))
 addFactor!(
     fg,
     [:x2; :x3],
@@ -219,7 +219,7 @@ Gadfly.draw(PNG(joinpath(imgdir, "hist_x$(psid).png"), 30cm, 25cm), pl)
 
 # pose :x4
 # gtp[:x4] = [2.5;0;0]
-addVariable!(fg, :x4, DynPose2; nanosecondtime = 4000_000_000)
+addVariable!(fg, :x4, DynPose2; timestamp = DFG.Timestamp(Nanosecond(4000_000_000)))
 addFactor!(
     fg,
     [:x3; :x4],
@@ -266,7 +266,7 @@ Gadfly.draw(PNG(joinpath(imgdir, "hist_x$(psid).png"), 30cm, 25cm), pl)
 
 # pose :x5
 # gtp[:x5] = [3.0;0;0]
-addVariable!(fg, :x5, DynPose2; nanosecondtime = 5000_000_000)
+addVariable!(fg, :x5, DynPose2; timestamp = DFG.Timestamp(Nanosecond(5000_000_000)))
 addFactor!(
     fg,
     [:x4; :x5],
@@ -301,7 +301,7 @@ Gadfly.draw(PNG(joinpath(imgdir, "hist_x$(psid).png"), 30cm, 25cm), pl)
 
 # pose :x6
 # gtp[:x6] = [3.0;0;0]
-addVariable!(fg, :x6, DynPose2; nanosecondtime = 6000_000_000)
+addVariable!(fg, :x6, DynPose2; timestamp = DFG.Timestamp(Nanosecond(6000_000_000)))
 addFactor!(
     fg,
     [:x5; :x6],

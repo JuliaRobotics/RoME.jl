@@ -12,7 +12,7 @@ using TensorCast
     fg = initfg()
 
     # add first pose locations
-    addVariable!(fg, :x0, DynPose2; nanosecondtime = 0)
+    addVariable!(fg, :x0, DynPose2; timestamp = DFG.Timestamp(Nanosecond(0)))
 
     # Prior factor as boundary condition
     pp0 = DynPose2VelocityPrior(
@@ -24,7 +24,7 @@ using TensorCast
     # initialize the first pose
     IncrementalInference.doautoinit!(fg, [getVariable(fg, :x0);])
 
-    addVariable!(fg, :x1, DynPose2; nanosecondtime = 1000_000_000)
+    addVariable!(fg, :x1, DynPose2; timestamp = DFG.Timestamp(Nanosecond(1000_000_000)))
 
     # conditional likelihood between Dynamic Point2
     dp2dp2 = VelPose2VelPose2(
@@ -114,7 +114,7 @@ end
     fg = initfg()
 
     # add first pose locations
-    addVariable!(fg, :x0, DynPose2; nanosecondtime = 0)
+    addVariable!(fg, :x0, DynPose2; timestamp = DFG.Timestamp(Nanosecond(0)))
 
     # Prior factor as boundary condition
     pp0 = DynPose2VelocityPrior(
@@ -127,7 +127,7 @@ end
     k = 0
     for sy in Symbol[Symbol("x$i") for i = 1:10]
         k += 1
-        addVariable!(fg, sy, DynPose2; nanosecondtime = 1000_000_000 * k)
+        addVariable!(fg, sy, DynPose2; timestamp = DFG.Timestamp(Nanosecond(1000_000_000 * k)))
 
         # conditional likelihood between Dynamic Point2
         dp2dp2 = VelPose2VelPose2(
@@ -244,7 +244,7 @@ end
     global fg = initfg()
 
     # add first pose locations
-    addVariable!(fg, :x0, DynPose2; nanosecondtime = 0)
+    addVariable!(fg, :x0, DynPose2; timestamp = DFG.Timestamp(Nanosecond(0)))
 
     # Prior factor as boundary condition
     global pp0 = DynPose2VelocityPrior(
@@ -253,7 +253,7 @@ end
     )
     addFactor!(fg, [:x0;], pp0)
 
-    addVariable!(fg, :x1, DynPose2; nanosecondtime = 1000_000_000)
+    addVariable!(fg, :x1, DynPose2; timestamp = DFG.Timestamp(Nanosecond(1000_000_000)))
 
     global pp0 = DynPose2VelocityPrior(
         MvNormal([1.0; 0.0; pi / 2], Matrix(Diagonal([0.01; 0.01; 0.001] .^ 2))),

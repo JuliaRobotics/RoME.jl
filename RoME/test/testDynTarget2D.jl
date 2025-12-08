@@ -14,7 +14,7 @@ addFactor!(
     [:x1],
     PriorPose2(MvNormal([0.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
 )
-addVariable!(fg, :l1, DynPoint2; nanosecondtime = 0)
+addVariable!(fg, :l1, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(0)))
 addFactor!(fg, [:x1; :l1], br)
 
 addVariable!(fg, :x2, Pose2)
@@ -23,7 +23,7 @@ addFactor!(
     [:x2],
     PriorPose2(MvNormal([10.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
 )
-addVariable!(fg, :l2, DynPoint2; nanosecondtime = 1_000_000_000)
+addVariable!(fg, :l2, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(1_000_000_000)))
 addFactor!(fg, [:l1; :l2], cvf)
 addFactor!(fg, [:x2; :l2], br)
 
@@ -33,7 +33,7 @@ addFactor!(
     [:x3],
     PriorPose2(MvNormal([20.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
 )
-addVariable!(fg, :l3, DynPoint2; nanosecondtime = 2_000_000_000)
+addVariable!(fg, :l3, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(2_000_000_000)))
 addFactor!(fg, [:l2; :l3], cvf)
 addFactor!(fg, [:x3; :l3], br)
 
@@ -43,7 +43,7 @@ addFactor!(
     [:x4],
     PriorPose2(MvNormal([30.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
 )
-addVariable!(fg, :l4, DynPoint2; nanosecondtime = 3_000_000_000)
+addVariable!(fg, :l4, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(3_000_000_000)))
 addFactor!(fg, [:l3; :l4], cvf)
 addFactor!(fg, [:x4; :l4], br)
 
@@ -74,7 +74,7 @@ addFactor!(
     [:x1],
     PriorPose2(MvNormal([0.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
 )
-addVariable!(fg, :l1, DynPoint2; nanosecondtime = 0)
+addVariable!(fg, :l1, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(0)))
 addFactor!(fg, [:x1; :l1], br)
 
 addVariable!(fg, :x2, Pose2)
@@ -83,7 +83,7 @@ addFactor!(
     [:x2],
     PriorPose2(MvNormal([10.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
 )
-addVariable!(fg, :l2, DynPoint2; nanosecondtime = 1_000_000_000)
+addVariable!(fg, :l2, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(1_000_000_000)))
 addFactor!(fg, [:l1; :l2], cvf)
 addFactor!(fg, [:x2; :l2], br)
 
@@ -93,7 +93,7 @@ addFactor!(
     [:x3],
     PriorPose2(MvNormal([20.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
 )
-addVariable!(fg, :l3, DynPoint2; nanosecondtime = 2_000_000_000)
+addVariable!(fg, :l3, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(2_000_000_000)))
 addFactor!(fg, [:l2; :l3], cvf)
 addFactor!(fg, [:x3; :l3], br)
 
@@ -103,7 +103,7 @@ addFactor!(
     [:x4],
     PriorPose2(MvNormal([30.0; 0; 0], Matrix(Diagonal([0.1; 0.1; 0.05] .^ 2)))),
 )
-addVariable!(fg, :l4, DynPoint2; nanosecondtime = 3_000_000_000)
+addVariable!(fg, :l4, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(3_000_000_000)))
 addFactor!(fg, [:l3; :l4], cvf)
 addFactor!(fg, [:x4; :l4], br)
 
