@@ -4,7 +4,7 @@ using RoME
 using Test
 using TensorCast
 using DistributedFactorGraphs
-using Manifolds: hat
+using LieGroups: hat
 
 ##
 
@@ -191,9 +191,9 @@ end
     ## complete the unit test
 
     points = getPoints(getBelief(fg, :x1))
-    mean(SpecialEuclidean(2), points)
+    mean(SpecialEuclideanGroup(2; variant = :right), points)
 
-    @cast pts[j, i] := getCoordinates.(Pose2, points)[i][j]
+    @cast pts[j, i] := DFG.getCoordinates.(Pose2, points)[i][j]
     pts = collect(pts)
     pts[1, :] .-= 10.0
 
@@ -260,9 +260,9 @@ end
     tree = solveTree!(fg)
 
     points = getPoints(getBelief(fg, :x1))
-    mean(SpecialEuclidean(2), points)
+    mean(SpecialEuclideanGroup(2; variant = :right), points)
 
-    @cast pts[j, i] := getCoordinates.(Pose2, points)[i][j]
+    @cast pts[j, i] := DFG.getCoordinates.(Pose2, points)[i][j]
     pts = collect(pts)
 
     pts[1, :] .+= 10.0

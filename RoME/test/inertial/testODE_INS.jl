@@ -73,12 +73,12 @@ end
     fg = initfg()
 
     # the starting points and "0 seconds"
-    v0 = addVariable!(fg, :w_P0, RotVelPos; timestamp = DateTime(2000, 1, 1, 0, 0, 0))
+    v0 = addVariable!(fg, :w_P0, RotVelPos; timestamp = DFG.Timestamp(DateTime(2000, 1, 1, 0, 0, 0), tz"UTC"))
     v1 = addVariable!(
         fg,
         :w_P1,
         RotVelPos;
-        timestamp = DateTime(2000, 1, 1, 0, 0, dt * (N - 1)),
+        timestamp = DFG.Timestamp(DateTime(2000, 1, 1, 0, 0, dt * (N - 1)), tz"UTC"),
     )
     # `accurate_time = trunc(getDatetime(var), Second) + (1e-9*getNstime(var) % 1)`
 
