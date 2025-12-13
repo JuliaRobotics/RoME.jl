@@ -3,12 +3,12 @@
 """
 $(TYPEDEF)
 """
-mutable struct DynPose2VelocityPrior{T1, T2} <: IncrementalInference.AbstractPriorObservation where {
+@tags mutable struct DynPose2VelocityPrior{T1, T2} <: IncrementalInference.AbstractPriorObservation where {
     T1 <: IIF.SamplableBelief,
     T2 <: IIF.SamplableBelief,
 }
-    Zpose::T1
-    Zvel::T2
+    Zpose::T1 & DFG.@packed
+    Zvel::T2 & DFG.@packed
 end
 function DynPose2VelocityPrior(
     z1::T1,
@@ -92,26 +92,6 @@ function compare(a::DynPose2VelocityPrior, b::DynPose2VelocityPrior)::Bool
 end
 
 ## Packing types
-
-"""
-$(TYPEDEF)
-"""
-Base.@kwdef struct PackedDynPose2VelocityPrior <: AbstractPackedObservation
-    strpose::PackedSamplableBelief
-    strvel::PackedSamplableBelief
-end
-
-function convert(::Type{PackedDynPose2VelocityPrior}, d::DynPose2VelocityPrior)
-    return PackedDynPose2VelocityPrior(
-        convert(PackedSamplableBelief, d.Zpose),
-        convert(PackedSamplableBelief, d.Zvel),
-    )
-end
-function convert(::Type{DynPose2VelocityPrior}, d::PackedDynPose2VelocityPrior)
-    posedistr = convert(SamplableBelief, d.strpose)
-    veldistr = convert(SamplableBelief, d.strvel)
-    return DynPose2VelocityPrior(posedistr, veldistr)
-end
 
 """
 $(TYPEDEF)

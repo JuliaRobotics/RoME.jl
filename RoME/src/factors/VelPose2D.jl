@@ -122,22 +122,14 @@ function compare(a::VelPose2VelPose2, b::VelPose2VelPose2; tol::Float64 = 1e-10)
     return TP
 end
 
-"""
-$(TYPEDEF)
-"""
-Base.@kwdef struct PackedVelPose2VelPose2 <: AbstractPackedObservation
-    Zpose::PackedSamplableBelief
-    Zvel::PackedSamplableBelief
+@tags struct PackedVelPose2VelPose2 <: AbstractPackedObservation
+    Zpose & DFG.@packed
+    Zvel & DFG.@packed
 end
 
-function convert(::Type{PackedVelPose2VelPose2}, d::VelPose2VelPose2)
-    return PackedVelPose2VelPose2(
-        convert(PackedSamplableBelief, d.Zpose.Z),
-        convert(PackedSamplableBelief, d.Zvel),
-    )
+function DFG.pack(d::VelPose2VelPose2)
+    return PackedVelPose2VelPose2(d.Zpose.Z, d.Zvel)
 end
-function convert(::Type{VelPose2VelPose2}, d::PackedVelPose2VelPose2)
-    posediZ = convert(SamplableBelief, d.Zpose)
-    veldiZ = convert(SamplableBelief, d.Zvel)
-    return VelPose2VelPose2(posediZ, veldiZ)
+function DFG.unpack(d::PackedVelPose2VelPose2)
+    return VelPose2VelPose2(d.Zpose, d.Zvel)
 end

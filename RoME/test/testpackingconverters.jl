@@ -152,7 +152,7 @@ if false
         # DFG.getSolverData(f1)
         # unpackeddata
 
-        @test DFG.compare(DFG.getSolverData(f1), unpackeddata)
+        @test DFG.compare(DFG.getState(f1), unpackeddata)
 
         # TODO: https://github.com/JuliaRobotics/DistributedFactorGraphs.jl/issues/44
         packedv1data = packVariableNodeData(DFG.getSolverData(v1))

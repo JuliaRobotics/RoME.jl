@@ -86,7 +86,7 @@ function parseG2oInstruction!(
         variable = addVariable!(fg, poseId, Pose3)
         if initialize
             # initVariable!(fg, poseId, MvNormal(p, cov), :parametric)
-            vnd = getSolverData(variable, :parametric)
+            vnd = getState(variable, :parametric)
             vnd.val[1] = p
             vnd.bw .= cov
         end

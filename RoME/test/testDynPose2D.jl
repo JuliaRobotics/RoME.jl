@@ -1,6 +1,8 @@
 using RoME
 using Test
 using TensorCast
+using Dates
+using DistributedFactorGraphs.JSON
 
 ##
 
@@ -86,21 +88,22 @@ end
         MvNormal(zeros(3), Matrix(Diagonal([0.01; 0.01; 0.001] .^ 2))),
         MvNormal([10.0; 0], Matrix(Diagonal([0.1; 0.1] .^ 2))),
     )
+    from_fac = FactorDFG((:x1,), pp0)
+    jstr = JSON.json(from_fac; style = DFG.DFGJSONStyle())
+    to_fac = JSON.parse(jstr, FactorDFG; style = DFG.DFGJSONStyle())
+    # check if the original and unpacked are equal
+    @test from_fac == to_fac
 
-    pp = convert(PackedDynPose2VelocityPrior, pp0)
-    ppu = convert(DynPose2VelocityPrior, pp)
-
-    @test RoME.compare(pp0, ppu)
-
+    #
     dp2dp2 = VelPose2VelPose2(
         MvNormal([10.0; 0; 0], Matrix(Diagonal([0.01; 0.01; 0.001] .^ 2))),
         MvNormal([0.0; 0], Matrix(Diagonal([0.1; 0.1] .^ 2))),
     )
-
-    pp = convert(PackedVelPose2VelPose2, dp2dp2)
-    ppu = convert(VelPose2VelPose2, pp)
-
-    @test RoME.compare(dp2dp2, ppu)
+    from_fac = FactorDFG((:x1, :x2), dp2dp2)
+    jstr = JSON.json(from_fac; style = DFG.DFGJSONStyle())
+    to_fac = JSON.parse(jstr, FactorDFG; style = DFG.DFGJSONStyle())
+    # check if the original and unpacked are equal
+    @test from_fac == to_fac
 
     ##
 
