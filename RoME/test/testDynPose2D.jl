@@ -179,7 +179,7 @@ end
 
     ##
 
-    x5 = getPPE(getVariable(fg, :x5)).suggested
+    x5 = IIF.calcMeanMaxSuggested(getVariable(fg, :x5)).suggested
     # x5 = KDE.getKDEMean(getBelief(getVariable(fg, :x5)))
 
     @test abs(x5[1]) < 1.5

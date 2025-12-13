@@ -82,7 +82,7 @@ function generateGraph_Helix2D!(
 
     # select the starting point
     _μ0 = μ0
-    # @show _μ0 = 1 == bidx ? μ0 : getPPE(dfg, lastpose, refKey).suggested
+    # @show _μ0 = 1 == bidx ? μ0 : calcMeanMaxSuggested(dfg, lastpose, refKey).suggested
     Tμ = SE2(_μ0 - [0; 0; pi / 2]) # TODO update to Manifolds.jl
 
     # current end pose count for number of turns

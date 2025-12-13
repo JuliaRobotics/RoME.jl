@@ -8,6 +8,7 @@ using LieGroups
 using DocStringExtensions
 using Optim
 using RecursiveArrayTools: ArrayPartition
+using DistributedFactorGraphs
 
 import Base: convert
 import IncrementalInference:

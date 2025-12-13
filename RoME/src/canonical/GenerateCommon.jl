@@ -64,6 +64,7 @@ function _addPoseCanonical!(
 
     # store simulated PPE for future use
     # ppe = DFG.MeanMaxPPE(refKey, simPPE, simPPE, simPPE)
+    #FIXME PPE replacement
     doRef ? setPPE!(v_n, refKey, typeof(simPPE), simPPE) : nothing
 
     # user callback in case something more needs to be passed down

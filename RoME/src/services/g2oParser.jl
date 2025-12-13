@@ -318,13 +318,13 @@ end
 
 function _writeG2oLinePose2(io, dfg::AbstractDFG, label::Symbol, i::Int, solveKey::Symbol)
     # println("trying VERTEX_SE2")
-    (x, y, θ) = getPPESuggested(dfg, label, solveKey)
+    (x, y, θ) = IIF.calcMeanMaxSuggested(dfg, label, solveKey).suggested
     return write(io, "VERTEX_SE2 $i $x $y $θ\n")
 end
 
 function _writeG2oLinePose3(io, dfg::AbstractDFG, label::Symbol, i::Int, solveKey::Symbol)
     # println("WHAT IS GOING ON")
-    Xc = getPPESuggested(dfg, label, solveKey)
+    Xc = IIF.calcMeanMaxSuggested(dfg, label, solveKey).suggested
     p = getPoint(Pose3, Xc)
     x, y, z = p.x[1]
     R = p.x[2]

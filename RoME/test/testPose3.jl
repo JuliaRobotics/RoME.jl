@@ -136,7 +136,7 @@ end
         ArrayPartition([0, 2.0, 0], [0 -1 0; 1 0 0; 0 0 1.0]),
         atol = 1e-6,
     )
-    @test isapprox(getPPESuggested(fg, :bRa, :parametric), [0, 0, -0.1], atol = 1e-6)
+    @test isapprox(IIF.calcMeanMaxSuggested(fg, :bRa, :parametric).suggested, [0, 0, -0.1], atol = 1e-6)
 
     # Non-parametric is not working yet because
     # bRa cannot be initialized and solveGraph!(fg) gives an error
@@ -169,5 +169,5 @@ end
         ArrayPartition([0, 2.0, 0], [0 -1 0; 1 0 0; 0 0 1.0]),
         atol = 1e-1,
     )
-    @test isapprox(getPPESuggested(fg, :bRa), [0, 0, -0.1], atol = 1e-1)
+    @test isapprox(IIF.calcMeanMaxSuggested(fg, :bRa).suggested, [0, 0, -0.1], atol = 1e-1)
 end

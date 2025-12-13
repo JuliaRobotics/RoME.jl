@@ -40,7 +40,7 @@ using Test
 
     # piggy back test on PPE for parametric
     @test all(
-        getPPE.(fg, [:x0; :x1; :x2], :parametric) .|>
+        IIF.calcMeanMaxSuggested.(fg, [:x0; :x1; :x2], :parametric) .|>
         s -> isapprox(s.suggested[3], pi / 2; atol = 1e-6),
     )
 

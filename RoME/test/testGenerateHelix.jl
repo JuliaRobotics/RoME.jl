@@ -13,15 +13,15 @@ using RoME
 
     ##
 
-    @test isapprox([0; 0], getPPE(fg, :x0, :simulated).suggested, atol = 1e-3)
-    @test isapprox([15; 0], getPPE(fg, :x1, :simulated).suggested, atol = 1e-3)
-    @test isapprox([15; 15], getPPE(fg, :x2, :simulated).suggested, atol = 1e-3)
-    @test isapprox([5; 15], getPPE(fg, :x3, :simulated).suggested, atol = 1e-3)
-    @test isapprox([5; 0], getPPE(fg, :x4, :simulated).suggested, atol = 1e-3)
-    @test isapprox([20; 0], getPPE(fg, :x5, :simulated).suggested, atol = 1e-3)
-    @test isapprox([20; 15], getPPE(fg, :x6, :simulated).suggested, atol = 1e-3)
-    @test isapprox([10; 15], getPPE(fg, :x7, :simulated).suggested, atol = 1e-3)
-    @test isapprox([10; 0], getPPE(fg, :x8, :simulated).suggested, atol = 1e-3)
+    @test isapprox([0; 0], IIF.calcMeanMaxSuggested(fg, :x0, :simulated).suggested, atol = 1e-3)
+    @test isapprox([15; 0], IIF.calcMeanMaxSuggested(fg, :x1, :simulated).suggested, atol = 1e-3)
+    @test isapprox([15; 15], IIF.calcMeanMaxSuggested(fg, :x2, :simulated).suggested, atol = 1e-3)
+    @test isapprox([5; 15], IIF.calcMeanMaxSuggested(fg, :x3, :simulated).suggested, atol = 1e-3)
+    @test isapprox([5; 0], IIF.calcMeanMaxSuggested(fg, :x4, :simulated).suggested, atol = 1e-3)
+    @test isapprox([20; 0], IIF.calcMeanMaxSuggested(fg, :x5, :simulated).suggested, atol = 1e-3)
+    @test isapprox([20; 15], IIF.calcMeanMaxSuggested(fg, :x6, :simulated).suggested, atol = 1e-3)
+    @test isapprox([10; 15], IIF.calcMeanMaxSuggested(fg, :x7, :simulated).suggested, atol = 1e-3)
+    @test isapprox([10; 0], IIF.calcMeanMaxSuggested(fg, :x8, :simulated).suggested, atol = 1e-3)
 
     ##
 
@@ -29,15 +29,15 @@ using RoME
 
     ##
 
-    @test isapprox([0; 0], getPPE(fg, :x0, :simulated).suggested, atol = 1e-3)
-    @test isapprox([15; 0], getPPE(fg, :x1, :simulated).suggested, atol = 1e-3)
-    @test isapprox([15; 15], getPPE(fg, :x2, :simulated).suggested, atol = 1e-3)
-    @test isapprox([5; 15], getPPE(fg, :x3, :simulated).suggested, atol = 1e-3)
-    @test isapprox([5; 0], getPPE(fg, :x4, :simulated).suggested, atol = 1e-3)
-    @test isapprox([20; 0], getPPE(fg, :x5, :simulated).suggested, atol = 1e-3)
-    @test isapprox([20; 15], getPPE(fg, :x6, :simulated).suggested, atol = 1e-3)
-    @test isapprox([10; 15], getPPE(fg, :x7, :simulated).suggested, atol = 1e-3)
-    @test isapprox([10; 0], getPPE(fg, :x8, :simulated).suggested, atol = 1e-3)
+    @test isapprox([0; 0], IIF.calcMeanMaxSuggested(fg, :x0, :simulated).suggested, atol = 1e-3)
+    @test isapprox([15; 0], IIF.calcMeanMaxSuggested(fg, :x1, :simulated).suggested, atol = 1e-3)
+    @test isapprox([15; 15], IIF.calcMeanMaxSuggested(fg, :x2, :simulated).suggested, atol = 1e-3)
+    @test isapprox([5; 15], IIF.calcMeanMaxSuggested(fg, :x3, :simulated).suggested, atol = 1e-3)
+    @test isapprox([5; 0], IIF.calcMeanMaxSuggested(fg, :x4, :simulated).suggested, atol = 1e-3)
+    @test isapprox([20; 0], IIF.calcMeanMaxSuggested(fg, :x5, :simulated).suggested, atol = 1e-3)
+    @test isapprox([20; 15], IIF.calcMeanMaxSuggested(fg, :x6, :simulated).suggested, atol = 1e-3)
+    @test isapprox([10; 15], IIF.calcMeanMaxSuggested(fg, :x7, :simulated).suggested, atol = 1e-3)
+    @test isapprox([10; 0], IIF.calcMeanMaxSuggested(fg, :x8, :simulated).suggested, atol = 1e-3)
 
     ##
 
@@ -68,7 +68,7 @@ end
 
     lastpose = sortDFG(ls(fg))[end]
     @test isapprox(
-        getPPE(fg, lastpose, :simulated).suggested,
+        IIF.calcMeanMaxSuggested(fg, lastpose, :simulated).suggested,
         [20, 0, 1.465088],
         atol = 0.001,
     )
@@ -109,7 +109,7 @@ end
     ]
 
     for (i, v) in enumerate(vars)
-        @test isapprox(ppes[i], getPPE(fg, v, :simulated).suggested; atol = 1e-5)
+        @test isapprox(ppes[i], IIF.calcMeanMaxSuggested(fg, v, :simulated).suggested; atol = 1e-5)
     end
 
     # check that the graph can be expanded with the same generator function
@@ -142,7 +142,7 @@ end
     push!(vars, :x5)
     push!(ppes, [15.0; 8.660254037844387; -0.5235988055902416])
 
-    @test isapprox(ppes[end], getPPE(fg, :x5, :simulated).suggested; atol = 1e-5)
+    @test isapprox(ppes[end], IIF.calcMeanMaxSuggested(fg, :x5, :simulated).suggested; atol = 1e-5)
 
     ##
 end
@@ -155,7 +155,7 @@ end
 
 # ##
 
-# vals = getPPE.(fg, (ls(fg) |> sortDFG), :simulated) .|> x-> x.suggested
+# vals = IIF.calcMeanMaxSuggested.(fg, (ls(fg) |> sortDFG), :simulated) .|> x-> x.suggested
 # @cast XYT[d,p] := vals[p][d]
 
 # Gadfly.plot(x=XYT[1,:],y=XYT[2,:], Geom.path)

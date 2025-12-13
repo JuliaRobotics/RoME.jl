@@ -4,7 +4,7 @@ using RoME
 using RoMETypes
 using Test
 using DistributedFactorGraphs
-using JSON
+using DistributedFactorGraphs.JSON
 # import DistributedFactorGraphs: packVariableNodeData, unpackVariableNodeData
 
 prior_types = [

@@ -42,13 +42,13 @@ using RoME
     # working before IIF 1010
 
     @warn("Test for beehive graph is using loose bounds until IIF #1010 is resolved.")
-    @test isapprox(getPPE(fg, :l11).suggested, [5; 10 * sin(pi / 3)], atol = 6)
-    @test isapprox(getPPE(fg, :l0).suggested, [20; 0], atol = 4)
+    @test isapprox(IIF.calcMeanMaxSuggested(fg, :l11).suggested, [5; 10 * sin(pi / 3)], atol = 6)
+    @test isapprox(IIF.calcMeanMaxSuggested(fg, :l0).suggested, [20; 0], atol = 4)
     @error "degraded numerical performance"
-    @test isapprox(getPPE(fg, :l7).suggested, [20; -20 * sin(pi / 3)], atol = 6)
+    @test isapprox(IIF.calcMeanMaxSuggested(fg, :l7).suggested, [20; -20 * sin(pi / 3)], atol = 6)
 
     # likely to fail until IIF 1010 is completed
-    @test_skip isapprox(getPPE(fg, :x21).suggested[1:2], [10; -20 * sin(pi / 3)], atol = 4)
+    @test_skip isapprox(IIF.calcMeanMaxSuggested(fg, :x21).suggested[1:2], [10; -20 * sin(pi / 3)], atol = 4)
 
     ##
 
@@ -60,7 +60,7 @@ end
 
     fg = generateGraph_Beehive!(8; graphinit = false, postpose_cb = (g, l) -> @show l)
 
-    @test isapprox(getPPE(fg, :x0, :simulated).suggested[1:2], [0.0; 0.0], atol = 1e-8)
+    @test isapprox(IIF.calcMeanMaxSuggested(fg, :x0, :simulated).suggested[1:2], [0.0; 0.0], atol = 1e-8)
 
     ##
 
