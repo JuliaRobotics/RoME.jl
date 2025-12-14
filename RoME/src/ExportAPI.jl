@@ -106,7 +106,6 @@ export
     InertialDynamic,
 
     # Various utilities
-    passTypeThrough,
     buildGraphChain!,
 
     # SLAM specific functions

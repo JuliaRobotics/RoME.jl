@@ -10,9 +10,9 @@ function IncrementalInference.preambleCache(
     ::VelAlign,
 )
     # TODO, obsolete -- replace with NamedTuple submanifold checks
-    @assert typeof(getVariableType(vars[1])) <: VelPos3 "VelAlign expects first variable type VelPos3"
-    @assert typeof(getVariableType(vars[2])) <: RotVelPos "VelAlign expects second variable type RotVelPos"
-    @assert typeof(getVariableType(vars[3])) <: Rotation3 "VelAlign expects third variable type Rotation"
+    @assert typeof(getStateKind(vars[1])) <: VelPos3 "VelAlign expects first variable type VelPos3"
+    @assert typeof(getStateKind(vars[2])) <: RotVelPos "VelAlign expects second variable type RotVelPos"
+    @assert typeof(getStateKind(vars[3])) <: Rotation3 "VelAlign expects third variable type Rotation"
     return (; p_vel = s -> s.x[1], q_rot = s -> s.x[1], q_vel = s -> s.x[2])
 end
 

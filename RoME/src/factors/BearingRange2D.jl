@@ -80,8 +80,6 @@ end
 
 # Support for database based solving
 
-passTypeThrough(d::FunctionNodeData{<:Pose2Point2Range}) = d
-
 Base.@kwdef struct PackedPose2Point2BearingRange <: AbstractPackedObservation
     bearstr::PackedSamplableBelief
     rangstr::PackedSamplableBelief

@@ -84,7 +84,7 @@ function _addLandmarkBeehive!(
         if haskey(_honeycombRecipe, genLabel)
             isAlready = true
             genLabel = _honeycombRecipe[genLabel]
-            simPPE = getPPE(fg, genLabel, refKey)
+            simPPE = IIF.calcMeanMaxSuggested(fg, genLabel, refKey)
         end
     end
 
@@ -275,11 +275,6 @@ function generateGraph_Honeycomb!(
             postpose_cb,
             solverParams = SolverParams(; graphinit),
         ) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
-
-        # # reference ppe on :x0
-        # refVal = zeros(3)
-        # ppe = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
-        # setPPE!(dfg[:x0], refKey, DFG.MeanMaxPPE, ppe)
 
         # add a new landmark (if not yet present)
         if !addLandmarks

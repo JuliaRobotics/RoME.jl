@@ -177,7 +177,7 @@ end
     # X here is not within the injectivity radius of G, therefore the log will not be valid and the results wrong
     # p = deepcopy(ϵ)
     # q = IIF.getPoint(Pose3, [10;0;0;pi;pi;pi])
-    # X = Manifolds.hat(G, ϵ, [10.,0,0,pi,pi,pi])
+    # X = LieGroups.hat(G, ϵ, [10.,0,0,pi,pi,pi])
     # res = calcFactorResidual(fg, :x1x2f1, X, p, q)
     # @test norm(res) < 1e-10
 
@@ -255,7 +255,7 @@ end
     ##
 
     # check mean and covariances after one up and down pass over the tree
-    muX1 = getPPE(fg, :x1).suggested # Statistics.mean(getVal(fg,:x1),dims=2)
+    muX1 = IIF.calcMeanMaxSuggested(fg, :x1).suggested # Statistics.mean(getVal(fg,:x1),dims=2)
     @test sum(map(Int, abs.(muX1[1:3]) .< 1.0)) == 3
 
     # sidestep trivial case, #412
@@ -274,7 +274,7 @@ end
     @show stdX1[4:6]
     @test sum(map(Int, 0.02 .< stdX1[4:6] .< 0.5)) == 3
 
-    muX2 = getPPE(fg, :x2).suggested # Statistics.mean(getVal(fg,:x2),dims=2)
+    muX2 = IIF.calcMeanMaxSuggested(fg, :x2).suggested # Statistics.mean(getVal(fg,:x2),dims=2)
     @show muX2[1:3] - [10.0; 0; 0]
     @test sum(map(Int, abs.(muX2[1:3] - [10.0; 0; 0]) .< 1.5)) == 3
 

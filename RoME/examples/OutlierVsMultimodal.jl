@@ -165,7 +165,7 @@ for i = 1:(2 * CYCLES)
     addVariable!(fg, lmid, RoME.Point2)
     pts = [rand(MvNormal(L[i, :], diagm([0.01; 0.01] .^ 2))) for _ = 1:100]
     initVariable!(fg, lmid, manikde!(Point2, pts))
-    setVariablePosteriorEstimates!(fg, lmid)
+    setPPE!(fg, lmid)
 
     BR[lmid] = Dict{Symbol, Tuple}()
     varNear, varDist = findVariablesNear(fg, L[i, :], r"x\d"; number = 10)

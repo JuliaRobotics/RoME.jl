@@ -58,7 +58,7 @@ function accumulateDiscreteLocalFrame!(
     Phik = SE2(DX),
 )
     return accumulateDiscreteLocalFrame!(
-        getFactorFunction(dfg, fctlbl),
+        getObservation(dfg, fctlbl),
         DX,
         Qc,
         dt;

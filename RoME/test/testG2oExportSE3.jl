@@ -2,6 +2,8 @@
 # using Revise
 
 using RoME
+using RoMETypes
+using DistributedFactorGraphs
 using OrderedCollections: OrderedDict
 using Test
 
@@ -21,7 +23,6 @@ using Test
     # fg = loadDFG!(initfg(), joinpath(@__DIR__,"testdata","g2otest.tar.gz"))
     fg = loadDFG(joinpath(@__DIR__, "testdata", "g2otest.tar.gz"))
 
-    setPPE!.(fg, ls(fg), :parametric)
     g2ofile = joinpath("/tmp", "caesar", "export.g2o")
     mkpath(dirname(g2ofile))
     varIntLabel = OrderedDict(zip(ls(fg), (0:(length(ls(fg)) - 1))))

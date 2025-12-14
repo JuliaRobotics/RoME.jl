@@ -60,7 +60,7 @@ end
 
     M = getManifold(p2br)
     _zi = [0, 20.0]
-    zi = Manifolds.hat(M, getPointIdentity(M), _zi)
+    zi = LieGroups.hat(M, getPointIdentity(M), _zi)
 
     res = calcFactorResidualTemporary(p2br, (Pose2, Point2), zi, (xi, li))
     #
@@ -75,7 +75,7 @@ end
     li = zeros(2)
     li[2] = 20.0
     _zi = [pi / 2, 20.0]
-    zi = Manifolds.hat(M, getPointIdentity(M), _zi)
+    zi = LieGroups.hat(M, getPointIdentity(M), _zi)
     # idx = 1
     # res = zeros(2)
     # p2br(res, fmd, idx, zi, xi, li)
@@ -93,7 +93,7 @@ end
     li = zeros(2)
     li[2] = 20.0
     _zi = [0.0, 20.0]
-    zi = Manifolds.hat(M, getPointIdentity(M), _zi)
+    zi = LieGroups.hat(M, getPointIdentity(M), _zi)
 
     res = calcFactorResidualTemporary(p2br, (Pose2, Point2), zi, (xi, li))
 
@@ -110,7 +110,7 @@ end
     li[1] = 20.0
     # zi = ([0.0;pi/2],[0.0;20.0],)
     _zi = [pi / 2, 20.0]
-    zi = Manifolds.hat(M, getPointIdentity(M), _zi)
+    zi = LieGroups.hat(M, getPointIdentity(M), _zi)
     # idx = 2
     # res = zeros(2)
     # p2br(res, fmd, idx, zi, xi, li)

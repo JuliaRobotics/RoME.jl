@@ -3,12 +3,12 @@
 """
 $(TYPEDEF)
 """
-mutable struct DynPose2VelocityPrior{T1, T2} <: IncrementalInference.AbstractPriorObservation where {
+@tags mutable struct DynPose2VelocityPrior{T1, T2} <: IncrementalInference.AbstractPriorObservation where {
     T1 <: IIF.SamplableBelief,
     T2 <: IIF.SamplableBelief,
 }
-    Zpose::T1
-    Zvel::T2
+    Zpose::T1 & DFG.@packed
+    Zvel::T2 & DFG.@packed
 end
 function DynPose2VelocityPrior(
     z1::T1,
@@ -96,26 +96,6 @@ end
 """
 $(TYPEDEF)
 """
-Base.@kwdef struct PackedDynPose2VelocityPrior <: AbstractPackedObservation
-    strpose::PackedSamplableBelief
-    strvel::PackedSamplableBelief
-end
-
-function convert(::Type{PackedDynPose2VelocityPrior}, d::DynPose2VelocityPrior)
-    return PackedDynPose2VelocityPrior(
-        convert(PackedSamplableBelief, d.Zpose),
-        convert(PackedSamplableBelief, d.Zvel),
-    )
-end
-function convert(::Type{DynPose2VelocityPrior}, d::PackedDynPose2VelocityPrior)
-    posedistr = convert(SamplableBelief, d.strpose)
-    veldistr = convert(SamplableBelief, d.strvel)
-    return DynPose2VelocityPrior(posedistr, veldistr)
-end
-
-"""
-$(TYPEDEF)
-"""
 Base.@kwdef struct PackedDynPose2Pose2 <: AbstractPackedObservation
     Z::PackedSamplableBelief
 end
@@ -156,7 +136,7 @@ function (cf::CalcFactor{<:DynPose2DynPose2})(meas, wXi, wXj)
     # se2vee!(res, jXjhat)
     z = meas
     wxi, wxj = wXi, wXj
-    dt = Dates.value(cf.fullvariables[2].nstime - cf.fullvariables[1].nstime) * 1e-9
+    dt = DFG.calcDeltatime(cf.fullvariables[1], cf.fullvariables[2])
     wpj = (wxi[1:2] + dt * wxi[4:5] + z[1:2])
     thetaj = se2vee(SE2([0; 0; wxi[3]]) * SE2([0; 0; z[3]]))[3]
     res13 = se2vee(SE2(wxj[1:3]) \ SE2([wpj; thetaj]))

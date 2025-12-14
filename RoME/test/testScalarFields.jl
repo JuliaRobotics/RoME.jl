@@ -32,7 +32,7 @@ import IncrementalInference: LevelSetGridNormal
     ## modify to generate elevation measurements (data/smallData as in Boxy) and priors
 
     dem = Interpolations.LinearInterpolation((x, y), img) # interpolated DEM
-    elevation(p) = dem(getPPE(fg, p, :simulated).suggested[1:2]'...)
+    elevation(p) = dem(IIF.calcMeanMaxSuggested(fg, p, :simulated).suggested[1:2]'...)
     sigma_e = 0.01 # elevation measurement uncertainty
 
     ## test buildDEMSimulated to ensure interpolation matches raw data 
@@ -70,7 +70,7 @@ import IncrementalInference: LevelSetGridNormal
     storeDir = joinLogPath(fg, "data")
     mkpath(storeDir)
     datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir)
-    addBlobStore!(fg, datastore)
+    addBlobstore!(fg, datastore)
 
     # new feature, going to temporarily disable as WIP
     getSolverParams(fg).attemptGradients = false
@@ -102,7 +102,7 @@ import IncrementalInference: LevelSetGridNormal
 
     ## optional prior at start
 
-    mu0 = getPPE(fg, :x0, :simulated).suggested
+    mu0 = IIF.calcMeanMaxSuggested(fg, :x0, :simulated).suggested
     pr0 = PriorPose2(MvNormal(mu0, 0.01 .* [1; 1; 1]))
     addFactor!(fg, [:x0], pr0)
 
@@ -113,8 +113,8 @@ import IncrementalInference: LevelSetGridNormal
     ## check at least the first five poses
 
     for lb in sortDFG(ls(fg, r"x\d+"))[1:4]
-        sim = getPPE(fg, lb, :simulated).suggested
-        ppe = getPPE(fg, lb).suggested
+        sim = IIF.calcMeanMaxSuggested(fg, lb, :simulated).suggested
+        ppe = IIF.calcMeanMaxSuggested(fg, lb).suggested
         @test isapprox(sim[1:2], ppe[1:2], atol = 1000)
         @test isapprox(sim[3], ppe[3], atol = 0.75)
     end
@@ -125,8 +125,8 @@ import IncrementalInference: LevelSetGridNormal
     # try
 
     # for lb in sortDFG(ls(fg,r"x\d+"))[5:end]
-    #   sim = getPPE(fg, lb, :simulated).suggested
-    #   ppe = getPPE(fg, lb).suggested
+    #   sim = IIF.calcMeanMaxSuggested(fg, lb, :simulated).suggested
+    #   ppe = IIF.calcMeanMaxSuggested(fg, lb).suggested
     #   @test isapprox(sim[1:2], ppe[1:2], atol=400)
     #   @test isapprox(sim[3], ppe[3], atol=0.5)
     # end

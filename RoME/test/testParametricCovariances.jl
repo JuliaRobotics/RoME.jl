@@ -54,8 +54,8 @@ end
     IIF.autoinitParametric!(fg)
     # IIF.solveGraph!(fg)
 
-    @test isapprox([0; 0; 0.0], getPPESuggested(fg, :x0, :parametric); atol = 1e-4)
-    @test isapprox([1.05; 0; 0], getPPESuggested(fg, :x1, :parametric); atol = 1e-4)
+    @test isapprox([0; 0; 0.0], IIF.calcMeanMaxSuggested(fg, :x0, :parametric).suggested; atol = 1e-4)
+    @test isapprox([1.05; 0; 0], IIF.calcMeanMaxSuggested(fg, :x1, :parametric).suggested; atol = 1e-4)
 
     ##
 end

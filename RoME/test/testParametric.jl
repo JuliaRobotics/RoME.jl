@@ -189,7 +189,7 @@ end
         fg = LocalDFG(; solverParams = SolverParams(; algorithms = [:default, :parametric]))
 
         # add first pose locations
-        addVariable!(fg, :x0, DynPose2; nanosecondtime = 0)
+        addVariable!(fg, :x0, DynPose2; timestamp = DFG.Timestamp(Nanosecond(0)))
 
         # Prior factor as boundary condition
         pp0 = DynPose2VelocityPrior(
@@ -198,7 +198,7 @@ end
         )
         addFactor!(fg, [:x0;], pp0)
 
-        addVariable!(fg, :x1, DynPose2; nanosecondtime = 1000_000_000)
+        addVariable!(fg, :x1, DynPose2; timestamp = DFG.Timestamp(Nanosecond(1000_000_000)))
 
         # conditional likelihood between Dynamic Point2
         dp2dp2 = VelPose2VelPose2(

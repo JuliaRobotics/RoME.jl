@@ -62,9 +62,9 @@ using RoME
     addFactor!(fg, [:w_P_c2; :w_Ph], f2)
 
     # FIXME, should be done on parametric initVariable above
-    getSolverData(fg[:w_P_c1], :parametric).bw = diagm(ones(6))
-    getSolverData(fg[:w_P_c2], :parametric).bw = diagm(ones(6))
-    getSolverData(fg[:w_Ph], :parametric).bw = diagm(ones(3))
+    getState(fg[:w_P_c1], :parametric).bw = diagm(ones(6))
+    getState(fg[:w_P_c2], :parametric).bw = diagm(ones(6))
+    getState(fg[:w_Ph], :parametric).bw = diagm(ones(3))
 
     M = getManifold(fg, :w_P_c1)
     addFactor!(

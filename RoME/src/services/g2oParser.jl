@@ -86,7 +86,7 @@ function parseG2oInstruction!(
         variable = addVariable!(fg, poseId, Pose3)
         if initialize
             # initVariable!(fg, poseId, MvNormal(p, cov), :parametric)
-            vnd = getSolverData(variable, :parametric)
+            vnd = getState(variable, :parametric)
             vnd.val[1] = p
             vnd.bw .= cov
         end
@@ -318,13 +318,13 @@ end
 
 function _writeG2oLinePose2(io, dfg::AbstractDFG, label::Symbol, i::Int, solveKey::Symbol)
     # println("trying VERTEX_SE2")
-    (x, y, θ) = getPPESuggested(dfg, label, solveKey)
+    (x, y, θ) = IIF.calcMeanMaxSuggested(dfg, label, solveKey).suggested
     return write(io, "VERTEX_SE2 $i $x $y $θ\n")
 end
 
 function _writeG2oLinePose3(io, dfg::AbstractDFG, label::Symbol, i::Int, solveKey::Symbol)
     # println("WHAT IS GOING ON")
-    Xc = getPPESuggested(dfg, label, solveKey)
+    Xc = IIF.calcMeanMaxSuggested(dfg, label, solveKey).suggested
     p = getPoint(Pose3, Xc)
     x, y, z = p.x[1]
     R = p.x[2]
@@ -334,7 +334,7 @@ function _writeG2oLinePose3(io, dfg::AbstractDFG, label::Symbol, i::Int, solveKe
 end
 
 function _doG2oLoop(io, dfg, label, i, solveKey)
-    vartype = getVariableType(dfg, label)
+    vartype = getStateKind(dfg, label)
     typename = string(typeof(vartype).name.name)
     # FIXME, HACK, WTF https://github.com/JuliaLang/julia/issues/46871#issuecomment-1318035929
     fnc = getfield(RoME, Symbol(:_writeG2oLine, typename))
@@ -378,7 +378,7 @@ function _writeG2oFactors(
             # only add factors to g2o file once, remove if found
             !(fc in fcts) ? continue : filter!(x -> x != fc, fcts)
             # actually add the factor to the file
-            fnc = getFactorType(dfg, fc)
+            fnc = getObservation(dfg, fc)
             pstr = stringG2o!(dfg, fc, fnc, varIntLabel, uniqVarInt; overwriteMapping)
             println(io, pstr)
         end

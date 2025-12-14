@@ -20,7 +20,7 @@ gp = GenericProjection{
 )
 ```
 """
-@kwdef struct GenericProjection{SRC <: InferenceVariable, TRG <: InferenceVariable, C, D} <:
+@kwdef struct GenericProjection{SRC <: StateType{Any}, TRG <: StateType{Any}, C, D} <:
               AbstractManifoldMinimize
     cam::C
     Z::D
@@ -33,30 +33,27 @@ function GenericProjection{SRC, TRG}(
     return GenericProjection{SRC, TRG, C, D}(; cam, Z)
 end
 
-getManifold(gp::GenericProjection{S, T}) where {S, T} = TranslationGroup(getDimension(gp.Z))
+DFG.getManifold(gp::GenericProjection{S, T}) where {S, T} = TranslationGroup(getDimension(gp.Z))
 
 """
 $(TYPEDEF)
 
 Serialization type for `GenericProjection`.
 """
-Base.@kwdef struct PackedGenericProjection <: AbstractPackedObservation
+@tags struct PackedGenericProjection <: AbstractPackedObservation
     fromtype::String
     totype::String
     cam::Dict{Symbol, Any}
-    Z::PackedSamplableBelief
+    Z & DFG.@packed
 end
-function convert(::Type{GenericProjection}, packed::PackedGenericProjection)
-    fromtype = DFG.getTypeFromSerializationModule(packed.fromtype) # Pose3
-    totype = DFG.getTypeFromSerializationModule(packed.totype)   # Point3
-    cam = convert(DFG.getTypeFromSerializationModule(packed.cam[:_type]), packed.cam)
-    Z = convert(SamplableBelief, packed.Z)
+function DFG.unpack(packed::PackedGenericProjection)
+    fromtype = IIF.getTypeFromSerializationModule(packed.fromtype) # Pose3
+    totype = IIF.getTypeFromSerializationModule(packed.totype)   # Point3
+    cam = convert(IIF.getTypeFromSerializationModule(packed.cam[:_type]), packed.cam)
+    Z = packed.Z
     return GenericProjection{fromtype, totype}(cam, Z)
 end
-function convert(
-    ::Type{PackedGenericProjection},
-    obj::GenericProjection{FT, TT},
-) where {FT, TT}
+function DFG.pack(obj::GenericProjection{FT, TT}) where {FT, TT}
     camdict = Dict{Symbol, Any}(
         :height => obj.cam.height,
         :width => obj.cam.width,
@@ -69,6 +66,6 @@ function convert(
         string(FT.name.module, ".", FT.name.name), # "RoME.Pose3",  # string(FT)
         string(TT.name.module, ".", TT.name.name), # "RoME.Point3", # string(TT)
         camdict,
-        convert(PackedSamplableBelief, obj.Z),
+        obj.Z,
     )
 end

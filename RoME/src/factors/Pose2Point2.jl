@@ -9,8 +9,8 @@ export Pose2Point2, PackedPose2Point2
 
 Bearing and Range constraint from a Pose2 to Point2 variable.
 """
-Base.@kwdef struct Pose2Point2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldMinimize
-    Z::T = MvNormal(zeros(2), LinearAlgebra.diagm([0.01; 0.01]))
+DFG.@kwarg struct Pose2Point2{T} <: IIF.AbstractManifoldMinimize
+    Z::T & DFG.@packed
     partial::Tuple{Int, Int} = (1, 2)
 end
 # convenience and default constructor
@@ -41,15 +41,15 @@ end
 
 ## Serialization support
 
-Base.@kwdef struct PackedPose2Point2 <: AbstractPackedObservation
-    Z::PackedSamplableBelief
-end
+# Base.@kwdef struct PackedPose2Point2 <: AbstractPackedObservation
+#     Z::PackedSamplableBelief
+# end
 
-function DFG.pack(obj::Pose2Point2)
-    return PackedPose2Point2(convert(PackedSamplableBelief, obj.Z))
-end
+# function DFG.pack(obj::Pose2Point2)
+#     return PackedPose2Point2(convert(PackedSamplableBelief, obj.Z))
+# end
 
-# TODO -- should not be resorting to string, consider specialized code for parametric distribution types and KDEs
-function DFG.unpack(packed::PackedPose2Point2)
-    return Pose2Point2(convert(SamplableBelief, packed.Z))
-end
+# # TODO -- should not be resorting to string, consider specialized code for parametric distribution types and KDEs
+# function DFG.unpack(packed::PackedPose2Point2)
+#     return Pose2Point2(convert(SamplableBelief, packed.Z))
+# end

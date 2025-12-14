@@ -56,7 +56,7 @@ end
 
     sf = sampleFactor(fg, :x1f2, N)
 
-    Mzrp = f1 |> getFactorType |> getManifold
+    Mzrp = f1 |> getObservation |> getManifold
     zrp0 = identity_element(Mzrp)
     mu = vee(Mzrp, zrp0, log(Mzrp, zrp0, mean(Mzrp, sf)))
     # mu = getCoordinates(Pose3, mean(Mzrp, sf)) # M # starting to improve partials, getManifold of partial factor returns whatever that manifold is
@@ -137,7 +137,7 @@ f2 = addFactor!(fg, [:x1; :x2], xyy; graphinit = false)
 
     @cast pts[j, i] := _pts[i][j]
 
-    newdims = [3; 4; 5] # collect(DFG.getSolverData(f1).fnc.usrfnc!.partial)
+    newdims = [3; 4; 5] # collect(DFG.getState(f1).fnc.usrfnc!.partial)
 
     olddims = setdiff(collect(1:6), newdims)
 
@@ -331,7 +331,7 @@ end
     # pts = collect(pts)
 
     # find which dimensions are and and are not updated by XYYaw partial
-    newdims = [1, 2, 6] # collect(DFG.getSolverData(f2).fnc.usrfnc!.partial)
+    newdims = [1, 2, 6] # collect(DFG.getState(f2).fnc.usrfnc!.partial)
     olddims = setdiff(collect(1:6), newdims)
 
     # check the number of points are correct
@@ -384,7 +384,7 @@ end
     @test size(val, 2) == N
 
     estmu1mean = Statistics.mean(val[collect(DFG.getObservation(f1).partial), :]; dims = 2)
-    # estmu2mean = Statistics.mean(val[collect(DFG.getSolverData(f2).fnc.usrfnc!.partial),:],dims=2)
+    # estmu2mean = Statistics.mean(val[collect(DFG.getState(f2).fnc.usrfnc!.partial),:],dims=2)
     estmu2mean = Statistics.mean(val[[1, 2, 6], :]; dims = 2)
 
     @show estmu1mean
@@ -440,7 +440,7 @@ end
         wTx1 = getPointIdentity(Pose3)
         wTx2 = ArrayPartition(xyz_rpy[1:3], Matrix(RotXYZ(xyz_rpy[4:6]...)))
 
-        x1Tx2 = Manifolds.compose(M3, inv(M3, wTx1), wTx2)
+        x1Tx2 = LieGroups.compose(M3, inv(M3, wTx1), wTx2)
         X = log(M3, ϵ3, x1Tx2)
         Xc = vee(M3, ϵ3, X)
 
