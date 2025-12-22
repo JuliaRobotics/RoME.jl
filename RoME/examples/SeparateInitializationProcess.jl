@@ -12,11 +12,11 @@ addprocs(3)
 
     import IncrementalInference: getSample
 
-    # struct Pose2 <: IncrementalInference.InferenceVariable
+    # struct Pose2 <: IncrementalInference.StateType{Any}
     #   dims::Int
     #   Pose2() = new(3)
     # end
-    # struct Point2 <: IncrementalInference.InferenceVariable
+    # struct Point2 <: IncrementalInference.StateType{Any}
     #   dims::Int
     #   Point2() = new(2)
     # end

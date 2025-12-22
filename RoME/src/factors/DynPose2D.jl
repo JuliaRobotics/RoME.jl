@@ -97,11 +97,11 @@ end
 $(TYPEDEF)
 """
 Base.@kwdef struct PackedDynPose2Pose2 <: AbstractPackedObservation
-    Z::PackedSamplableBelief
+    Z::PackedBelief
 end
 
 function convert(::Type{PackedDynPose2Pose2}, d::DynPose2Pose2)
-    return PackedDynPose2Pose2(convert(PackedSamplableBelief, d.Zpose.Z))
+    return PackedDynPose2Pose2(convert(PackedBelief, d.Zpose.Z))
 end
 function convert(::Type{DynPose2Pose2}, d::PackedDynPose2Pose2)
     return DynPose2Pose2(convert(SamplableBelief, d.Z))

@@ -48,8 +48,8 @@ using Test
     addFactor!(fg, [:x0; :deadreckon_x0], drec; solvable = 0)
 
     #
-    @test length(map(x -> x.label, getVariables(fg; solvable = 1))) == 8
-    @test length(map(x -> x.label, getVariables(fg; solvable = 0))) == 9
+    @test length(map(x -> x.label, getVariables(fg; solvableFilter = >=(1)))) == 8
+    @test length(map(x -> x.label, getVariables(fg; solvableFilter = >=(0)))) == 9
     #
     # # make sure
     @test length(getEliminationOrder(fg; solvable = 1)) == 8

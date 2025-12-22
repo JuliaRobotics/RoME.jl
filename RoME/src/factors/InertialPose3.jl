@@ -242,7 +242,7 @@ end
 $(TYPEDEF)
 """
 Base.@kwdef mutable struct PackedInertialPose3 <: AbstractPackedObservation
-    Z::PackedSamplableBelief
+    Z::PackedBelief
     # vecZij::Array{Float64,1} # 3translations, 3rotation, 3 velocities
     # vecCov::Array{Float64,1}
     # dimc::Int
@@ -256,7 +256,7 @@ Base.@kwdef mutable struct PackedInertialPose3 <: AbstractPackedObservation
 end
 function PackedInertialPose3(ip3::InertialPose3)
     return PackedInertialPose3(
-        convert(PackedSamplableBelief, ip3.Z),
+        convert(PackedBelief, ip3.Z),
         veeQuaternion(ip3.pioc),
         ip3.pioc.rnTime,
         ip3.dPdDa[:],

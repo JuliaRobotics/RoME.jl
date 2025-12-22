@@ -57,9 +57,9 @@ tree = solveTree!(fg)
 using RoMEPlotting
 Gadfly.set_default_plot_size(40cm, 25cm)
 
-plotKDE(fg, sort(union(ls(fg, r"x"), ls(fg, r"l"))); dims = [1; 2], title = "Positions")
+plotKDE(fg, sort(ls(fg; labelFilter =  contains( r"[xl]"))); dims = [1; 2], title = "Positions")
 
-plotKDE(fg, sort(ls(fg, r"l")); dims = [3; 4], title = "velocities")
+plotKDE(fg, sort(ls(fg; labelFilter =  contains( r"l"))); dims = [3; 4], title = "velocities")
 
 fg = initfg()
 
@@ -117,9 +117,9 @@ tree = solveTree!(fg)
 using RoMEPlotting
 Gadfly.set_default_plot_size(40cm, 25cm)
 
-plotKDE(fg, sort(union(ls(fg, r"x"), ls(fg, r"l"))); dims = [1; 2], title = "Positions")
+plotKDE(fg, sort(ls(fg; labelFilter =  contains( r"[xl]"))); dims = [1; 2], title = "Positions")
 
-plotKDE(fg, sort(ls(fg, r"l")); dims = [3; 4], title = "velocities")
+plotKDE(fg, sort(ls(fg; labelFilter =  contains( r"l"))); dims = [3; 4], title = "velocities")
 
 #
 #

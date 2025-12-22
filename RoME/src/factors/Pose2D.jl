@@ -47,13 +47,13 @@ end
 $(TYPEDEF)
 """
 Base.@kwdef struct PackedPose2Pose2 <: AbstractPackedObservation
-    Z::PackedSamplableBelief
+    Z::PackedBelief
 end
 function convert(::Type{Pose2Pose2}, d::PackedPose2Pose2)
     return Pose2Pose2(convert(SamplableBelief, d.Z))
 end
 function convert(::Type{PackedPose2Pose2}, d::Pose2Pose2)
-    return PackedPose2Pose2(convert(PackedSamplableBelief, d.Z))
+    return PackedPose2Pose2(convert(PackedBelief, d.Z))
 end
 
 # FIXME, rather have separate compareDensity functions

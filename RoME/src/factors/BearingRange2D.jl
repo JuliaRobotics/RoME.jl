@@ -81,14 +81,14 @@ end
 # Support for database based solving
 
 Base.@kwdef struct PackedPose2Point2BearingRange <: AbstractPackedObservation
-    bearstr::PackedSamplableBelief
-    rangstr::PackedSamplableBelief
+    bearstr::PackedBelief
+    rangstr::PackedBelief
 end
 
 function DFG.pack(d::Pose2Point2BearingRange)
     return PackedPose2Point2BearingRange(
-        convert(PackedSamplableBelief, d.bearing),
-        convert(PackedSamplableBelief, d.range),
+        convert(PackedBelief, d.bearing),
+        convert(PackedBelief, d.range),
     )
 end
 
