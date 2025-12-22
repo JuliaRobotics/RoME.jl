@@ -366,7 +366,7 @@ function _writeG2oFactors(
     for vs in vars
         # assign a unique number
         # all factors connected to variable
-        vfcs = ls(dfg, vs; solvable)
+        vfcs = listNeighbors(dfg, vs; solvableFilter = >=(solvable))
         kvfcs = intersect(vfcs, fcts)
         for fc in kvfcs
             # ignore priors
@@ -409,9 +409,9 @@ function exportG2o(
     #
     uniqVarInt = Int[-1;]
     # all variables
-    vars = ls(dfg, poseRegex; solvable) |> sortDFG
+    vars = ls(dfg; labelFilter =  contains(poseRegex), solvableFilter = >=(solvable)) |> sortDFG
     # all factors
-    fcts = lsf(dfg; solvable)
+    fcts = lsf(dfg; solvableFilter = >=(solvable))
     # build text file based on factors, using pose variable order as guide
     io = open(filename, "w")
 

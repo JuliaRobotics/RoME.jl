@@ -42,7 +42,7 @@ end
 $(TYPEDEF)
 """
 Base.@kwdef struct PackedPriorPose2 <: AbstractPackedObservation
-    Z::PackedSamplableBelief
+    Z::PackedBelief
 end
 function DFG.pack(d::PriorPose2)
     return PackedPriorPose2(packDistribution(d.Z))

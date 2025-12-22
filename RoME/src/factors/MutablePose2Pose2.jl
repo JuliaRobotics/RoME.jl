@@ -39,7 +39,7 @@ end
 $(TYPEDEF)
 """
 Base.@kwdef struct PackedMutablePose2Pose2Gaussian <: AbstractPackedObservation
-    Z::PackedSamplableBelief
+    Z::PackedBelief
     timestamp::Int64 # serialized in millisecond
 end
 function convert(::Type{MutablePose2Pose2Gaussian}, d::PackedMutablePose2Pose2Gaussian)
@@ -50,7 +50,7 @@ function convert(::Type{MutablePose2Pose2Gaussian}, d::PackedMutablePose2Pose2Ga
 end
 function convert(::Type{PackedMutablePose2Pose2Gaussian}, d::MutablePose2Pose2Gaussian)
     return PackedMutablePose2Pose2Gaussian(
-        convert(PackedSamplableBelief, d.Z),
+        convert(PackedBelief, d.Z),
         datetime2unix(d.timestamp) * 1e3 |> Int,
     )
 end

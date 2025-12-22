@@ -55,8 +55,8 @@ end
 Serialization type of `PriorPose3ZRP`.
 """
 Base.@kwdef struct PackedPriorPose3ZRP <: AbstractPackedObservation
-    zdata::PackedSamplableBelief
-    rpdata::PackedSamplableBelief
+    zdata::PackedBelief
+    rpdata::PackedBelief
 end
 function DFG.unpack(d::PackedPriorPose3ZRP)
     return PriorPose3ZRP(
@@ -66,8 +66,8 @@ function DFG.unpack(d::PackedPriorPose3ZRP)
 end
 function DFG.pack(d::PriorPose3ZRP)
     return PackedPriorPose3ZRP(
-        convert(PackedSamplableBelief, d.z),
-        convert(PackedSamplableBelief, d.rp),
+        convert(PackedBelief, d.z),
+        convert(PackedBelief, d.rp),
     )
 end
 
@@ -181,7 +181,7 @@ end
 # Serialization type of Pose3Pose3XYYaw.
 # """
 # Base.@kwdef struct PackedPose3Pose3XYYaw <: AbstractPackedObservation
-#     Z::PackedSamplableBelief
+#     Z::PackedBelief
 # end
 
 # function DFG.unpack(d::PackedPose3Pose3XYYaw)
@@ -189,7 +189,7 @@ end
 # end
 
 # function DFG.pack(d::Pose3Pose3XYYaw)
-#     return PackedPose3Pose3XYYaw(convert(PackedSamplableBelief, d.Z))
+#     return PackedPose3Pose3XYYaw(convert(PackedBelief, d.Z))
 # end
 
 function compare(a::Pose3Pose3XYYaw, b::Pose3Pose3XYYaw; tol::Float64 = 1e-10)
@@ -239,7 +239,7 @@ end
 # Serialization type of Pose3Pose3Rotation.
 # """
 # Base.@kwdef struct PackedPose3Pose3Rotation <: AbstractPackedObservation
-#     Z::PackedSamplableBelief
+#     Z::PackedBelief
 # end
 
 # function DFG.unpack(d::PackedPose3Pose3Rotation)
@@ -247,7 +247,7 @@ end
 # end
 
 # function DFG.pack(d::Pose3Pose3Rotation)
-#     return PackedPose3Pose3Rotation(convert(PackedSamplableBelief, d.Z))
+#     return PackedPose3Pose3Rotation(convert(PackedBelief, d.Z))
 # end
 
 function compare(a::Pose3Pose3Rotation, b::Pose3Pose3Rotation; tol::Float64 = 1e-10)

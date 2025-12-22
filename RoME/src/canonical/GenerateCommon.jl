@@ -20,8 +20,8 @@ function _addPoseCanonical!(
     factor::AbstractObservation;
     poseRegex::Regex = r"x\d+",
     genLabel = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, posecount),
-    srcType::Type{<:InferenceVariable} = getStateKind(fg, prevLabel) |> typeof,
-    poseType::Type{<:InferenceVariable} = srcType, # control destination type TODO simplify
+    srcType::Type{<:StateType} = getStateKind(fg, prevLabel) |> typeof,
+    poseType::Type{<:StateType} = srcType, # control destination type TODO simplify
     graphinit::Bool = false,
     solvable::Integer = 1,
     inflation::Real = getSolverParams(fg).inflation,
@@ -85,7 +85,7 @@ Notes
 - Use callback `postpose_cb(g::AbstractDFG,lastpose::Symbol)` to call user operations after each pose step.
 """
 function generateGraph_ZeroPose(;
-    varType::Type{<:InferenceVariable} = Pose2,
+    varType::Type{<:StateType} = Pose2,
     graphinit = nothing,
     solverParams::SolverParams = SolverParams(),
     dfg::AbstractDFG = LocalDFG{SolverParams}(; solverParams),
@@ -154,7 +154,7 @@ function buildGraphChain!(
     fctType::Type{<:AbstractRelativeObservation} = Pose2Pose2,
     preFct_args_cb::Function = (fg_, data) -> (data.currData,);
     stopAfter::Integer = 2^(Sys.WORD_SIZE - 1) - 1,
-    varType::IIF.InstanceType{InferenceVariable} = Pose2,
+    varType::IIF.InstanceType{StateType} = Pose2,
     solverParams::SolverParams = SolverParams(),
     solvable::Integer = 1,
     fctKwargs::NamedTuple = (;),

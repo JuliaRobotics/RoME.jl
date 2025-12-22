@@ -29,7 +29,7 @@ end
 function GenericProjection{SRC, TRG}(
     cam::C,
     Z::D,
-) where {SRC <: InferenceVariable, TRG <: InferenceVariable, C, D}
+) where {SRC <: StateType, TRG <: StateType, C, D}
     return GenericProjection{SRC, TRG, C, D}(; cam, Z)
 end
 

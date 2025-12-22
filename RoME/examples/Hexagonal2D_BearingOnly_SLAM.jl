@@ -45,7 +45,7 @@ bear2 = atan(10, 10) - pi / 3
 
 # Add landmarks with Bearing range measurements at x0, x6, x12, x18, x24, x30...
 # Get variables
-vars = ls(fg, r"x") |> sortDFG
+vars = ls(fg; labelFilter = contains(r"x")) |> sortDFG
 for xIndex = 1:6:length(vars)
     @info("Creating factor between $(vars[xIndex]) and l1...")
     p2br = Pose2Point2Bearing(Normal(bear1, 0.05))

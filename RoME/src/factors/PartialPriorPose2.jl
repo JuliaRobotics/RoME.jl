@@ -31,11 +31,11 @@ end
 $(TYPEDEF)
 """
 Base.@kwdef struct PackedPartialPriorYawPose2 <: AbstractPackedObservation
-    Z::PackedSamplableBelief
+    Z::PackedBelief
 end
 
 function convert(::Type{PackedPartialPriorYawPose2}, d::PartialPriorYawPose2)
-    return PackedPartialPriorYawPose2(convert(PackedSamplableBelief, d.Z))
+    return PackedPartialPriorYawPose2(convert(PackedBelief, d.Z))
 end
 function convert(::Type{PartialPriorYawPose2}, d::PackedPartialPriorYawPose2)
     return PartialPriorYawPose2(convert(SamplableBelief, d.Z))

@@ -42,11 +42,11 @@ end
 ## Serialization support
 
 # Base.@kwdef struct PackedPose2Point2 <: AbstractPackedObservation
-#     Z::PackedSamplableBelief
+#     Z::PackedBelief
 # end
 
 # function DFG.pack(obj::Pose2Point2)
-#     return PackedPose2Point2(convert(PackedSamplableBelief, obj.Z))
+#     return PackedPose2Point2(convert(PackedBelief, obj.Z))
 # end
 
 # # TODO -- should not be resorting to string, consider specialized code for parametric distribution types and KDEs

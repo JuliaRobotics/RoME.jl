@@ -522,7 +522,7 @@ end
 
 ## serde
 
-struct PackedIMUDeltaFactor{T <: PackedSamplableBelief} <: AbstractPackedObservation
+struct PackedIMUDeltaFactor{T <: PackedBelief} <: AbstractPackedObservation
     Z::T # NOTE dim is 9 as Δt is not included in covariance
     dt::Float64
     D::Vector{Float64}
@@ -533,7 +533,7 @@ struct PackedIMUDeltaFactor{T <: PackedSamplableBelief} <: AbstractPackedObserva
 end
 
 function PackedIMUDeltaFactor(; Z, dt, D, Sigma, J_b, b)
-    _gettype(zt::PackedSamplableBelief) = zt
+    _gettype(zt::PackedBelief) = zt
     function _gettype(zt)
         return DistributedFactorGraphs.getTypeFromSerializationModule(zt["_type"])(; zt...)
     end
@@ -549,7 +549,7 @@ function PackedIMUDeltaFactor(; Z, dt, D, Sigma, J_b, b)
 end
 
 function convert(::Type{<:PackedIMUDeltaFactor}, d::IMUDeltaFactor)
-    Z = convert(PackedSamplableBelief, d.Z)
+    Z = convert(PackedBelief, d.Z)
     return PackedIMUDeltaFactor(;
         Z,
         dt = d.Δt,

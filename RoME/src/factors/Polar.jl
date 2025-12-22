@@ -4,7 +4,7 @@
 
 Range and theta definition on `(:Euclid, :Circular)` manifold.
 """
-struct Polar <: IIF.InferenceVariable
+struct Polar <: IIF.StateType{Any}
     dims::Int
 end
 
