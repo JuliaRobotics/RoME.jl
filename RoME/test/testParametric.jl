@@ -30,8 +30,8 @@ using LieGroups
     initAll!(fg)
     IIF.initParametricFrom!(fg)
 
-    vars = ls(fg; labelFilter =  contains(r"x"))
-    lands = ls(fg; labelFilter =  contains(r"l"))
+    vars = ls(fg; whereLabel =  contains(r"x"))
+    lands = ls(fg; whereLabel =  contains(r"l"))
     results = IIF.autoinitParametric!.(fg, [vars; lands])
 
     # pl = plotSLAM2D(fg, solveKey=:parametric, drawContour=false, xmin=-20, xmax=20, ymin=-20, ymax=20)

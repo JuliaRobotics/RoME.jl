@@ -192,7 +192,7 @@ There are also two matrix values: the first is the relative transform based on m
 """
 function assembleChordsDict(
     dfg::AbstractDFG,
-    vsyms = ls(dfg; labelFilter =  contains(r"x\d")) |> sortDFG,
+    vsyms = ls(dfg; whereLabel =  contains(r"x\d")) |> sortDFG,
     MAXADI = 10,
     lastPoseNum = getVariableLabelNumber(vsyms[end]),
     chords = Dict{Symbol, Dict{Symbol, Tuple}}(),

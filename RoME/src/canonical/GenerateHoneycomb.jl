@@ -264,7 +264,7 @@ function generateGraph_Honeycomb!(
     # does anything exist in the graph yet
     posecount = if :x0 in ls(dfg)
         # what is the last pose
-        lastPose = (ls(dfg, r"x\d+") |> sortDFG)[end]
+        lastPose = (ls(dfg; whereLabel =  contains(r"x\d+")) |> sortDFG)[end]
         # get latest posecount number
         match(r"\d+", string(lastPose)).match |> x -> parse(Int, x)
     else

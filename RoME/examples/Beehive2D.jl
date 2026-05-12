@@ -595,8 +595,8 @@ getPoints(getBelief(l0adfg, :l0))
 
 ## DEBUG post 6
 
-pl = plotKDE(fg, ls(fg; labelFilter = contains(r"l")); levels = 1)
-pl = plotKDE(fg, ls(fg; labelFilter = contains(r"x")); levels = 1)
+pl = plotKDE(fg, ls(fg; whereLabel = contains(r"l")); levels = 1)
+pl = plotKDE(fg, ls(fg; whereLabel = contains(r"x")); levels = 1)
 
 dontMarginalizeVariablesAll!(fg)
 getSolverParams(fg).dbg = true
