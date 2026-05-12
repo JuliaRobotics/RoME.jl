@@ -1,32 +1,4 @@
-struct MetricLieGroup{
-    𝔽,
-    O <: AbstractGroupOperation,
-    M <: ManifoldsBase.AbstractManifold{𝔽},
-    L <: LieGroup{𝔽, O, M},
-    G <: RiemannianMetric,
-} <: AbstractLieGroup{𝔽, O, M}
-    lie_group::L
-    metric::G
-end
-
-ManifoldsBase.base_manifold(G::MetricLieGroup) = G.lie_group
-function ManifoldsBase.submanifold_component(G::MetricLieGroup, args...)
-    return submanifold_component(G.lie_group, args...)
-end
-function ManifoldsBase.submanifold_components(G::MetricLieGroup, args...)
-    return submanifold_components(G.lie_group, args...)
-end
-LieGroups.LieAlgebra(G::MetricLieGroup) = LieAlgebra(base_manifold(G))
-LieGroups.inv!(G::MetricLieGroup, args...) = inv!(base_manifold(G), args...)
-LieGroups.inv(G::MetricLieGroup, args...) = inv(base_manifold(G), args...)
-LieGroups.compose!(G::MetricLieGroup, args...) = compose!(base_manifold(G), args...)
-LieGroups.compose(G::MetricLieGroup, args...) = compose(base_manifold(G), args...)
-function LieGroups.identity_element(G::MetricLieGroup, args...)
-    return identity_element(base_manifold(G), args...)
-end
-function LieGroups.identity_element!(G::MetricLieGroup, args...)
-    return identity_element!(base_manifold(G), args...)
-end
+using LieGroups: MetricLieGroup
 
 # Left Invariant Rigid Body Kinematics Metric CrokeKumar eq 61.
 # A family of left invariant metrics:
@@ -46,10 +18,13 @@ end
 SOnxRn_MetricManifoldType =
     Union{typeof(SOnxRn_MetricManifold(2)), typeof(SOnxRn_MetricManifold(3))}
 
+#
+LieGroups.LieAlgebra(G::SOnxRn_MetricManifoldType) = LieAlgebra(G.lie_group)
+
 # geodesics for metric (61) are the same as geodesics on the product manifold SO(3)×IR3
 function Manifolds.exp(M::SOnxRn_MetricManifoldType, X)
-    G = base_manifold(M)
-    ε = identity_element(M, typeof(X))
+    G = base_lie_group(M)
+    ε = identity_element(G, typeof(X))
     return exp(base_manifold(G), ε, X)
 end
 
@@ -60,7 +35,7 @@ function Manifolds.exp!(M::SOnxRn_MetricManifoldType, g, X)
 end
 
 function ManifoldsBase.log(M::SOnxRn_MetricManifoldType, p)
-    G = base_manifold(M)
+    G = base_lie_group(M)
     # ε = identity_element(G, typeof(p))
     # X = log(base_manifold(G), ε, p)
     PG = ProductLieGroup(map(LieGroup, G.manifold.manifolds, G.op.operations)...)

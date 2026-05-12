@@ -28,11 +28,11 @@ function (cf::CalcFactor{<:PriorPose3})(m, p)
     return vee(LieAlgebra(M), log(M, p, m))
 end
 
-function (cf::CalcFactor{<:Pose3Pose3})(X, p::ArrayPartition{T}, q) where {T}
+function (cf::CalcFactor{<:Pose3Pose3})(X, p, q)
+    # X ∈ TₚM, X̂ ∈ TₚM, p,q ∈ M
     M = getManifold(Pose3Pose3)
     X̂ = log(M, p, q)
-    Xc::SVector{6, T} = vee(LieAlgebra(M), X - X̂)
-    return Xc
+    return vee(LieAlgebra(M), X - X̂)
 end
 
 # FIXME, rather have separate compareDensity functions

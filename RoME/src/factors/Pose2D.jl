@@ -40,6 +40,17 @@ function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
     return vee(M, p, X - X̂) # TODO check sign
 end
 
+# An alternative error function that parallel transports the error vector back to p
+# function (cf::CalcFactor{<:RobustPose2Pose2})(X, p, q)
+#     G = getManifold(RobustPose2Pose2)
+#     q̂ = exp(G, p, X)
+#     E_q̂ = log(G, q̂, q)
+#     # Parallel transport the error vector back to p.
+#     E_p = parallel_transport_to(G, q̂, E_q̂, p)    
+#     return vee(LieAlgebra(G), E_p) 
+# end
+
+
 # NOTE, serialization support -- will be reduced to macro in future
 # ------------------------------------
 
