@@ -221,7 +221,7 @@ function manageSolveTree!(
 
     # needs to run asynchronously
     ST = @async begin
-        while @show length(ls(dfg, :x0; solvableFilter = >=(1))) == 0
+        while @show length(ls(dfg, :x0; whereSolvable = >=(1))) == 0
             "waiting for prior on x0" |> println
             sleep(1)
         end
@@ -298,7 +298,7 @@ function manageSolveTree!(
                 mss.solveInProgress = SSMReady
 
                 # adjust latest RTT after solve, latest solved -- hard coded pose stride 10
-                lastList = sortDFG(ls(dfg; labelFilter =  contains( r"x\d+9\b|x9\b"), solvableFilter = >=(1)))
+                lastList = sortDFG(ls(dfg; whereLabel =  contains( r"x\d+9\b|x9\b"), whereSolvable = >=(1)))
                 if 0 < length(lastList)
                     lastSolved = lastList[end]
                     mss.drtCurrent =

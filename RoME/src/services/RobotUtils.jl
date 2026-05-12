@@ -210,7 +210,7 @@ List all variables that fall in numerical range `from`, `to`, and with prefix ke
 
 Related
 
-DFG.getVariableLabelNumber, DFT.findFactorsBetweenNaive
+DFG.getVariableLabelNumber
 """
 function listVariablesLabelsWithinRange(
     fg::AbstractDFG,

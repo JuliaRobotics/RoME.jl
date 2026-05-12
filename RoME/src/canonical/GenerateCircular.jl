@@ -29,7 +29,7 @@ Related
 function generateGraph_Circle(
     poses::Int = 6;
     fg::AbstractDFG = initfg(),
-    offsetPoses::Int = maximum([length(ls(fg; labelFilter = contains(r"x\d"))) - 1; 0]),
+    offsetPoses::Int = maximum([length(ls(fg; whereLabel = contains(r"x\d"))) - 1; 0]),
     autoinit::Union{Bool, Nothing} = nothing,
     graphinit::Bool = true,
     landmark::Bool = true,

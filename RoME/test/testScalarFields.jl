@@ -112,7 +112,7 @@ import IncrementalInference: LevelSetGridNormal
 
     ## check at least the first five poses
 
-    for lb in sortDFG(ls(fg; labelFilter =  contains(r"x\d+")))[1:4]
+    for lb in sortDFG(ls(fg; whereLabel =  contains(r"x\d+")))[1:4]
         sim = IIF.calcMeanMaxSuggested(fg, lb, :simulated).suggested
         ppe = IIF.calcMeanMaxSuggested(fg, lb).suggested
         @test isapprox(sim[1:2], ppe[1:2], atol = 1000)
@@ -124,7 +124,7 @@ import IncrementalInference: LevelSetGridNormal
     @error "Skipping latter part of testScalarTest.jl, see #518"
     # try
 
-    # for lb in sortDFG(ls(fg; labelFilter =  contains(r"x\d+")))[5:end]
+    # for lb in sortDFG(ls(fg; whereLabel =  contains(r"x\d+")))[5:end]
     #   sim = IIF.calcMeanMaxSuggested(fg, lb, :simulated).suggested
     #   ppe = IIF.calcMeanMaxSuggested(fg, lb).suggested
     #   @test isapprox(sim[1:2], ppe[1:2], atol=400)
