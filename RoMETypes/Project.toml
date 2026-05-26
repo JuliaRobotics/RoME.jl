@@ -14,7 +14,7 @@ RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-DistributedFactorGraphs = "0.27, 0.28.0"
+DistributedFactorGraphs = "0.29"
 DocStringExtensions = "0.9.3"
 LieGroups = "0.1.11"
 LinearAlgebra = "1.11.0"

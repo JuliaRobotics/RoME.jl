@@ -504,7 +504,7 @@ plotTreeProductDown(csmcStep19.cliqSubFg, csmcStep19.tree, :x4, :x5)
 printCliqHistorySummary(tree, :x3)
 csmc = getCliqSolveHistory(tree, :x3)[9][4]
 
-IIF.getCliqueSolverParams(csmc).dbg = true
+getSolverParams(csmc.dfg).dbg = true
 
 stuff = sandboxCliqResolveStep(tree, :x3, 9)
 

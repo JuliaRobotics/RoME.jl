@@ -72,7 +72,7 @@ function generateGraph_Circle(
         pp = Pose2Pose2(
             let d = MvNormal(
                     [10.0; 0; 2pi / (cyclePoses) + biasTurn],
-                    Matrix(Diagonal((kappaOdo * [0.1; 0.1; 0.01]) .^ 2)),
+                    Matrix(Diagonal((kappaOdo * [0.1; 0.1; 0.1]) .^ 2)),
                 )
                 sampleNoise ? MvNormal(rand(d), d.Σ) : d
             end,
