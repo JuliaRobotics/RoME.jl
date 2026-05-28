@@ -276,12 +276,12 @@ end
     )
     # @time IIF.solveGraphParametric!(fg; stopping_criterion, debug, is_sparse=false, damping_term_min=1e-12, expect_zero_residual=true);
 
-    getState(fg, :x0, :parametric).val[1] ≈ ArrayPartition(
+    DFG.refMeans(getState(fg, :x0, :parametric))[1] ≈ ArrayPartition(
         SA[1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0],
         SA[10.0, 0.0, 0.0],
         SA[0.0, 0.0, 0.0],
     )
-    x1 = getState(fg, :x1, :parametric).val[1]
+    x1 = DFG.refMeans(getState(fg, :x1, :parametric))[1]
     @test isapprox(SpecialOrthogonalGroup(3), x1.x[1], ΔR, atol = 1e-5)
     @test isapprox(x1.x[2], [10, 0, -1], atol = 1e-3)
     @test isapprox(x1.x[3], [10, 0, -0.5], atol = 1e-3)

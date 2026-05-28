@@ -49,11 +49,11 @@ end
 
     M = getManifold(Pose3)
 
-    p0 = getVal(fg, :x0; solveKey = :parametric)[1]
-    p1 = getVal(fg, :x1; solveKey = :parametric)[1]
-    p2 = getVal(fg, :x2; solveKey = :parametric)[1]
-    p3 = getVal(fg, :x3; solveKey = :parametric)[1]
-    p4 = getVal(fg, :x4; solveKey = :parametric)[1]
+    p0 = DFG.refMeans(getState(fg, :x0, :parametric))[1]
+    p1 = DFG.refMeans(getState(fg, :x1, :parametric))[1]
+    p2 = DFG.refMeans(getState(fg, :x2, :parametric))[1]
+    p3 = DFG.refMeans(getState(fg, :x3, :parametric))[1]
+    p4 = DFG.refMeans(getState(fg, :x4, :parametric))[1]
 
     @test isapprox(M, p0, p4, atol = 0.001)
 
@@ -106,14 +106,14 @@ end
     #FIXME manopt parametric cannot init this graph
     # IIF.autoinitParametric!(fg)
 
-    r = IIF.solveGraphParametric!(fg)
+    r = IIF.solveGraphParametric!(fg; init = false)
 
     M = getManifold(Pose3)
 
-    p0 = getVal(fg, :x0; solveKey = :parametric)[1]
-    p1 = getVal(fg, :x1; solveKey = :parametric)[1]
-    p2 = getVal(fg, :x2; solveKey = :parametric)[1]
-    R = getVal(fg, :bRa; solveKey = :parametric)[1]
+    p0 = DFG.refMeans(getState(fg, :x0, :parametric))[1]
+    p1 = DFG.refMeans(getState(fg, :x1, :parametric))[1]
+    p2 = DFG.refMeans(getState(fg, :x2, :parametric))[1]
+    R = DFG.refMeans(getState(fg, :bRa, :parametric))[1]
 
     @test isapprox(
         M,
@@ -136,7 +136,12 @@ end
         ArrayPartition([0, 2.0, 0], [0 -1 0; 1 0 0; 0 0 1.0]),
         atol = 1e-6,
     )
-    @test isapprox(IIF.calcMeanMaxSuggested(fg, :bRa, :parametric).suggested, [0, 0, -0.1], atol = 1e-6)
+    SO3 = SpecialOrthogonalGroup(3)
+    @test isapprox(
+        DFG.refMeans(getState(fg, :bRa, :parametric))[1],
+        exp(SO3, hat(LieAlgebra(SO3), [0, 0, -0.1])),
+        atol = 1e-6
+    )
 
     # Non-parametric is not working yet because
     # bRa cannot be initialized and solveGraph!(fg) gives an error

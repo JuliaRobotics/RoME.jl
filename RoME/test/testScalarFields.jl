@@ -69,8 +69,8 @@ import IncrementalInference: LevelSetGridNormal
 
     storeDir = joinLogPath(fg, "data")
     mkpath(storeDir)
-    datastore = FolderStore{Vector{UInt8}}(:default_folder_store, storeDir)
-    addBlobstore!(fg, datastore)
+    datastore = DFG.FolderBlobprovider(storeDir)
+    addBlobprovider!(fg, datastore)
 
     # new feature, going to temporarily disable as WIP
     getSolverParams(fg).attemptGradients = false
