@@ -44,7 +44,7 @@ export PriorPoint2,
 
 export LeftInvariantMetricSE
 
-include("manifolds/SOnxRn_MetricManifold.jl")
+include("manifolds/LeftInvariantMetricSE.jl")
 include("variables/VariableTypes.jl")
 include("factors/FactorTypes.jl")
 
