@@ -8,33 +8,33 @@ using LieGroups: MetricLieGroup
 # Can we add α and β as parameters to the metric?
 struct LeftInvariantKinematicMetric <: RiemannianMetric end
 
-function SOnxRn_MetricManifold(n)
+function LeftInvariantMetricSE(n)
     return MetricLieGroup(
         SpecialEuclideanGroup(n; variant = :right),
         LeftInvariantKinematicMetric(),
     )
 end
 
-SOnxRn_MetricManifoldType =
-    Union{typeof(SOnxRn_MetricManifold(2)), typeof(SOnxRn_MetricManifold(3))}
+LeftInvariantMetricSEType =
+    Union{typeof(LeftInvariantMetricSE(2)), typeof(LeftInvariantMetricSE(3))}
 
 #
-LieGroups.LieAlgebra(G::SOnxRn_MetricManifoldType) = LieAlgebra(G.lie_group)
+LieGroups.LieAlgebra(G::LeftInvariantMetricSEType) = LieAlgebra(G.lie_group)
 
 # geodesics for metric (61) are the same as geodesics on the product manifold SO(3)×IR3
-function Manifolds.exp(M::SOnxRn_MetricManifoldType, X)
+function Manifolds.exp(M::LeftInvariantMetricSEType, X)
     G = base_lie_group(M)
     ε = identity_element(G, typeof(X))
     return exp(base_manifold(G), ε, X)
 end
 
-function Manifolds.exp!(M::SOnxRn_MetricManifoldType, g, X)
+function Manifolds.exp!(M::LeftInvariantMetricSEType, g, X)
     G = base_manifold(M)
     ε = identity_element(M, typeof(g))
     return exp!(base_manifold(G), g, ε, X)
 end
 
-function ManifoldsBase.log(M::SOnxRn_MetricManifoldType, p)
+function ManifoldsBase.log(M::LeftInvariantMetricSEType, p)
     G = base_lie_group(M)
     # ε = identity_element(G, typeof(p))
     # X = log(base_manifold(G), ε, p)
@@ -42,14 +42,14 @@ function ManifoldsBase.log(M::SOnxRn_MetricManifoldType, p)
     X = log(PG, p)
     return X
 end
-function Manifolds.log!(M::SOnxRn_MetricManifoldType, X, p)
+function Manifolds.log!(M::LeftInvariantMetricSEType, X, p)
     G = base_manifold(M)
     ε = identity_element(M, typeof(p))
     log!(base_manifold(G), X, ε, p)
     return X
 end
 
-function Manifolds.inner(M::SOnxRn_MetricManifoldType, p, X, Y)
+function Manifolds.inner(M::LeftInvariantMetricSEType, p, X, Y)
     Xtr = submanifold_components(M, X)[1]
     XRo = submanifold_components(M, X)[2]
     Ytr = submanifold_components(M, Y)[1]
@@ -58,11 +58,11 @@ function Manifolds.inner(M::SOnxRn_MetricManifoldType, p, X, Y)
     return dot(Xtr, Ytr) + dot(XRo, YRo) / 2
 end
 
-function DFG.getPointIdentity(::typeof(SOnxRn_MetricManifold(2)))
+function DFG.getPointIdentity(::typeof(LeftInvariantMetricSE(2)))
     return ArrayPartition(SA[0; 0.0], SA[1 0; 0 1.0])
 end
-function DFG.getPointIdentity(::typeof(SOnxRn_MetricManifold(3)))
+function DFG.getPointIdentity(::typeof(LeftInvariantMetricSE(3)))
     return ArrayPartition(SA[0, 0, 0.0], SA[1 0 0; 0 1 0; 0 0 1.0])
 end
 
-# LieGroups.LieAlgebra(G::SOnxRn_MetricManifoldType) = LieAlgebra(base_manifold(G))
+# LieGroups.LieAlgebra(G::LeftInvariantMetricSEType) = LieAlgebra(base_manifold(G))

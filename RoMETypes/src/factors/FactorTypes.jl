@@ -44,7 +44,7 @@ Related
 
 [`Pose3Pose3`](@ref), [`Point2Point2`](@ref), [`MutablePose2Pose2Gaussian`](@ref), [`DynPose2`](@ref), [`IMUDeltaFactor`](@ref)
 """
-DFG.@defObservationType Pose2Pose2 RelativeObservation SOnxRn_MetricManifold(2)
+DFG.@defObservationType Pose2Pose2 RelativeObservation LeftInvariantMetricSE(2)
 
 """
 $(TYPEDEF)
@@ -60,6 +60,6 @@ PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 DFG.@defObservationType PriorPose2 PriorObservation TranslationGroup(2) ×
                                                     SpecialOrthogonalGroup(2)
 
-DFG.@defObservationType Pose3Pose3 RelativeObservation SOnxRn_MetricManifold(3)
+DFG.@defObservationType Pose3Pose3 RelativeObservation LeftInvariantMetricSE(3)
 DFG.@defObservationType PriorPose3 PriorObservation TranslationGroup(3) ×
                                                     SpecialOrthogonalGroup(3)

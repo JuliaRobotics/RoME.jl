@@ -42,7 +42,7 @@ compare(a::PriorPose2, b::PriorPose2; tol::Float64 = 1e-10) = compareDensity(a.Z
 
 ##
 #TODO is this manifold not SO3
-DFG.@defObservationType Pose3Pose3RotOffset AbstractManifoldMinimize SOnxRn_MetricManifold(
+DFG.@defObservationType Pose3Pose3RotOffset AbstractManifoldMinimize LeftInvariantMetricSE(
     3,
 )
 
@@ -61,7 +61,7 @@ function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
 end
 
 ##
-DFG.@defObservationType Pose3Pose3Transform AbstractManifoldMinimize SOnxRn_MetricManifold(
+DFG.@defObservationType Pose3Pose3Transform AbstractManifoldMinimize LeftInvariantMetricSE(
     3,
 )
 
@@ -83,7 +83,7 @@ end
   $(TYPEDEF)
 Pose3Pose3 factor where the translation scale is not known, ie. Pose3Pose3 with unit (normalized) translation.
 """
-DFG.@defObservationType Pose3Pose3UnitTrans AbstractManifoldMinimize SOnxRn_MetricManifold(
+DFG.@defObservationType Pose3Pose3UnitTrans AbstractManifoldMinimize LeftInvariantMetricSE(
     3,
 )
 
@@ -95,8 +95,8 @@ function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) whe
 end
 
 #  FIXME needed until AMP#41 is done hopefully can be removed soon 🐛💥
-# Base.convert(::Type{<:Tuple}, ::typeof(SOnxRn_MetricManifold(2))) = (:Euclid,:Euclid,:Circular)
-AMP._manifoldtuple(::typeof(SOnxRn_MetricManifold(2))) = (:Euclid, :Euclid, :Circular)
-function AMP._manifoldtuple(::typeof(SOnxRn_MetricManifold(3)))
+# Base.convert(::Type{<:Tuple}, ::typeof(LeftInvariantMetricSE(2))) = (:Euclid,:Euclid,:Circular)
+AMP._manifoldtuple(::typeof(LeftInvariantMetricSE(2))) = (:Euclid, :Euclid, :Circular)
+function AMP._manifoldtuple(::typeof(LeftInvariantMetricSE(3)))
     return (:Euclid, :Euclid, :Euclid, :Circular, :Circular, :Circular)
 end

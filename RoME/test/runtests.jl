@@ -15,7 +15,7 @@ using LinearAlgebra
 using Random
 using StaticArrays
 
-using RoME: SOnxRn_MetricManifold
+using RoME: LeftInvariantMetricSE
 using ManifoldsBase: submanifold_component
 
 @error("add test for generateGraph_Beehive!, norm( simulated - default ) < tol")

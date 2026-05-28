@@ -25,7 +25,7 @@ Pose2 is a SE(2) mechanization of two Euclidean translations and one Circular ro
 """
 @defStateType(
     Pose2,
-    TranslationGroup(2) × SpecialOrthogonalGroup(2), #TODO look at using SOnxRn_MetricManifold(2) 
+    TranslationGroup(2) × SpecialOrthogonalGroup(2), #TODO look at using LeftInvariantMetricSE(2) 
     ArrayPartition(SA[0; 0.0], SA[1 0; 0 1.0])
 )
 
@@ -41,7 +41,7 @@ Future:
 """
 @defStateType(
     Pose3,
-    TranslationGroup(3) × SpecialOrthogonalGroup(3), #TODO look at using SOnxRn_MetricManifold(3) 
+    TranslationGroup(3) × SpecialOrthogonalGroup(3), #TODO look at using LeftInvariantMetricSE(3) 
     ArrayPartition(SA[0; 0; 0.0], SA[1 0 0; 0 1 0; 0 0 1.0])
 )
 
@@ -83,7 +83,7 @@ Note
 """
 @defStateType(
     DynPose2,
-    # SOnxRn_MetricManifold(2) × TranslationGroup(2), #FIXME SOnxRn(2) or SE(2)
+    # LeftInvariantMetricSE(2) × TranslationGroup(2), #FIXME SOnxRn(2) or SE(2)
     # ArrayPartition(ArrayPartition(SA[0;0.0],SA[1 0; 0 1.0]),SA[0;0.0])
     TranslationGroup(2) × SpecialOrthogonalGroup(2) × TranslationGroup(2),
     ArrayPartition(SA[0; 0.0], SA[1 0; 0 1.0], SA[0; 0.0])

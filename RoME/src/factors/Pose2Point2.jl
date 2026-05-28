@@ -22,7 +22,7 @@ DFG.getManifold(::InstanceType{Pose2Point2}) = getManifold(Point2)
 # define the conditional probability constraint
 function (cfo::CalcFactor{<:Pose2Point2})(p_Xpq, w_T_p, w_Tl_q)
     #
-    M = SOnxRn_MetricManifold(2)
+    M = LeftInvariantMetricSE(2)
 
     p_T_qhat = ArrayPartition(SA[p_Xpq[1]; p_Xpq[2]], SMatrix{2, 2}([1 0; 0 1.0]))
     _w_T_p = ArrayPartition(SA[w_T_p.x[1]...], SMatrix{2, 2}(w_T_p.x[2]))

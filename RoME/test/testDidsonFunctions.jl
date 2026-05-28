@@ -49,7 +49,7 @@ using Test
 
     pts = approxConv(fg, :x0x1f1, :x0)
 
-    p2 = manikde!(SOnxRn_MetricManifold(3), pts)
+    p2 = manikde!(LeftInvariantMetricSE(3), pts)
 end
 
 # using Gadfly

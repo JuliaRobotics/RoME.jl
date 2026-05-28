@@ -32,7 +32,7 @@ function Statistics.mean(::typeof(SE2E2_Manifold), pts::AbstractVector)
         (
             d -> ArrayPartition(submanifold_component(d, 1), submanifold_component(d, 2))
         ).(pts)
-    mse2 = mean(SOnxRn_MetricManifold(2), se2_)
+    mse2 = mean(LeftInvariantMetricSE(2), se2_)
     e2_ = (d -> ArrayPartition(submanifold_component(d, 3))).(pts)
     me2 = mean(Euclidean(2), e2_)
     return ArrayPartition(

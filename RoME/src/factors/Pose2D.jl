@@ -29,7 +29,7 @@ Base.@kwdef struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldM
     Z::T = MvNormal(Diagonal([1.0; 1.0; 1.0]))
 end
 
-DFG.getManifold(::InstanceType{Pose2Pose2}) = SOnxRn_MetricManifold(2)
+DFG.getManifold(::InstanceType{Pose2Pose2}) = LeftInvariantMetricSE(2)
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2()
 

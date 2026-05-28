@@ -42,7 +42,7 @@ export PriorPoint2,
     PriorPose2,
     PackedPriorPose2
 
-export SOnxRn_MetricManifold
+export LeftInvariantMetricSE
 
 include("manifolds/SOnxRn_MetricManifold.jl")
 include("variables/VariableTypes.jl")

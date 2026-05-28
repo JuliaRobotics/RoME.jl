@@ -170,7 +170,7 @@ end
     PM, varLabels, r, Σ = IIF.solveGraphParametric(fg) #autodiff=:finite)
 
     @test isapprox(
-        RoME.SOnxRn_MetricManifold(2),
+        RoME.LeftInvariantMetricSE(2),
         r[1],
         ArrayPartition([2, 0.0], [0 -1; 1 0.0]),
         atol = 1e-3,

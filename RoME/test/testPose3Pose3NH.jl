@@ -53,7 +53,7 @@ end
     # @testset "Ensure variables initialized properly" begin
 
     # start with to tight an initialization
-    muX1 = mean(SOnxRn_MetricManifold(3), getVal(fg, :x1))
+    muX1 = mean(LeftInvariantMetricSE(3), getVal(fg, :x1))
     @test isapprox(submanifold_component(muX1, 1), [0, 0, 0], atol = 0.4)
     @test isapprox(submanifold_component(muX1, 2), [1 0 0; 0 1 0; 0 0 1], atol = 0.04)
 
@@ -67,7 +67,7 @@ end
 
     priorpts = approxConv(fg, :x1f1, :x1)
     # priorpts = evalFactor(fg, fg.g.vertices[2], 1)
-    means = mean(SOnxRn_MetricManifold(3), priorpts)
+    means = mean(LeftInvariantMetricSE(3), priorpts)
     @test sum(map(Int, abs.(submanifold_component(means, 1)) .> 0.5)) == 0
     @test isapprox(submanifold_component(means, 2), [1 0 0; 0 1 0; 0 0 1], atol = 0.05)
 
@@ -92,8 +92,8 @@ end
     X2pts = approxConv(fg, :x1x2f1, :x2; N = N)
     # X2pts = evalFactor(fg, fg.g.vertices[6], 3, N=N)
     X3pts = approxConv(fg, :x2x3f1, :x3)
-    X2ptsMean = mean(SOnxRn_MetricManifold(3), X2pts)
-    X3ptsMean = mean(SOnxRn_MetricManifold(3), X3pts)
+    X2ptsMean = mean(LeftInvariantMetricSE(3), X2pts)
+    X3ptsMean = mean(LeftInvariantMetricSE(3), X3pts)
 
     # @show X2ptsMean
     # @show X3ptsMean
@@ -135,8 +135,8 @@ end
 
     # plotKDE([p2t;p2],c=["red";"blue"],dims=[1;2],levels=3)
 
-    t1 = mmd(SOnxRn_MetricManifold(3), X1ptst, X1pts; bw = [0.001;])
-    t2 = mmd(SOnxRn_MetricManifold(3), X2ptst, X2pts; bw = [0.001;])
+    t1 = mmd(LeftInvariantMetricSE(3), X1ptst, X1pts; bw = [0.001;])
+    t2 = mmd(LeftInvariantMetricSE(3), X2ptst, X2pts; bw = [0.001;])
 
     @test t1 < 0.6
     @test t2 < 0.6
