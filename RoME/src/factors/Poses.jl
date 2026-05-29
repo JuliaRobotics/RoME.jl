@@ -41,24 +41,42 @@ compare(a::Pose2Pose2, b::Pose2Pose2; tol::Float64 = 1e-10) = compareDensity(a.Z
 compare(a::PriorPose2, b::PriorPose2; tol::Float64 = 1e-10) = compareDensity(a.Z, b.Z)
 
 ##
-#TODO is this manifold not SO3
 DFG.@defObservationType Pose3Pose3RotOffset AbstractManifoldMinimize LeftInvariantMetricSE(
     3,
 )
 
-# measurement is in frame a, for example imu frame
-# p and q is in frame b, for example body frame
-# bRa is the rotation to get a in the b frame 
-# measurement in frame a is converted to frame b and used to calculate the error
-function (cf::CalcFactor{<:Pose3Pose3RotOffset})(aX, p, q, bRa)
+# Measurement `aX` is a tangent vector in frame 'a' (sensor frame)
+# Poses `p` and `q` are in frame 'b' (body frame)
+# `bRa` is the rotation offset to get frame 'a' into frame 'b'
+function (cf::CalcFactor{<:Pose3Pose3RotOffset})(X, p, q, bRa)
+    # X̂p ∈ TₚM, X̂ ∈ TₚM, p,q ∈ M
     M = getManifold(Pose3Pose3RotOffset)
-    # measurement in frame a, input is tangent, can also use vector transport 
-    a_m = exp(M, getPointIdentity(M), aX)
-    b_m = ArrayPartition(a_m.x[1], bRa * a_m.x[2])
+    
+    # X̂p ∈ TₚM is the relative tangent vector between the body poses, anchored at base point `p`.
+    X̂p = log(M, p, q)
+        
+    # By evaluating `diff_left_compose` at base point `p`, we push the body's tangent vector `X̂p` 
+    # forward to the point on the manifold where the sensor exists (p ∘ bTa).
+    # This yields `X̂` (anchored at p ∘ bTa), aligning perfectly with measurement `X`.
+    bTa = ArrayPartition(zeros(eltype(bRa), 3), bRa)
+    X̂ = diff_left_compose(base_lie_group(M), p, bTa, X̂p)
+    
+    # NOTE we could have used the adjoint as well to transform the predicted tangent vector to the SENSOR frame 'a'
+    # aRb = transpose(bRa)
+    # aTb = ArrayPartition(zeros(eltype(bRa), 3), aRb)
+    # aX̂ = adjoint(base_lie_group(M), aTb, X̂p)
 
-    q̂ = LieGroups.compose(M, p, b_m)
-    return vee(M, q, log(M, q, q̂)) # coordinates
+    # Calculate the residual
+    return vee(LieAlgebra(M), X - X̂)
 end
+
+#TODO Pose3Pose3Offset with a pose offset.
+# function (cf::CalcFactor{<:Pose3Pose3Offset})(X, p, q, bTa)
+#     M = getManifold(Pose3Pose3Offset)
+#     X̂p = log(M, p, q)
+#     X̂ = diff_left_compose(base_lie_group(M), p, bTa, X̂p)
+#     return vee(LieAlgebra(M), X - X̂)
+# end
 
 ##
 DFG.@defObservationType Pose3Pose3Transform AbstractManifoldMinimize LeftInvariantMetricSE(
