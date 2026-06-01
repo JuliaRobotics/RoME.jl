@@ -105,7 +105,7 @@ function solveMultiviewLandmark!(
     _c_Xi = Vector{CameraModels.PixelIndex{true, Float64}}()
     for fl in flbs
         vl = setdiff(ls(dfg, fl), [lmlb;])[1]
-        push!(_w_P_ci, getState(getVariable(dfg, vl), :parametric).val[1])
+        push!(_w_P_ci, DFG.refMeans(getState(getVariable(dfg, vl), :parametric))[1])
         union!(vlbs, [vl;])
 
         # TODO apply camera intrinsic calibration
@@ -121,7 +121,7 @@ function solveMultiviewLandmark!(
         w_Ph0 = [
             (
                 retry * randn(3) .+
-                getState(getVariable(dfg, lmlb), :parametric).val[1]
+                DFG.refMeans(getState(getVariable(dfg, lmlb), :parametric))[1]
             )...
             1.0
         ]

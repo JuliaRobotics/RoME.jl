@@ -201,18 +201,13 @@ end
     IIF.solveGraphParametric!(fg)
 
     ##
-
-    @show IIF.calcMeanMaxSuggested(fg, :x2, :parametric).suggested
-    @show IIF.calcMeanMaxSuggested(fg, :x2, :default).suggested
-
+    G = getManifold(fg[:x2])
+    par_ref = vee(LieAlgebra(G), log(G, DFG.refMeans(getState(fg, :x2, :parametric))[1]))
     test_err = 9999 * ones(3)
-    test_err[1:2] =
-        IIF.calcMeanMaxSuggested(fg, :x2, :default).suggested[1:2] -
-        IIF.calcMeanMaxSuggested(fg, :x2, :parametric).suggested[1:2]
+    test_err[1:2] = IIF.calcMeanMaxSuggested(fg, :x2, :default).suggested[1:2] - par_ref[1:2]
 
-    @show theta = IIF.calcMeanMaxSuggested(fg, :x2, :default).suggested[3]
-    @show theta_ref = IIF.calcMeanMaxSuggested(fg, :x2, :parametric).suggested[3]
-    @show test_err[3] = Manifolds.log(Manifolds.Circle(), theta_ref, theta) # theta_ref - theta_
+    theta = IIF.calcMeanMaxSuggested(fg, :x2, :default).suggested[3]
+    test_err[3] = Manifolds.log(Manifolds.Circle(), par_ref[3], theta) # theta_ref - theta_
 
     # # arg, workaround until #244
     # theta = (getBelief(fg, :x2, :default) |> getPoints)[3,:] .+ pi
@@ -220,7 +215,7 @@ end
     # @show theta_ = Statistics.mean(theta)
     # @show theta_ref = TU.wrapRad(IIF.calcMeanMaxSuggested(fg, :x2, :parametric).suggested[3] + pi)
 
-    @show test_err .= abs.(test_err)
+    test_err .= abs.(test_err)
 
     @test isapprox(test_err[1], 0, atol = 0.5)
     @test isapprox(test_err[2], 0, atol = 0.5)

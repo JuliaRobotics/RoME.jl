@@ -3,6 +3,8 @@
 using Test
 using CameraModels
 using RoME
+using DistributedFactorGraphs
+using RoMETypes
 # using Manifolds
 
 # using ManifoldDiff
@@ -45,13 +47,29 @@ using RoME
     addVariable!(fg, :w_P_c2, Pose3)
     addVariable!(fg, :w_Ph, Point3)
 
-    c1 = manikde!(Pose3, [w_T_c1 for _ = 1:1]; bw = ones(6))
-    c2 = manikde!(Pose3, [w_T_c2 for _ = 1:1]; bw = ones(6))
-    h1 = manikde!(Position3, [zeros(3) for _ = 1:1]; bw = ones(3))
+    # c1 = manikde!(Pose3, [w_T_c1 for _ = 1:1]; bw = ones(6))
+    # c2 = manikde!(Pose3, [w_T_c2 for _ = 1:1]; bw = ones(6))
+    # h1 = manikde!(Position3, [zeros(3) for _ = 1:1]; bw = ones(3))
+    # initVariable!(fg, :w_P_c1, w_T_c1, :parametric)
+    # initVariable!(fg, :w_P_c2, c2, :parametric)
+    # initVariable!(fg, :w_Ph, h1, :parametric)
 
-    initVariable!(fg, :w_P_c1, c1, :parametric)
-    initVariable!(fg, :w_P_c2, c2, :parametric)
-    initVariable!(fg, :w_Ph, h1, :parametric)
+    #FIXME manually init :parametric states until AMP upgrade is done
+    state = getState(fg, :w_P_c1, :parametric)
+    DFG.refMeans(state)[1] = w_T_c1
+    state.initialized = true
+    
+    state = getState(fg, :w_P_c2, :parametric)
+    DFG.refMeans(state)[1] = w_T_c2
+    state.initialized = true
+
+    state = getState(fg, :w_Ph, :parametric)
+    state.initialized = true
+
+    # FIXME, should be done on parametric initVariable above
+    # getState(fg[:w_P_c1], :parametric).bw = diagm(ones(6))
+    # getState(fg[:w_P_c2], :parametric).bw = diagm(ones(6))
+    # getState(fg[:w_Ph], :parametric).bw = diagm(ones(3))
 
     Z = MvNormal([240.0; 320], [1 0; 0 1.0])
     f1 = RoME.GenericProjection{Pose3, Point3}(cam, Z)
@@ -60,11 +78,6 @@ using RoME
     Z = MvNormal([240.0; 315], [1 0; 0 1.0])
     f2 = RoME.GenericProjection{Pose3, Point3}(cam, Z)
     addFactor!(fg, [:w_P_c2; :w_Ph], f2)
-
-    # FIXME, should be done on parametric initVariable above
-    getState(fg[:w_P_c1], :parametric).bw = diagm(ones(6))
-    getState(fg[:w_P_c2], :parametric).bw = diagm(ones(6))
-    getState(fg[:w_Ph], :parametric).bw = diagm(ones(3))
 
     M = getManifold(fg, :w_P_c1)
     addFactor!(
@@ -90,6 +103,7 @@ using RoME
     )
 
     @error "TODO Work in progress for solving GenericProjection factors via solveGraphParametric!"
+    # There is no CalcFactor for GenericProjection
     # IIF.solveGraphParametric!(fg)
 
     ##

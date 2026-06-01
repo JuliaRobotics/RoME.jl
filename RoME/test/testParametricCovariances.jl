@@ -54,10 +54,10 @@ end
     IIF.autoinitParametric!(fg)
     # IIF.solveGraph!(fg)
 
-    @test isapprox([0; 0; 0.0], IIF.calcMeanMaxSuggested(fg, :x0, :parametric).suggested; atol = 1e-4)
-    @test isapprox([1.05; 0; 0], IIF.calcMeanMaxSuggested(fg, :x1, :parametric).suggested; atol = 1e-4)
+    G = getManifold(fg[:x0])
+    @test isapprox([0; 0; 0.0], vee(LieAlgebra(G), log(G, DFG.refMeans(getState(fg, :x0, :parametric))[1])); atol = 1e-4)
+    @test isapprox([1.05; 0; 0], vee(LieAlgebra(G), log(G, DFG.refMeans(getState(fg, :x1, :parametric))[1])); atol = 1e-4)
 
-    ##
 end
 ##
 
