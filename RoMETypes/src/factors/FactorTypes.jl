@@ -20,25 +20,24 @@ DFG.@defObservationType PriorPoint2 PriorObservation LieGroups.TranslationGroup(
 """
 $(TYPEDEF)
 
-Rigid transform between two Pose2's, assuming (x,y,theta).
+Rigid transform between two Pose2's.
 
-Calcuated as:
+Calculated as:
 ```math
 \\begin{aligned}
-\\hat{q}=\\exp_pX_m\\\\
-X = \\log_q \\hat{q}\\\\
-X^i = \\mathrm{vee}(q, X)
+\\hat{X} = \\log(\\mathcal{M}, p, q)\\\\
+X_e = X_m - \\hat{X}\\\\
+X^i = \\mathrm{vee}(\\mathfrak{g}, X_e)
 \\end{aligned}
 ```
 with:
-``\\mathcal M= \\mathrm{SE}(2)`` Special Euclidean group\\
-``p`` and ``q`` ``\\in \\mathcal M`` the two Pose2 points\\
-the measurement vector ``X_m \\in T_p \\mathcal M``\\
-and the error vector ``X \\in T_q \\mathcal M``\\
-``X^i`` coordinates of ``X``
-
-DevNotes
-- Maybe with Manifolds.jl, `{T <: IIF.SamplableBelief, S, R, P}`
+`\\mathcal M= LeftInvariantMetricSE(2)` Special Euclidean group with a left-invariant metric\
+`\\mathfrak{g} = \\mathfrak{se}(2)` the Lie algebra at the identity element\
+`p` and `q` `\\in \\mathcal M` the two Pose2 points\
+the measurement vector `X_m \\in \\mathfrak{g}`\
+the predicted relative tangent vector `\\hat{X} \\in \\mathfrak{g}`\
+the error vector `X_e \\in \\mathfrak{g}`\
+`X^i` coordinate vector of the error
 
 Related
 
@@ -57,9 +56,16 @@ Example:
 PriorPose2( MvNormal([10; 10; pi/6.0], Matrix(Diagonal([0.1;0.1;0.05].^2))) )
 ```
 """
-DFG.@defObservationType PriorPose2 PriorObservation TranslationGroup(2) ×
-                                                    SpecialOrthogonalGroup(2)
+DFG.@defObservationType(
+    PriorPose2,
+    PriorObservation,
+    TranslationGroup(2) × SpecialOrthogonalGroup(2)
+)
 
 DFG.@defObservationType Pose3Pose3 RelativeObservation LeftInvariantMetricSE(3)
-DFG.@defObservationType PriorPose3 PriorObservation TranslationGroup(3) ×
-                                                    SpecialOrthogonalGroup(3)
+
+DFG.@defObservationType(
+    PriorPose3,
+    PriorObservation,
+    TranslationGroup(3) × SpecialOrthogonalGroup(3)
+)

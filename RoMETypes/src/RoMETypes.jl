@@ -22,8 +22,7 @@ export Point2,
     RotVelPos,
     VelPos3,
     DynPoint2,
-    DynPose2,
-    projectCartesian
+    DynPose2
 
 export PriorPoint2,
     PackedPriorPoint2,
