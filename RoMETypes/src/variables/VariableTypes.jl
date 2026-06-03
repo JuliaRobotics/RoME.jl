@@ -21,11 +21,13 @@ p3 = Point3()
 """
 $(TYPEDEF)
 
-Pose2 is a SE(2) mechanization of two Euclidean translations and one Circular rotation, used for general 2D SLAM.
+Pose2 represents a 2D pose parameterized as a **product manifold** of two Euclidean translations and one planar rotation.
+
+Unlike a coupled Special Euclidean group (`SE(2)`), the translation and rotation components are topologically decoupled. Tangent space vectors correspond to direct coordinate offsets (typically aligned with global map axes) rather than body-frame velocity twists. Used for general 2D SLAM.
 """
 @defStateType(
     Pose2,
-    TranslationGroup(2) × SpecialOrthogonalGroup(2), #TODO look at using LeftInvariantMetricSE(2) 
+    TranslationGroup(2) × SpecialOrthogonalGroup(2),
     ArrayPartition(SA[0; 0.0], SA[1 0; 0 1.0])
 )
 
@@ -41,7 +43,7 @@ Future:
 """
 @defStateType(
     Pose3,
-    TranslationGroup(3) × SpecialOrthogonalGroup(3), #TODO look at using LeftInvariantMetricSE(3) 
+    TranslationGroup(3) × SpecialOrthogonalGroup(3),
     ArrayPartition(SA[0; 0; 0.0], SA[1 0 0; 0 1 0; 0 0 1.0])
 )
 
