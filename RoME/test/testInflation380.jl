@@ -4,6 +4,7 @@
 using Test
 using RoME
 using Statistics
+using LieGroups
 
 ##
 
@@ -207,7 +208,7 @@ end
     test_err[1:2] = IIF.calcMeanMaxSuggested(fg, :x2, :default).suggested[1:2] - par_ref[1:2]
 
     theta = IIF.calcMeanMaxSuggested(fg, :x2, :default).suggested[3]
-    test_err[3] = Manifolds.log(Manifolds.Circle(), par_ref[3], theta) # theta_ref - theta_
+    test_err[3] = log(Circle(), par_ref[3], theta) # theta_ref - theta_
 
     # # arg, workaround until #244
     # theta = (getBelief(fg, :x2, :default) |> getPoints)[3,:] .+ pi

@@ -23,7 +23,8 @@ $(TYPEDEF)
 
 Pose2 represents a 2D pose parameterized as a **product manifold** of two Euclidean translations and one planar rotation.
 
-Unlike a coupled Special Euclidean group (`SE(2)`), the translation and rotation components are topologically decoupled. Tangent space vectors correspond to direct coordinate offsets (typically aligned with global map axes) rather than body-frame velocity twists. Used for general 2D SLAM.
+Unlike a coupled Special Euclidean group (`SE(2)`), the translation and rotation components are topologically decoupled. 
+Tangent space vectors correspond to direct coordinate offsets (typically aligned with global map axes) rather than body-frame velocity twists.
 """
 @defStateType(
     Pose2,
@@ -34,12 +35,10 @@ Unlike a coupled Special Euclidean group (`SE(2)`), the translation and rotation
 """
 $(TYPEDEF)
 
-Pose3 is currently a Euler angle mechanization of three Euclidean translations and three Circular rotation.
+Pose3 represents a 3D pose parameterized as a **product manifold** of three Euclidean translations and one 3D rotation.
 
-Future:
-------
-- Work in progress on AMP3D for proper non-Euler angle on-manifold operations.
-- TODO the AMP upgrade is aimed at resolving 3D to Quat/SE3/SP3 -- current Euler angles will be replaced
+Unlike a coupled Special Euclidean group (`SE(3)`), the translation and rotation components are topologically decoupled. 
+Tangent space vectors correspond to direct coordinate offsets (typically aligned with global map axes) rather than body-frame velocity twists.
 """
 @defStateType(
     Pose3,
