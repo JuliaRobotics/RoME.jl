@@ -51,7 +51,7 @@ relative_types = [
     Pose3Pose3Rotation,
     Pose3Pose3XYYaw,
     RoME.Pose3Pose3RotOffset,
-    RoME.Pose3Pose3Transform,
+    RoME.Pose3Pose3Offset,
     RoME.Pose3Pose3UnitTrans,
     VelAlign,
     VelPoint2VelPoint2,

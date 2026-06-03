@@ -217,8 +217,7 @@ end
         ),
     )
 
-    #FIXME needs IIF autoinitParametric! update PR #TBD
-    # IIF.autoinitParametric!(fg)
+    IIF.autoinitParametric!(fg)
     r = IIF.solveGraphParametric!(fg; init = false)
 
     M = getManifold(Pose3)
@@ -255,4 +254,100 @@ end
     @test isapprox(M, np1, ArrayPartition([0, 1.0, 0], R_x1), atol = 2e-1)
     @test isapprox(M, np2, ArrayPartition(Vector(x2_pos), R_x2), atol = 2e-1)
     @test isapprox(IIF.calcMeanMaxSuggested(fg, :bRa).suggested, [0, 0, -α], atol = 2e-1)
+end
+
+@testset "Application Test: Query Camera Relocalization against Known Map" begin
+    M = getManifold(Pose3)
+    alg = LieAlgebra(M)
+    
+    # =========================================================================
+    # 1. THE KNOWN REFERENCE MAP (Two cameras with known poses)
+    # =========================================================================
+    # Shift Reference Camera A away from the [0,0,0] default init to prevent NaN normals
+    p_A_true_coords = SA[0.0, -2.0, 0.0, 0.0, 0.0, 0.0]
+    p_A_true = exp(M, hat(alg, p_A_true_coords))
+    
+    # Reference Camera B
+    p_B_true_coords = SA[3.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    p_B_true = exp(M, hat(alg, p_B_true_coords))
+    
+    # =========================================================================
+    # 2. THE UNKNOWN QUERY POSE (To be recovered, scale and all)
+    # =========================================================================
+    # In reality, the query camera is sitting out at X=1.5, Y=4.0, Z=0.0
+    R_query_true = SA[cos(0.1) 0.0 sin(0.1); 0.0 1.0 0.0; -sin(0.1) 0.0 cos(0.1)]
+    p_query_true = ArrayPartition(SA[1.5, 4.0, 0.0], R_query_true)
+    
+    # =========================================================================
+    # 3. GENERATE THE MATCHING MEASUREMENTS (Scale-Free Rays)
+    # =========================================================================
+    # Feature matching from Known Pose A -> Unknown Query Pose
+    X_A_query_coords = vee(alg, log(M, p_A_true, p_query_true))
+    t_A_scale_free = normalize(X_A_query_coords[1:3])
+    X_A_query_coords = SVector{6, Float64}(t_A_scale_free..., X_A_query_coords[4:6]...)
+    
+    # Feature matching from Known Pose B -> Unknown Query Pose
+    X_B_query_coords = vee(alg, log(M, p_B_true, p_query_true))
+    t_B_scale_free = normalize(X_B_query_coords[1:3])
+    X_B_query_coords = SVector{6, Float64}(t_B_scale_free..., X_B_query_coords[4:6]...)
+
+    # =========================================================================
+    # 4. CONSTRUCT THE FACTOR GRAPH
+    # =========================================================================
+    dfg = initfg()
+    
+    # Add our map nodes and the unknown query node
+    addVariable!(dfg, :cam_knownA, Pose3)
+    addVariable!(dfg, :cam_knownB, Pose3)
+    addVariable!(dfg, :cam_unknown, Pose3)
+    
+    # Lock the reference map nodes to their true, known coordinates using Priors
+    # (Using Matrix(I) to ensure compatibility with all versions of Distributions.jl)
+    addFactor!(dfg, [:cam_knownA], PriorPose3(MvNormal(p_A_true_coords, 0.01 * I(6))))
+    addFactor!(dfg, [:cam_knownB], PriorPose3(MvNormal(p_B_true_coords, 0.01 * I(6))))
+    
+    # Add the scale-free direction factors from image matching
+    addFactor!(dfg, [:cam_knownA, :cam_unknown], RoME.Pose3Pose3UnitTrans(MvNormal(X_A_query_coords, 0.1 * I(6))))
+    addFactor!(dfg, [:cam_knownB, :cam_unknown], RoME.Pose3Pose3UnitTrans(MvNormal(X_B_query_coords, 0.1 * I(6))))
+    
+    # =========================================================================
+    # 5. SOLVE AND VERIFY
+    # =========================================================================
+    IIF.autoinitParametric!(dfg, [:cam_knownA, :cam_knownB])
+    IIF.solveGraphParametric!(dfg; init = false)
+    
+    cam_unknown = getState(dfg, :cam_unknown, :parametric)
+    cam_unknown_μ = DFG.refMeans(cam_unknown)[1]
+    cam_unknown_Σ = DFG.refCovariances(cam_unknown)[1]
+
+    # Verify translation coordinates were fully recovered (Scale and all)
+    @test isapprox(cam_unknown_μ.x[1], p_query_true.x[1], atol = 1e-3)
+    # Verify the rotation matrix was fully recovered
+    @test isapprox(cam_unknown_μ.x[2], p_query_true.x[2], atol = 1e-3)
+
+    # Verify inferred bearings from solved pose match the scale-free input rays.
+    X_A_est = vee(alg, log(M, p_A_true, cam_unknown_μ))
+    X_B_est = vee(alg, log(M, p_B_true, cam_unknown_μ))
+    @test isapprox(normalize(X_A_est[1:3]), t_A_scale_free, atol = 1e-6)
+    @test isapprox(normalize(X_B_est[1:3]), t_B_scale_free, atol = 1e-6)
+
+    # Covariance should be physically valid and reflect weaker depth observability.
+    Σsym = Symmetric(cam_unknown_Σ)
+    @test isapprox(cam_unknown_Σ, Matrix(Σsym), atol = 1e-10)
+    @test isposdef(Σsym)
+    @test cam_unknown_Σ[2, 2] > cam_unknown_Σ[1, 1] > cam_unknown_Σ[3, 3]
+
+    rot_var = diag(cam_unknown_Σ)[4:6]
+    @test maximum(abs.(rot_var .- mean(rot_var))) < 1e-3
+
+    # test against previously computed expected covariance to catch regressions (not verified).
+    expcted_Σ = [
+         1.97957   -2.81315   -0.0        0.00282   -0.0       -0.028109;
+        -2.81315   17.2234     0.0       -0.001448  -0.0        0.014428;
+        -0.0        0.0        1.36339    0.023114   0.002655   0.002319;
+         0.00282   -0.001448   0.023114   0.054942   2.4e-5    -2.0e-6;
+        -0.0       -0.0        0.002655   2.4e-5     0.054964   2.0e-6;
+        -0.028109   0.014428   0.002319  -2.0e-6     2.0e-6     0.054958;
+    ]
+    @test isapprox(cam_unknown_Σ, expcted_Σ, atol=1e-3)
 end

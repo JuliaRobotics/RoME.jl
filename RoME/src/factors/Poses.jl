@@ -69,28 +69,14 @@ function (cf::CalcFactor{<:Pose3Pose3RotOffset})(Xs, p, q, pRs)
     return vee(LieAlgebra(M), Xs - X̂s)
 end
 
-#TODO Pose3Pose3Offset with a pose offset.
-# function (cf::CalcFactor{<:Pose3Pose3Offset})(X, p, q, pTs)
-#     M = getManifold(Pose3Pose3Offset)
-#     X̂p = log(M, p, q)
-#     X̂ = diff_left_compose(base_lie_group(M), p, pTs, X̂p)
-#     return vee(LieAlgebra(M), X - X̂)
-# end
+#
+DFG.@defObservationType Pose3Pose3Offset AbstractManifoldMinimize LeftInvariantMetricSE(3)
 
-##
-DFG.@defObservationType Pose3Pose3Transform AbstractManifoldMinimize LeftInvariantMetricSE(
-    3,
-)
-
-function (cf::CalcFactor{<:Pose3Pose3Transform})(p_NX, p, q, Δ)
-    M = getManifold(Pose3Pose3Transform)
-    ε = getPointIdentity(M)
-
-    Δn = compose(M, Δ, exp(M, ε, p_NX))
-    q̂ = LieGroups.compose(M, p, Δn)
-
-    Xc::SVector{6, T} = get_coordinates(M, q, log(M, q, q̂), DefaultOrthogonalBasis())
-    return Xc
+function (cf::CalcFactor{<:Pose3Pose3Offset})(X, p, q, pTs)
+    M = getManifold(Pose3Pose3Offset)
+    X̂p = log(M, p, q)
+    X̂ = diff_left_compose(base_lie_group(M), p, pTs, X̂p)
+    return vee(LieAlgebra(M), X - X̂)
 end
 
 ## ====================================
@@ -100,15 +86,22 @@ end
   $(TYPEDEF)
 Pose3Pose3 factor where the translation scale is not known, ie. Pose3Pose3 with unit (normalized) translation.
 """
-DFG.@defObservationType Pose3Pose3UnitTrans AbstractManifoldMinimize LeftInvariantMetricSE(
-    3,
-)
+DFG.@defObservationType Pose3Pose3UnitTrans AbstractManifoldMinimize LeftInvariantMetricSE(3)
 
-function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p::ArrayPartition{T}, q) where {T}
+# NOTE: this manifold is actually Sphere(2) × SpecialOrthogonal(3), but we embed in LeftInvariantMetricSE(3) and use the chordal distance `-`.
+function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p, q)
     M = getManifold(Pose3Pose3UnitTrans)
-    q̂ = exp(M, p, X)
-    Xc::SVector{6, T} = vee(LieAlgebra(M), log(M, q, q̂))
-    return SVector{6, T}(normalize(Xc[1:3])..., Xc[4:6]...)
+    
+    X̂ = log(M, p, q)
+    X_coords = vee(LieAlgebra(M), X)
+    X̂_coords = vee(LieAlgebra(M), X̂)
+    
+    # Calculate the residual at p: measurement - prediction
+    # We normalize the prediction's translation direction to match the unit measurement X
+    return SVector{6}(
+        (normalize(X_coords[1:3]) - normalize(X̂_coords[1:3]))...,
+        (X_coords[4:6] - X̂_coords[4:6])...
+    )
 end
 
 #  FIXME needed until AMP#41 is done hopefully can be removed soon 🐛💥

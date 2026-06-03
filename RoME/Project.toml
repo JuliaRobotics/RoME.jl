@@ -93,8 +93,9 @@ julia = "1.10"
 CameraModels = "0d57b887-6120-40e6-8b8c-29d3116bc0c1"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["CameraModels", "DifferentialEquations", "Flux", "ImageIO", "Test"]
+test = ["CameraModels", "DifferentialEquations", "Flux", "ImageIO", "Test", "ForwardDiff"]

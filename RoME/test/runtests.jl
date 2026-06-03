@@ -37,6 +37,7 @@ testfiles = [
 
     #parametric tests
     "testParametric.jl"
+    "testPose2Propagate.jl"
     "testPose3.jl"
     "testVelPos3.jl"
 
