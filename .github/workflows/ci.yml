@@ -24,7 +24,7 @@ jobs:
         
         include:
           - environment: 'standard'
-            project-path: '.'
+            project-path: 'RoME/test'
           - environment: 'upstream'
             project-path: 'RoME/test/upstream_test'
             
