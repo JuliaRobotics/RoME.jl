@@ -4,74 +4,68 @@ on:
   push:
     branches:
       - develop
-      - release**
+      - 'release/**'
   workflow_dispatch:
+
 jobs:
   test:
-    name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }} - ${{ matrix.arch }}
+    name: Julia ${{ matrix.julia-version }} - Env:${{ matrix.environment }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     env:
       JULIA_PKG_SERVER: ""
+      JULIA_PROJECT: ${{ matrix.project-path }} # Native Julia env var sets the active workspace context
     strategy:
       fail-fast: false
       matrix:
-        julia-version: ['1.12', 'nightly']
+        julia-version: ['1', 'nightly']
         os: [ubuntu-latest]
         arch: [x64]
+        environment: ['standard', 'upstream']
+        
+        include:
+          - environment: 'standard'
+            project-path: '.'
+          - environment: 'upstream'
+            project-path: 'RoME/test/upstream_test'
+            
+        exclude:
+          - environment: 'upstream'
+            julia-version: 'nightly'
+            
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v4
-        env:
-          cache-name: cache-artifacts
-        with:
-          path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
-      - uses: julia-actions/julia-buildpkg@latest
+          
+      - uses: julia-actions/cache@v2
+      
+      # Using a fully static shell template satisfies the GitHub Actions linter.
+      # Julia automatically spins up in the folder specified by JULIA_PROJECT above.
+      - name: Instantiate workspace
+        shell: julia --color=yes {0}
+        run: |
+          using Pkg
+          Pkg.instantiate()
+          
       - run: |
           git config --global user.name Tester
           git config --global user.email te@st.er
-      - uses: julia-actions/julia-runtest@latest
+
+      - name: Run Test Suite
+        shell: julia --color=yes {0}
+        run: |
+          using Pkg
+          Pkg.test("RoME")
         continue-on-error: ${{ matrix.julia-version == 'nightly' }}
+        
       - uses: julia-actions/julia-processcoverage@v1
-        if: ${{ matrix.julia-version == '1.10' }}
-      - uses: codecov/codecov-action@v1
+        if: ${{ matrix.julia-version == '1' }}
+        
+      - uses: codecov/codecov-action@v4
+        if: ${{ matrix.julia-version == '1' }}
         with:
           file: lcov.info
-
-  upstream-dev:
-    #if: github.ref != 'refs/heads/release**'
-    name: Upstream Dev
-    runs-on: ubuntu-latest
-    env:
-      JULIA_PKG_SERVER: ""
-    steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v2
-        with:
-          version: '1'
-          arch: x64
-      - uses: julia-actions/cache@v2
-      - name: Dev dependencies
-        shell: julia --color=yes --project=monorepo {0}
-        run: |
-          using Pkg;
-          Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="develop"))
-          # TODO, temp until RoME is AMP15 compatible.
-          # Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="develop"))
-          # Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInferenceTypes"))
-          # Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInference"))
-          Pkg.develop([PackageSpec(path="RoMETypes"), PackageSpec(path="RoME")])
-      - name: Run tests
-        env:
-          IIF_TEST_GROUP: 'basic_functional_group'
-        run: >
-          julia --color=yes --project=monorepo -e 'using Pkg; Pkg.test("RoME")'
-
+          token: ${{ secrets.CODECOV_TOKEN }}
