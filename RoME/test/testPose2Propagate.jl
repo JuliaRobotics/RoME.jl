@@ -192,4 +192,3 @@ end
     @test isapprox(DFG.refMeans(x2)[1], q; atol = 1e-4)
 
 end
-

@@ -31,13 +31,13 @@ X^i = \\mathrm{vee}(\\mathfrak{g}, X_e)
 \\end{aligned}
 ```
 with:
-`\\mathcal M= LeftInvariantMetricSE(2)` Special Euclidean group with a left-invariant metric\
-`\\mathfrak{g} = \\mathfrak{se}(2)` the Lie algebra at the identity element\
-`p` and `q` `\\in \\mathcal M` the two Pose2 points\
-the measurement vector `X_m \\in \\mathfrak{g}`\
-the predicted relative tangent vector `\\hat{X} \\in \\mathfrak{g}`\
-the error vector `X_e \\in \\mathfrak{g}`\
-`X^i` coordinate vector of the error
+- `\\mathcal M= LeftInvariantMetricSE(2)` Special Euclidean group with a left-invariant metric
+- `\\mathfrak{g} = \\mathfrak{se}(2)` the Lie algebra at the identity element
+- `p` and `q` `\\in \\mathcal M` the two Pose2 points
+- the measurement vector `X_m \\in \\mathfrak{g}`
+- the predicted relative tangent vector `\\hat{X} \\in \\mathfrak{g}`
+- the error vector `X_e \\in \\mathfrak{g}`
+- `X^i` coordinate vector of the error
 
 Related
 

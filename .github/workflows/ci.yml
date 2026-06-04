@@ -64,9 +64,10 @@ jobs:
         run: |
           using Pkg;
           Pkg.add(PackageSpec(name="DistributedFactorGraphs",rev="develop"))
-          # Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="develop")) # TODO, temp until RoME is AMP15 compatible.
-          Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInferenceTypes"))
-          Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInference"))
+          # TODO, temp until RoME is AMP15 compatible.
+          # Pkg.add(PackageSpec(name="ApproxManifoldProducts",rev="develop"))
+          # Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInferenceTypes"))
+          # Pkg.add(PackageSpec(url="https://github.com/JuliaRobotics/IncrementalInference.jl",rev="develop",subdir="IncrementalInference"))
           Pkg.develop([PackageSpec(path="RoMETypes"), PackageSpec(path="RoME")])
       - name: Run tests
         env:
