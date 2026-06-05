@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       JULIA_PKG_SERVER: ""
-      JULIA_PROJECT: ${{ matrix.project-path }} # Native Julia env var sets the active workspace context
+      JULIA_PROJECT: ${{ matrix.project-path }}
     strategy:
       fail-fast: false
       matrix:
@@ -42,7 +42,6 @@ jobs:
           
       - uses: julia-actions/cache@v2
       
-      # Using a fully static shell template satisfies the GitHub Actions linter.
       # Julia automatically spins up in the folder specified by JULIA_PROJECT above.
       - name: Instantiate workspace
         shell: julia --color=yes {0}
@@ -58,7 +57,7 @@ jobs:
         shell: julia --color=yes {0}
         run: |
           using Pkg
-          Pkg.test("RoME")
+          Pkg.test("RoME"; coverage = true)
         continue-on-error: ${{ matrix.julia-version == 'nightly' }}
         
       - uses: julia-actions/julia-processcoverage@v1
