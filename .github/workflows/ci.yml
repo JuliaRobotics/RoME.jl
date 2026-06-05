@@ -62,6 +62,8 @@ jobs:
         continue-on-error: ${{ matrix.julia-version == 'nightly' }}
         
       - uses: julia-actions/julia-processcoverage@v1
+        with:
+          directories: RoME/src,RoME/ext,RoMETypes/src
         if: ${{ matrix.julia-version == '1' }}
         
       - uses: codecov/codecov-action@v4
