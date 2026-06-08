@@ -119,12 +119,12 @@ end
 # Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1,2,4,5,6))   # (1,2,6))
 Pose3Pose3XYYaw(z::SamplableBelief) = Pose3Pose3XYYaw(z, (1, 2, 6))
 
-DFG.getManifold(::Type{<:Pose3Pose3XYYaw}) = SOnxRn_MetricManifold(2)
+DFG.getManifold(::Type{<:Pose3Pose3XYYaw}) = LeftInvariantMetricSE(2)
 
 ## NOTE, Yaw only works if you assume a preordained global reference point, such as identity_element(Pose3)
 function (cfo::CalcFactor{<:Pose3Pose3XYYaw})(X, wTp, wTq)
     #
-    M = SOnxRn_MetricManifold(2)
+    M = LeftInvariantMetricSE(2)
 
     rx = normalize(view(wTp.x[2], 1:2, 1))
     R = SA[

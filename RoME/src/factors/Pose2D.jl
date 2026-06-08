@@ -29,7 +29,7 @@ Base.@kwdef struct Pose2Pose2{T <: IIF.SamplableBelief} <: IIF.AbstractManifoldM
     Z::T = MvNormal(Diagonal([1.0; 1.0; 1.0]))
 end
 
-DFG.getManifold(::InstanceType{Pose2Pose2}) = SOnxRn_MetricManifold(2)
+DFG.getManifold(::InstanceType{Pose2Pose2}) = LeftInvariantMetricSE(2)
 
 Pose2Pose2(::UniformScaling) = Pose2Pose2()
 
@@ -39,6 +39,17 @@ function (cf::CalcFactor{<:Pose2Pose2})(X, p, q)
     X̂ = log(M, p, q)
     return vee(M, p, X - X̂) # TODO check sign
 end
+
+# An alternative error function that parallel transports the error vector back to p
+# function (cf::CalcFactor{<:RobustPose2Pose2})(X, p, q)
+#     G = getManifold(RobustPose2Pose2)
+#     q̂ = exp(G, p, X)
+#     E_q̂ = log(G, q̂, q)
+#     # Parallel transport the error vector back to p.
+#     E_p = parallel_transport_to(G, q̂, E_q̂, p)    
+#     return vee(LieAlgebra(G), E_p) 
+# end
+
 
 # NOTE, serialization support -- will be reduced to macro in future
 # ------------------------------------

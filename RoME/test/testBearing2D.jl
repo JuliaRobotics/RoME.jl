@@ -10,7 +10,7 @@ using LieGroups: hat
 
 @testset "Testing Bearing2D factor" begin
     ##
-    M = RoME.SOnxRn_MetricManifold(2)
+    M = RoME.LeftInvariantMetricSE(2)
     ϵ = getPointIdentity(M)
     ps = [exp(M, ϵ, hat(M, ϵ, [0.0, 0, 0]))]
     push!(ps, exp(M, ϵ, hat(M, ϵ, [5.0, 0, 0])))

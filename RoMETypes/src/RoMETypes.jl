@@ -22,8 +22,7 @@ export Point2,
     RotVelPos,
     VelPos3,
     DynPoint2,
-    DynPose2,
-    projectCartesian
+    DynPose2
 
 export PriorPoint2,
     PackedPriorPoint2,
@@ -42,9 +41,9 @@ export PriorPoint2,
     PriorPose2,
     PackedPriorPose2
 
-export SOnxRn_MetricManifold
+export LeftInvariantMetricSE
 
-include("manifolds/SOnxRn_MetricManifold.jl")
+include("manifolds/LeftInvariantMetricSE.jl")
 include("variables/VariableTypes.jl")
 include("factors/FactorTypes.jl")
 

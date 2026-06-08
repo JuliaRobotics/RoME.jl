@@ -348,7 +348,7 @@ end
 
     # check the forward convolution is working properly
     _pts = getPoints(propagateBelief(fg, :x0, ls(fg, :x0); N)[1])
-    p_μ = mean(SOnxRn_MetricManifold(2), _pts)
+    p_μ = mean(LeftInvariantMetricSE(2), _pts)
 
     _pts = IIF.getCoordinates.(Pose2, _pts)
     @cast pts[j, i] := _pts[i][j]

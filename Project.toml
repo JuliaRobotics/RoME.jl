@@ -1,0 +1,6 @@
+[workspace]
+projects = [
+    "RoMETypes",
+    "RoME",
+    "RoME/test"
+]

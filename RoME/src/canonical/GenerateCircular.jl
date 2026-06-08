@@ -38,6 +38,7 @@ function generateGraph_Circle(
     biasTurn::Real = 0.0,
     kappaOdo::Real = 1.0,
     cyclePoses::Int = poses,
+    sampleNoise::Bool = false,
 )
     # assume empty factor graph object fg
     @assert offsetPoses < poses "`offsetPoses` must be smaller than total number of `poses`"
@@ -69,10 +70,12 @@ function generateGraph_Circle(
         addVariable!(fg, nsym, Pose2)
         # TODO rework the addition of noise alongside simulated ground truth, maybe `noise_t_cb`.
         pp = Pose2Pose2(
-            MvNormal(
-                [10.0; 0; 2pi / (cyclePoses) + biasTurn],
-                Matrix(Diagonal((kappaOdo * [0.1; 0.1; 0.1]) .^ 2)),
-            ),
+            let d = MvNormal(
+                    [10.0; 0; 2pi / (cyclePoses) + biasTurn],
+                    Matrix(Diagonal((kappaOdo * [0.1; 0.1; 0.1]) .^ 2)),
+                )
+                sampleNoise ? MvNormal(rand(d), d.Σ) : d
+            end,
         )
         addFactor!(fg, [psym; nsym], pp; graphinit = graphinit)
     end
