@@ -40,7 +40,7 @@ jobs:
           version: ${{ matrix.julia-version }}
           arch: ${{ matrix.arch }}
           
-      - uses: julia-actions/cache@v2
+      - uses: julia-actions/cache@v3
       
       # Julia automatically spins up in the folder specified by JULIA_PROJECT above.
       - name: Instantiate workspace
