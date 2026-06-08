@@ -2,6 +2,12 @@
 
 RoME.jl follows semver, with only a few case specific exceptions.  Please see repo's [Milestones](https://github.com/JuliaRobotics/RoME.jl/milestones?state=closed) page for a more complete list of changes.  This NEWS file lists select changes like to produce breaking changes downstream.  Note serious efforts are taken to have both breaking and smaller changes go through a proper deprecation and warning printout cycle, consistent with JuliaLang convention.
 
+## v0.25
+
+- **RoMETypes subpackage**: RoME types have been extracted into a separate registered `RoMETypes.jl` package.
+- Use the new LieGroups.jl package for group-related operations (moving away from Manifolds.jl).
+- DistributedFactorGraphs.jl breaking changes towards supporting DFG v1.
+
 ## v0.24
 
 - Manifolds based inertial odometry (preintegration).  Replaces previous 2015-2016 generation `InertialPose3` variables and factors.
