@@ -28,7 +28,7 @@ testfiles = [
     # Inertial
     "inertial/testInertialDynamic.jl"
     "inertial/testODE_INS.jl"
-    "inertial/testIMUDeltaFactor.jl" #FIXME slow
+    "inertial/testIMUDeltaFactor.jl"
 
     # ...
     # "testFluxModelsPose2.jl";
@@ -42,7 +42,7 @@ testfiles = [
     "testVelPos3.jl"
 
     # tests most likely to fail on numerics
-    "testScalarFields.jl" #FIXME slow
+    "testScalarFields.jl"
     "testPoint2Point2Init.jl"
     "threeDimLinearProductTest.jl"
     "testPose3Pose3NH.jl"
@@ -70,9 +70,9 @@ testfiles = [
     "testBasicPose2Stationary.jl"
     "TestPoseAndPoint2Constraints.jl"
     "testDynPoint2D.jl"
-    "testDeltaOdo.jl" #FIXME slow
+    "testDeltaOdo.jl"
     "testFixedLagFG.jl"
-    "testDynPose2D.jl" #FIXME slow
+    "testDynPose2D.jl"
     "testPartialPriorYawPose2.jl"
     "TestDefaultFGInitialization.jl"
     "testAccumulateFactors.jl"

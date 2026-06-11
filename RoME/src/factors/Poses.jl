@@ -41,7 +41,7 @@ compare(a::Pose2Pose2, b::Pose2Pose2; tol::Float64 = 1e-10) = compareDensity(a.Z
 compare(a::PriorPose2, b::PriorPose2; tol::Float64 = 1e-10) = compareDensity(a.Z, b.Z)
 
 ##
-DFG.@defObservationType Pose3Pose3RotOffset AbstractManifoldMinimize LeftInvariantMetricSE(
+DFG.@defObservationType Pose3Pose3RotOffset RelativeObservation LeftInvariantMetricSE(
     3,
 )
 
@@ -70,7 +70,7 @@ function (cf::CalcFactor{<:Pose3Pose3RotOffset})(Xs, p, q, pRs)
 end
 
 #
-DFG.@defObservationType Pose3Pose3Offset AbstractManifoldMinimize LeftInvariantMetricSE(3)
+DFG.@defObservationType Pose3Pose3Offset RelativeObservation LeftInvariantMetricSE(3)
 
 function (cf::CalcFactor{<:Pose3Pose3Offset})(X, p, q, pTs)
     M = getManifold(Pose3Pose3Offset)
@@ -86,7 +86,7 @@ end
   $(TYPEDEF)
 Pose3Pose3 factor where the translation scale is not known, ie. Pose3Pose3 with unit (normalized) translation.
 """
-DFG.@defObservationType Pose3Pose3UnitTrans AbstractManifoldMinimize LeftInvariantMetricSE(3)
+DFG.@defObservationType Pose3Pose3UnitTrans RelativeObservation LeftInvariantMetricSE(3)
 
 # NOTE: this manifold is actually Sphere(2) × SpecialOrthogonal(3), but we embed in LeftInvariantMetricSE(3) and use the chordal distance `-`.
 function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p, q)
