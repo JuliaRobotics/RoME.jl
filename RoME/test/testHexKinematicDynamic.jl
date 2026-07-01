@@ -106,7 +106,8 @@ addFactor!(fg, [:w_P_b4, :w_P_b5], TestKinP2P2(MvNormal([10.0,0,pi/3], diagm([0.
 addFactor!(fg, [:w_P_b5, :w_P_b6], TestKinP2P2(MvNormal([10.0,0,pi/3], diagm([0.1, 0.2, 0.01].^2)))) 
 
 
-
+stopping_criterion=StopAfterIteration(1000) | StopWhenGradientNormLess(1e-4) | StopWhenStepsizeLess(1e-4)
+debug = [:Iteration, :Cost," | ", :tension, " | ", :Stepsize, " | ", :GradientNorm, " | ", :last_step_successful, "\n", :Stop]
 
 IIF.solveGraphParametric!(fg; init=false, stopping_criterion, debug)
 
