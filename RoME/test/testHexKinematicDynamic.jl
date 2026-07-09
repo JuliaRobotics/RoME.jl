@@ -84,7 +84,7 @@ end
 fg = initfg()
 getSolverParams(fg).graphinit = false
 
-addVariable!(fg, :w_P_b0, Pose_SE2)
+addVariable!(fg, :w_P_b0, Pose_Tr2xSO2)
 P = zeros(3)  # make on-manifold
 prior = Prior_Tr2xSO2(MvNormal(P, 0.01 * Matrix{Float64}(LinearAlgebra.I, 3, 3)))
 addFactor!(fg, [:w_P_b0,], prior)
