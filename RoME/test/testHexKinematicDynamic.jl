@@ -169,45 +169,42 @@ IIF.solveGraphParametric!(fg; init=false, stopping_criterion, debug)
 mean(getBelief(fg, :w_P_b6, :parametric))
 
 
+## end of main code, plotting section follows
 
-
+if false
 ## plotting
+    using GLMakie
 
-using GLMakie
+    function plot2D(subfg, x_labels = sortDFG(listVariables(subfg; whereLabel = startswith("w_P"))))
+        pnts = map(x_labels) do v
+            val = mean(getBelief(fg, v, :parametric))
+            Point2f(val.x[1][1:2])
+        end
+        fig = lines(pnts; axis = (aspect = DataAspect(),))
+        θs = map(x_labels) do v
+            R = mean(getBelief(subfg, v, :parametric)).x[2]
+            atan(R[2, 1], R[1, 1])
+        end
+        
+        scatter!(pnts; rotation = θs, markersize = 15, marker = '➤')
 
-function plot2D(subfg, x_labels = sortDFG(listVariables(subfg; whereLabel = startswith("w_P"))))
-    pnts = map(x_labels) do v
-        val = mean(getBelief(fg, v, :parametric))
-        Point2f(val.x[1][1:2])
+        return fig
     end
-    fig = lines(pnts; axis = (aspect = DataAspect(),))
-    θs = map(x_labels) do v
-        R = mean(getBelief(subfg, v, :parametric)).x[2]
-        atan(R[2, 1], R[1, 1])
-    end
-    
-    scatter!(pnts; rotation = θs, markersize = 15, marker = '➤')
-
-    return fig
-end
-
-
-
 
 ## plot the 2D trajectory of the poses
 
-fig = plot2D(fg)
+    fig = plot2D(fg)
 
+    theta = range(0, 2π, length=100)
+    circle_x = 5 .+ 10 .* cos.(theta)
+    circle_y = 8.66 .+ 10 .* sin.(theta)
+    lines!(circle_x, circle_y; color=:green)
+    scatter!([5], [8.66]; color=:black, markersize=10)
 
-theta = range(0, 2π, length=100)
-circle_x = 5 .+ 10 .* cos.(theta)
-circle_y = 8.66 .+ 10 .* sin.(theta)
-lines!(circle_x, circle_y; color=:green)
-scatter!([5], [8.66]; color=:black, markersize=10)
+    # lines!([0, 9.06] ./ 2, [0, -5.24] ./ 2; color=:red)
 
-# lines!([0, 9.06] ./ 2, [0, -5.24] ./ 2; color=:red)
-
-
-fig
+    fig
+##
+end
 
 #
