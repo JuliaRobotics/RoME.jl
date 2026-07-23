@@ -104,9 +104,9 @@ function (cf::CalcFactor{<:Pose3Pose3UnitTrans})(X, p, q)
     )
 end
 
-#  FIXME needed until AMP#41 is done hopefully can be removed soon 🐛💥
-# Base.convert(::Type{<:Tuple}, ::typeof(LeftInvariantMetricSE(2))) = (:Euclid,:Euclid,:Circular)
-AMP._manifoldtuple(::typeof(LeftInvariantMetricSE(2))) = (:Euclid, :Euclid, :Circular)
-function AMP._manifoldtuple(::typeof(LeftInvariantMetricSE(3)))
-    return (:Euclid, :Euclid, :Euclid, :Circular, :Circular, :Circular)
-end
+# #  FIXME needed until AMP#41 is done hopefully can be removed soon 🐛💥
+# # Base.convert(::Type{<:Tuple}, ::typeof(LeftInvariantMetricSE(2))) = (:Euclid,:Euclid,:Circular)
+# AMP._manifoldtuple(::typeof(LeftInvariantMetricSE(2))) = (:Euclid, :Euclid, :Circular)
+# function AMP._manifoldtuple(::typeof(LeftInvariantMetricSE(3)))
+#     return (:Euclid, :Euclid, :Euclid, :Circular, :Circular, :Circular)
+# end

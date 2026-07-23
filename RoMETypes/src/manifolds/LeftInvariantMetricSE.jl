@@ -16,7 +16,7 @@ function LeftInvariantMetricSE(n)
 end
 
 LeftInvariantMetricSEType =
-    Union{typeof(LeftInvariantMetricSE(2)), typeof(LeftInvariantMetricSE(3))}
+    Union{<:typeof(LeftInvariantMetricSE(2)), <:typeof(LeftInvariantMetricSE(3))}
 
 #
 LieGroups.LieAlgebra(G::LeftInvariantMetricSEType) = LieAlgebra(G.lie_group)
