@@ -34,3 +34,25 @@ TransformUtils = "9b8138ad-1b09-5408-aa39-e87ed6d21b63"
 CameraModels = {rev = "develop", url = "https://github.com/JuliaRobotics/CameraModels.jl"}
 RoME = {path = ".."}
 RoMETypes = {path = "../../RoMETypes"}
+
+[compat]
+DelimitedFiles = "1.9.1"
+DifferentialEquations = "8.0.2"
+Distributions = "0.25.129"
+Flux = "0.16.10"
+ForwardDiff = "1.4.1"
+ImageCore = "0.10.5"
+ImageIO = "0.6.9"
+IncrementalInference = "0.37.2"
+IncrementalInferenceTypes = "0.1.1"
+Interpolations = "0.16.3"
+Manifolds = "0.11.29"
+ManifoldsBase = "2.5.0"
+Manopt = "0.6.3"
+OrderedCollections = "2.0.1"
+Rotations = "1.7.1"
+StaticArrays = "1.9.18"
+Statistics = "1.11.1"
+TensorCast = "0.4.9"
+TimeZones = "1.22.2"
+TransformUtils = "0.2.21"
