@@ -5,7 +5,7 @@ using Test
 ##
 
 @testset "Basic PartialPriorYawPose2 test" begin
-    ##
+##
 
     fg = initfg()
 
@@ -22,7 +22,11 @@ using Test
 
     addFactor!(fg, [:x; :l], Pose2Point2(MvNormal([1.0, 1], [0.1, 0.1])))
 
+##
+
     initAll!(fg)
+
+##
 
     tree = solveTree!(fg)
 
@@ -34,11 +38,11 @@ using Test
     @test isapprox(M.manifold[2], submanifold_component(me_, 2), [1 0; 0 1], atol = 0.05)
     @test isapprox(mean(getVal(fg, :l)), [1, 1], atol = 0.05)
 
-    ##
+##
 end
 
 @testset "Basic PartialPriorYawPose2 test with Bearing Range" begin
-    ##
+##
 
     fg = initfg()
 
@@ -61,7 +65,7 @@ end
     @test isapprox(M.manifold[2], submanifold_component(me_, 2), [1 0; 0 1], atol = 0.05)
     @test isapprox(mean(getVal(fg, :l)), [10, 10], atol = 0.05)
 
-    ##
+##
 end
 
 # Debug plots using Makie

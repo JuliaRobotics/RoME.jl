@@ -20,7 +20,7 @@ using ManifoldsBase: submanifold_component
 
 ##
 
-# include()
+# include("testPose3.jl")
 
 ##
 
@@ -35,13 +35,18 @@ testfiles = [
     "threeDimLinearProductTest.jl"
     "testBearingRange2D.jl"
     "testpackingconverters.jl" #FIXME for new DFG deprecations
-    "testPoint2Point2.jl" # numerics still a bit wild, which is less important during initial AMP v0.15 upgrade
     "testBasicPose2Conv.jl"
     "testhigherdimroots.jl"
     "testBasicPose2Conv.jl"
     "testDidsonFunctions.jl"
     "testDynPoint2D.jl"
     "testDeltaOdo.jl"
+    "TestDefaultFGInitialization.jl"
+    "testAccumulateFactors.jl"
+
+    "testPoint2Point2.jl" # numerics still a bit wild, which is less important during initial AMP v0.15 upgrade
+
+
 
 
 
@@ -72,19 +77,17 @@ testfiles = [
     "testParametricSimulated.jl" # FIX
     "testGraphGenerators.jl" # FIX
     "testTreeInitCommonMsg_IIF913.jl" # FIX dim mismatch, expected len 3 got 6
-    "testHexagonal2D_CliqByCliq.jl"      # special case debugging
+    "testHexagonal2D_CliqByCliq.jl"  # FIX, dim mismatch, expected len 3 got 6 # special case debugging
 
     "testGenericProjection.jl" # broken COMPAT w CameraModels
     "testBasicPose2Stationary.jl" # FIX
 
     "TestPoseAndPoint2Constraints.jl" # FIX, dim mismatch, expected len 3 got 6
 
-    "testDynPose2D.jl"
-    "testFixedLagFG.jl"
-    "testPartialPriorYawPose2.jl"
-    "TestDefaultFGInitialization.jl"
-    "testAccumulateFactors.jl"
-    "testDeadReckoningTether.jl"
+    "testDynPose2D.jl" # FIX, L181, dim mismatch, expected len 5 got 8
+    "testFixedLagFG.jl" # FIX, dim mismatch, expected len 3 got 6
+    "testPartialPriorYawPose2.jl" # FIX partial [3] during HoDe bw optim
+    "testDeadReckoningTether.jl" # FIX, dim mismatch, expected len 3 got 6
     "testGenerateHelix.jl" # FIX
 
     # starts multiprocess.
