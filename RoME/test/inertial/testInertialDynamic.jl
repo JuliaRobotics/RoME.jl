@@ -7,9 +7,8 @@ using StaticArrays
 
 ##
 @testset "test InertialDynamic factor" begin
-    ##
+## test factor with rotation around z axis and initial velocity up
 
-    ## test factor with rotation around z axis and initial velocity up
     # DUPLICATED IN testIMUDeltaFactor.jl
 
     dt = 0.1
@@ -30,11 +29,11 @@ using StaticArrays
     tsp = tst + Second(imu.tspan[2] - imu.tspan[1])
     tspan = (tst, tsp)
 
-    ##
+##
 
     fac = RoME.InertialDynamic(tspan, dt, imu.accels, imu.gyros)
 
-    ## build a basic factor graph
+## build a basic factor graph
 
     fg = initfg()
     getSolverParams(fg).N = 50
@@ -63,29 +62,29 @@ using StaticArrays
     #
     f1 = addFactor!(fg, [:w_P0; :w_P1], fac; graphinit = false)
 
-    ##
+##
 
-    @test !isInitialized(fg, :w_P1)
+    @test !IncrementalInference.hasState(fg, :w_P1, :default)
     doautoinit!(fg, :w_P0)
-    @test isInitialized(fg, :w_P0)
+    @test IncrementalInference.hasState(fg, :w_P0, :default)
 
-    ##
+##
 
     # flb = getLabel(f1)
     # sampleFactor(fg, flb, 50)
 
-    ##
+##
 
-    try
+    # try
         P1 = approxConvBelief(fg, getLabel(f1), :w_P1)
-    catch
-        @error "FIXME first approxConv on InertialDynamic failed!"
-        @test_broken false
-    end
+    # catch
+    #     @error "FIXME first approxConv on InertialDynamic failed!"
+    #     @test_broken false
+    # end
 
     # P1 = approxConvBelief(fg, getLabel(f1), :w_P1)
 
-    ##
+##
 end
 
 ##

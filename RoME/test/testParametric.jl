@@ -183,6 +183,7 @@ end
     # pl = plotSLAM2D(fg; lbls=true, solveKey=:parametric, point_size=4pt, drawPoints=false, drawContour=false)
 end
 
+##
 @testset "Test Parametric DynPose2VelocityPrior and VelPose2VelPose2" begin
     @test_broken begin
         @warn "Parametric VelPose2 is broken and tests skipped"
@@ -215,6 +216,7 @@ end
         @test isapprox(r[2], [10, 0, 0, 10, 0], atol = 1e-3)
     end
 end
+##
 
 @testset "Test Parametric PriorPoint2 and Point2Point2Range" begin
     fg = LocalDFG(; solverParams = SolverParams(; algorithms = [:default, :parametric]))
@@ -232,7 +234,10 @@ end
     addFactor!(fg, [:x1; :l2], Point2Point2Range(Normal(1.0, 0.1)))
     addFactor!(fg, [:x1; :l3], Point2Point2Range(Normal(1.0, 0.1)))
 
+    IncrementalInference.prepareStates!(fg, IncrementalInference.NLLSSolver(), :parametric)
     PM, varLabels, r, Σ = IIF.solveGraphParametric(fg)
 
     @test isapprox(r[1], [1, 1], atol = 1e-3)
 end
+
+##

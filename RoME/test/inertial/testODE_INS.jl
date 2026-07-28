@@ -14,6 +14,7 @@ using RoME
 # import Base: convert
 using Random
 using Test
+using DistributedFactorGraphs: @tz_str
 
 ##
 

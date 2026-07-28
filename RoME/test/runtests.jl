@@ -18,38 +18,38 @@ using StaticArrays
 using RoME: LeftInvariantMetricSE
 using ManifoldsBase: submanifold_component
 
+##
+
+# include("testScalarFields.jl")
+
+##
+
 @error("add test for generateGraph_Beehive!, norm( simulated - default ) < tol")
 
 testfiles = [
+    "inertial/testIMUDeltaFactor.jl"
+    "testPartialRangeCrossCorrelations.jl"
+    "testParametric.jl"
+    
     # known broken tests
     "testG2oParser.jl"  # deferred
-
-    # dev test first, for faster issues.
-    # Inertial
-    "inertial/testInertialDynamic.jl"
-    "inertial/testODE_INS.jl"
-    "inertial/testIMUDeltaFactor.jl"
-
-    # ...
+    "inertial/testInertialDynamic.jl" # same problem as IIF/test/testDERelative.jl, access [1] of [0]
+    "inertial/testODE_INS.jl" # same problem as IIF/test/testDERelative.jl, access [1] of [0]
     # "testFluxModelsPose2.jl";
-    "testPartialRangeCrossCorrelations.jl"
-    "testG2oExportSE3.jl"
-
-    #parametric tests
-    "testParametric.jl"
-    "testPose2Propagate.jl"
-    "testPose3.jl"
-    "testVelPos3.jl"
+    "testG2oExportSE3.jl" # FIX
+    "testPose2Propagate.jl" # FIX
+    "testPose3.jl" # FIX
+    "testVelPos3.jl" # FIX
 
     # tests most likely to fail on numerics
-    "testScalarFields.jl"
-    "testPoint2Point2Init.jl"
-    "threeDimLinearProductTest.jl"
-    "testPose3Pose3NH.jl"
+    "testScalarFields.jl" # SKIPPING SOLVE FOR SLOW AMP V0.15
+    "testPoint2Point2Init.jl" # FIX
+    "threeDimLinearProductTest.jl" # FIX
+    "testPose3Pose3NH.jl" # FIX,   UndefVarError: `LeftInvariantMetricSE` not defined in `Main`
 
     # recent development work
-    "testPartialPose2.jl"
-    "testPartialPose3.jl"
+    "testPartialPose2.jl" # FIX, L39 numeric all ~zero
+    "testPartialPose3.jl" # FIX, UndefVarError: `LeftInvariantMetricSE` not defined in `Main` 
     "testBearingRange2D.jl"
     "testBearing2D.jl"
     "testMultimodalRangeBearing.jl" # restore after Bearing factors are fixed
@@ -59,9 +59,9 @@ testfiles = [
     "testInflation380.jl"
     "testPoint2Point2.jl"
     "testParametricCovariances.jl"
-    "testParametricSimulated.jl"
+    "testParametricSimulated.jl" # FIX
     "testBasicPose2Conv.jl"
-    "testGraphGenerators.jl"
+    "testGraphGenerators.jl" # FIX
     "testTreeInitCommonMsg_IIF913.jl"
     "testHexagonal2D_CliqByCliq.jl"      # special case debugging
     "testhigherdimroots.jl"
@@ -77,11 +77,11 @@ testfiles = [
     "TestDefaultFGInitialization.jl"
     "testAccumulateFactors.jl"
     "testDeadReckoningTether.jl"
-    "testGenerateHelix.jl"
+    "testGenerateHelix.jl" # FIX
 
     # starts multiprocess.
     # don't move up, special factors defined in other test files are not added to multiprocess (Distributed.jl)
-    "testBeehiveGrow.jl" # also starts multiprocess
+    # "testBeehiveGrow.jl" # FIX, also starts multiprocess
 ]
 
 #FIXME

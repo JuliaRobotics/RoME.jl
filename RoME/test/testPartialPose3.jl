@@ -7,6 +7,7 @@ using Test
 # using Manifolds: hat, vee, identity_element, SpecialOrthogonal, SpecialEuclidean
 import Manifolds
 using TensorCast
+using StaticArrays
 using DistributedFactorGraphs
 using Rotations: RotX, RotY, RotZ, RotZYX, RotXYZ
 

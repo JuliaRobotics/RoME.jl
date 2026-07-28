@@ -34,7 +34,7 @@ function _addPoseCanonical!(
 )
     #
     # calculate and add the reference value
-    isAlready, simPPE, = IIF._checkVariableByReference(
+    isAlready, simPPE, _ = IIF._checkVariableByReference(
         fg,
         prevLabel,
         poseRegex,
@@ -49,6 +49,8 @@ function _addPoseCanonical!(
     # dispatch on prior or binary factor
     _getlabels(fact::AbstractPriorObservation) = [genLabel;]
     _getlabels(fact::AbstractRelativeObservation) = [prevLabel; genLabel]
+
+    _Exp(M::AbstractLieGroup, ξ::AbstractVector{<:Real}) = exp(M, hat(LieAlgebra(M),ξ))
 
     # add new pose variable
     v_n = addVariable!(fg, genLabel, poseType; solvable, tags = variableTags)
@@ -65,7 +67,18 @@ function _addPoseCanonical!(
     # store simulated PPE for future use
     # ppe = DFG.MeanMaxPPE(refKey, simPPE, simPPE, simPPE)
     #FIXME PPE replacement
-    doRef ? setPPE!(v_n, refKey, typeof(simPPE), simPPE) : nothing
+    if doRef
+        kind = getStateKind(v_n)
+        Σ = ApproxManifoldProducts._forcestatic(diagm(ones(getDimension(kind))))
+        p = ApproxManifoldProducts._forcestatic(_Exp(getManifold(kind), simPPE.suggested))
+        belief = HomotopyDensity_legacy(kind, [p, ]; bw = Σ, newbw = false)
+        state = State(refKey, kind; belief, marginalized = false, initialized = true)
+        mergeState!(
+            v_n,
+            state,
+        )
+        # setPPE!(v_n, refKey, typeof(simPPE), simPPE) : nothing
+    end
 
     # user callback in case something more needs to be passed down
     postpose_cb(fg, genLabel)

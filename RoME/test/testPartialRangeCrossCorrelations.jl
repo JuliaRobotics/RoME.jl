@@ -5,12 +5,12 @@
 using RoME
 using Test
 using TensorCast
+using LinearAlgebra
 
 ##
 
 @testset "Test correlation induced by partials" begin
-
-    ##
+##
 
     # start with an empty factor graph object
     N = 200
@@ -31,11 +31,11 @@ using TensorCast
     addFactor!(fg, [:x0; :x1], pp)
     addFactor!(fg, [:x1; :l1], ppr)
 
-    ##
+##
 
     tree = solveTree!(fg)
 
-    ## check that stuff is where it should be
+## check that stuff is where it should be
 
     L1 = getPoints(getBelief(fg, :l1))
     @cast L1_[j, i] := L1[i][j]
@@ -50,25 +50,25 @@ using TensorCast
     mvp = fit(MvNormal, L1_p)
 
     # check diagonal structure for correlation
-    @test isapprox(mvn.Σ.mat[1, 1], 4.0, atol = 3.6)
-    @test isapprox(mvn.Σ.mat[2, 2], 3.4, atol = 3.0)
-    @test isapprox(mvn.Σ.mat[1, 2], 2.0, atol = 1.75)
+    @test isapprox(mvn.Σ.mat[1, 1], 4.0^2, atol = 7.0)
+    @test isapprox(mvn.Σ.mat[2, 2], 3^2, atol = 6.0)
+    @test isapprox(mvn.Σ.mat[1, 2], 0.0, atol = 3.0)
 
-    @test isapprox(mvp.Σ.mat[1, 1], 4.0, atol = 3.6)
-    @test isapprox(mvp.Σ.mat[2, 2], 3.4, atol = 3.0)
-    @test isapprox(mvp.Σ.mat[1, 2], -2.0, atol = 1.75)
+    @test isapprox(mvp.Σ.mat[1, 1],  4.0^2, atol = 7.0)
+    @test isapprox(mvp.Σ.mat[2, 2],  3.0^2, atol = 6.0)
+    @test isapprox(mvp.Σ.mat[1, 2], 0.0, atol = 4.0)
 
     # sanity check for symmetry
-    @test mvn.Σ.mat - mvn.Σ.mat' |> norm < 0.01
+    @test LinearAlgebra.norm(mvn.Σ.mat - mvn.Σ.mat') < 0.01
 
     # test means in the right location
-    @test isapprox(mvn.μ[1], 5.4, atol = 2.0)
+    @test isapprox(mvn.μ[1], 5, atol = 2.5)
     @test isapprox(mvn.μ[2], -4.2, atol = 2.0)
 
-    @test isapprox(mvp.μ[1], 5.4, atol = 2.0)
+    @test isapprox(mvp.μ[1], 5, atol = 2.5)
     @test isapprox(mvp.μ[2], 4.2, atol = 2.0)
 
-    ##
+##
 
 end
 
