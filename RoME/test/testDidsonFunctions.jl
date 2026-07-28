@@ -15,7 +15,7 @@ using Test
 
     N = 100
     Xc = [0.01 * randn(6) for _ = 1:N]
-    pts = getPoint.(Pose3, Xc)
+    pts = DistributedFactorGraphs.getPoint.(Pose3, Xc)
 
     # pre-emptively populate the measurements, kept separate since nlsolve calls fp(x, res) multiple times
     # measurement = getSample(meas, N)
@@ -32,7 +32,7 @@ using Test
 
     @warn "still need to insert kld(..) test to ensure this is working"
 
-    p1 = manikde!(TranslationGroup(3), pts)
+    p1 = HomotopyDensity_legacy(TranslationGroup(3), pts)
 
     println("Test back projection from ")
 
@@ -49,7 +49,7 @@ using Test
 
     pts = approxConv(fg, :x0x1f1, :x0)
 
-    p2 = manikde!(LeftInvariantMetricSE(3), pts)
+    p2 = HomotopyDensity_legacy(RoME.LeftInvariantMetricSE(3), pts)
 end
 
 # using Gadfly
@@ -86,7 +86,7 @@ end
     # implemented in SensorModels.jl
     meas = LinearRangeBearingElevation((3.0, 3e-4), (0.2, 3e-4))
 
-    @time X = getVal(v1)
+    # @time X = getBelief(v1)
 
     v2 = addVariable!(fg, :l1, Point3; N = N)
     f2 = addFactor!(fg, [:x1; :l1], meas) #, threadmodel=MultiThreaded)

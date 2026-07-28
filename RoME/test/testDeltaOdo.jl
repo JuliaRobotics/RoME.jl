@@ -4,12 +4,21 @@
 
 using TransformUtils
 using RoME
-# using Gadfly
-# Gadfly.set_default_plot_size(35cm, 25cm)
-
+using LinearAlgebra
 using Test
 
+
+using LieGroups
+import Rotations as _Rot
+_difftheta(wth1::Float64, wth2::Float64) = vee(
+    LieAlgebra(SpecialOrthogonalGroup(2)),
+    log(SpecialOrthogonalGroup(2), _Rot.RotMatrix(wth1)' * _Rot.RotMatrix(wth2))
+)
+
+##
+
 @testset "test odometry accumulation MutablePose2Pose2Gaussian..." begin
+##
 
     ## load the existing odometry data
     data = randn(3, 1000)
@@ -69,7 +78,9 @@ using Test
     # Gadfly.plot(y=nXYT[3,:], Geom.path)
 
     @test norm(cumdata[1:2, :] - nXYT[1:2, :]) < 1e-6
-    @test norm(difftheta.(yaw, nXYT[3, :])) < 1e-3
+    @test norm(_difftheta.(yaw, nXYT[3, :])) < 1e-3
+
+##
 end
 
 #

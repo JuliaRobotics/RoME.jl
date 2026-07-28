@@ -7,6 +7,7 @@ using Test
 using StaticArrays
 using LieGroups
 using Manifolds
+using TensorCast
 
 M = getManifold(Pose3)
 ϵ = getPointIdentity(Pose3)
@@ -137,7 +138,6 @@ end
 ##
 
 @testset "Adding Pose3Pose3 to graph..." begin
-
 ##
 
     N
@@ -210,6 +210,7 @@ end
 
 # Noticed a DomainError on convolutions here after mutlithreading upgrade.  Previously used fill(PP3REUSE, Threads.nthreads())
 @testset "Testing Pose3Pose3 evaluation..." begin
+##
     initAll!(fg)
     @test isInitialized(fg, :x2)
     X1pts = approxConv(fg, :x1x2f1, :x1)
@@ -229,6 +230,8 @@ end
     @test isapprox(T, [10, 0, 0], atol = 1.0)
     Rc = submanifold_component(mu, 2)
     @test isapprox(SpecialOrthogonalGroup(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol = 0.25)
+
+##
 end
 
 @testset "Construct Bayes tree and perform inference..." begin

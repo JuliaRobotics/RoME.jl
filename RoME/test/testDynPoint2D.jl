@@ -3,77 +3,81 @@
 using RoME
 using Test
 using Dates
-# using RoMEPlotting,
-# , IncrementalInference, Distributions
-# using KernelDensityEstimate #, KernelDensityEstimatePlotting
+using LinearAlgebra
+using TensorCast
 
+##
 @testset "test DynPoint2..." begin
+##
 
     # N = 75
-    global fg = initfg()
+    fg = initfg()
 
     # add two point locations
-    global v0 = addVariable!(fg, :x0, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(0)))
+    v0 = addVariable!(fg, :x0, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(0)))
     
-    global v1 = addVariable!(fg, :x1, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(10^9)))
+    v1 = addVariable!(fg, :x1, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(10^9)))
 
     # Prior factor as boundary condition
-    global pp0 = DynPoint2VelocityPrior(
+    pp0 = DynPoint2VelocityPrior(
         MvNormal([zeros(2); 10 * ones(2)], 0.1 * Matrix{Float64}(LinearAlgebra.I, 4, 4)),
     )
-    global f0 = addFactor!(fg, [:x0;], pp0)
+    f0 = addFactor!(fg, [:x0;], pp0)
     # conditional likelihood between Dynamic Point2
-    global dp2dp2 = DynPoint2DynPoint2(
+    dp2dp2 = DynPoint2DynPoint2(
         MvNormal([10 * ones(2); zeros(2)], 0.1 * Matrix{Float64}(LinearAlgebra.I, 4, 4)),
     )
-    global f1 = addFactor!(fg, [:x0; :x1], dp2dp2)
+    f1 = addFactor!(fg, [:x0; :x1], dp2dp2)
 
     # Graphs.plot(fg.g)
     initAll!(fg)
 
-    # global tree = wipeBuildNewTree!(fg)
+    # tree = wipeBuildNewTree!(fg)
     # inferOverTree!(fg, tree)
     tree = solveTree!(fg)
-
+##
     # X1 = getVal(fg, :x1)
-    @show global x0 = getKDEMax(getBelief(fg, :x0))
+    @show x0 = mean(getBelief(fg, :x0))
 
     @test norm(x0[1:2] - [0.0; 0.0]) < 1.0
     @test norm(x0[3:4] - [10.0; 10.0]) < 1.0
 
-    @show global x1 = getKDEMax(getBelief(fg, :x1))
+    @show x1 = mean(getBelief(fg, :x1))
 
     @test norm(x1[1:2] - [20.0; 20.0]) < 1.0
     @test norm(x1[3:4] - [10.0; 10.0]) < 1.0
+
+##
 end
 
 @testset "test DynPoint2VelocityPrior..." begin
+##
 
     # N = 75
-    global fg = initfg()
+    fg = initfg()
 
     # add two point locations
-    global v0 = addVariable!(fg, :x0, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(0)))
-    global v1 = addVariable!(fg, :x1, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(10^9)))
-    global v2 = addVariable!(fg, :x2, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(2 * 10^9)))
+    v0 = addVariable!(fg, :x0, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(0)))
+    v1 = addVariable!(fg, :x1, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(10^9)))
+    v2 = addVariable!(fg, :x2, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(2 * 10^9)))
 
     # Prior factor as boundary condition
-    global pp0 = DynPoint2VelocityPrior(
+    pp0 = DynPoint2VelocityPrior(
         MvNormal([zeros(2); 10 * ones(2)], 0.1 * Matrix{Float64}(LinearAlgebra.I, 4, 4)),
     )
-    global f0 = addFactor!(fg, [:x0;], pp0)
+    f0 = addFactor!(fg, [:x0;], pp0)
 
     # conditional likelihood between Dynamic Point2
-    global dp2dp2 = VelPoint2VelPoint2(
+    dp2dp2 = VelPoint2VelPoint2(
         MvNormal([10 * ones(2); zeros(2)], 0.1 * Matrix{Float64}(LinearAlgebra.I, 4, 4)),
     )
-    global f1 = addFactor!(fg, [:x0; :x1], dp2dp2)
+    f1 = addFactor!(fg, [:x0; :x1], dp2dp2)
 
     # conditional likelihood between Dynamic Point2
-    global dp2dp2 = VelPoint2VelPoint2(
+    dp2dp2 = VelPoint2VelPoint2(
         MvNormal([10 * ones(2); zeros(2)], 0.1 * Matrix{Float64}(LinearAlgebra.I, 4, 4)),
     )
-    global f2 = addFactor!(fg, [:x1; :x2], dp2dp2)
+    f2 = addFactor!(fg, [:x1; :x2], dp2dp2)
 
     # Graphs.plot(fg.g)
     initAll!(fg)
@@ -82,41 +86,47 @@ end
     @test isInitialized(fg, :x1)
     @test isInitialized(fg, :x2)
 
-    # global tree = wipeBuildNewTree!(fg)
+    # tree = wipeBuildNewTree!(fg)
     # inferOverTree!(fg, tree)
     tree = solveTree!(fg)
 
+##
+
     # X1 = getVal(fg, :x1)
-    @show global x0 = getKDEMax(getBelief(fg, :x0))
+    @show x0 = mean(getBelief(fg, :x0))
     @test norm(x0[1:2] - [0.0; 0.0]) < 1.0
     @test norm(x0[3:4] - [10.0; 10.0]) < 1.0
 
-    @show global x1 = getKDEMax(getBelief(fg, :x1))
+    @show x1 = mean(getBelief(fg, :x1))
     @test norm(x1[1:2] - [10.0; 10.0]) < 1.0
     @test norm(x1[3:4] - [10.0; 10.0]) < 1.0
 
-    @show global x2 = getKDEMax(getBelief(fg, :x2))
+    @show x2 = mean(getBelief(fg, :x2))
     @test norm(x2[1:2] - [20.0; 20.0]) < 1.0
     @test norm(x2[3:4] - [10.0; 10.0]) < 1.0
+
+##
 end
 
 @testset "test VelPoint2VelPoint2" begin
-    global N = 100
-    global pμ = [0.0, 0, 10.0, 0]
-    global pσ = Matrix(Diagonal([0.1; 0.1; 0.1; 0.1] .^ 2))
+##
 
-    global fg = initfg()
+    N = 100
+    pμ = [0.0, 0, 10.0, 0]
+    pσ = Matrix(Diagonal([0.1; 0.1; 0.1; 0.1] .^ 2))
+
+    fg = initfg()
 
     addVariable!(fg, :x1, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(0)))
-    global pp = DynPoint2VelocityPrior(MvNormal(pμ, pσ))
+    pp = DynPoint2VelocityPrior(MvNormal(pμ, pσ))
     addFactor!(fg, [:x1;], pp; graphinit = false)
 
     initAll!(fg)
 
     addVariable!(fg, :x2, DynPoint2; timestamp = DFG.Timestamp(Nanosecond(1_000_000_000)))
-    global dpμ = [10.0; 0; 0; 0]
-    global dpσ = Matrix(Diagonal([1.0; 1; 0.5; 0.01] .^ 2))
-    global vp = VelPoint2VelPoint2(MvNormal(dpμ, dpσ))
+    dpμ = [10.0; 0; 0; 0]
+    dpσ = Matrix(Diagonal([1.0; 1; 0.5; 0.01] .^ 2))
+    vp = VelPoint2VelPoint2(MvNormal(dpμ, dpσ))
     addFactor!(fg, [:x1, :x2], vp; graphinit = false)
 
     # writeGraphPdf(fg)
@@ -151,6 +161,7 @@ end
     # pl = plotKDE(kde!(pX2[1:2,:]), dims=[1;2], levels=3, c=["blue"])
     # pl = plotKDE(kde!(X1[1:2,:]), dims=[1;2], levels=3, c=["blue"])
 
+##
 end
 
 #

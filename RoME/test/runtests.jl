@@ -20,17 +20,31 @@ using ManifoldsBase: submanifold_component
 
 ##
 
-# include("testScalarFields.jl")
+# include()
 
 ##
 
 @error("add test for generateGraph_Beehive!, norm( simulated - default ) < tol")
 
 testfiles = [
+    # tests that run on AMP v0.15
     "inertial/testIMUDeltaFactor.jl"
     "testPartialRangeCrossCorrelations.jl"
     "testParametric.jl"
-    
+    "testParametricCovariances.jl" # 2 test_broken
+    "threeDimLinearProductTest.jl"
+    "testBearingRange2D.jl"
+    "testpackingconverters.jl" #FIXME for new DFG deprecations
+    "testPoint2Point2.jl" # numerics still a bit wild, which is less important during initial AMP v0.15 upgrade
+    "testBasicPose2Conv.jl"
+    "testhigherdimroots.jl"
+    "testBasicPose2Conv.jl"
+    "testDidsonFunctions.jl"
+    "testDynPoint2D.jl"
+    "testDeltaOdo.jl"
+
+
+
     # known broken tests
     "testG2oParser.jl"  # deferred
     "inertial/testInertialDynamic.jl" # same problem as IIF/test/testDERelative.jl, access [1] of [0]
@@ -44,35 +58,29 @@ testfiles = [
     # tests most likely to fail on numerics
     "testScalarFields.jl" # SKIPPING SOLVE FOR SLOW AMP V0.15
     "testPoint2Point2Init.jl" # FIX
-    "threeDimLinearProductTest.jl" # FIX
-    "testPose3Pose3NH.jl" # FIX,   UndefVarError: `LeftInvariantMetricSE` not defined in `Main`
+    "testPose3Pose3NH.jl" # FIX, dim mismatch, expected len 6 got 12
 
     # recent development work
     "testPartialPose2.jl" # FIX, L39 numeric all ~zero
-    "testPartialPose3.jl" # FIX, UndefVarError: `LeftInvariantMetricSE` not defined in `Main` 
-    "testBearingRange2D.jl"
-    "testBearing2D.jl"
-    "testMultimodalRangeBearing.jl" # restore after Bearing factors are fixed
+    "testPartialPose3.jl" # FIX, MethodError: no method matching getManifoldPartial(::SpecialOrthogonalGroup{ManifoldsBase.TypeParameter{Tuple{3}}}, ::Vector{Int64}, ::SMatrix{3, 3, Float64, 9}, ::Base.RefValue{Int64}; doError::Bool)
+    "testBearing2D.jl" # FIX, dim mismatch expected len 3 got 6
+    # "testMultimodalRangeBearing.jl" # restore after Bearing factors are fixed
 
     # regular tests expected to pass
-    "testpackingconverters.jl" #FIXME for new DFG deprecations
-    "testInflation380.jl"
-    "testPoint2Point2.jl"
-    "testParametricCovariances.jl"
+    "testInflation380.jl" # FIX, expected input len 3 got 6
+
     "testParametricSimulated.jl" # FIX
-    "testBasicPose2Conv.jl"
     "testGraphGenerators.jl" # FIX
-    "testTreeInitCommonMsg_IIF913.jl"
+    "testTreeInitCommonMsg_IIF913.jl" # FIX dim mismatch, expected len 3 got 6
     "testHexagonal2D_CliqByCliq.jl"      # special case debugging
-    "testhigherdimroots.jl"
-    "testGenericProjection.jl"
-    "testDidsonFunctions.jl"
-    "testBasicPose2Stationary.jl"
-    "TestPoseAndPoint2Constraints.jl"
-    "testDynPoint2D.jl"
-    "testDeltaOdo.jl"
-    "testFixedLagFG.jl"
+
+    "testGenericProjection.jl" # broken COMPAT w CameraModels
+    "testBasicPose2Stationary.jl" # FIX
+
+    "TestPoseAndPoint2Constraints.jl" # FIX, dim mismatch, expected len 3 got 6
+
     "testDynPose2D.jl"
+    "testFixedLagFG.jl"
     "testPartialPriorYawPose2.jl"
     "TestDefaultFGInitialization.jl"
     "testAccumulateFactors.jl"

@@ -34,7 +34,7 @@ end
 
     fg = initfg()
 
-    M = LeftInvariantMetricSE(3)
+    M = RoME.LeftInvariantMetricSE(3)
     N = 100
     fg.solverParams.N = N
     fg.solverParams.graphinit = false
@@ -513,7 +513,7 @@ end
     end
 
     ##
-    M = LeftInvariantMetricSE(3)
+    M = RoME.LeftInvariantMetricSE(3)
     mpts = getPoints(fg[1], :x4)
     mu_fg1 = mean(M, mpts)
 

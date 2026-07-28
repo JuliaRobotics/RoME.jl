@@ -2,6 +2,7 @@ using RoME
 using Test
 using TensorCast
 using Dates
+using LinearAlgebra
 using DistributedFactorGraphs.JSON
 
 ##
