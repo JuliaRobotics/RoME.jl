@@ -1,11 +1,13 @@
 
 using RoME
 using TransformUtils
+using LinearAlgebra
 using Statistics
 using Test
 using StaticArrays
 using LieGroups
 using Manifolds
+using TensorCast
 
 M = getManifold(Pose3)
 ϵ = getPointIdentity(Pose3)
@@ -13,8 +15,7 @@ M = getManifold(Pose3)
 ##
 
 @testset "test 3D convolutions and products" begin
-
-    ##
+##
 
     tf = SE3([0.0; 0.0; 0.0], TU.AngleAxis(pi / 4, [0; 0; 1.0]))# Euler(pi/4,0.0,0.0) )
 
@@ -32,19 +33,21 @@ M = getManifold(Pose3)
 
     fg = initfg()
     addVariable!(fg, :x0, Pose3)
-    X_ = manikde!(Pose3, X; bw = ones(6))
+
+    X_ = HomotopyDensity_legacy(Pose3(), X; bw = ones(6), newbw = false)
     initVariable!(fg, :x0, X_)
 
     addVariable!(fg, :x1, Pose3)
     addFactor!(fg, [:x0; :x1], odo)
 
-    Y = getPoints(approxConvBelief(fg, :x0x1f1, :x1))[1] # , N=1) # X ⊕ odo
+    Y_ = approxConvBelief(fg, :x0x1f1, :x1)
+    Y = getPoints(Y_)[1] # , N=1)
 
     @error "TODO fix approxConv(.. N=1) case"
     # @test norm(Y[1:3]-zeros(3)) < 1.0
     # @test norm(Y[4:6]-[zeros(2);pi/4]) < 0.15
 
-    ##
+##
 
     tf = SE3([0.0; 0.0; 0.0], TU.AngleAxis(pi / 4, [0; 0; 1.0]))# Euler(pi/4,0.0,0.0) )
 
@@ -62,19 +65,19 @@ M = getManifold(Pose3)
 
     fg = initfg()
     addVariable!(fg, :x0, Pose3)
-    X_ = manikde!(Pose3, X; bw = ones(6))
+    X_ = HomotopyDensity_legacy(Pose3(), X; bw = ones(6), newbw = false)
     initVariable!(fg, :x0, X_)
 
     addVariable!(fg, :x1, Pose3)
     addFactor!(fg, [:x0; :x1], odo)
 
-    Y = getPoints(approxConvBelief(fg, :x0x1f1, :x1))[1] #, N=1) # X ⊕ odo
+    Y = getPoints(approxConvBelief(fg, :x0x1f1, :x1))[1] #, N=1)
 
     @error "TODO fix approxConv(.. N=1) case"
     # @test norm(Y[1:3]-zeros(3)) < 1.0
     # @test norm(Y[4:6]-[zeros(2);pi/4]) < 0.2
 
-    ##
+##
 
 end
 
@@ -98,7 +101,7 @@ end
 ##
 
 @testset "Ensure variable is properly initialized" begin
-    ##
+##
 
     M = getManifold(Pose3)
     # start with initialization
@@ -117,11 +120,11 @@ end
     @test sum(map(Int, 0.5 .< stdX1[1:3] .< 1.5)) == 3
     @test sum(map(Int, 0.05 .< stdX1[4:6] .< 0.15)) == 3
 
-    ##
+##
 end
 
 @testset "Testing PriorPose3 evaluation..." begin
-    ##
+##
 
     priorpts = approxConv(fg, :x1f1, :x1) # fg.g.vertices[2], 1
     coX1 = IIF.getCoordinates.(Pose3, priorpts)
@@ -129,14 +132,13 @@ end
     @test sum(map(Int, abs.(means[1:3]) .> 0.5)) == 0
     @test sum(map(Int, abs.(means[4:6]) .> 0.05)) == 0
 
-    ##
+##
 end
 
 ##
 
 @testset "Adding Pose3Pose3 to graph..." begin
-
-    ##
+##
 
     N
     odoconstr = Pose3Pose3(MvNormal([10.0, 0, 0, 0, 0, 0], odoCov))
@@ -144,7 +146,7 @@ end
     addFactor!(fg, [:x1; :x2], odoconstr; inflation = 0.1)
     # @test !isInitialized(fg, :x2)
 
-    ## test opposites
+## test opposites
 
     #test factor :x1x2f1 residuals (zero) at a few points
     G = getManifold(getFactor(fg, :x1x2f1))
@@ -181,7 +183,7 @@ end
     # res = calcFactorResidual(fg, :x1x2f1, X, p, q)
     # @test norm(res) < 1e-10
 
-    ## test following introduction of inflation, see IIF #1051
+## test following introduction of inflation, see IIF #1051
 
     # force the inflation trivial error, https://github.com/JuliaRobotics/RoME.jl/issues/380#issuecomment-778795848
     # IIF._getCCW(fg,:x1x2f1).inflation = 10.0
@@ -200,7 +202,7 @@ end
     @test 0.95N < sum(-2 .< pts[5, :] .< 2)
     @test 0.95N < sum(-2 .< pts[6, :] .< 2)
 
-    ##
+##
 
 end
 
@@ -208,6 +210,7 @@ end
 
 # Noticed a DomainError on convolutions here after mutlithreading upgrade.  Previously used fill(PP3REUSE, Threads.nthreads())
 @testset "Testing Pose3Pose3 evaluation..." begin
+##
     initAll!(fg)
     @test isInitialized(fg, :x2)
     X1pts = approxConv(fg, :x1x2f1, :x1)
@@ -227,10 +230,12 @@ end
     @test isapprox(T, [10, 0, 0], atol = 1.0)
     Rc = submanifold_component(mu, 2)
     @test isapprox(SpecialOrthogonalGroup(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol = 0.25)
+
+##
 end
 
 @testset "Construct Bayes tree and perform inference..." begin
-    ##
+##
 
     tree = solveTree!(fg)
     mu = mean(M, getVal(fg, :x1))
@@ -245,14 +250,14 @@ end
     Rc = submanifold_component(mu, 2)
     @test isapprox(SpecialOrthogonalGroup(3), Rc, [1 0 0; 0 1 0; 0 0 1], atol = 0.25)
 
-    ##
+##
 end
 
 ##
 
 @testset "Ensure basic parameters on x1,x2 after inference..." begin
 
-    ##
+##
 
     # check mean and covariances after one up and down pass over the tree
     muX1 = IIF.calcMeanMaxSuggested(fg, :x1).suggested # Statistics.mean(getVal(fg,:x1),dims=2)
@@ -297,7 +302,7 @@ end
     println("previous test failure 0.05 .< $(round.(stdX2[4:6],digits=2)) .< 0.35")
     @test sum(map(Int, 0.05 .< stdX2[4:6] .< 0.5)) == 3
 
-    ##
+##
 
 end
 

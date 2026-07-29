@@ -14,7 +14,7 @@ using Test
     u0 = ArrayPartition([0; 0.0], [1 0; 0 1.0])
     M = getManifold(Pose2) # TODO add better dispatch to simplify
     x0 = [AMP.makePointFromCoords(M, 0.01 * randn(3), u0) for _ = 1:100]
-    X0 = manikde!(M, x0)
+    X0 = HomotopyDensity_legacy(Pose2(), x0)
     initVariable!(fg, :x0, X0)
 
     addVariable!(fg, :x1, Pose2)
@@ -53,7 +53,7 @@ using Test
     ## now test the deconvolution
 
     pts, meas = approxDeconv(fg, :x0x1f1)
-    X12_ = manikde!(M, pts)
+    X12_ = HomotopyDensity_legacy(Pose2(), pts)
 
     # check that deconv is good
 

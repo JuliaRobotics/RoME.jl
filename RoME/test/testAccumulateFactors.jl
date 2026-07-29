@@ -11,7 +11,7 @@ using Test
 ##
 
 @testset "Test parametric mean accumulation..." begin
-    ##
+##
 
     fg = initfg()
 
@@ -23,12 +23,14 @@ using Test
 
     # drawGraph(fg)
 
+##
+    IncrementalInference.prepareStates!(fg, IncrementalInference.NPBPSolver(), :default)
     # add parametric means
     val = accumulateFactorMeans(fg, [:x0f1; :x0x1f1])
 
     @test isapprox(val, [10; 0; 0], atol = 1e-3)
 
-    ##
+##
 end
 
 #

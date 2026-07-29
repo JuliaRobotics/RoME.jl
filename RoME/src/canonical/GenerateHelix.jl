@@ -52,14 +52,14 @@ function generateGraph_Helix2D!(
     _initpose = Symbol(match(r"[A-Za-z]+", poseRegex.pattern).match, 0)
     if !exists(dfg, _initpose)
         generateGraph_ZeroPose(; dfg, μ0, solverParams, postpose_cb) # , μ0=[0;0;1e-5] # tried for fix NLsolve on wrap issue
-        # getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
-        # reference ppe on :x0
-        ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
-        setPPE!(dfg[:x0], refKey, DFG.MeanMaxPPE, ppe)
+        # # getSolverParams(dfg).useMsgLikelihoods = useMsgLikelihoods    
+        # # reference ppe on :x0
+        # ppe = DFG.MeanMaxPPE(refKey, μ0, μ0, μ0)
+        # setPPE!(dfg[:x0], refKey, DFG.MeanMaxPPE, ppe)
     end
 
     # start from existsing poses
-    _poses = ls(dfg, poseRegex) |> sortDFG
+    _poses = ls(dfg; whereLabel = contains(poseRegex)) |> sortDFG
     # what is the last pose and posecount number
     lastpose = _poses[end]
     posecount = match(r"\d+", string(lastpose)).match |> x -> parse(Int, x)
@@ -103,7 +103,7 @@ function generateGraph_Helix2D!(
             # check exit condition
             numposes - 1 <= posecount && break
             # add a new pose
-            newpose = Tμ * TU.SE2(tmp_[:, ps])
+            newpose = Tμ * TU.SE2(tmp_[:, ps]) # FIXME, change to Manifolds
             deltaodo = se2vee(oldpose \ newpose)
             factor = Pose2Pose2(MvNormal(deltaodo, Qd))
             posecount += 1

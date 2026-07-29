@@ -93,12 +93,14 @@ function LieGroups.compose(M::SpecialGalileanGroup, p, q)
     return ArrayPartition(ΔR * δR, Δv + ΔR * δv, Δp + Δv * δt + ΔR * δp, Δt + δt)
 end
 
+_skew3(w) = LieGroups.hat(LieAlgebra(SpecialOrthogonalGroup(3)), w)
+
 function LieGroups.hat(
     M::Union{<:SpecialGalileanGroup, <:typeof(LieAlgebra(SpecialGalileanGroup()))},
     Xⁱ::SVector{10, T},
 ) where {T <: Real}
     return ArrayPartition(
-        ApproxManifoldProducts.skew(Xⁱ[SA[7:9...]]), # θ ωΔt
+        _skew3(Xⁱ[SA[7:9...]]), # θ ωΔt
         Xⁱ[SA[4:6...]],       # ν aΔt
         Xⁱ[SA[1:3...]],       # ρ vΔt
         Xⁱ[10],               # Δt
@@ -131,7 +133,7 @@ function _Q(θ⃗)
     else
         u = θ⃗ / θ
         sθ, cθ = sincos(θ)
-        uₓ = ApproxManifoldProducts.skew(u)
+        uₓ = _skew3(u)
         # NOTE difference in references here --- (θ - sθ)/θ^2 vs (θ - sθ)/θ
         # with no ^2 looking correct when compared to exp of SE3
         return SMatrix{3, 3, T}(I) + (1 - cθ) / θ * uₓ + (θ - sθ) / θ * uₓ^2
@@ -146,7 +148,7 @@ function _P(θ⃗)
     else
         u = θ⃗ / θ
         sθ, cθ = sincos(θ)
-        uₓ = ApproxManifoldProducts.skew(u)
+        uₓ = _skew3(u)
         return 1 / 2 * SMatrix{3, 3, T}(I) +
                (θ - sθ) / θ^2 * uₓ +
                (cθ + 1 / 2 * θ^2 - 1) / θ^2 * uₓ^2
@@ -244,8 +246,8 @@ function adjointMatrix(::SpecialGalileanGroup, X::ArrayPartition{T}) where {T}
 
     IΔt = SMatrix{3, 3, T}(X.x[4] * I)
 
-    ρₓ = ApproxManifoldProducts.skew(ρ)
-    νₓ = ApproxManifoldProducts.skew(ν)
+    ρₓ = _skew3(ρ)
+    νₓ = _skew3(ν)
 
     m0 = zeros(3, 3)
     v0 = zeros(3)
@@ -265,8 +267,8 @@ function AdjointMatrix(::SpecialGalileanGroup, p::ArrayPartition{T}) where {T}
     Δp = p.x[3]
     Δt = p.x[4]
 
-    Δvₓ = ApproxManifoldProducts.skew(Δv)
-    pmvtₓ = ApproxManifoldProducts.skew(Δp - Δv * Δt)
+    Δvₓ = _skew3(Δv)
+    pmvtₓ = _skew3(Δp - Δv * Δt)
 
     m0 = zeros(3, 3)
     v0 = zeros(3)

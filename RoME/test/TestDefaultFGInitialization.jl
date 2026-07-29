@@ -1,6 +1,7 @@
 
 using RoME
 using Test
+using LinearAlgebra
 
 @testset "Basic Pose2 initialization" begin
     global fg = initfg()

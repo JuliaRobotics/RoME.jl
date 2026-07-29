@@ -3,6 +3,19 @@
 ## Legacy, remove once AMP #41 is resolved
 ##==============================================================================
 
+# function AMP.getPoints(
+#     mkd::ApproxManifoldProducts.HomotopyDensity{M},
+# ) where {M <: typeof(BearingRange_Manifold)}
+#     data_ = getPoints(mkd.belief)
+#     return [makePointFromCoords(mkd.manifold, view(data_, :, i)) for i = 1:size(data_, 2)]
+# end
+
+
+# function AMP.getPoints(mkd::ApproxManifoldProducts.HomotopyDensity{M}) where {M <: typeof(SE2E2_Manifold)}
+#     data_ = getPoints(mkd.belief)
+#     return [makePointFromCoords(mkd.manifold, view(data_, :, i)) for i = 1:size(data_, 2)]
+# end
+
 
 # Base.convert(
 #   ::Type{<:Tuple}, 

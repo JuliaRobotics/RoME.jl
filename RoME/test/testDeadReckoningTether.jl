@@ -5,6 +5,7 @@
 using DistributedFactorGraphs
 using IncrementalInference
 using RoME
+using LinearAlgebra
 
 using Test
 

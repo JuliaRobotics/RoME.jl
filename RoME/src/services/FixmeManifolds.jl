@@ -22,11 +22,6 @@ function AMP.makePointFromCoords(::typeof(SE2E2_Manifold), p::AbstractVector{<:R
     return ArrayPartition(([p[1], p[2]]), [cos(α) -sin(α); sin(α) cos(α)], ([p[4], p[5]]))
 end
 
-function AMP.getPoints(mkd::ApproxManifoldProducts.HomotopyDensity{M}) where {M <: typeof(SE2E2_Manifold)}
-    data_ = getPoints(mkd.belief)
-    return [makePointFromCoords(mkd.manifold, view(data_, :, i)) for i = 1:size(data_, 2)]
-end
-
 function Statistics.mean(::typeof(SE2E2_Manifold), pts::AbstractVector)
     se2_ =
         (
@@ -61,13 +56,6 @@ const BearingRange_Manifold = _CircleEuclid()
 
 function AMP.makePointFromCoords(::typeof(BearingRange_Manifold), p::AbstractVector{<:Real})
     return ArrayPartition(([p[1];]), ([p[2];]))
-end
-
-function AMP.getPoints(
-    mkd::ApproxManifoldProducts.HomotopyDensity{M},
-) where {M <: typeof(BearingRange_Manifold)}
-    data_ = getPoints(mkd.belief)
-    return [makePointFromCoords(mkd.manifold, view(data_, :, i)) for i = 1:size(data_, 2)]
 end
 
 function Statistics.mean(::typeof(BearingRange_Manifold), pts::AbstractVector)
