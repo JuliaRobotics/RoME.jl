@@ -111,6 +111,7 @@ end
     aX = diff_left_compose(base_lie_group(M), x0, bTa, bX)
     meas_coords = vee(𝔤, aX)
 
+##
     # Verify analytical values: Ry(β) rotates body vectors into sensor frame
     # Translation: Ry(0.3) * [2, 0, 0] = [2cos(β), 0, -2sin(β)]
     @test isapprox(meas_coords[1], 2 * cos(β), atol = 1e-10)
@@ -224,6 +225,7 @@ end
         ),
     )
 
+##
     IIF.autoinitParametric!(fg)
     r = IIF.solveGraphParametric!(fg; init = false)
 
@@ -260,8 +262,12 @@ end
     @test isapprox(M, np0, ArrayPartition([0, 0.0, 0], R_x0), atol = 2e-1)
     @test isapprox(M, np1, ArrayPartition([0, 1.0, 0], R_x1), atol = 2e-1)
     @test isapprox(M, np2, ArrayPartition(Vector(x2_pos), R_x2), atol = 2e-1)
-    @test isapprox(IIF.calcMeanMaxSuggested(fg, :bRa).suggested, [0, 0, -α], atol = 2e-1)
-
+    @test isapprox(
+        SpecialOrthogonalGroup(3),
+        exp(SpecialOrthogonalGroup(3), hat(LieAlgebra(SpecialOrthogonalGroup(3)), [0, 0, -α])),
+        IIF.calcMeanMaxSuggested(fg, :bRa).suggested;
+        atol = 2e-1
+    )
 ##
 end
 
