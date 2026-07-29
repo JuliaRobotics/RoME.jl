@@ -129,11 +129,11 @@ fixme_broken_tests = [
 
 
     # broken PPE tests
-    "testScalarFields.jl",
-    "testParametricSimulated.jl",
-    "testGraphGenerators.jl",
-    "testGenerateHelix.jl",
-    "testBeehiveGrow.jl",
+    "testScalarFields.jl"
+    "testParametricSimulated.jl"
+    "testGraphGenerators.jl"
+    "testGenerateHelix.jl"
+    "testBeehiveGrow.jl"
 ]
 
 ## Tests not ready yet
