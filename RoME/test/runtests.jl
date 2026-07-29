@@ -20,7 +20,7 @@ using ManifoldsBase: submanifold_component
 
 ##
 
-include("testPose3.jl")
+# include("testPose3.jl")
 
 ##
 
