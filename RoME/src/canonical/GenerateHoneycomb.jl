@@ -107,7 +107,11 @@ function _addLandmarkBeehive!(
         )
 
         # also set :simulated PPE for similar future usage
-        setPPE!(newVar, :simulated, typeof(simPPE), simPPE)   # TODO this API can be improved
+        IncrementalInference.prepareState!(
+            newVar, IncrementalInference.NLLSSolver(), :simulated;
+            belief = HomotopyDensity_legacy(RoME.Point2(), [simPPE.suggested, ]; newbw=false)
+        )
+        # setPPE!(newVar, :simulated, typeof(simPPE), simPPE)   # TODO this API can be improved
     else
         @info "Adding simulated loop closure with perfect data association" lastPose genLabel
         addFactor!(

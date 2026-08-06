@@ -77,7 +77,7 @@ end
 # boxes start bottom left, spine of boxy helix is on x-axis
 function driveOneBox!(
     fg;
-    lastPose = sortDFG(ls(fg; tags = [:POSE]))[end],
+    lastPose = sortDFG(ls(fg; whereTags = s->any(s .== :POSE)))[end],
     slew_x = 2 / 3,
     length_x = 15,
     length_y = length_x,

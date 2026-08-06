@@ -2,6 +2,7 @@
 
 using Test
 using RoME
+using LieGroups
 
 ##
 
@@ -12,8 +13,12 @@ using RoME
 
     solveGraph!(fg)
 
-    @test isapprox([0; 0; 0.0], IIF.calcMeanMaxSuggested(fg, :x0, :simulated).suggested, atol = 1)
-    @test isapprox([0; 0; 0.0], IIF.calcMeanMaxSuggested(fg, :x0).suggested, atol = 1)
+    M = getManifold(getStateKind(fg, :x0))
+
+    @show val1 = IIF.calcMeanMaxSuggested(fg, :x0, :simulated).suggested
+    @test isapprox(M, LieGroups.identity_element(M), val1, atol = 1)
+    @show val2 = IIF.calcMeanMaxSuggested(fg, :x0).suggested
+    @test isapprox(M, LieGroups.identity_element(M), val2, atol = 1)
 
     ##
 end

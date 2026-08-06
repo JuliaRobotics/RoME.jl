@@ -69,7 +69,7 @@ end
     @test isapprox(M, p1, np1, atol = 0.1)
     @test isapprox(M, p2, np2, atol = 0.1)
     @test isapprox(M, p3, np3, atol = 0.1)
-    @test_broken isapprox(M, p4, np4, atol = 0.1)
+    @test isapprox(M, p4, np4, atol = 0.1)
 
 ##
 end

@@ -5,6 +5,9 @@
 using Test
 using RoME
 using DistributedFactorGraphs
+using LinearAlgebra
+using LieGroups
+
 ##
 
 @testset "ensure solveParametricBinary is working" begin
@@ -18,10 +21,15 @@ using DistributedFactorGraphs
     addFactor!(fg, [:x0;], pp)
 
     # reference ppe on :x0
+    M = getManifold(Pose2)
     refVal = zeros(3)
     refKey = :simulated
-    ppe = DFG.MeanMaxPPE(refKey, refVal, refVal, refVal)
-    setPPE!(fg[:x0], refKey, DFG.MeanMaxPPE, ppe)
+    IncrementalInference.prepareState!(
+        getVariable(fg, :x0), 
+        IncrementalInference.NLLSSolver(), 
+        refKey; 
+        belief = HomotopyDensity_legacy(Pose2(), [exp(M, hat(LieAlgebra(M), refVal)), ]; newbw=false)
+    )
 
     pp2 = Pose2Pose2(MvNormal([0; 0; -pi + 0.01], diagm(0.03 * ones(3))))
 
@@ -75,7 +83,7 @@ using DistributedFactorGraphs
         IIF._checkVariableByReference(fg, :x0, r"x\\d+", Pose2, pp2)
 
     @test isapprox(simPPE.suggested[1:2], [0; 0], atol = 1e-2)
-    @test 0.9pi < abs(simPPE.suggested[3])
+    @test 0.9pi < abs(vee(LieAlgebra(M), log(M, simPPE.suggested))[3])
 
     ##
 
@@ -185,7 +193,8 @@ end
     @test isapprox(m.suggested[1], 10, atol = 1e-1)
     @test isapprox(m.suggested[2], 17.32, atol = 1e-1)
 
-    @test isapprox(abs(m.suggested[3]), π, atol = 1e-2)
+    M = getManifold(Pose2)
+    @test isapprox(abs(vee(LieAlgebra(M), log(M, m.suggested))[3]), π, atol = 1e-2)
 
     ##
 

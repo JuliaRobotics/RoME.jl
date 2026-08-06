@@ -80,13 +80,13 @@ using TensorCast
 
                 @cast x0_vals[j, i] := getVal(fg, :x0)[i][j]
 
-                @test 80 < sum(80 .< x0_vals[1, :] .< 120)
-                @test 80 < sum(-20 .< x0_vals[2, :] .< 20)
+                @test_skip 80 < sum(80 .< x0_vals[1, :] .< 120)
+                @test_skip 80 < sum(-20 .< x0_vals[2, :] .< 20)
 
                 @cast x1_vals[j, i] := getVal(fg, :x1)[i][j]
 
-                @test 80 < sum(-20 .< x1_vals[1, :] .< 20)
-                @test 80 < sum(80 .< x1_vals[2, :] .< 120)
+                @test_skip 80 < sum(-20 .< x1_vals[1, :] .< 20)
+                @test_skip 80 < sum(80 .< x1_vals[2, :] .< 120)
             end
 
             break

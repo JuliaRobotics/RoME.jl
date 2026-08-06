@@ -70,7 +70,8 @@ function _addPoseCanonical!(
     if doRef
         kind = getStateKind(v_n)
         Σ = ApproxManifoldProducts._forcestatic(diagm(ones(getDimension(kind))))
-        p = ApproxManifoldProducts._forcestatic(_Exp(getManifold(kind), simPPE.suggested))
+        p = simPPE.suggested # changed on onpoint during IIF v0.38
+        # p = ApproxManifoldProducts._forcestatic(_Exp(getManifold(kind), simPPE.suggested))
         belief = HomotopyDensity_legacy(kind, [p, ]; bw = Σ, newbw = false)
         state = State(refKey, kind; belief, marginalized = false, initialized = true)
         mergeState!(
@@ -184,7 +185,7 @@ function buildGraphChain!(
     ),
     inflation_fct::Real = getSolverParams(dfg).inflation,
     varRegex::Regex = r"x\d+",
-    varLast::Symbol = sortDFG(ls(dfg, varRegex))[end],
+    varLast::Symbol = sortDFG(ls(dfg; whereLabel = contains(varRegex)))[end],
     varCount::Integer = match(r"\d+", string(varLast)).match |> x -> parse(Int, x),
     varPrefix::Symbol = match(r"[a-zA-Z_]+", varRegex.pattern).match |> Symbol,
 )
