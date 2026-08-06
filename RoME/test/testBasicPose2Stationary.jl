@@ -3,11 +3,12 @@
 using RoME
 using Test
 using TensorCast
+using LinearAlgebra
 
 ##
 
 @testset "basic pose2 trivial case without forcing autoinit..." begin
-    ##
+##
 
     fg = initfg()
 
@@ -25,7 +26,7 @@ using TensorCast
     addVariable!(fg, :x2, Pose2)
     addFactor!(fg, [:x1; :x2], Pose2Pose2(MvNormal(zeros(3), cov)))
 
-    ##
+##
 
     M = getManifold(Pose2)
     Xc_badval = [
@@ -34,7 +35,12 @@ using TensorCast
 
     # badval = map((Xc)->DFG.getPoint(Pose2, Xc), Xc_badval)
 
-    setValKDE!(fg, :x2, manikde!(Pose2, Xc_badval))
+    IncrementalInference.prepareState!(
+        getVariable(fg, :x2), 
+        IncrementalInference.NPBPSolver(), # FIXME, consolidation workaround
+        :default; 
+        belief = HomotopyDensity_legacy(Pose2(), Xc_badval)
+    )
 
     N = 100
     # batchSolve!(fg, N=N)
@@ -50,7 +56,7 @@ using TensorCast
             atol = 0.01,
         )
 
-        Xpts = getCoordinates.(Ref(Pose2), pts)
+        Xpts = IncrementalInference.getCoordinates.(Ref(Pose2), pts)
         @cast Xptsarr[j, i] := Xpts[i][j]
 
         @test 0.95 * N < sum(-1.0 .< Xptsarr[1, :] .< 1.0)
@@ -60,7 +66,7 @@ using TensorCast
 end
 
 @testset "basic pose2 with forcing bad initialization..." begin
-    ##
+##
 
     fg = initfg()
 
@@ -90,7 +96,14 @@ end
     ]
     # badval = map((Xc)->DFG.getPoint(Pose2, Xc), eachcol(Xc_badval))
 
-    setValKDE!(fg, :x2, manikde!(Pose2, Xc_badval))
+    IncrementalInference.prepareState!(
+        getVariable(fg, :x2), 
+        IncrementalInference.NPBPSolver(), # FIXME, consolidation workaround
+        :default; 
+        belief = HomotopyDensity_legacy(Pose2(), Xc_badval)
+    )
+    # setValKDE!(fg, :x2, HomotopyDensity_legacy(Pose2(), Xc_badval))
+    
 
     # tree = wipeBuildNewTree!(fg, drawpdf=true, show=true)
 
@@ -98,11 +111,11 @@ end
     getSolverParams(fg).N = N
     solveTree!(fg)
 
-    ##
+##
 
     for xx in [:x0; :x1; :x2]
         manipts = getVal(fg, xx)
-        manicrd = getCoordinates.(Ref(Pose2), manipts)
+        manicrd = IncrementalInference.getCoordinates.(Ref(Pose2), manipts)
         @cast pts[j, i] := manicrd[i][j]
 
         @test 0.95 * N < sum(-0.5 .< pts[1, :] .< 0.5)
@@ -110,7 +123,7 @@ end
         @test 0.95 * N < sum(-1.0 .< pts[3, :] .< 1.0)
     end
 
-    ##
+##
 end
 
 # using RoMEPlotting
@@ -120,7 +133,7 @@ end
 # spyCliqMat(tree, :x2)
 
 @testset "test basic banana (split)..." begin
-    ##
+##
 
     fg = initfg()
 
@@ -146,7 +159,7 @@ end
     solveTree!(fg)
 
     manipts = getPoints(getBelief(fg, :x0))
-    manicrd = getCoordinates.(Ref(Pose2), manipts)
+    manicrd = IncrementalInference.getCoordinates.(Ref(Pose2), manipts)
     @cast pts[j, i] := manicrd[i][j]
 
     N = size(pts, 2)
@@ -156,7 +169,7 @@ end
     @test 0.7 * N < sum(abs.(pts[3, :]) .< 2.0)
 
     manipts = getPoints(getBelief(fg, :x1))
-    manicrd = getCoordinates.(Ref(Pose2), manipts)
+    manicrd = IncrementalInference.getCoordinates.(Ref(Pose2), manipts)
     @cast pts[j, i] := manicrd[i][j]
 
     @test 0.7 * N < sum(0.0 .< pts[1, :])
@@ -170,5 +183,5 @@ end
     #
     # plotKDE(fg, ls(fg))
 
-    ##
+##
 end

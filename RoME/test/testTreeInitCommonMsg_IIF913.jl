@@ -6,8 +6,7 @@ using RoME
 ##
 
 @testset "Testing tree init prior usage" begin
-
-    ##
+##
 
     fg = generateGraph_Circle(4; graphinit = true)
     # deleteVariable!.(fg, [:x3, :x4, :l1])
@@ -22,7 +21,7 @@ using RoME
     prpo = PriorPose2(MvNormal([5.0, 0.0, 0.0], 0.01 * diagm([1; 1; 1.0])))
     addFactor!(fg, [:x0], prpo)
 
-    ##
+##
 
     smtasks = Task[]
     tree = solveTree!(fg; smtasks = smtasks) #, recordcliqs=ls(fg));
@@ -30,14 +29,13 @@ using RoME
     # hists = fetchCliqHistoryAll!(smtasks)
     # printCSMHistoryLogical(hists)
 
-    ##
+##
 
-    X4 = getPoints(fg, :x4)
-    μX4 = mean(getManifold(Pose2), X4)
+    μX4 = mean(getBelief(fg, :x4))
 
     @error("Must first fix IIF #913")
     @test 2.0 < submanifold_component(μX4, 1)[1]
     @test -1.5 < submanifold_component(μX4, 1)[2] < 1.5
 
-    ##
+##
 end

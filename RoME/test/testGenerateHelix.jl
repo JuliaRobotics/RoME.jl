@@ -2,6 +2,7 @@
 
 using Test
 using RoME
+using LieGroups
 
 ##
 
@@ -65,11 +66,13 @@ end
     )
 
     ## # test slew in x
+    M = getManifold(Pose2)
 
     lastpose = sortDFG(ls(fg))[end]
     @test isapprox(
+        M,
         IIF.calcMeanMaxSuggested(fg, lastpose, :simulated).suggested,
-        [20, 0, 1.465088],
+        exp(M, hat(LieAlgebra(M), [20, 0, 1.465088])),
         atol = 0.001,
     )
 
@@ -108,8 +111,13 @@ end
         [11.045284632676536, 9.945218953682733, -0.10471978645923721],
     ]
 
+    M = getManifold(Pose2)
     for (i, v) in enumerate(vars)
-        @test isapprox(ppes[i], IIF.calcMeanMaxSuggested(fg, v, :simulated).suggested; atol = 1e-5)
+        @test isapprox(M,
+            exp(M, hat(LieAlgebra(M), ppes[i])), 
+            IIF.calcMeanMaxSuggested(fg, v, :simulated).suggested; 
+            atol = 1e-5
+        )
     end
 
     # check that the graph can be expanded with the same generator function
@@ -142,7 +150,13 @@ end
     push!(vars, :x5)
     push!(ppes, [15.0; 8.660254037844387; -0.5235988055902416])
 
-    @test isapprox(ppes[end], IIF.calcMeanMaxSuggested(fg, :x5, :simulated).suggested; atol = 1e-5)
+    M = getManifold(Pose2)
+    @test isapprox(
+        M, 
+        exp(M, hat(LieAlgebra(M), ppes[end])), 
+        IIF.calcMeanMaxSuggested(fg, :x5, :simulated).suggested; 
+        atol = 1e-5
+    )
 
     ##
 end

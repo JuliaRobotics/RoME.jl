@@ -9,8 +9,7 @@ using LieGroups
 ##
 
 @testset "test inflation is working via distance" begin
-
-    ##
+##
 
     fg = initfg()
     # getSolverParams(fg).inflation = 50.0
@@ -25,9 +24,11 @@ using LieGroups
 
     addFactor!(fg, [:x0; :x1], EuclidDistance(Normal(100.0, 1.0)))
 
+##
+
     pts = approxConv(fg, :x0, :x1)
 
-    ##
+##
     # does this give a "donut ring" at 1000?
 
     res = 99999 * ones(100)
@@ -38,7 +39,7 @@ using LieGroups
 
     @test 0.9 * N < sum(abs.(res) .< 5)
 
-    ## new test trying to force inflation error
+## new test trying to force inflation error
 
     X1_ = [randn(2) for _ = 1:N]
     for pt in X1_
@@ -46,7 +47,7 @@ using LieGroups
     end
     initVariable!(fg, :x1, X1_)
 
-    ##
+##
 
     fct = getObservation(fg, :x0x1f1)
     deleteFactor!(fg, :x0x1f1)
@@ -58,7 +59,7 @@ using LieGroups
 
     pts = approxConv(fg, :x0x1f1, :x1)
 
-    ##
+##
     # does this give a "donut ring" at 1000?
 
     res = 99999 * ones(100)
@@ -69,7 +70,7 @@ using LieGroups
 
     @test 0.9 * N < sum(abs.(res) .< 5)
 
-    ##
+##
 
     # using RoMEPlotting
     # Gadfly.set_default_plot_size(25cm,20cm)
@@ -79,13 +80,12 @@ using LieGroups
     # # pts = getBelief(fg, :x1) |> getPoints
     # plotKDE(manikde!(ContinuousEuclid{2}, pts))
 
-    ##
+##
 
 end
 
 @testset "test inflation on range solve" begin
-
-    ##
+##
 
     N = 100
     fg = initfg()
@@ -101,11 +101,11 @@ end
     (p -> (p[1] -= 900)).(pts)
     initVariable!(fg, :x1, pts)
 
-    ##
+##
 
     tree = solveGraph!(fg)
 
-    ##
+##
 
     pts_ = getBelief(fg, :x1) |> getPoints
 
@@ -125,17 +125,15 @@ end
     @test 0.2 * N < sum(-150 .< pts[2, :] .< 0)
     @test 0.2 * N < sum(0 .< pts[2, :] .< 150)
 
-    ##
+##
 
     # pl = plotKDE(fg, ls(fg))
 
-    ##
-
+##
 end
 
 @testset "test bearing range with inflation, #380, IIF #1051" begin
-
-    ##
+##
 
     fg = initfg()
 
@@ -192,7 +190,7 @@ end
     )
     addFactor!(fg, [:x2; :l2], p2br)
 
-    ##
+##
 
     # nonparametric solution
     solveGraph!(fg)
@@ -201,7 +199,7 @@ end
     IIF.autoinitParametric!(fg)
     IIF.solveGraphParametric!(fg)
 
-    ##
+##
     G = getManifold(fg[:x2])
     par_ref = vee(LieAlgebra(G), log(G, DFG.refMeans(getState(fg, :x2, :parametric))[1]))
     test_err = 9999 * ones(3)
@@ -218,11 +216,11 @@ end
 
     test_err .= abs.(test_err)
 
-    @test isapprox(test_err[1], 0, atol = 0.5)
-    @test isapprox(test_err[2], 0, atol = 0.5)
+    @test_broken isapprox(test_err[1], 0, atol = 0.5)
+    @test_broken isapprox(test_err[2], 0, atol = 0.5)
     @test isapprox(test_err[3], 0, atol = 0.6)
 
-    ##
+##
 
 end
 

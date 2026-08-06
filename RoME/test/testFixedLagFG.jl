@@ -2,7 +2,7 @@
 
 using Test
 using RoME
-# using LinearAlgebra
+using LinearAlgebra
 # , Distributions
 
 # TODO -- use this for cleanup
@@ -86,6 +86,7 @@ end
 
     # Back up data from these two poses so we can compare them once we solve again.
     X5 = deepcopy(getVal(fg, :x5))
+    doautoinit!(fg, :x7)
     X7 = deepcopy(getVal(fg, :x7))
 
     @test isInitialized(fg, :x5)

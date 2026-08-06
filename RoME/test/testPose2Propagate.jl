@@ -2,6 +2,7 @@ using RoME
 using LieGroups
 using Test
 using ForwardDiff
+using LinearAlgebra
 
 function propagate_with_sigmapoints(G_domain, G_codomain, p_mean, Xp_mean, Sigma_prior, Sigma_meas)
     N_p = size(Sigma_prior, 1)
@@ -132,18 +133,18 @@ end
 
     IIF.solveGraphParametric!(fg)
     
-    x1 = getState(fg, :x1, :parametric)
-    x2 = getState(fg, :x2, :parametric)
+    x1 = getState(fg, :x1, :parametric) |> getBelief
+    x2 = getState(fg, :x2, :parametric) |> getBelief
 
     # x1 should just match the prior
-    @test isapprox(DFG.refMeans(x1)[1], p; atol = 1e-6)
-    @test isapprox(DFG.refCovariances(x1)[1], Sigma_prior; atol = 1e-6)
+    @test isapprox(mean(x1), p; atol = 1e-6)
+    @test isapprox(cov(x1), Sigma_prior; atol = 1e-6)
 
     # x2 should match propagated mean and covariance
-    @test isapprox(DFG.refCovariances(x2)[1], jac_cov_x2; atol = 1e-6)
-    @test isapprox(DFG.refCovariances(x2)[1], ut_cov_x2; atol = 3e-3)
+    @test isapprox(cov(x2), jac_cov_x2; atol = 1e-6)
+    @test isapprox(cov(x2), ut_cov_x2; atol = 3e-3)
 
-    @test isapprox(DFG.refMeans(x2)[1], q; atol = 1e-6)
+    @test isapprox(mean(x2), q; atol = 1e-6)
 
 end
 
@@ -179,16 +180,16 @@ end
 
     IIF.solveGraphParametric!(fg)
     
-    x1 = getState(fg, :x1, :parametric)
-    x2 = getState(fg, :x2, :parametric)
+    x1 = getBelief(getState(fg, :x1, :parametric))
+    x2 = getBelief(getState(fg, :x2, :parametric))
 
     # x1 should just match the prior
-    @test isapprox(DFG.refMeans(x1)[1], p; atol = 1e-4)
-    @test isapprox(DFG.refCovariances(x1)[1], Sigma_prior; atol = 1e-4)
+    @test isapprox(mean(x1), p; atol = 1e-4)
+    @test isapprox(cov(x1), Sigma_prior; atol = 1e-4)
 
     # x2 should match propagated mean and covariance
-    @test isapprox(DFG.refCovariances(x2)[1], ut_cov_x2; atol = 3e-3)
-    @test isapprox(DFG.refCovariances(x2)[1], jac_cov_x2; atol = 1e-4)
-    @test isapprox(DFG.refMeans(x2)[1], q; atol = 1e-4)
+    @test isapprox(cov(x2), ut_cov_x2; atol = 3e-3)
+    @test isapprox(cov(x2), jac_cov_x2; atol = 1e-4)
+    @test isapprox(mean(x2), q; atol = 1e-4)
 
 end
